@@ -1,3 +1,4 @@
+from datetime import UTC
 import hashlib
 from typing import Any
 from unittest import mock
@@ -6,7 +7,6 @@ from django.conf import settings
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
-from pytz import utc
 
 from extras.test_utils.factories import (
     AccountFactory,
@@ -21,7 +21,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.celery_tasks import prepare_payment_plan_task
+from hope.apps.payment.celery_tasks import prepare_payment_plan_async_task
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import Payment, PaymentPlan, Program
@@ -51,7 +51,7 @@ def calculate_hash_manually(payment: Payment) -> str:
     sha1.update(str(payment.household_id).encode("utf-8"))
     sha1.update(str(payment.head_of_household_id).encode("utf-8"))
     sha1.update(str(payment.delivery_type).encode("utf-8"))
-    sha1.update(str(payment.currency).encode("utf-8"))
+    sha1.update(str(payment.currency.code if payment.currency else None).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity).encode("utf-8"))
     sha1.update(str(payment.entitlement_quantity_usd).encode("utf-8"))
     sha1.update(str(payment.delivered_quantity).encode("utf-8"))
@@ -75,9 +75,10 @@ def user() -> Any:
 def program(business_area: Any) -> Program:
     return ProgramFactory(
         status=Program.ACTIVE,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
         business_area=business_area,
+        cycle=False,
     )
 
 
@@ -85,8 +86,8 @@ def program(business_area: Any) -> Program:
 def program_cycle(program: Program) -> Any:
     return ProgramCycleFactory(
         program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         title="Cycle Signature",
     )
 
@@ -141,6 +142,7 @@ def test_signature_after_prepare_payment_plan(
     user: Any,
     program: Program,
     program_cycle: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     DeliveryMechanismFactory(code="cash", name="Cash")
     fsp = FinancialServiceProviderFactory()
@@ -196,7 +198,7 @@ def test_signature_after_prepare_payment_plan(
 
     with (
         mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
-        mock.patch("hope.apps.payment.services.payment_plan_services.prepare_payment_plan_task"),
+        mock.patch("hope.apps.payment.services.payment_plan_services.prepare_payment_plan_async_task"),
     ):
         pp = PaymentPlanService.create(
             input_data=input_data,
@@ -207,7 +209,8 @@ def test_signature_after_prepare_payment_plan(
     pp.refresh_from_db()
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
-    prepare_payment_plan_task(str(pp.id))
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
     pp.refresh_from_db()
 
     assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK

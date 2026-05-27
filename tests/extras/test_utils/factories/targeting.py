@@ -17,6 +17,7 @@ class TargetingCriteriaRuleFactory(DjangoModelFactory):
     payment_plan = factory.SubFactory(PaymentPlanFactory)
     household_ids = ""
     individual_ids = ""
+    alternative_collectors_ids = ""
 
     class Meta:
         model = TargetingCriteriaRule

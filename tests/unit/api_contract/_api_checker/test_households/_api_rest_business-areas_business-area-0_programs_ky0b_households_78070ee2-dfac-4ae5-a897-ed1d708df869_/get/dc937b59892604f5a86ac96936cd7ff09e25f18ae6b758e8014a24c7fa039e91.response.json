@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "2631"
+        "Content-Length": "2633"
     },
     "data": {
         "id": "78070ee2-dfac-4ae5-a897-ed1d708df869",
@@ -56,7 +56,7 @@
         "male_children_count": null,
         "female_children_count": null,
         "children_disabled_count": null,
-        "currency": "",
+        "currency": null,
         "first_registration_date": "2025-01-01T00:00:00Z",
         "last_registration_date": "2025-01-01T00:00:00Z",
         "unhcr_id": "",

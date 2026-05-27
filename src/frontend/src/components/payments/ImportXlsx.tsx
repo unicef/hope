@@ -29,7 +29,7 @@ export const ImportXlsx = ({
 }: ImportXlsxProps): ReactElement => {
   const [xlsxError, setXlsxError] = useState<string | null>(null);
   const { showMessage } = useSnackbar();
-  const { businessArea, programId: programSlug } = useBaseUrl();
+  const { businessArea, programId: programCode } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
   const queryClient = useQueryClient();
@@ -41,7 +41,7 @@ export const ImportXlsx = ({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programSlug,
+          programCode: programCode,
           verificationPlanId: paymentVerificationPlanId,
           formData: data,
         },
@@ -52,7 +52,7 @@ export const ImportXlsx = ({
           'PaymentVerificationPlanDetails',
           businessArea,
           paymentPlanId,
-          programSlug,
+          programCode,
         ],
       });
       queryClient.invalidateQueries({

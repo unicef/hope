@@ -215,7 +215,9 @@ def generate_rdi_xlsx_files(*args: Any, **options: Any) -> None:
     wb.save(filepath)
 
 
-def get_hh_ids(count: int, household_ids: list[Any], households: WriteOnlyWorksheet | Worksheet, seed: Any | None):
+def get_hh_ids(
+    count: int, household_ids: list[Any], households: WriteOnlyWorksheet | Worksheet, seed: Any | None
+) -> None:
     for index, (key, (_, value)) in enumerate(get_household_header_mapping().items()):
         if value is None:
             continue

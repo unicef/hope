@@ -10,6 +10,7 @@ import pytest
 from extras.test_utils.factories.account import PartnerFactory
 from extras.test_utils.factories.core import (
     BusinessAreaFactory,
+    CurrencyFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
 )
@@ -23,6 +24,7 @@ from hope.apps.registration_data.tasks.rdi_xlsx_people_create import RdiXlsxPeop
 from hope.models import (
     Country as GeoCountry,
     DataCollectingType,
+    Facility,
     FlexibleAttribute,
     PendingAccount,
     PendingHousehold,
@@ -205,6 +207,7 @@ def rdi_people_dependencies(
     pdu_attribute: object,
     custom_attribute: object,
 ) -> dict[str, object]:
+    CurrencyFactory(code="USD", name="United States Dollar")
     return {
         "admin_areas": admin_areas,
         "partners": partners,
@@ -230,7 +233,7 @@ def test_execute(
         business_area.id,
         program.id,
     )
-    assert PendingHousehold.objects.count() == 5
+    assert PendingHousehold.objects.count() == 3
     assert PendingIndividual.objects.count() == 5
 
     individual_data = {
@@ -269,9 +272,18 @@ def test_execute(
     assert alternate_role.role == ROLE_ALTERNATE
     assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
     assert alternate_role.individual.flex_fields["custom_field_i_f"] == 2.99
+    ind_2 = PendingIndividual.objects.get(full_name="Jan    Index3")
+    hh_2 = ind_2.household
+    assert hh_2.facility.name == "NEW SCHOOL 23"
+
+    facility = Facility.objects.get(name="NEW SCHOOL 23")
+    assert facility.__str__() == "NEW SCHOOL 23"
+    assert facility.admin_area.p_code == "AF11"
 
     worker_individuals = PendingIndividual.objects.filter(relationship="NON_BENEFICIARY")
     assert worker_individuals.count() == 2
+    for worker in worker_individuals:
+        assert worker.household is None
 
     assert PendingAccount.objects.count() == 3
     dmd1 = PendingAccount.objects.get(individual__full_name="Collector ForJanIndex_3")

@@ -3,6 +3,7 @@
 from typing import Any, Callable
 
 from django.core.cache import cache
+from django.test import TestCase
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -94,20 +95,23 @@ def test_list_beneficiary_group_caching(
     assert response.status_code == status.HTTP_304_NOT_MODIFIED
     etag_after_cache = response.headers["ETAG"]
 
-    beneficiary_group1.group_label = "new_group_label"
-    beneficiary_group1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        beneficiary_group1.group_label = "new_group_label"
+        beneficiary_group1.save()
     response = authenticated_client.get(list_url, HTTP_IF_NONE_MATCH=etag)
     assert response.status_code == status.HTTP_200_OK
     after_edit_etag = response.headers["ETAG"]
     assert etag_after_cache != after_edit_etag
 
-    beneficiary_group3 = BeneficiaryGroupFactory(name="Other `BG")
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        beneficiary_group3 = BeneficiaryGroupFactory(name="Other `BG")
     response = authenticated_client.get(list_url, HTTP_IF_NONE_MATCH=after_edit_etag)
     assert response.status_code == status.HTTP_200_OK
     after_create_etag = response.headers["ETAG"]
     assert after_edit_etag != after_create_etag
 
-    beneficiary_group3.delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        beneficiary_group3.delete()
     response = authenticated_client.get(list_url, HTTP_IF_NONE_MATCH=after_create_etag)
     assert response.status_code == status.HTTP_200_OK
     after_delete_etag = response.headers["ETAG"]

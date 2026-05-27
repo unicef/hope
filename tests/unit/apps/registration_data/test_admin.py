@@ -1,9 +1,14 @@
 """Tests for registration data admin functionality."""
 
 from typing import Any
+from unittest.mock import Mock, patch
+import uuid
 
+from constance.test import override_config
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
+from django.test import Client
 from django.urls import reverse
 import pytest
 
@@ -12,19 +17,25 @@ from extras.test_utils.factories import (
     DocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
+    ImportDataFactory,
     IndividualFactory,
+    KoboImportDataFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     TicketComplaintDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
 )
-from hope.admin.registration_data import RegistrationDataImportAdmin
+from hope.admin.registration_data import (
+    RegistrationDataImportAdmin,
+)
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
+from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.apps.household.services.index_management import rebuild_program_indexes
+from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 from hope.models import (
     BusinessArea,
     Document,
@@ -38,7 +49,11 @@ from hope.models import (
 )
 from hope.models.utils import MergeStatusModel
 
-pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = [
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.elasticsearch,
+]
 
 
 @pytest.fixture
@@ -49,6 +64,148 @@ def afghanistan(db: Any) -> BusinessArea:
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
     return ProgramFactory(name="Test program For RDI", business_area=afghanistan)
+
+
+@pytest.fixture
+def biometric_program(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(
+        name="Biometric Program For RDI",
+        business_area=afghanistan,
+        biometric_deduplication_enabled=True,
+    )
+
+
+@pytest.fixture
+def admin_user() -> Any:
+    User = get_user_model()  # noqa
+    return User.objects.create_superuser(username="root", email="root@root.com", password="password")
+
+
+@pytest.fixture
+def admin_client(admin_user: Any) -> Client:
+    client = Client()
+    client.login(username="root", password="password")
+    return client
+
+
+@patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task")
+def test_rerun_rdi_xlsx_schedules_async_job(
+    mock_registration_xlsx_import_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    import_data = ImportDataFactory(business_area_slug=afghanistan.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        data_source=RegistrationDataImport.XLS,
+        import_data=import_data,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_registration_xlsx_import_task.assert_called_once_with(
+        registration_data_import=rdi,
+        import_data_id=str(import_data.id),
+        business_area_id=str(afghanistan.id),
+        program_id=str(program.id),
+    )
+
+
+@patch("hope.apps.registration_data.celery_tasks.registration_kobo_import_async_task")
+def test_rerun_rdi_kobo_schedules_async_job(
+    mock_registration_kobo_import_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    import_data = KoboImportDataFactory(business_area_slug=afghanistan.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        data_source=RegistrationDataImport.KOBO,
+        import_data=import_data,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_registration_kobo_import_task.assert_called_once_with(
+        registration_data_import=rdi,
+        import_data_id=str(import_data.id),
+        business_area_id=str(afghanistan.id),
+        program_id=str(program.id),
+    )
+
+
+def test_rerun_rdi_unsupported_data_source_shows_error_message(
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        data_source=RegistrationDataImport.FLEX_REGISTRATION,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    messages = [m.message for m in get_messages(response.wsgi_request)]
+    assert "Cannot rerun RDI if it's not a XLS or KOBO." in messages
+
+
+@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
+def test_rerun_merge_rdi_schedules_async_job(
+    mock_merge_registration_data_import_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.MERGE_ERROR,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_merge_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_merge_registration_data_import_task.assert_called_once_with(rdi)
+
+
+@patch("hope.apps.registration_data.celery_tasks.classify_findings_and_schedule_merge_async_task")
+@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
+def test_rerun_merge_rdi_cw_routes_to_classify_findings_task(
+    mock_merge_registration_data_import_task: Mock,
+    mock_classify_findings_task: Mock,
+    admin_client: Client,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=afghanistan,
+        program=program,
+        status=RegistrationDataImport.MERGE_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_merge_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_classify_findings_task.assert_called_once_with(rdi)
+    mock_merge_registration_data_import_task.assert_not_called()
 
 
 @pytest.mark.elasticsearch
@@ -93,7 +250,7 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
         rdi_merge_status=MergeStatusModel.PENDING,
     )
 
-    rebuild_search_index()
+    rebuild_program_indexes(str(program.id))
 
     assert RegistrationDataImport.objects.count() == 1
     assert PendingHousehold.objects.count() == 1
@@ -112,7 +269,11 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
 
 
 @pytest.mark.elasticsearch
-def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: Program) -> None:
+def test_delete_rdi_merged(
+    django_app: Any,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
     rdi = RegistrationDataImportFactory(
         name="RDI To Remove",
         business_area=afghanistan,
@@ -170,8 +331,6 @@ def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: 
         individual=individual1,
     )
 
-    rebuild_search_index()
-
     User = get_user_model()  # noqa
     admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
 
@@ -190,7 +349,24 @@ def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: 
     assert "DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING" in content
     assert "This action will result in removing:" in content
 
-    RegistrationDataImportAdmin._delete_merged_rdi(rdi)
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_program_indexes(str(program.id))
+
+        individual_doc = get_individual_doc(str(program.id))
+        household_doc = get_household_doc(str(program.id))
+        ensure_index_ready(individual_doc._index._name)
+        ensure_index_ready(household_doc._index._name)
+
+        assert individual_doc.search().count() == 2
+        assert household_doc.search().count() == 1
+
+        RegistrationDataImportAdmin._delete_merged_rdi(rdi)
+
+        ensure_index_ready(individual_doc._index._name)
+        ensure_index_ready(household_doc._index._name)
+
+        assert individual_doc.search().count() == 0
+        assert household_doc.search().count() == 0
 
     assert GrievanceTicket.objects.count() == 0
     assert GrievanceTicket.objects.filter(id=grievance_ticket1.id).first() is None
@@ -213,3 +389,48 @@ def test_delete_rdi_merged(django_app: Any, afghanistan: BusinessArea, program: 
 
     assert Document.objects.count() == 0
     assert Document.objects.filter(id=document.id).first() is None
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [
+        (RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS, True),
+        (RegistrationDataImport.DEDUP_ENGINE_ERROR, True),
+        (RegistrationDataImport.DEDUP_ENGINE_PROCESSING, False),
+    ],
+)
+def test_fetch_biometric_deduplication_results_visible(biometric_program: Program, status: str, expected: bool) -> None:
+    rdi = RegistrationDataImportFactory(
+        program=biometric_program,
+        business_area=biometric_program.business_area,
+        deduplication_engine_status=status,
+    )
+
+    assert RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(rdi) is expected
+
+
+@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process_async_task")
+def test_fetch_biometric_deduplication_results_button(
+    mock_fetch_results_delay: Mock,
+    admin_client: Client,
+    biometric_program: Program,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        name="RDI To Fetch Results",
+        business_area=biometric_program.business_area,
+        program=biometric_program,
+        status=RegistrationDataImport.IN_REVIEW,
+        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR,
+    )
+
+    url = reverse(
+        "admin:registration_data_registrationdataimport_fetch_biometric_deduplication_results",
+        args=[rdi.pk],
+    )
+    response = admin_client.post(url)
+
+    rdi.refresh_from_db()
+
+    assert response.status_code == 302
+    assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PROCESSING
+    mock_fetch_results_delay.assert_called_once_with(str(biometric_program.id), str(rdi.id))

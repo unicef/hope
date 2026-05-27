@@ -34,7 +34,7 @@ function PaymentDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug: businessArea,
         paymentId: paymentId,
-        programSlug: programId,
+        programCode: programId,
         paymentPlanPk: paymentPlanId,
       }),
   });
@@ -68,7 +68,7 @@ function PaymentDetailsPage(): ReactElement {
       ((hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
         paymentPlanStatus === PaymentPlanStatusEnum.ACCEPTED) ||
         paymentPlanStatus === PaymentPlanStatusEnum.FINISHED) &&
-      payment.parent?.financialServiceProvider?.communicationChannel === 'XLSX'
+      !payment.parent?.isPaymentGateway
     ) {
       const ButtonComponent =
         payment.status === PaymentStatusEnum.FORCE_FAILED

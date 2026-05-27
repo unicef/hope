@@ -115,7 +115,7 @@ export function GrievancesTableRow({
           {ticket.programs.map((program) => (
             <BlackLink
               key={program.id}
-              to={`/${businessArea}/programs/${program.slug}/details/${program.slug}`}
+              to={`/${businessArea}/programs/${program.code}/details/${program.code}`}
             >
               {program.name}
             </BlackLink>

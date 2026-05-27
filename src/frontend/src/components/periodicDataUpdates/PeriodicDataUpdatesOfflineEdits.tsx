@@ -70,7 +70,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
     () => ({
       ordering: 'created_at',
       businessAreaSlug,
-      programSlug: programId,
+      programCode: programId,
     }),
     [businessAreaSlug, programId],
   );
@@ -97,7 +97,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
         createApiParams(
-          { businessAreaSlug, programSlug: programId },
+          { businessAreaSlug, programCode: programId },
           queryVariables,
           { withPagination: true, rowsPerPage: 5 },
         ),
@@ -111,7 +111,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
       RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve(
         {
           businessAreaSlug,
-          programSlug: programId,
+          programCode: programId,
         },
       ),
     enabled: !!businessAreaSlug && !!programId,

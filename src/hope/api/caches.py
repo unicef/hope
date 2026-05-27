@@ -1,5 +1,5 @@
 import functools
-from typing import Any, Callable
+from typing import Any, Callable, ParamSpec
 
 from constance import config
 from django.conf import settings
@@ -7,9 +7,30 @@ from django.core.cache import cache
 from django.db.models import Count, Max, QuerySet
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework_extensions.cache.decorators import CacheResponse
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
+
+
+class _ConstanceTTLCacheResponse(CacheResponse):
+    # Reads REST_API_TTL from constance per request instead of at decoration time.
+    # Why: with the database constance backend, evaluating config.REST_API_TTL at
+    # import time hits the constance table before migrations can be applied,
+    # breaking bootstrap (URL resolver runs during `manage.py check`).
+    def __init__(
+        self,
+        key_func: Any = None,
+        cache: str | None = None,
+        cache_errors: bool | None = None,
+    ) -> None:
+        super().__init__(timeout=0, key_func=key_func, cache=cache, cache_errors=cache_errors)
+
+    def calculate_timeout(self, view_instance: Any, **_: Any) -> int:
+        return config.REST_API_TTL
+
+
+cached_response = _ConstanceTTLCacheResponse
 
 
 def _inm_matches(etag: str, inm_header: str | None) -> bool:
@@ -30,9 +51,12 @@ def _inm_matches(etag: str, inm_header: str | None) -> bool:
     return any(n_etag == norm(t) for t in tokens)
 
 
+P = ParamSpec("P")
+
+
 def etag_decorator(
-    key_constructor_class: "KeyConstructor", compare_etags: bool = True, safe_only: bool = True
-) -> Callable:
+    key_constructor_class: "type[KeyConstructor] | type", compare_etags: bool = True, safe_only: bool = True
+) -> Callable[[Callable[P, Response]], Callable[P, Response]]:
     """Decorate ViewSet methods.
 
     Computes ETag from a KeyConstructor and:
@@ -40,9 +64,9 @@ def etag_decorator(
     - Otherwise: sets ETag header on the response.
     """
 
-    def inner(function: Callable) -> Callable:
+    def inner(function: Callable[P, Response]) -> Callable[P, Response]:
         @functools.wraps(function)
-        def wrapper(*args: Any, **kwargs: Any) -> Response:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> Response:
             view_instance, request = args[0], args[1]
 
             if safe_only and request.method not in ("GET", "HEAD"):
@@ -170,9 +194,9 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
-        program_slug = kwargs.get("program_slug")
+        program_code = kwargs.get("program_code")
 
-        version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
+        version_key = f"{business_area_slug}:{business_area_version}:{program_code}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
         return str(version)
 
@@ -192,7 +216,7 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     def _get_queryset(
         self,
         business_area_slug: Any | None,
-        program_slug: Any | None,
+        program_code: Any | None,
         view_instance: Any | None,
     ) -> QuerySet:
         return view_instance.get_queryset()
@@ -208,16 +232,16 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     ) -> str:
         business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-        program_slug = kwargs.get("program_slug")
+        program_code = kwargs.get("program_code")
 
-        queryset = self._get_queryset(business_area_slug, program_slug, view_instance).aggregate(
+        queryset = self._get_queryset(business_area_slug, program_code, view_instance).aggregate(
             latest_updated_at=Max("updated_at"), obj_count=Count("id")
         )
         latest_updated_at = queryset["latest_updated_at"]
         obj_count = queryset["obj_count"]
 
         return (
-            f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
+            f"{business_area_slug}:{business_area_version}:{program_code}:{self.specific_view_cache_key}"
             f":{latest_updated_at}:{obj_count}"
         )
 

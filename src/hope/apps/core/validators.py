@@ -61,8 +61,8 @@ class BaseValidator:
                 errors_list.append(e.message)
 
         if errors_list:
-            logger.warning(", ".join(errors_list))
-            raise Exception(", ".join(errors_list))
+            logger.warning(", ".join(str(e) for e in errors_list))
+            raise Exception(", ".join(str(e) for e in errors_list))
 
 
 def prepare_choices_for_validation(choices_sheet: "Worksheet") -> dict[str, list[str]]:

@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -13,7 +14,6 @@ from extras.test_utils.factories import (
     PendingDocumentFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
@@ -58,7 +58,7 @@ def program(business_area):
 def payment_plan(business_area, program, user):
     return PaymentPlanFactory(
         business_area=business_area,
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=program.cycles.first(),
         created_by=user,
     )
 
@@ -202,7 +202,7 @@ def test_getting_individual_with_status_sent_to_cash_assist(
     tax_id = document.document_number
     payment_plan = PaymentPlanFactory(
         business_area=business_area,
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=program.cycles.first(),
         created_by=user,
         status=PaymentPlan.Status.TP_LOCKED,
     )
@@ -232,7 +232,7 @@ def test_getting_individual_with_status_paid(
     tax_id = document.document_number
     payment = PaymentFactory(
         household=household,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         delivery_date=datetime.date.today(),
         delivered_quantity=1,
     )

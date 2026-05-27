@@ -1,7 +1,7 @@
 from io import BytesIO
 import logging
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 import zipfile
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -74,15 +74,21 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         program: Program,
     ) -> None:
         """Ensure order_number/token_number for all rows in qs."""
-        existing_orders: set[int] = set(
-            Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
-                "order_number", flat=True
-            )
+        existing_orders: set[int] = cast(
+            "set[int]",
+            set(
+                Payment.objects.filter(order_number__isnull=False, parent__program_cycle__program=program).values_list(
+                    "order_number", flat=True
+                )
+            ),
         )
-        existing_tokens: set[int] = set(
-            Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
-                "token_number", flat=True
-            )
+        existing_tokens: set[int] = cast(
+            "set[int]",
+            set(
+                Payment.objects.filter(token_number__isnull=False, parent__program_cycle__program=program).values_list(
+                    "token_number", flat=True
+                )
+            ),
         )
 
         missing_qs = qs.filter(Q(order_number__isnull=True) | Q(token_number__isnull=True))
@@ -91,7 +97,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         if not payments_ids:
             return
 
-        payments = list(qs.only("id", "order_number", "token_number"))
+        payments: list[Payment] = list(
+            cast("QuerySet[Payment, Payment]", qs.only("id", "order_number", "token_number"))
+        )
         if not payments:  # pragma: no cover
             return
 
@@ -124,19 +132,18 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
 
     def get_account_fields_headers(self) -> list[str]:
-        # Iterate over eligible payments to find the first with valid account_data
-        qs = (
-            self.payment_plan.eligible_payments.select_related("household_snapshot")
-            .only("id", "household_snapshot__snapshot_data")  # keep it minimal
-            .filter(
+        # Iterate over eligible payments to find the first with valid account_data.
+        # Use values_list to avoid Payment instances with deferred fields (N+1 on parent_id).
+        snapshot_data_qs = (
+            self.payment_plan.eligible_payments.filter(
                 Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
                 | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
             )
             .order_by("unicef_id")
+            .values_list("household_snapshot__snapshot_data", flat=True)
         )
-        for payment in qs:
-            snapshot = getattr(payment, "household_snapshot", None)
-            snapshot_data = snapshot.snapshot_data if snapshot else {}
+        for snapshot_data_dict in snapshot_data_qs:
+            snapshot_data = snapshot_data_dict or {}
             collector_data = (
                 snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
             )
@@ -253,6 +260,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             split.split_payment_items.eligible()
             .select_related(
                 "household_snapshot",
+                "currency",
                 "delivery_type",
                 "financial_service_provider",
                 "parent",
@@ -265,7 +273,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def get_payment_row(self, payment: Payment) -> list[str]:
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment, column_name, self.admin_areas_dict
+                payment, column_name, self.admin_areas_dict, self.all_document_types
             )
             for column_name in self.template_columns
         ]
@@ -347,8 +355,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation
 
-        fsp: "FinancialServiceProvider" = self.payment_plan.financial_service_provider
-        delivery_mechanism: DeliveryMechanism = self.payment_plan.delivery_mechanism
+        fsp_or_none = self.payment_plan.financial_service_provider
+        dm_or_none = self.payment_plan.delivery_mechanism
+        if fsp_or_none is None:
+            raise ValueError("FSP must be set (guarded by SplitPaymentPlanMutation)")
+        if dm_or_none is None:
+            raise ValueError("Delivery mechanism must be set (guarded by SplitPaymentPlanMutation)")
+        fsp: "FinancialServiceProvider" = fsp_or_none
+        delivery_mechanism: DeliveryMechanism = dm_or_none
         splits = self.payment_plan.splits.all().order_by("order")
         splits_count = splits.count()
         for i, split in enumerate(splits):

@@ -32,7 +32,7 @@ export const PeopleListTable = ({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       ageMax: filter.ageMax,
       ageMin: filter.ageMin,
       sex: [filter.sex],
@@ -86,7 +86,7 @@ export const PeopleListTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -106,7 +106,7 @@ export const PeopleListTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),

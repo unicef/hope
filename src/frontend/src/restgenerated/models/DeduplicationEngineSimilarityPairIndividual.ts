@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type DeduplicationEngineSimilarityPairIndividual = {
     id: string;
-    readonly photo: string;
+    readonly photo: string | null;
     fullName: string;
     unicefId: string;
     similarityScore: number;

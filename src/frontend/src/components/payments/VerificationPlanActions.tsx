@@ -37,7 +37,7 @@ export function VerificationPlanActions({
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
   const queryClient = useQueryClient();
   const pollingIntervalRef = useRef(null);
 
@@ -47,7 +47,7 @@ export function VerificationPlanActions({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanNode.id,
-          programSlug: programSlug,
+          programCode: programCode,
           verificationPlanId: verificationPlan.id,
         },
       ),
@@ -63,7 +63,7 @@ export function VerificationPlanActions({
             'PaymentVerificationPlanDetails',
             businessArea,
             paymentPlanNode.id,
-            programSlug,
+            programCode,
           ],
         });
       }, 2000);
@@ -90,7 +90,7 @@ export function VerificationPlanActions({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanNode.id,
-          programSlug: programSlug,
+          programCode: programCode,
           verificationPlanId: verificationPlan.id,
         },
       ),
@@ -101,7 +101,7 @@ export function VerificationPlanActions({
           'PaymentVerificationPlanDetails',
           businessArea,
           paymentPlanNode.id,
-          programSlug,
+          programCode,
         ],
       });
     },
@@ -229,7 +229,7 @@ export function VerificationPlanActions({
                               'PaymentVerificationPlanDetails',
                               businessArea,
                               paymentPlanNode.id,
-                              programSlug,
+                              programCode,
                             ],
                           });
                         }, 1000);

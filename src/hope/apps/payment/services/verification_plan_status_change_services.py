@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx
+from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx_async_task
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
@@ -73,13 +73,14 @@ class VerificationPlanStatusChangeServices:
         )
 
     def activate(self) -> PaymentVerificationPlan:
-        with cache.lock(
+        lock = cache.lock(
             f"payment_verification_plan_activate_rapidpro_{str(self.payment_verification_plan.id)}",
-            blocking_timeout=60 * 5,
             timeout=60 * 5,
-        ) as locked:
-            if not locked:
-                raise ValidationError("RapidPro activation already in progress")  # pragma: no cover
+        )
+        if not lock.acquire(blocking=False):
+            raise ValidationError("RapidPro activation already in progress")
+        try:
+            self.payment_verification_plan.refresh_from_db()
 
             if not self.payment_verification_plan.can_activate:
                 raise ValidationError("You can activate only PENDING/ERROR verifications")
@@ -94,6 +95,8 @@ class VerificationPlanStatusChangeServices:
             self.payment_verification_plan.save()
 
             return self.payment_verification_plan
+        finally:
+            lock.release()
 
     def _activate_rapidpro(self) -> None | Exception:
         api = RapidProAPI(self.payment_verification_plan.business_area.slug, RapidProAPI.MODE_VERIFICATION)
@@ -106,9 +109,9 @@ class VerificationPlanStatusChangeServices:
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
         successful_flows, exception = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
         new_flow_start_uuids = [sf.response["uuid"] for sf in successful_flows]
-        self.payment_verification_plan.rapid_pro_flow_start_uuids = [
+        self.payment_verification_plan.rapid_pro_flow_start_uuids = list(
             {*self.payment_verification_plan.rapid_pro_flow_start_uuids, *new_flow_start_uuids}
-        ]
+        )
         self.payment_verification_plan.save(update_fields=["rapid_pro_flow_start_uuids"])
 
         all_urns = []
@@ -201,7 +204,7 @@ class VerificationPlanStatusChangeServices:
 
         self.payment_verification_plan.xlsx_file_exporting = True
         self.payment_verification_plan.save()
-        create_payment_verification_plan_xlsx.delay(str(self.payment_verification_plan.pk), user_id)
+        create_payment_verification_plan_xlsx_async_task(self.payment_verification_plan, user_id)
         return self.payment_verification_plan
 
     def import_xlsx(self, file: io.BytesIO) -> PaymentVerificationPlan:

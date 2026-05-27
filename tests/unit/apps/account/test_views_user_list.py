@@ -243,7 +243,7 @@ def test_user_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 5
-        assert len(ctx.captured_queries) == 12
+        assert len(ctx.captured_queries) == 9
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
@@ -252,7 +252,7 @@ def test_user_list_caching(
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert etag == etag_second_call
-        assert len(ctx.captured_queries) == 6
+        assert len(ctx.captured_queries) == 4
 
     user2.first_name = "Zoe"
     user2.save()
@@ -264,7 +264,7 @@ def test_user_list_caching(
         assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
         assert etag_third_call not in [etag, etag_second_call]
         # 4 queries are saved because of cached permissions calculations
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 5
 
     user3.delete()
     with CaptureQueriesContext(connection) as ctx:
@@ -274,7 +274,7 @@ def test_user_list_caching(
         etag_fourth_call = response.headers["etag"]
         assert len(response.json()["results"]) == 4
         assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_third_call]
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 5
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
@@ -283,4 +283,4 @@ def test_user_list_caching(
         assert response.has_header("etag")
         etag_fifth_call = response.headers["etag"]
         assert etag_fifth_call == etag_fourth_call
-        assert len(ctx.captured_queries) == 6
+        assert len(ctx.captured_queries) == 4

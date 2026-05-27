@@ -83,7 +83,7 @@ def test_user_is_unicef(user: User, business_area: BusinessArea, program: Progra
 
     arguments = {
         "business_area": business_area.slug,
-        "program": program.slug,
+        "program": program.code,
     }
     result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
     assert result
@@ -109,7 +109,7 @@ def test_user_is_not_unicef_and_has_permission_in_different_program(
 
     arguments = {
         "business_area": business_area.slug,
-        "program": program.slug,
+        "program": program.code,
     }
     result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
     assert not result
@@ -135,7 +135,7 @@ def test_user_is_not_unicef_and_partner_has_permission_in_program(
 
     arguments = {
         "business_area": business_area.slug,
-        "program": program.slug,
+        "program": program.code,
     }
     result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
     assert result
@@ -161,7 +161,7 @@ def test_user_is_not_unicef_and_user_has_permission_in_program(
 
     arguments = {
         "business_area": business_area.slug,
-        "program": program.slug,
+        "program": program.code,
     }
     result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
     assert result
@@ -186,7 +186,7 @@ def test_user_is_not_unicef_and_partner_has_permission_in_whole_ba(
 
     arguments = {
         "business_area": business_area.slug,
-        "program": program.slug,
+        "program": program.code,
     }
     result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
     assert result
@@ -211,7 +211,7 @@ def test_user_is_not_unicef_and_user_has_permission_in_whole_ba(
 
     arguments = {
         "business_area": business_area.slug,
-        "program": program.slug,
+        "program": program.code,
     }
     result = check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
     assert result

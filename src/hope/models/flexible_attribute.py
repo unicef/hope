@@ -73,8 +73,8 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         related_name="flex_field",
     )
     required = models.BooleanField(default=False)
-    label = JSONField(default=dict, validators=[label_contains_english_en_validator])
-    hint = JSONField(default=dict)
+    label = JSONField(default=dict, blank=True, validators=[label_contains_english_en_validator])
+    hint = JSONField(default=dict, blank=True)
 
     class Meta:
         app_label = "core"
@@ -86,6 +86,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
                 name="unique_name_without_program",
             ),
         ]
+        ordering = ("name",)
 
     def clean(self) -> None:
         if (
@@ -120,7 +121,7 @@ class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
 
 class FlexibleAttributeGroup(SoftDeletionTreeModel):
     name = models.CharField(max_length=255, unique=True)
-    label = JSONField(default=dict)
+    label = JSONField(default=dict, blank=True)
     required = models.BooleanField(default=False)
     repeatable = models.BooleanField(default=False)
     parent = TreeForeignKey(
@@ -142,6 +143,7 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
 
     class Meta:
         app_label = "core"
+        ordering = ("name",)
 
 
 class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
@@ -152,7 +154,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUU
 
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    label = JSONField(default=dict)
+    label = JSONField(default=dict, blank=True)
     flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
 
     def __str__(self) -> str:
@@ -182,6 +184,7 @@ class PeriodicFieldData(models.Model):
         app_label = "core"
         verbose_name = "Periodic Field Data"
         verbose_name_plural = "Periodic Fields Data"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"Periodic Field Data: {self.pk}"

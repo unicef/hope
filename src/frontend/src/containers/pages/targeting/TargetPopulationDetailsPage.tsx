@@ -18,18 +18,18 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
 
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const {
     data: paymentPlan,
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
-    queryKey: ['targetPopulation', businessAreaSlug, id, programSlug],
+    queryKey: ['targetPopulation', businessAreaSlug, id, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
         businessAreaSlug: businessAreaSlug,
         id: id,
-        programSlug,
+        programCode,
       }),
     refetchInterval: (query) => {
       const data = query.state.data;

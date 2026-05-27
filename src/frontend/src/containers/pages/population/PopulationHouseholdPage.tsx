@@ -34,7 +34,7 @@ function PopulationHouseholdPage(): ReactElement {
 
   const initialFilter = {
     search: '',
-    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentType: '',
     documentNumber: '',
     residenceStatus: '',
     admin1: '',

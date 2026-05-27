@@ -48,8 +48,8 @@ class LogEntryViewSet(
 
     def get_queryset(self) -> QuerySet[LogEntry]:
         queryset = super().get_queryset()
-        if program_slug := self.kwargs.get("program_slug"):
-            queryset = queryset.filter(programs__slug=program_slug)
+        if code := self.kwargs.get("program_code"):
+            queryset = queryset.filter(programs__code=code)
         return queryset
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

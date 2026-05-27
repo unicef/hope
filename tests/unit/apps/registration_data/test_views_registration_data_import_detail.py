@@ -63,7 +63,7 @@ def url_detail(afghanistan: BusinessArea, program1: Program, rdi1: RegistrationD
         "api:registration-data:registration-data-imports-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
             "pk": rdi1.id,
         },
     )
@@ -176,7 +176,7 @@ def test_get_registration_data_import_detail_with_deduplication_statistics(
         "api:registration-data:registration-data-imports-detail",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
             "pk": rdi.id,
         },
     )

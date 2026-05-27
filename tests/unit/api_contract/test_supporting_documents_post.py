@@ -8,7 +8,7 @@ from unit.api_contract._helpers import PostRecorder
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -44,7 +44,7 @@ def role_assignment(request, db, superuser, business_area, role):
 
 @frozenfixture()
 def payment_plan(request, db, business_area, program, superuser):
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     return PaymentPlanFactory(business_area=business_area, program_cycle=cycle, created_by=superuser)
 
 
@@ -52,7 +52,7 @@ def test_create_supporting_document(superuser, business_area, program, role_assi
     recorder = PostRecorder(DATA_DIR, as_user=superuser)
     url = (
         f"/api/rest/business-areas/{business_area.slug}"
-        f"/programs/{program.slug}/payment-plans/{payment_plan.pk}/supporting-documents/"
+        f"/programs/{program.code}/payment-plans/{payment_plan.pk}/supporting-documents/"
     )
     data = {
         "title": "Test Document",

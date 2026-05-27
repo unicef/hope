@@ -6,6 +6,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
+import { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
@@ -32,15 +33,13 @@ const FeedbackFilters = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { businessArea } = useBaseUrl();
   const { isAllPrograms } = useBaseUrl();
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+  const { data: issueTypeChoices, isLoading: choicesLoading } = useQuery<
+    Choice[]
+  >({
+    queryKey: ['choicesFeedbackIssueType'],
+    queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
@@ -97,8 +96,8 @@ const FeedbackFilters = ({
             value={filter.issueType}
             data-cy="filters-issue-type"
           >
-            {choicesData?.feedbackIssueTypeChoices?.map((issueType) => (
-              <MenuItem key={issueType.name} value={issueType.value}>
+            {issueTypeChoices?.map((issueType) => (
+              <MenuItem key={issueType.value} value={issueType.value}>
                 {issueType.name}
               </MenuItem>
             ))}

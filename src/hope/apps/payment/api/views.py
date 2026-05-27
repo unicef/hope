@@ -2,13 +2,12 @@ from datetime import datetime
 from decimal import Decimal
 import logging
 import mimetypes
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
-from constance import config
-from django.db import transaction
-from django.db.models import Prefetch, Q, QuerySet
-from django.http import FileResponse
+from django.db import DatabaseError, transaction
+from django.db.models import Prefetch, QuerySet
+from django.http import FileResponse, Http404
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -21,9 +20,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
@@ -51,6 +49,7 @@ from hope.apps.payment.api.filters import (
 )
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
+    ApplyCustomExchangeRateSerializer,
     ApplyEngineFormulaSerializer,
     ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
@@ -86,13 +85,14 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
-    export_pdf_payment_plan_summary,
-    import_payment_plan_payment_list_from_xlsx,
-    payment_plan_apply_engine_rule,
-    payment_plan_apply_steficon_hh_selection,
-    payment_plan_exclude_beneficiaries,
-    payment_plan_full_rebuild,
-    payment_plan_set_entitlement_flat_amount,
+    export_pdf_payment_plan_summary_async_task,
+    import_payment_plan_payment_list_from_xlsx_async_task,
+    payment_plan_apply_custom_exchange_rate_async_task,
+    payment_plan_apply_engine_rule_async_task,
+    payment_plan_apply_steficon_hh_selection_async_task,
+    payment_plan_exclude_beneficiaries_async_task,
+    payment_plan_full_rebuild_async_task,
+    payment_plan_set_entitlement_flat_amount_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.mark_as_failed import (
@@ -139,6 +139,9 @@ from hope.models import (
     log_create,
 )
 
+if TYPE_CHECKING:
+    from hope.models import User
+
 logger = logging.getLogger(__name__)
 
 
@@ -167,9 +170,11 @@ class PaymentVerificationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.filter(
-        status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
-    ).order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.filter(status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED))
+        .select_related("currency")
+        .order_by("-created_at")
+    )
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentVerificationPlanListSerializer,
@@ -319,7 +324,14 @@ class PaymentVerificationViewSet(
         self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
     ) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = self.get_verification_plan_object()
+        try:
+            payment_verification_plan = PaymentVerificationPlan.objects.select_for_update(nowait=True).get(
+                pk=verification_plan_id
+            )
+        except PaymentVerificationPlan.DoesNotExist:
+            raise Http404
+        except DatabaseError:
+            raise ValidationError("Payment verification plan is locked by another request.")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
@@ -576,12 +588,14 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
 
-    def get_verification_record(self) -> PaymentVerificationPlan:
+    def get_verification_record(self) -> Payment:
         return get_object_or_404(Payment, id=self.kwargs.get("pk"))
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
-        return payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
+        return payment_plan.eligible_payments.exclude(
+            payment_verifications__payment_verification_plan__isnull=True
+        ).select_related("currency")
 
     @extend_schema(
         responses={
@@ -642,7 +656,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
         if received_amount is not None and received_amount != 0 and not received:
             raise ValidationError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
-        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)  # type: ignore[arg-type]
         payment_verification.status_date = timezone.now()
         payment_verification.received_amount = received_amount
         payment_verification.save()
@@ -680,7 +694,7 @@ class PaymentPlanViewSet(
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program")
+        .select_related("program_cycle__program", "currency")
         .order_by("-created_at")
     )
     http_method_names = ["get", "post", "patch", "delete"]
@@ -705,6 +719,7 @@ class PaymentPlanViewSet(
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "abort": PaymentPlanAbortSerializer,
+        "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -745,13 +760,16 @@ class PaymentPlanViewSet(
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
+        "custom_exchange_rate": [
+            Permissions.PM_CUSTOM_EXCHANGE_RATE,
+        ],
     }
 
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
 
     @etag_decorator(PaymentPlanListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanListKeyConstructor())
+    @cached_response(key_func=PaymentPlanListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -843,8 +861,8 @@ class PaymentPlanViewSet(
             data=request.data,
         )
         serializer.is_valid(raise_exception=True)
-        payment_plan_exclude_beneficiaries.delay(
-            str(payment_plan.id),
+        payment_plan_exclude_beneficiaries_async_task(
+            payment_plan,
             serializer.validated_data["excluded_households_ids"],
             serializer.validated_data.get("exclusion_reason", ""),
         )
@@ -963,16 +981,13 @@ class PaymentPlanViewSet(
             if not engine_rule.enabled or engine_rule.deprecated:
                 raise ValidationError("This engine rule is not enabled or is deprecated.")
             # PaymentPlan entitlement
-            if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
-                old_payment_plan = copy_model_object(payment_plan)
-                if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
-                    raise ValidationError("Rule Engine run in progress")
-                flow = PaymentPlanFlow(payment_plan)
-                flow.background_action_status_steficon_run()
-                payment_plan.save()
-                transaction.on_commit(
-                    lambda: payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
-                )
+            old_payment_plan = copy_model_object(payment_plan)
+            if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
+                raise ValidationError("Rule Engine run in progress")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_steficon_run()
+            payment_plan.save()
+            transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule))
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1003,7 +1018,7 @@ class PaymentPlanViewSet(
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("You can only export Payment List for LOCKED Payment Plan")
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=request.user.pk)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=str(request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1055,7 +1070,7 @@ class PaymentPlanViewSet(
             payment_plan.save()
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
-            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan))
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
@@ -1099,13 +1114,69 @@ class PaymentPlanViewSet(
             payment_plan.flat_amount_value = flat_amount_value
             payment_plan.save()
             payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
-            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount.delay(payment_plan.id))
+            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount_async_task(payment_plan))
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        request=ApplyCustomExchangeRateSerializer,
+        responses={200: PaymentPlanDetailSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="custom-exchange-rate",
+    )
+    @transaction.atomic
+    def custom_exchange_rate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.IN_REVIEW]:
+            raise ValidationError("User can only set custom exchange rate for OPEN/IN_REVIEW Payment Plan")
+        serializer.is_valid(raise_exception=True)
+
+        exchange_rate = serializer.validated_data.get("custom_exchange_rate")
+        unore_exchange_rate = serializer.validated_data.get("unore_exchange_rate")
+        if version := serializer.validated_data.get("version"):
+            check_concurrency_version_in_mutation(version, payment_plan)
+
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_applying_custom_exchange_rate()
+
+        if exchange_rate is not None:
+            payment_plan.exchange_rate = exchange_rate
+            payment_plan.custom_exchange_rate = True
+            payment_plan.custom_exchange_rate_set_by = cast("User", request.user)
+        else:
+            payment_plan.exchange_rate = unore_exchange_rate
+            payment_plan.custom_exchange_rate = False
+            payment_plan.custom_exchange_rate_set_by = None
+        payment_plan.save(
+            update_fields=[
+                "background_action_status",
+                "custom_exchange_rate",
+                "exchange_rate",
+                "custom_exchange_rate_set_by",
+            ]
+        )
+        payment_plan.refresh_from_db(
+            fields=[
+                "background_action_status",
+                "custom_exchange_rate",
+                "exchange_rate",
+                "custom_exchange_rate_set_by",
+            ]
+        )
+        transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate_async_task(payment_plan))
+        response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+        return Response(
+            data=response_serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(
         detail=True,
@@ -1275,7 +1346,7 @@ class PaymentPlanViewSet(
             )
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            request.user.pk, fsp_xlsx_template_id
+            str(request.user.pk), fsp_xlsx_template_id
         )
 
         log_create(
@@ -1332,7 +1403,7 @@ class PaymentPlanViewSet(
             raise ValidationError("Export failed: The Payment List is empty.")
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(request.user.id, None)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(str(request.user.id), None)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1366,12 +1437,9 @@ class PaymentPlanViewSet(
             raise ValidationError(
                 "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             )
-        if (
-            payment_plan.financial_service_provider.communication_channel
-            != FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
-        ):
+        if payment_plan.is_payment_gateway:
             raise ValidationError(
-                "Only for FSP with Communication Channel XLSX can be imported reconciliation manually."
+                "Manual reconciliation import is not available for payment plans using payment gateway."
             )
 
         serializer = self.get_serializer(data=request.data)
@@ -1445,7 +1513,7 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        export_pdf_payment_plan_summary.delay(payment_plan.pk, str(request.user.pk))
+        export_pdf_payment_plan_summary_async_task(payment_plan, str(request.user.pk))
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
@@ -1561,7 +1629,11 @@ class PaymentPlanGlobalViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        .select_related("currency")
+        .order_by("-created_at")
+    )
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,
     }
@@ -1583,7 +1655,7 @@ class TargetPopulationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.all().order_by("-created_at")
+    queryset = PaymentPlan.objects.all().select_related("currency").order_by("-created_at")
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
         "list": TargetPopulationListSerializer,
@@ -1615,7 +1687,7 @@ class TargetPopulationViewSet(
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
 
     @etag_decorator(TargetPopulationListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=TargetPopulationListKeyConstructor())
+    @cached_response(key_func=TargetPopulationListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -1812,7 +1884,7 @@ class TargetPopulationViewSet(
             payment_plan_copy.save()
             payment_plan_copy.refresh_from_db()
 
-            transaction.on_commit(lambda: payment_plan_full_rebuild.delay(payment_plan_copy.id))
+            transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(payment_plan_copy))
             log_create(
                 PaymentPlan.ACTIVITY_LOG_MAPPING,
                 "business_area",
@@ -1849,7 +1921,7 @@ class TargetPopulationViewSet(
         tp.steficon_rule_targeting = engine_rule.latest
         tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
         tp.save()
-        payment_plan_apply_steficon_hh_selection.delay(str(tp.pk), str(engine_rule.pk))
+        payment_plan_apply_steficon_hh_selection_async_task(tp, str(engine_rule.id))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1895,7 +1967,7 @@ class PaymentPlanManagerialViewSet(
 
     # TODO: e2e failed probably because of cache here
     @etag_decorator(PaymentPlanKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    @cached_response(key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -2068,7 +2140,20 @@ class PaymentViewSet(
             qs = parent.eligible_payments_with_conflicts
         else:
             qs = parent.eligible_payments
-        return qs.prefetch_related(individual_prefetch).all()
+        return (
+            qs.select_related(
+                "currency",
+                "head_of_household",
+                "collector",
+                "household_snapshot",
+                "financial_service_provider",
+                "business_area",
+                "program__business_area",
+                "parent__program_cycle__program__data_collecting_type",
+            )
+            .prefetch_related(individual_prefetch, "payment_verifications")
+            .all()
+        )
 
     @action(
         detail=True,
@@ -2135,6 +2220,7 @@ class PaymentGlobalViewSet(
                 "parent",
                 "financial_service_provider",
                 "program",
+                "currency",
             )
             .order_by("-created_at")
         )
@@ -2144,7 +2230,7 @@ class PaymentGlobalViewSet(
         return Response(data=self.get_serializer(instance={}).data)
 
 
-@extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore
+@extend_schema(responses={200: FspChoicesSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def available_fsps_for_delivery_mechanisms(
@@ -2152,19 +2238,31 @@ def available_fsps_for_delivery_mechanisms(
 ) -> Response:
     delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
-    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
-        fsps_qs = (
-            FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=dm.name)
-                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__name=dm.name,
-                allowed_business_areas__slug=business_area_slug,
-            )
-            .prefetch_related("delivery_mechanisms")
-            .distinct()
+    fsps = (
+        FinancialServiceProvider.objects.filter(
+            allowed_business_areas__slug=business_area_slug,
         )
+        .prefetch_related(
+            "delivery_mechanisms",
+            "fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism",
+        )
+        .distinct()
+    )
 
-        return list(fsps_qs.values("id", "name"))
+    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
+        result = []
+        for fsp in fsps:
+            dm_names = {d.name for d in fsp.delivery_mechanisms.all()}
+            if dm.name not in dm_names:
+                continue
+
+            templates = list(fsp.fsp_xlsx_template_per_delivery_mechanisms.all())
+            has_templates = bool(templates)
+            template_dm_names = {t.delivery_mechanism.name for t in templates if t.delivery_mechanism}
+
+            if dm.name in template_dm_names or not has_templates:
+                result.append({"id": fsp.id, "name": fsp.name})
+        return result
 
     list_resp = [
         {

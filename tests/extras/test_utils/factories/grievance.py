@@ -13,8 +13,10 @@ from hope.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
     TicketNote,
     TicketPaymentVerificationDetails,
+    TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
@@ -79,6 +81,20 @@ class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
         category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
         issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
     )
+
+
+class SensitiveGrievanceTicketWithoutExtrasFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketSensitiveDetails
+
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST,
+    )
+    household = None
+    individual = None
+    payment = None
 
 
 class TicketDeleteIndividualDetailsFactory(DjangoModelFactory):
@@ -194,3 +210,17 @@ class TicketNoteFactory(DjangoModelFactory):
 
     ticket = factory.SubFactory(GrievanceTicketFactory)
     description = factory.Sequence(lambda n: f"Note {n}")
+
+
+class TicketPositiveFeedbackDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketPositiveFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory)
+
+
+class TicketNegativeFeedbackDetailsFactory(DjangoModelFactory):
+    class Meta:
+        model = TicketNegativeFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory)

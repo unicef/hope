@@ -7,6 +7,7 @@ from hope.apps.grievance.services.data_change.data_change_service import (
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
+from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.models import Individual, log_create
 
@@ -56,3 +57,4 @@ class IndividualDeleteService(DataChangeService):
             if household_to_remove.active_individuals.count() == 0:
                 household_to_remove.withdraw()
             recalculate_data(household_to_remove)
+        invalidate_household_and_individual_list_cache(individual_to_remove.program_id)

@@ -9,17 +9,23 @@ from factory.django import DjangoModelFactory
 
 from hope.apps.periodic_data_update.utils import field_label_to_field_name
 from hope.models import (
+    AsyncJob,
     BeneficiaryGroup,
     BusinessArea,
     CountryCodeMap,
     DataCollectingType,
+    Facility,
     FileTemp,
     FlexibleAttribute,
     FlexibleAttributeChoice,
+    FlexibleAttributeGroup,
     PeriodicFieldData,
     StorageFile,
+    UniversalUpdate,
     XLSXKoboTemplate,
 )
+from hope.models.async_job import PeriodicAsyncJob
+from hope.models.currency import Currency
 
 
 class BusinessAreaFactory(DjangoModelFactory):
@@ -38,12 +44,22 @@ class BusinessAreaFactory(DjangoModelFactory):
 class BeneficiaryGroupFactory(DjangoModelFactory):
     class Meta:
         model = BeneficiaryGroup
+        django_get_or_create = ("name",)
 
     name = factory.Sequence(lambda n: f"Group {n}")
     group_label = "Household"
     group_label_plural = "Households"
     member_label = "Individual"
     member_label_plural = "Individuals"
+
+
+class CurrencyFactory(DjangoModelFactory):
+    class Meta:
+        model = Currency
+        django_get_or_create = ("code",)
+
+    code = "PLN"
+    name = "Polish Zloty"
 
 
 class CountryCodeMapFactory(DjangoModelFactory):
@@ -110,6 +126,14 @@ class FlexibleAttributeChoiceFactory(DjangoModelFactory):
     label = factory.LazyFunction(lambda: {"English(EN)": "Choice"})
 
 
+class FlexibleAttributeGroupFactory(DjangoModelFactory):
+    class Meta:
+        model = FlexibleAttributeGroup
+
+    name = factory.Sequence(lambda n: f"flex_group_{n}")
+    label = factory.LazyFunction(lambda: {"English(EN)": "Group"})
+
+
 class XLSXKoboTemplateFactory(DjangoModelFactory):
     class Meta:
         model = XLSXKoboTemplate
@@ -132,3 +156,34 @@ class StorageFileFactory(DjangoModelFactory):
 
     business_area = factory.SubFactory(BusinessAreaFactory)
     file = factory.LazyFunction(lambda: SimpleUploadedFile("storage.txt", b"test"))
+
+
+class FacilityFactory(DjangoModelFactory):
+    class Meta:
+        model = Facility
+        django_get_or_create = ("name", "business_area")
+
+    business_area = factory.SubFactory(BusinessAreaFactory)
+    admin_area = factory.SubFactory("extras.test_utils.factories.geo.AreaFactory")
+    name = factory.Sequence(lambda n: f"Facility {n}")
+
+
+class AsyncJobFactory(DjangoModelFactory):
+    class Meta:
+        model = AsyncJob
+
+    job_name = factory.Sequence(lambda n: f"job_{n}")
+
+
+class PeriodicAsyncJobFactory(DjangoModelFactory):
+    class Meta:
+        model = PeriodicAsyncJob
+
+    job_name = factory.Sequence(lambda n: f"periodic_job_{n}")
+
+
+class UniversalUpdateFactory(DjangoModelFactory):
+    class Meta:
+        model = UniversalUpdate
+
+    program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")

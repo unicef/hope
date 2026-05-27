@@ -45,18 +45,18 @@ export function ApprovePaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: AcceptanceProcess;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansApproveCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -76,13 +76,12 @@ export function ApprovePaymentPlan({
   });
 
   const shouldShowLastApproverMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const approvalNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.approvalNumberRequired;
-
+      latestApprovalProcess?.approvalNumberRequired;
     const approvalsCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.approval?.length;
+      latestApprovalProcess?.actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };
@@ -94,7 +93,7 @@ export function ApprovePaymentPlan({
         approve({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             comment: values.comment,
           },

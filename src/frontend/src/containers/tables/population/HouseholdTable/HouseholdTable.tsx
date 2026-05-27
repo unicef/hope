@@ -56,7 +56,7 @@ export const HouseholdTable = ({
 
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       sizeMin: filter.householdSizeMin,
       sizeMax: filter.householdSizeMax,
       search: filter.search.trim(),
@@ -121,7 +121,7 @@ export const HouseholdTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -138,7 +138,7 @@ export const HouseholdTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),
@@ -227,6 +227,7 @@ export const HouseholdTable = ({
         <TableCell align="right">
           <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
         </TableCell>
+        <TableCell align="left">{household.facilityName}</TableCell>
       </ClickableTableRow>
     );
   };

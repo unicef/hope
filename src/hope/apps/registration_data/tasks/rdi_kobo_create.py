@@ -38,6 +38,7 @@ from hope.models import (
     BusinessArea,
     Country as GeoCountry,
     DocumentType,
+    Facility,
     ImportData,
     KoboImportedSubmission,
     PendingDocument,
@@ -48,6 +49,7 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
+from hope.models.currency import Currency
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +129,15 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         elif field_data_dict["name"] in ["admin1", "admin2", "admin3", "admin4"]:
             correct_value = Area.objects.get(p_code=value)
         elif field_data_dict["name"] in ["country", "country_origin"]:
-            correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)
+            correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)  # type: ignore[arg-type]
+        elif field_data_dict["name"] == "currency":
+            if value in (None, ""):
+                correct_value = None
+            else:
+                try:
+                    correct_value = Currency.objects.get(code=value)
+                except Currency.DoesNotExist:
+                    raise ValueError(f"Unknown currency code '{value}' on household #{self.household_count}")
         else:
             correct_value = self._cast_value(value, field)
 
@@ -317,7 +327,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     ) -> PendingIndividualRoleInHousehold | None:
         individual_obj.last_registration_date = individual_obj.first_registration_date
         individual_obj.registration_data_import = self.registration_data_import
-        individual_obj.program = self.registration_data_import.program
+        individual_obj.program = self.registration_data_import.program  # type: ignore[assignment]
         individual_obj.business_area = self.business_area
         individual_obj.age_at_registration = calculate_age_at_registration(
             self.registration_data_import.created_at,
@@ -350,7 +360,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_obj.first_registration_date = registration_date
         household_obj.last_registration_date = registration_date
         household_obj.registration_data_import = self.registration_data_import
-        household_obj.program = self.registration_data_import.program
+        household_obj.program = self.registration_data_import.program  # type: ignore[assignment]
         household_obj.business_area = self.business_area
         household_obj.set_admin_areas(save=False)
         for ind in current_individuals:
@@ -405,23 +415,33 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     self._handle_exception("Individual", i_field, e)
         return only_collector_flag, role
 
+    def _create_facility(self, facility_data: dict) -> Facility | None:
+        if "name" in facility_data:
+            return Facility.objects.get_or_create(
+                name=facility_data["name"].upper(),
+                admin_area=Area.objects.get(p_code=facility_data["admin_area"]),
+                business_area=self.business_area,
+            )[0]
+        return None
+
     def handle_household(  # noqa: PLR0912
         self,
         collectors_to_create: dict,
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
-        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")
-        submission_meta_data: dict = kwargs.get("submission_meta_data")
-        self.household_count: int = kwargs.get("household_count")
+        individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")  # type: ignore[assignment]
+        submission_meta_data: dict = kwargs.get("submission_meta_data")  # type: ignore[assignment]
+        self.household_count: int = kwargs.get("household_count")  # type: ignore[assignment]
         individuals_to_create_list = []
         documents_and_identities_to_create = []
         submission_meta_data["detail_id"] = submission_meta_data.pop("kobo_asset_id", "")
         household_obj = PendingHousehold(**submission_meta_data)
         self.attachments = household.get("_attachments", [])
         registration_date = None
+        facility_data = {}
         current_individuals = []
         ind_count = 0
         for hh_field, hh_value in household.items():
@@ -452,6 +472,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if role_obj:
                         collectors_to_create[individual_obj.get_hash_key].append(role_obj)
 
+            # create Facility data
+            elif hh_field in ("facility_name_h_c", "facility_admin_area_h_c"):
+                if hh_field == "facility_name_h_c":
+                    facility_data["name"] = hh_value
+                elif hh_field == "facility_admin_area_h_c":
+                    facility_data["admin_area"] = hh_value
+
             elif hh_field == "end":
                 registration_date = parse(hh_value)
             elif hh_field == "start":
@@ -464,6 +491,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 except (Error, ValidationError, ValueError, TypeError) as e:
                     logger.warning(e)
                     self._handle_exception("Household", hh_field, e)
+
+        household_obj.facility = self._create_facility(facility_data)
         self._finalize_household(
             household_obj,
             registration_date,

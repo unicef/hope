@@ -8,14 +8,15 @@ from django.db.models.signals import m2m_changed, post_delete, post_save, pre_de
 from django.dispatch import receiver
 from django.utils import timezone
 
-from hope.api.caches import get_or_create_cache_key
 from hope.apps.account.caches import get_user_permissions_version_key
 from hope.apps.account.profile_cache import profile_cache
-from hope.models import BusinessArea, Partner, Role, RoleAssignment, User
+from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, RoleAssignment, User, UserRoleAssignment
 
 
 @receiver(post_save, sender=RoleAssignment)
+@receiver(post_save, sender=UserRoleAssignment)
 @receiver(pre_delete, sender=RoleAssignment)
+@receiver(pre_delete, sender=UserRoleAssignment)
 def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     if instance.user:
         instance.user.last_modify_date = timezone.now()
@@ -56,14 +57,22 @@ def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, 
 
 
 def _invalidate_user_permissions_cache(users: Iterable) -> None:
-    for user in users:
-        version_key = get_user_permissions_version_key(user)
-        get_or_create_cache_key(version_key, 0)
-        cache.incr(version_key)
+    version_keys = [get_user_permissions_version_key(user) for user in users]
+
+    def _increment() -> None:
+        for version_key in version_keys:
+            cache.get_or_set(version_key, 0, timeout=None)
+            cache.incr(version_key)
+
+    transaction.on_commit(_increment)
 
 
 @receiver(post_save, sender=RoleAssignment)
+@receiver(post_save, sender=UserRoleAssignment)
+@receiver(post_save, sender=PartnerRoleAssignment)
 @receiver(pre_delete, sender=RoleAssignment)
+@receiver(pre_delete, sender=UserRoleAssignment)
+@receiver(pre_delete, sender=PartnerRoleAssignment)
 def invalidate_permissions_cache_on_role_assignment_change(
     sender: Any, instance: RoleAssignment, **kwargs: Any
 ) -> None:
@@ -71,6 +80,7 @@ def invalidate_permissions_cache_on_role_assignment_change(
 
     when the RoleAssignment is created, updated, or deleted.
     """
+    users: Iterable
     if instance.user:
         users = [instance.user]
     else:
@@ -148,13 +158,17 @@ def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **k
 @receiver(post_save, sender=Permission)
 @receiver(post_delete, sender=Permission)
 @receiver(post_save, sender=RoleAssignment)
+@receiver(post_save, sender=UserRoleAssignment)
+@receiver(post_save, sender=PartnerRoleAssignment)
 @receiver(post_delete, sender=RoleAssignment)
-def _authz_global_changed(*args, **kwargs):
+@receiver(post_delete, sender=UserRoleAssignment)
+@receiver(post_delete, sender=PartnerRoleAssignment)
+def _authz_global_changed(*args: Any, **kwargs: Any) -> None:
     transaction.on_commit(profile_cache.bump_global)
 
 
 @receiver(m2m_changed, sender=Group.permissions.through)
-def _group_permissions_changed(action, **kwargs):
+def _group_permissions_changed(action: str, **kwargs: Any) -> None:
     if action in {"post_add", "post_remove", "post_clear"}:
         transaction.on_commit(profile_cache.bump_global)
 
@@ -162,11 +176,11 @@ def _group_permissions_changed(action, **kwargs):
 # Invalidate only the UserProfile associated with the User
 @receiver(post_save, sender=User)
 @receiver(post_delete, sender=User)
-def _user_changed(instance: User, **kwargs):
+def _user_changed(instance: User, **kwargs: Any) -> None:
     transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))
 
 
 @receiver(m2m_changed, sender=User.groups.through)
-def _user_groups_changed(instance: User, action, **kwargs):
+def _user_groups_changed(instance: User, action: str, **kwargs: Any) -> None:
     if action in {"post_add", "post_remove", "post_clear"}:
         transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))

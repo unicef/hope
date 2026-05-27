@@ -1,10 +1,11 @@
 from collections import OrderedDict
 
 from django.db import transaction
+from django.db.models import Prefetch
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from hope.models import User
+from hope.models import RoleAssignment, User
 
 
 class GenericField:
@@ -25,8 +26,9 @@ class PartnerField(GenericField):
 
 class RoleAssignmentField(GenericField):
     def value(self, user: User, business_area: str) -> str:
-        all_roles = user.role_assignments.filter(business_area__slug=business_area)
-        return ", ".join([f"{role.business_area.name}-{role.role.name}" for role in all_roles])
+        roles = getattr(user, "prefetched_role_assignments", [])
+
+        return ", ".join(f"{role.business_area.name}-{role.role.name}" for role in roles)
 
 
 class ExportUsersXlsx:
@@ -57,14 +59,24 @@ class ExportUsersXlsx:
     def get_exported_users_file(self) -> Workbook | None:
         fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
         users = (
-            User.objects.prefetch_related("user_roles")
-            .select_related("partner")
+            User.objects.select_related("partner")
+            .prefetch_related(
+                Prefetch(
+                    "role_assignments",
+                    queryset=RoleAssignment.objects.filter(business_area__slug=self.business_area_slug).select_related(
+                        "role", "business_area"
+                    ),
+                    to_attr="prefetched_role_assignments",
+                )
+            )
             .filter(
                 is_superuser=False,
                 role_assignments__business_area__slug=self.business_area_slug,
             )
+            .order_by("first_name")
+            .distinct()
         )
-        if users.exists() is False:
+        if not users:
             return None
 
         for user in users.iterator(chunk_size=2000):

@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.test import TestCase
 
-from extras.test_utils.old_factories.program import ProgramFactory
+from extras.test_utils.factories import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import IDENTIFICATION_TYPE_CHOICE
 from hope.models import AdminAreaLimitedTo, DocumentType, Role, RoleAssignment
@@ -37,11 +37,11 @@ class BaseTestCase(TestCase):
     def create_partner_role_with_permissions(  # pragma: no cover
         cls,
         partner: "Partner",
-        permissions: Iterable,
+        permissions: Iterable[Any],
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> RoleAssignment:
         """Create Partner Role with permissions.
 
@@ -69,11 +69,11 @@ class BaseTestCase(TestCase):
     def create_user_role_with_permissions(  # pragma: no cover
         cls,
         user: "User",
-        permissions: Iterable,
+        permissions: Iterable[Any],
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> RoleAssignment:
         """Create User Role with related permissions.
 

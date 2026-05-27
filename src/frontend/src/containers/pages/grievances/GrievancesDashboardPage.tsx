@@ -20,7 +20,7 @@ import { formatFigure } from '@utils/utils';
 
 function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
-  const { businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
+  const { businessAreaSlug, programCode, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
 
   // Use program-specific dashboard if we're in a specific program context,
@@ -29,7 +29,7 @@ function GrievancesDashboardPage(): ReactElement {
     queryKey: [
       'grievanceDashboard',
       businessAreaSlug,
-      programSlug,
+      programCode,
       isAllPrograms,
     ],
     queryFn: () => {
@@ -41,7 +41,7 @@ function GrievancesDashboardPage(): ReactElement {
         return RestService.restBusinessAreasProgramsGrievanceTicketsDashboardRetrieve(
           {
             businessAreaSlug,
-            programSlug,
+            programCode,
           },
         );
       }

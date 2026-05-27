@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, ImportData, Program, RegistrationDataImport, Role, RoleAssignment, User
 from hope.models.api_token import APIToken
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def authenticated_api_client(api_token) -> APIClient:
 def upload_url(business_area, program) -> str:
     return reverse(
         "api:generic-import:generic-import-upload-upload",
-        args=[business_area.slug, program.slug],
+        args=[business_area.slug, program.code],
     )
 
 
@@ -110,7 +110,7 @@ def other_program(other_business_area) -> Program:
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.celery_tasks.process_generic_import_task.delay")
+@patch("hope.apps.generic_import.celery_tasks.process_generic_import_async_task")
 def test_upload_valid_xlsx_file_creates_import_data_and_rdi_and_schedules_task(
     mock_task, authenticated_api_client, upload_url, xlsx_file, user, business_area, program, role_assignment
 ):
@@ -137,10 +137,7 @@ def test_upload_valid_xlsx_file_creates_import_data_and_rdi_and_schedules_task(
     assert rdi.data_source == RegistrationDataImport.XLS
     assert rdi.import_data == import_data
 
-    mock_task.assert_called_once_with(
-        registration_data_import_id=str(rdi.id),
-        import_data_id=str(import_data.id),
-    )
+    mock_task.assert_called_once_with(registration_data_import=rdi, import_data=import_data)
 
 
 @pytest.mark.django_db
@@ -196,7 +193,7 @@ def test_upload_to_business_area_not_in_token_valid_for_returns_404(
 ):
     url = reverse(
         "api:generic-import:generic-import-upload-upload",
-        args=[other_business_area.slug, program.slug],
+        args=[other_business_area.slug, program.code],
     )
 
     response = authenticated_api_client.post(url, {"file": xlsx_file}, format="multipart")
@@ -205,9 +202,7 @@ def test_upload_to_business_area_not_in_token_valid_for_returns_404(
 
 
 @pytest.mark.django_db
-def test_upload_with_nonexistent_program_slug_returns_404(
-    authenticated_api_client, business_area, xlsx_file, role_assignment
-):
+def test_upload_with_nonexistent_code_returns_404(authenticated_api_client, business_area, xlsx_file, role_assignment):
     url = reverse(
         "api:generic-import:generic-import-upload-upload",
         args=[business_area.slug, "nonexistent-program"],
@@ -226,7 +221,7 @@ def test_upload_program_from_different_business_area_returns_404(
 
     url = reverse(
         "api:generic-import:generic-import-upload-upload",
-        args=[business_area.slug, other_program.slug],
+        args=[business_area.slug, other_program.code],
     )
 
     response = authenticated_api_client.post(url, {"file": xlsx_file}, format="multipart")
@@ -235,7 +230,7 @@ def test_upload_program_from_different_business_area_returns_404(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.celery_tasks.process_generic_import_task.delay")
+@patch("hope.apps.generic_import.celery_tasks.process_generic_import_async_task")
 def test_upload_with_session_authentication_succeeds(mock_task, user, upload_url, xlsx_file, role_assignment, client):
     client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
 

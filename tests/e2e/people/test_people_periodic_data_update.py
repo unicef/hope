@@ -15,25 +15,22 @@ from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
 from e2e.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
-from extras.test_utils.old_factories.core import (
-    DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.household import create_household_and_individuals
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.periodic_data_update import (
+from extras.test_utils.factories import (
+    HouseholdFactory,
+    IndividualFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PDUXlsxTemplateFactory,
     PDUXlsxUploadFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
 )
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
+from hope.apps.household.const import HOST, SEEING
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
 from hope.models import (
-    HOST,
-    SEEING,
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,
@@ -45,6 +42,7 @@ from hope.models import (
     PeriodicFieldData,
     Program,
 )
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -59,9 +57,8 @@ def clear_downloaded_files(download_path: str) -> None:
 
 
 @pytest.fixture
-def program() -> Program:
-    business_area = create_afghanistan()
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+def program(business_area: BusinessArea) -> object:
+    dct = DataCollectingType.objects.filter(type=DataCollectingType.Type.SOCIAL).first()
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     return ProgramFactory(
         name="Test Program",
@@ -98,7 +95,7 @@ def individual(add_people: Individual) -> Individual:
         parent=payment_plan,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     add_people.total_cash_received_usd = 21.36
@@ -109,27 +106,26 @@ def individual(add_people: Individual) -> Individual:
 @pytest.fixture
 def add_people(program: Program) -> Individual:
     business_area = program.business_area
-    rdi = RegistrationDataImportFactory()
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "business_area": business_area,
-            "program": program,
-            "residence_status": HOST,
-            "registration_data_import": rdi,
-        },
-        individuals_data=[
-            {
-                "full_name": "Stacey Freeman",
-                "given_name": "Stacey",
-                "middle_name": "",
-                "family_name": "Freeman",
-                "business_area": business_area,
-                "observed_disability": [SEEING],
-                "registration_data_import": rdi,
-            },
-        ],
+    rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
+    hoh = IndividualFactory(
+        full_name="Stacey Freeman",
+        household=None,
+        business_area=business_area,
+        program=program,
+        given_name="Stacey",
+        middle_name="",
+        family_name="Freeman",
+        observed_disability=[SEEING],
     )
-    return individuals[0]
+    hh = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        residence_status=HOST,
+        registration_data_import=rdi,
+    )
+    hoh.household = hh
+    hoh.save()
+    return hoh
 
 
 def create_flexible_attribute(
@@ -217,7 +213,6 @@ class TestPeoplePDUXlsxUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Successful"
-        page_individuals.screenshot(screenshot_path, "0")
 
     @pytest.mark.night
     def test_people_periodic_data_update_upload_form_error(

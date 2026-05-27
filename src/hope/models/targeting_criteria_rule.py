@@ -20,9 +20,11 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
     )
     household_ids = models.TextField(blank=True)
     individual_ids = models.TextField(blank=True)
+    alternative_collectors_ids = models.TextField(blank=True, help_text="Use Alternative collectors for those IDs")
 
     class Meta:
         app_label = "targeting"
+        ordering = ("id",)
 
     def get_filters(self) -> "QuerySet":
         return self.filters.all()

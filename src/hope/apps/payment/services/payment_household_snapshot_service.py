@@ -156,7 +156,7 @@ def get_individual_snapshot(individual: Individual, payment: Payment | None = No
         individual=individual,
     ).exists()
 
-    if is_hh_collector and payment and payment.delivery_type:
+    if is_hh_collector and payment and payment.delivery_type and payment.financial_service_provider:
         individual_data["account_data"] = PaymentDataCollector.delivery_data(
             payment.financial_service_provider,
             payment.delivery_type,

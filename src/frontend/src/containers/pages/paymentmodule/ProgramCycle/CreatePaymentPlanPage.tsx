@@ -32,16 +32,16 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     useMutation({
       mutationFn: ({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
-        programSlug: string;
+        programCode: string;
         requestBody;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansCreate({
           businessAreaSlug,
-          programSlug,
+          programCode,
           requestBody,
         }),
     });
@@ -59,7 +59,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         status: 'DRAFT',
         programCycle: programCycleId,
       });
@@ -119,7 +119,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
       const res = await createPaymentPlan({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         requestBody,
       });
 

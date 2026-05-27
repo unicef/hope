@@ -41,7 +41,7 @@ function RegistrationDataImportPage(): ReactElement {
     queryFn: () =>
       RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
         businessAreaSlug: businessArea,
-        slug: programId,
+        code: programId,
       }),
   });
   const { data: businessAreaData } = useQuery<BusinessArea>({

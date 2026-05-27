@@ -43,18 +43,18 @@ export function AbortPaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: { abortComment?: string };
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansAbortCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -83,7 +83,7 @@ export function AbortPaymentPlan({
         abort({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             abortComment: values.comment,
           },

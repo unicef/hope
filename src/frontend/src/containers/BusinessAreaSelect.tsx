@@ -51,7 +51,7 @@ const CountrySelect = styled(Select)`
 `;
 
 export function BusinessAreaSelect(): ReactElement {
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
 
   const [selectedBusinessArea, setSelectedBusinessArea] = useState<string>(
     businessAreaSlug || '',
@@ -71,11 +71,11 @@ export function BusinessAreaSelect(): ReactElement {
   }, [businessAreaSlug, selectedBusinessArea]);
 
   const { data } = useQuery({
-    queryKey: ['businessAreasProfile', businessAreaSlug, programSlug],
+    queryKey: ['businessAreasProfile', businessAreaSlug, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug,
-        program: programSlug === 'all' ? undefined : programSlug,
+        program: programCode === 'all' ? undefined : programCode,
       });
     },
     staleTime: 15 * 60 * 1000, // Data is considered fresh for 15 minutes (business areas don't change often)

@@ -58,6 +58,18 @@ class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
         )
 
 
+class GrievanceTicketRelatedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrievanceTicket
+        fields = (
+            "id",
+            "unicef_id",
+            "category",
+            "issue_type",
+            "status",
+        )
+
+
 class GrievanceDocumentSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField()
     file_path = serializers.SerializerMethodField()
@@ -102,7 +114,7 @@ class HouseholdUpdateRolesSerializer(serializers.Serializer):
     individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
     new_role = serializers.ChoiceField(choices=ROLE_CHOICE + (("NO_ROLE", "No role"),), required=False)
 
-    def validate_new_role(self, value):
+    def validate_new_role(self, value: Any) -> Any:
         if value == "NO_ROLE":
             return None
         return value
@@ -116,14 +128,14 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     individual_unicef_id = serializers.CharField(source="ticket_details.individual.unicef_id", default="")
     admin = serializers.CharField(source="admin2.name", default="")
     assigned_to = UserSerializer()
-    related_tickets = serializers.SerializerMethodField()
+    related_tickets_count = serializers.SerializerMethodField()
     total_days = serializers.SerializerMethodField()
     created_by = UserSerializer()
     target_id = serializers.SerializerMethodField()
 
     class Meta:
         model = GrievanceTicket
-        fields = (
+        fields = [
             "id",
             "admin",
             "unicef_id",
@@ -141,21 +153,28 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "created_at",
             "created_by",
             "total_days",
-            "related_tickets",
+            "related_tickets_count",
             "programs",
             "target_id",
-        )
+        ]
 
     def get_programs(self, obj: GrievanceTicket) -> dict:
         return ProgramSmallSerializer(obj.programs, many=True).data
 
-    def get_related_tickets(self, obj: GrievanceTicket) -> dict:
-        return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
+    def get_related_tickets_count(self, obj: GrievanceTicket) -> int:
+        existing_count = getattr(obj, "existing_tickets_count", None)
+        if existing_count is None:
+            return obj._related_tickets.count()
+        linked_tickets = list(obj.linked_tickets.all())
+        if obj.household_unicef_id:
+            overlap = sum(1 for t in linked_tickets if t.household_unicef_id == obj.household_unicef_id)
+            return len(linked_tickets) + existing_count - overlap
+        return len(linked_tickets) + existing_count
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
 
-    def get_target_id(self, obj: GrievanceTicket) -> str:
+    def get_target_id(self, obj: GrievanceTicket) -> str | None:
         # qs annotated values in the list view
         if getattr(obj, "has_social_worker_program_annotated", None):
             ticket_details = obj.ticket_details
@@ -173,6 +192,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     postpone_deduplication = serializers.BooleanField(source="business_area.postpone_deduplication")
     individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
     payment_record = serializers.SerializerMethodField()
+    related_tickets = serializers.SerializerMethodField()
     linked_tickets = serializers.SerializerMethodField()
     existing_tickets = serializers.SerializerMethodField()
     documentation = serializers.SerializerMethodField()
@@ -187,7 +207,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     target_id = serializers.SerializerMethodField()
 
     class Meta(GrievanceTicketListSerializer.Meta):
-        fields = (
+        fields = [
             "id",
             "unicef_id",
             "status",
@@ -222,12 +242,12 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "documentation",
             "ticket_notes",
             "ticket_details",
-        )
+        ]
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
 
-    def get_target_id(self, obj: GrievanceTicket) -> str:
+    def get_target_id(self, obj: GrievanceTicket) -> str | None:
         return obj.target_id
 
     def get_payment_record(self, obj: GrievanceTicket) -> dict | None:
@@ -237,6 +257,9 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         else:
             payment_record = getattr(obj.ticket_details, "payment", None)
         return PaymentSmallSerializer(payment_record).data if payment_record else None
+
+    def get_related_tickets(self, obj: GrievanceTicket) -> dict:
+        return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
 
     def get_linked_tickets(self, obj: GrievanceTicket) -> dict:
         return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("-created_at"), many=True).data
@@ -371,7 +394,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     roles = serializers.ListField(child=HouseholdUpdateRolesSerializer(), required=False)
 
     @staticmethod
-    def validate_roles(value: list[dict[str, str]]) -> dict[str, str]:
+    def validate_roles(value: list[dict[str, str]]) -> list[dict[str, str]]:
         new_roles = [item["new_role"] for item in value]
         duplicates = {role for role in new_roles if new_roles.count(role) > 1 and role is not None}
         if duplicates:

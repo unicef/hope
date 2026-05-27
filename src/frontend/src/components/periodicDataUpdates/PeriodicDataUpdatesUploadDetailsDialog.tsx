@@ -80,7 +80,7 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: uploadId,
       }),
     enabled: !!uploadId,

@@ -30,7 +30,7 @@ function CommunicationTable({
   const initialQueryVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       createdAtRange: JSON.stringify({
         min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
         max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
@@ -64,7 +64,7 @@ function CommunicationTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsMessagesList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -81,7 +81,7 @@ function CommunicationTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsMessagesCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

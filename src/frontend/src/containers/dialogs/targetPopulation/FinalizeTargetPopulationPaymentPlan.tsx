@@ -38,7 +38,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       RestService.restBusinessAreasProgramsTargetPopulationsMarkReadyRetrieve({
         businessAreaSlug: businessArea,
         id: targetPopulationId,
-        programSlug: programId,
+        programCode: programId,
       }),
     onSuccess: () => {
       showMessage(t('Target Population Finalized'));

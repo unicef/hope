@@ -38,5 +38,4 @@ class SanctionListIndividualAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         ("country_of_birth", AutoCompleteFilter),
     )
     inlines = (SanctionListIndividualDateOfBirthInline,)
-    raw_id_fields = ("country_of_birth",)
     readonly_fields = ("sanction_list", "reference_number", "data_id")

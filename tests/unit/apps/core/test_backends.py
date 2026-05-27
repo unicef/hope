@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
 from django.utils import timezone
 import pytest
 
@@ -278,8 +279,9 @@ def test_expired_role_assignment_excludes_permissions(
     permissions = backend.get_all_permissions(user, business_area)
     assert get_permission_name(permission) in permissions
 
-    role_assignment_user.expiry_date = timezone.now() - timezone.timedelta(days=1)
-    role_assignment_user.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment_user.expiry_date = timezone.now() - timezone.timedelta(days=1)
+        role_assignment_user.save()
 
     permissions = backend.get_all_permissions(user, business_area)
     assert get_permission_name(permission) not in permissions
@@ -326,8 +328,9 @@ def test_partner_loses_permission_when_assigned_to_different_program(
     permissions_in_program = backend.get_all_permissions(user, program)
     assert "PROGRAMME_FINISH" in permissions_in_program
 
-    role_assignment_partner.program = program_other
-    role_assignment_partner.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment_partner.program = program_other
+        role_assignment_partner.save()
 
     permissions_in_program = backend.get_all_permissions(user, program)
     assert set() == permissions_in_program
@@ -346,8 +349,9 @@ def test_user_loses_permission_when_assigned_to_different_program(
     permissions_a = backend.get_all_permissions(user, program_a)
     assert "PROGRAMME_CREATE" in permissions_a
 
-    role_assignment_user.program = program_b
-    role_assignment_user.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        role_assignment_user.program = program_b
+        role_assignment_user.save()
 
     permissions_a = backend.get_all_permissions(user, program_a)
     assert set() == permissions_a

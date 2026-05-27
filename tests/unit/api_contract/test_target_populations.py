@@ -7,7 +7,7 @@ from unit.api_contract._helpers import HopeRecorder
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -43,7 +43,7 @@ def role_assignment(request, db, superuser, business_area, role):
 
 @frozenfixture()
 def target_population(request, db, business_area, program, superuser):
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -54,11 +54,11 @@ def target_population(request, db, business_area, program, superuser):
 
 def test_list_target_populations(superuser, business_area, program, role_assignment, target_population):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/target-populations/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/target-populations/")
 
 
 def test_retrieve_target_population(superuser, business_area, program, role_assignment, target_population):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/target-populations/{target_population.pk}/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/target-populations/{target_population.pk}/"
     )

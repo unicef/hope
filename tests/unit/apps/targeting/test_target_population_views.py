@@ -12,7 +12,6 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -53,8 +52,6 @@ def programs(business_area):
 @pytest.fixture
 def target_populations(business_area, programs):
     program1, program2 = programs
-    ProgramCycleFactory(program=program1)
-    ProgramCycleFactory(program=program2)
     with freezegun.freeze_time("2022-01-01"):
         tp1 = PaymentPlanFactory(
             business_area=business_area,
@@ -102,7 +99,7 @@ def list_url(business_area, programs):
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 

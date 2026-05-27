@@ -114,7 +114,10 @@ class ExchangeRates:
             return response_json
         return self.api_client.fetch_exchange_rates()
 
-    def get_exchange_rate_for_currency_code(self, currency_code: str, dispersion_date: datetime) -> float | None:
+    def get_exchange_rate_for_currency_code(self, currency_code: str | None, dispersion_date: datetime) -> float | None:
+        if currency_code is None:
+            return None
+
         currency: SingleExchangeRate | None = self.exchange_rates_dict.get(currency_code)
 
         if currency is None:

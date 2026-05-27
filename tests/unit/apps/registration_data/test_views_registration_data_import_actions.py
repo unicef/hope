@@ -162,13 +162,13 @@ def test_run_deduplication_without_permission(
 ) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-run-deduplication",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.celery_tasks.deduplication_engine_process.delay")
+@patch("hope.apps.registration_data.api.views.deduplication_engine_process_async_task")
 def test_run_deduplication(
     mock_deduplication_engine_process: Mock,
     api_client: APIClient,
@@ -176,13 +176,13 @@ def test_run_deduplication(
 ) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-run-deduplication",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     resp = api_client.post(url, {}, format="json")
 
     assert resp.status_code == status.HTTP_200_OK
     assert resp.data == {"message": "Deduplication process started"}
-    mock_deduplication_engine_process.assert_called_once_with(str(program.id))
+    mock_deduplication_engine_process.assert_called_once_with(str(program.pk))
 
     RegistrationDataImportFactory(
         program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
@@ -198,15 +198,15 @@ def test_run_deduplication(
     assert resp.json() == ["Biometric deduplication is not enabled for this program"]
 
 
-@patch("hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
+@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
 def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APIClient, program: Program) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-webhook-deduplication",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client.get(url)
     assert response.status_code == status.HTTP_200_OK
-    mock_fetch_dedup_results.assert_called_once_with(str(program.id))
+    mock_fetch_dedup_results.assert_called_once_with(str(program.pk))
 
 
 def test_merge_rdi_without_permission(
@@ -223,13 +223,13 @@ def test_merge_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-merge",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_task.delay")
+@patch("hope.apps.registration_data.api.views.merge_registration_data_import_async_task")
 def test_merge_rdi(mock_merge_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=business_area,
@@ -240,7 +240,7 @@ def test_merge_rdi(mock_merge_task: Mock, api_client: APIClient, program: Progra
 
     url = reverse(
         "api:registration-data:registration-data-imports-merge",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -249,7 +249,7 @@ def test_merge_rdi(mock_merge_task: Mock, api_client: APIClient, program: Progra
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.MERGE_SCHEDULED
-    mock_merge_task.assert_called_once_with(registration_data_import_id=rdi.id)
+    mock_merge_task.assert_called_once_with(registration_data_import=rdi)
 
 
 def test_merge_rdi_with_invalid_status(api_client: APIClient, program: Program, business_area: BusinessArea) -> None:
@@ -262,7 +262,7 @@ def test_merge_rdi_with_invalid_status(api_client: APIClient, program: Program, 
 
     url = reverse(
         "api:registration-data:registration-data-imports-merge",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -270,6 +270,31 @@ def test_merge_rdi_with_invalid_status(api_client: APIClient, program: Program, 
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DEDUPLICATION
+
+
+@patch("hope.apps.registration_data.api.views.merge_registration_data_import_async_task")
+def test_merge_rdi_cw_sourced_returns_403(
+    mock_merge_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+        country_workspace_id="cw-correlation-id-123",
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-merge",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    response = api_client.post(url, {}, format="json")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.IN_REVIEW
+    mock_merge_task.assert_not_called()
 
 
 def test_erase_rdi_without_permission(
@@ -286,7 +311,7 @@ def test_erase_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-erase",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -330,7 +355,7 @@ def test_erase_rdi(
 
     url = reverse(
         "api:registration-data:registration-data-imports-erase",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -345,10 +370,10 @@ def test_erase_rdi(
     assert mock_remove_es.call_count == 2
     es_call_args = mock_remove_es.call_args_list[0][0]
     assert set(es_call_args[0]) == set(individual_ids)
-    assert es_call_args[1].__name__ == f"IndividualDocument_{program.business_area.slug}_{program.slug}"
+    assert es_call_args[1].__name__ == f"IndividualDocument_{program.business_area.slug}_{program.code}"
     es_call_args_2 = mock_remove_es.call_args_list[1][0]
     assert set(es_call_args_2[0]) == {household.id}
-    assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
+    assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.business_area.slug}_{program.code}"
 
     mock_service.report_individuals_status.assert_called_once()
     report_call_args = mock_service.report_individuals_status.call_args[0]
@@ -378,7 +403,7 @@ def test_erase_rdi_with_invalid_status(api_client: APIClient, program: Program, 
 
     url = reverse(
         "api:registration-data:registration-data-imports-erase",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -411,7 +436,7 @@ def test_refuse_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-refuse",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {"reason": "Test reason"}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -472,7 +497,7 @@ def test_refuse_rdi(
 
     url = reverse(
         "api:registration-data:registration-data-imports-refuse",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
@@ -495,11 +520,11 @@ def test_refuse_rdi(
 
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[0][0][1].__name__
-        == f"IndividualDocument_{program.business_area.slug}_{program.slug}"
+        == f"IndividualDocument_{program.business_area.slug}_{program.code}"
     )
     assert (
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[1][0][1].__name__
-        == f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
+        == f"HouseholdDocument_{program.business_area.slug}_{program.code}"
     )
 
 
@@ -524,7 +549,7 @@ def test_refuse_rdi_with_invalid_status(api_client: APIClient, program: Program,
 
     url = reverse(
         "api:registration-data:registration-data-imports-refuse",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
@@ -534,6 +559,43 @@ def test_refuse_rdi_with_invalid_status(api_client: APIClient, program: Program,
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DEDUPLICATION
+
+
+def test_refuse_rdi_cw_sourced_returns_403(
+    api_client: APIClient, program: Program, business_area: BusinessArea
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+        country_workspace_id="cw-correlation-id-456",
+    )
+
+    create_household_and_individuals(
+        household_data={
+            "registration_data_import": rdi,
+            "program": program,
+            "business_area": business_area,
+        },
+        individuals_data=[
+            {"program": program, "registration_data_import": rdi},
+        ],
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-refuse",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    response = api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.IN_REVIEW
+    assert rdi.refuse_reason in (None, "")
 
 
 def test_deduplicate_rdi_without_permission(
@@ -550,13 +612,13 @@ def test_deduplicate_rdi_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-deduplicate",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.celery_tasks.rdi_deduplication_task.delay")
+@patch("hope.apps.registration_data.api.views.rdi_deduplication_async_task")
 def test_deduplicate_rdi(
     mock_deduplicate_task: Mock, api_client: APIClient, program: Program, business_area: BusinessArea
 ) -> None:
@@ -569,7 +631,7 @@ def test_deduplicate_rdi(
 
     url = reverse(
         "api:registration-data:registration-data-imports-deduplicate",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -578,7 +640,7 @@ def test_deduplicate_rdi(
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DEDUPLICATION
 
-    mock_deduplicate_task.assert_called_once_with(registration_data_import_id=str(rdi.id))
+    mock_deduplicate_task.assert_called_once_with(registration_data_import=rdi)
 
 
 def test_deduplicate_rdi_with_invalid_status(
@@ -593,7 +655,7 @@ def test_deduplicate_rdi_with_invalid_status(
 
     url = reverse(
         "api:registration-data:registration-data-imports-deduplicate",
-        args=["afghanistan", program.slug, rdi.id],
+        args=["afghanistan", program.code, rdi.id],
     )
 
     response = api_client.post(url, {}, format="json")
@@ -609,7 +671,7 @@ def test_status_choices_without_permission(
 ) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-status-choices",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client_no_permissions.get(url)
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -618,7 +680,7 @@ def test_status_choices_without_permission(
 def test_status_choices(api_client: APIClient, program: Program) -> None:
     url = reverse(
         "api:registration-data:registration-data-imports-status-choices",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
     response = api_client.get(url)
     assert response.status_code == status.HTTP_200_OK
@@ -638,7 +700,7 @@ def test_registration_xlsx_import_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -650,7 +712,7 @@ def test_registration_xlsx_import_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_xlsx_import_async_task")
 def test_registration_xlsx_import(
     mock_import_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:
@@ -667,7 +729,7 @@ def test_registration_xlsx_import(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -706,7 +768,7 @@ def test_registration_xlsx_import_import_data_not_found(api_client: APIClient, u
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -734,7 +796,7 @@ def test_registration_xlsx_import_import_data_not_ready(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -766,7 +828,7 @@ def test_registration_xlsx_import_program_finished(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -793,7 +855,7 @@ def test_registration_kobo_import_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -806,7 +868,7 @@ def test_registration_kobo_import_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_kobo_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_kobo_import_async_task")
 def test_registration_kobo_import(
     mock_import_task: Mock, api_client: APIClient, user: User, program: Program, business_area: BusinessArea
 ) -> None:
@@ -823,7 +885,7 @@ def test_registration_kobo_import(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -864,7 +926,7 @@ def test_registration_kobo_import_kobo_data_not_found(api_client: APIClient, use
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -893,7 +955,7 @@ def test_registration_kobo_import_kobo_data_not_ready(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -926,7 +988,7 @@ def test_registration_kobo_import_program_finished(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-kobo-import",
-        args=["afghanistan", program.slug],
+        args=["afghanistan", program.code],
     )
 
     data = {
@@ -942,7 +1004,7 @@ def test_registration_kobo_import_program_finished(
     assert "In order to perform this action, program status must not be finished." in response.data
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_rdi_social_worker_program_with_household_ids(
     mock_registration_task: Mock, api_client: APIClient, user: User, business_area: BusinessArea
 ) -> None:
@@ -1003,7 +1065,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", target_program.slug],
+        args=["afghanistan", target_program.code],
     )
 
     # Import using household IDs
@@ -1025,7 +1087,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_rdi_social_worker_program_with_individual_ids(
     mock_registration_task: Mock, api_client: APIClient, user: User, business_area: BusinessArea
 ) -> None:
@@ -1087,7 +1149,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", target_program.slug],
+        args=["afghanistan", target_program.code],
     )
 
     # Import using individual IDs
@@ -1108,7 +1170,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_without_permission(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1137,7 +1199,7 @@ def test_create_registration_data_import_without_permission(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1154,7 +1216,7 @@ def test_create_registration_data_import_without_permission(
     mock_registration_task.assert_not_called()
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1201,7 +1263,7 @@ def test_create_registration_data_import(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1222,7 +1284,7 @@ def test_create_registration_data_import(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_with_ids_filter(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1269,7 +1331,7 @@ def test_create_registration_data_import_with_ids_filter(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1289,7 +1351,7 @@ def test_create_registration_data_import_with_ids_filter(
     mock_registration_task.assert_called_once()
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_invalid_bg(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1321,7 +1383,7 @@ def test_create_registration_data_import_invalid_bg(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1338,7 +1400,7 @@ def test_create_registration_data_import_invalid_bg(
     assert "Cannot import data from a program with a different Beneficiary Group." in str(response.data)
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_invalid_dct(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1370,7 +1432,7 @@ def test_create_registration_data_import_invalid_dct(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1387,7 +1449,7 @@ def test_create_registration_data_import_invalid_dct(
     assert "Cannot import data from a program with not compatible data collecting type." in str(response.data)
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_program_finished(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1422,7 +1484,7 @@ def test_create_registration_data_import_program_finished(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1439,7 +1501,7 @@ def test_create_registration_data_import_program_finished(
     assert "In order to perform this action, program status must not be finished." in str(response.data)
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_cannot_check_against_sanction_list(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1477,7 +1539,7 @@ def test_create_registration_data_import_cannot_check_against_sanction_list(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_no_sanction.slug],
+        args=["afghanistan", program_no_sanction.code],
     )
 
     data = {
@@ -1494,7 +1556,7 @@ def test_create_registration_data_import_cannot_check_against_sanction_list(
     assert "Cannot check against sanction list." in str(response.data)
 
 
-@patch("hope.apps.registration_data.celery_tasks.registration_program_population_import_task.delay")
+@patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_0_objects(
     mock_registration_task: Mock,
     api_client_no_permissions: APIClient,
@@ -1516,7 +1578,7 @@ def test_create_registration_data_import_0_objects(
 
     url = reverse(
         "api:registration-data:registration-data-imports-list",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {
@@ -1559,7 +1621,7 @@ def test_registration_xlsx_import_name_not_unique(
 
     url = reverse(
         "api:registration-data:registration-data-imports-registration-xlsx-import",
-        args=["afghanistan", program_with_sanction_list.slug],
+        args=["afghanistan", program_with_sanction_list.code],
     )
 
     data = {

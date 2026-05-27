@@ -48,11 +48,11 @@ def feedback(request, db, business_area, program, superuser):
 
 def test_list_feedbacks_program(superuser, business_area, program, role_assignment, feedback):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/feedbacks/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/feedbacks/")
 
 
 def test_retrieve_feedback_program(superuser, business_area, program, role_assignment, feedback):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/feedbacks/{feedback.pk}/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/feedbacks/{feedback.pk}/"
     )

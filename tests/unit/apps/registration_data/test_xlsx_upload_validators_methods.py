@@ -90,6 +90,7 @@ def program(
     countries: dict[str, Any],
     afghanistan_admin_areas: list[Any],
     assistance_type_flex_attribute: Any,
+    all_currencies: None,
 ) -> Any:
     return ProgramFactory(business_area=business_area)
 
@@ -99,6 +100,7 @@ def social_worker_program(
     business_area: Any,
     countries: dict[str, Any],
     afghanistan_admin_areas: list[Any],
+    all_currencies: None,
 ) -> Any:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
@@ -353,6 +355,11 @@ def test_rows_validator(
                     "header": "assistance_type_h_f",
                     "message": "Sheet: 'Households', Unexpected value: Option 1, Option 2, Option "
                     "3 for type select many of field assistance_type_h_f",
+                    "row_number": 4,
+                },
+                {
+                    "header": "facility_admin_area_h_c",
+                    "message": "'facility_admin_area_h_c' is required when 'facility_name_h_c' is provided.",
                     "row_number": 4,
                 },
                 {
@@ -722,6 +729,11 @@ def test_validate_incorrect_admin_area(program: Any) -> None:
             "message": "Sheet: 'Households': Area with code: F-35 does not exist",
         },
         {
+            "header": "facility_admin_area_h_c",
+            "message": "Sheet: 'Households': Area with code: F-35 does not exist",
+            "row_number": 3,
+        },
+        {
             "header": "admin1_h_c",
             "row_number": 4,
             "message": "Sheet: 'Households': Area with code: F-35 does not exist",
@@ -763,18 +775,31 @@ def test_validate_people_sheet_invalid(
         {
             "row_number": 1,
             "header": "People",
-            "message": "Invalid value in field 'pp_primary_collector_id' for Individual with index_id 1. "
-            "Value cannot be empty for relationship NON_BENEFICIARY",
+            "message": "Individual with index_id None is NON_BENEFICIARY and cannot have 'pp_primary_collector_id' set."
+            " NON_BENEFICIARY individuals can only be alternate collectors.",
         },
         {
             "row_number": 1,
             "header": "People",
-            "message": "Individual with index_id 1 has to have an Primary collector.",
+            "message": "Individual with index_id None is NON_BENEFICIARY and must have 'pp_alternate_collector_id' "
+            "set.",
         },
         {
             "row_number": 1,
             "header": "People",
-            "message": "Individual with index_id 4 has to have an Primary collector.",
+            "message": "Individual with index_id 1 is NON_BENEFICIARY and must have 'pp_alternate_collector_id' set.",
+        },
+        {
+            "row_number": 1,
+            "header": "People",
+            "message": "Individual with index_id 1 is HEAD and must have 'pp_primary_collector_id' pointing to their "
+            "own index_id.",
+        },
+        {
+            "row_number": 1,
+            "header": "People",
+            "message": "Individual with index_id 4 is HEAD and must have 'pp_primary_collector_id' pointing to their "
+            "own index_id.",
         },
         {
             "row_number": 1,
@@ -786,6 +811,11 @@ def test_validate_people_sheet_invalid(
             "row_number": 3,
             "header": "pp_index_id",
             "message": "Sheet: 'People', Unexpected value: None for type integer of field pp_index_id",
+        },
+        {
+            "row_number": 3,
+            "header": "pp_facility_admin_area_h_c",
+            "message": "'pp_facility_admin_area_h_c' is required when 'pp_facility_name_h_c' is provided.",
         },
     ]
     with open(file_path, "rb") as file:
@@ -906,4 +936,57 @@ def test_validate_pdu_empty_row(
     sheet.append(data_row)
     validator = UploadXLSXInstanceValidator(program)
     errors = validator._validate_pdu(sheet[2], sheet[1], 3)
+    assert errors == []
+
+
+def test_validate_facility_admin_area_header(
+    social_worker_program: Any,
+) -> None:
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "People"
+    sheet.append(
+        [
+            "pp_facility_name_h_c",
+            "pp_index_id",
+            "pp_first_registration_date_i_c",
+            "pp_estimated_birth_date_i_c",
+            "pp_gender_i_c",
+            "pp_relationship_i_c",
+            "pp_full_name_i_c",
+            "pp_birth_date_i_c",
+        ]
+    )
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+    validator.validate_file_with_template(workbook)
+    errors = validator.errors
+    errors.sort(key=operator.itemgetter("row_number", "header"))
+    assert errors == [
+        {
+            "row_number": 1,
+            "header": "pp_facility_admin_area_h_c",
+            "message": "Missing column name 'pp_facility_admin_area_h_c'",
+        }
+    ]
+    # add missing column and should pass
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "People"
+    sheet.append(
+        [
+            "pp_facility_name_h_c",
+            "pp_facility_admin_area_h_c",
+            "pp_index_id",
+            "pp_first_registration_date_i_c",
+            "pp_estimated_birth_date_i_c",
+            "pp_gender_i_c",
+            "pp_relationship_i_c",
+            "pp_full_name_i_c",
+            "pp_birth_date_i_c",
+        ]
+    )
+
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+    validator.validate_file_with_template(workbook)
+    errors = validator.errors
     assert errors == []

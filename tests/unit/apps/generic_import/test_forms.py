@@ -361,7 +361,7 @@ def test_business_area_widget_adds_data_slug(user, business_area, create_user_ro
 
 
 @pytest.mark.django_db
-def test_program_widget_adds_data_slug(user, business_area, program, create_user_role_with_permissions):
+def test_program_widget_adds_data_code(user, business_area, program, create_user_role_with_permissions):
     create_user_role_with_permissions(
         user,
         [Permissions.GENERIC_IMPORT_DATA],

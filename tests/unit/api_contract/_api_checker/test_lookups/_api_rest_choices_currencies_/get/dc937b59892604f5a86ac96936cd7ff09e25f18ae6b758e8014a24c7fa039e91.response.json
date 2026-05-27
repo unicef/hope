@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "6745"
+        "Content-Length": "6789"
     },
     "data": [
         {
@@ -565,6 +565,10 @@
         },
         {
             "name": "Syrian pound",
+            "value": "SYP01"
+        },
+        {
+            "name": "Syrian pound Old",
             "value": "SYP"
         },
         {

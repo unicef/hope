@@ -1,6 +1,8 @@
 from unittest.mock import MagicMock, patch
 
+from django.core.exceptions import ValidationError
 import pytest
+import requests
 
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 
@@ -85,3 +87,32 @@ def test_broadcast_message_batch_formats_urns_with_telegram_prefix(mock_config, 
     call_args = mock_post.call_args[0][1]
     assert call_args["urns"] == ["telegram:123456789"]
     assert call_args["text"] == "Hello Telegram"
+
+
+@patch("hope.apps.core.services.rapid_pro.api.config")
+def test_start_flow_raises_validation_error_on_urns_error(mock_config, rapid_pro_api):
+    mock_config.RAPID_PRO_PROVIDER = "tel"
+    rapid_pro_api.MAX_URNS_PER_REQUEST = 100
+
+    http_error = requests.exceptions.HTTPError()
+    http_error.response = MagicMock(status_code=400)
+    http_error.response.json.return_value = {"urns": {"0": "invalid"}}
+
+    with patch.object(rapid_pro_api, "_handle_post_request", side_effect=http_error):
+        with patch.object(rapid_pro_api, "_parse_json_urns_error", return_value={"phone_numbers": ["111 - incorrect"]}):
+            _, error = rapid_pro_api.start_flow("flow-uuid", ["111"])
+            assert isinstance(error, ValidationError)
+
+
+@patch("hope.apps.core.services.rapid_pro.api.config")
+def test_broadcast_message_batch_raises_validation_error_on_urns_error(mock_config, rapid_pro_api):
+    mock_config.RAPID_PRO_PROVIDER = "tel"
+
+    http_error = requests.exceptions.HTTPError()
+    http_error.response = MagicMock(status_code=400)
+    http_error.response.json.return_value = {"urns": {"0": "invalid"}}
+
+    with patch.object(rapid_pro_api, "_handle_post_request", side_effect=http_error):
+        with patch.object(rapid_pro_api, "_parse_json_urns_error", return_value={"phone_numbers": ["111 - incorrect"]}):
+            with pytest.raises(ValidationError):
+                rapid_pro_api._broadcast_message_batch(["111"], "Hello")

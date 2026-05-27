@@ -41,12 +41,12 @@ def role_assignment(request, db, superuser, business_area, role):
     return RoleAssignmentFactory(user=superuser, business_area=business_area, role=role)
 
 
-@patch("hope.apps.registration_data.celery_tasks.pull_kobo_submissions_task.delay")
+@patch("hope.apps.registration_data.celery_tasks.pull_kobo_submissions_async_task")
 def test_save_kobo_import_data(mock_delay, superuser, business_area, program, role_assignment):
     recorder = PostRecorder(DATA_DIR, as_user=superuser)
     url = (
         f"/api/rest/business-areas/{business_area.slug}"
-        f"/programs/{program.slug}/kobo-import-data-upload/save-kobo-import-data/"
+        f"/programs/{program.code}/kobo-import-data-upload/save-kobo-import-data/"
     )
     data = {
         "uid": "kobo_asset_abc",

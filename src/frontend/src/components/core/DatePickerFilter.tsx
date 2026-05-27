@@ -11,15 +11,7 @@ export const DatePickerFilter = ({
   dataCy = 'date-picker-filter',
   ...props
 }): ReactElement => {
-  let datePickerValue = null;
-  if (value) {
-    // If value is 'YYYY-MM-DD', convert to ISO string for parseISO
-    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-      datePickerValue = parseISO(`${value}T00:00:00.000Z`);
-    } else {
-      datePickerValue = parseISO(value);
-    }
-  }
+  const datePickerValue = value ? parseISO(value) : null;
   const calculatedDataCy =
     dataCy === 'date-picker-filter'
       ? `date-picker-filter-${props?.label || props?.placeholder || ''}`

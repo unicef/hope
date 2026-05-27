@@ -52,7 +52,9 @@ class PDUDataExtractionService:
         return queryset
 
     @staticmethod
-    def _apply_boolean_filter(queryset, filter_value, filter_fn):
+    def _apply_boolean_filter(
+        queryset: QuerySet[Individual], filter_value: Any, filter_fn: Any
+    ) -> QuerySet[Individual]:
         if filter_value:
             return filter_fn(queryset)
         if filter_value is False:

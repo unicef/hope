@@ -4,7 +4,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
 import RegistrationPeopleFilters from '@components/rdi/RegistrationPeopleFilters';
-import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
+import RegistrationDataImportTable from '@containers/tables/rdi/RegistrationDataImportTable/RegistrationDataImportTable';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -34,16 +34,16 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const { businessArea, programId, businessAreaSlug, programSlug } =
+  const { businessArea, programId, businessAreaSlug, programCode } =
     useBaseUrl();
   const { showMessage } = useSnackbar();
 
   const { data: deduplicationFlags, isLoading: loading } = useQuery({
-    queryKey: ['deduplicationFlags', businessAreaSlug, programSlug],
+    queryKey: ['deduplicationFlags', businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
         businessAreaSlug,
-        slug: programSlug,
+        code: programCode,
       }),
   });
 
@@ -128,7 +128,7 @@ function PeopleRegistrationDataImportPage(): ReactElement {
         }}
       />
       <Box ref={tableRef}>
-        <RegistrationDataImportForPeopleTable
+        <RegistrationDataImportTable
           filter={appliedFilter}
           canViewDetails={hasPermissions(
             PERMISSIONS.RDI_VIEW_DETAILS,

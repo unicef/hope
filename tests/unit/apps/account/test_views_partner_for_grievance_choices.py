@@ -163,7 +163,7 @@ def test_get_partner_for_grievance_choices_for_program(
 
     response = authenticated_client.get(
         partner_for_grievance_choices_url,
-        {"program": program.slug},
+        {"program": program.code},
     )
 
     assert response.status_code == status.HTTP_200_OK

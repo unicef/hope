@@ -9,8 +9,8 @@ export type ProgramOnlyName = {
      */
     name: string;
     /**
-     * Program slug [sys]
+     * Program code
      */
-    slug: string;
+    code: string;
 };
 

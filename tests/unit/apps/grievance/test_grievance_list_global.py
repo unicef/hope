@@ -441,8 +441,7 @@ def test_grievance_ticket_global_list_with_all_permissions(
         assert grievance_ticket_result["programs"] == [
             {
                 "id": str(grievance_ticket.programs.first().id),
-                "programme_code": grievance_ticket.programs.first().programme_code,
-                "slug": grievance_ticket.programs.first().slug,
+                "code": grievance_ticket.programs.first().code,
                 "name": grievance_ticket.programs.first().name,
                 "status": grievance_ticket.programs.first().status,
                 "screen_beneficiary": grievance_ticket.programs.first().screen_beneficiary,
@@ -484,13 +483,8 @@ def test_grievance_ticket_global_list_with_all_permissions(
         if grievance_ticket.target_id:
             assert grievance_ticket_result["target_id"] == grievance_ticket.target_id
 
-        assert grievance_ticket_result["related_tickets"] == [
-            {
-                "id": str(linked_ticket.id),
-                "unicef_id": linked_ticket.unicef_id,
-            }
-            for linked_ticket in grievance_ticket.linked_tickets.all()
-        ]
+        assert grievance_ticket_result["related_tickets_count"] == grievance_ticket._related_tickets.count()
+        assert "related_tickets" not in grievance_ticket_result
 
 
 @freeze_time("2024-08-25 12:00:00")
@@ -847,7 +841,7 @@ def test_all_edit_household_fields_attributes(
 
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 39
+    assert len(data) == 41
 
     first_field = data[0]
     assert "id" in first_field

@@ -10,6 +10,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -470,7 +471,7 @@ def test_create_grievance_ticket_complaint(
         household=household_with_individuals["household"],
         collector=household_with_individuals["individuals"][0],
         business_area=afghanistan,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         parent__created_by=user,
         program=program,
     )

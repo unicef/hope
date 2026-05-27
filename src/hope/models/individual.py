@@ -17,13 +17,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
 from hope.apps.core.utils import FlexFieldsEncoder
-from hope.apps.household.field_validators import validate_originating_id
-from hope.apps.household.mixins import IndividualDeliveryDataMixin
-from hope.apps.household.signals import individual_deleted, individual_withdrawn
-from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
-from hope.models.business_area import BusinessArea
-from hope.models.document import Document
-from hope.models.household import (
+from hope.apps.household.const import (
     BLANK,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -49,8 +43,14 @@ from hope.models.household import (
     UNIQUE,
     UNIQUE_IN_BATCH,
     WORK_STATUS_CHOICE,
-    PendingHousehold,
 )
+from hope.apps.household.field_validators import validate_originating_id
+from hope.apps.household.mixins import IndividualDeliveryDataMixin
+from hope.apps.household.signals import individual_deleted, individual_withdrawn
+from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
+from hope.models.business_area import BusinessArea
+from hope.models.document import Document
+from hope.models.household import PendingHousehold
 from hope.models.utils import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -75,6 +75,7 @@ class IndividualCollection(UnicefIdentifiedModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)
 
 
 class Individual(
@@ -211,6 +212,7 @@ class Individual(
         max_length=255,
         choices=MARITAL_STATUS_CHOICE,
         default=BLANK,
+        blank=True,
         db_index=True,
         help_text="Beneficiary marital status",
     )
@@ -233,7 +235,7 @@ class Individual(
         default=NOT_PROVIDED,
         help_text="Work status",
     )
-    pregnant = models.BooleanField(null=True, help_text="Pregnant status")
+    pregnant = models.BooleanField(null=True, blank=True, help_text="Pregnant status")
     fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
     child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
     disability = models.CharField(
@@ -324,15 +326,20 @@ class Individual(
         encoder=FlexFieldsEncoder,
         help_text="FlexFields JSON representation [sys]",
     )
-    phone_no_valid = models.BooleanField(null=True, db_index=True, help_text="Beneficiary phone number valid [sys]")
+    phone_no_valid = models.BooleanField(
+        null=True, blank=True, db_index=True, help_text="Beneficiary phone number valid [sys]"
+    )
     phone_no_alternative_valid = models.BooleanField(
         null=True,
+        blank=True,
         db_index=True,
         help_text="Beneficiary phone number alternative valid [sys]",
     )
     first_registration_date = models.DateField(help_text="First registration date [sys]")
     last_registration_date = models.DateField(help_text="Last registration date [sys]")
-    enrolled_in_nutrition_programme = models.BooleanField(null=True, help_text="Enrolled in nutrition program [sys]")
+    enrolled_in_nutrition_programme = models.BooleanField(
+        null=True, blank=True, help_text="Enrolled in nutrition program [sys]"
+    )
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
@@ -392,6 +399,14 @@ class Individual(
         validators=[validate_originating_id],
         help_text="""A unified external reference with a fixed-length source prefix (XLS, KOB, or AUR)
                      and a source-specific identifier separated by '#', e.g., 'KOB#321#123'.""",
+    )
+    country_workspace_id = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Primary key of the Individual on the originating Country Workspace system. "
+        "Used as the reference key when communicating with the Deduplication Engine.",
     )
     program_registration_id = models.CharField(
         max_length=100,
@@ -475,13 +490,14 @@ class Individual(
             return cache.get("sanction_list_last_check")
         return None
 
-    def withdraw(self) -> None:
+    def withdraw(self, notify: bool = True) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.accounts.update(active=False)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.save()
-        individual_withdrawn.send(sender=self.__class__, instance=self)
+        if notify:
+            individual_withdrawn.send(sender=self.__class__, instance=self)
 
     def unwithdraw(self) -> None:
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
@@ -524,6 +540,7 @@ class Individual(
     class Meta:
         app_label = "household"
         verbose_name = "Individual"
+        ordering = ("id",)
         indexes = (
             GinIndex(fields=["vector_column"]),
             models.Index(
@@ -569,6 +586,11 @@ class Individual(
                 include=["birth_date"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
             ),
+            models.Index(
+                name="idx_hi_prog_rdi_status",
+                fields=["program", "rdi_merge_status"],
+                condition=Q(is_removed=False),
+            ),
         )
         constraints = [
             UniqueConstraint(
@@ -589,7 +611,12 @@ class Individual(
                 name="originating_id_ind_unique_constraint",
             ),
         ]
-        permissions = (("update_individual_iban", "Can update individual IBAN"),)
+        permissions = (
+            ("update_individual_iban", "Can update individual IBAN"),
+            ("individual_sanity_check", "Can check individual sanity"),
+            ("see_linked_objects", "Can see linked objects"),
+            ("reset_sync_date", "Can reset sync date"),
+        )
 
     def recalculate_data(self, save: bool = True) -> tuple[Any, list[str]]:
         update_fields = ["disability"]
@@ -623,7 +650,7 @@ class Individual(
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
 
     @cached_property
-    def parents(self) -> list["Individual"]:
+    def parents(self) -> "QuerySet[Individual] | list[Individual]":
         return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True)) if self.household else []
 
     def is_golden_record_duplicated(self) -> bool:
@@ -675,19 +702,31 @@ class PendingIndividual(Individual):
     objects = PendingManager()
 
     @property
-    def households_and_roles(self) -> QuerySet:
+    def households_and_roles(self) -> Any:
         return super().households_and_roles(manager="pending_objects")
 
+    @households_and_roles.setter
+    def households_and_roles(self, value: Any) -> None:
+        pass
+
     @property
-    def documents(self) -> QuerySet:
+    def documents(self) -> Any:
         return super().documents(manager="pending_objects")
 
-    @property
-    def identities(self) -> QuerySet:
-        return super().identities(manager="pending_objects")
+    @documents.setter
+    def documents(self, value: Any) -> None:
+        pass
 
     @property
-    def pending_household(self) -> QuerySet:
+    def identities(self) -> Any:
+        return super().identities(manager="pending_objects")
+
+    @identities.setter
+    def identities(self, value: Any) -> None:
+        pass
+
+    @property
+    def pending_household(self) -> "PendingHousehold":
         return PendingHousehold.objects.get(pk=self.household.pk)
 
     class Meta:

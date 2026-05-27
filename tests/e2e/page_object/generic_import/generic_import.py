@@ -231,8 +231,8 @@ class GenericImport(BaseComponents):
         option = select.first_selected_option
         return option.get_attribute("data-slug") or ""
 
-    def get_selected_program_slug(self) -> str:
-        """Get data-slug attribute of selected program."""
+    def get_selected_code(self) -> str:
+        """Get data-code attribute of selected program."""
         select = Select(self.get_select_program())
         option = select.first_selected_option
-        return option.get_attribute("data-slug") or ""
+        return option.get_attribute("data-code") or ""

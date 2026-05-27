@@ -2,7 +2,7 @@ from operator import itemgetter
 
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, CountryFactory, ProgramFactory
+from extras.test_utils.factories import AreaFactory, BusinessAreaFactory, CountryFactory, ProgramFactory
 from hope.apps.registration_data.validators import KoboProjectImportDataInstanceValidator
 from hope.models import Program
 
@@ -26,6 +26,8 @@ VALID_JSON = [
         "household_questions/size_h_c": "1",
         "household_questions/country_h_c": "AFG",
         "monthly_expenditures_questions/total_expense_h_f": "0",
+        "facility_name_h_c": "Test Name",
+        "facility_admin_area_h_c": "UA777",
         "individual_questions": [
             {
                 "individual_questions/preferred_language_i_c": "pl-pl",
@@ -308,6 +310,7 @@ INVALID_JSON = [
         "child_protection_questions/ok_parent_hit_child_h_f": "level_never",
         "wash_questions/seat_handrail_for_disabled_h_f": "0",
         "monthly_expenditures_questions/total_expense_h_f": "157",
+        "facility_admin_area_h_c": "AF777",
         "individual_questions": [
             {
                 "individual_questions/preferred_language_i_c": "test",
@@ -505,6 +508,7 @@ def countries() -> dict:
 
 @pytest.fixture
 def business_area(countries: dict) -> object:
+    AreaFactory(p_code="UA777")
     return BusinessAreaFactory(slug="afghanistan")
 
 
@@ -783,6 +787,10 @@ def test_validate_everything(
             "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
         },
         {
+            "header": "facility_admin_area_h_c",
+            "message": "Area with code: AF777 does not exist",
+        },
+        {
             "header": "preferred_language_i_c",
             "message": "Invalid choice test for field preferred_language_i_c",
         },
@@ -796,3 +804,15 @@ def test_validate_everything(
         },
     ]
     assert result == expected
+
+    INVALID_JSON[0]["facility_name_h_c"] = "Test Facility"
+    INVALID_JSON[0]["facility_admin_area_h_c"] = None
+
+    result_2 = validator.validate_everything(INVALID_JSON, business_area)
+    result_2.sort(key=itemgetter("header"))
+
+    expected[5] = {
+        "header": "facility_admin_area_h_c",
+        "message": "'facility_admin_area_h_c' is required when 'facility_name_h_c' is provided",
+    }
+    assert result_2 == expected

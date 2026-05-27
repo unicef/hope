@@ -10,11 +10,10 @@ def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> dict:
     if payment_plan.is_social_worker_program:
         scopes.append(Scope.XLSX_PEOPLE)
     factory = FieldFactory.from_only_scopes(scopes)
-    factory.apply_business_area(payment_plan.business_area.slug)
-    field = factory.to_dict_by("name")[field_name]
-    choices = field.get("choices") or field.pop("_choices", None)
+    field = dict(factory.to_dict_by("name")[field_name])
+    choices = field.pop("_choices", None)
     if choices and callable(choices):
-        field["choices"] = choices()
+        field["choices"] = choices(business_area_slug=payment_plan.business_area.slug)
     field["id"] = uuid.uuid4()
     return field
 

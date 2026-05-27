@@ -5,13 +5,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 export const DefaultRoute = (): ReactElement | null => {
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const { data: meData } = useQuery({
-    queryKey: ['profile', businessAreaSlug, programSlug],
+    queryKey: ['profile', businessAreaSlug, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug,
-        program: programSlug === 'all' ? undefined : programSlug,
+        program: programCode === 'all' ? undefined : programCode,
       });
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes

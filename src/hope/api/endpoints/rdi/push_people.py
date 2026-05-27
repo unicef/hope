@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.common import (
+    CountryWorkspaceIdConditionalMixin,
     DisabilityChoiceField,
     NullableChoiceField,
 )
@@ -21,8 +23,7 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializerUpload,
 )
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models import (
+from hope.apps.household.const import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -33,13 +34,16 @@ from hope.models import (
     OBSERVED_DISABILITY_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
+)
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
     Area,
     Country,
+    Grant,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
 )
-from hope.models.utils import Grant
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -56,7 +60,22 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
     pass
 
 
-class PushPeopleSerializer(serializers.ModelSerializer):
+class PushPeopleListSerializer(serializers.ListSerializer):
+    def validate(self, attrs: list[dict]) -> list[dict]:
+        cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
+        duplicates = sorted(cw_id for cw_id, count in Counter(cw_ids).items() if count > 1)
+        if duplicates:
+            raise serializers.ValidationError(
+                {
+                    "country_workspace_id": [
+                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicates)}."
+                    ]
+                }
+            )
+        return attrs
+
+
+class PushPeopleSerializer(CountryWorkspaceIdConditionalMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.MultipleChoiceField(
@@ -87,6 +106,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
+    country_workspace_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=150)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -95,13 +115,14 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
-    def validate_disability(self, value):
+    def validate_disability(self, value: Any) -> Any:
         if value == "":
             return NOT_DISABLED
         return value
 
     class Meta:
         model = PendingIndividual
+        list_serializer_class = PushPeopleListSerializer
         exclude = [
             "id",
             "registration_data_import",
@@ -173,11 +194,11 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
-        photo_file = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.programme_code)
+        photo_file = self.get_photo(individual_data.pop("photo", None), self.selected_rdi.program.code)
 
         disability_certificate_picture_file = self.get_photo(
             individual_data.pop("disability_certificate_picture", None),
-            self.selected_rdi.program.programme_code,
+            self.selected_rdi.program.code,
         )
 
         person_type = person_data.get("type")
@@ -185,7 +206,10 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
-        individual_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, individual_data.get("flex_fields"))
+        program = rdi.program
+        if program is None:
+            raise ValueError("RDI program must not be None")
+        individual_data["flex_fields"] = populate_pdu_with_null_values(program, individual_data.get("flex_fields"))
 
         ind = PendingIndividual.objects.create(
             business_area=rdi.business_area,
@@ -206,7 +230,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             hh.save()
 
         for doc in documents:
-            doc["photo"] = self.get_photo(doc.pop("image", None), self.selected_rdi.program.programme_code)
+            doc["photo"] = self.get_photo(doc.pop("image", None), self.selected_rdi.program.code)
             self.save_document(ind, doc)
 
         for account in accounts:
@@ -232,7 +256,11 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     @extend_schema(request=PushPeopleSerializer)
     @atomic()
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
-        serializer = PushPeopleSerializer(data=request.data, many=True)
+        serializer = PushPeopleSerializer(
+            data=request.data,
+            many=True,
+            context={"is_coming_from_cw": self.selected_rdi.is_coming_from_cw},
+        )
         if serializer.is_valid():
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)
 

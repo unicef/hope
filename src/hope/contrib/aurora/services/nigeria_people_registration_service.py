@@ -15,6 +15,7 @@ from hope.contrib.aurora.services.generic_registration_service import (
 )
 from hope.models import (
     Country,
+    Document,
     DocumentType,
     FinancialInstitutionMapping,
     FinancialServiceProvider,
@@ -29,6 +30,33 @@ logger = logging.getLogger(__name__)
 
 
 class NigeriaPeopleRegistrationService(GenericRegistrationService):
+    @staticmethod
+    def _get_national_id_field_name(mapping: dict) -> str:
+        individuals_key = mapping["defaults"].get("individuals_key", "individual-details")
+        individuals_mapping = mapping.get(individuals_key, {})
+        for field_name, mapped_field in individuals_mapping.items():
+            if mapped_field == "document.doc_national-document_number":
+                return field_name
+        return "national_id_no_i_c"
+
+    def _record_has_duplicate_national_id(
+        self,
+        individual_data: dict,
+        registration_data_import: RegistrationDataImport,
+        mapping: dict,
+    ) -> bool:
+        national_id_field_name = self._get_national_id_field_name(mapping)
+        national_id = (individual_data.get(national_id_field_name) or "").strip()
+        if not national_id:
+            return False
+
+        national_document_type_key = IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        return Document.all_merge_status_objects.filter(
+            program=registration_data_import.program,
+            type__key=national_document_type_key,
+            document_number=national_id,
+        ).exists()
+
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         default_mapping = {
             "defaults": {
@@ -65,6 +93,18 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         }
 
         mapping = mergedicts(default_mapping, self.registration.mapping or {}, [])
+        record_data_dict = record.get_data()
+        individuals_key = mapping["defaults"].get("individuals_key", "individual-details")
+        individual_data = record_data_dict.get(individuals_key, [])[0]
+
+        if self._record_has_duplicate_national_id(individual_data, registration_data_import, mapping):
+            record.ignored = True
+            record.save(update_fields=["ignored"])
+            logger.warning(
+                f"Ignoring Aurora record with duplicate national id,"
+                f" record_id {record.id}, record_source_id {record.source_id}",
+            )
+            return
 
         household = self.create_household_data(record, registration_data_import, mapping)
         individuals, head, pr_collector, _ = self.create_individuals(
@@ -81,9 +121,7 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         household.head_of_household = head_of_household
         PendingIndividualRoleInHousehold.objects.create(individual=collector, household=household, role=ROLE_PRIMARY)
 
-        record_data_dict = record.get_data()
-        individual_data = record_data_dict.get(mapping["defaults"].get("individuals_key", "individual-details"), [])[0]
-        self._prepare_national_id(individual_data, individual)
+        self._prepare_national_id(individual_data, individual, mapping)
 
         household.registration_id = record.source_id
         household.detail_id = record.source_id
@@ -91,9 +129,10 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         record.mark_as_imported()
 
     def _prepare_national_id(
-        self, individual_dict: dict, imported_individual: PendingIndividual
+        self, individual_dict: dict, imported_individual: PendingIndividual, mapping: dict
     ) -> PendingDocument | None:
-        national_id = individual_dict.get("national_id_no_i_c")
+        national_id_field_name = self._get_national_id_field_name(mapping)
+        national_id = individual_dict.get(national_id_field_name)
         if not national_id:
             return None
         photo = None

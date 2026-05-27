@@ -50,13 +50,13 @@ def pdu_upload(request, db, business_area, program, superuser):
 def test_list_pdu_uploads(superuser, business_area, program, role_assignment, pdu_upload):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/periodic-data-update-uploads/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/periodic-data-update-uploads/"
     )
 
 
 def test_retrieve_pdu_upload(superuser, business_area, program, role_assignment, pdu_upload):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/periodic-data-update-uploads/{pdu_upload.pk}/"
     )

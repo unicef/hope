@@ -10,3 +10,4 @@ class KoboImportData(ImportData):
 
     class Meta:
         app_label = "registration_data"
+        ordering = ("id",)

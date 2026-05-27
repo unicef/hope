@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from collections.abc import MutableMapping
+from collections.abc import Iterator, MutableMapping
 from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
@@ -16,7 +16,6 @@ from typing import (
     Callable,
     Generator,
     Iterable,
-    Iterator,
     Optional,
 )
 
@@ -25,7 +24,8 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.db.models import F, Func, Q, Value
+from django.db.models import F, Func, JSONField, Q, Value
+from django.db.models.functions import Cast
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_filters import OrderingFilter
@@ -132,50 +132,48 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
 
 
 def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
-    from django.db.models import F
+    """Flexible Attributes objects to dict mapping.
 
-    """
-    Flexible Attributes objects to dict mapping:
-        "individuals": {
-            "test_i_f": {
-                "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
-                "type": "SELECT_ONE",
-                "name": "test_i_f",
-                "lookup": "test_i_f",
-                "required": True,
-                "label": {
-                    "English(EN)": "This is test label"
-                },
-                "hint": "",
-                "choices": [
-                    {
-                        "English(EN)": "Yes",
-                        "value": 0
-                    }
-                ],
-                "associated_with": Individual,
+    "individuals": {
+        "test_i_f": {
+            "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
+            "type": "SELECT_ONE",
+            "name": "test_i_f",
+            "lookup": "test_i_f",
+            "required": True,
+            "label": {
+                "English(EN)": "This is test label"
             },
+            "hint": "",
+            "choices": [
+                {
+                    "English(EN)": "Yes",
+                    "value": 0
+                }
+            ],
+            "associated_with": Individual,
         },
-        "households": {
-            "test_h_f": {
-                "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
-                "type": "SELECT_ONE",
-                "name": "test_h_f",
-                "lookup": "test_h_f",
-                "required": True,
-                "label": {
-                    "English(EN)": "This is test label"
-                },
-                "hint": "",
-                "choices": [
-                    {
-                        "English(EN)": "Yes",
-                        "value": 0
-                    }
-                ],
-                "associated_with": Household,
+    },
+    "households": {
+        "test_h_f": {
+            "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
+            "type": "SELECT_ONE",
+            "name": "test_h_f",
+            "lookup": "test_h_f",
+            "required": True,
+            "label": {
+                "English(EN)": "This is test label"
             },
-        }
+            "hint": "",
+            "choices": [
+                {
+                    "English(EN)": "Yes",
+                    "value": 0
+                }
+            ],
+            "associated_with": Household,
+        },
+    }.
     """
     from hope.models import FlexibleAttribute
 
@@ -199,7 +197,7 @@ def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
             "required": attr.required,
             "label": attr.label,
             "hint": attr.hint,
-            "choices": list(attr.choices.values("label", value=F("name"))),
+            "choices": [{"label": c.label, "value": c.name} for c in attr.choices.all()],
             "associated_with": associated_with,
         }
 
@@ -262,13 +260,14 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
         raise
 
 
-def nested_dict_get(dictionary: dict, path: str) -> str | None:
-    return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
-        # type: ignore # FIXME (got "Dict[Any, Any]", expected "Optional[str]")
-        path.split("."),
-        dictionary,
-    )
+def nested_dict_get(dictionary: dict[str, Any], path: str) -> Any:
+    result: Any = dictionary
+    for key in path.split("."):
+        if isinstance(result, dict):
+            result = result.get(key, None)
+        else:
+            return None
+    return result
 
 
 def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, int | float]:
@@ -277,7 +276,7 @@ def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, 
     return {"count": count, "percentage": percentage}
 
 
-def _apply_dict_fields(data, instance, dict_fields):
+def _apply_dict_fields(data: dict[str, Any], instance: Any, dict_fields: dict[str, list[str]]) -> None:
     for main_field_key, nested_fields in dict_fields.items():
         main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
         if main_field == "__NOT_EXIST__":
@@ -322,7 +321,7 @@ def to_dict(
     return data
 
 
-def _process_nested_fields(instance_data_dict, nested_fields, obj):
+def _process_nested_fields(instance_data_dict: dict[str, Any], nested_fields: list[str], obj: Any) -> None:
     for nested_field in nested_fields:
         attrs_to_get = nested_field.split(".")
         value = None
@@ -333,10 +332,6 @@ def _process_nested_fields(instance_data_dict, nested_fields, obj):
                 value = getattr(obj, attr, "__EMPTY_VALUE__")
         if value != "__EMPTY_VALUE__":
             instance_data_dict[attrs_to_get[-1]] = value
-
-
-def build_arg_dict(model_object: "Model", mapping_dict: dict) -> dict:
-    return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
 def build_arg_dict_from_dict(data_dict: dict, mapping_dict: dict) -> dict:
@@ -367,8 +362,8 @@ class CustomOrderingFilter(OrderingFilter):
             if field.startswith("-"):
                 field_name = field[1:]
                 desc = True
-            if isinstance(self.lower_dict.get(field_name), Lower):
-                lower_field = self.lower_dict.get(field_name)
+            lower_field = self.lower_dict.get(field_name)
+            if isinstance(lower_field, Lower):
                 if desc:
                     lower_field = lower_field.desc()
                 new_ordering.append(lower_field)
@@ -565,21 +560,6 @@ def timezone_datetime(value: Any) -> datetime:
     return datetime_value
 
 
-def save_data_in_cache(
-    cache_key: str,
-    data_lambda: Callable,
-    timeout: int = 60 * 60 * 24,
-    cache_condition: Callable | None = None,
-) -> Any:
-    cache_data = cache.get(cache_key, "NOT_CACHED")
-    if cache_data == "NOT_CACHED":
-        cache_data = data_lambda()
-        if cache_condition and not cache_condition(cache_data):
-            return cache_data
-        cache.set(cache_key, cache_data, timeout=timeout)
-    return cache_data
-
-
 def clear_cache_for_key(key: str) -> None:
     """Remove cache if key starts with."""
     if hasattr(cache, "keys"):
@@ -653,7 +633,7 @@ def send_email_notification(
 # https://github.com/saxix/django-adminfilters/blob/676765e3bf25038595a29756014c01e11c5a5d39/src/adminfilters/autocomplete.py#L55
 # not working with .all_objects()
 class AutoCompleteFilterTemp(AutoCompleteFilter):
-    def choices(self, changelist: Any) -> list:
+    def choices(self, changelist: Any) -> list[Any]:
         self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
         if self.lookup_val:
             get_kwargs = {self.field.target_field.name: self.lookup_val}
@@ -675,6 +655,7 @@ class FlexFieldsEncoder(json.JSONEncoder):
 class JSONBSet(Func):
     function = "jsonb_set"
     template = "%(function)s(%(expressions)s)"
+    output_field = JSONField()
 
     def __init__(
         self,
@@ -684,8 +665,7 @@ class JSONBSet(Func):
         create_missing: bool = True,
         **extra: Any,
     ) -> None:
-        create_missing = Value("true") if create_missing else Value("false")  # type: ignore
-        super().__init__(expression, path, new_value, create_missing, **extra)
+        super().__init__(expression, path, Cast(new_value, JSONField()), Value(create_missing), **extra)
 
 
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
@@ -697,7 +677,7 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
         business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
             slug=business_area_slug
         )
-        assets = KoboAPI().get_all_projects_data(business_area.country_code)  # type: ignore
+        assets = KoboAPI().get_all_projects_data(business_area.country_code)
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise ValidationError("Provided business area does not exist.") from e
@@ -718,9 +698,17 @@ def get_fields_attr_generators(
     from hope.models import FlexibleAttribute, Program
 
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
-            "created_at"
+        flex_qs = (
+            FlexibleAttribute.objects.filter(
+                Q(program__isnull=True) | Q(program__id=program_id),
+                is_removed=False,
+            )
+            .select_related("pdu_data")
+            .prefetch_related("choices")
+            .order_by("created_at")
         )
+        yield from flex_qs
+
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
             yield from (

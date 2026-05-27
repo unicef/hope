@@ -28,12 +28,13 @@ export function VerificationsTable({
 }: VerificationsTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
   const initialQueryVariables = useMemo(
     () => ({
       ...filter,
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       paymentVerificationPk: paymentPlanId,
     }),
     [filter, businessArea, programId, paymentPlanId],
@@ -55,7 +56,7 @@ export function VerificationsTable({
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           paymentVerificationPk: paymentPlanId,
           ...queryVariables,
         },
@@ -85,7 +86,7 @@ export function VerificationsTable({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             paymentVerificationPk: paymentPlanId,
           },
           queryVariables,
@@ -100,9 +101,13 @@ export function VerificationsTable({
 
   const replacements = {
     payment_record__head_of_household__family_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.groupLabel}`,
+      isSocialDctType
+        ? _beneficiaryGroup?.memberLabel
+        : `Head of ${_beneficiaryGroup?.groupLabel}`,
     payment_record__household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+      isSocialDctType
+        ? `${_beneficiaryGroup?.memberLabel} ID`
+        : `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

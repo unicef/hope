@@ -17,9 +17,13 @@ import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
+import { BlackLink } from '@components/core/BlackLink';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { Overview } from '@components/payments/Overview';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
 
 const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
@@ -31,6 +35,7 @@ interface PeopleBioDataProps {
   businessArea: string;
   choicesData: IndividualChoices;
   grievancesChoices: GrievanceChoices;
+  household?: HouseholdDetail;
 }
 export const PeopleBioData = ({
   individual,
@@ -38,6 +43,7 @@ export const PeopleBioData = ({
   businessArea,
   choicesData,
   grievancesChoices,
+  household,
 }: PeopleBioDataProps): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
@@ -114,6 +120,87 @@ export const PeopleBioData = ({
     );
   };
 
+  const renderDelegate = (): ReactNode | null => {
+    const alternateRole = (household?.rolesInHousehold as any[])?.find(
+      (r) => r.role === 'ALTERNATE',
+    );
+    const delegate = alternateRole?.individual;
+
+    return (
+      <>
+        <Grid size={{ xs: 12 }}>
+          <BorderBox />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Delegate')}>
+            {delegate?.unicefId ? (
+              <BlackLink to={`/${baseUrl}/population/people/${delegate.id}`}>
+                {delegate.unicefId}
+              </BlackLink>
+            ) : (
+              '-'
+            )}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
+  const renderBiometricDataSection = (): ReactNode => {
+    if (!individual.biometricDeduplicationGoldenRecordStatus) {
+      return null;
+    }
+
+    const biometricCheckRun =
+      individual.biometricDeduplicationGoldenRecordStatus !== 'Not Processed';
+    const biometricTickets: Array<{
+      id: string;
+      unicefId: string;
+      category: number;
+    }> = (individual.linkedGrievancesBiometrics as any) ?? [];
+
+    return (
+      <>
+        <Grid size={{ xs: 12 }}>
+          <BorderBox />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Typography variant="h6">{t('Biometric Data')}</Typography>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Trait')}>
+            {individual.photo ? (
+              <IndividualPhotoModal individual={individual} />
+            ) : null}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Biometric Check')}>
+            {biometricCheckRun ? t('Was run') : t('Was not run')}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Tickets related')}>
+            {biometricTickets.length > 0
+              ? biometricTickets.map((ticket) => {
+                  return (
+                    <Box key={ticket.id}>
+                      <BlackLink
+                        to={`/${baseUrl}/grievance/tickets/
+                          system-generated/${ticket.id}`}
+                      >
+                        {ticket.unicefId}
+                      </BlackLink>
+                    </Box>
+                  );
+                })
+              : null}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
+
   let peopleFromHouseholdData = null;
   if (individual?.household) {
     const household = individual.household;
@@ -122,6 +209,13 @@ export const PeopleBioData = ({
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Residence Status')}>
             {household?.residenceStatus}
+          </LabelizedField>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={t('Type')}>
+            {individual.relationship === RelationshipEnum.HEAD
+              ? t('Beneficiary')
+              : t('Non-beneficiary')}{' '}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -353,7 +447,9 @@ export const PeopleBioData = ({
             />
           )}
         </Grid>
+        {renderBiometricDataSection()}
         {renderDigitalWalletInfo()}
+        {renderDelegate()}
       </Grid>
     </Overview>
   );

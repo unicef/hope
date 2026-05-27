@@ -56,7 +56,9 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     sanction_list_possible_match = serializers.BooleanField(source="annotate_has_sanction_list_possible_match")
     sanction_list_confirmed_match = serializers.BooleanField(source="annotate_has_sanction_list_confirmed_match")
     program_name = serializers.CharField(source="program.name")
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
+    facility_name = serializers.CharField(source="facility.name", read_only=True)
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 
     class Meta:
         model = Household
@@ -79,7 +81,8 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "sanction_list_confirmed_match",
             "program_id",
             "program_name",
-            "program_slug",
+            "program_code",
+            "facility_name",
         ]
 
 
@@ -112,7 +115,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     delivered_quantities = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
 
     class Meta:
         model = Household
@@ -137,14 +140,14 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
             "village",
             "geopoint",
             "import_id",
-            "program_slug",
+            "program_code",
         )
 
     @extend_schema_field(DeliveredQuantitySerializer(many=True))
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:
@@ -170,7 +173,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
             "household",
         )
 
-    def get_role(self, obj: Individual) -> str:
+    def get_role(self, obj: Individual) -> str | None:
         role = obj.households_and_roles(manager="all_merge_status_objects").first()
         return role.role if role else None
 
@@ -199,6 +202,7 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         model = GrievanceTicket
         fields = (
             "id",
+            "unicef_id",
             "category",
             "status",
         )
@@ -227,6 +231,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     program = serializers.CharField(source="program.name")
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     has_duplicates = serializers.SerializerMethodField()
@@ -239,6 +244,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     delivered_quantities = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
     roles_in_household = serializers.SerializerMethodField()
+    facility_name = serializers.CharField(source="facility.name", read_only=True)
 
     class Meta:
         model = Household
@@ -308,6 +314,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "residence_status",
             "program_registration_id",
             "delivered_quantities",
+            "facility_name",
             # for grievance table
             "consent",
             "name_enumerator",
@@ -337,7 +344,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
-    def get_import_id(self, obj: Household) -> str:
+    def get_import_id(self, obj: Household) -> str | None:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:
@@ -361,7 +368,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
     active_individuals_count = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
-    program_slug = serializers.CharField(source="program.slug")
+    program_code = serializers.CharField(source="program.code")
 
     class Meta:
         model = Household
@@ -380,7 +387,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
             "residence_status",
             "size",
             "active_individuals_count",
-            "program_slug",
+            "program_code",
         )
 
     def get_active_individuals_count(self, obj: Household) -> int:

@@ -49,13 +49,13 @@ def pdu_online_edit(request, db, business_area, program, superuser):
 def test_list_pdu_online_edits(superuser, business_area, program, role_assignment, pdu_online_edit):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/periodic-data-update-online-edits/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/periodic-data-update-online-edits/"
     )
 
 
 def test_retrieve_pdu_online_edit(superuser, business_area, program, role_assignment, pdu_online_edit):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/periodic-data-update-online-edits/{pdu_online_edit.pk}/"
     )

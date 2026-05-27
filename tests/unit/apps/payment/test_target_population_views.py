@@ -26,6 +26,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.api.views import TargetPopulationViewSet
 from hope.models import Payment, PaymentPlan, Program, ProgramCycle, Rule
 
 pytestmark = pytest.mark.django_db
@@ -43,7 +44,7 @@ def target_population_list_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP List")
     tp = PaymentPlanFactory(
         name="Test new TP",
@@ -62,14 +63,14 @@ def target_population_list_context(
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     tp_count_url = reverse(
         "api:payments:target-populations-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)
@@ -94,7 +95,7 @@ def target_population_detail_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Detail")
 
     tp = PaymentPlanFactory(
@@ -108,7 +109,7 @@ def target_population_detail_context(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(tp.id),
         },
     )
@@ -133,7 +134,7 @@ def target_population_filter_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Filter")
 
     tp = PaymentPlanFactory(
@@ -164,7 +165,7 @@ def target_population_filter_context(
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)
@@ -195,7 +196,7 @@ def target_population_create_update_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Create")
 
     tp = PaymentPlanFactory(
@@ -208,14 +209,14 @@ def target_population_create_update_context(
         "api:payments:target-populations-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     update_url = reverse(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": tp.pk,
         },
     )
@@ -256,7 +257,7 @@ def target_population_actions_context(
 ) -> dict[str, Any]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
-    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program_active, title="Cycle TP Actions")
 
     client = api_client(user)
@@ -267,10 +268,11 @@ def target_population_actions_context(
         status=PaymentPlan.Status.TP_OPEN,
         created_by=user,
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
     url_kwargs = {
         "business_area_slug": business_area.slug,
-        "program_slug": program_active.slug,
+        "program_code": program_active.code,
         "pk": target_population.pk,
     }
     return {
@@ -295,7 +297,7 @@ def pending_payments_context(
     api_client: Callable,
     business_area: Any,
 ) -> dict[str, Any]:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program, title="Cycle Pending")
 
     partner = PartnerFactory(name="TestPartner")
@@ -366,7 +368,7 @@ def pending_payments_context(
         "api:payments:target-populations-pending-payments",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": str(target_population.id),
         },
     )
@@ -374,7 +376,7 @@ def pending_payments_context(
         "api:payments:target-populations-pending-payments-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": str(target_population.id),
         },
     )
@@ -1129,7 +1131,7 @@ def test_tp_delete(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": tp.pk,
         },
     )
@@ -1199,7 +1201,7 @@ def test_vulnerability_score_filter_applies_correctly(
         "api:payments:target-populations-apply-engine-formula",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )
@@ -1242,7 +1244,7 @@ def test_vulnerability_score_filter_applies_correctly(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )
@@ -1334,7 +1336,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
         "api:payments:target-populations-detail",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )
@@ -1369,7 +1371,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
         "api:payments:target-populations-apply-engine-formula",
         kwargs={
             "business_area_slug": target_population_actions_context["business_area"].slug,
-            "program_slug": target_population_actions_context["program_active"].slug,
+            "program_code": target_population_actions_context["program_active"].code,
             "pk": target_population_actions_context["target_population"].pk,
         },
     )
@@ -1502,3 +1504,52 @@ def test_pending_payments_ordering(
     expected_ids = [str(i) for i in expected_ids_qs]
 
     assert returned_ids == expected_ids
+
+
+def test_apply_engine_formula_tp_without_version_skips_concurrency_check(
+    target_population_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_actions_context["user"],
+        [Permissions.TARGETING_UPDATE],
+        target_population_actions_context["business_area"],
+        target_population_actions_context["program_active"],
+    )
+    rule_for_tp = RuleCommitFactory(
+        rule__type=Rule.TYPE_TARGETING,
+        rule__enabled=True,
+        version=33,
+        is_release=True,
+    ).rule
+    target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
+    target_population_actions_context["target_population"].save()
+
+    response = target_population_actions_context["client"].post(
+        target_population_actions_context["url_apply_steficon"],
+        {"engine_formula_rule_id": str(rule_for_tp.pk)},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert "STEFICON_WAIT" in response.json()["status"]
+
+
+def test_pending_payments_without_pagination_returns_flat_response(
+    pending_payments_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    create_user_role_with_permissions(
+        user=pending_payments_context["user"],
+        permissions=[Permissions.TARGETING_VIEW_DETAILS],
+        business_area=pending_payments_context["business_area"],
+        program=pending_payments_context["program"],
+    )
+    monkeypatch.setattr(TargetPopulationViewSet, "pagination_class", None)
+
+    response = pending_payments_context["client"].get(pending_payments_context["pending_payments_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    assert isinstance(body, list)
+    assert len(body) == 3

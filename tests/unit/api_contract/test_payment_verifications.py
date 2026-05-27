@@ -7,7 +7,7 @@ from unit.api_contract._helpers import HopeRecorder, JsonPostRecorder
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.models import PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -44,7 +44,7 @@ def role_assignment(request, db, superuser, business_area, role):
 
 @frozenfixture()
 def payment_plan(request, db, business_area, program, superuser):
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -55,13 +55,13 @@ def payment_plan(request, db, business_area, program, superuser):
 
 def test_list_payment_verifications(superuser, business_area, program, role_assignment, payment_plan):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/payment-verifications/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/payment-verifications/")
 
 
 def test_retrieve_payment_verification(superuser, business_area, program, role_assignment, payment_plan):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-verifications/{payment_plan.pk}/"
     )
 
@@ -69,7 +69,7 @@ def test_retrieve_payment_verification(superuser, business_area, program, role_a
 def test_sample_size(superuser, business_area, program, role_assignment, payment_plan):
     recorder = JsonPostRecorder(DATA_DIR, as_user=superuser)
     recorder.assertPOST(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-verifications/{payment_plan.pk}/sample-size/",
         data={
             "sampling": "FULL_LIST",

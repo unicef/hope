@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import UTC, timedelta
 from decimal import Decimal
 from typing import Any
 from unittest import mock
@@ -7,11 +7,11 @@ from unittest.mock import patch
 from aniso8601 import parse_date
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
+from django.test import override_settings
 from django.utils import timezone
 from django.utils.timezone import now
 from freezegun import freeze_time
 import pytest
-from pytz import utc
 from rest_framework.exceptions import ValidationError
 from viewflow.fsm import TransitionNotAllowed
 
@@ -22,6 +22,7 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
@@ -35,11 +36,12 @@ from extras.test_utils.factories import (
     TargetingCriteriaRuleFactory,
     UserFactory,
 )
+from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_task,
-    prepare_payment_plan_task,
+    prepare_follow_up_payment_plan_async_task,
+    prepare_payment_plan_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -119,7 +121,7 @@ def account_type_bank() -> AccountType:
 
 @pytest.fixture
 def program(business_area: Any) -> Program:
-    return ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    return ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
 
 
 @pytest.fixture
@@ -189,7 +191,7 @@ def test_delete_when_its_one_pp_in_cycle(payment_plan_base: PaymentPlan) -> None
 
 
 def test_delete_when_its_two_pp_in_cycle(user: User, business_area: Any) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
     program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
     pp_1 = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
@@ -219,13 +221,14 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2019, 10, 12, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2019, 10, 12, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 12, 10, tzinfo=UTC).date(),
+        cycle=False,
     )
     program_cycle = ProgramCycleFactory(
         program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         status=ProgramCycle.ACTIVE,
     )
     household = HouseholdFactory(business_area=business_area, program=program)
@@ -295,10 +298,11 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     pp.status = PaymentPlan.Status.TP_OPEN
     pp.save()
 
+    currency_usd = CurrencyFactory(code="USD", name="United States Dollar")
     open_input_data = {
         "dispersion_start_date": parse_date("2020-09-10"),
         "dispersion_end_date": parse_date("2020-09-11"),
-        "currency": "USD",
+        "currency": currency_usd,
     }
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
@@ -332,14 +336,15 @@ def test_create(
     dm_transfer_to_account: Any,
     account_type_bank: AccountType,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
     hh2 = HouseholdFactory(program=program, business_area=business_area)
@@ -392,8 +397,8 @@ def test_create(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(86):
-        prepare_payment_plan_task.delay(str(pp.id))
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -412,7 +417,7 @@ def test_update_validation_errors(get_exchange_rate_mock: Any, payment_plan_base
     input_data = {
         "dispersion_start_date": parse_date("2020-09-10"),
         "dispersion_end_date": parse_date("2020-09-11"),
-        "currency": "USD",
+        "currency": CurrencyFactory(code="USD", name="United States Dollar"),
     }
 
     with pytest.raises(ValidationError) as error:
@@ -435,6 +440,7 @@ def test_create_follow_up_pp(
     business_area: Any,
     cycle: ProgramCycle,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     pp = PaymentPlanFactory(
         total_households_count=1,
@@ -458,7 +464,6 @@ def test_create_follow_up_pp(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
         )
         payments.append(payment)
 
@@ -501,7 +506,8 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 1
 
-    prepare_follow_up_payment_plan_task(follow_up_pp.id)
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_follow_up_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -534,8 +540,9 @@ def test_create_follow_up_pp(
 
     assert pp.follow_ups.count() == 2
 
-    with django_assert_num_queries(53):
-        prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
+    with django_assert_num_queries(62):
+        with django_capture_on_commit_callbacks(execute=True):
+            prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -566,8 +573,8 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="PLN",
         is_follow_up=True,
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
     dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
@@ -575,10 +582,10 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
         {
             "dispersion_start_date": dispersion_start_date,
             "dispersion_end_date": dispersion_end_date,
-            "currency": "UAH",
+            "currency": CurrencyFactory(code="UAH", name="Ukrainian Hryvnia"),
         }
     )
-    assert payment_plan.currency == "PLN"
+    assert payment_plan.currency.code == "PLN"
     assert payment_plan.dispersion_start_date == dispersion_start_date
     assert payment_plan.dispersion_end_date == dispersion_end_date
 
@@ -616,7 +623,6 @@ def test_split(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
             collector=collector,
         )
         payments.append(payment)
@@ -639,7 +645,6 @@ def test_split(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
             collector=collector,
         )
         payments.append(payment)
@@ -658,7 +663,6 @@ def test_split(
             parent=pp,
             household=hh,
             status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-            currency="PLN",
             collector=collector,
         )
         payments.append(payment)
@@ -751,14 +755,16 @@ def test_send_to_payment_gateway(
 
     split.sent_to_payment_gateway = False
     split.save()
-    with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay") as mock_task:
+    with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task") as mock_task:
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
         pps.send_to_payment_gateway()
-        assert mock_task.call_count == 1
+        mock_task.assert_called_once_with(pp, str(pps.user.pk))
 
 
-@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx.delay")
+@mock.patch(
+    "hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
+)
 def test_import_xlsx_per_fsp(
     mock_task: Any,
     user: User,
@@ -798,13 +804,14 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
+        cycle=False,
     )
     cycle = ProgramCycleFactory(
         program=program,
-        start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         status=ProgramCycle.ACTIVE,
     )
     input_data = {
@@ -866,14 +873,15 @@ def test_full_rebuild(
     user: User,
     business_area: Any,
     django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
-        start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-        end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+        start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
+        end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
     hh2 = HouseholdFactory(program=program, business_area=business_area)
@@ -914,8 +922,8 @@ def test_full_rebuild(
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
 
-    with django_assert_num_queries(70):
-        prepare_payment_plan_task.delay(str(pp.id))
+    with django_capture_on_commit_callbacks(execute=True):
+        prepare_payment_plan_async_task(pp)
 
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.TP_OPEN
@@ -977,10 +985,24 @@ def test_tp_lock_invalid_pp_status(user: User, business_area: Any, cycle: Progra
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.DRAFT,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan).tp_lock()
     assert str(error.value) == 'Status_Tp_Lock :: no transition from "DRAFT"'
+
+
+def test_tp_lock_invalid_build_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING,
+    )
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).tp_lock()
+    assert error.value.detail[0] == "Can only be locked when Build Status OK"
 
 
 def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:
@@ -1108,7 +1130,9 @@ def test_update_pp_validation_errors(user: User, business_area: Any, cycle: Prog
     assert error.value.detail[0] == "Not possible to assign Finished Program Cycle"
 
 
-def test_rebuild_payment_plan_population(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_rebuild_payment_plan_population(
+    user: User, business_area: Any, cycle: ProgramCycle, django_capture_on_commit_callbacks: Any
+) -> None:
     pp = PaymentPlanFactory(
         name="test_data",
         program_cycle=cycle,
@@ -1117,27 +1141,83 @@ def test_rebuild_payment_plan_population(user: User, business_area: Any, cycle: 
         status=PaymentPlan.Status.TP_OPEN,
     )
 
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False,
+            should_update_money_stats=True,
+            vulnerability_filter=False,
+            payment_plan=pp,
+        )
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=True,
+            should_update_money_stats=False,
+            vulnerability_filter=False,
+            payment_plan=pp,
+        )
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False,
+            should_update_money_stats=False,
+            vulnerability_filter=True,
+            payment_plan=pp,
+        )
+
+    pp.refresh_from_db(fields=("build_status",))
+    assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+
+
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_rebuild_stats_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
+def test_rebuild_payment_plan_population_full_rebuild_with_money_stats_queues_both_tasks(
+    mock_full_rebuild: mock.Mock,
+    mock_rebuild_stats: mock.Mock,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+
     PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=False,
+        rebuild_list=True,
         should_update_money_stats=True,
         vulnerability_filter=False,
         payment_plan=pp,
     )
+
+    mock_full_rebuild.assert_called_once_with(pp)
+    mock_rebuild_stats.assert_called_once_with(pp)
+
+
+@patch("hope.apps.payment.celery_tasks.payment_plan_apply_steficon_hh_selection_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
+def test_rebuild_payment_plan_population_full_rebuild_with_steficon_targeting_queues_steficon(
+    mock_full_rebuild: mock.Mock,
+    mock_apply_steficon: mock.Mock,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        steficon_rule_targeting=RuleCommitFactory(),
+    )
+
     PaymentPlanService.rebuild_payment_plan_population(
         rebuild_list=True,
-        should_update_money_stats=False,
-        vulnerability_filter=False,
-        payment_plan=pp,
-    )
-    PaymentPlanService.rebuild_payment_plan_population(
-        rebuild_list=False,
         should_update_money_stats=False,
         vulnerability_filter=True,
         payment_plan=pp,
     )
 
-    pp.refresh_from_db(fields=("build_status",))
-    assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    mock_full_rebuild.assert_called_once_with(pp)
+    mock_apply_steficon.assert_called_once_with(pp, str(pp.steficon_rule_targeting.rule_id))
 
 
 def test_lock_fsp_validation(
@@ -1245,13 +1325,13 @@ def test_update_pp_currency(
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="AMD",
+        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
-    PaymentPlanService(payment_plan).update({"currency": "PLN"})
+    PaymentPlanService(payment_plan).update({"currency": CurrencyFactory(code="PLN", name="Polish Zloty")})
     payment_plan.refresh_from_db()
-    assert payment_plan.currency == "PLN"
+    assert payment_plan.currency.code == "PLN"
 
 
 def test_update_pp_currency_validation(
@@ -1266,12 +1346,12 @@ def test_update_pp_currency_validation(
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="USDC",
+        currency=CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True),
         delivery_mechanism=dm_transfer_to_digital_wallet,
         financial_service_provider=fsp,
     )
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"currency": "PLN"})
+        PaymentPlanService(payment_plan).update({"currency": CurrencyFactory(code="PLN", name="Polish Zloty")})
     assert (
         error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
     )
@@ -1283,7 +1363,7 @@ def test_update_dispersion_end_date(user: User, business_area: Any, cycle: Progr
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        currency="AMD",
+        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
     )
     new_end_date = timezone.now().date() + timedelta(days=3)
     PaymentPlanService(payment_plan).update({"dispersion_end_date": new_end_date})
@@ -1304,7 +1384,7 @@ def test_update_pp_dm_fsp(
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.TP_OPEN,
-        currency="AMD",
+        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
         delivery_mechanism=None,
         financial_service_provider=None,
     )
@@ -1342,12 +1422,13 @@ def test_update_pp_dm_fsp(
     assert payment_plan.financial_service_provider == fsp
 
 
-def test_export_xlsx(payment_plan_base: PaymentPlan, user) -> None:
+def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_on_commit_callbacks: Any) -> None:
     payment_plan_base.status = PaymentPlan.Status.LOCKED
     payment_plan_base.save()
     assert FileTemp.objects.all().count() == 0
 
-    PaymentPlanService(payment_plan_base).export_xlsx(user.pk)
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan_base).export_xlsx(str(user.pk))
 
     assert FileTemp.objects.all().count() == 1
     assert FileTemp.objects.first().object_id == str(payment_plan_base.pk)
@@ -1372,7 +1453,9 @@ def test_create_payments_integrity_error_handling(
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
-    TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", payment_plan=payment_plan)
+    TargetingCriteriaRuleFactory(
+        household_ids=f"{household.unicef_id}", payment_plan=payment_plan, alternative_collectors_ids="HH-1"
+    )
 
     PaymentFactory(
         parent=payment_plan,
@@ -1397,7 +1480,7 @@ def test_create_payments_integrity_error_handling(
 
         with pytest.raises(ValidationError) as error:
             PaymentPlanService.create_payments(payment_plan)
-        assert f"Couldn't find a primary collector in {household.unicef_id}" in str(error.value)
+        assert f"Couldn't find a PRIMARY collector in {household.unicef_id}" in str(error.value)
 
 
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
@@ -1459,10 +1542,32 @@ def test_send_reconciliation_overdue_emails() -> None:
     assert pp.has_payments_reconciliation_overdue is True
 
     with mock.patch(
-        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email.delay"
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
     ) as mock_task:
         PaymentPlanService.send_reconciliation_overdue_emails()
-        mock_task.assert_called_once_with(str(pp.id))
+        mock_task.assert_called_once_with(pp)
+
+
+def test_send_reconciliation_overdue_emails_skips_payment_plans_without_overdue_reconciliation() -> None:
+    pp = PaymentPlanFactory(
+        dispersion_start_date=now() - timedelta(days=10),
+        dispersion_end_date=now(),
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    pp.refresh_from_db()
+    program = pp.program
+    program.reconciliation_window_in_days = 10
+    program.send_reconciliation_window_expiry_notifications = True
+    program.save()
+
+    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity=1)
+    assert pp.has_payments_reconciliation_overdue is False
+
+    with mock.patch(
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
+    ) as mock_task:
+        PaymentPlanService.send_reconciliation_overdue_emails()
+        mock_task.assert_not_called()
 
 
 def test_send_reconciliation_overdue_email(business_area: Any) -> None:
@@ -1503,3 +1608,186 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
                 " Please take the necessary steps to complete the reconciliation process timely."
             )
             assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
+
+
+def test_get_collector() -> None:
+    household_dict = {
+        "unicef_id": "ID_1",
+        "use_alt_collector": True,
+        # no Alt Collector
+    }
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService._get_collector(household_dict)
+    assert error.value.detail[0] == "Couldn't find a ALTERNATE collector in ID_1"
+
+    household_dict = {
+        "unicef_id": "ID_2",
+        "use_alt_collector": False,
+        # no Pr Collector
+    }
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService._get_collector(household_dict)
+    assert error.value.detail[0] == "Couldn't find a PRIMARY collector in ID_2"
+
+    collector = IndividualFactory()
+    household_dict = {
+        "unicef_id": "ID_2",
+        "use_alt_collector": False,
+        "pr_collector": collector.id,
+    }
+    collcector_result, collcector_type = PaymentPlanService._get_collector(household_dict)
+    assert collcector_result == collector
+    assert collcector_type == "PRIMARY"
+
+
+@override_settings(ENV="prod")
+def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> None:
+    partner_unicef = PartnerFactory(name="UNICEF")
+    partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+    role, _ = Role.objects.update_or_create(
+        name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
+    )
+
+    pp = PaymentPlanFactory(
+        dispersion_start_date=now() - timedelta(days=10),
+        dispersion_end_date=now(),
+        status=PaymentPlan.Status.ACCEPTED,
+        business_area=business_area,
+    )
+    pp.refresh_from_db()
+    program = pp.program
+    program.reconciliation_window_in_days = 10
+    program.send_reconciliation_window_expiry_notifications = True
+    program.save()
+
+    different_program = ProgramFactory(business_area=business_area)
+
+    user_with_perm_in_program = UserFactory(partner=partner_unicef_hq)
+    RoleAssignment.objects.create(
+        user=user_with_perm_in_program, role=role, business_area=business_area, program=program
+    )
+
+    user_with_perm_ba_wide = UserFactory(partner=partner_unicef_hq)
+    RoleAssignment.objects.create(user=user_with_perm_ba_wide, role=role, business_area=business_area, program=None)
+
+    superuser_with_perm = UserFactory(partner=partner_unicef_hq, is_superuser=True)
+    RoleAssignment.objects.create(user=superuser_with_perm, role=role, business_area=business_area, program=program)
+
+    user_with_perm_in_different_program = UserFactory(partner=partner_unicef_hq)
+    RoleAssignment.objects.create(
+        user=user_with_perm_in_different_program, role=role, business_area=business_area, program=different_program
+    )
+
+    with mock.patch.object(User, "email_user", autospec=True) as mock_email_user:
+        PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
+
+        assert mock_email_user.call_count == 2
+        emailed_users = {call.args[0] for call in mock_email_user.call_args_list}
+        assert user_with_perm_in_program in emailed_users
+        assert user_with_perm_ba_wide in emailed_users
+        assert superuser_with_perm not in emailed_users
+        assert user_with_perm_in_different_program not in emailed_users
+
+
+@pytest.fixture
+def locked_payment_plan():
+    return PaymentPlanFactory(
+        program_cycle=ProgramCycleFactory(),
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+
+@pytest.fixture
+def locked_payment_plan_with_payments(locked_payment_plan):
+    for _ in range(PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK + 1):
+        PaymentFactory(parent=locked_payment_plan)
+    return locked_payment_plan
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_raises_type_error_when_required_number_is_none(mock_config, locked_payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
+        with pytest.raises(TypeError):
+            service.validate_acceptance_process_approval_count(approval_process)
+
+
+def test_check_payment_plan_and_update_status_raises_type_error_when_required_number_is_none(locked_payment_plan):
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=None):
+        with pytest.raises(TypeError):
+            service.check_payment_plan_and_update_status(approval_process)
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_does_not_raise_when_count_below_required(mock_config, locked_payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 0
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.validate_acceptance_process_approval_count(approval_process)
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+def test_validate_acceptance_raises_when_count_meets_required(mock_config, locked_payment_plan):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = True
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 5
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        with pytest.raises(ValidationError, match="Can't create new approval"):
+            service.validate_acceptance_process_approval_count(approval_process)
+
+
+def test_check_payment_plan_and_update_status_does_not_change_when_count_below_required(locked_payment_plan):
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 0
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.check_payment_plan_and_update_status(approval_process)
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
+def test_check_payment_plan_and_update_status_triggers_when_count_meets_required(
+    mock_flow_cls, mock_notify, locked_payment_plan
+):
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.APPROVE.value
+    service.user = mock.MagicMock()
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 5
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+        service.check_payment_plan_and_update_status(approval_process)
+
+    mock_flow_cls.return_value.status_approve.assert_called_once()
+
+
+def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):
+    service = PaymentPlanService(payment_plan=locked_payment_plan_with_payments)
+    payments = locked_payment_plan_with_payments.eligible_payments.all()
+    payments_count = payments.count()
+
+    with patch.object(service, "_validate_split_by_record"):
+        result = service._build_payments_chunks(
+            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
+            chunks_no=None,
+            payments=payments,
+            payments_count=payments_count,
+        )
+    assert len(result) == 1

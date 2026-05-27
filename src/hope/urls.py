@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import include, path, re_path
+from django.urls import URLPattern, URLResolver, include, path, re_path
 
 import hope.apps.account.views
 import hope.apps.accountability.views
@@ -19,13 +19,12 @@ import hope.apps.household.views
 import hope.apps.payment.views
 import hope.apps.registration_data.views
 import hope.apps.sanction_list.views
-import hope.apps.targeting.views
 from hope.apps.web.views import react_main
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
 
-api_patterns = [
+api_patterns: list[URLPattern | URLResolver] = [
     path("rest/", include("hope.api.urls", namespace="api")),
     path("", include("social_django.urls", namespace="social")),
     path("fields_attributes/", all_fields_attributes, name="fields_attributes"),
@@ -64,11 +63,6 @@ api_patterns = [
     path(
         "download-sanction-template",
         hope.apps.sanction_list.views.download_sanction_template,
-    ),
-    path(
-        f"{settings.ADMIN_PANEL_URL}/download-target-population-xlsx/<uuid:target_population_id>/",
-        hope.apps.targeting.views.download_xlsx_households,
-        name="admin-download-target-population",
     ),
     path(
         "download-survey-sample/<str:survey_id>",

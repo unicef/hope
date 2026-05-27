@@ -7,7 +7,7 @@ from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
 from hope.models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
-RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
+type RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 
 index_settings = {
     "number_of_shards": 1,
@@ -59,10 +59,10 @@ class IndividualDocument(Document):
             "partner": fields.KeywordField(attr="partner.name", similarity="boolean"),
         }
     )
-    program_id = fields.KeywordField(attr="program.id")
+    program_id = fields.KeywordField(attr="program_id")
     detail_id = fields.TextField()
     program_registration_id = fields.TextField()
-    registration_data_import_id = fields.KeywordField(attr="registration_data_import.id")
+    registration_data_import_id = fields.KeywordField(attr="registration_data_import_id")
     rdi_merge_status = fields.KeywordField()
 
     def prepare_phone_no_text(self, instance: Individual) -> str:
@@ -136,7 +136,7 @@ class HouseholdDocument(Document):
     admin1 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
-    program_id = fields.KeywordField(attr="program.id")
+    program_id = fields.KeywordField(attr="program_id")
     detail_id = fields.TextField()
     program_registration_id = fields.TextField()
 
@@ -158,7 +158,7 @@ class HouseholdDocument(Document):
         fields = []
         related_models = [Individual]
 
-    def get_instances_from_related(self, related_instance: Individual) -> Household:
+    def get_instances_from_related(self, related_instance: Individual) -> Household | None:
         if isinstance(related_instance, Individual):
             return related_instance.household
         return None
@@ -196,7 +196,7 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
     except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
-    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_{program.business_area.slug}_{program.slug}"
+    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_{program.business_area.slug}_{program.code}"
 
     class ProgramIndividualDocument(IndividualDocument):
         class Index:
@@ -206,10 +206,10 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
         class Django(IndividualDocument.Django):
             pass
 
-        def get_queryset(self):
+        def get_queryset(self) -> QuerySet[Individual]:
             return Individual.all_merge_status_objects.filter(program_id=program_id)
 
-    ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.business_area.slug}_{program.slug}"
+    ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.business_area.slug}_{program.code}"
     _set_django_attr(ProgramIndividualDocument, ProgramIndividualDocument.Django)
     return ProgramIndividualDocument
 
@@ -226,7 +226,7 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
     except Program.DoesNotExist:  # pragma: no cover
         raise ValueError(f"Program {program_id} does not exist.")
 
-    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households_{program.business_area.slug}_{program.slug}"
+    index_name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households_{program.business_area.slug}_{program.code}"
 
     class ProgramHouseholdDocument(HouseholdDocument):
         class Index:
@@ -236,9 +236,9 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
         class Django(HouseholdDocument.Django):
             pass
 
-        def get_queryset(self):
+        def get_queryset(self) -> QuerySet[Household]:
             return Household.objects.filter(program_id=program_id)
 
-    ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.business_area.slug}_{program.slug}"
+    ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.business_area.slug}_{program.code}"
     _set_django_attr(ProgramHouseholdDocument, ProgramHouseholdDocument.Django)
     return ProgramHouseholdDocument

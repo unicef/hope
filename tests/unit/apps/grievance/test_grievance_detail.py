@@ -4,6 +4,7 @@ from typing import Any, Callable
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.core.files.base import ContentFile
+from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
@@ -12,6 +13,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -316,8 +318,7 @@ def assert_base_grievance_data(
     assert data["programs"] == [
         {
             "id": str(program.id),
-            "programme_code": program.programme_code,
-            "slug": program.slug,
+            "code": program.code,
             "name": program.name,
             "status": program.status,
             "screen_beneficiary": program.screen_beneficiary,
@@ -346,7 +347,7 @@ def assert_base_grievance_data(
             "geopoint": household.geopoint,
             "size": household.size,
             "residence_status": household.get_residence_status_display(),
-            "program_slug": household.program.slug,
+            "program_code": household.program.code,
             "head_of_household": {
                 "id": str(household.head_of_household.id),
                 "full_name": household.head_of_household.full_name,
@@ -428,7 +429,7 @@ def assert_base_grievance_data(
             "id": str(individual.id),
             "unicef_id": individual.unicef_id,
             "full_name": individual.full_name,
-            "program_slug": individual.program.slug,
+            "program_code": individual.program.code,
             "household": {
                 "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
@@ -440,7 +441,7 @@ def assert_base_grievance_data(
                     "id": str(individual.household.admin2.id),
                     "name": individual.household.admin2.name,
                 },
-                "program_slug": individual.program.slug,
+                "program_code": individual.program.code,
                 "admin3": None,
                 "admin4": None,
                 "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
@@ -493,7 +494,7 @@ def assert_base_grievance_data(
                         "zip_code": role.household.zip_code,
                         "residence_status": role.household.get_residence_status_display(),
                         "import_id": role.household.unicef_id,
-                        "program_slug": program.slug,
+                        "program_code": program.code,
                     },
                 }
                 for role in individual.households_and_roles(manager="all_merge_status_objects").all()
@@ -1238,7 +1239,7 @@ def test_grievance_detail_delete_household(
             "village": ticket_details.reason_household.village,
             "geopoint": None,
             "import_id": ticket_details.reason_household.unicef_id,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     }
 
@@ -1342,7 +1343,7 @@ def test_grievance_detail_system_flagging(
         "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
         "sex": golden_records_individual.sex,
         "duplicate": golden_records_individual.duplicate,
-        "program_slug": golden_records_individual.program.slug,
+        "program_code": golden_records_individual.program.code,
         "household": {
             "id": str(golden_records_individual.household.id),
             "unicef_id": golden_records_individual.household.unicef_id,
@@ -1379,7 +1380,7 @@ def test_grievance_detail_system_flagging(
             "zip_code": golden_records_individual.household.zip_code,
             "residence_status": golden_records_individual.household.get_residence_status_display(),
             "import_id": golden_records_individual.household.unicef_id,
-            "program_slug": golden_records_individual.household.program.slug,
+            "program_code": golden_records_individual.household.program.code,
         },
         "deduplication_golden_record_results": [
             {
@@ -1470,7 +1471,7 @@ def test_grievance_detail_payment_verification(
         delivered_quantity_usd=50,
         delivered_quantity=100,
         entitlement_quantity=100,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     payment_verification = PaymentVerificationFactory(
         payment_verification_plan=payment_verification_plan,
@@ -1695,7 +1696,7 @@ def test_grievance_detail_needs_adjudication(
         "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
         "sex": golden_records_individual.sex,
         "duplicate": golden_records_individual.duplicate,
-        "program_slug": golden_records_individual.program.slug,
+        "program_code": golden_records_individual.program.code,
         "household": {
             "id": str(golden_records_individual.household.id),
             "unicef_id": golden_records_individual.household.unicef_id,
@@ -1732,7 +1733,7 @@ def test_grievance_detail_needs_adjudication(
             "zip_code": golden_records_individual.household.zip_code,
             "residence_status": golden_records_individual.household.get_residence_status_display(),
             "import_id": golden_records_individual.household.unicef_id,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
         "deduplication_golden_record_results": [
             {
@@ -1774,7 +1775,7 @@ def test_grievance_detail_needs_adjudication(
         "last_registration_date": f"{individuals2[0].last_registration_date:%Y-%m-%d}",
         "sex": individuals2[0].sex,
         "duplicate": individuals2[0].duplicate,
-        "program_slug": individuals2[0].program.slug,
+        "program_code": individuals2[0].program.code,
         "household": {
             "id": str(individuals2[0].household.id),
             "unicef_id": individuals2[0].household.unicef_id,
@@ -1807,7 +1808,7 @@ def test_grievance_detail_needs_adjudication(
             "zip_code": individuals2[0].household.zip_code,
             "residence_status": individuals2[0].household.get_residence_status_display(),
             "import_id": individuals2[0].household.unicef_id,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
         "deduplication_golden_record_results": [],
         "documents": [],
@@ -1821,7 +1822,7 @@ def test_grievance_detail_needs_adjudication(
             "last_registration_date": f"{individuals2[0].last_registration_date:%Y-%m-%d}",
             "sex": individuals2[0].sex,
             "duplicate": individuals2[0].duplicate,
-            "program_slug": individuals2[0].program.slug,
+            "program_code": individuals2[0].program.code,
             "household": {
                 "id": str(individuals2[0].household.id),
                 "unicef_id": individuals2[0].household.unicef_id,
@@ -1854,7 +1855,7 @@ def test_grievance_detail_needs_adjudication(
                 "zip_code": individuals2[0].household.zip_code,
                 "residence_status": individuals2[0].household.get_residence_status_display(),
                 "import_id": individuals2[0].household.unicef_id,
-                "program_slug": program.slug,
+                "program_code": program.code,
             },
             "deduplication_golden_record_results": [],
             "documents": [],
@@ -1869,7 +1870,7 @@ def test_grievance_detail_needs_adjudication(
             "last_registration_date": f"{duplicate.last_registration_date:%Y-%m-%d}",
             "sex": duplicate.sex,
             "duplicate": duplicate.duplicate,
-            "program_slug": duplicate.program.slug,
+            "program_code": duplicate.program.code,
             "household": {
                 "id": str(duplicate.household.id),
                 "unicef_id": duplicate.household.unicef_id,
@@ -1902,7 +1903,7 @@ def test_grievance_detail_needs_adjudication(
                 "zip_code": duplicate.household.zip_code,
                 "residence_status": duplicate.household.get_residence_status_display(),
                 "import_id": duplicate.household.unicef_id,
-                "program_slug": program.slug,
+                "program_code": program.code,
             },
             "deduplication_golden_record_results": [],
             "documents": [],
@@ -1948,12 +1949,13 @@ def test_grievance_detail_needs_adjudication(
         "dedup_engine_similarity_pair": {},  # No permissions
     }
 
-    create_user_role_with_permissions(
-        user,
-        [Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
-        afghanistan,
-        whole_business_area_access=True,
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(
+            user,
+            [Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
+            afghanistan,
+            whole_business_area_access=True,
+        )
     response = authenticated_client.get(
         reverse(
             detail_url_name,

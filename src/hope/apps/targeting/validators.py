@@ -1,16 +1,19 @@
 import logging
+from typing import Any
 
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import get_attr_value
+from hope.apps.household.const import ROLE_ALTERNATE
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
     DataCollectingType,
     FlexibleAttribute,
     Household,
     Individual,
+    IndividualRoleInHousehold,
     Program,
     TargetingCriteriaRuleFilter,
 )
@@ -20,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def _resolve_attribute(rule_filter: dict, program: Program):
+    def _resolve_attribute(rule_filter: dict, program: Program) -> Any:
         flex_field_classification = rule_filter["flex_field_classification"]
         if flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
@@ -77,7 +80,7 @@ class TargetingCriteriaRuleFilterInputValidator:
         field_type = get_attr_value("type", attribute, None)
         if field_type == FlexibleAttribute.PDU:
             field_type = attribute.pdu_data.subtype
-        if field_type not in comparison_attribute.get("supported_types"):
+        if field_type not in comparison_attribute.get("supported_types"):  # type: ignore[operator]
             raise ValidationError(
                 f"{rule_filter['field_name']} is '{get_attr_value('type', attribute)}' type filter "
                 f"and does not accept '{rule_filter['comparison_method']}' comparison method"
@@ -110,6 +113,7 @@ class TargetingCriteriaInputValidator:
         for rule in rules:
             household_ids = rule.get("household_ids")
             individual_ids = rule.get("individual_ids")
+            alternative_collectors_ids = rule.get("alternative_collectors_ids")
 
             if household_ids and not (
                 program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
@@ -132,6 +136,34 @@ class TargetingCriteriaInputValidator:
                 ids_list = [i for i in ids_list if i.startswith("IND")]
                 if not Individual.objects.filter(unicef_id__in=ids_list, program=program).exists():
                     raise ValidationError("The given individuals do not exist in the current program")
+
+            # validate alternate collectors
+            if alternative_collectors_ids:
+                alt_col_ids_list = [i.strip() for i in alternative_collectors_ids.split(",")]
+
+                invalid_ids = [i for i in alt_col_ids_list if not i.startswith(("HH", "IND"))]
+                if invalid_ids:
+                    raise ValidationError(f"Invalid collector ID(s): {invalid_ids}")
+
+                hh_ids = [i for i in alt_col_ids_list if i.startswith("HH")]
+                ind_ids = [i for i in alt_col_ids_list if i.startswith("IND")]
+                existing_hh_roles = set(
+                    IndividualRoleInHousehold.objects.filter(
+                        household__unicef_id__in=hh_ids,
+                        role=ROLE_ALTERNATE,
+                    ).values_list("household__unicef_id", flat=True)
+                )
+                existing_ind_roles = set(
+                    IndividualRoleInHousehold.objects.filter(
+                        household__individuals__unicef_id__in=ind_ids,
+                        role=ROLE_ALTERNATE,
+                    ).values_list("household__individuals__unicef_id", flat=True)
+                )
+                missing_alt_roles = [unicef_id for unicef_id in hh_ids if unicef_id not in existing_hh_roles] + [
+                    unicef_id for unicef_id in ind_ids if unicef_id not in existing_ind_roles
+                ]
+                if missing_alt_roles:
+                    raise ValidationError(f"Can't find Alternate collector role for ID(s): {missing_alt_roles}")
 
             is_empty_rules = all(
                 len(rule.get(key, [])) == 0

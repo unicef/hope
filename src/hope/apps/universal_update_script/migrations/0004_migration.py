@@ -3,24 +3,6 @@
 from django.db import migrations, models
 
 
-def migrate_task_results_ids(apps, schema_editor):
-    """Migrate from curr_async_result_id to celery_tasks_results_ids for UniversalUpdate model.
-
-    Assign existing results for both tasks as there was no differentiation in the previous model.
-    """
-    UniversalUpdate = apps.get_model("universal_update_script", "UniversalUpdate")
-    universal_updates_to_update = []
-    for obj in UniversalUpdate.objects.filter(curr_async_result_id__isnull=False):
-        if obj.curr_async_result_id:
-            obj.celery_tasks_results_ids = {
-                "generate_universal_individual_update_template": obj.curr_async_result_id,
-                "run_universal_individual_update": obj.curr_async_result_id,
-            }
-            universal_updates_to_update.append(obj)
-    if universal_updates_to_update:
-        UniversalUpdate.objects.bulk_update(universal_updates_to_update, ["celery_tasks_results_ids"])
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("universal_update_script", "0003_migration"),
@@ -34,7 +16,6 @@ class Migration(migrations.Migration):
                 blank=True, default=dict, help_text="Current (active) AsyncResult ids for celery tasks."
             ),
         ),
-        migrations.RunPython(migrate_task_results_ids, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name="universalupdate",
             name="curr_async_result_id",

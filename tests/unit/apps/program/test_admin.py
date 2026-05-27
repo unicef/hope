@@ -305,12 +305,11 @@ def test_form_new_program_biometric_enabled_calls_service(
     business_area: BusinessArea,
 ) -> None:
     program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True)
-    programme_code = program.generate_programme_code()
+    code = program.generate_code()
     data = _program_form_data(
         program,
         name=f"{program.name}-new",
-        programme_code=programme_code,
-        slug=programme_code.lower(),
+        code=code,
     )
     form = ProgramAdminForm(data=data)
 
@@ -329,12 +328,11 @@ def test_form_new_program_biometric_disabled_does_not_call_service(
     business_area: BusinessArea,
 ) -> None:
     program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
-    programme_code = program.generate_programme_code()
+    code = program.generate_code()
     data = _program_form_data(
         program,
         name=f"{program.name}-new",
-        programme_code=programme_code,
-        slug=programme_code.lower(),
+        code=code,
         biometric_deduplication_enabled=False,
     )
     form = ProgramAdminForm(data=data)
@@ -402,7 +400,7 @@ def test_bulk_upload_individuals_photos_schedules_job(
         patch("hope.admin.program.AsyncJob") as async_job_cls,
     ):
         file_temp_cls.objects.create.return_value = file_temp
-        async_job_cls.objects.create.return_value = job
+        async_job_cls.queue_task.return_value = job
 
         handler = admin_instance.bulk_upload_individuals_photos
         response = handler.__call__(admin_instance, request, program.pk)
@@ -413,8 +411,7 @@ def test_bulk_upload_individuals_photos_schedules_job(
         content_type=get_content_type_for_model(program),
         file=upload,
     )
-    async_job_cls.objects.create.assert_called_once()
-    job.queue.assert_called_once_with()
+    async_job_cls.queue_task.assert_called_once()
     admin_instance.message_user.assert_called()
     assert response.status_code == 200
 

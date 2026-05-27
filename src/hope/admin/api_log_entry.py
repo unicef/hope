@@ -13,7 +13,7 @@ class APILogEntryAdmin(SmartModelAdmin):
     list_display = ("token", "url", "method", "timestamp")
     list_filter = (("token", AutoCompleteFilter), "method")
     date_hierarchy = "timestamp"
-    search_fields = "url"
+    search_fields = ("url",)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False

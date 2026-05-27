@@ -120,19 +120,19 @@ function Entitlement({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         requestBody: ApplyEngineFormula;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansApplyEngineFormulaCreate(
           {
             businessAreaSlug,
             id,
-            programSlug,
+            programCode,
             requestBody,
           },
         ),
@@ -152,19 +152,19 @@ function Entitlement({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         requestBody: any;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansEntitlementFlatAmountCreate(
           {
             businessAreaSlug,
             id,
-            programSlug,
+            programCode,
             requestBody,
           },
         ),
@@ -197,17 +197,17 @@ function Entitlement({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve(
         {
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         },
       ),
     onSuccess: async () => {
@@ -335,7 +335,7 @@ function Entitlement({
                 onClick={async () => {
                   try {
                     await setSteficonRule({
-                      programSlug: programId,
+                      programCode: programId,
                       businessAreaSlug: businessArea,
                       id: paymentPlan.id,
                       requestBody: {
@@ -398,7 +398,7 @@ function Entitlement({
                   onClick={async () => {
                     try {
                       await applyFlatAmount({
-                        programSlug: programId,
+                        programCode: programId,
                         businessAreaSlug: businessArea,
                         id: paymentPlan.id,
                         requestBody: {
@@ -455,7 +455,7 @@ function Entitlement({
                   onClick={() =>
                     mutateExport({
                       businessAreaSlug: businessArea,
-                      programSlug: programId,
+                      programCode: programId,
                       id: paymentPlan.id,
                     })
                   }

@@ -37,7 +37,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,
         id: programCycleId,
-        programSlug: programId,
+        programCode: programId,
       });
     },
   });

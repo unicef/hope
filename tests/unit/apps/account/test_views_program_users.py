@@ -193,7 +193,7 @@ def test_program_users_returns_users_with_roles_in_program(
         role=role_with_user_management_permissions,
     )
 
-    response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+    response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
     assert response.status_code == status.HTTP_200_OK
 
     response_results = response.data["results"]
@@ -306,50 +306,50 @@ def test_program_users_caching(
     )
 
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 6
-        assert len(ctx.captured_queries) == 21
+        assert len(ctx.captured_queries) == 18
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert etag == etag_second_call
-        assert len(ctx.captured_queries) == 10
+        assert len(ctx.captured_queries) == 8
 
     user2.first_name = "Zoe"
     user2.save()
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_third_call = response.headers["etag"]
         assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
         assert etag_third_call not in [etag, etag_second_call]
         # 6 queries are saved because of cached permissions calculations
-        assert len(ctx.captured_queries) == 15
+        assert len(ctx.captured_queries) == 12
 
     user3.delete()
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_fourth_call = response.headers["etag"]
         assert len(response.json()["results"]) == 5
         assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
-        assert len(ctx.captured_queries) == 15
+        assert len(ctx.captured_queries) == 12
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
-        response = authenticated_client.get(list_url, {"program": program.slug, "serializer": "program_users"})
+        response = authenticated_client.get(list_url, {"program": program.code, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
         assert response.has_header("etag")
         etag_fifth_call = response.headers["etag"]
         assert etag_fifth_call == etag_fourth_call
-        assert len(ctx.captured_queries) == 10
+        assert len(ctx.captured_queries) == 8

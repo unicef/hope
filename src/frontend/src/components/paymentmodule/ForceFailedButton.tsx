@@ -33,19 +33,19 @@ export function ForceFailedButton({
         businessAreaSlug,
         id,
         paymentPlanId: ppId,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
         paymentPlanId: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve(
           {
             businessAreaSlug,
             paymentId: id,
             paymentPlanPk: ppId,
-            programSlug,
+            programCode,
           },
         ),
       onSuccess: () => {
@@ -59,7 +59,7 @@ export function ForceFailedButton({
   const submit = (): void => {
     markAsFailed({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       paymentPlanId,
       id: paymentId,
     });

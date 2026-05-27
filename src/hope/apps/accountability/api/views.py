@@ -1,6 +1,6 @@
 from functools import partial
 import logging
-from typing import Any
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import QuerySet
@@ -33,8 +33,8 @@ from hope.apps.accountability.api.serializers import (
     SurveySerializer,
 )
 from hope.apps.accountability.celery_tasks import (
-    export_survey_sample_task,
-    send_survey_to_users,
+    export_survey_sample_async_task,
+    send_survey_to_users_async_task,
 )
 from hope.apps.accountability.filters import (
     FeedbackFilter,
@@ -57,7 +57,7 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvidedError
 from hope.apps.core.utils import to_choice_object
-from hope.models import BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, log_create
+from hope.models import BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, User, log_create
 
 logger = logging.getLogger(__name__)
 
@@ -120,8 +120,8 @@ class FeedbackViewSet(
 
     def get_queryset(self) -> QuerySet[Feedback]:
         queryset = super().get_queryset()
-        if program_slug := self.kwargs.get("program_slug"):
-            queryset = queryset.filter(program__slug=program_slug)
+        if code := self.kwargs.get("program_code"):
+            queryset = queryset.filter(program__code=code)
         return queryset
 
     @transaction.atomic
@@ -135,10 +135,10 @@ class FeedbackViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        program_slug = self.kwargs.get("program_slug")
+        program_code = self.kwargs.get("program_code")
         program = None
-        if program_slug:
-            program = Program.objects.get(slug=program_slug)
+        if program_code:
+            program = Program.objects.get(code=program_code)
 
         if program_id := serializer.validated_data.get("program_id"):
             program = Program.objects.get(id=program_id)
@@ -148,13 +148,13 @@ class FeedbackViewSet(
 
         # additional check for global scope - check if user has permission in the target program
         if (
-            not program_slug
+            not program_code
             and program
             and not check_permissions(
                 self.request.user,
                 self.get_permissions_for_action(),
                 business_area=business_area,
-                program=program.slug,
+                program=program.code,
             )
         ):
             raise PermissionDenied
@@ -205,7 +205,7 @@ class FeedbackViewSet(
             self.request.user,
             self.get_permissions_for_action(),
             business_area=business_area,
-            program=program.slug,
+            program=program.code,
         ):
             raise PermissionDenied
 
@@ -242,7 +242,7 @@ class FeedbackViewSet(
             self.request.user,
             self.get_permissions_for_action(),
             business_area=feedback.business_area,
-            program=feedback.program.slug,
+            program=feedback.program.code,
         ):
             raise PermissionDenied
 
@@ -306,7 +306,7 @@ class MessageViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        program = Program.objects.get(slug=self.program_slug)
+        program = Program.objects.get(code=self.program_code)
 
         input_data = serializer.validated_data
         input_data["program"] = str(program.pk)
@@ -406,14 +406,14 @@ class SurveyViewSet(
         serializer.is_valid(raise_exception=True)
 
         business_area = BusinessArea.objects.get(slug=self.business_area_slug)
-        program = Program.objects.get(slug=self.program_slug)
+        program = Program.objects.get(code=self.program_code)
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
         input_data["program"] = str(program.pk)
 
         survey = SurveyCrudServices.create(request.user, business_area, input_data)  # type: ignore
-        transaction.on_commit(partial(send_survey_to_users.delay, survey.id))
+        transaction.on_commit(partial(send_survey_to_users_async_task, survey))
         log_create(
             Survey.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -434,7 +434,7 @@ class SurveyViewSet(
     @action(detail=True, methods=["get"], url_path="export-sample")
     def export_sample(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         survey = self.get_object()
-        export_survey_sample_task.delay(survey.id, request.user.id)
+        export_survey_sample_async_task(survey, cast("User", request.user))
         serializer = self.get_serializer(survey)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 

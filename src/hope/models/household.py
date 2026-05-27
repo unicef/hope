@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from datetime import timedelta
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.core.validators import validate_image_file_extension
 from django.db import models
@@ -17,7 +19,17 @@ from multiselectfield import MultiSelectField
 from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.currencies import CURRENCY_CHOICES
+from hope.apps.household.const import (
+    BLANK,
+    DATA_SHARING_CHOICES,
+    ORG_ENUMERATOR_CHOICES,
+    REGISTRATION_METHOD_CHOICES,
+    RESIDENCE_STATUS_CHOICE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+)
 from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import (
     HouseholdDeliveryDataMixin,
@@ -26,8 +38,6 @@ from hope.apps.household.signals import (
     household_deleted,
     household_withdrawn,
 )
-from hope.models.area import Area
-from hope.models.business_area import BusinessArea
 from hope.models.storage_file import StorageFile
 from hope.models.utils import (
     AbstractSyncable,
@@ -42,262 +52,9 @@ from hope.models.utils import (
 
 if TYPE_CHECKING:
     from hope.contrib.aurora.models import Record
+    from hope.models.area import Area
+    from hope.models.business_area import BusinessArea
     from hope.models.individual import Individual
-
-# TODO: remove later
-# please use hope.apps.household.const
-BLANK = ""
-IDP = "IDP"
-REFUGEE = "REFUGEE"
-OTHERS_OF_CONCERN = "OTHERS_OF_CONCERN"
-HOST = "HOST"
-NON_HOST = "NON_HOST"
-RETURNEE = "RETURNEE"
-RESIDENCE_STATUS_CHOICE = (
-    (BLANK, _("None")),
-    (IDP, _("Displaced  |  Internally Displaced People")),
-    (REFUGEE, _("Displaced  |  Refugee / Asylum Seeker")),
-    (OTHERS_OF_CONCERN, _("Displaced  |  Others of Concern")),
-    (HOST, _("Non-displaced  |   Host")),
-    (NON_HOST, _("Non-displaced  |   Non-host")),
-    (RETURNEE, _("Displaced  |   Returnee")),
-)
-# INDIVIDUALS
-MALE = "MALE"
-FEMALE = "FEMALE"
-OTHER = "OTHER"
-NOT_COLLECTED = "NOT_COLLECTED"
-NOT_ANSWERED = "NOT_ANSWERED"
-
-SEX_CHOICE = (
-    (MALE, _("Male")),
-    (FEMALE, _("Female")),
-    (OTHER, _("Other")),
-    (NOT_COLLECTED, _("Not collected")),
-    (NOT_ANSWERED, _("Not answered")),
-)
-
-SINGLE = "SINGLE"
-MARRIED = "MARRIED"
-WIDOWED = "WIDOWED"
-DIVORCED = "DIVORCED"
-SEPARATED = "SEPARATED"
-MARITAL_STATUS_CHOICE = (
-    (BLANK, _("None")),
-    (DIVORCED, _("Divorced")),
-    (MARRIED, _("Married")),
-    (SEPARATED, _("Separated")),
-    (SINGLE, _("Single")),
-    (WIDOWED, _("Widowed")),
-)
-
-NONE = "NONE"
-SEEING = "SEEING"
-HEARING = "HEARING"
-WALKING = "WALKING"
-MEMORY = "MEMORY"
-SELF_CARE = "SELF_CARE"
-COMMUNICATING = "COMMUNICATING"
-OBSERVED_DISABILITY_CHOICE = (
-    (NONE, _("None")),
-    (SEEING, _("Difficulty seeing (even if wearing glasses)")),
-    (HEARING, _("Difficulty hearing (even if using a hearing aid)")),
-    (WALKING, _("Difficulty walking or climbing steps")),
-    (MEMORY, _("Difficulty remembering or concentrating")),
-    (SELF_CARE, _("Difficulty with self care (washing, dressing)")),
-    (
-        COMMUNICATING,
-        _("Difficulty communicating (e.g understanding or being understood)"),
-    ),
-)
-NON_BENEFICIARY = "NON_BENEFICIARY"  # delegate
-HEAD = "HEAD"
-SON_DAUGHTER = "SON_DAUGHTER"
-WIFE_HUSBAND = "WIFE_HUSBAND"
-BROTHER_SISTER = "BROTHER_SISTER"
-MOTHER_FATHER = "MOTHER_FATHER"
-AUNT_UNCLE = "AUNT_UNCLE"
-GRANDMOTHER_GRANDFATHER = "GRANDMOTHER_GRANDFATHER"
-MOTHERINLAW_FATHERINLAW = "MOTHERINLAW_FATHERINLAW"
-DAUGHTERINLAW_SONINLAW = "DAUGHTERINLAW_SONINLAW"
-SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
-GRANDDAUGHTER_GRANDSON = "GRANDDAUGHER_GRANDSON"  # key is wrong, but it is used in kobo and aurora
-NEPHEW_NIECE = "NEPHEW_NIECE"
-COUSIN = "COUSIN"
-FOSTER_CHILD = "FOSTER_CHILD"
-RELATIONSHIP_UNKNOWN = "UNKNOWN"
-RELATIONSHIP_OTHER = "OTHER"
-FREE_UNION = "FREE_UNION"
-
-RELATIONSHIP_CHOICE = (
-    (RELATIONSHIP_UNKNOWN, "Unknown"),
-    (AUNT_UNCLE, "Aunt / Uncle"),
-    (BROTHER_SISTER, "Brother / Sister"),
-    (COUSIN, "Cousin"),
-    (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
-    (GRANDDAUGHTER_GRANDSON, "Granddaughter / Grandson"),
-    (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
-    (HEAD, "Head of household (self)"),
-    (MOTHER_FATHER, "Mother / Father"),
-    (MOTHERINLAW_FATHERINLAW, "Mother-in-law / Father-in-law"),
-    (NEPHEW_NIECE, "Nephew / Niece"),
-    (
-        NON_BENEFICIARY,
-        "Not a Family Member. Can only act as a recipient.",
-    ),
-    (RELATIONSHIP_OTHER, "Other"),
-    (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
-    (SON_DAUGHTER, "Son / Daughter"),
-    (WIFE_HUSBAND, "Wife / Husband"),
-    (FOSTER_CHILD, "Foster child"),
-    (FREE_UNION, "Free union"),
-)
-YES = "1"
-NO = "0"
-YES_NO_CHOICE = (
-    (BLANK, _("None")),
-    (YES, _("Yes")),
-    (NO, _("No")),
-)
-
-NOT_PROVIDED = "NOT_PROVIDED"
-WORK_STATUS_CHOICE = (
-    (YES, _("Yes")),
-    (NO, _("No")),
-    (NOT_PROVIDED, _("Not provided")),
-)
-ROLE_PRIMARY = "PRIMARY"
-ROLE_ALTERNATE = "ALTERNATE"
-ROLE_CHOICE = (
-    (ROLE_ALTERNATE, "Alternate collector"),
-    (ROLE_PRIMARY, "Primary collector"),
-)
-IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
-IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
-IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"
-IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
-IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
-IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
-IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
-IDENTIFICATION_TYPE_BANK_STATEMENT = "BANK_STATEMENT"
-IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE = "DISABILITY_CERTIFICATE"
-IDENTIFICATION_TYPE_FOSTER_CHILD = "FOSTER_CHILD"
-IDENTIFICATION_TYPE_OTHER = "OTHER"
-IDENTIFICATION_TYPE_CHOICE = (
-    (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
-    (IDENTIFICATION_TYPE_DRIVERS_LICENSE, _("Driver's License")),
-    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
-    (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
-    (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
-    (IDENTIFICATION_TYPE_TAX_ID, _("Tax Number Identification")),
-    (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
-    (IDENTIFICATION_TYPE_BANK_STATEMENT, _("Bank Statement")),
-    (IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE, _("Disability Certificate")),
-    (IDENTIFICATION_TYPE_FOSTER_CHILD, _("Foster Child")),
-    (IDENTIFICATION_TYPE_OTHER, _("Other")),
-)
-IDENTIFICATION_TYPE_DICT = {
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "Birth Certificate",
-    IDENTIFICATION_TYPE_DRIVERS_LICENSE: "Driver's License",
-    IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
-    IDENTIFICATION_TYPE_NATIONAL_ID: "National ID",
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "National Passport",
-    IDENTIFICATION_TYPE_TAX_ID: "Tax Number Identification",
-    IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: "Foreigner's Residence Permit",
-    IDENTIFICATION_TYPE_OTHER: "Other",
-}
-UNHCR = "UNHCR"
-WFP = "WFP"
-AGENCY_TYPE_CHOICES = (
-    (UNHCR, _("UNHCR")),
-    (WFP, _("WFP")),
-)
-STATUS_ACTIVE = "ACTIVE"
-STATUS_INACTIVE = "INACTIVE"
-STATUS_WITHDRAWN = "WITHDRAWN"
-STATUS_DUPLICATE = "DUPLICATE"
-INDIVIDUAL_STATUS_CHOICES = (
-    (STATUS_ACTIVE, "Active"),
-    (STATUS_DUPLICATE, "Duplicate"),
-    (STATUS_WITHDRAWN, "Withdrawn"),
-)
-INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
-UNIQUE = "UNIQUE"
-DUPLICATE = "DUPLICATE"
-NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
-NOT_PROCESSED = "NOT_PROCESSED"
-DEDUPLICATION_POSTPONE = "POSTPONE"
-DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
-    (DUPLICATE, "Duplicate"),
-    (NEEDS_ADJUDICATION, "Needs Adjudication"),
-    (NOT_PROCESSED, "Not Processed"),
-    (DEDUPLICATION_POSTPONE, "Postpone"),
-    (UNIQUE, "Unique"),
-)
-SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
-DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
-UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
-NOT_PROCESSED = "NOT_PROCESSED"
-DEDUPLICATION_BATCH_STATUS_CHOICE = (
-    (DUPLICATE_IN_BATCH, "Duplicate in batch"),
-    (NOT_PROCESSED, "Not Processed"),
-    (SIMILAR_IN_BATCH, "Similar in batch"),
-    (UNIQUE_IN_BATCH, "Unique in batch"),
-)
-SOME_DIFFICULTY = "SOME_DIFFICULTY"
-LOT_DIFFICULTY = "LOT_DIFFICULTY"
-CANNOT_DO = "CANNOT_DO"
-SEVERITY_OF_DISABILITY_CHOICES = (
-    (BLANK, _("None")),
-    (LOT_DIFFICULTY, "A lot of difficulty"),
-    (CANNOT_DO, "Cannot do at all"),
-    (SOME_DIFFICULTY, "Some difficulty"),
-)
-UNICEF = "UNICEF"
-PARTNER = "PARTNER"
-ORG_ENUMERATOR_CHOICES = (
-    (BLANK, _("None")),
-    (PARTNER, "Partner"),
-    (UNICEF, "UNICEF"),
-)
-HUMANITARIAN_PARTNER = "HUMANITARIAN_PARTNER"
-PRIVATE_PARTNER = "PRIVATE_PARTNER"
-GOVERNMENT_PARTNER = "GOVERNMENT_PARTNER"
-DATA_SHARING_CHOICES = (
-    (BLANK, _("None")),
-    (GOVERNMENT_PARTNER, "Government partners"),
-    (HUMANITARIAN_PARTNER, "Humanitarian partners"),
-    (PRIVATE_PARTNER, "Private partners"),
-    (UNICEF, "UNICEF"),
-)
-HH_REGISTRATION = "HH_REGISTRATION"
-COMMUNITY = "COMMUNITY"
-REGISTRATION_METHOD_CHOICES = (
-    (BLANK, _("None")),
-    (COMMUNITY, "Community-level Registration"),
-    (HH_REGISTRATION, "Household Registration"),
-)
-
-DISABLED = "disabled"
-NOT_DISABLED = "not disabled"
-DISABILITY_CHOICES = (
-    (
-        DISABLED,
-        "disabled",
-    ),
-    (
-        NOT_DISABLED,
-        "not disabled",
-    ),
-)
-SANCTION_LIST_POSSIBLE_MATCH = "SANCTION_LIST_POSSIBLE_MATCH"
-SANCTION_LIST_CONFIRMED_MATCH = "SANCTION_LIST_CONFIRMED_MATCH"
-INDIVIDUAL_FLAGS_CHOICES = (
-    (DUPLICATE, "Duplicate"),
-    (NEEDS_ADJUDICATION, "Needs adjudication"),
-    (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
-    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
-)
 
 logger = logging.getLogger(__name__)
 
@@ -314,6 +71,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
     class Meta:
         app_label = "household"
+        ordering = ("id",)
 
 
 class Household(
@@ -390,11 +148,13 @@ class Household(
             "org_name_enumerator",
             "village",
             "registration_method",
-            "currency",
             "unhcr_id",
             "detail_id",
             "program_registration_id",
-        ]
+        ],
+        {
+            "currency.code": "currency",
+        },
     )
     business_area = models.ForeignKey(
         "core.BusinessArea",
@@ -421,6 +181,7 @@ class Household(
         related_name="households",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         help_text="Collection of household representations",
     )
     representatives = models.ManyToManyField(
@@ -500,17 +261,26 @@ class Household(
         related_name="heading_household",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
         help_text="Household head of household",
+    )
+    facility = models.ForeignKey(
+        "Facility",
+        related_name="households",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
     )
     consent_sign = ImageField(
         validators=[validate_image_file_extension],
         blank=True,
         help_text="Household consent sign image",
     )
-    consent = models.BooleanField(null=True, help_text="Household consent")
+    consent = models.BooleanField(null=True, blank=True, help_text="Household consent")
     consent_sharing = MultiSelectField(
         choices=DATA_SHARING_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household consent sharing",
     )
     residence_status = models.CharField(
@@ -636,14 +406,22 @@ class Household(
         help_text="Household unknown sex group count",
     )  # NOT_COLLECTED
 
-    returnee = models.BooleanField(null=True, help_text="Household returnee status")
-    fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
-    child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
+    returnee = models.BooleanField(null=True, blank=True, help_text="Household returnee status")
+    fchild_hoh = models.BooleanField(null=True, blank=True, help_text="Female child headed household flag")
+    child_hoh = models.BooleanField(null=True, blank=True, help_text="Child headed household flag")
     village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
-    currency = models.CharField(
+    currency_old = models.CharField(
         max_length=250,
-        choices=CURRENCY_CHOICES,
+        blank=True,
         default=BLANK,
+        help_text="Household currency (legacy, pending removal)",
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="households",
         help_text="Household currency",
     )
     unhcr_id = models.CharField(
@@ -675,6 +453,7 @@ class Household(
         max_length=250,
         choices=REGISTRATION_METHOD_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household registration method [sys]",
     )
     family_id = models.CharField(
@@ -695,6 +474,7 @@ class Household(
         choices=CollectType.choices,
         default=CollectType.STANDARD.value,
         max_length=8,
+        blank=True,
         help_text="Household collect type [sys]",
     )
     program_registration_id = models.CharField(
@@ -742,6 +522,7 @@ class Household(
         max_length=250,
         choices=ORG_ENUMERATOR_CHOICES,
         default=BLANK,
+        blank=True,
         help_text="Household org enumerator [sys]",
     )
     org_name_enumerator = models.CharField(
@@ -751,7 +532,9 @@ class Household(
         help_text="Household org name enumerator [sys]",
     )
     # TODO: kobo_submission_uuid and kobo_submission_time are deprecated, will be removed soon.
-    kobo_submission_uuid = models.UUIDField(null=True, default=None, help_text="Household Kobo submission uuid [sys]")
+    kobo_submission_uuid = models.UUIDField(
+        null=True, blank=True, default=None, help_text="Household Kobo submission uuid [sys]"
+    )
     kobo_submission_time = models.DateTimeField(
         max_length=150,
         blank=True,
@@ -782,7 +565,15 @@ class Household(
     class Meta:
         app_label = "household"
         verbose_name = "Household"
-        permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        permissions = (
+            ("withdrawn", "Can withdrawn Household"),
+            ("sanity_check", "Sanity check Household"),
+            ("gdpr_remove", "GDPR remove Household data"),
+            ("logical_delete", "Logical delete Household"),
+            ("see_linked_objects", "Can see Linked Objects"),
+            ("reset_sync_date", "Can reset sync date"),
+        )
+        ordering = ("id",)
 
         indexes = [
             models.Index(
@@ -803,6 +594,11 @@ class Household(
                 name="hi_prog_ltreg_act_merg_idx",
                 fields=["program", "last_registration_date"],
                 condition=Q(is_removed=False, rdi_merge_status="MERGED"),
+            ),
+            models.Index(
+                name="idx_hh_prog_rdi_status",
+                fields=["program", "rdi_merge_status"],
+                condition=Q(is_removed=False),
             ),
         ]
         constraints = [
@@ -833,12 +629,13 @@ class Household(
     def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag: Any | None = None) -> None:
+    def withdraw(self, tag: Any | None = None, notify: bool = True) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.internal_data["withdrawn_tag"] = tag
         self.save()
-        household_withdrawn.send(sender=self.__class__, instance=self)
+        if notify:
+            household_withdrawn.send(sender=self.__class__, instance=self)
 
     def unwithdraw(self) -> None:
         self.withdrawn = False
@@ -883,15 +680,15 @@ class Household(
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
     @cached_property
-    def primary_collector(self) -> Optional["Individual"]:
+    def primary_collector(self) -> "Individual" | None:
         return self.representatives.filter(households_and_roles__role=ROLE_PRIMARY).first()
 
     @cached_property
-    def alternate_collector(self) -> Optional["Individual"]:
+    def alternate_collector(self) -> "Individual" | None:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     @property
-    def flex_registrations_record(self) -> Optional["Record"]:
+    def flex_registrations_record(self) -> "Record" | None:
         from hope.contrib.aurora.models import Record
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
@@ -924,8 +721,8 @@ class Household(
         conditions = [
             self.is_removed,
             self.withdrawn,
-            self.removed_date >= yesterday,
-            self.withdrawn_date >= yesterday,
+            self.removed_date >= yesterday,  # type: ignore[operator]
+            self.withdrawn_date >= yesterday,  # type: ignore[operator]
         ]
         return all(conditions)
 
@@ -941,23 +738,23 @@ class PendingHousehold(Household):
     objects = PendingManager()
 
     @property
-    def individuals(self) -> QuerySet:
-        return super().individuals(manager="pending_objects")
+    def individuals(self) -> QuerySet:  # type: ignore[override]
+        return super().individuals(manager="pending_objects")  # type: ignore[return-value]
 
     @property
-    def individuals_and_roles(self) -> QuerySet:
-        return super().individuals_and_roles(manager="pending_objects")
+    def individuals_and_roles(self) -> QuerySet:  # type: ignore[override]
+        return super().individuals_and_roles(manager="pending_objects")  # type: ignore[return-value]
 
     @property
     def pending_representatives(self) -> QuerySet:
-        return super().representatives(manager="pending_objects")
+        return super().representatives(manager="pending_objects")  # type: ignore[return-value]
 
     @cached_property
-    def primary_collector(self) -> Optional["Individual"]:
+    def primary_collector(self) -> "Individual" | None:
         return self.pending_representatives.get(households_and_roles__role=ROLE_PRIMARY)
 
     @cached_property
-    def alternate_collector(self) -> Optional["Individual"]:
+    def alternate_collector(self) -> "Individual" | None:
         return self.pending_representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     class Meta:

@@ -18,3 +18,4 @@ class PaymentPlanSplitPayments(TimeStampedUUIDModel):
     class Meta:
         app_label = "payment"
         unique_together = ("payment_plan_split", "payment")
+        ordering = ("id",)

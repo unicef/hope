@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Q, QuerySet, Sum
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
@@ -24,15 +24,15 @@ from model_utils.models import SoftDeletableModel
 from psycopg2._range import NumericRange
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hope.apps.household.const import FEMALE, MALE
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.approval import Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.household import FEMALE, MALE, Household
+from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.payment import Payment
 from hope.models.rule import Rule, RuleCommit
@@ -74,7 +74,6 @@ class PaymentPlan(
             "created_by",
             "status",
             "status_date",
-            "currency",
             "dispersion_start_date",
             "dispersion_end_date",
             "start_date",
@@ -99,6 +98,7 @@ class PaymentPlan(
             "abort_comment",
             "reconciliation_import_file",
             "flat_amount_value",
+            "use_payment_gateway",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -107,6 +107,7 @@ class PaymentPlan(
             "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
+            "currency.code": "currency",
         },
     )
 
@@ -187,6 +188,14 @@ class PaymentPlan(
             "IMPORTING_ENTITLEMENTS",
             "Importing Entitlements flat amount",
         )
+        APPLYING_CUSTOM_EXCHANGE_RATE = (
+            "APPLYING_CUSTOM_EXCHANGE_RATE",
+            "Applying Custom Exchange Rate",
+        )
+        APPLYING_CUSTOM_EXCHANGE_RATE_ERROR = (
+            "APPLYING_CUSTOM_EXCHANGE_RATE_ERROR",
+            "Applying Custom Exchange Rate Error",
+        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -211,6 +220,7 @@ class PaymentPlan(
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -356,11 +366,18 @@ class PaymentPlan(
         null=True,
         help_text="Payment Plan end date",
     )
-    currency = models.CharField(
-        max_length=4,
-        choices=CURRENCY_CHOICES,
+    currency_old = models.CharField(
+        max_length=5,
         blank=True,
         null=True,
+        help_text="Currency (legacy, pending removal)",
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payment_plans",
         help_text="Currency",
     )
     dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
@@ -428,6 +445,22 @@ class PaymentPlan(
         max_digits=15,
         help_text="Exchange Rate [sys]",
     )
+    custom_exchange_rate = models.BooleanField(
+        default=False,
+        help_text="Custom Exchange Rate flag [sys]",
+    )
+    use_payment_gateway = models.BooleanField(
+        default=False,
+        help_text="Send this payment plan through the payment gateway regardless of the FSP communication channel",
+    )
+    custom_exchange_rate_set_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="User who set the custom exchange rate [sys]",
+    )
     female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
     male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
     female_adults_count = models.PositiveIntegerField(default=0, help_text="Female Adults Count [sys]")
@@ -441,6 +474,7 @@ class PaymentPlan(
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
+        blank=True,
         help_text="Total Entitled Quantity [sys]",
     )
     total_entitled_quantity_usd = models.DecimalField(
@@ -535,7 +569,13 @@ class PaymentPlan(
         app_label = "payment"
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        permissions = (("can_recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),)
+        permissions = (
+            ("recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),
+            ("restart_preparing_payment_plan", "Can restart Preparing Payment Plans"),
+            ("restart_exporting_template_for_entitlement", "Can restart Exporting Template for Entitlements"),
+            ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
+            ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
+        )
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -665,21 +705,19 @@ class PaymentPlan(
         Need to call from source_payment_plan level
         like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
         """
+        # Exclude beneficiaries who are currently in different follow-up Payment Plan
+        # within the same cycle (contains excluded from other follow-ups)
+        follow_up_households = Payment.objects.filter(
+            is_follow_up=True,
+            parent__source_payment_plan=self,
+            parent__program_cycle=self.program_cycle,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        ).exclude(parent=self)
         return (
             self.unsuccessful_payments()
             .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
-            .exclude(
-                # Exclude beneficiaries who are currently in different follow-up Payment Plan
-                # within the same cycle (contains excluded from other follow-ups)
-                household_id__in=Payment.objects.filter(
-                    is_follow_up=True,
-                    parent__source_payment_plan=self,
-                    parent__program_cycle=self.program_cycle,
-                    excluded=False,
-                )
-                .exclude(parent=self)
-                .values_list("household_id", flat=True)
-            )
+            .exclude(Exists(follow_up_households))
         )
 
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
@@ -690,7 +728,7 @@ class PaymentPlan(
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
                 return ModifiedData(
-                    approval_process.sent_for_approval_date,
+                    approval_process.sent_for_approval_date,  # type: ignore[arg-type]
                     approval_process.sent_for_approval_by,
                 )
             if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
@@ -710,15 +748,30 @@ class PaymentPlan(
         return ModifiedData(self.updated_at)
 
     # from generic pp
-    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
-        if self.currency == USDC:
+    def get_exchange_rate(
+        self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None
+    ) -> float | None:
+        if self.custom_exchange_rate and self.exchange_rate is not None:
+            return float(self.exchange_rate)
+
+        return self.get_unore_exchange_rate(exchange_rates_client)
+
+    def get_unore_exchange_rate(
+        self, exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None
+    ) -> float | None:
+        if not self.currency:
+            raise ValueError("Cannot get exchange rate for PaymentPlan without currency")
+
+        if self.currency.code == "USDC":
             # exchange rate for Digital currency USDC to USD
             return 1.0
 
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
-        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+        return exchange_rates_client.get_exchange_rate_for_currency_code(
+            self.currency.code, self.currency_exchange_date
+        )
 
     def available_payment_records(
         self,
@@ -769,7 +822,9 @@ class PaymentPlan(
         Copied from TP and used in:
         1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
         """
-        all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
+        all_households = Household.objects.filter(
+            business_area=self.business_area, program=self.program_cycle.program
+        ).prefetch_related("individuals")
         households = all_households.filter(self.get_query()).order_by("unicef_id")
         return households.distinct()
 
@@ -813,14 +868,8 @@ class PaymentPlan(
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False
-        return self.financial_service_provider.is_payment_gateway
-
-    @property
-    def fsp_communication_channel(self) -> str:
-        return (
-            FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-            if self.is_payment_gateway
-            else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        return self.use_payment_gateway or (
+            self.financial_service_provider.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
         )
 
     @property
@@ -853,7 +902,7 @@ class PaymentPlan(
         return not has_hh_ids and not has_ind_ids
 
     @property
-    def excluded_beneficiaries_ids(self) -> list[str]:
+    def excluded_beneficiaries_ids(self) -> list[str | None]:
         """Return HH or Ind IDs based on Program DCT."""
         return (
             list(self.payment_items.filter(excluded=True).values_list("household__individuals__unicef_id", flat=True))
@@ -862,7 +911,7 @@ class PaymentPlan(
         )
 
     @property
-    def currency_exchange_date(self) -> datetime:
+    def currency_exchange_date(self) -> Any:
         if (
             self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
             and (process := self.approval_process.first())
@@ -870,7 +919,7 @@ class PaymentPlan(
         ):
             return approval.created_at.date()
         now = timezone.now().date()
-        return min(now, self.dispersion_end_date)
+        return min(now, self.dispersion_end_date) if self.dispersion_end_date else now
 
     @property
     def can_create_payment_verification_plan(self) -> int:
@@ -902,7 +951,7 @@ class PaymentPlan(
         for Locked plan return export_file_entitlement file link
         for Accepted and Finished export_file_per_fsp file link
         """
-        pp_status_to_file_field = {
+        pp_status_to_file_field: dict[str, str] = {
             PaymentPlan.Status.LOCKED: "export_file_entitlement",
             PaymentPlan.Status.ACCEPTED: "export_file_per_fsp",
             PaymentPlan.Status.FINISHED: "export_file_per_fsp",
@@ -918,7 +967,7 @@ class PaymentPlan(
     def imported_file_name(self) -> str:
         """Get file to import entitlements."""
         try:
-            return self.imported_file.file.name if self.imported_file else ""
+            return (self.imported_file.file.name or "") if self.imported_file else ""
         except FileTemp.DoesNotExist:
             return ""
 
@@ -973,7 +1022,7 @@ class PaymentPlan(
     @property
     def can_send_to_payment_gateway(self) -> bool:
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        has_payment_gateway_fsp = self.financial_service_provider and self.financial_service_provider.is_payment_gateway
+        has_payment_gateway_fsp = bool(self.financial_service_provider and self.is_payment_gateway)
         has_not_sent_to_payment_gateway_splits = self.splits.filter(
             sent_to_payment_gateway=False,
         ).exists()
@@ -985,8 +1034,8 @@ class PaymentPlan(
         if not reconciliation_window_in_days:
             return False
 
-        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)
-        is_overdue = due_date <= now().date()
+        due_date = self.dispersion_start_date + timedelta(days=reconciliation_window_in_days)  # type: ignore[operator]
+        is_overdue = due_date <= now().date()  # type: ignore[operator]
 
         return (
             self.status == PaymentPlan.Status.ACCEPTED

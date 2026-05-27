@@ -1,22 +1,24 @@
 import logging
 from pathlib import Path
-import re
 import sys
 from time import sleep
 from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from constance import config as constance_config
+from constance.backends.memory import MemoryBackend
 from django.conf import settings
 from django.core.cache import cache
-from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import connections
 import pytest
 
+from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.fixtures import *  # noqa: F403, F401
 from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
+from hope.models.currency import Currency
 
 
 @pytest.fixture(autouse=True)
@@ -49,6 +51,32 @@ def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blo
         from hope.models import Role
 
         Role.objects.get_or_create(name="Role with all permissions")
+
+
+@pytest.fixture
+def currency_pln(db: Any) -> Currency:
+    return CurrencyFactory(code="PLN", name="Polish Zloty")
+
+
+@pytest.fixture
+def currency_usd(db: Any) -> Currency:
+    return CurrencyFactory(code="USD", name="United States Dollar")
+
+
+@pytest.fixture
+def currency_usdc(db: Any) -> Currency:
+    return CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True)
+
+
+@pytest.fixture
+def all_currencies(db: Any) -> None:
+    import importlib
+
+    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
+    Currency.objects.bulk_create(
+        [Currency(code=code, name=name, is_crypto=is_crypto) for code, name, is_crypto in mod.CURRENCIES],
+        ignore_conflicts=True,
+    )
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -119,6 +147,9 @@ def pytest_configure(config: Config) -> None:
     settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
 
+    constance_config._setup()
+    object.__setattr__(constance_config._wrapped, "_backend", MemoryBackend())
+
 
 def pytest_unconfigure(config: Config) -> None:
     import sys  # noqa
@@ -132,7 +163,7 @@ disabled_locally_test = pytest.mark.skip(
 
 
 @pytest.fixture
-def mock_elasticsearch(mocker: Any) -> None:
+def mock_elasticsearch(mocker: Any) -> Any:
     """Mock ES functions for tests that don't need actual ES.
 
     Use this fixture instead of django_elasticsearch_setup for tests that
@@ -148,8 +179,6 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch("hope.apps.household.services.index_management.delete_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.populate_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.rebuild_program_indexes")
-    # Disable ES signals
-    mocker.patch("hope.apps.household.signals._is_elasticsearch_enabled", return_value=False)
     # Also patch at usage locations (for modules that use `from X import Y`)
     mocker.patch(
         "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"
@@ -162,19 +191,19 @@ def mock_elasticsearch(mocker: Any) -> None:
     mocker.patch(
         "hope.apps.registration_data.tasks.deduplicate.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
+    mocker.patch("hope.apps.grievance.services.data_change.utils.update_es")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
     suffix = "_test"
     if xdist_suffix:
-        # Put a suffix like _gw0, _gw1 etc on xdist processes
         suffix += f"_{xdist_suffix}"
 
     _setup_test_elasticsearch(suffix=suffix)
     yield
-    _teardown_test_elasticsearch(suffix=suffix)
+    _delete_program_es_indexes()
 
 
 @pytest.fixture
@@ -210,26 +239,8 @@ def _setup_test_elasticsearch(suffix: str) -> None:
 
     _wait_for_es(connection_alias=worker_connection_postfix)
 
-    # Update index names and connections
-    for doc in registry.get_documents():
-        doc._index._name += suffix
-        # Use the worker-specific connection
-        doc._index._using = worker_connection_postfix
-        doc._index.delete(ignore=[404, 400])
-        doc._index.create()
 
-
-def _teardown_test_elasticsearch(suffix: str) -> None:
-    pattern = re.compile(f"{suffix}$")
-
-    for index in registry.get_indices():
-        index.delete(ignore=[404, 400])
-        index._name = pattern.sub("", index._name)
-
-    for doc in registry.get_documents():
-        doc._index._name = pattern.sub("", doc._index._name)
-
-    # Delete all dynamically created per-program test indexes
+def _delete_program_es_indexes() -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
     test_prefix = settings.ELASTICSEARCH_INDEX_PREFIX
     if test_prefix:

@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from natural_keys import NaturalKeyModel
 
+from hope.models.role import Role
 from hope.models.role_assignment import RoleAssignment
 from hope.models.user import User, logger
 from hope.models.utils import TimeStampedUUIDModel
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user: User, business_area: "BusinessArea", role: RoleAssignment) -> None:
+    def validate_user_role(self, user: User, business_area: "BusinessArea", role: Role) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
@@ -54,9 +55,12 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         verbose_name = "incompatible roles"
         verbose_name_plural = "incompatible roles"
         unique_together = ("role_one", "role_two")
+        ordering = ("id",)
 
     def clean(self) -> None:
         super().clean()
+        if not self.role_one_id or not self.role_two_id:
+            return
         if self.role_one == self.role_two:
             logger.warning(f"Provided roles are the same role={self.role_one}")
             raise ValidationError(_("Choose two different roles."))
@@ -88,6 +92,8 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
 
     def validate_unique(self, *args: Any, **kwargs: Any) -> None:
         super().validate_unique(*args, **kwargs)
+        if not self.role_one_id or not self.role_two_id:
+            return
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
         if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():

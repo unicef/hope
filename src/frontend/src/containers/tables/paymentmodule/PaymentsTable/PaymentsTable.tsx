@@ -17,7 +17,7 @@ import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { headCells } from './PaymentsTableHeadCells';
+import { headCells, headCellsPeople } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
 import { PaymentsFilters } from './PaymentsFilters';
@@ -71,7 +71,7 @@ const PaymentsTable = ({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       householdUnicefId: appliedFilter.householdUnicefId || null,
       individualUnicefId: appliedFilter.individualUnicefId || null,
       collectorFullName: appliedFilter.collectorFullName || null,
@@ -109,7 +109,7 @@ const PaymentsTable = ({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             paymentPlanPk: paymentPlan.id,
           },
           queryVariables,
@@ -133,7 +133,7 @@ const PaymentsTable = ({
         createApiParams(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
             paymentPlanPk: paymentPlan.id,
           },
           queryVariables,
@@ -160,7 +160,7 @@ const PaymentsTable = ({
       };
 
   const adjustedHeadCells = adjustHeadCells(
-    headCells,
+    isSocialDctType ? headCellsPeople : headCells,
     beneficiaryGroup,
     replacements,
   );

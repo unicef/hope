@@ -31,7 +31,6 @@ from hope.apps.core.attributes_qet_queries import (
     registration_data_import_query,
 )
 from hope.apps.core.countries import Countries
-from hope.apps.core.currencies import CURRENCY_CHOICES
 from hope.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
@@ -74,7 +73,6 @@ from hope.apps.core.field_attributes.lookup_functions import (
 )
 from hope.apps.core.languages import Languages
 from hope.apps.household.const import (
-    BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     MARITAL_STATUS_CHOICE,
@@ -89,6 +87,7 @@ from hope.apps.household.const import (
     WORK_STATUS_CHOICE,
 )
 from hope.models import Area, Country
+from hope.models.currency import Currency
 from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
@@ -722,10 +721,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Which currency will be used for financial questions?"},
         "hint": "",
-        "choices": [
-            {"label": {"English(EN)": currency_name}, "value": code}
-            for code, currency_name in CURRENCY_CHOICES
-            if code != BLANK
+        "choices": [],
+        "_choices": lambda *args, **kwargs: [
+            {"label": {"English(EN)": c.name}, "value": c.code} for c in Currency.objects.all().order_by("code")
         ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",
@@ -2357,6 +2355,40 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
         "xlsx_field": "extra_rdis_",
+    },
+    {
+        "id": "ad9b46c4-78df-420c-a073-5dc023b20af5",
+        "type": TYPE_STRING,
+        "name": "facility",
+        "lookup": "facility__name",
+        "required": False,
+        "label": {"English(EN)": "Facility name"},
+        "hint": "facility name",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "facility_name_h_c",
+        "scope": [
+            Scope.XLSX,
+            Scope.HOUSEHOLD_UPDATE,
+            Scope.XLSX_PEOPLE,
+        ],
+    },
+    {
+        "id": "6de27964-563f-4fd0-94b5-cb06b762d92b",
+        "type": TYPE_STRING,
+        "name": "facility_admin_area",
+        "lookup": "facility__admin_area__p_code",
+        "required": False,
+        "label": {"English(EN)": "Facility admin area"},
+        "hint": "facility admin area",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "facility_admin_area_h_c",
+        "scope": [
+            Scope.XLSX,
+            Scope.HOUSEHOLD_UPDATE,
+            Scope.XLSX_PEOPLE,
+        ],
     },
 ]
 

@@ -34,11 +34,11 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
       mutationFn: () =>
         RestService.restBusinessAreasProgramsFinishCreate({
           businessAreaSlug: businessArea,
-          slug: program.slug,
+          code: program.code,
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['program', businessArea, program.slug],
+          queryKey: ['program', businessArea, program.code],
         });
       },
     });
@@ -51,7 +51,7 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
         status: ProgramStatusEnum.FINISHED,
       });
       showMessage(t('Programme finished.'));
-      navigate(`/${baseUrl}/details/${program.slug}`);
+      navigate(`/${baseUrl}/details/${program.code}`);
       setOpen(false);
     } catch (error: any) {
       showApiErrorMessages(

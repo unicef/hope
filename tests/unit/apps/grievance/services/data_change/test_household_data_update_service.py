@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.test import TestCase
 import pytest
 
 from extras.test_utils.factories import (
@@ -15,8 +16,9 @@ from extras.test_utils.factories import (
 )
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import HouseholdDataUpdateService
+from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import ROLE_ALTERNATE
-from hope.models import IndividualRoleInHousehold, Program, User
+from hope.models import Currency, IndividualRoleInHousehold, Program, User
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -55,6 +57,28 @@ def role_context(program: Program) -> dict[str, Any]:
         business_area=program.business_area,
     )
     return {"individual": individual, "household": household, "grievance_ticket": grievance_ticket}
+
+
+def test_close_resolves_country_and_country_origin_from_iso_codes() -> None:
+    country = CountryFactory(iso_code3="POL")
+    country_origin = CountryFactory(iso_code3="UKR")
+    household = HouseholdFactory(create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "country": {"value": "POL", "approve_status": True},
+            "country_origin": {"value": "UKR", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.country == country
+    assert household.country_origin == country_origin
 
 
 def test_propagate_admin_areas_on_close_ticket() -> None:
@@ -348,3 +372,128 @@ def test_close_household_update_new_roles(program: Program, user: User) -> None:
     assert IndividualRoleInHousehold.objects.filter(household=household).count() == 2
     assert IndividualRoleInHousehold.objects.get(individual=first_individual).role == "PRIMARY"
     assert IndividualRoleInHousehold.objects.get(individual=second_individual).role == "ALTERNATE"
+
+
+def test_close_household_update_invalidates_cache(program: Program, user: User) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={
+            "village": {"value": "New Village", "approve_status": True},
+            "flex_fields": {},
+        },
+    )
+
+    hh_cache_before = get_household_list_program_key(program.id)
+
+    service = HouseholdDataUpdateService(grievance_ticket=ticket_details.ticket, extras=ticket_details.household_data)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        service.close(user)
+
+    assert get_household_list_program_key(program.id) > hh_cache_before
+
+
+def test_save_currency_change_records_previous_value_as_code(all_currencies: None) -> None:
+    usd_currency = Currency.objects.get(code="USD")
+    household = HouseholdFactory(create_role=False, currency=usd_currency)
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=household.business_area,
+    )
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household,
+                "household_data": {"currency": "EUR"},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "currency": {"value": "EUR", "approve_status": False, "previous_value": "USD"},
+        "flex_fields": {},
+    }
+
+
+def test_save_currency_change_with_null_previous_currency(all_currencies: None) -> None:
+    household = HouseholdFactory(create_role=False, currency=None)
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=household.business_area,
+    )
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household,
+                "household_data": {"currency": "USD"},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "currency": {"value": "USD", "approve_status": False, "previous_value": None},
+        "flex_fields": {},
+    }
+
+
+def test_update_currency_change_records_previous_value_as_code(all_currencies: None) -> None:
+    eur_currency = Currency.objects.get(code="EUR")
+    household = HouseholdFactory(create_role=False, currency=eur_currency)
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=household.business_area,
+    )
+    TicketHouseholdDataUpdateDetailsFactory(
+        ticket=grievance_ticket,
+        household=household,
+        household_data={},
+    )
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household,
+            "household_data": {"currency": "USD"},
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=update_extras)
+    ticket = service.update()
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "currency": {"value": "USD", "approve_status": False, "previous_value": "EUR"},
+        "flex_fields": {},
+    }
+
+
+def test_close_resolves_currency_from_code(all_currencies) -> None:
+    household = HouseholdFactory(create_role=False, currency=None)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "currency": {"value": "USD", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    usd_currency = Currency.objects.get(code="USD")
+    assert household.currency == usd_currency

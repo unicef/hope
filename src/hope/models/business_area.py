@@ -16,7 +16,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     It's used for drop down menu in top bar in the UI. Many times
     BusinessArea means country.
-    region_name is a short code for distinct business arease
+    region_name is a short code for distinct business areas
     <BusinessArea>
         <BUSINESS_AREA_CODE>0120</BUSINESS_AREA_CODE>
         <BUSINESS_AREA_NAME>Algeria</BUSINESS_AREA_NAME>
@@ -119,6 +119,8 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             ("can_split", "Can split BusinessArea"),
             ("ping_rapidpro", "Can test RapidPRO connection"),
             ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
+            ("mark_submissions", "Can mark submissions"),
+            ("reset_sync_date", "Can reset sync date"),
         )
         indexes = [
             # Optimize queries filtering by active status

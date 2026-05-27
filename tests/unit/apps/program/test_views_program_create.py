@@ -115,7 +115,7 @@ def bg_sw(db: Any) -> BeneficiaryGroup:
 def valid_input_data_standard(dct_standard: DataCollectingType, bg_household: BeneficiaryGroup) -> dict:
     return {
         "name": "Test Program",
-        "programme_code": None,
+        "code": None,
         "start_date": "2030-01-01",
         "end_date": "2033-12-31",
         "sector": Program.CHILD_PROTECTION,
@@ -195,8 +195,7 @@ def test_create_program_with_permission(
     expected_response = {
         **expected_response_standard,
         "id": str(program.id),
-        "programme_code": program.programme_code,  # programme_code is auto-generated
-        "slug": program.slug,  # slug is auto-generated
+        "code": program.code,  # code is auto-generated
         "version": program.version,
     }
     assert response.json() == expected_response
@@ -216,7 +215,7 @@ def test_create_program_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_create_program_with_programme_code(
+def test_create_program_with_code(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -233,7 +232,7 @@ def test_create_program_with_programme_code(
     )
     input_data_with_program_code = {
         **valid_input_data_standard,
-        "programme_code": "T3st",
+        "code": "t3st",
     }
     response = authenticated_client.post(list_url, input_data_with_program_code)
     assert response.status_code == status.HTTP_201_CREATED
@@ -241,14 +240,13 @@ def test_create_program_with_programme_code(
     expected_response = {
         **expected_response_standard,
         "id": str(program.id),
-        "programme_code": "T3ST",  # programme_code is uppercased
-        "slug": "t3st",  # slug is a slugified version of program_code
+        "code": "t3st",
         "version": program.version,
     }
     assert response.json() == expected_response
 
 
-def test_create_program_with_programme_code_invalid(
+def test_create_program_with_code_invalid(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -264,18 +262,18 @@ def test_create_program_with_programme_code_invalid(
     )
     input_data_with_program_code = {
         **valid_input_data_standard,
-        "programme_code": "T#ST",  # Invalid program code
+        "code": "T#ST",  # Invalid program code
     }
     response = authenticated_client.post(list_url, input_data_with_program_code)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "programme_code" in response.json()
+    assert "code" in response.json()
     assert (
-        "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -"
-        in response.json()["programme_code"][0]
+        "Programme code should be exactly 4 characters long"
+        " and may only contain lowercase letters, digits and character: -" in response.json()["code"][0]
     )
 
 
-def test_create_program_with_programme_code_existing(
+def test_create_program_with_code_existing(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -283,7 +281,7 @@ def test_create_program_with_programme_code_existing(
     valid_input_data_standard: dict,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    ProgramFactory(programme_code="T3ST", business_area=afghanistan)
+    ProgramFactory(code="t3st", business_area=afghanistan)
     create_user_role_with_permissions(
         user,
         [Permissions.PROGRAMME_CREATE],
@@ -292,12 +290,12 @@ def test_create_program_with_programme_code_existing(
     )
     input_data_with_program_code = {
         **valid_input_data_standard,
-        "programme_code": "T3st",
+        "code": "t3st",
     }
     response = authenticated_client.post(list_url, input_data_with_program_code)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "programme_code" in response.json()
-    assert response.json()["programme_code"][0] == "Programme code is already used."
+    assert "code" in response.json()
+    assert response.json()["code"][0] == "Programme code is already used."
 
 
 def test_create_program_with_missing_data(
@@ -467,8 +465,7 @@ def test_create_program_without_end_date(
     expected_response = {
         **expected_response_standard,
         "id": str(program.id),
-        "programme_code": program.programme_code,
-        "slug": program.slug,
+        "code": program.code,
         "end_date": None,
         "version": program.version,
     }
@@ -586,8 +583,7 @@ def test_create_program_with_partners_data(
     assert response.json() == {
         **expected_response_standard,
         "id": str(program.id),
-        "programme_code": program.programme_code,
-        "slug": program.slug,
+        "code": program.code,
         "version": program.version,
         "partners": [
             {
@@ -758,8 +754,7 @@ def test_create_program_with_pdu_fields(
             },
         ],
         "id": str(program.id),
-        "programme_code": program.programme_code,
-        "slug": program.slug,
+        "code": program.code,
         "version": program.version,
     }
 
@@ -937,7 +932,6 @@ def test_create_program_with_valid_pdu_fields_existing_field_name_in_different_p
             },
         ],
         "id": str(program.id),
-        "programme_code": program.programme_code,
-        "slug": program.slug,
+        "code": program.code,
         "version": program.version,
     }

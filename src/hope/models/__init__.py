@@ -14,6 +14,7 @@ from hope.models.business_area import *  # noqa: F403
 from hope.models.changelog import *  # noqa: F403
 from hope.models.country import *  # noqa: F403
 from hope.models.country_code_map import *  # noqa: F403
+from hope.models.currency import *  # noqa: F403
 from hope.models.custom_model_entry import *  # noqa: F403
 from hope.models.data_collecting_type import *  # noqa: F403
 from hope.models.deduplication_engine_similarity_pair import *  # noqa: F403
@@ -22,6 +23,7 @@ from hope.models.delivery_mechanism_config import *  # noqa: F403
 from hope.models.document import *  # noqa: F403
 from hope.models.document_type import *  # noqa: F403
 from hope.models.entitlement_card import *  # noqa: F403
+from hope.models.facility import *  # noqa: F403
 from hope.models.feedback import *  # noqa: F403
 from hope.models.feedback_message import *  # noqa: F403
 from hope.models.file_temp import *  # noqa: F403
@@ -81,6 +83,7 @@ from hope.models.universal_update_script import *  # noqa: F403
 from hope.models.user import *  # noqa: F403
 from hope.models.user_group import *  # noqa: F403
 from hope.models.utils import *  # noqa: F403
+from hope.models.western_union_data import *  # noqa: F403
 from hope.models.western_union_invoice import *  # noqa: F403
 from hope.models.western_union_invoice_payment import *  # noqa: F403
 from hope.models.western_union_payment_plan_report import *  # noqa: F403

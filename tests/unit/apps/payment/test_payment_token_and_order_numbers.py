@@ -38,7 +38,7 @@ def country_origin() -> Any:
 
 @pytest.fixture
 def program(business_area: Any) -> Any:
-    return ProgramFactory(business_area=business_area)
+    return ProgramFactory(business_area=business_area, cycle=False)
 
 
 @pytest.fixture
@@ -82,7 +82,6 @@ def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> 
             parent=payment_plan,
             household=household,
             program=program,
-            currency="PLN",
         )
         for household in households
     ]

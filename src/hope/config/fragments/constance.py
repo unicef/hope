@@ -1,11 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
-from hope.config.env import env
-
-CONSTANCE_REDIS_CONNECTION = env("CONSTANCE_REDIS_CONNECTION")
-CONSTANCE_REDIS_CODEC = env("CONSTANCE_REDIS_CODEC")
-CONSTANCE_REDIS_CACHE_TIMEOUT = 1
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
@@ -176,7 +172,7 @@ Clear Cache,clear-cache/
     ),
     "RECALCULATE_POPULATION_FIELDS_CHUNK": (
         50000,
-        "recalculate_population_fields_task Household table pagination value",
+        "recalculate_population_fields_async_task Household table pagination value",
         "positive_integers",
     ),
     "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (
@@ -218,6 +214,11 @@ Clear Cache,clear-cache/
         50,
         "Maximum file size in MB for generic import uploads",
         "positive_integers",
+    ),
+    "IS_ELASTICSEARCH_ENABLED": (
+        False,
+        "Enable Elasticsearch usage",
+        bool,
     ),
 }
 

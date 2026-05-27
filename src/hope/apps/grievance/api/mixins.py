@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -22,6 +24,16 @@ from hope.models import Household, Individual, IndividualRoleInHousehold, User
 
 
 class GrievancePermissionsMixin:
+    @staticmethod
+    def _tickets_without_programs_query() -> Q:
+        through_model = GrievanceTicket.programs.through
+        return ~Q(id__in=through_model.objects.values("grievanceticket_id"))
+
+    @staticmethod
+    def _tickets_for_program_ids_query(program_ids: set) -> Q:
+        through_model = GrievanceTicket.programs.through
+        return Q(id__in=through_model.objects.filter(program_id__in=program_ids).values("grievanceticket_id"))
+
     @property
     def grievance_permissions_query(self) -> Q:
         user = self.request.user
@@ -104,35 +116,46 @@ class GrievancePermissionsMixin:
                 )
             )
 
+            tickets_without_programs = self._tickets_without_programs_query()
+
             if programs_can_view_ex_sensitive_all:
-                filters |= (Q(programs__id__in=programs_can_view_ex_sensitive_all) | Q(programs__isnull=True)) & ~Q(
-                    **sensitive_category_filter
-                )
+                filters |= (
+                    self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_all) | tickets_without_programs
+                ) & ~Q(**sensitive_category_filter)
             if programs_can_view_sensitive_all:
-                filters |= (Q(programs__id__in=programs_can_view_sensitive_all) | Q(programs__isnull=True)) & Q(
-                    **sensitive_category_filter
-                )
+                filters |= (
+                    self._tickets_for_program_ids_query(programs_can_view_sensitive_all) | tickets_without_programs
+                ) & Q(**sensitive_category_filter)
             if programs_can_view_ex_sensitive_creator:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_ex_sensitive_creator) | Q(programs__isnull=True))
+                    (
+                        self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_creator)
+                        | tickets_without_programs
+                    )
                     & Q(**created_by_filter)
                     & ~Q(**sensitive_category_filter)
                 )
             if programs_can_view_ex_sensitive_owner:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_ex_sensitive_owner) | Q(programs__isnull=True))
+                    (
+                        self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_owner)
+                        | tickets_without_programs
+                    )
                     & Q(**assigned_to_filter)
                     & ~Q(**sensitive_category_filter)
                 )
             if programs_can_view_sensitive_creator:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_sensitive_creator) | Q(programs__isnull=True))
+                    (
+                        self._tickets_for_program_ids_query(programs_can_view_sensitive_creator)
+                        | tickets_without_programs
+                    )
                     & Q(**created_by_filter)
                     & Q(**sensitive_category_filter)
                 )
             if programs_can_view_sensitive_owner:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_sensitive_owner) | Q(programs__isnull=True))
+                    (self._tickets_for_program_ids_query(programs_can_view_sensitive_owner) | tickets_without_programs)
                     & Q(**assigned_to_filter)
                     & Q(**sensitive_category_filter)
                 )
@@ -140,7 +163,13 @@ class GrievancePermissionsMixin:
         return filters
 
     def _permission_filtering_based_on_program(
-        self, action, assigned_to_filter, created_by_filter, filters, permissions_map, **kwargs
+        self,
+        action: str,
+        assigned_to_filter: dict[str, Any],
+        created_by_filter: dict[str, Any],
+        filters: Q,
+        permissions_map: dict[str, Any],
+        **kwargs: Any,
     ) -> Q:
         sensitive_category_filter = kwargs.get("sensitive_category_filter")
         user = kwargs.get("user")
@@ -153,17 +182,17 @@ class GrievancePermissionsMixin:
         can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
 
         if can_view_ex_sensitive_all:
-            filters |= ~Q(**sensitive_category_filter)
+            filters |= ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_all:
-            filters |= Q(**sensitive_category_filter)
+            filters |= Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_ex_sensitive_creator:
-            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)
+            filters |= Q(**created_by_filter) & ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_ex_sensitive_owner:
-            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
+            filters |= Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_creator:
-            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)
+            filters |= Q(**created_by_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         if can_view_sensitive_owner:
-            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)
+            filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         return filters
 
 
@@ -227,6 +256,13 @@ class GrievanceMutationMixin:
 
     CREATE_ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
+            "required": ["extras.issue_type.household_data_update_issue_type_extras"],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "individual_delete_issue_type_extras",
+            ],
+        },
+        GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: {
             "required": ["extras.issue_type.household_data_update_issue_type_extras"],
             "not_allowed": [
                 "individual_data_update_issue_type_extras",
@@ -299,6 +335,13 @@ class GrievanceMutationMixin:
 
     UPDATE_EXTRAS_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
+            "required": ["extras.household_data_update_issue_type_extras"],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "add_individual_issue_type_extras",
+            ],
+        },
+        GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: {
             "required": ["extras.household_data_update_issue_type_extras"],
             "not_allowed": [
                 "individual_data_update_issue_type_extras",
@@ -475,7 +518,9 @@ class GrievanceMutationMixin:
         GrievanceNotification.send_all_notifications(messages)
         return grievance_ticket
 
-    def _set_status_based_on_assigned_to(self, approver, grievance_ticket, messages):
+    def _set_status_based_on_assigned_to(
+        self, approver: User, grievance_ticket: GrievanceTicket, messages: list
+    ) -> None:
         if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
             grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
 

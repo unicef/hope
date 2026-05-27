@@ -66,7 +66,7 @@ const EditProgramPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
-        slug: id,
+        code: id,
       }),
   });
 
@@ -97,7 +97,7 @@ const EditProgramPage = (): ReactElement => {
       mutationFn: (programData: ProgramUpdate) => {
         return RestService.restBusinessAreasProgramsUpdate({
           businessAreaSlug: businessArea,
-          slug: id,
+          code: id,
           requestBody: programData,
         });
       },
@@ -118,7 +118,7 @@ const EditProgramPage = (): ReactElement => {
     mutationFn: (partnerData: ProgramUpdatePartnerAccess) => {
       return RestService.restBusinessAreasProgramsUpdatePartnerAccessCreate({
         businessAreaSlug: businessArea,
-        slug: id,
+        code: id,
         requestBody: partnerData,
       });
     },
@@ -143,7 +143,7 @@ const EditProgramPage = (): ReactElement => {
 
   const {
     name,
-    programmeCode,
+    code: programCode,
     startDate,
     endDate,
     sector,
@@ -217,9 +217,8 @@ const EditProgramPage = (): ReactElement => {
 
       // Build the base programData object
       const programData: ProgramUpdate = {
-        programmeCode: requestValuesDetails.programmeCode,
+        code: programCode, // readonly
         name: requestValuesDetails.name,
-        slug: '', // readonly field, will be ignored by API
         sector: requestValuesDetails.sector,
         description: requestValuesDetails.description,
         budget: budgetToFixed,
@@ -252,7 +251,7 @@ const EditProgramPage = (): ReactElement => {
 
       const response = await updateProgramDetails(programData);
       showMessage(t('Programme edited.'));
-      navigate(`/${baseUrl}/details/${response.slug}`);
+      navigate(`/${baseUrl}/details/${response.code}`);
     } catch (e: any) {
       showApiErrorMessages(e, showMessage);
     }
@@ -286,7 +285,7 @@ const EditProgramPage = (): ReactElement => {
     isActive: program.status === 'ACTIVE',
     editMode: true,
     name,
-    programmeCode: programmeCode,
+    code: programCode,
     startDate: startDate,
     endDate: endDate,
     sector,
@@ -328,7 +327,7 @@ const EditProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
-      'programmeCode',
+      'code',
       'startDate',
       'endDate',
       'sector',

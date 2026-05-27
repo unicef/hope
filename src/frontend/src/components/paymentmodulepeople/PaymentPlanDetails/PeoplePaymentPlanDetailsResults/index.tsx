@@ -1,1 +1,0 @@
-export { PeoplePaymentPlanDetailsResults } from './PeoplePaymentPlanDetailsResults';

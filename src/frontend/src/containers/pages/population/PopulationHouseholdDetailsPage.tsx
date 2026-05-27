@@ -87,7 +87,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         await RestService.restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList(
           {
             businessAreaSlug: businessArea,
-            programSlug: programId,
+            programCode: programId,
           },
         );
       return { allHouseholdsFlexFieldsAttributes: data };

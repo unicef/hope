@@ -124,7 +124,7 @@ const CreateCommunicationPage = (): ReactElement => {
     mutationFn: (data: MessageCreate) =>
       RestService.restBusinessAreasProgramsMessagesCreate({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         requestBody: data,
       }),
   });
@@ -170,7 +170,7 @@ const CreateCommunicationPage = (): ReactElement => {
       const result =
         await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody,
         });
 
@@ -213,7 +213,7 @@ const CreateCommunicationPage = (): ReactElement => {
       const result =
         await RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         });
       setFlowsData({ surveyAvailableFlows: result });
     } catch (error) {

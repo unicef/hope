@@ -121,7 +121,7 @@ def business_area() -> Any:
 def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
     user = UserFactory()
 
-    program = ProgramFactory(business_area=business_area)
+    program = ProgramFactory(business_area=business_area, cycle=False)
     cycle = ProgramCycleFactory(program=program, title="Cycle RapidPro")
 
     payment_plan = PaymentPlanFactory(
@@ -155,7 +155,6 @@ def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
             head_of_household=household.head_of_household,
             delivered_quantity=Decimal(200),
             delivered_quantity_usd=200,
-            currency="PLN",
         )
 
         PaymentVerificationFactory(

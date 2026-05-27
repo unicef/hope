@@ -102,7 +102,7 @@ def pdu_edit_approved(business_area: BusinessArea, program: Program, user: User)
 def url_bulk_approve(business_area: BusinessArea, program: Program) -> str:
     return reverse(
         "api:periodic-data-update:periodic-data-update-online-edits-bulk-approve",
-        kwargs={"business_area_slug": business_area.slug, "program_slug": program.slug},
+        kwargs={"business_area_slug": business_area.slug, "program_code": program.code},
     )
 
 

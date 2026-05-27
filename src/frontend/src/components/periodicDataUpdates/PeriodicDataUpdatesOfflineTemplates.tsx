@@ -97,7 +97,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
       RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesCountRetrieve(
         {
           businessAreaSlug,
-          programSlug: programId,
+          programCode: programId,
         },
       ),
     enabled: !!businessAreaSlug && !!programId && page === 0,
@@ -124,7 +124,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   const handleExportClick = (templateId: number) => {
     exportTemplate({
       businessAreaSlug,
-      programSlug: programId,
+      programCode: programId,
       templateId: templateId,
     });
   };
@@ -143,7 +143,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     () => ({
       ordering: '-created_at',
       businessAreaSlug,
-      programSlug: programId,
+      programCode: programId,
     }),
     [businessAreaSlug, programId],
   );
@@ -167,7 +167,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
         createApiParams(
-          { businessAreaSlug, programSlug: programId },
+          { businessAreaSlug, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),

@@ -27,7 +27,7 @@ class ProgrammeDetails(BaseComponents):
     select_edit_program_partners = 'li[data-cy="menu-item-edit-partners"]'
     button_activate_program = 'button[data-cy="button-activate-program"]'
     button_activate_program_modal = 'button[data-cy="button-activate-program-modal"]'
-    label_programme_code = 'div[data-cy="label-Programme Code"]'
+    label_code = 'div[data-cy="label-Programme Code"]'
     button_finish_program = 'button[data-cy="button-finish-program"]'
     table_title = 'h6[data-cy="table-title"]'
     button_add_new_programme_cycle = 'button[data-cy="button-add-new-programme-cycle"]'
@@ -204,8 +204,8 @@ class ProgrammeDetails(BaseComponents):
     def get_button_activate_program_modal(self) -> WebElement:
         return self.wait_for(self.button_activate_program_modal)
 
-    def get_label_programme_code(self) -> WebElement:
-        return self.wait_for(self.label_programme_code)
+    def get_label_code(self) -> WebElement:
+        return self.wait_for(self.label_code)
 
     def get_button_finish_program(self) -> WebElement:
         return self.wait_for(self.button_finish_program)

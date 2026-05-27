@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -35,7 +36,10 @@ def get_individual(tax_id: str, business_area_code: str | None) -> PendingIndivi
     if pending_documents.count() > 1:
         raise ValidationError(f"Multiple imported documents ({pending_documents.count()}) with given tax_id found")
     if pending_documents.count() == 1:
-        return pending_documents.first().individual
+        doc = pending_documents.first()
+        if doc is None:
+            raise NotFound(f"Document with given tax_id: {tax_id} not found")
+        return cast("PendingIndividual", doc.individual)
     raise NotFound(f"Document with given tax_id: {tax_id} not found")
 
 

@@ -97,6 +97,13 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
         """Return list of program ids that the user (or user's partner) has permissions in selected business area."""
         from hope.models.program import Program
 
+        if not hasattr(self, "_program_ids_for_permissions_cache"):
+            self._program_ids_for_permissions_cache: dict = {}
+
+        cache_key = (business_area_id, tuple(sorted(perm.value for perm in permissions)))
+        if cache_key in self._program_ids_for_permissions_cache:
+            return self._program_ids_for_permissions_cache[cache_key]
+
         permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
 
         if RoleAssignment.objects.filter(
@@ -112,7 +119,10 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
                 Q(user=self) | Q(partner__user=self),
                 business_area_id=business_area_id,
             ).values_list("program_id", flat=True)
-        return [str(program_id) for program_id in programs_ids]
+
+        result = [str(program_id) for program_id in programs_ids]
+        self._program_ids_for_permissions_cache[cache_key] = result
+        return result
 
     def permissions_in_business_area(self, business_area_slug: str, program_id: UUID | str | None = None) -> set:
         """Return list of permissions for the given business area and program.
@@ -227,7 +237,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
 
         kwargs can have keys: 'body_variables', 'ccs', 'from_email', 'from_email_display',
         """
-        body_variables: dict[str, Any] = kwargs.get("body_variables")
+        body_variables: dict[str, Any] = kwargs.get("body_variables") or {}
         from_email: str | None = kwargs.get("from_email")
         from_email_display: str | None = kwargs.get("from_email_display")
         ccs: list[str] | None = kwargs.get("ccs")
@@ -258,8 +268,11 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             ("can_change_allowed_partners", "Can change allowed partners"),
             ("can_change_area_limits", "Can change area limits"),
             ("can_import_fixture", "Can import fixture"),
+            ("ad_users", "Can import AD users"),
+            ("can_upload_to_kobo", "Can upload CSV file to Kobo"),
         )
         indexes = [
             # Optimize JOIN queries between User and Partner in permissions methods
             models.Index(fields=["partner", "id"], name="idx_user_partner_id"),
         ]
+        ordering = ("id",)

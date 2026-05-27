@@ -65,4 +65,11 @@ export const headCells: HeadCell<HouseholdList>[] = [
     numeric: true,
     dataCy: 'household-registration-date',
   },
+  {
+    disablePadding: false,
+    label: 'Facility Name',
+    id: 'facilityName',
+    numeric: false,
+    dataCy: 'household-facility-name',
+  },
 ];

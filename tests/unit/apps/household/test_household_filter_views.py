@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from constance.test import override_config
 from django.utils import timezone
 import pytest
 from rest_framework import status
@@ -41,7 +42,7 @@ def household_filter_context(
         "api:households:households-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
     partner = PartnerFactory(name="TestPartner")
@@ -863,17 +864,14 @@ def test_filter_by_first_registration_date(household_filter_context: dict[str, A
 
 
 @pytest.fixture
-def household_filter_search_context(
-    api_client: Any, create_user_role_with_permissions: Any, django_elasticsearch_setup: Any
-) -> dict[str, Any]:
-    _ = django_elasticsearch_setup
+def household_filter_search_context(api_client: Any, create_user_role_with_permissions: Any) -> dict[str, Any]:
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
     list_url = reverse(
         "api:households:households-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
     partner = PartnerFactory(name="TestPartner")
@@ -1011,7 +1009,11 @@ def _test_search(
     return response_data, expected_results
 
 
+@pytest.mark.xdist_group(name="elasticsearch")
 @pytest.mark.parametrize(*parametrize_search_context)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
 def test_search(
     filters: Dict,
     household1_data: Dict,

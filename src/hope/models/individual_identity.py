@@ -12,7 +12,7 @@ class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
         null=True,
         on_delete=models.PROTECT,
     )
-    country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", null=True, blank=True, on_delete=models.PROTECT)
     number = models.CharField(max_length=255)
     copied_from = models.ForeignKey(
         "self",
@@ -26,6 +26,7 @@ class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
     class Meta:
         app_label = "household"
         verbose_name_plural = "Individual Identities"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.partner} {self.individual} {self.number}"

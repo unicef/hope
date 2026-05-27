@@ -34,7 +34,7 @@ class XlsxSomaliaParser(BaseParser):
         self._identities = []
         self._individual_roles = []
         self._errors = []
-        self._file_path = None
+        self._file_path: str | None = None
         self._parsed = False
         self._admin_areas = dict(Area.objects.values_list("name", "id"))
         # Cache Somalia country ID
@@ -181,7 +181,7 @@ class XlsxSomaliaParser(BaseParser):
             self._accounts.append(account_data)
         return individual_data
 
-    def _process_documents(self, row: dict, individual_id: str):
+    def _process_documents(self, row: dict, individual_id: str) -> None:
         doc_type = row.get("IndividualIDDocument")
         doc_number = row.get("IndividualIDNumber")
         if doc_number and doc_number != "None":

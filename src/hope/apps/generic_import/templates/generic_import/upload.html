@@ -174,9 +174,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         option.value = program.id;
                         // Sanitize program.name for extra safety
                         option.textContent = sanitizeText(program.name);
-                        // Add slug as data attribute for API call
-                        if (program.slug) {
-                            option.setAttribute('data-slug', program.slug);
+                        // Add code as data attribute for API call
+                        if (program.code) {
+                            option.setAttribute('data-code', program.code);
                         }
                         programSelect.appendChild(option);
                     });
@@ -227,14 +227,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedBAOption = businessAreaSelect.options[businessAreaSelect.selectedIndex];
         const businessAreaSlug = selectedBAOption?.getAttribute('data-slug');
 
-        // Get program slug from data-slug attribute
+        // Get program code from data-code attribute
         const selectedProgramOption = programSelect.options[programSelect.selectedIndex];
-        const programSlug = selectedProgramOption?.getAttribute('data-slug');
+        const programCode = selectedProgramOption?.getAttribute('data-code');
 
         const file = formData.get('file');
 
         // Validate
-        if (!businessAreaSlug || !programSlug || !file) {
+        if (!businessAreaSlug || !programCode || !file) {
             alert('{% translate "Please fill all required fields" %}');
             return;
         }
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Call API endpoint
             const response = await fetch(
-                `/api/rest/business-areas/${businessAreaSlug}/programs/${programSlug}/generic-import-upload/upload/`,
+                `/api/rest/business-areas/${businessAreaSlug}/programs/${programCode}/generic-import-upload/upload/`,
                 {
                     method: 'POST',
                     body: apiFormData,

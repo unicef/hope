@@ -49,12 +49,12 @@ def rdi(request, db, business_area, program, superuser):
 def test_list_registration_data_imports(superuser, business_area, program, role_assignment, rdi):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/registration-data-imports/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/registration-data-imports/"
     )
 
 
 def test_retrieve_registration_data_import(superuser, business_area, program, role_assignment, rdi):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/registration-data-imports/{rdi.pk}/"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/registration-data-imports/{rdi.pk}/"
     )

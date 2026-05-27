@@ -1,7 +1,6 @@
 import itertools
 from typing import TYPE_CHECKING, Any
 
-from constance import config
 from django.db import transaction
 from django.db.models import (
     Avg,
@@ -11,14 +10,16 @@ from django.db.models import (
     DateField,
     Exists,
     F,
+    IntegerField,
     OuterRef,
+    Prefetch,
     Q,
     QuerySet,
     Subquery,
     Value,
     When,
 )
-from django.db.models.functions import Extract
+from django.db.models.functions import Coalesce, Extract
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -37,9 +38,8 @@ from rest_framework.mixins import (
 from rest_framework.parsers import JSONParser
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import (
     Permissions,
     check_creator_or_owner_permission,
@@ -80,6 +80,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     GrievanceStatusChangeSerializer,
     GrievanceTicketDetailSerializer,
     GrievanceTicketListSerializer,
+    GrievanceTicketRelatedSerializer,
     GrievanceUpdateApproveStatusSerializer,
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
@@ -156,6 +157,8 @@ TICKET_ORDERING = {
 def transform_to_chart_dataset(qs: QuerySet) -> dict[str, Any]:
     labels, data = [], []
     for q in qs:
+        label: Any
+        value: Any
         label, value = q
         labels.append(label)
         data.append(value)
@@ -302,6 +305,9 @@ class GrievanceTicketViewSet(
     program_model_field = "programs"
     program_model_field_is_many = True
 
+    def get_count_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(self.grievance_permissions_query)
+
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
@@ -317,7 +323,15 @@ class GrievanceTicketViewSet(
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
-            .prefetch_related("programs", "programs__sanction_lists", *to_prefetch)
+            .prefetch_related(
+                "programs",
+                "programs__sanction_lists",
+                *to_prefetch,
+                Prefetch(
+                    "linked_tickets",
+                    queryset=GrievanceTicket.objects.only("id", "household_unicef_id"),
+                ),
+            )
             .annotate(
                 has_social_worker_program_annotated=Exists(
                     Program.objects.filter(
@@ -338,13 +352,27 @@ class GrievanceTicketViewSet(
                     default=timezone.now() - F("created_at"),  # type: ignore
                     output_field=DateField(),
                 ),
+                existing_tickets_count=Coalesce(
+                    Subquery(
+                        GrievanceTicket.objects.filter(
+                            household_unicef_id=OuterRef("household_unicef_id"),
+                            household_unicef_id__gt="",
+                        )
+                        .exclude(pk=OuterRef("pk"))
+                        .values("household_unicef_id")
+                        .annotate(c=Count("pk"))
+                        .values("c")[:1],
+                        output_field=IntegerField(),
+                    ),
+                    Value(0),
+                ),
             )
             .annotate(total_days=F("total__day"))
             .order_by("-created_at")
         )
 
     @etag_decorator(GrievanceTicketListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=GrievanceTicketListKeyConstructor())
+    @cached_response(key_func=GrievanceTicketListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
@@ -375,6 +403,7 @@ class GrievanceTicketGlobalViewSet(
     serializer_classes_by_action = {
         "list": GrievanceTicketListSerializer,
         "retrieve": GrievanceTicketDetailSerializer,
+        "related_tickets": GrievanceTicketRelatedSerializer,
         "choices": GrievanceChoicesSerializer,
         "create": CreateGrievanceTicketSerializer,
         "partial_update": UpdateGrievanceTicketSerializer,
@@ -402,6 +431,14 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
         "retrieve": [
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        ],
+        "related_tickets": [
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
@@ -509,6 +546,9 @@ class GrievanceTicketGlobalViewSet(
 
     parser_classes = (DictDrfNestedParser, JSONParser)
 
+    def get_count_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(self.grievance_permissions_query)
+
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
@@ -547,13 +587,30 @@ class GrievanceTicketGlobalViewSet(
                 ),
             )
             .annotate(total_days=F("total__day"))
-            .distinct()
             .order_by("-created_at")
+            .distinct()
         )
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return Response(data=self.get_serializer(instance={}).data)
+
+    @extend_schema(
+        responses={200: GrievanceTicketRelatedSerializer(many=True)},
+        parameters=[],
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="related-tickets",
+        filter_backends=[],
+        pagination_class=None,
+    )
+    def related_tickets(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        ticket = self.get_object()
+        qs = ticket._related_tickets.order_by("-created_at")
+        serializer = GrievanceTicketRelatedSerializer(qs, many=True)
+        return Response(serializer.data)
 
     @transaction.atomic
     @extend_schema(responses={201: GrievanceTicketDetailSerializer(many=True)})
@@ -568,7 +625,7 @@ class GrievanceTicketGlobalViewSet(
             user,
             self.get_permissions_for_action(),
             business_area=self.business_area,
-            program=program.slug,
+            program=program.code,
         ):
             raise PermissionDenied
 
@@ -576,7 +633,7 @@ class GrievanceTicketGlobalViewSet(
             user,
             [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
             business_area=self.business_area,
-            program=program.slug if program else None,
+            program=program.code if program else None,
         ):
             raise PermissionDenied
 
@@ -690,7 +747,9 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
         ):
             partner = user.partner
-            for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+            for selected_individual in grievance_ticket.ticket_details.selected_individuals.select_related(
+                "household__admin2", "program"
+            ).all():
                 if not partner.has_area_access(
                     area_id=selected_individual.household.admin2.id,
                     program_id=selected_individual.program.id,
@@ -1312,9 +1371,9 @@ class GrievanceTicketGlobalViewSet(
             .apply_business_area(self.business_area_slug)
         )
         all_options = list(fields) + list(
-            FlexibleAttribute.objects.filter(
-                associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-            ).prefetch_related("choices")
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+            .select_related("pdu_data")
+            .prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")
         return Response(
@@ -1333,7 +1392,9 @@ class GrievanceTicketGlobalViewSet(
                 associated_with__in=[
                     FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
                 ]
-            ).prefetch_related("choices")
+            )
+            .select_related("pdu_data")
+            .prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")
         return Response(
@@ -1359,6 +1420,7 @@ class GrievanceTicketGlobalViewSet(
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
             .exclude(type=FlexibleAttribute.PDU)
+            .select_related("pdu_data")
             .prefetch_related("choices")
         )
         sorted_list = sort_by_attr(all_options, "label.English(EN)")

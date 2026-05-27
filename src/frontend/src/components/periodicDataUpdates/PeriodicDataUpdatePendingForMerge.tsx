@@ -91,7 +91,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
   const initialQueryVariables = {
     ordering: 'created_at',
     businessAreaSlug,
-    programSlug: programId,
+    programCode: programId,
     status: ['APPROVED' as const],
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -100,7 +100,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate(
         {
           businessAreaSlug,
-          programSlug: programId,
+          programCode: programId,
           requestBody: { ids },
         },
       );
@@ -122,7 +122,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
           {
             ordering: 'created_at',
             businessAreaSlug,
-            programSlug: programId,
+            programCode: programId,
             status: ['MERGED' as const],
           },
           businessAreaSlug,
@@ -150,11 +150,11 @@ const PeriodicDataUpdatePendingForMerge = () => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
-        programSlug: programId,
+        programCode: programId,
         ordering: queryVariables.ordering,
         status: queryVariables.status,
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programSlug,
+    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
   });
 
   const results = data?.results ?? [];

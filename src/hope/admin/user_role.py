@@ -10,19 +10,18 @@ from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase
 from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, RoleAssignment, UserRoleAssignment
 
 logger = logging.getLogger(__name__)
 
 
-class RoleAssignmentInline(admin.TabularInline):
+class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = RoleAssignment
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
     ordering = ["business_area__name"]
-    autocomplete_fields = ["business_area", "program", "role"]
 
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         partner_id = request.resolver_match.kwargs.get("object_id")
@@ -39,9 +38,13 @@ class RoleAssignmentInline(admin.TabularInline):
 
         elif db_field.name == "role":
             if partner_id and partner_id.isdigit():
-                kwargs["queryset"] = Role.objects.filter(
-                    is_available_for_partner=True,
-                )
+                partner = Partner.objects.get(id=partner_id)
+                if partner.is_unicef_subpartner:
+                    kwargs["queryset"] = Role.objects.all()
+                else:
+                    kwargs["queryset"] = Role.objects.filter(
+                        is_available_for_partner=True,
+                    )
             else:
                 kwargs["queryset"] = Role.objects.all()
 
@@ -84,7 +87,6 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
 @admin.register(UserRoleAssignment)
 class UserRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     list_display = ("user", "role", "business_area", "program")
-    autocomplete_fields = ("user", "business_area", "role", "program", "group")
     search_fields = (
         "user__username",
         "user__first_name",
@@ -109,7 +111,6 @@ class UserRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
 @admin.register(PartnerRoleAssignment)
 class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     list_display = ("partner", "role", "business_area", "program")
-    autocomplete_fields = ("partner", "business_area", "role", "program", "group")
     search_fields = ("partner__name",)
     list_filter = (
         ("partner", AutoCompleteFilter),
@@ -128,5 +129,9 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "role":
-            field.queryset = Role.objects.filter(is_available_for_partner=True).order_by("name")
+            obj = self.get_object(request, request.resolver_match.kwargs.get("object_id")) if request else None
+            if obj and obj.partner and obj.partner.is_unicef_subpartner:
+                field.queryset = Role.objects.order_by("name")
+            else:
+                field.queryset = Role.objects.filter(is_available_for_partner=True).order_by("name")
         return field

@@ -95,7 +95,7 @@ function ImportedIndividualsTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

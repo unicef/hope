@@ -32,6 +32,7 @@ from hope.models import (
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
     pytest.mark.django_db,
+    pytest.mark.xdist_group("elasticsearch"),
 ]
 
 
@@ -415,7 +416,7 @@ def test_ticket_biometric_query_response(
             "api:grievance:grievance-tickets-list",
             kwargs={
                 "business_area_slug": business_area.slug,
-                "program_slug": program.slug,
+                "program_code": program.code,
             },
         )
     )

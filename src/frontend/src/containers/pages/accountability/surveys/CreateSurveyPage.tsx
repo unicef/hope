@@ -95,16 +95,16 @@ const CreateSurveyPage = (): ReactElement => {
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       requestBody: any;
     }) =>
       RestService.restBusinessAreasProgramsSurveysCreate({
         businessAreaSlug,
-        programSlug,
+        programCode,
         requestBody,
       }),
   });
@@ -180,7 +180,7 @@ const CreateSurveyPage = (): ReactElement => {
       const result =
         await RestService.restBusinessAreasProgramsSurveysSampleSizeCreate({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody,
         });
 
@@ -205,7 +205,7 @@ const CreateSurveyPage = (): ReactElement => {
       const result =
         await RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
         });
       setFlowsData({ surveyAvailableFlows: result });
     } catch (error) {
@@ -438,7 +438,7 @@ const CreateSurveyPage = (): ReactElement => {
 
                 response = await mutate({
                   businessAreaSlug: businessArea,
-                  programSlug: programId,
+                  programCode: programId,
                   requestBody,
                 });
                 showMessage(t('Survey created.'));

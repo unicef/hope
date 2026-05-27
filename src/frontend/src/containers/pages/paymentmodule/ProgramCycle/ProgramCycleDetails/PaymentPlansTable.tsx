@@ -28,11 +28,11 @@ export const PaymentPlansTable = ({
   title,
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = React.useMemo(
     () => ({
-      programSlug: programId,
+      programCode: programId,
       businessAreaSlug: businessArea,
       search: filter.search,
       status: filter.status,
@@ -79,7 +79,7 @@ export const PaymentPlansTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -97,7 +97,7 @@ export const PaymentPlansTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),
@@ -106,7 +106,9 @@ export const PaymentPlansTable = ({
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
+      isSocialDctType
+        ? 'Num. of People'
+        : `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
   const itemsCount = usePersistedCount(page, dataPaymentPlansCount);

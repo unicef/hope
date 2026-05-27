@@ -12,7 +12,9 @@ class PaymentPlanSupportingDocument(models.Model):
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="documents")
     file = models.FileField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
 
     class Meta:
         app_label = "payment"

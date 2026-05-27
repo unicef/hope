@@ -376,6 +376,10 @@ export function paymentPlanBackgroundActionStatusToColor(
     [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
     [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
+      theme.hctPalette.gray,
+    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
+      theme.palette.error.main,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
     [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
@@ -631,6 +635,13 @@ export function formatCurrencyWithSymbol(
   if (currency === 'USDC') return `${formatFigure(numValue)} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
   if (!currency) return formatCurrency(numValue, true);
+
+  // Guard against non-ISO-4217 currency codes (e.g. app-specific codes like SYP01)
+  // Intl.NumberFormat only accepts valid 3-letter ISO 4217 codes
+  const ISO_CURRENCY_RE = /^[A-Z]{3}$/;
+  if (!ISO_CURRENCY_RE.test(currency)) {
+    return `${formatFigure(numValue)} ${currency}`;
+  }
 
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
@@ -962,10 +973,10 @@ type DateType = 'startOfDay' | 'endOfDay';
 export const dateToIsoString = (date: Date, type: DateType): string => {
   if (!date) return null;
   if (type === 'startOfDay') {
-    return moment.utc(date).startOf('day').toISOString();
+    return moment(date).startOf('day').toISOString();
   }
   if (type === 'endOfDay') {
-    return moment.utc(date).endOf('day').toISOString();
+    return moment(date).endOf('day').toISOString();
   }
   throw new Error('Invalid type specified');
 };

@@ -36,6 +36,7 @@ if SENTRY_DSN:
             "Http404",
             "AuthCanceled",
             "TokenNotProvidedError",
+            "TransitionNotAllowed",
         ],
         before_send=SentryFilter().before_send,
         environment=SENTRY_ENVIRONMENT,

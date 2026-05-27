@@ -48,7 +48,7 @@ const DeleteProgramCycle = ({
       // Use the generated RestService method for deleting a program cycle
       return RestService.restBusinessAreasProgramsCyclesDestroy({
         businessAreaSlug: businessArea,
-        programSlug: program.slug,
+        programCode: program.code,
         //@ts-ignore
         id: programCycle.id,
       });
@@ -68,7 +68,7 @@ const DeleteProgramCycle = ({
       }
     }
     await queryClient.invalidateQueries({
-      queryKey: ['programCycles', businessArea, program.slug],
+      queryKey: ['programCycles', businessArea, program.code],
       exact: false,
     });
     setOpen(false);

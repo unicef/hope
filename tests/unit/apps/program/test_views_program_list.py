@@ -6,6 +6,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
@@ -193,8 +194,7 @@ def test_program_list_with_permissions(
 
     program_data1 = response_data[0]
     assert program_data1["id"] == str(program.id)
-    assert program_data1["programme_code"] == program.programme_code
-    assert program_data1["slug"] == program.slug
+    assert program_data1["code"] == program.code
     assert program_data1["name"] == program.name
     assert program_data1["start_date"] == program.start_date.strftime("%Y-%m-%d")
     assert program_data1["end_date"] == program.end_date.strftime("%Y-%m-%d")
@@ -316,16 +316,17 @@ def test_program_list_caching(
     no_queries_cached = 5
 
     program_afghanistan2 = ProgramFactory(business_area=afghanistan)
-    for prog in [
-        program,
-        program_in_ukraine,
-    ]:
-        create_user_role_with_permissions(
-            user,
-            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-            afghanistan,
-            prog,
-        )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        for prog in [
+            program,
+            program_in_ukraine,
+        ]:
+            create_user_role_with_permissions(
+                user,
+                [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+                afghanistan,
+                prog,
+            )
 
     def _test_response_len_and_queries(response_len: int, queries_len: int) -> None:
         with CaptureQueriesContext(connection) as queries:
@@ -339,20 +340,23 @@ def test_program_list_caching(
     # second request should be cached
     _test_response_len_and_queries(1, no_queries_cached)  # on CI we have 7 here instead of 5 #FIXME
     # caching data should invalidate cache, -4 queries because of cached permissions
-    program.name = "New Name"
-    program.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program.name = "New Name"
+        program.save()
     _test_response_len_and_queries(1, no_queries_not_cached_with_permissions)
     # changing programs from other business area should not invalidate cache
-    program_in_ukraine.name = "New Name"
-    program_in_ukraine.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        program_in_ukraine.name = "New Name"
+        program_in_ukraine.save()
     _test_response_len_and_queries(1, 5)  # on CI we have 7 here instead of 5 #FIXME
     # changing user permissions should invalidate cache
-    create_user_role_with_permissions(
-        user,
-        [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-        afghanistan,
-        program_afghanistan2,
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(
+            user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            afghanistan,
+            program_afghanistan2,
+        )
     _test_response_len_and_queries(2, no_queries_not_cached_no_permissions)
     # cached data with another call
     _test_response_len_and_queries(2, no_queries_cached)
@@ -615,7 +619,7 @@ def test_filter_by_compatible_dct(
         program2,
     )
 
-    response = authenticated_client.get(list_url, {"compatible_dct": program1.slug})
+    response = authenticated_client.get(list_url, {"compatible_dct": program1.code})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 1
@@ -648,7 +652,7 @@ def test_filter_by_beneficiary_group_match(
     )
 
     # additional check to test filter doesn't break allowed_programs constraints
-    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.slug})
+    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.code})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 0
@@ -659,7 +663,7 @@ def test_filter_by_beneficiary_group_match(
         afghanistan,
         program3,
     )
-    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.slug})
+    response = authenticated_client.get(list_url, {"beneficiary_group_match": program1.code})
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()["results"]
     assert len(response_data) == 1

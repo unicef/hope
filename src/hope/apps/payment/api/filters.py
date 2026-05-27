@@ -22,7 +22,7 @@ class PaymentPlanFilter(FilterSet):
     status = django_filters.ChoiceFilter(
         choices=PaymentPlan.Status.choices,
     )
-    program = django_filters.CharFilter(method="filter_by_program", help_text="Filter by program slug")
+    program = django_filters.CharFilter(method="filter_by_program", help_text="Filter by program code")
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     fsp = django_filters.CharFilter(field_name="financial_service_provider__name")
@@ -55,7 +55,7 @@ class PaymentPlanFilter(FilterSet):
         }
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(program_cycle__program__slug=value)
+        return qs.filter(program_cycle__program__code=value)
 
     def filter_by_program_cycle(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_cycle_id=value)
@@ -266,6 +266,15 @@ class PaymentSearchFilter(FilterSet):
         lookup_expr="istartswith",
     )
     collector_id = django_filters.CharFilter(field_name="collector_id")
+
+    ordering = OrderingFilter(
+        fields=(
+            ("unicef_id", "unicef_id"),
+            ("household__unicef_id", "household__unicef_id"),
+            ("household__size", "household__size"),
+            ("collector__full_name", "collector__full_name"),
+        )
+    )
 
     class Meta:
         model = Payment

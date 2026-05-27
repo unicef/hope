@@ -67,7 +67,7 @@ export function LookUpHouseholdTable({
 
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       familySize: JSON.stringify({
         before: filter.householdSizeMin,
         after: filter.householdSizeMax,
@@ -118,7 +118,7 @@ export function LookUpHouseholdTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -136,7 +136,7 @@ export function LookUpHouseholdTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
       }),
     enabled: !!businessArea && !isAllPrograms && page === 0,
   });
@@ -150,7 +150,7 @@ export function LookUpHouseholdTable({
     queryKey: ['businessAreasHouseholdsList', queryVariables, businessArea],
     queryFn: () => {
       const restQueryVariables = Object.fromEntries(
-        Object.entries(queryVariables).filter(([key]) => key !== 'programSlug'),
+        Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
       );
       return RestService.restBusinessAreasHouseholdsList(
         createApiParams(
@@ -172,7 +172,7 @@ export function LookUpHouseholdTable({
     ],
     queryFn: () => {
       const restQueryVariables = Object.fromEntries(
-        Object.entries(queryVariables).filter(([key]) => key !== 'programSlug'),
+        Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
       );
       return RestService.restBusinessAreasHouseholdsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),

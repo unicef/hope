@@ -48,9 +48,9 @@ def survey(request, db, business_area, program, superuser):
 
 def test_list_surveys(superuser, business_area, program, role_assignment, survey):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/surveys/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/surveys/")
 
 
 def test_retrieve_survey(superuser, business_area, program, role_assignment, survey):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/surveys/{survey.pk}/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/surveys/{survey.pk}/")

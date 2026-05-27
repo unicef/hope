@@ -49,4 +49,4 @@ def periodic_field(request, db, program):
 
 def test_list_periodic_fields(superuser, business_area, program, role_assignment, periodic_field):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/periodic-fields/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/periodic-fields/")

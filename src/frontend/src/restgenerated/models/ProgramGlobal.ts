@@ -15,7 +15,7 @@ export type ProgramGlobal = {
     /**
      * Program code
      */
-    programmeCode?: string | null;
+    code: string;
     /**
      * Program status
      *

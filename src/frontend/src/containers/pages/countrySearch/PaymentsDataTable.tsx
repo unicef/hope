@@ -38,11 +38,11 @@ const PaymentsDataTable: React.FC<PaymentsDataTableProps> = ({
         <TableBody>
           {paymentsData.results && paymentsData.results.length > 0 ? (
             paymentsData.results.map((payment) => {
-              const paymentDetailsPath = `/${businessArea}/programs/${payment.programSlug}/payment-module/payments/${payment.id}`;
-              const programDetailsPath = `/${baseUrl}/details/${payment.programSlug}`;
-              const paymentPlanDetailsPath = `/${businessArea}/programs/${payment.programSlug}/payment-module/payment-plans/${payment.parentId}`;
-              const householdDetailsPath = `/${businessArea}/programs/${payment.programSlug}/population/household/${payment.householdId}`;
-              const individualDetailsPath = `/${businessArea}/programs/${payment.programSlug}/population/individuals/${payment.hohId}`;
+              const paymentDetailsPath = `/${businessArea}/programs/${payment.programCode}/payment-module/payments/${payment.id}`;
+              const programDetailsPath = `/${baseUrl}/details/${payment.programCode}`;
+              const paymentPlanDetailsPath = `/${businessArea}/programs/${payment.programCode}/payment-module/payment-plans/${payment.parentId}`;
+              const householdDetailsPath = `/${businessArea}/programs/${payment.programCode}/population/household/${payment.householdId}`;
+              const individualDetailsPath = `/${businessArea}/programs/${payment.programCode}/population/individuals/${payment.hohId}`;
 
               return (
                 <TableRow key={payment.id} hover>

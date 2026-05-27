@@ -105,7 +105,7 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
         else:
             role_assignments = (
                 user.partner.role_assignments.order_by("business_area__slug", "role__name")
-                .select_related("business_area", "role")
+                .select_related("business_area", "role", "program")
                 .exclude(expiry_date__lt=timezone.now())
             )
         return RoleAssignmentSerializer(role_assignments, many=True).data
@@ -120,7 +120,7 @@ class ProgramUsersSerializer(serializers.ModelSerializer):
         else:
             role_assignments = (
                 user.role_assignments.order_by("business_area__slug", "role__name")
-                .select_related("business_area", "role")
+                .select_related("business_area", "role", "program")
                 .exclude(expiry_date__lt=timezone.now())
             )
         return RoleAssignmentSerializer(role_assignments, many=True).data
@@ -157,9 +157,9 @@ class ProfileSerializer(ProgramUsersSerializer):
             return {e.value for e in Permissions}
 
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        if program_slug := request.query_params.get("program"):  # scope program
+        if program_code := request.query_params.get("program"):  # scope program
             program = self.context.get("program") or get_object_or_404(
-                Program, slug=program_slug, business_area__slug=business_area_slug
+                Program, code=program_code, business_area__slug=business_area_slug
             )
             return user.permissions_in_business_area(business_area_slug, program.id)
 
@@ -176,9 +176,9 @@ class ProfileSerializer(ProgramUsersSerializer):
         request = self.context.get("request", {})
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
 
-        if program_slug := request.query_params.get("program"):
+        if program_code := request.query_params.get("program"):
             program = self.context.get("program") or get_object_or_404(
-                Program, slug=program_slug, business_area__slug=business_area_slug
+                Program, code=program_code, business_area__slug=business_area_slug
             )
             return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
 
@@ -210,7 +210,7 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
             return "ADMIN_AREA"
         return "BUSINESS_AREA"
 
-    def get_areas(self, obj: Partner) -> ReturnDict:
+    def get_areas(self, obj: Partner) -> ReturnDict | None:
         if not obj.annotate_has_admin_area_limit:
             return None
         areas_qs = obj.get_areas_for_program(obj.partner_program).order_by("name")

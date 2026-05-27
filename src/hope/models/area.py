@@ -58,7 +58,7 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     def __str__(self) -> str:
         return self.name
 
-    def natural_key(self) -> tuple[str]:
+    def natural_key(self) -> tuple[Any, ...]:
         return self.area_type, self.p_code
 
     @classmethod

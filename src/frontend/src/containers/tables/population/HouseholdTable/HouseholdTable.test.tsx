@@ -7,7 +7,6 @@ import { HouseholdTable } from './HouseholdTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { ResidenceStatusEnum } from '@restgenerated/models/ResidenceStatusEnum';
-import { CurrencyEnum } from '@restgenerated/models/CurrencyEnum';
 import type { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
@@ -36,7 +35,7 @@ describe('HouseholdTable', () => {
         residenceStatus: ResidenceStatusEnum.HOST,
         totalCashReceived: '1000.00',
         totalCashReceivedUsd: '1000.00',
-        currency: CurrencyEnum.USD,
+        currency: 'USD',
         size: 5,
         status: 'ACTIVE',
         lastRegistrationDate: '2023-01-15T10:30:00Z',
@@ -46,7 +45,8 @@ describe('HouseholdTable', () => {
         sanctionListConfirmedMatch: false,
         programId: 'test-program',
         programName: 'Test Program',
-        programSlug: 'test-program',
+        programCode: 'test-program',
+        facilityName: 'Name',
       },
     ],
   };

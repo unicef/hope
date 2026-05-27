@@ -8,6 +8,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     DocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -31,7 +32,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket
@@ -85,13 +85,11 @@ def user(partner: Partner) -> User:
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
-    program = ProgramFactory(
+    return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
         name="program afghanistan 1",
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 @pytest.fixture
@@ -960,7 +958,7 @@ def test_approve_payment_details(
     payment = PaymentFactory(
         parent=payment_plan,
         household=household_one,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         collector=household_one.head_of_household,
     )
     payment_verification = PaymentVerificationFactory(

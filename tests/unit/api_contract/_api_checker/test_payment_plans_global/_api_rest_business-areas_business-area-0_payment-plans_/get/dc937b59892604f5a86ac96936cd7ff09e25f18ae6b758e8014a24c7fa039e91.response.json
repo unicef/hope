@@ -35,8 +35,7 @@
                 "updated_at": "2025-01-01T00:00:00Z",
                 "program": {
                     "id": "27a2901f-f1de-4989-a1af-8f8eec77813d",
-                    "programme_code": "VI-F",
-                    "slug": "vi-f",
+                    "code": "vi-f",
                     "name": "Program 0",
                     "status": "ACTIVE",
                     "screen_beneficiary": false

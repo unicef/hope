@@ -46,14 +46,14 @@ interface MessagesProps {
 
 function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessAreaSlug, programSlug],
+    queryKey: ['profile', businessAreaSlug, programCode],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug,
-        program: programSlug,
+        program: programCode,
       });
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes

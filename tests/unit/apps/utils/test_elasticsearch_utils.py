@@ -1,13 +1,27 @@
 from unittest.mock import MagicMock, call, patch
 
+from constance.test import override_config
+from elasticsearch import NotFoundError
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
-from hope.apps.utils.elasticsearch_utils import delete_all_indexes, populate_all_indexes, rebuild_search_index
+from hope.apps.utils.elasticsearch_utils import (
+    delete_all_indexes,
+    populate_all_indexes,
+    rebuild_search_index,
+    remove_elasticsearch_documents_by_matching_ids,
+)
 from hope.models import BusinessArea, Program
+
+pytestmark = [
+    pytest.mark.elasticsearch,
+    pytest.mark.xdist_group(name="elasticsearch"),
+    pytest.mark.usefixtures("django_elasticsearch_setup"),
+]
 
 
 @patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_ensure_index_ready_healthy_green(mock_connections: MagicMock) -> None:
     from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 
@@ -21,6 +35,7 @@ def test_ensure_index_ready_healthy_green(mock_connections: MagicMock) -> None:
 
 
 @patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_ensure_index_ready_healthy_yellow(mock_connections: MagicMock) -> None:
     from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 
@@ -34,6 +49,7 @@ def test_ensure_index_ready_healthy_yellow(mock_connections: MagicMock) -> None:
 
 
 @patch("hope.apps.utils.elasticsearch_utils.connections")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_ensure_index_ready_red_raises(mock_connections: MagicMock) -> None:
     from hope.apps.utils.elasticsearch_utils import ensure_index_ready
 
@@ -46,106 +62,136 @@ def test_ensure_index_ready_red_raises(mock_connections: MagicMock) -> None:
 
 
 @pytest.mark.django_db
-@patch("hope.apps.utils.elasticsearch_utils._populate")
 @patch("hope.apps.household.services.index_management.populate_program_indexes")
-def test_populate_all_indexes_calls_per_program_and_global(
-    mock_populate_program: MagicMock, mock_populate: MagicMock
-) -> None:
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_populate_all_indexes_calls_per_program_and_global(mock_populate_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     populate_all_indexes()
 
     mock_populate_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
     assert mock_populate_program.call_count == 2
-    mock_populate.assert_called_once_with(models=None, options={"parallel": False, "quiet": True})
 
 
 @pytest.mark.django_db
-@patch("hope.apps.utils.elasticsearch_utils._populate")
 @patch("hope.apps.household.services.index_management.populate_program_indexes")
-def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMock, mock_populate: MagicMock) -> None:
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     populate_all_indexes()
 
     mock_populate_program.assert_not_called()
-    mock_populate.assert_called_once_with(models=None, options={"parallel": False, "quiet": True})
 
 
 @pytest.mark.django_db
-@patch("hope.apps.utils.elasticsearch_utils._delete")
 @patch("hope.apps.household.services.index_management.delete_program_indexes")
-def test_delete_all_indexes_calls_per_program_and_global(
-    mock_delete_program: MagicMock, mock_delete: MagicMock
-) -> None:
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_delete_all_indexes_calls_per_program_and_global(mock_delete_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     delete_all_indexes()
 
     mock_delete_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
     assert mock_delete_program.call_count == 2
-    mock_delete.assert_called_once_with(models=None)
 
 
 @pytest.mark.django_db
-@patch("hope.apps.utils.elasticsearch_utils._delete")
 @patch("hope.apps.household.services.index_management.delete_program_indexes")
-def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock, mock_delete: MagicMock) -> None:
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     delete_all_indexes()
 
     mock_delete_program.assert_not_called()
-    mock_delete.assert_called_once_with(models=None)
 
 
 @pytest.mark.django_db
-@patch("hope.apps.utils.elasticsearch_utils._rebuild")
 @patch("hope.apps.household.services.index_management.rebuild_program_indexes")
-def test_rebuild_search_index_calls_per_program_and_global(
-    mock_rebuild_program: MagicMock, mock_rebuild: MagicMock
-) -> None:
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_rebuild_search_index_calls_per_program_and_global(mock_rebuild_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     rebuild_search_index()
 
     mock_rebuild_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
     assert mock_rebuild_program.call_count == 2
-    mock_rebuild.assert_called_once_with(models=None, options={"parallel": False, "quiet": True})
 
 
 @pytest.mark.django_db
-@patch("hope.apps.utils.elasticsearch_utils._rebuild")
 @patch("hope.apps.household.services.index_management.rebuild_program_indexes")
-def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock, mock_rebuild: MagicMock) -> None:
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     rebuild_search_index()
 
     mock_rebuild_program.assert_not_called()
-    mock_rebuild.assert_called_once_with(models=None, options={"parallel": False, "quiet": True})
 
 
 @pytest.mark.django_db
-@patch("hope.apps.utils.elasticsearch_utils._rebuild")
 @patch("hope.apps.household.services.index_management.rebuild_program_indexes")
-def test_rebuild_search_index_custom_options(mock_rebuild_program: MagicMock, mock_rebuild: MagicMock) -> None:
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_rebuild_search_index_custom_options(mock_rebuild_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
-    ProgramFactory(business_area=ba, status=Program.ACTIVE)
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        ProgramFactory(business_area=ba, status=Program.ACTIVE)
 
     custom_options: dict = {"parallel": True, "quiet": False}
     rebuild_search_index(options=custom_options)
 
-    mock_rebuild.assert_called_once_with(models=None, options=custom_options)
+    mock_rebuild_program.assert_called_once()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_remove_elasticsearch_documents_by_matching_ids_deletes_docs() -> None:
+    mock_document = MagicMock()
+
+    remove_elasticsearch_documents_by_matching_ids(["id-1", "id-2"], mock_document)
+
+    mock_document.search.return_value.params.return_value.update_from_dict.return_value.delete.assert_called_once()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_remove_elasticsearch_documents_by_matching_ids_skips_empty_list() -> None:
+    mock_document = MagicMock()
+
+    remove_elasticsearch_documents_by_matching_ids([], mock_document)
+
+    mock_document.search.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=False)
+def test_remove_elasticsearch_documents_by_matching_ids_skips_when_disabled() -> None:
+    mock_document = MagicMock()
+
+    remove_elasticsearch_documents_by_matching_ids(["id-1"], mock_document)
+
+    mock_document.search.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_remove_elasticsearch_documents_by_matching_ids_ignores_not_found() -> None:
+    mock_document = MagicMock()
+    mock_document.search.return_value.params.return_value.update_from_dict.return_value.delete.side_effect = (
+        NotFoundError(message="index_not_found_exception", meta=MagicMock(), body={})
+    )
+
+    remove_elasticsearch_documents_by_matching_ids(["id-1"], mock_document)

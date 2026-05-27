@@ -1,7 +1,7 @@
 from django.urls import reverse
 import pytest
 
-from extras.test_utils.factories import CountryFactory, PartnerFactory, UserFactory
+from extras.test_utils.factories import CountryFactory, CurrencyFactory, PartnerFactory, UserFactory
 from hope.apps.core.languages import LANGUAGES, Languages
 
 # === Fixtures ===
@@ -23,6 +23,18 @@ def countries():
     return [
         CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"),
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616"),
+    ]
+
+
+@pytest.fixture
+def currencies():
+    from hope.models.currency import Currency
+
+    Currency.objects.all().delete()
+    return [
+        CurrencyFactory(code="PLN", name="Polish Zloty"),
+        CurrencyFactory(code="USD", name="United States Dollar"),
+        CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True),
     ]
 
 
@@ -110,3 +122,27 @@ def test_choices_countries_returns_available_countries(authenticated_client, cou
     assert response.status_code == 200
     assert len(response.data) == 2
     assert response.data[0] == {"name": "Afghanistan", "value": "AFG"}
+
+
+@pytest.mark.django_db
+def test_choices_currencies_returns_currencies_from_db(authenticated_client, currencies):
+    response = authenticated_client.get(reverse("api:choices-currencies"))
+
+    assert response.status_code == 200
+    assert len(response.data) == 3
+    assert response.data == [
+        {"name": "Polish Zloty", "value": "PLN"},
+        {"name": "USD Coin", "value": "USDC"},
+        {"name": "United States Dollar", "value": "USD"},
+    ]
+
+
+@pytest.mark.django_db
+def test_choices_currencies_returns_value_name_format(authenticated_client, currencies):
+    response = authenticated_client.get(reverse("api:choices-currencies"))
+
+    assert response.status_code == 200
+    for item in response.data:
+        assert "value" in item
+        assert "name" in item
+        assert len(item) == 2

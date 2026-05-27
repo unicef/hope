@@ -23,6 +23,7 @@ import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { LookUpDelegate } from '../../LookUps/LookUpDelegate/LookUpDelegate';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BoxPadding = styled.div`
@@ -330,6 +331,15 @@ function Description({
               errors={errors}
             />
           </BoxWithBorderBottom>
+        </Box>
+      )}
+      {values.issueType === GRIEVANCE_ISSUE_TYPES.UPDATE_DELEGATE && (
+        <Box sx={{ mt: 3 }}>
+          <Grid size={{ xs: 6 }}>
+            <Box sx={{ py: 3 }}>
+              <LookUpDelegate values={values} onValueChange={setFieldValue} />
+            </Box>
+          </Grid>
         </Box>
       )}
     </>

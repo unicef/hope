@@ -8,6 +8,7 @@ from rest_framework import status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -24,7 +25,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import BusinessArea, PaymentVerification, PaymentVerificationPlan, Program
@@ -50,13 +50,11 @@ def user(partner: PartnerFactory) -> UserFactory:
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
-    program = ProgramFactory(
+    return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
         name="program afghanistan 1",
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 @pytest.fixture
@@ -97,7 +95,7 @@ def payment_verification_ticket(afghanistan: BusinessArea, program: Program, hou
     payment = PaymentFactory(
         parent=payment_plan,
         household=household,
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         program=program,
         collector=household.head_of_household,
     )

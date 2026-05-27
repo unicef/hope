@@ -18,10 +18,12 @@ from hope.apps.grievance.services.data_change.utils import (
     to_date_string,
     verify_flex_fields,
 )
+from hope.apps.household.api.caches import invalidate_household_list_cache
 from hope.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from hope.models import Area, Household, Individual, country as geo_models, log_create
+from hope.models.currency import Currency
 
 
 def _prepare_roles_with_approve_status(roles_data: list[dict[Any, Any]]) -> list[dict[str, Any]]:
@@ -63,6 +65,8 @@ class HouseholdDataUpdateService(DataChangeService):
                 current_value = current_value.alpha3
             if isinstance(current_value, geo_models.Country):
                 current_value = current_value.iso_code3
+            if isinstance(current_value, Currency):
+                current_value = current_value.code
             field_dict["previous_value"] = current_value
 
         if admin_area_title := household_data_with_approve_status.get("admin_area_title"):
@@ -119,6 +123,8 @@ class HouseholdDataUpdateService(DataChangeService):
                 current_value = current_value.alpha3
             if isinstance(current_value, geo_models.Country):
                 current_value = current_value.iso_code3
+            if isinstance(current_value, Currency):
+                current_value = current_value.code
             field_dict["previous_value"] = current_value
 
         if admin_area_title := household_data_with_approve_status.get("admin_area_title"):
@@ -165,12 +171,17 @@ class HouseholdDataUpdateService(DataChangeService):
             if isinstance(data, dict) and data.get("approve_status") is True
         }
         if country_origin.get("value") is not None:
-            household_data["country_origin"]["value"] = geo_models.Country.objects.filter(
+            household_data["country_origin"]["value"] = geo_models.Country.objects.filter(  # type: ignore[index]
                 iso_code3=country_origin.get("value")
             ).first()
         if country.get("value") is not None:
-            household_data["country"]["value"] = geo_models.Country.objects.filter(
+            household_data["country"]["value"] = geo_models.Country.objects.filter(  # type: ignore[index]
                 iso_code3=country.get("value")
+            ).first()
+        currency = household_data.get("currency", {})
+        if currency.get("value") is not None:
+            household_data["currency"]["value"] = Currency.objects.filter(  # type: ignore[index]
+                code=currency.get("value")
             ).first()
         only_approved_data = {
             field: value_and_approve_status.get("value")
@@ -184,6 +195,8 @@ class HouseholdDataUpdateService(DataChangeService):
         merged_flex_fields.update(flex_fields)
 
         Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+
+        invalidate_household_list_cache(household.program_id)
         updated_household = Household.objects.get(id=household.id)
 
         if admin_area_title.get("value") is not None and is_approved(admin_area_title):

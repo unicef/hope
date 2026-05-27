@@ -41,13 +41,13 @@ export function RevertForceFailedButton({
       businessAreaSlug,
       id,
       paymentPlanId: ppId,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
       paymentPlanId: string;
-      programSlug: string;
+      programCode: string;
       requestBody: RevertMarkPaymentAsFailed;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate(
@@ -55,7 +55,7 @@ export function RevertForceFailedButton({
           businessAreaSlug,
           paymentId: id,
           paymentPlanPk: ppId,
-          programSlug,
+          programCode,
           requestBody,
         },
       ),
@@ -79,7 +79,7 @@ export function RevertForceFailedButton({
   }): void => {
     revertMarkAsFailed({
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       paymentPlanId,
       id: paymentId,
       requestBody: {

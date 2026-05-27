@@ -5,7 +5,7 @@ from factory import LazyFunction, SubFactory
 from factory.django import DjangoModelFactory
 
 from hope.models import APIToken
-from hope.models.utils import Grant
+from hope.models.grant import Grant
 
 
 class APITokenFactory(DjangoModelFactory):

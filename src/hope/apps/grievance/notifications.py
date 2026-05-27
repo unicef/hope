@@ -29,7 +29,7 @@ class GrievanceNotification:
     ACTION_OVERDUE = auto()
     ACTION_SEND_TO_APPROVAL = auto()
 
-    def __init__(self, grievance_ticket: GrievanceTicket, action: auto, **kwargs: Any) -> None:
+    def __init__(self, grievance_ticket: GrievanceTicket, action: Any, **kwargs: Any) -> None:
         self.grievance_ticket = grievance_ticket
         self.action = action
         self.extra_data = kwargs
@@ -194,7 +194,7 @@ class GrievanceNotification:
         ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_bodies,
     }
 
-    ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[int, Callable] = {
+    ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {
         ACTION_ASSIGNMENT_CHANGED: _prepare_assigned_to_recipient,
         ACTION_SYSTEM_FLAGGING_CREATED: _prepare_universal_category_created_recipients,
         ACTION_DEDUPLICATION_CREATED: _prepare_universal_category_created_recipients,

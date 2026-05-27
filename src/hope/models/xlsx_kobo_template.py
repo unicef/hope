@@ -45,7 +45,7 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     template_id = models.CharField(max_length=200, blank=True)
     first_connection_failed_time = models.DateTimeField(null=True, blank=True)
 
-    objects = XLSXKoboTemplateManager()
+    objects = XLSXKoboTemplateManager()  # type: ignore[assignment]
 
     class Meta:
         app_label = "core"

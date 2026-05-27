@@ -45,7 +45,7 @@ interface GrievancesTableProps {
 export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
-  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } =
+  const { businessArea, businessAreaSlug, programCode, isAllPrograms } =
     useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -88,7 +88,7 @@ export const GrievancesTable = ({
       priority: filter.priority === 'Not Set' ? 0 : filter.priority,
       urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
       preferredLanguage: filter.preferredLanguage,
-      programSlug: isAllPrograms ? filter.program : programSlug,
+      programCode: isAllPrograms ? filter.program : programCode,
       isActiveProgram: filter.programState === 'active' ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
@@ -120,7 +120,7 @@ export const GrievancesTable = ({
       filter.programState,
       filter.areaScope,
       isAllPrograms,
-      programSlug,
+      programCode,
     ],
   );
 
@@ -219,7 +219,7 @@ export const GrievancesTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsGrievanceTicketsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -238,7 +238,7 @@ export const GrievancesTable = ({
       queryFn: () =>
         RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
           createApiParams(
-            { businessAreaSlug: businessArea, programSlug: programId },
+            { businessAreaSlug: businessArea, programCode: programId },
             queryVariables,
           ),
         ),
@@ -285,11 +285,11 @@ export const GrievancesTable = ({
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryKey: ['profile', businessAreaSlug, programCode],
       queryFn: () => {
         return RestService.restBusinessAreasUsersProfileRetrieve({
           businessAreaSlug,
-          program: programSlug === 'all' ? undefined : programSlug,
+          program: programCode === 'all' ? undefined : programCode,
         });
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes

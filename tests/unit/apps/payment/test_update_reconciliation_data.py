@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -6,8 +6,6 @@ from unittest.mock import patch
 
 from django.conf import settings
 import pytest
-import pytz
-from pytz import utc
 
 from extras.test_utils.factories import (
     ApprovalFactory,
@@ -16,7 +14,6 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -76,7 +73,7 @@ def program(business_area: Any) -> Program:
 
 @pytest.fixture
 def payment_plan_context(business_area: Any, user: Any, program: Program) -> dict[str, Any]:
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2020, 8, 10),
         dispersion_end_date=date(2020, 12, 10),
@@ -100,8 +97,7 @@ def payment_plan_context(business_area: Any, user: Any, program: Program) -> dic
             collector=household.head_of_household,
             entitlement_quantity=212,
             delivered_quantity=150,
-            currency="PLN",
-            delivery_date=datetime(2023, 10, 23).replace(tzinfo=utc),
+            delivery_date=datetime(2023, 10, 23).replace(tzinfo=UTC),
         )
         payment.unicef_id = unicef_id
         payment.save(update_fields=["unicef_id"])
@@ -126,7 +122,7 @@ def test_uploading_delivery_date_with_xlsx(
         patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
         patch(
             "hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
-            return_value=datetime(2024, 11, 22).replace(tzinfo=utc),
+            return_value=datetime(2024, 11, 22).replace(tzinfo=UTC),
         ),
     ):
         import_service = XlsxPaymentPlanImportPerFspService(
@@ -140,7 +136,7 @@ def test_uploading_delivery_date_with_xlsx(
     payment_1.refresh_from_db()
     payment_2.refresh_from_db()
     payment_3.refresh_from_db()
-    date_now = pytz.utc.localize(datetime(2024, 11, 22))
+    date_now = datetime(2024, 11, 22, tzinfo=UTC)
     assert payment_1.delivery_date == date_now
     assert payment_2.delivery_date == old_delivery_date2
     assert payment_3.delivery_date == old_delivery_date3
@@ -195,9 +191,9 @@ def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
     payment_2.refresh_from_db()
     payment_3.refresh_from_db()
 
-    assert payment_1.delivery_date == datetime(2023, 5, 5).replace(tzinfo=utc)
-    assert payment_2.delivery_date == datetime(2023, 10, 23).replace(tzinfo=utc)
-    assert payment_3.delivery_date == datetime(2023, 10, 23).replace(tzinfo=utc)
+    assert payment_1.delivery_date == datetime(2023, 5, 5).replace(tzinfo=UTC)
+    assert payment_2.delivery_date == datetime(2023, 10, 23).replace(tzinfo=UTC)
+    assert payment_3.delivery_date == datetime(2023, 10, 23).replace(tzinfo=UTC)
 
 
 def test_upload_reference_id(
@@ -206,7 +202,7 @@ def test_upload_reference_id(
     program: Program,
     file_reference_id: BytesIO,
 ) -> None:
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),
@@ -221,7 +217,7 @@ def test_upload_reference_id(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
         created_by=user,
-        created_at=datetime(2023, 5, 5).replace(tzinfo=utc),
+        created_at=datetime(2023, 5, 5).replace(tzinfo=UTC),
     )
 
     payment_1 = PaymentFactory(
@@ -259,7 +255,7 @@ def test_upload_transaction_status_blockchain_link(
     program: Program,
     file_reference_id: BytesIO,
 ) -> None:
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),
@@ -274,7 +270,7 @@ def test_upload_transaction_status_blockchain_link(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
         created_by=user,
-        created_at=datetime(2023, 5, 5).replace(tzinfo=utc),
+        created_at=datetime(2023, 5, 5).replace(tzinfo=UTC),
     )
     payment_1 = PaymentFactory(
         parent=payment_plan,

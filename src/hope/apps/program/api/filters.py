@@ -59,7 +59,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
                     Decimal(0.0),
                 )
             )
-            filter_dict = {filter_mapping.get(name): value}
+            filter_dict = {filter_mapping[name]: value}
         return queryset.filter(**filter_dict)
 
     def filter_total_entitled_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
@@ -78,7 +78,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
                     Decimal(0.0),
                 )
             )
-            filter_dict = {filter_mapping.get(name): value}
+            filter_dict = {filter_mapping[name]: value}
         return queryset.filter(**filter_dict)
 
 
@@ -138,12 +138,12 @@ class ProgramFilter(UpdatedAtFilter):
 
     def compatible_dct_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         business_area_slug = self.request.parser_context.get("kwargs", {}).get("business_area_slug")
-        current_program = Program.objects.get(slug=value, business_area__slug=business_area_slug)
+        current_program = Program.objects.get(code=value, business_area__slug=business_area_slug)
         return qs.filter(data_collecting_type__compatible_types=current_program.data_collecting_type).exclude(
             id=current_program.id
         )
 
     def beneficiary_group_match_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         business_area_slug = self.request.parser_context.get("kwargs", {}).get("business_area_slug")
-        current_program = Program.objects.get(slug=value, business_area__slug=business_area_slug)
+        current_program = Program.objects.get(code=value, business_area__slug=business_area_slug)
         return qs.filter(beneficiary_group=current_program.beneficiary_group).exclude(id=current_program.id)

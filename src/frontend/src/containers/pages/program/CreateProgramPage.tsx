@@ -186,11 +186,10 @@ export const CreateProgramPage = (): ReactElement => {
     try {
       const programData: ProgramCreate = {
         id: '', // Will be set by server
-        slug: '', // Will be set by server
         version: 0, // Will be set by server
         status: '', // Will be set by server
         name: requestValues.name,
-        programmeCode: requestValues.programmeCode || null,
+        code: requestValues.code || null,
         sector: requestValues.sector,
         description: requestValues.description || '',
         budget: budgetToFixed.toString(),
@@ -217,7 +216,7 @@ export const CreateProgramPage = (): ReactElement => {
       const response = await createProgram(programData);
 
       showMessage('Programme created.');
-      navigate(`/${baseUrl}/details/${response.slug}`);
+      navigate(`/${baseUrl}/details/${response.code}`);
     } catch (error: any) {
       showApiErrorMessages(error, showMessage);
     }
@@ -227,7 +226,7 @@ export const CreateProgramPage = (): ReactElement => {
     isActive: false,
     editMode: false,
     name: '',
-    programmeCode: '',
+    code: '',
     startDate: '',
     endDate: undefined,
     sector: '',
@@ -249,7 +248,7 @@ export const CreateProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
-      'programmeCode',
+      'code',
       'startDate',
       'endDate',
       'sector',
@@ -287,7 +286,7 @@ export const CreateProgramPage = (): ReactElement => {
         handleSubmit(values);
       }}
       initialTouched={{
-        programmeCode: true,
+        code: true,
       }}
       validationSchema={programValidationSchema(t)}
       validationContext={{ programHasRdi: false, isCopy: false }}

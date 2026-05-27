@@ -34,9 +34,9 @@ const INDDataTable: React.FC<INDDataTableProps> = ({ indData }) => {
         <TableBody>
           {indData.results && indData.results.length > 0 ? (
             indData.results.map((individual: any) => {
-              const individualDetailsPath = `/${businessArea}/programs/${individual.program.slug}/population/individuals/${individual.id}`;
-              const householdDetailsPath = `/${businessArea}/programs/${individual.program.slug}/population/household/${individual.household.id}`;
-              const programDetailsPath = `/${baseUrl}/details/${individual?.program?.slug}`;
+              const individualDetailsPath = `/${businessArea}/programs/${individual.program.code}/population/individuals/${individual.id}`;
+              const householdDetailsPath = `/${businessArea}/programs/${individual.program.code}/population/household/${individual.household.id}`;
+              const programDetailsPath = `/${baseUrl}/details/${individual?.program?.code}`;
               return (
                 <TableRow key={individual.id} hover>
                   <TableCell>

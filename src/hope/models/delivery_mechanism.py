@@ -35,5 +35,5 @@ class DeliveryMechanism(TimeStampedUUIDModel):
     def get_choices(cls, only_active: bool = True) -> list[tuple[str, str]]:
         dms = cls.objects.all().values_list("code", "name")
         if only_active:
-            dms.filter(is_active=True)
+            dms = dms.filter(is_active=True)
         return list(dms)

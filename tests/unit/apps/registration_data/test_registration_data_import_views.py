@@ -3,6 +3,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import freezegun
 import pytest
@@ -66,14 +67,14 @@ def registration_data_import_context(api_client: Any) -> Callable[[], dict[str, 
             "api:registration-data:registration-data-imports-list",
             kwargs={
                 "business_area_slug": afghanistan.slug,
-                "program_slug": program1.slug,
+                "program_code": program1.code,
             },
         )
         url_detail = reverse(
             "api:registration-data:registration-data-imports-detail",
             kwargs={
                 "business_area_slug": afghanistan.slug,
-                "program_slug": program1.slug,
+                "program_code": program1.code,
                 "pk": rdi1.id,
             },
         )
@@ -202,6 +203,7 @@ def test_list_registration_data_imports(
             "number_of_households": rdi1.number_of_households,
             "number_of_individuals": rdi1.number_of_individuals,
             "biometric_deduplicated": rdi1.biometric_deduplicated,
+            "country_workspace_id": rdi1.country_workspace_id,
         } in response_json
         assert {
             "id": str(rdi2.id),
@@ -215,6 +217,7 @@ def test_list_registration_data_imports(
             "number_of_households": rdi2.number_of_households,
             "number_of_individuals": rdi2.number_of_individuals,
             "biometric_deduplicated": rdi2.biometric_deduplicated,
+            "country_workspace_id": rdi2.country_workspace_id,
         } in response_json
         assert {
             "id": str(rdi3.id),
@@ -228,6 +231,7 @@ def test_list_registration_data_imports(
             "number_of_households": rdi3.number_of_households,
             "number_of_individuals": rdi3.number_of_individuals,
             "biometric_deduplicated": rdi3.biometric_deduplicated,
+            "country_workspace_id": rdi3.country_workspace_id,
         } in response_json
         assert {
             "id": str(rdi_program2.id),
@@ -241,6 +245,7 @@ def test_list_registration_data_imports(
             "number_of_households": rdi1.number_of_households,
             "number_of_individuals": rdi1.number_of_individuals,
             "biometric_deduplicated": rdi1.biometric_deduplicated,
+            "country_workspace_id": rdi1.country_workspace_id,
         } not in response_json
 
 
@@ -306,7 +311,7 @@ def test_list_registration_data_imports_caching(
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 16
+            assert len(ctx.captured_queries) == 13
 
         with CaptureQueriesContext(connection) as ctx:
             response = context["client"].get(context["url_list"])
@@ -317,15 +322,16 @@ def test_list_registration_data_imports_caching(
             assert len(ctx.captured_queries) == 4
             assert etag_second_call == etag
 
-        context["rdi1"].status = RegistrationDataImport.MERGE_ERROR
-        context["rdi1"].save(update_fields=["status"])
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            context["rdi1"].status = RegistrationDataImport.MERGE_ERROR
+            context["rdi1"].save(update_fields=["status"])
         with CaptureQueriesContext(connection) as ctx:
             response = context["client"].get(context["url_list"])
             assert response.status_code == status.HTTP_200_OK
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 7
             assert etag_call_after_update != etag
 
         with CaptureQueriesContext(connection) as ctx:

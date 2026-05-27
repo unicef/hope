@@ -12,6 +12,7 @@ from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -42,14 +43,14 @@ def payment_plan_list_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program_active)
+    cycle = program_active.cycles.first()
     pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=user,
         name="PP List",
-        currency="USD",
+        currency=CurrencyFactory(code="USD", name="United States Dollar"),
         excluded_ids="HH-1",
         dispersion_start_date=date(2025, 2, 1),
         dispersion_end_date=date(2025, 3, 1),
@@ -67,14 +68,14 @@ def payment_plan_list_context(
         "api:payments:payment-plans-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     pp_count_url = reverse(
         "api:payments:payment-plans-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)
@@ -102,14 +103,14 @@ def payment_plan_detail_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program_active)
+    cycle = program_active.cycles.first()
     pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=user,
         name="PP Detail",
-        currency="USD",
+        currency=CurrencyFactory(code="USD", name="United States Dollar"),
         excluded_ids="HH-1",
         dispersion_start_date=date(2025, 2, 1),
         dispersion_end_date=date(2025, 3, 1),
@@ -121,7 +122,7 @@ def payment_plan_detail_context(
         "api:payments:payment-plans-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(pp.id),
         },
     )
@@ -149,7 +150,7 @@ def payment_plan_filter_context(
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = ProgramCycleFactory(program=program_active)
+    cycle = program_active.cycles.first()
     pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -168,7 +169,7 @@ def payment_plan_filter_context(
         "api:payments:payment-plans-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     client = api_client(user)
@@ -423,8 +424,6 @@ def test_payment_plan_detail(
     assert payment_plan["can_send_to_payment_gateway"] is False
     assert payment_plan["can_split"] is False
     assert payment_plan["total_households_count_with_valid_phone_no"] == 0
-    assert payment_plan["is_payment_gateway_and_all_sent_to_fsp"] is False
-    assert payment_plan["fsp_communication_channel"] == "XLSX"
     assert payment_plan["can_export_xlsx"] is False
     assert payment_plan["can_download_xlsx"] is False
     assert payment_plan["can_send_xlsx_password"] is False
@@ -682,3 +681,28 @@ def test_filter_by_is_follow_up(payment_plan_filter_context: dict[str, Any]) -> 
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["name"] == "NEW_FOLLOW_up"
+
+
+def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:
+    other_program = ProgramFactory(
+        business_area=payment_plan_filter_context["business_area"],
+        status=Program.ACTIVE,
+    )
+    other_cycle = other_program.cycles.first()
+    PaymentPlanFactory(
+        name="PP Other Program",
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=other_cycle,
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"program": payment_plan_filter_context["program_active"].code},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    assert len(response_data) == 2
+    returned_names = {r["name"] for r in response_data}
+    assert returned_names == {"PP Filter Open", "PP Filter Finished"}
+    assert "PP Other Program" not in returned_names

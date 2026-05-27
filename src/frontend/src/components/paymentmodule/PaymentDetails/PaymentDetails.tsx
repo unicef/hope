@@ -117,8 +117,7 @@ function PaymentDetails({
               )}
             </LabelizedField>
           </Grid>
-          {payment.parent.financialServiceProvider.communicationChannel ==
-            'API' && (
+          {payment.parent.isPaymentGateway && (
             <Grid size={{ xs: 3 }}>
               <LabelizedField
                 label={t('Sent to FSP on')}
@@ -273,15 +272,6 @@ function PaymentDetails({
               value={payment.additionalDocumentNumber}
             />
           </Grid>
-          {payment.extras &&
-            Object.entries(payment.extras).map(([key, value]) => (
-              <Grid key={key} size={{ xs: 3 }}>
-                <LabelizedField
-                  label={formatNormalCaseValue(key)}
-                  value={safeStringify(value)}
-                />
-              </Grid>
-            ))}
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
@@ -295,6 +285,25 @@ function PaymentDetails({
           )}
         </Grid>
       </Overview>
+      {payment.extras && Object.keys(payment.extras).length > 0 && (
+        <Overview>
+          <Title>
+            <Typography variant="h6">
+              {t('Reconciliation Information: Extra Info')}
+            </Typography>
+          </Title>
+          <Grid container spacing={3}>
+            {Object.entries(payment.extras).map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Overview>
+      )}
       {canViewActivityLog && (
         <UniversalActivityLogTable objectId={payment.id} />
       )}

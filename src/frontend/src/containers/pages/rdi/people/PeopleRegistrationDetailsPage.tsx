@@ -52,7 +52,7 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: id,
         }),
     });

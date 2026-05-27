@@ -7,8 +7,8 @@ from unittest.mock import patch
 import uuid
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.geo import AreaFactory
@@ -20,7 +20,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.payment.xlsx.xlsx_verification_export_service import XlsxVerificationExportService
 from hope.apps.payment.xlsx.xlsx_verification_import_service import XlsxVerificationImportService
@@ -48,7 +48,7 @@ def program(business_area, admin_areas):
 
 @pytest.fixture
 def program_cycle(program):
-    return ProgramCycleFactory(program=program)
+    return program.cycles.first()
 
 
 @pytest.fixture
@@ -75,7 +75,6 @@ def verification_setup(verification_plan, program, business_area, admin_areas):
             parent=verification_plan.payment_plan,
             household=household,
             head_of_household=household.head_of_household,
-            currency="PLN",
             delivered_quantity=Decimal("150.00"),
             entitlement_quantity=Decimal("120.00"),
             program=program,
@@ -196,6 +195,23 @@ def test_validation_invalid_version(verification_setup):
         match=(rf"Unsupported file version \(-1\). Only version: {XlsxVerificationExportService.VERSION} is supported"),
     ):
         import_service.validate()
+
+
+def test_validation_no_verification_sheet(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    export_service = XlsxVerificationExportService(verification_plan)
+    wb = export_service.generate_workbook()
+    sheet = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
+    wb.remove(sheet)
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = io.BytesIO(tmp.read())
+    import_service = XlsxVerificationImportService(verification_plan, file)
+    with pytest.raises(
+        ValidationError,
+        match=(rf"Sheet '{XlsxVerificationExportService.VERIFICATION_SHEET}' not found in provided file."),
+    ):
+        import_service.open_workbook()
 
 
 def test_validation_payment_record_id(verification_setup):
@@ -363,7 +379,7 @@ def test_import_valid_status_changed_received_yes_full(verification_setup):
 )
 def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str):
     program = ProgramFactory()
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, business_area=program.business_area)
     registration_data_import = RegistrationDataImportFactory(
         business_area=payment_plan.business_area,
@@ -388,7 +404,6 @@ def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str
         household=household_1,
         entitlement_quantity=Decimal("120.00"),
         delivered_quantity=Decimal("150.00"),
-        currency="PLN",
         program=payment_plan.program,
         collector=household_1.head_of_household,
     )
@@ -411,7 +426,6 @@ def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str
         household=household_2,
         entitlement_quantity=Decimal("120.00"),
         delivered_quantity=Decimal("150.00"),
-        currency="PLN",
         program=payment_plan.program,
         collector=household_2.head_of_household,
     )

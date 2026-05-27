@@ -28,7 +28,8 @@ export const FormikDateField = ({
   let formattedValue = null;
 
   if (field.value && typeof field.value === 'string') {
-    formattedValue = parseISO(field.value);
+    const match = /^(\d{4}-\d{2}-\d{2})/.exec(field.value);
+    formattedValue = match ? parseISO(match[1]) : parseISO(field.value);
   }
 
   const datePickerComponent = (

@@ -50,7 +50,7 @@ def get_program_data(program: Program) -> dict:
     return {
         "id": str(program.id),
         "name": program.name,
-        "slug": program.slug,
+        "code": program.code,
     }
 
 
@@ -423,7 +423,7 @@ def test_user_profile_in_scope_program(
     partner_role_assignments: None,
     user_profile_url: str,
 ):
-    response = authenticated_client.get(user_profile_url, {"program": program1.slug})
+    response = authenticated_client.get(user_profile_url, {"program": program1.code})
     assert response.status_code == status.HTTP_200_OK
 
     profile_data = response.data
@@ -584,7 +584,7 @@ def test_cross_area_filter_available_in_scope_program(
         program=program1,
     )
 
-    response = authenticated_client.get(user_profile_url, {"program": program1.slug})
+    response = authenticated_client.get(user_profile_url, {"program": program1.code})
     assert response.status_code == status.HTTP_200_OK
     profile_data = response.data
     assert profile_data["cross_area_filter_available"] == filter_available

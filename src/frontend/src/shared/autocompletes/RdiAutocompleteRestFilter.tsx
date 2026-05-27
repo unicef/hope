@@ -44,7 +44,7 @@ export function RdiAutocompleteRestFilter({
   const [queryVariables, setQueryVariables] = useState({
     limit: 20,
     businessAreaSlug: businessArea,
-    programSlug: programId || '',
+    programCode: programId || '',
     search: debouncedInputText || undefined,
     ordering: 'name',
   });
@@ -77,7 +77,7 @@ export function RdiAutocompleteRestFilter({
   useEffect(() => {
     setQueryVariables((prev) => ({
       ...prev,
-      programSlug: programId || '',
+      programCode: programId || '',
     }));
   }, [programId]);
 

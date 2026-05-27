@@ -9,6 +9,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import { useProgramContext } from 'src/programContext';
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportList;
@@ -27,6 +28,7 @@ export function RegistrationDataImportTableRow({
 }: PaymentRecordTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const importDetailsPath = `/${baseUrl}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
@@ -90,9 +92,11 @@ export function RegistrationDataImportTableRow({
       <TableCell align="right">
         {registrationDataImport.numberOfIndividuals}
       </TableCell>
-      <TableCell align="right">
-        {registrationDataImport.numberOfHouseholds}
-      </TableCell>
+      {!isSocialDctType && (
+        <TableCell align="right">
+          {registrationDataImport.numberOfHouseholds}
+        </TableCell>
+      )}
       <TableCell align="left">{renderImportedBy()}</TableCell>
       <TableCell align="left">{registrationDataImport.dataSource}</TableCell>
     </ClickableTableRow>

@@ -3,7 +3,6 @@ from unittest import mock
 from unittest.mock import patch
 
 from django.forms import model_to_dict
-from flags.models import FlagState
 from freezegun import freeze_time
 import pytest
 
@@ -557,7 +556,7 @@ def test_merging_external_collector(
     },
 )
 @mock.patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_individuals_status"
+    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_ack_to_biometric_deduplication_engine"
 )
 @mock.patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
@@ -565,10 +564,10 @@ def test_merging_external_collector(
 @mock.patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
 )
-def test_merge_biometric_deduplication_enabled(
+def test_merge_biometric_deduplication_non_cw_path(
     update_rdis_deduplication_statistics_mock: mock.Mock,
     create_grievance_tickets_for_duplicates_mock: mock.Mock,
-    report_individuals_status_mock: mock.Mock,
+    report_ack_mock: mock.Mock,
     rdi: object,
     areas: dict,
     pending_head_individual: object,
@@ -576,13 +575,6 @@ def test_merge_biometric_deduplication_enabled(
     create_pending_individuals,
     django_capture_on_commit_callbacks,
 ) -> None:
-    FlagState.objects.get_or_create(
-        name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
-
     program = rdi.program
     program.biometric_deduplication_enabled = True
     program.save(update_fields=["biometric_deduplication_enabled"])
@@ -594,15 +586,70 @@ def test_merge_biometric_deduplication_enabled(
     create_pending_individuals(household, pending_head_individual)
     with django_capture_on_commit_callbacks(execute=True):
         RdiMergeTask().execute(rdi.pk)
+
     create_grievance_tickets_for_duplicates_mock.assert_called_once_with(rdi)
     update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=rdi)
 
-    args, _ = report_individuals_status_mock.call_args
-    assert args[0] == program
+    report_ack_mock.assert_called_once()
+    args, _ = report_ack_mock.call_args
+    assert args[0] == rdi
+    assert args[0].country_workspace_id is None
     assert set(args[1]) == {
         str(_id) for _id in Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
     }
-    assert args[2] == "merged"
+
+
+@patch.dict(
+    "os.environ",
+    {
+        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+    },
+)
+@mock.patch(
+    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_ack_to_biometric_deduplication_engine"
+)
+@mock.patch(
+    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
+)
+@mock.patch(
+    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
+)
+def test_merge_biometric_deduplication_cw_path(
+    update_rdis_deduplication_statistics_mock: mock.Mock,
+    create_grievance_tickets_for_duplicates_mock: mock.Mock,
+    report_ack_mock: mock.Mock,
+    rdi: object,
+    areas: dict,
+    pending_head_individual: object,
+    pending_household_factory,
+    create_pending_individuals,
+    django_capture_on_commit_callbacks,
+) -> None:
+    program = rdi.program
+    program.biometric_deduplication_enabled = True
+    program.save(update_fields=["biometric_deduplication_enabled"])
+    rdi.country_workspace_id = "test-correlation-id"
+    rdi.save(update_fields=["country_workspace_id"])
+    household = pending_household_factory(
+        pending_head_individual,
+        admin4=areas["area4"],
+        zip_code="00-123",
+    )
+    create_pending_individuals(household, pending_head_individual)
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(rdi.pk)
+
+    create_grievance_tickets_for_duplicates_mock.assert_called_once_with(rdi)
+    update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=rdi)
+
+    report_ack_mock.assert_called_once()
+    args, _ = report_ack_mock.call_args
+    assert args[0] == rdi
+    assert args[0].country_workspace_id == "test-correlation-id"
+    assert set(args[1]) == {
+        str(_id) for _id in Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+    }
 
 
 def test_merge_empty_rdi(rdi: object, django_capture_on_commit_callbacks) -> None:
@@ -630,7 +677,7 @@ def test_merge_execute_cleans_up_es_on_exception(
     household_ids = list(PendingHousehold.objects.filter(registration_data_import=rdi).values_list("id", flat=True))
 
     with patch(
-        "hope.apps.registration_data.tasks.rdi_merge.populate_index",
+        "unit.apps.registration_data.test_rdi_merge.RdiMergeTask._populate_index_individuals",
         side_effect=Exception("ES failure"),
     ):
         with pytest.raises(Exception, match="ES failure"):
@@ -643,3 +690,83 @@ def test_merge_execute_cleans_up_es_on_exception(
     assert set(removed_ids) == set(individual_ids)
     removed_ids = call_args_list[1][0][0]
     assert set(removed_ids) == set(household_ids)
+
+
+@pytest.fixture
+def rdi_merge_task():
+    return RdiMergeTask()
+
+
+def test_run_deduplication_raises_when_business_area_is_none(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.business_area = None
+    rdi.program = mock.MagicMock()
+
+    with pytest.raises(ValueError, match="RDI business_area must not be None"):
+        rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
+
+
+def test_run_deduplication_raises_when_program_is_none(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.business_area = mock.MagicMock()
+    rdi.program = None
+
+    with pytest.raises(ValueError, match="RDI program must not be None"):
+        rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
+
+
+def test_run_biometric_deduplication_skips_when_program_is_none(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.program = None
+
+    rdi_merge_task._run_biometric_deduplication(rdi, [])
+
+
+def test_run_biometric_deduplication_skips_when_biometric_deduplication_disabled(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.program = mock.MagicMock()
+    rdi.program.biometric_deduplication_enabled = False
+
+    rdi_merge_task._run_biometric_deduplication(rdi, [])
+
+
+def test_run_biometric_deduplication_calls_service_when_enabled(rdi_merge_task):
+    rdi = mock.MagicMock()
+    rdi.program = mock.MagicMock()
+    rdi.program.biometric_deduplication_enabled = True
+
+    with mock.patch("hope.apps.registration_data.tasks.rdi_merge.BiometricDeduplicationService") as mock_service_cls:
+        mock_service = mock_service_cls.return_value
+        rdi_merge_task._run_biometric_deduplication(rdi, ["ind-id-1", "ind-id-2"])
+
+    mock_service.create_grievance_tickets_for_duplicates.assert_called_once_with(rdi)
+    mock_service.update_rdis_deduplication_statistics.assert_called_once_with(rdi.program, exclude_rdi=rdi)
+    mock_service.report_ack_to_biometric_deduplication_engine.assert_called_once_with(rdi, ["ind-id-1", "ind-id-2"])
+
+
+@mock.patch("hope.apps.registration_data.tasks.rdi_merge.get_individual_doc")
+def test_populate_index_individuals_when_es_enabled(
+    mock_get_individual_doc: mock.Mock,
+    rdi: object,
+    rdi_merge_task,
+) -> None:
+    with mock.patch("hope.apps.registration_data.tasks.rdi_merge.config") as mock_config:
+        mock_config.IS_ELASTICSEARCH_ENABLED = True
+        rdi_merge_task._populate_index_individuals(rdi)
+
+    mock_get_individual_doc.assert_called_once_with(str(rdi.program.id))
+    mock_get_individual_doc.return_value.return_value.update.assert_called_once()
+
+
+@mock.patch("hope.apps.registration_data.tasks.rdi_merge.get_household_doc")
+def test_populate_index_households_when_es_enabled(
+    mock_get_household_doc: mock.Mock,
+    rdi: object,
+    rdi_merge_task,
+) -> None:
+    with mock.patch("hope.apps.registration_data.tasks.rdi_merge.config") as mock_config:
+        mock_config.IS_ELASTICSEARCH_ENABLED = True
+        rdi_merge_task._populate_index_households(rdi)
+
+    mock_get_household_doc.assert_called_once_with(str(rdi.program.id))
+    mock_get_household_doc.return_value.return_value.update.assert_called_once()

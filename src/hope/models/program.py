@@ -13,7 +13,7 @@ from django.core.validators import (
 from django.db import models
 from django.db.models import Q, QuerySet, Value
 from django.db.models.constraints import UniqueConstraint
-from django.db.models.functions import Concat, Lower
+from django.db.models.functions import Concat
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 from strategy_field.fields import StrategyField
@@ -40,9 +40,7 @@ class ProgramQuerySet(QuerySet):
     UNICEF_ID_ANNOTATION = "annotated_unicef_id"
 
     def with_unicef_id(self) -> "ProgramQuerySet":
-        return self.annotate(
-            **{self.UNICEF_ID_ANNOTATION: Concat("business_area__slug", Value("-"), Lower("programme_code"))}
-        )
+        return self.annotate(**{self.UNICEF_ID_ANNOTATION: Concat("business_area__slug", Value("-"), "code")})
 
     def get_by_unicef_id(self, unicef_id: str) -> "Program":
         try:
@@ -161,9 +159,8 @@ class Program(
         help_text="Program name",
         db_collation="und-ci-det",
     )
-    programme_code = models.CharField(max_length=4, null=True, blank=True, help_text="Program code")
+    code = models.CharField(max_length=4, db_index=True, help_text="Program code")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
-    slug = models.CharField(max_length=4, db_index=True, help_text="Program slug [sys]")
     description = models.CharField(
         blank=True,
         max_length=255,
@@ -244,43 +241,34 @@ class Program(
 
     def clean(self) -> None:
         super().clean()
+        if not self.data_collecting_type_id or not self.beneficiary_group_id:
+            return
         if (
-            self.data_collecting_type
-            and self.beneficiary_group
-            and (
-                self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
-                and self.beneficiary_group.master_detail
-            )
-            or (
-                self.data_collecting_type.type == DataCollectingType.Type.STANDARD
-                and not self.beneficiary_group.master_detail
-            )
+            self.data_collecting_type.type == DataCollectingType.Type.SOCIAL and self.beneficiary_group.master_detail
+        ) or (
+            self.data_collecting_type.type == DataCollectingType.Type.STANDARD
+            and not self.beneficiary_group.master_detail
         ):
             raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
-        if not self.programme_code:
-            self.programme_code = self.generate_programme_code()
-        if not self.slug:
-            self.slug = self.generate_slug()
+        if not self.code:
+            self.code = self.generate_code()
         if self.data_collecting_type_id is None and self.data_collecting_type:
             # save the related object before saving Program
             self.data_collecting_type.save()
         super().save(*args, **kwargs)
 
-    def generate_programme_code(self) -> str:
-        programme_code = "".join(secrets.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
-        if Program.objects.filter(business_area_id=self.business_area_id, programme_code=programme_code).exists():
-            return self.generate_programme_code()
-        return programme_code
-
-    def generate_slug(self) -> str:
-        return self.programme_code.lower()
+    def generate_code(self) -> str:
+        code = "".join(secrets.choice(string.ascii_lowercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=self.business_area_id, code=code).exists():
+            return self.generate_code()
+        return code
 
     @property
     def unicef_id(self) -> str:
-        return f"{self.business_area.slug}-{self.generate_slug()}"
+        return f"{self.business_area.slug}-{self.code}"
 
     @staticmethod
     def get_total_number_of_households_from_payments(
@@ -312,14 +300,14 @@ class Program(
 
     @property
     def admin_areas_log(self) -> str:
-        return ", ".join(self.admin_areas.all())
+        return ", ".join(str(area) for area in self.admin_areas.all())
 
     @property
     def is_social_worker_program(self) -> bool:
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     @property
-    def screen_beneficiary(self) -> None:
+    def screen_beneficiary(self) -> bool:
         """Return if program will be screened against the sanction lists.
 
         :return:
@@ -328,6 +316,7 @@ class Program(
 
     class Meta:
         app_label = "program"
+        ordering = ("id",)
         constraints = [
             UniqueConstraint(
                 fields=["name", "business_area", "is_removed"],
@@ -335,19 +324,15 @@ class Program(
                 name="unique_for_program_if_not_removed",
             ),
             UniqueConstraint(
-                fields=["business_area", "programme_code"],
+                fields=["business_area", "code"],
                 condition=Q(is_removed=False),
-                name="unique_for_business_area_and_programme_code_if_not_removed",
-            ),
-            UniqueConstraint(
-                fields=["business_area", "slug"],
-                condition=Q(is_removed=False),
-                name="unique_for_business_area_and_slug_if_not_removed",
+                name="unique_for_business_area_and_code_if_not_removed",
             ),
         ]
         permissions = [
             ("enroll_beneficiaries", "Can enroll beneficiaries"),
             ("can_bulk_upload_individual_photos", "Can bulk upload Individual photos"),
+            ("reset_sync_date", "Can reset sync date"),
         ]
         verbose_name = "Programme"
 
@@ -355,12 +340,15 @@ class Program(
         return self.name
 
     def validate_unique(self, exclude: Collection[str] | None = ...) -> None:  # type: ignore
+        if not self.business_area_id:
+            super().validate_unique(exclude)
+            return
         query = Program.objects.filter(name=self.name, business_area=self.business_area, is_removed=False)
         if query.exists() and query.first() != self:
             raise ValidationError(
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
-        super().validate_unique()
+        super().validate_unique(exclude)
 
     def is_active(self) -> bool:
         return self.status == self.ACTIVE

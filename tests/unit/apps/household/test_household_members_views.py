@@ -123,7 +123,7 @@ def test_household_members_permissions(
             household_members_context["members_url_name"],
             kwargs={
                 "business_area_slug": household_members_context["afghanistan"].slug,
-                "program_slug": household_members_context["program"].slug,
+                "program_code": household_members_context["program"].code,
                 "pk": str(household_members_context["household1"].id),
             },
         )
@@ -143,7 +143,7 @@ def test_household_members(create_user_role_with_permissions: Any, household_mem
             household_members_context["members_url_name"],
             kwargs={
                 "business_area_slug": household_members_context["afghanistan"].slug,
-                "program_slug": household_members_context["program"].slug,
+                "program_code": household_members_context["program"].code,
                 "pk": str(household_members_context["household1"].id),
             },
         )
@@ -193,7 +193,7 @@ def test_household_members(create_user_role_with_permissions: Any, household_mem
                 "village": household1.village,
                 "geopoint": None,
                 "import_id": household1.unicef_id,
-                "program_slug": household_members_context["program"].slug,
+                "program_code": household_members_context["program"].code,
             },
         },
         {
@@ -226,7 +226,7 @@ def test_household_members(create_user_role_with_permissions: Any, household_mem
                 "village": household1.village,
                 "geopoint": None,
                 "import_id": household1.unicef_id,
-                "program_slug": household_members_context["program"].slug,
+                "program_code": household_members_context["program"].code,
             },
         },
         {
@@ -259,7 +259,7 @@ def test_household_members(create_user_role_with_permissions: Any, household_mem
                 "village": household2.village,
                 "geopoint": None,
                 "import_id": household2.unicef_id,
-                "program_slug": household_members_context["program"].slug,
+                "program_code": household_members_context["program"].code,
             },
         },
     ]

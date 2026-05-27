@@ -49,7 +49,12 @@ import {
   thingForSpecificGrievanceType,
 } from '@utils/utils';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -77,9 +82,13 @@ function EmptyComponent(): ReactElement {
 function FormikSelectedEntitiesSync({
   fetchedHousehold,
   fetchedIndividual,
+  businessArea,
+  entityProgramCode,
 }: {
   fetchedHousehold: any;
   fetchedIndividual: any;
+  businessArea: string;
+  entityProgramCode: string | undefined;
 }) {
   const { values, setFieldValue } = useFormikContext<any>();
   React.useEffect(() => {
@@ -92,6 +101,47 @@ function FormikSelectedEntitiesSync({
       setFieldValue('selectedIndividual', fetchedIndividual);
     }
   }, [fetchedIndividual, values.selectedIndividual, setFieldValue]);
+
+  // Resolve the household ID from either the fetched individual or the form value
+  const individualForDelegate = fetchedIndividual ?? values.selectedIndividual;
+  const householdIdForDelegate =
+    typeof individualForDelegate === 'object' && individualForDelegate !== null
+      ? individualForDelegate?.household?.id
+      : undefined;
+  const programCodeForDelegate =
+    entityProgramCode ??
+    (typeof individualForDelegate === 'object' && individualForDelegate !== null
+      ? (individualForDelegate?.program?.code ??
+        individualForDelegate?.programCode)
+      : undefined);
+
+  const { data: householdForDelegate } = useQuery({
+    queryKey: [
+      'householdForDelegate',
+      businessArea,
+      programCodeForDelegate,
+      householdIdForDelegate,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug: businessArea,
+        programCode: programCodeForDelegate,
+        id: String(householdIdForDelegate),
+      }),
+    enabled: !!householdIdForDelegate && !!programCodeForDelegate,
+  });
+
+  React.useEffect(() => {
+    if (householdForDelegate) {
+      const alternateRole = (
+        householdForDelegate.rolesInHousehold as any[]
+      )?.find((r) => r.role === 'ALTERNATE');
+      const delegate = alternateRole?.individual ?? null;
+      setFieldValue('selectedDelegate', delegate);
+      setFieldValue('originalDelegate', delegate);
+    }
+  }, [householdForDelegate, setFieldValue]);
+
   return null;
 }
 
@@ -156,7 +206,7 @@ const CreateGrievancePage = (): ReactElement => {
   const feedbackProgram = feedbackProgramId
     ? programsData?.results?.find((prog) => prog.id === feedbackProgramId)
     : undefined;
-  const feedbackProgramSlug = feedbackProgram?.slug;
+  const feedbackProgramCode = feedbackProgram?.code;
 
   // Fetch full household object if selectedHousehold is an ID (string/number)
   const shouldFetchHousehold = Boolean(
@@ -165,24 +215,24 @@ const CreateGrievancePage = (): ReactElement => {
       typeof selectedHousehold === 'number'),
   );
 
-  const entityProgramSlug =
-    feedbackProgramSlug || (programId !== 'all' ? programId : undefined);
+  const entityProgramCode =
+    feedbackProgramCode || (programId !== 'all' ? programId : undefined);
 
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
       queryKey: [
         'household',
         businessArea,
-        entityProgramSlug,
+        entityProgramCode,
         selectedHousehold,
       ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsHouseholdsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: entityProgramSlug,
+          programCode: entityProgramCode,
           id: String(selectedHousehold),
         }),
-      enabled: shouldFetchHousehold && !!entityProgramSlug,
+      enabled: shouldFetchHousehold && !!entityProgramCode,
     });
   const selectedIndividual = location.state?.selectedIndividual;
 
@@ -198,17 +248,18 @@ const CreateGrievancePage = (): ReactElement => {
       queryKey: [
         'individual',
         businessArea,
-        entityProgramSlug,
+        entityProgramCode,
         selectedIndividual,
       ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: entityProgramSlug,
+          programCode: entityProgramCode,
           id: String(selectedIndividual),
         }),
-      enabled: shouldFetchIndividual && !!entityProgramSlug,
+      enabled: shouldFetchIndividual && !!entityProgramCode,
     });
+
   const category = location.state?.category;
   const linkedFeedbackId = location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
@@ -218,6 +269,20 @@ const CreateGrievancePage = (): ReactElement => {
   // Prefill description from linked ticket if available
   const linkedTicketDescription =
     isLinkedFromUrl && linkedTicketData ? linkedTicketData.description : '';
+
+  const initialDelegate = (() => {
+    const indObject =
+      selectedIndividual &&
+      typeof selectedIndividual !== 'string' &&
+      typeof selectedIndividual !== 'number'
+        ? selectedIndividual
+        : null;
+
+    const alternateRole = (
+      indObject?.household?.rolesInHousehold as any[]
+    )?.find((r) => r.role === 'ALTERNATE');
+    return alternateRole?.individual ?? null;
+  })();
 
   const initialValues = {
     description: linkedTicketDescription || '',
@@ -229,6 +294,8 @@ const CreateGrievancePage = (): ReactElement => {
     area: '',
     selectedHousehold: selectedHousehold || null,
     selectedIndividual: selectedIndividual || null,
+    selectedDelegate: initialDelegate,
+    originalDelegate: initialDelegate,
     selectedPaymentRecords: [],
     selectedLinkedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
@@ -470,18 +537,18 @@ const CreateGrievancePage = (): ReactElement => {
         touched,
         handleChange,
       }) => {
-        const dynamicEntityProgramSlug =
-          feedbackProgramSlug ||
+        const dynamicEntityProgramCode =
+          feedbackProgramCode ||
           (programId !== 'all'
             ? programId
             : (typeof values.selectedHousehold === 'object' &&
-                values.selectedHousehold?.program?.slug) ||
+                values.selectedHousehold?.program?.code) ||
               (typeof values.selectedHousehold === 'object' &&
-                values.selectedHousehold?.programSlug) ||
+                values.selectedHousehold?.programCode) ||
               (typeof values.selectedIndividual === 'object' &&
-                values.selectedIndividual?.program?.slug) ||
+                values.selectedIndividual?.program?.code) ||
               (typeof values.selectedIndividual === 'object' &&
-                values.selectedIndividual?.programSlug));
+                values.selectedIndividual?.programCode));
 
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
@@ -517,6 +584,8 @@ const CreateGrievancePage = (): ReactElement => {
                   ? fetchedIndividual
                   : values.selectedIndividual
               }
+              businessArea={businessArea}
+              entityProgramCode={entityProgramCode}
             />
             <AutoSubmitFormOnEnter />
             <PageHeader
@@ -571,7 +640,7 @@ const CreateGrievancePage = (): ReactElement => {
                       {activeStep === GrievanceSteps.Verification && (
                         <Verification
                           values={values}
-                          programSlug={dynamicEntityProgramSlug}
+                          programCode={dynamicEntityProgramCode}
                         />
                       )}
                       {activeStep === GrievanceSteps.Description && (
@@ -591,7 +660,7 @@ const CreateGrievancePage = (): ReactElement => {
                           <DataChangeComponent
                             values={values}
                             setFieldValue={setFieldValue}
-                            programSlug={dynamicEntityProgramSlug}
+                            programCode={dynamicEntityProgramCode}
                           />
                         </>
                       )}

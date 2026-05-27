@@ -3,7 +3,7 @@ from typing import Any
 from django.db import models
 
 from hope.models.sanction_list import SanctionList
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import InternalDataFieldModel, TimeStampedUUIDModel
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):
@@ -34,7 +34,7 @@ class ActiveIndividualsManager(models.Manager):
         return self.get_queryset().hard_delete()
 
 
-class SanctionListIndividual(TimeStampedUUIDModel):
+class SanctionListIndividual(TimeStampedUUIDModel, InternalDataFieldModel):
     first_name = models.CharField(max_length=85)
     second_name = models.CharField(max_length=85, blank=True, default="")
     third_name = models.CharField(max_length=85, blank=True, default="")
@@ -69,3 +69,7 @@ class SanctionListIndividual(TimeStampedUUIDModel):
 
     def __str__(self) -> str:
         return self.full_name
+
+    def record_dob_parse_error(self, raw: str | None, dob_type: str) -> None:
+        errors = self.internal_data.setdefault("date_of_birth_parse_errors", [])
+        errors.append({"raw": raw, "type": dob_type})

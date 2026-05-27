@@ -138,7 +138,7 @@ def get_update_authorized_users_url(afghanistan: BusinessArea, program: Program,
         "api:periodic-data-update:periodic-data-update-online-edits-update-authorized-users",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
             "pk": pdu_edit_id,
         },
     )

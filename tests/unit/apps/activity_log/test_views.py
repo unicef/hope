@@ -171,7 +171,7 @@ def url_list_per_program(business_area: Any, program_1: Any) -> str:
         "api:activity-logs:activity-logs-per-program-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_1.slug,
+            "program_code": program_1.code,
         },
     )
 
@@ -182,7 +182,7 @@ def url_count_per_program(business_area: Any, program_1: Any) -> str:
         "api:activity-logs:activity-logs-per-program-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_1.slug,
+            "program_code": program_1.code,
         },
     )
 
@@ -291,7 +291,7 @@ def test_activity_logs_list_returns_is_user_generated_for_grievance_ticket(
 
 
 @pytest.mark.enable_activity_log
-def test_activity_logs_list_returns_correct_program_slugs(
+def test_activity_logs_list_returns_correct_codes(
     api_client: Any,
     user: Any,
     business_area: Any,
@@ -308,10 +308,10 @@ def test_activity_logs_list_returns_correct_program_slugs(
 
     response_results = response.json()["results"]
 
-    assert response_results[0]["program_slug"] is None
-    assert response_results[1]["program_slug"] == program_1.slug
-    assert response_results[2]["program_slug"] == program_2.slug
-    assert response_results[3]["program_slug"] == program_1.slug
+    assert response_results[0]["program_code"] is None
+    assert response_results[1]["program_code"] == program_1.code
+    assert response_results[2]["program_code"] == program_2.code
+    assert response_results[3]["program_code"] == program_1.code
 
 
 @pytest.mark.enable_activity_log

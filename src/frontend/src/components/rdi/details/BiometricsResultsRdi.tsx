@@ -64,26 +64,26 @@ const BiometricsResultsRdi = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
 
   const individual1Query = useQuery({
-    queryKey: ['individual', individual1?.id, businessAreaSlug, programSlug],
+    queryKey: ['individual', individual1?.id, businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
         id: individual1?.id,
-        programSlug,
+        programCode,
       }),
     enabled: dialogOpen && !!individual1?.id,
   });
 
   const individual2Query = useQuery({
-    queryKey: ['individual', individual2?.id, businessAreaSlug, programSlug],
+    queryKey: ['individual', individual2?.id, businessAreaSlug, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsRetrieve({
         businessAreaSlug,
         id: individual2?.id,
-        programSlug,
+        programCode,
       }),
     enabled: dialogOpen && !!individual2?.id,
   });

@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Any
 
-from django.db.models import DecimalField, Sum
+from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Coalesce
 
 from hope.models import Household, Payment
@@ -14,8 +14,8 @@ def delivered_quantity_service(household: Household) -> list[dict[str, Any]]:
     )
     quantities_per_currency = (
         payment_items.exclude(status=Payment.STATUS_FORCE_FAILED)
-        .exclude(currency="USD")
-        .values("currency")
+        .exclude(currency__code="USD")
+        .values(currency_code=F("currency__code"))
         .annotate(
             total_delivered_quantity=Coalesce(Sum("delivered_quantity", output_field=DecimalField()), Decimal(0.0))
         )
@@ -24,7 +24,7 @@ def delivered_quantity_service(household: Household) -> list[dict[str, Any]]:
     results = [
         {
             "total_delivered_quantity": quantity["total_delivered_quantity"],
-            "currency": quantity["currency"],
+            "currency": quantity["currency_code"],
         }
         for quantity in quantities_per_currency
     ]

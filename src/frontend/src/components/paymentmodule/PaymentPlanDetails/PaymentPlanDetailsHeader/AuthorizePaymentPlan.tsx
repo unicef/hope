@@ -44,18 +44,18 @@ export function AuthorizePaymentPlan({
     mutationFn: ({
       businessAreaSlug,
       id,
-      programSlug,
+      programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
-      programSlug: string;
+      programCode: string;
       requestBody: AcceptanceProcess;
     }) =>
       RestService.restBusinessAreasProgramsPaymentPlansAuthorizeCreate({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         requestBody,
       }),
     onSuccess: () => {
@@ -75,13 +75,12 @@ export function AuthorizePaymentPlan({
   });
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
+    const latestApprovalProcess =
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const authorizationNumberRequired =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        ?.authorizationNumberRequired;
-
+      latestApprovalProcess?.authorizationNumberRequired;
     const authorizationsCount =
-      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
-        .actions?.authorization?.length;
+      latestApprovalProcess?.actions?.authorization?.length;
 
     return authorizationNumberRequired - 1 === authorizationsCount;
   };
@@ -93,7 +92,7 @@ export function AuthorizePaymentPlan({
         authorize({
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
-          programSlug: programId,
+          programCode: programId,
           requestBody: {
             comment: values.comment,
           },

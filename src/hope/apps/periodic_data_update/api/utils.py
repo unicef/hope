@@ -13,6 +13,10 @@ def add_round_names_to_rounds_data(rounds_data: list[dict[str, Any]], program: P
 
         try:
             flex_attribute = FlexibleAttribute.objects.select_related("pdu_data").get(name=field_name, program=program)
+            if round_number is None:
+                raise serializers.ValidationError(
+                    {"rounds_data": f"Round number is required for field '{field_name}'."}
+                )
             round_index = round_number - 1
             round_data["round_name"] = flex_attribute.pdu_data.rounds_names[round_index]
         except FlexibleAttribute.DoesNotExist:  # pragma: no cover

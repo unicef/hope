@@ -49,7 +49,7 @@ def deduplication_flags_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:programs:programs-deduplication-flags",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "slug": program.slug,
+            "code": program.code,
         },
     )
 

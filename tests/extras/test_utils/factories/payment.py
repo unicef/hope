@@ -1,6 +1,6 @@
 """Payment-related factories."""
 
-from datetime import date, timedelta
+from datetime import UTC, date, timedelta
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
@@ -13,7 +13,9 @@ from hope.models import (
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -26,13 +28,14 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    WesternUnionData,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
 )
 
 from . import HouseholdFactory, IndividualFactory
 from .account import UserFactory
-from .core import BusinessAreaFactory
+from .core import BusinessAreaFactory, CurrencyFactory
 from .program import ProgramCycleFactory
 
 
@@ -79,6 +82,7 @@ class ApprovalFactory(DjangoModelFactory):
 class AccountTypeFactory(DjangoModelFactory):
     class Meta:
         model = AccountType
+        django_get_or_create = ("key",)
 
     key = factory.Sequence(lambda n: f"account_type_{n}")
     label = factory.Sequence(lambda n: f"Account Type {n}")
@@ -102,7 +106,7 @@ class PaymentFactory(DjangoModelFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory)
     status_date = factory.LazyFunction(timezone.now)
-    currency = "PLN"
+    currency = factory.SubFactory(CurrencyFactory)
     business_area = factory.SelfAttribute("parent.business_area")
     household = factory.SubFactory(
         HouseholdFactory,
@@ -116,6 +120,7 @@ class PaymentFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..household.program"),
         registration_data_import=factory.SelfAttribute("..household.registration_data_import"),
     )
+    financial_service_provider = factory.SelfAttribute("parent.financial_service_provider")
 
 
 class PaymentHouseholdSnapshotFactory(DjangoModelFactory):
@@ -171,6 +176,7 @@ class PaymentVerificationFactory(DjangoModelFactory):
     payment = factory.SubFactory(
         PaymentFactory, parent=factory.SelfAttribute("..payment_verification_plan.payment_plan")
     )
+    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=UTC)
 
 
 class DeliveryMechanismFactory(DjangoModelFactory):
@@ -222,6 +228,13 @@ class WesternUnionInvoiceFactory(DjangoModelFactory):
     name = factory.Sequence(lambda n: f"WU Invoice {n}")
 
 
+class WesternUnionDataFactory(DjangoModelFactory):
+    class Meta:
+        model = WesternUnionData
+
+    name = factory.Sequence(lambda n: f"WU Data {n}")
+
+
 class FinancialInstitutionFactory(DjangoModelFactory):
     class Meta:
         model = FinancialInstitution
@@ -236,3 +249,20 @@ class WesternUnionPaymentPlanReportFactory(DjangoModelFactory):
 
     qcf_file = factory.SubFactory(WesternUnionInvoiceFactory)
     payment_plan = factory.SubFactory(PaymentPlanFactory)
+
+
+class DeliveryMechanismConfigFactory(DjangoModelFactory):
+    class Meta:
+        model = DeliveryMechanismConfig
+
+    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
+    fsp = factory.SubFactory(FinancialServiceProviderFactory)
+
+
+class FinancialInstitutionMappingFactory(DjangoModelFactory):
+    class Meta:
+        model = FinancialInstitutionMapping
+
+    financial_institution = factory.SubFactory(FinancialInstitutionFactory)
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
+    code = factory.Sequence(lambda n: f"CODE{n}")

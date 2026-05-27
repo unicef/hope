@@ -147,7 +147,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         null=True,
         default=None,
     )
-    business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
+    business_area = models.ForeignKey(BusinessArea, null=True, blank=True, on_delete=models.CASCADE)
     # TODO: set to not nullable Program and on_delete=models.PROTECT
     program = models.ForeignKey(
         "program.Program",
@@ -202,6 +202,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     dedup_engine_batch_duplicates = models.PositiveIntegerField(default=0)
     dedup_engine_golden_record_duplicates = models.PositiveIntegerField(default=0)
 
+    country_workspace_id = models.CharField(max_length=255, null=True, blank=True)
+
     def __str__(self) -> str:
         return self.name
 
@@ -209,7 +211,20 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         app_label = "registration_data"
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
-        permissions = (("rerun_rdi", "Can Rerun RDI"),)
+        permissions = (
+            ("rerun_rdi", "Can Rerun RDI"),
+            ("fetch_biometric_deduplication_results", "Can Fetch Biometric Duplication Results"),
+            ("delete_rdi", "Can Delete RDI"),
+            ("delete_merged_rdi", "Can Delete Merged RDI"),
+        )
+        ordering = ("id",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["country_workspace_id"],
+                condition=Q(country_workspace_id__isnull=False),
+                name="unique_rdi_country_workspace_id",
+            ),
+        ]
 
     def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
@@ -232,6 +247,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
 
     def can_be_merged(self) -> bool:
         return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
+
+    @property
+    def is_coming_from_cw(self) -> bool:
+        return self.country_workspace_id is not None
 
     def refresh_population_statistics(self) -> None:
         self.number_of_individuals = Individual.objects.filter(registration_data_import=self).count()

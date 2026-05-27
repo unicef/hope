@@ -2,9 +2,10 @@ from _decimal import Decimal
 import dataclasses
 from enum import Enum
 import logging
-from typing import Any
+from typing import Any, cast
 
-from django.db.models import QuerySet
+from django.db import transaction
+from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
 from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
@@ -36,7 +37,7 @@ logger = logging.getLogger(__name__)
 class FlexibleArgumentsDataclassMixin:
     @classmethod
     def create_from_dict(cls, _dict: dict) -> Any:
-        class_fields = {f.name for f in dataclasses.fields(cls)}
+        class_fields = {f.name for f in dataclasses.fields(cls)}  # type: ignore[arg-type]
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
@@ -65,22 +66,22 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
 
     def get_fsp(self, obj: Any) -> str:
-        return obj.financial_service_provider.payment_gateway_id
+        return obj.payment_plan.financial_service_provider.payment_gateway_id
 
     def get_payload(self, obj: Any) -> dict:
+        business_area = obj.payment_plan.business_area
+        payment_country = business_area.payment_countries.first()
         payload = {
-            "destination_currency": obj.payment_plan.currency,
+            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "user": self.context["user_email"],
-            "config_key": obj.payment_plan.business_area.code,
-            "delivery_mechanism": obj.delivery_mechanism.code,
+            "config_key": business_area.code,
+            "delivery_mechanism": obj.payment_plan.delivery_mechanism.code,
+            "office": business_area.slug,
+            "country": payment_country.iso_code3 if payment_country else None,
         }
-        if obj.payment_plan.business_area.payment_countries.count() == 1:  # TODO temporary solution
-            payload["destination_country_iso_code3"] = (
-                obj.payment_plan.business_area.payment_countries.first().iso_code2
-            )
-            payload["destination_country_iso_code2"] = (
-                obj.payment_plan.business_area.payment_countries.first().iso_code3
-            )
+        if payment_country:  # TODO temporary solution
+            payload["destination_country_iso_code3"] = payment_country.iso_code3
+            payload["destination_country_iso_code2"] = payment_country.iso_code2
         return payload
 
     def get_external_code(self, obj: Any) -> str:
@@ -132,7 +133,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                 account_data["service_provider_code"] = fsp_mapping.code
 
             except FinancialInstitutionMapping.DoesNotExist:
-                raise Exception(
+                logger.error(
                     f"No Financial Institution Mapping found for"
                     f" financial_institution {financial_institution},"
                     f" fsp {obj.financial_service_provider},"
@@ -159,7 +160,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                     account_data["service_provider_code"] = fsp_mapping.code
 
                 except FinancialInstitutionMapping.DoesNotExist:
-                    raise Exception(
+                    logger.error(
                         f"No Financial Institution Mapping found for"
                         f" financial_institution_code {financial_institution_code},"
                         f" fsp {obj.financial_service_provider},"
@@ -178,13 +179,13 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
     def get_payload(self, obj: Payment) -> dict:
         snapshot_data = self.get_extra_data(obj)
-        collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or {}
+        collector_data = snapshot_data.get(f"{obj.collector_type}_collector".lower(), {})
         account_data = collector_data.get("account_data", {})
         account_type = obj.delivery_type.account_type and obj.delivery_type.account_type.key
 
         payload_data = {
             "amount": obj.entitlement_quantity,
-            "destination_currency": obj.currency,
+            "destination_currency": obj.currency.code if obj.currency else None,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": account_type,
             "collector_id": collector_data.get("unicef_id", ""),
@@ -258,7 +259,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
             logger.warning(f"Invalid Payment status: {self.status}")
             hope_status = Payment.STATUS_ERROR
 
-        return hope_status() if callable(hope_status) else hope_status
+        return cast("str", hope_status() if callable(hope_status) else hope_status)
 
 
 @dataclasses.dataclass()
@@ -292,8 +293,10 @@ class FspData(FlexibleArgumentsDataclassMixin):
     configs: list[FspConfig | dict]
 
     def __post_init__(self) -> None:
-        if self.configs and isinstance(self.configs[0], dict):
-            self.configs = [FspConfig.create_from_dict(config) for config in self.configs]  # type: ignore
+        self.configs = [
+            FspConfig.create_from_dict(config)  # type: ignore
+            for config in self.configs
+        ]
 
 
 @dataclasses.dataclass()
@@ -375,7 +378,7 @@ class PaymentGatewayAPI(BaseAPI):
         validate_response: bool = True,
     ) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,
@@ -450,7 +453,7 @@ class PaymentGatewayService:
         obj: PaymentPlanSplit,
         validate_response: bool = True,
     ) -> str | None:
-        if obj.is_payment_gateway:
+        if obj.payment_plan.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(
                 new_status, obj.id, validate_response=validate_response
             )
@@ -499,8 +502,10 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments_qs = split.split_payment_items.eligible().filter(
-                    status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR]
+                payments_qs = (
+                    split.split_payment_items.eligible()
+                    .select_related("currency")
+                    .filter(status__in=[Payment.STATUS_PENDING, Payment.STATUS_ERROR])
                 )
                 if id_filters:
                     # filter by id to add missing records to payment instructions
@@ -509,49 +514,87 @@ class PaymentGatewayService:
 
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
+
+        all_pg_ids = [str(fsp_data.id) for fsp_data in fsps_data]
+        all_vendor_numbers = [fsp_data.vendor_number for fsp_data in fsps_data if fsp_data.vendor_number]
+        all_dm_pg_ids = {str(config.delivery_mechanism) for fsp_data in fsps_data for config in fsp_data.configs}
+
+        fsps_by_pg_id = {
+            fsp.payment_gateway_id: fsp
+            for fsp in FinancialServiceProvider.objects.filter(payment_gateway_id__in=all_pg_ids)
+        }
+        fsps_by_vendor_number = {
+            fsp.vision_vendor_number: fsp
+            for fsp in FinancialServiceProvider.objects.filter(vision_vendor_number__in=all_vendor_numbers)
+        }
+        delivery_mechanisms_by_pg_id = {
+            dm.payment_gateway_id: dm for dm in DeliveryMechanism.objects.filter(payment_gateway_id__in=all_dm_pg_ids)
+        }
+
         for fsp_data in fsps_data:
-            fsp, created = FinancialServiceProvider.objects.update_or_create(
-                payment_gateway_id=fsp_data.id,
-                defaults={
-                    "vision_vendor_number": fsp_data.vendor_number,
-                    "name": fsp_data.name,
-                    "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
-                },
-            )
+            with transaction.atomic():
+                payment_gateway_id = str(fsp_data.id)
 
-            if not created:
-                fsp.delivery_mechanisms.clear()
-            delivery_mechanisms_pg_ids = {config.delivery_mechanism for config in fsp_data.configs}
-            if delivery_mechanisms_pg_ids:
-                delivery_mechanisms = DeliveryMechanism.objects.filter(
-                    payment_gateway_id__in=delivery_mechanisms_pg_ids
-                )
-                fsp.delivery_mechanisms.set(delivery_mechanisms)
+                fsp = fsps_by_pg_id.get(payment_gateway_id)
+                created = False
+                if not fsp:
+                    if not fsp_data.vendor_number:
+                        raise ValueError(f"Payment Gateway FSP {fsp_data.name} is missing vendor_number")
 
-            # get last config for dm which doesn't have country assigned
-            dm_required_fields = {}
-            for config in fsp_data.configs:
-                if not config.country:
-                    dm_required_fields[config.delivery_mechanism] = config.required_fields
+                    fsp = fsps_by_vendor_number.get(fsp_data.vendor_number)
+                    if fsp:
+                        if fsp.payment_gateway_id and fsp.payment_gateway_id != payment_gateway_id:
+                            raise ValueError(
+                                f"FSP {fsp.name} already has a different payment_gateway_id: "
+                                f"{fsp.payment_gateway_id} != {payment_gateway_id}"
+                            )
+                        fsp.payment_gateway_id = payment_gateway_id
+                    else:
+                        fsp = FinancialServiceProvider(
+                            payment_gateway_id=payment_gateway_id,
+                            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                        )
+                        created = True
 
-            for dm_id, required_fields in dm_required_fields.items():
-                DeliveryMechanismConfig.objects.update_or_create(
-                    delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
-                    fsp=fsp,
-                    country=None,  # TODO create config for each country in configs data?
-                    defaults={"required_fields": required_fields},
-                )
+                fsp.vision_vendor_number = fsp_data.vendor_number
+                fsp.name = fsp_data.name
+                fsp.data_transfer_configuration = [dataclasses.asdict(config) for config in fsp_data.configs]  # type: ignore
+                fsp.save()
 
-                for required_field in required_fields:
-                    FspNameMapping.objects.get_or_create(
-                        external_name=required_field,
-                        fsp=fsp,
-                        defaults={
-                            "hope_name": required_field,
-                            "source": FspNameMapping.SourceModel.ACCOUNT,
-                        },
+                if delivery_mechanisms_pg_ids := {str(config.delivery_mechanism) for config in fsp_data.configs}:
+                    if not created:
+                        fsp.delivery_mechanisms.clear()
+                    fsp.delivery_mechanisms.set(
+                        [
+                            delivery_mechanisms_by_pg_id[pg_id]
+                            for pg_id in delivery_mechanisms_pg_ids
+                            if pg_id in delivery_mechanisms_by_pg_id
+                        ]
                     )
+
+                # get last config for dm which doesn't have country assigned
+                dm_required_fields = {}
+                for config in fsp_data.configs:
+                    if not config.country:
+                        dm_required_fields[str(config.delivery_mechanism)] = config.required_fields
+
+                for dm_id, required_fields in dm_required_fields.items():
+                    DeliveryMechanismConfig.objects.update_or_create(
+                        delivery_mechanism=delivery_mechanisms_by_pg_id[dm_id],
+                        fsp=fsp,
+                        country=None,  # TODO create config for each country in configs data?
+                        defaults={"required_fields": required_fields},
+                    )
+
+                    for required_field in required_fields:
+                        FspNameMapping.objects.get_or_create(
+                            external_name=required_field,
+                            fsp=fsp,
+                            defaults={
+                                "hope_name": required_field,
+                                "source": FspNameMapping.SourceModel.ACCOUNT,
+                            },
+                        )
 
     def sync_account_types(self) -> None:
         account_types_data = self.api.get_account_types()
@@ -571,7 +614,7 @@ class PaymentGatewayService:
         pg_payment_records: list[PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
-        exchange_rate: float,
+        exchange_rate: Decimal | float | None,
     ) -> None:
         try:
             matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
@@ -579,7 +622,7 @@ class PaymentGatewayService:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return
 
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
+        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -605,38 +648,42 @@ class PaymentGatewayService:
             payment.delivery_date = delivery_date
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity),  # type: ignore
+                amount=Decimal(delivered_quantity),  # type: ignore[arg-type]
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate),
+                exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
 
         payment.save(update_fields=update_fields)
 
     def sync_records(self) -> None:
-        payment_plans = (
-            PaymentPlan.objects.prefetch_related("splits", "splits__split_payment_items")
-            .filter(
-                splits__sent_to_payment_gateway=True,
-                status=PaymentPlan.Status.ACCEPTED,
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            )
-            .distinct()
+        payment_plans = PaymentPlan.objects.prefetch_related(
+            "splits",
+            Prefetch(
+                "splits__split_payment_items",
+                queryset=Payment.objects.eligible()
+                .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
+                .order_by("unicef_id")
+                .select_related("household_snapshot", "delivery_type", "currency"),
+                to_attr="eligible_items",
+            ),
+        ).filter(
+            Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
+            Q(use_payment_gateway=True)
+            | Q(financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
+            status=PaymentPlan.Status.ACCEPTED,
+            financial_service_provider__isnull=False,
         )
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.exchange_rate
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
-                payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
+                payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
+
                 for instruction in payment_instructions:
-                    pending_payments = (
-                        instruction.split_payment_items.eligible()
-                        .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
-                        .order_by("unicef_id")
-                    )
-                    if pending_payments.exists():
+                    pending_payments = getattr(instruction, "eligible_items", [])
+                    if pending_payments:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
                             self.update_payment(
@@ -646,8 +693,8 @@ class PaymentGatewayService:
                                 payment_plan,
                                 exchange_rate,
                             )
-                        payment_plan.update_money_fields()
 
+                payment_plan.update_money_fields()
                 if payment_plan.is_reconciled:
                     flow = PaymentPlanFlow(payment_plan)
                     flow.status_finished()
@@ -665,7 +712,7 @@ class PaymentGatewayService:
             self.update_payment(
                 payment,
                 [pg_payment_record],
-                payment.parent_split,
+                payment.parent_split,  # type: ignore[arg-type]
                 payment_plan,
                 payment_plan.exchange_rate,
             )
@@ -690,7 +737,11 @@ class PaymentGatewayService:
         payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
 
         for instruction in payment_instructions:
-            payments = instruction.split_payment_items.eligible().all().order_by("unicef_id")
+            payments = (
+                instruction.split_payment_items.eligible()
+                .order_by("unicef_id")
+                .select_related("household_snapshot", "delivery_type", "currency")
+            )
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
             for payment in payments:
                 self.update_payment(
@@ -714,6 +765,13 @@ class PaymentGatewayService:
 
     def sync_delivery_mechanisms(self) -> None:
         delivery_mechanisms: list[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
+        dm_account_types = [dm.account_type for dm in delivery_mechanisms if dm.account_type]
+
+        account_types = AccountType.objects.filter(payment_gateway_id__in=dm_account_types).only(
+            "id", "payment_gateway_id"
+        )
+        account_type_map = {str(account_type.payment_gateway_id): account_type for account_type in account_types}
+
         for dm in delivery_mechanisms:
             DeliveryMechanism.objects.update_or_create(
                 payment_gateway_id=dm.id,
@@ -722,9 +780,7 @@ class PaymentGatewayService:
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
-                    "account_type": (
-                        AccountType.objects.get(payment_gateway_id=dm.account_type) if dm.account_type else None
-                    ),
+                    "account_type": account_type_map.get(str(dm.account_type)) if dm.account_type else None,
                 },
             )
 

@@ -348,6 +348,7 @@ def test_import_with_missing_account_type(
     business_area,
     somalia_excel_file_exact,
     registration_data_import,
+    generic_financial_institutions,
 ):
     parser = XlsxSomaliaParser(business_area)
     parser.parse(somalia_excel_file_exact)

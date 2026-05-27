@@ -33,16 +33,16 @@ export const ProgramCycleDetailsHeader = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesFinishCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -65,16 +65,16 @@ export const ProgramCycleDetailsHeader = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
       }) =>
         RestService.restBusinessAreasProgramsCyclesReactivateCreate({
           businessAreaSlug,
           id,
-          programSlug,
+          programCode,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -104,7 +104,7 @@ export const ProgramCycleDetailsHeader = ({
       await finishMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
@@ -117,7 +117,7 @@ export const ProgramCycleDetailsHeader = ({
       await reactivateMutation({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: programId,
+        programCode: programId,
       });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {

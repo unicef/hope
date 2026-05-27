@@ -48,7 +48,7 @@ export function LookUpReassignRole({
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: selectedIndividualId,
         }),
       enabled: !!selectedIndividualId,

@@ -17,7 +17,6 @@ from extras.test_utils.factories import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
@@ -51,7 +50,7 @@ def program(business_area: Any) -> Any:
 def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> dict[str, Any]:
     payment_record_amount = 2
 
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
@@ -64,7 +63,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
         payment_plan=payment_plan,
     )
     individuals = []
-    version_key = f":1:{business_area.slug}:1:{program.slug}:registration_data_import_list"
+    version_key = f":1:{business_area.slug}:1:{program.code}:registration_data_import_list"
     cache.set(version_key, 1)
     for i in range(payment_record_amount):
         registration_data_import = RegistrationDataImportFactory(
@@ -89,7 +88,6 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
             head_of_household=head,
             collector=head,
             delivered_quantity=200,
-            currency="PLN",
         )
 
         PaymentVerificationFactory(
@@ -101,7 +99,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
 
     other_program = ProgramFactory(business_area=business_area)
     other_program.admin_areas.set([AreaFactory(), AreaFactory(), AreaFactory()])
-    other_cycle = ProgramCycleFactory(program=other_program)
+    other_cycle = other_program.cycles.first()
     other_payment_plan = PaymentPlanFactory(
         program_cycle=other_cycle,
         business_area=business_area,
@@ -134,7 +132,6 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
             head_of_household=other_household.head_of_household,
             collector=other_household.head_of_household,
             delivered_quantity=200,
-            currency="PLN",
         )
 
         PaymentVerificationFactory(
@@ -308,6 +305,39 @@ def test_failing_rapid_pro_during_cash_plan_payment_verification(
     )
 
 
+def test_activate_rapidpro_stores_flat_uuid_list(
+    rapidpro_verification_setup: dict[str, Any],
+) -> None:
+    verification = rapidpro_verification_setup["verification"]
+
+    flow_uuid_1 = str(uuid.uuid4())
+    flow_uuid_2 = str(uuid.uuid4())
+
+    post_request_mock = MagicMock()
+    post_request_mock.side_effect = [
+        {"uuid": flow_uuid_1},
+        {"uuid": flow_uuid_2},
+    ]
+
+    with (
+        patch.object(RapidProAPI, "MAX_URNS_PER_REQUEST", 1),
+        patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+            MagicMock(return_value=None),
+        ),
+        patch(
+            "hope.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+            post_request_mock,
+        ),
+    ):
+        VerificationPlanStatusChangeServices(verification).activate()
+
+    verification.refresh_from_db()
+    assert set(verification.rapid_pro_flow_start_uuids) == {flow_uuid_1, flow_uuid_2}
+    assert all(isinstance(uid, str) for uid in verification.rapid_pro_flow_start_uuids)
+    assert all("{" not in uid for uid in verification.rapid_pro_flow_start_uuids)
+
+
 def test_does_payment_record_have_right_hoh_phone_number(
     rapidpro_verification_setup: dict[str, Any],
 ) -> None:
@@ -343,13 +373,29 @@ def test_does_payment_record_have_right_hoh_phone_number(
     assert result is True
 
 
+def test_activate_raises_when_cache_lock_is_taken(
+    rapidpro_verification_setup: dict[str, Any],
+) -> None:
+    verification = rapidpro_verification_setup["verification"]
+    lock_key = f"payment_verification_plan_activate_rapidpro_{verification.id}"
+
+    holder = cache.lock(lock_key, timeout=60 * 5)
+    holder.acquire(blocking=False)
+
+    try:
+        with pytest.raises(ValidationError, match="RapidPro activation already in progress"):
+            VerificationPlanStatusChangeServices(verification).activate()
+    finally:
+        holder.release()
+
+
 def test_export_xlsx_validation_if_no_records(
     business_area: Any,
     user: Any,
     program: Any,
 ) -> None:
     payment_plan = PaymentPlanFactory(
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=program.cycles.first(),
         business_area=business_area,
         created_by=user,
     )

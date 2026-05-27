@@ -88,6 +88,9 @@ class FlexibleAttributeForPDUService:
 
                 pdu_data = pdu_field.pop("pdu_data")
 
+                if pdu_data_object is None:
+                    continue
+
                 if pdu_data["number_of_rounds"] == pdu_data_object.number_of_rounds:
                     continue
 

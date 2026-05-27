@@ -49,7 +49,7 @@ export function ImportedPeopleTable({
       household,
       duplicatesOnly: showDuplicates,
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
       page,
     }),
     [rdiId, household, showDuplicates, businessArea, programId, page],
@@ -70,7 +70,7 @@ export function ImportedPeopleTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
@@ -87,7 +87,7 @@ export function ImportedPeopleTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
         ),
       ),

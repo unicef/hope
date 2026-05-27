@@ -50,4 +50,4 @@ def log_entry(db, business_area, program, superuser):
 
 def test_list_activity_logs(superuser, business_area, program, role_assignment, log_entry):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
-    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}/activity-logs/")
+    recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/activity-logs/")

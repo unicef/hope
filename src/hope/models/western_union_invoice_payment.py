@@ -22,10 +22,13 @@ class WesternUnionInvoicePayment(models.Model):
     transaction_status = models.CharField(
         max_length=1,
         choices=TRANSACTION_STATUS_CHOICES,
+        null=True,
+        blank=True,
     )
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.payment.unicef_id} - {self.transaction_status}"

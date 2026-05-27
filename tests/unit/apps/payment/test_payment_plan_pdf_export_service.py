@@ -12,7 +12,7 @@ from extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import PaymentPlanPDFExportService
 from hope.models import Approval, DataCollectingType, Payment, PaymentPlan
 
@@ -34,7 +34,7 @@ def financial_service_provider(delivery_mechanism_cash: Any) -> Any:
 @pytest.fixture
 def program_and_cycle() -> dict[str, Any]:
     program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     return {"program": program, "program_cycle": program_cycle}
 
 
@@ -58,7 +58,6 @@ def payment_plan(
         delivered_quantity=Decimal("0.00"),
         entitlement_quantity_usd=Decimal("20.00"),
         delivered_quantity_usd=Decimal("0.00"),
-        currency="PLN",
         status=Payment.STATUS_PENDING,
     )
     PaymentFactory(
@@ -67,7 +66,6 @@ def payment_plan(
         delivered_quantity=Decimal("10.00"),
         entitlement_quantity_usd=Decimal("20.00"),
         delivered_quantity_usd=Decimal("20.00"),
-        currency="PLN",
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     PaymentFactory(
@@ -76,7 +74,6 @@ def payment_plan(
         delivered_quantity=Decimal("5.00"),
         entitlement_quantity_usd=Decimal("20.00"),
         delivered_quantity_usd=Decimal("10.00"),
-        currency="PLN",
         status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     PaymentFactory(
@@ -85,7 +82,6 @@ def payment_plan(
         delivered_quantity=Decimal("0.00"),
         entitlement_quantity_usd=Decimal("200.00"),
         delivered_quantity_usd=Decimal("0.00"),
-        currency="PLN",
         status=Payment.STATUS_NOT_DISTRIBUTED,
     )
     payment_plan.update_money_fields()

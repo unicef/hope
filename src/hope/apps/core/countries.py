@@ -1021,6 +1021,11 @@ class SanctionListCountries:
             "SRB",
         ),
         (
+            "Serbia and Montenegro",
+            "CS",
+            "SCG",
+        ),
+        (
             "Seychelles",
             "SC",
             "SYC",

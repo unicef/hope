@@ -8,6 +8,7 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     AreaFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
@@ -21,6 +22,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
+from hope.apps.household.const import ROLE_ALTERNATE
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
     PaymentListSerializer,
@@ -369,7 +371,6 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["reconciliation_summary"]["number_of_payments"] == 1
     assert data["excluded_households"] == []
     assert data["excluded_individuals"] == []
-    assert data["fsp_communication_channel"] == "XLSX"
     assert data["can_create_follow_up"] is False
     assert data["can_split"] is True
     assert data["can_export_xlsx"] is False
@@ -377,6 +378,26 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["can_send_xlsx_password"] is False
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
+
+
+def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
+    payment_plan_detail_context: dict[str, Any],
+) -> None:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    user = payment_plan_detail_context["user"]
+    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.exchange_rate = 1.25
+    payment_plan.custom_exchange_rate = True
+    payment_plan.save(update_fields=["status", "currency", "exchange_rate", "custom_exchange_rate"])
+    payment_plan.get_unore_exchange_rate = Mock(return_value=2.0)
+
+    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
+
+    assert data["exchange_rate"] == "1.25000000"
+    assert data["custom_exchange_rate"] is True
+    assert data["unore_exchange_rate"] == 2.0
+    payment_plan.get_unore_exchange_rate.assert_called_once_with()
 
 
 def test_payment_plan_detail_can_export_xlsx(payment_plan_detail_context: dict[str, Any]) -> None:
@@ -394,7 +415,6 @@ def test_payment_plan_detail_can_export_xlsx(payment_plan_detail_context: dict[s
     RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["fsp_communication_channel"] == "API"
     assert data["can_export_xlsx"] is False
 
 
@@ -413,7 +433,6 @@ def test_payment_plan_detail_can_download_xlsx(payment_plan_detail_context: dict
     RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["fsp_communication_channel"] == "API"
     assert data["can_download_xlsx"] is False
 
 
@@ -432,7 +451,6 @@ def test_payment_plan_detail_can_send_xlsx_password(payment_plan_detail_context:
     RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["fsp_communication_channel"] == "API"
     assert data["can_send_xlsx_password"] is False
 
 
@@ -503,3 +521,68 @@ def test_volume_by_delivery_mechanism_serializer_get_volume_fields(volume_by_del
 
     assert data["volume"] == 222
     assert data["volume_usd"] == 111
+
+
+def test_payment_list_serializer_snapshot_collector_data_with_collector_type_primary(
+    payment_list_context: dict[str, Any],
+) -> None:
+    payment = payment_list_context["payment"]
+    household_data = {
+        "primary_collector": {"full_name": "Test Primary Collector"},
+        "alternate_collector": {"full_name": "Test Alternate Collector"},
+    }
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data=household_data,
+        household_id=payment.household.id,
+    )
+    payment = Payment.objects.get(id=payment.id)
+    full_name = PaymentListSerializer.get_collector_field(payment, "full_name", "PRIMARY")
+    assert full_name == "Test Primary Collector"
+
+
+def test_payment_list_serializer_snapshot_collector_data_with_collector_type_alternate(
+    payment_list_context: dict[str, Any],
+) -> None:
+    payment = payment_list_context["payment"]
+    household_data = {
+        "primary_collector": {"full_name": "Test Primary Collector"},
+        "alternate_collector": {"full_name": "Test Alternate Collector"},
+    }
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data=household_data,
+        household_id=payment.household.id,
+    )
+    payment = Payment.objects.get(id=payment.id)
+    full_name = PaymentListSerializer.get_collector_field(payment, "full_name", "ALTERNATE")
+    assert full_name == "Test Alternate Collector"
+
+
+def test_payment_list_serializer_snapshot_collector_data_with_collector_type_based_on_payment(
+    payment_list_context: dict[str, Any],
+) -> None:
+    payment = payment_list_context["payment"]
+    household_data = {
+        "primary_collector": {"full_name": "Test Primary Collector"},
+        "alternate_collector": {"full_name": "Test Alternate Collector"},
+    }
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data=household_data,
+        household_id=payment.household.id,
+    )
+    payment = Payment.objects.get(id=payment.id)
+
+    assert payment.collector_is_primary is True
+    full_name = PaymentListSerializer.get_collector_field(payment, "full_name")
+    assert full_name == "Test Primary Collector"
+
+    payment.collector_type = ROLE_ALTERNATE
+    payment.save()
+    role = payment.collector.households_and_roles.first()
+    role.role = ROLE_ALTERNATE
+    role.save()
+    assert payment.collector_is_alternate is True
+    full_name_alt = PaymentListSerializer.get_collector_field(payment, "full_name")
+    assert full_name_alt == "Test Alternate Collector"

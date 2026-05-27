@@ -35,7 +35,7 @@ function VerificationPaymentDetailsPage(): ReactElement {
           businessAreaSlug: businessArea,
           paymentVerificationPk: paymentPlanId,
           id,
-          programSlug: programId,
+          programCode: programId,
         },
       ),
   });

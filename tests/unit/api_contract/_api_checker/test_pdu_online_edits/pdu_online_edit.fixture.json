@@ -6,7 +6,6 @@
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
-                "celery_tasks_results_ids": {},
                 "name": "Online Edit 0",
                 "business_area": "e609466f-4754-411e-8ad5-e6362ddad708",
                 "program": "8ed32caf-b7e7-49be-b8cf-3714bbae3cdc",
@@ -72,9 +71,8 @@
                     "beneficiary_group": "f88c93c6-c6b4-414a-8a7d-9a47da7c9693",
                     "business_area": "e609466f-4754-411e-8ad5-e6362ddad708",
                     "name": "Program 0",
-                    "programme_code": "679S",
                     "status": "ACTIVE",
-                    "slug": "679s",
+                    "code": "679s",
                     "description": "",
                     "start_date": "2025-01-01",
                     "end_date": "2026-01-01",

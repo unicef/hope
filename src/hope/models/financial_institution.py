@@ -24,6 +24,7 @@ class FinancialInstitution(TimeStampedModel):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     @classmethod
     def get_rdi_template_choices(cls) -> dict:

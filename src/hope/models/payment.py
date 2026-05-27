@@ -13,8 +13,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
-from rest_framework.exceptions import ValidationError as DRFValidationError
 
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_CHOICE, ROLE_PRIMARY
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.models.individual import Individual
@@ -97,15 +97,21 @@ class Payment(
     # use program_id in UniqueConstraint order_number and token_number per Program
     program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
     household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True)
-    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True, blank=True)
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True, blank=True)
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True, blank=True
     )
     collector = models.ForeignKey(
         "household.Individual",
         on_delete=models.PROTECT,
         related_name="collector_payments",
+    )
+    collector_type = models.CharField(
+        max_length=120,
+        default=ROLE_PRIMARY,
+        choices=ROLE_CHOICE,
+        help_text="Collector type using for payment, by default is Primary",
     )
     source_payment = models.ForeignKey(
         "self",
@@ -121,10 +127,18 @@ class Payment(
         default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
-    currency = models.CharField(
-        max_length=4,
+    currency_old = models.CharField(
+        max_length=5,
         null=True,
         blank=True,
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payments",
+        help_text="Currency",
     )
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
@@ -202,7 +216,7 @@ class Payment(
         help_text="Sent to FSP on date",
     )
 
-    objects = PaymentManager()
+    objects = PaymentManager()  # type: ignore[assignment]
 
     class Meta:
         app_label = "payment"
@@ -223,7 +237,7 @@ class Payment(
                 name="token_number_unique_per_program",
             ),
         ]
-        ordering = ("id",)
+        ordering = ("-created_at",)
 
     signature_fields = (
         "parent_id",
@@ -245,7 +259,7 @@ class Payment(
         "household_id",
         "head_of_household_id",
         "delivery_type",
-        "currency",
+        "currency.code",
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",
@@ -319,10 +333,20 @@ class Payment(
             return prefetched[0] if prefetched else None
         return household.individuals.select_related().first()
 
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
+    @property
+    def collector_is_alternate(self) -> bool:
+        return self.collector_type == ROLE_ALTERNATE
+
+    @property
+    def collector_is_primary(self) -> bool:
+        return self.collector_type == ROLE_PRIMARY
+
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
+        if self.entitlement_quantity is None:
+            raise ValueError("entitlement_quantity must not be None")
         if delivered_quantity < self.entitlement_quantity:
             return Payment.STATUS_DISTRIBUTION_PARTIAL
 
@@ -332,13 +356,3 @@ class Payment(
         raise ValidationError(
             f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
         )
-
-    def validate_payment_fsp_communication_channel(self) -> None:
-        """Validate payment fsp communication channel XLSX for manual mark as failed."""
-        from hope.models import FinancialServiceProvider
-
-        if (
-            not self.financial_service_provider.communication_channel
-            == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
-        ):
-            raise DRFValidationError("Only Payment with FSP communication channel XLSX can be manually mark as failed")

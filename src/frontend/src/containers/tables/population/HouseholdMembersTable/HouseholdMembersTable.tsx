@@ -103,7 +103,7 @@ export const HouseholdMembersTable = ({
   const initialQueryVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
-      programSlug: programId,
+      programCode: programId,
     };
   }, [businessArea, programId]);
 
@@ -122,7 +122,7 @@ export const HouseholdMembersTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programCode: programId,
         id: household.id,
       }),
     enabled: !!businessArea && !!programId,

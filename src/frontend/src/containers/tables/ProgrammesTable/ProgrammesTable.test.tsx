@@ -31,11 +31,10 @@ describe('ProgrammesTable', () => {
     results: [
       {
         id: 'program-1',
-        programmeCode: 'PROG001',
+        code: 'pr01',
         beneficiaryGroupMatch: 'test-program',
         compatibleDct: 'test-program',
         numberOfHouseholdsWithTpInProgram: 1000,
-        slug: 'test-program',
         name: 'Emergency Cash Transfer Program',
         startDate: '2023-01-01',
         endDate: '2023-12-31',
@@ -69,9 +68,8 @@ describe('ProgrammesTable', () => {
       },
       {
         id: 'program-2',
-        programmeCode: 'PROG002',
+        code: 'pr02',
         numberOfHouseholdsWithTpInProgram: 1000,
-        slug: 'education-program',
         name: 'Education Support Initiative',
         startDate: '2023-06-01',
         endDate: '2024-05-31',

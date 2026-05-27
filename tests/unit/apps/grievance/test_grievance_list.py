@@ -360,7 +360,7 @@ def list_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:grievance:grievance-tickets-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
 
@@ -371,7 +371,7 @@ def count_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:grievance:grievance-tickets-count",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program.slug,
+            "program_code": program.code,
         },
     )
 
@@ -427,8 +427,7 @@ def test_grievance_ticket_list_with_all_permissions(
         assert grievance_ticket_result["programs"] == [
             {
                 "id": str(grievance_ticket.programs.first().id),
-                "programme_code": grievance_ticket.programs.first().programme_code,
-                "slug": grievance_ticket.programs.first().slug,
+                "code": grievance_ticket.programs.first().code,
                 "name": grievance_ticket.programs.first().name,
                 "status": grievance_ticket.programs.first().status,
                 "screen_beneficiary": grievance_ticket.programs.first().screen_beneficiary,
@@ -469,13 +468,8 @@ def test_grievance_ticket_list_with_all_permissions(
         if grievance_ticket.target_id:
             assert grievance_ticket_result["target_id"] == grievance_ticket.target_id
 
-        assert grievance_ticket_result["related_tickets"] == [
-            {
-                "id": str(linked_ticket.id),
-                "unicef_id": linked_ticket.unicef_id,
-            }
-            for linked_ticket in grievance_ticket.linked_tickets.all()
-        ]
+        assert grievance_ticket_result["related_tickets_count"] == grievance_ticket._related_tickets.count()
+        assert "related_tickets" not in grievance_ticket_result
 
 
 @pytest.mark.parametrize(
@@ -705,7 +699,7 @@ def test_grievance_ticket_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 9
-        assert len(ctx.captured_queries) == 47
+        assert len(ctx.captured_queries) == 37
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
@@ -714,7 +708,7 @@ def test_grievance_ticket_list_caching(
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert etag == etag_second_call
-        assert len(ctx.captured_queries) == 10
+        assert len(ctx.captured_queries) == 8
 
     ticket = setup_grievance_tickets[0]
     ticket.priority = 1
@@ -726,8 +720,7 @@ def test_grievance_ticket_list_caching(
         etag_third_call = response.headers["etag"]
         assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
         assert etag_third_call not in [etag, etag_second_call]
-        # 5 queries are saved because of cached permissions calculations
-        assert len(ctx.captured_queries) == 42
+        assert len(ctx.captured_queries) == 32
 
     set_admin_area_limits_in_program(partner, program, [area1])
     with CaptureQueriesContext(connection) as ctx:
@@ -738,7 +731,7 @@ def test_grievance_ticket_list_caching(
         assert len(response.json()["results"]) == 6
         assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
         assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-        assert len(ctx.captured_queries) == 39
+        assert len(ctx.captured_queries) == 32
 
     ticket.delete()
     with CaptureQueriesContext(connection) as ctx:
@@ -753,7 +746,7 @@ def test_grievance_ticket_list_caching(
             etag_third_call,
             etag_changed_areas,
         ]
-        assert len(ctx.captured_queries) == 35
+        assert len(ctx.captured_queries) == 29
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
@@ -762,4 +755,96 @@ def test_grievance_ticket_list_caching(
         assert response.has_header("etag")
         etag_fifth_call = response.headers["etag"]
         assert etag_fifth_call == etag_fourth_call
-        assert len(ctx.captured_queries) == 10
+        assert len(ctx.captured_queries) == 8
+
+
+def test_grievance_ticket_list_cache_invalidated_when_ticket_programs_change(
+    api_client: Any,
+    list_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    setup_grievance_tickets: list[GrievanceTicket],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = api_client.get(list_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.has_header("etag")
+    etag = response.headers["etag"]
+    assert len(response.json()["results"]) == 9
+
+    ticket = setup_grievance_tickets[0]
+    ticket.programs.remove(program)
+
+    response = api_client.get(list_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.has_header("etag")
+    etag_without_program = response.headers["etag"]
+    assert etag_without_program != etag
+    assert len(response.json()["results"]) == 8
+    assert str(ticket.id) not in [result["id"] for result in response.json()["results"]]
+
+    ticket.programs.add(program)
+
+    response = api_client.get(list_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.has_header("etag")
+    etag_with_program_restored = response.headers["etag"]
+    assert etag_with_program_restored != etag_without_program
+    assert len(response.json()["results"]) == 9
+    assert str(ticket.id) in [result["id"] for result in response.json()["results"]]
+
+
+def test_grievance_ticket_count_changes_when_ticket_programs_change(
+    api_client: Any,
+    count_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    setup_grievance_tickets: list[GrievanceTicket],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = api_client.get(count_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 9
+
+    ticket = setup_grievance_tickets[0]
+    ticket.programs.remove(program)
+
+    response = api_client.get(count_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 8
+
+    ticket.programs.add(program)
+
+    response = api_client.get(count_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 9

@@ -14,7 +14,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.models import PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -51,7 +51,7 @@ def role_assignment(request, db, superuser, business_area, role):
 
 @frozenfixture()
 def payment_plan(request, db, business_area, program, superuser):
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -98,7 +98,7 @@ def test_list_verification_records(superuser, business_area, program, role_assig
     payment_plan = payment_verification.payment_verification_plan.payment_plan
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-verifications/{payment_plan.pk}/verifications/"
     )
 
@@ -108,6 +108,6 @@ def test_retrieve_verification_record(superuser, business_area, program, role_as
     payment = payment_verification.payment
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(
-        f"/api/rest/business-areas/{business_area.slug}/programs/{program.slug}"
+        f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}"
         f"/payment-verifications/{payment_plan.pk}/verifications/{payment.pk}/"
     )

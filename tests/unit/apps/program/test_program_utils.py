@@ -5,6 +5,7 @@ import json
 from typing import Any
 from unittest.mock import patch
 
+from constance.test import override_config
 from django.core.cache import cache
 from django.db.utils import IntegrityError
 import pytest
@@ -20,12 +21,13 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
-from hope.apps.household.celery_tasks import enroll_households_to_program_task
+from hope.apps.household.celery_tasks import enroll_households_to_program_async_task
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
 from hope.apps.program.utils import (
+    CopyProgramPopulation,
     _create_enrollment_rdi,
     _format_integrity_error,
     _prepare_and_save_household_copy,
@@ -372,26 +374,33 @@ def test_enroll_household_with_head_of_household_already_copied(enrollment_test_
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
-def test_enroll_households_to_program_task(enrollment_test_data: dict) -> None:
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_enroll_households_to_program_task(enrollment_test_data: dict, django_capture_on_commit_callbacks: Any) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
-    enroll_households_to_program_task(
-        [str(enrollment_test_data["household_already_enrolled"].id)],
-        str(enrollment_test_data["program2"].pk),
-        str(enrollment_test_data["user"].pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        enroll_households_to_program_async_task(
+            [enrollment_test_data["household_already_enrolled"].id],
+            str(enrollment_test_data["program2"].pk),
+            str(enrollment_test_data["user"].pk),
+        )
     assert hh_count == Household.objects.count()
     assert ind_count == Individual.objects.count()
 
 
 @pytest.mark.elasticsearch
 @pytest.mark.usefixtures("django_elasticsearch_setup")
-def test_enroll_households_to_program_task_already_running(enrollment_test_data: dict) -> None:
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_enroll_households_to_program_task_already_running(
+    enrollment_test_data: dict, django_capture_on_commit_callbacks: Any
+) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
 
     task_params = {
-        "task_name": "enroll_households_to_program_task",
+        "task_name": "enroll_households_to_program_async_task",
         "household_ids": [str(enrollment_test_data["household"].id)],
         "program_for_enroll_id": str(enrollment_test_data["program2"].pk),
     }
@@ -399,22 +408,24 @@ def test_enroll_households_to_program_task_already_running(enrollment_test_data:
     cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
     cache.set(cache_key, True, timeout=24 * 60 * 60)
 
-    enroll_households_to_program_task(
-        [str(enrollment_test_data["household"].id)],
-        str(enrollment_test_data["program2"].pk),
-        str(enrollment_test_data["user"].pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        enroll_households_to_program_async_task(
+            [enrollment_test_data["household"].id],
+            str(enrollment_test_data["program2"].pk),
+            str(enrollment_test_data["user"].pk),
+        )
 
     assert hh_count == Household.objects.count()
     assert ind_count == Individual.objects.count()
 
     cache.delete(cache_key)
 
-    enroll_households_to_program_task(
-        [str(enrollment_test_data["household"].id)],
-        str(enrollment_test_data["program2"].pk),
-        str(enrollment_test_data["user"].pk),
-    )
+    with django_capture_on_commit_callbacks(execute=True):
+        enroll_households_to_program_async_task(
+            [enrollment_test_data["household"].id],
+            str(enrollment_test_data["program2"].pk),
+            str(enrollment_test_data["user"].pk),
+        )
 
     assert hh_count + 1 == Household.objects.count()
     assert ind_count + 2 == Individual.objects.count()
@@ -522,3 +533,50 @@ def test_prepare_and_save_household_copy_head_in_exclude_dict(
     assert household.pk != original_id
     assert household.copied_from_id == original_id
     assert household.head_of_household_id == target_individual.id
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_copy_program_population_creates_collections_when_missing(
+    program1: Program, program2: Program, user: User
+) -> None:
+    individual_hoh = IndividualFactory(household=None, program=program1)
+    hh = HouseholdFactory(program=program1, head_of_household=individual_hoh)
+    individual_hoh.refresh_from_db()
+
+    assert individual_hoh.individual_collection is None
+    assert hh.household_collection is None
+
+    rdi = RegistrationDataImportFactory(business_area=program2.business_area, program=program2)
+
+    copier = CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=individual_hoh.pk),
+        copy_from_households=Household.objects.filter(pk=hh.pk),
+        program=program2,
+        rdi=rdi,
+        create_collection=True,
+    )
+    copier.copy_program_population()
+
+    individual_hoh.refresh_from_db()
+    hh.refresh_from_db()
+
+    assert individual_hoh.individual_collection is not None
+    assert hh.household_collection is not None
+
+    copied_individual = Individual.objects.filter(program=program2, copied_from=individual_hoh).first()
+    assert copied_individual is not None
+    assert copied_individual.individual_collection == individual_hoh.individual_collection
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_enroll_households_raises_on_integrity_error(enrollment_test_data: dict) -> None:
+    with patch(
+        "hope.apps.program.utils._prepare_and_save_household_copy",
+        side_effect=IntegrityError("duplicate key"),
+    ):
+        with pytest.raises(Exception, match="Following households failed"):
+            enroll_households_to_program(
+                Household.objects.filter(id=enrollment_test_data["household"].id),
+                enrollment_test_data["program2"],
+                str(enrollment_test_data["user"].pk),
+            )

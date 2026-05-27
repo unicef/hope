@@ -277,7 +277,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             record,
             household_address,
             consent_data,
-            needs_assessment,
+            needs_assessment or {},
             registration_data_import,
         )
 

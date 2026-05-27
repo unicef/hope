@@ -12,6 +12,7 @@ class FinancialInstitutionMapping(TimeStampedModel):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
         unique_together = ("financial_service_provider", "financial_institution")
 
     def __str__(self) -> str:

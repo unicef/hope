@@ -102,7 +102,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody: { ids },
         },
       );
@@ -133,7 +133,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendBackCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: numericId,
           requestBody: { comment: sendBackComment },
         },
@@ -166,7 +166,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSendForApprovalCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: numericId,
         },
       );
@@ -191,7 +191,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           requestBody: { ids },
         },
       );
@@ -231,7 +231,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: numericId,
         },
       ),
@@ -342,7 +342,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       await RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsSaveDataCreate(
         {
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programCode: programId,
           id: numericId,
           requestBody: payload,
         },

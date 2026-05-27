@@ -24,19 +24,19 @@ export function GrievanceIndividualPhotoModal({
     queryKey: [
       'individualPhotos',
       businessArea,
-      selectedProgram?.slug,
+      selectedProgram?.code,
       individualId,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: selectedProgram?.slug || '',
+        programCode: selectedProgram?.code || '',
         id: individualId || '',
       }),
     enabled:
       !!isCurrent &&
       !!businessArea &&
-      !!selectedProgram?.slug &&
+      !!selectedProgram?.code &&
       !!individualId,
   });
 

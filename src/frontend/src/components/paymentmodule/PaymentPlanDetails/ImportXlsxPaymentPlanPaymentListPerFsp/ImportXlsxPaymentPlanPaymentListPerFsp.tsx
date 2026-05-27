@@ -57,26 +57,26 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       permissions,
     ) &&
     allowedState.includes(paymentPlan.backgroundActionStatus) &&
-    paymentPlan.fspCommunicationChannel == 'XLSX';
+    !paymentPlan.isPaymentGateway;
 
   const { mutateAsync: importReconciliationXlsx, isPending: fileLoading } =
     useMutation({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        programCode,
         formData,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        programCode: string;
         formData: PaymentPlanImportFile;
       }) =>
         RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
           {
             businessAreaSlug,
             id,
-            programSlug,
+            programCode,
             formData,
           },
         ),
@@ -95,7 +95,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       await importReconciliationXlsx({
         businessAreaSlug: businessArea,
         id: paymentPlan.id,
-        programSlug: programId,
+        programCode: programId,
         formData: {
           file: fileToImport,
         },
@@ -112,7 +112,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
               !isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />
             }
             color="primary"
-            data-cy="button-import"
+            data-cy="button-import-reconciliation"
             onClick={() => setOpenImport(true)}
             disabled={!isActiveProgram}
             data-perm={PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION}

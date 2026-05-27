@@ -161,7 +161,7 @@ export const CreateVerificationPlan = ({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const { businessArea, baseUrl, programId: programSlug } = useBaseUrl();
+  const { businessArea, baseUrl, programId: programCode } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const queryClient = useQueryClient();
 
@@ -171,7 +171,7 @@ export const CreateVerificationPlan = ({
         {
           businessAreaSlug: businessArea,
           id: paymentPlanId,
-          programSlug: programSlug,
+          programCode: programCode,
           requestBody: data,
         },
       ),
@@ -182,7 +182,7 @@ export const CreateVerificationPlan = ({
           'PaymentVerificationPlanDetails',
           businessArea,
           paymentPlanId,
-          programSlug,
+          programCode,
         ],
       });
     },
@@ -191,11 +191,11 @@ export const CreateVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programSlug],
+    queryKey: ['rapidProFlows', businessArea, programCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
-        programSlug: programSlug,
+        programCode: programCode,
       }),
     enabled: false,
   });
@@ -221,7 +221,7 @@ export const CreateVerificationPlan = ({
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
 
   const loadSampleSize = useCallback(async () => {
-    if (!businessArea || !programSlug) return;
+    if (!businessArea || !programCode) return;
 
     try {
       const requestBody = prepareSampleSizeRequest(selectedTab, formValues);
@@ -231,7 +231,7 @@ export const CreateVerificationPlan = ({
           {
             businessAreaSlug: businessArea,
             id: paymentPlanId,
-            programSlug: programSlug,
+            programCode: programCode,
             requestBody,
           },
         );
@@ -247,7 +247,7 @@ export const CreateVerificationPlan = ({
     }
   }, [
     businessArea,
-    programSlug,
+    programCode,
     selectedTab,
     formValues,
     paymentPlanId,

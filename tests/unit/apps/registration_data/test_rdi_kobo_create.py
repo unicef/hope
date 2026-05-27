@@ -1,4 +1,5 @@
 from io import BytesIO
+import json
 from pathlib import Path
 import re
 from unittest import mock
@@ -25,7 +26,14 @@ from extras.test_utils.factories import (
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import IDENTIFICATION_TYPE_CHOICE
 from hope.apps.registration_data.tasks.rdi_kobo_create import RdiKoboCreateTask
-from hope.models import PendingAccount, PendingDocument, PendingHousehold, PendingIndividual, RegistrationDataImport
+from hope.models import (
+    Currency,
+    PendingAccount,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    RegistrationDataImport,
+)
 from hope.models.financial_institution import FinancialInstitution
 from hope.models.utils import MergeStatusModel
 
@@ -84,7 +92,7 @@ def account_types() -> None:
 
 
 @pytest.fixture
-def import_data() -> object:
+def import_data(all_currencies: dict[str, Currency]) -> object:
     content = (FILES_DIR / "kobo_submissions.json").read_bytes()
     file = File(BytesIO(content), name="kobo_submissions.json")
     return ImportDataFactory(
@@ -127,6 +135,26 @@ def registration_data_import(
         number_of_individuals=99,
         number_of_households=33,
     )
+
+
+@pytest.fixture
+def kobo_task(
+    business_area: object,
+    registration_data_import: object,
+    all_currencies: dict[str, Currency],
+) -> RdiKoboCreateTask:
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    task.household_count = 1
+    return task
+
+
+@pytest.fixture
+def import_data_with_unknown_currency(all_currencies: dict[str, Currency]) -> object:
+    raw = (FILES_DIR / "kobo_submissions.json").read_bytes()
+    submissions = json.loads(raw)
+    submissions[0]["currency_h_c"] = "ZZZ"
+    file = File(BytesIO(json.dumps(submissions).encode()), name="kobo_submissions_with_unknown_currency.json")
+    return ImportDataFactory(file=file, number_of_households=1, number_of_individuals=2)
 
 
 def _mock_get_attached_file():
@@ -412,8 +440,8 @@ def test_handle_documents_and_identities(
 
     result = list(PendingDocument.objects.values("document_number", "individual_id"))
     expected = [
-        {"document_number": "123123123", "individual_id": individual.id},
         {"document_number": "444111123", "individual_id": individual.id},
+        {"document_number": "123123123", "individual_id": individual.id},
     ]
     assert result == expected
 
@@ -428,7 +456,9 @@ def test_handle_documents_and_identities(
     assert national_passport == "national_passport"
 
 
-def test_handle_household_dict(business_area: object, registration_data_import: object) -> None:
+def test_handle_household_dict(
+    business_area: object, registration_data_import: object, all_currencies: dict[str, Currency]
+) -> None:
     households_to_create = []
     collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
     household = {
@@ -446,7 +476,10 @@ def test_handle_household_dict(business_area: object, registration_data_import: 
         "village_h_c": "VillageName",
         "nearest_school_h_f": "next",
         "hh_geopoint_h_c": "46.123 6.312 0 0",
+        "facility_name_h_c": "Facility Kobo Test",
+        "facility_admin_area_h_c": "SO2502",
         "size_h_c": "5",
+        "currency_h_c": "USD",
         "children_under_18_h_f": "2",
         "children_6_to_11_h_f": "1",
         "hohh_is_caregiver_h_f": "0",
@@ -477,6 +510,94 @@ def test_handle_household_dict(business_area: object, registration_data_import: 
     assert hh.detail_id == "kobo_asset_id_string_OR_detail_id"
     assert hh.kobo_submission_time.isoformat() == "2022-02-22T12:22:22"
     assert hh.kobo_submission_uuid == "5b6f30ee-010b-4bd5-a510-e78f062af155"
+    assert hh.facility.name == "FACILITY KOBO TEST"
+    assert hh.facility.admin_area.p_code == "SO2502"
+    assert hh.facility.business_area.id == business_area.id
+    assert hh.currency == Currency.objects.get(code="USD")
+
+
+def test_handle_household_dict_empty_currency_sets_null(
+    business_area: object, registration_data_import: object, all_currencies: dict[str, Currency]
+) -> None:
+    households_to_create = []
+    collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
+    household = {
+        "_id": 1112,
+        "uuid": "qweqweqweqwe2",
+        "start": "2024-03",
+        "end": "2024-03",
+        "consent_h_c": "1",
+        "country_h_c": "NGA",
+        "admin1_h_c": "SO25",
+        "admin2_h_c": "SO2502",
+        "facility_name_h_c": "Facility Kobo Test",
+        "facility_admin_area_h_c": "SO2502",
+        "size_h_c": "5",
+        "currency_h_c": "",
+        "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
+        "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af156",
+        "_submission_time": "2022-02-22T12:22:22",
+    }
+    submission_meta_data = {
+        "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af156",
+        "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
+        "kobo_submission_time": "2022-02-22T12:22:22",
+    }
+
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    task.handle_household(
+        collectors_to_create,
+        head_of_households_mapping,
+        household,
+        households_to_create,
+        individuals_ids_hash_dict=individuals_ids_hash_dict,
+        submission_meta_data=submission_meta_data,
+        household_count=1,
+    )
+
+    assert households_to_create[0].currency is None
+
+
+def test_handle_household_dict_none_currency_sets_null(
+    business_area: object, registration_data_import: object, all_currencies: dict[str, Currency]
+) -> None:
+    households_to_create = []
+    collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = ({}, {}, {})
+    household = {
+        "_id": 1113,
+        "uuid": "qweqweqweqwe3",
+        "start": "2024-03",
+        "end": "2024-03",
+        "consent_h_c": "1",
+        "country_h_c": "NGA",
+        "admin1_h_c": "SO25",
+        "admin2_h_c": "SO2502",
+        "facility_name_h_c": "Facility Kobo Test",
+        "facility_admin_area_h_c": "SO2502",
+        "size_h_c": "5",
+        "currency_h_c": None,
+        "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
+        "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af157",
+        "_submission_time": "2022-02-22T12:22:22",
+    }
+    submission_meta_data = {
+        "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af157",
+        "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
+        "kobo_submission_time": "2022-02-22T12:22:22",
+    }
+
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    task.handle_household(
+        collectors_to_create,
+        head_of_households_mapping,
+        household,
+        households_to_create,
+        individuals_ids_hash_dict=individuals_ids_hash_dict,
+        submission_meta_data=submission_meta_data,
+        household_count=1,
+    )
+
+    assert households_to_create[0].currency is None
 
 
 def test_process_individual_try_except(business_area: object, registration_data_import: object) -> None:
@@ -537,3 +658,81 @@ def test_phone_number_validation_flags(
     tesa_ind = individuals.get(full_name="Tesa Testowski")
     assert tesa_ind.phone_no_valid is None
     assert tesa_ind.phone_no_alternative_valid is None
+
+
+def test_finalize_individual_with_no_program(
+    business_area: object,
+    registration_data_import: object,
+) -> None:
+    """Exercise _finalize_individual when RDI has no program (False branches of `if rdi_program is not None`)."""
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    # Simulate program=None on the RDI
+    RegistrationDataImport.objects.filter(pk=registration_data_import.pk).update(program=None)
+    task.registration_data_import.refresh_from_db()
+
+    individual_obj = PendingIndividual(
+        first_registration_date="2024-01-01",
+        birth_date="2000-01-01",
+        flex_fields={},
+    )
+    household_obj = PendingHousehold()
+
+    result = task._finalize_individual(individual_obj, household_obj, only_collector_flag=False, role=None)
+    assert result is None
+    assert individual_obj.program_id is None
+
+
+def test_finalize_household_with_no_program(
+    business_area: object,
+    registration_data_import: object,
+) -> None:
+    """Exercise _finalize_household when RDI has no program."""
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    RegistrationDataImport.objects.filter(pk=registration_data_import.pk).update(program=None)
+    task.registration_data_import.refresh_from_db()
+
+    household_obj = PendingHousehold()
+
+    task._finalize_household(
+        household_obj,
+        registration_date="2024-01-01",
+        current_individuals=[],
+        individuals_to_create_list=[],
+        documents_and_identities_to_create=[],
+    )
+    assert household_obj.program_id is None
+
+
+def test_kobo_end_to_end_with_sdg_succeeds(
+    business_area: object,
+    registration_data_import: object,
+    import_data: object,
+    program: object,
+) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        side_effect=_mock_get_attached_file(),
+    ):
+        task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+        task.execute(import_data.id, program.id)
+
+    registration_data_import.refresh_from_db()
+    assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
+    household = PendingHousehold.objects.get()
+    assert household.currency is not None
+    assert household.currency.code == "SDG"
+
+
+def test_kobo_end_to_end_with_unknown_currency_raises(
+    business_area: object,
+    registration_data_import: object,
+    import_data_with_unknown_currency: object,
+    program: object,
+) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
+        side_effect=_mock_get_attached_file(),
+    ):
+        task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+        with pytest.raises(Exception, match=r"Error processing Household.*Unknown currency code.*ZZZ"):
+            task.execute(import_data_with_unknown_currency.id, program.id)

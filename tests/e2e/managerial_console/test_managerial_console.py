@@ -1,5 +1,4 @@
 from datetime import datetime, timezone as dt_timezone
-from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -8,14 +7,14 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
-from extras.test_utils.old_factories.account import UserFactory
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.payment import (
+from extras.test_utils.factories import (
     ApprovalProcessFactory,
     PaymentPlanFactory,
+    ProgramFactory,
+    UserFactory,
 )
-from extras.test_utils.old_factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, PaymentPlan, Program, User
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -32,28 +31,24 @@ def second_test_program() -> Program:
 
 def create_program(
     name: str,
-    dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.ACTIVE,
-    partner: Optional[Partner] = None,
 ) -> Program:
-    dct = DataCollectingTypeFactory(type=dct_type)
+    dct = DataCollectingType.objects.get(code="full")
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
-    if partner:
-        program.partners.add(partner.id)
-    return program
 
 
 @pytest.fixture
 def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
-    program_cycle_second = ProgramCycleFactory(program=second_test_program)
+    program_cycle_second = second_test_program.cycles.first()
     ba = BusinessArea.objects.get(slug="afghanistan")
     PaymentPlanFactory(
         program_cycle=program_cycle_second,
@@ -64,7 +59,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=ba,
-        currency="USD",
+        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),

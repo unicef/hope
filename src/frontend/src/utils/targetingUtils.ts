@@ -54,7 +54,9 @@ export const validate = (values, beneficiaryGroup) => {
       values.individualsFiltersBlocks.length ===
       0 &&
     (!values.householdIds || values.householdIds.length === 0) &&
-    (!values.individualIds || values.individualIds.length === 0)
+    (!values.individualIds || values.individualIds.length === 0) &&
+    (!values.alternativeCollectorsIds ||
+      values.alternativeCollectorsIds.length === 0)
   ) {
     errors.nonFieldErrors = [
       `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
@@ -243,6 +245,7 @@ function mapBlockFilters(blocks, blockKey) {
 export function mapCriteriaToInitialValues(criteria) {
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
+  const alternativeCollectorsIds = criteria.alternativeCollectorsIds || '';
   const deliveryMechanism = criteria.deliveryMechanism || '';
   const fsp = criteria.fsp || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
@@ -253,6 +256,7 @@ export function mapCriteriaToInitialValues(criteria) {
     fsp,
     individualIds,
     householdIds,
+    alternativeCollectorsIds,
     householdsFiltersBlocks: mapFiltersToInitialValues(householdsFiltersBlocks),
     individualsFiltersBlocks: mapBlockFilters(
       individualsFiltersBlocks,
@@ -417,6 +421,7 @@ export function getTargetingCriteriaVariables(values) {
     rules: values.criterias.map((criteria) => ({
       individualIds: criteria.individualIds,
       householdIds: criteria.householdIds,
+      alternativeCollectorsIds: criteria.alternativeCollectorsIds,
       householdsFiltersBlocks:
         criteria.householdsFiltersBlocks.map(mapFilterToVariable),
       individualsFiltersBlocks: criteria.individualsFiltersBlocks.map(

@@ -1,6 +1,6 @@
 from django.db import models
 
-from hope.models.household import ROLE_CHOICE
+from hope.apps.household.const import ROLE_CHOICE
 from hope.models.utils import AbstractSyncable, PendingManager, SoftDeletableMergeStatusModel, TimeStampedUUIDModel
 
 
@@ -32,6 +32,8 @@ class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDMo
     class Meta:
         app_label = "household"
         unique_together = [("role", "household"), ("household", "individual")]
+        ordering = ("-role", "id")
+        permissions = (("reset_sync_date", "Can reset sync date"),)
 
     def __str__(self) -> str:
         return f"{self.individual.full_name} - {self.role}"

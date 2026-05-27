@@ -10,6 +10,7 @@ from rest_framework import serializers, status
 from rest_framework.authentication import get_authorization_header
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response as DRFResponse
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
@@ -102,7 +103,7 @@ class BaseAPI:
 
 
 class BusinessAreaMixin:
-    business_area_model_field = "business_area"
+    business_area_model_field: str | None = "business_area"
 
     @property
     def business_area_slug(self) -> str | None:
@@ -131,14 +132,14 @@ class ProgramMixin:
         return self.kwargs.get("business_area_slug")
 
     @property
-    def program_slug(self) -> str | None:
-        return self.kwargs.get("program_slug")
+    def program_code(self) -> str | None:
+        return self.kwargs.get("program_code")
 
     @cached_property
     def program(self) -> "Program":
         from hope.models import Program
 
-        return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
+        return get_object_or_404(Program, code=self.program_code, business_area__slug=self.business_area_slug)
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()
@@ -196,24 +197,37 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        from hope.models import Program
+        from hope.models import Area, Program
 
         queryset = super().get_queryset()
         user = self.request.user
+        partner = user.partner
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
             self.get_permissions_for_action(),
         )
 
+        # Batch-fetch all area limits for all programs in a single query instead of one per program.
+        area_ids_by_program: dict[str, list] = {}
+        for row in (
+            Area.objects.filter(
+                admin_area_limits__partner=partner,
+                admin_area_limits__program_id__in=program_ids,
+            )
+            .values("id", "admin_area_limits__program_id")
+            .distinct()
+        ):
+            p_id = str(row["admin_area_limits__program_id"])
+            area_ids_by_program.setdefault(p_id, []).append(row["id"])
+
         filter_q = Q()
         for program_id in Program.objects.filter(id__in=program_ids).values_list("id", flat=True):
             program_q = Q(**{f"{self.program_model_field}__id__in": [program_id]})
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
-            # apply admin area limits if partner has restrictions
             areas_query = Q()
-            if area_limits := user.partner.get_area_limits_for_program(program_id):
+            if area_ids := area_ids_by_program.get(str(program_id)):
                 for field in self.admin_area_model_fields:
-                    areas_query |= Q(**{f"{field}__in": area_limits})
+                    areas_query |= Q(**{f"{field}__in": area_ids})
 
             filter_q |= Q(program_q & areas_null) | Q(program_q & areas_query)
         return (
@@ -283,6 +297,9 @@ class CountActionMixin:
     #  Adds a count action to the viewset that returns the count of the queryset.
     ordering_fields = "__all__"
 
+    def get_count_queryset(self) -> QuerySet:
+        return self.get_queryset()
+
     @extend_schema(
         responses={
             status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
@@ -294,13 +311,13 @@ class CountActionMixin:
         methods=["get"],
     )
     def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_count_queryset()).order_by()
         queryset_count = queryset.count()
         return DRFResponse({"count": queryset_count})
 
 
 class PermissionsMixin:
-    from hope.models.utils import Grant
+    from hope.models import Grant
 
     """Mixin to allow using the same viewset for both internal and external endpoints.
 
@@ -308,6 +325,7 @@ class PermissionsMixin:
         variable token_permission.
         """
 
+    permission_classes: list[type[BasePermission]]
     token_permission = Grant.API_READ_ONLY
 
     def is_external_request(self) -> bool:
@@ -316,7 +334,7 @@ class PermissionsMixin:
             return False
 
         auth_header = get_authorization_header(self.request).split()
-        return auth_header and auth_header[0].lower() == b"token"
+        return bool(auth_header and auth_header[0].lower() == b"token")
 
     def get_authenticators(self) -> list[Any]:
         if self.is_external_request():

@@ -42,9 +42,11 @@ ACCOUNT_FIELD = "account_details"
 EXTRA_FIELD = "extra"
 
 
-def mergedicts(a: dict, b: dict, path: list | None) -> dict:
+def mergedicts(a: dict, b: dict | None, path: list | None) -> dict:
     if not path:
         path = []
+    if not b:
+        return a
     for key, value in b.items():
         if key in a:
             if isinstance(a[key], dict) and isinstance(value, dict):
@@ -163,9 +165,15 @@ class GenericRegistrationService(BaseRegistrationService):
                     my_dict.update(cls._create_household_dict(data_dict[key], value))
 
         # update admin areas values
-        for key in ["admin1", "admin2", "admin3", "admin4"]:
-            if key in my_dict and Area.objects.filter(p_code=my_dict[key]).exists():
-                my_dict[key] = str(Area.objects.get(p_code=my_dict[key]).id)
+        admin_keys = ["admin1", "admin2", "admin3", "admin4"]
+        areas_p_codes = [my_dict[k] for k in admin_keys if k in my_dict]
+
+        areas = Area.objects.filter(p_code__in=areas_p_codes).only("id", "p_code")
+        area_map = {area.p_code: str(area.id) for area in areas}
+
+        for key in admin_keys:
+            if key in my_dict and my_dict[key] in area_map:
+                my_dict[key] = area_map[my_dict[key]]
         return my_dict
 
     @staticmethod
@@ -264,7 +272,9 @@ class GenericRegistrationService(BaseRegistrationService):
             **account_data,
         )
 
-    def _assign_individual_roles(self, individual, extra_data, head, pr_collector, sec_collector):
+    def _assign_individual_roles(
+        self, individual: "PendingIndividual", extra_data: dict, head: Any, pr_collector: Any, sec_collector: Any
+    ) -> tuple:
         if individual.relationship == HEAD:
             if head:
                 raise ValidationError("Head of Household already exist")
@@ -348,7 +358,7 @@ class GenericRegistrationService(BaseRegistrationService):
             head = pr_collector = individuals[0]
         return individuals, head, pr_collector, sec_collector
 
-    def _create_documents(self, documents_data: list[dict], individual: PendingIndividual, mapping: dict):
+    def _create_documents(self, documents_data: list[dict], individual: PendingIndividual, mapping: dict) -> None:
         for document_data in documents_data.values():
             key = document_data.pop("key", None)  # skip documents' without key
             if key:

@@ -115,7 +115,7 @@ class CollectorAttributeSerializer(serializers.Serializer):
     type = serializers.CharField()
     name = serializers.CharField()
     lookup = serializers.CharField()
-    label = serializers.DictField()  # type: ignore
+    label = serializers.DictField()  # type: ignore[assignment]
     hint = serializers.CharField()
     required = serializers.BooleanField()  # type: ignore
     choices = serializers.ListField(child=serializers.CharField())

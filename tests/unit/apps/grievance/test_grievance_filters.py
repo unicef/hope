@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
+    CurrencyFactory,
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdFactory,
@@ -39,7 +40,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory
 from extras.test_utils.factories.sanction_list import SanctionListIndividualFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import (
@@ -49,7 +49,8 @@ from hope.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import HEAD, BusinessArea, Partner, PaymentVerification, PaymentVerificationPlan, Program, User
+from hope.apps.household.const import HEAD
+from hope.models import BusinessArea, Partner, PaymentVerification, PaymentVerificationPlan, Program, User
 
 pytestmark = pytest.mark.django_db
 
@@ -490,7 +491,7 @@ def tickets(
     needs_adjudication_details_1.populate_cross_area_flag()
 
     # Create payment related objects
-    program_cycle = ProgramCycleFactory(program=program_afghanistan1)
+    program_cycle = program_afghanistan1.cycles.first()
     payment_plan = PaymentPlanFactory(
         id="689ba2ea-8ffb-4787-98e4-ae12797ee4da",
         name="TEST",
@@ -506,7 +507,7 @@ def tickets(
     payment1 = PaymentFactory(
         parent=payment_plan,
         household=data["household1"],
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         head_of_household=data["individuals1"][0],
         financial_service_provider=financial_service_provider1,
         program=program_afghanistan1,
@@ -544,7 +545,7 @@ def tickets(
         parent=payment_plan,
         household=data["household2"],
         head_of_household=data["individuals2"][0],
-        currency="PLN",
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
         program=program_afghanistan1,
         collector=data["individuals2"][0],
     )
@@ -623,7 +624,7 @@ def list_url(afghanistan: BusinessArea, program_afghanistan1: Program) -> str:
         "api:grievance:grievance-tickets-list",
         kwargs={
             "business_area_slug": afghanistan.slug,
-            "program_slug": program_afghanistan1.slug,
+            "program_code": program_afghanistan1.code,
         },
     )
 
@@ -1277,7 +1278,7 @@ def test_filter_by_program(
     is_filtered: bool,
     expected_count: int,
 ) -> None:
-    filter_value = program_afghanistan1.slug if is_filtered else ""
+    filter_value = program_afghanistan1.code if is_filtered else ""
     client = api_client(user)
     response = client.get(list_global_url, {"program": filter_value})
     assert response.status_code == status.HTTP_200_OK

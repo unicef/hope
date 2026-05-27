@@ -4,6 +4,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
@@ -14,6 +15,7 @@ from extras.test_utils.factories import (
     ApprovalFactory,
     ApprovalProcessFactory,
     BusinessAreaFactory,
+    FileTempFactory,
     PartnerFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
@@ -40,8 +42,8 @@ def managerial_context(
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
     client = api_client(user)
-    program1 = ProgramFactory(business_area=business_area)
-    program2 = ProgramFactory(business_area=business_area)
+    program1 = ProgramFactory(business_area=business_area, cycle=False)
+    program2 = ProgramFactory(business_area=business_area, cycle=False)
     cycle1 = ProgramCycleFactory(program=program1, title="Cycle 1")
     cycle2 = ProgramCycleFactory(program=program2, title="Cycle 2")
     payment_plan1 = PaymentPlanFactory(
@@ -131,12 +133,13 @@ def test_list_payment_plans(
     assert len(response_json) == 1
     assert response_json[0]["unicef_id"] == "PP-MAN-001"
 
-    create_partner_role_with_permissions(
-        managerial_context["partner"],
-        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
-        managerial_context["business_area"],
-        program=managerial_context["program2"],
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_partner_role_with_permissions(
+            managerial_context["partner"],
+            [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            managerial_context["business_area"],
+            program=managerial_context["program2"],
+        )
 
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
@@ -163,7 +166,7 @@ def test_list_payment_plans(
         etag = response.headers["etag"]
 
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 6
 
     with CaptureQueriesContext(connection) as ctx:
         response = managerial_context["client"].get(managerial_context["url"])
@@ -173,7 +176,7 @@ def test_list_payment_plans(
         etag_second_call = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
         assert etag_second_call == etag
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 6
 
 
 def test_list_payment_plans_approval_process_data(
@@ -203,8 +206,9 @@ def test_list_payment_plans_approval_process_data(
     )
     assert response_json[0]["last_approval_process_by"] == str(approval_process.sent_for_approval_by)
 
-    managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_AUTHORIZATION
-    managerial_context["payment_plan1"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_AUTHORIZATION
+        managerial_context["payment_plan1"].save()
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()["results"]
@@ -215,8 +219,9 @@ def test_list_payment_plans_approval_process_data(
     )
     assert response_json[0]["last_approval_process_by"] == str(approval_approval.created_by)
 
-    managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_REVIEW
-    managerial_context["payment_plan1"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_REVIEW
+        managerial_context["payment_plan1"].save()
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()["results"]
@@ -226,8 +231,9 @@ def test_list_payment_plans_approval_process_data(
     )
     assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
 
-    managerial_context["payment_plan1"].status = PaymentPlan.Status.ACCEPTED
-    managerial_context["payment_plan1"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        managerial_context["payment_plan1"].status = PaymentPlan.Status.ACCEPTED
+        managerial_context["payment_plan1"].save()
     response = managerial_context["client"].get(managerial_context["url"])
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()["results"]
@@ -332,3 +338,58 @@ def test_bulk_action_no_approve_permissions(
 def test_get_action_permission(action_name: str, result: str | None) -> None:
     payment_plan_managerial_viewset = PaymentPlanManagerialViewSet()
     assert payment_plan_managerial_viewset._get_action_permission(action_name) == result
+
+
+def _attach_files(payment_plan: PaymentPlan, user: Any) -> None:
+    payment_plan.imported_file = FileTempFactory(created_by=user)
+    payment_plan.export_file_entitlement = FileTempFactory(created_by=user)
+    payment_plan.export_file_per_fsp = FileTempFactory(created_by=user)
+    payment_plan.save(update_fields=["imported_file", "export_file_entitlement", "export_file_per_fsp"])
+
+
+def test_bulk_action_copies_payment_plan_files_when_present(
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    create_partner_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [
+            Permissions.PM_VIEW_LIST,
+            Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
+        ],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+    create_partner_role_with_permissions(
+        managerial_context["partner"],
+        [
+            Permissions.PM_VIEW_LIST,
+            Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
+        ],
+        managerial_context["business_area"],
+        managerial_context["program2"],
+    )
+    ApprovalProcessFactory(payment_plan=managerial_context["payment_plan1"])
+    ApprovalProcessFactory(payment_plan=managerial_context["payment_plan2"])
+    _attach_files(managerial_context["payment_plan1"], managerial_context["user"])
+    _attach_files(managerial_context["payment_plan2"], managerial_context["user"])
+
+    response = managerial_context["client"].post(
+        managerial_context["bulk_url"],
+        data={
+            "ids": [
+                managerial_context["payment_plan1"].id,
+                managerial_context["payment_plan2"].id,
+            ],
+            "action": PaymentPlan.Action.APPROVE.value,
+            "comment": "Test comment",
+        },
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    managerial_context["payment_plan1"].refresh_from_db()
+    managerial_context["payment_plan2"].refresh_from_db()
+    assert managerial_context["payment_plan1"].status == PaymentPlan.Status.IN_AUTHORIZATION
+    assert managerial_context["payment_plan2"].status == PaymentPlan.Status.IN_AUTHORIZATION

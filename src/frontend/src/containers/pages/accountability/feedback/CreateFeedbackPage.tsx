@@ -326,13 +326,13 @@ function CreateFeedbackPage(): ReactElement {
                                   <Box py={4}>
                                     <HouseholdQuestionnaire
                                       values={values}
-                                      programSlug={
-                                        values.selectedHousehold?.programSlug ||
+                                      programCode={
+                                        values.selectedHousehold?.programCode ||
                                         values.selectedHousehold?.program
-                                          ?.slug ||
+                                          ?.code ||
                                         values.selectedIndividual?.program
-                                          ?.slug ||
-                                        values.selectedIndividual?.programSlug
+                                          ?.code ||
+                                        values.selectedIndividual?.programCode
                                       }
                                     />
                                   </Box>

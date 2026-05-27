@@ -2,7 +2,6 @@ import copy
 import logging
 from typing import Any
 
-from constance import config
 from django.db import transaction
 from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
@@ -23,9 +22,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hope.api.caches import etag_decorator
+from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import (
@@ -61,8 +59,8 @@ from hope.apps.program.api.serializers import (
     ProgramUpdateSerializer,
 )
 from hope.apps.program.celery_tasks import (
-    copy_program_task,
-    populate_pdu_new_rounds_with_null_values_task,
+    copy_program_async_task,
+    populate_pdu_new_rounds_with_null_values_async_task,
 )
 from hope.apps.program.utils import (
     copy_program_object,
@@ -129,7 +127,7 @@ class ProgramViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramFilter
-    lookup_field = "slug"
+    lookup_field = "code"
 
     def get_queryset(self) -> QuerySet[Program]:
         queryset = super().get_queryset()
@@ -154,7 +152,7 @@ class ProgramViewSet(
             .prefetch_related(
                 Prefetch(
                     "pdu_fields",
-                    queryset=FlexibleAttribute.objects.order_by("created_at"),
+                    queryset=FlexibleAttribute.objects.select_related("pdu_data").order_by("created_at"),
                 )
             )
             .select_related("beneficiary_group", "data_collecting_type", "business_area")
@@ -163,7 +161,7 @@ class ProgramViewSet(
         )
 
     @etag_decorator(ProgramListKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=ProgramListKeyConstructor())
+    @cached_response(key_func=ProgramListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -244,9 +242,8 @@ class ProgramViewSet(
             status=Program.DRAFT,
             business_area=self.business_area,
         )
-        if not program.programme_code:
-            program.programme_code = program.generate_programme_code()
-        program.slug = program.generate_slug()
+        if not program.code:
+            program.code = program.generate_code()
 
         program.full_clean()
         program.save()
@@ -297,7 +294,7 @@ class ProgramViewSet(
 
         FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
         if pdu_fields:
-            populate_pdu_new_rounds_with_null_values_task.delay(str(program.id))
+            populate_pdu_new_rounds_with_null_values_async_task(str(program.pk))
 
         log_create(
             Program.ACTIVITY_LOG_MAPPING,
@@ -368,11 +365,7 @@ class ProgramViewSet(
             create_program_partner_access(partners_data, program, partner_access)
 
         transaction.on_commit(
-            lambda: copy_program_task.delay(
-                copy_from_program_id=str(old_program.id),
-                new_program_id=str(program.id),
-                user_id=str(self.request.user.id),
-            )
+            lambda: copy_program_async_task(str(old_program.pk), str(program.pk), str(self.request.user.pk))
         )
 
         if pdu_fields:
@@ -389,7 +382,7 @@ class ProgramViewSet(
 
         return Response(
             status=status.HTTP_201_CREATED,
-            data={"message": f"Program copied successfully. New Program slug: {program.slug}"},
+            data={"message": f"Program copied successfully. New Program code: {program.code}"},
         )
 
     def perform_destroy(self, instance: Program) -> None:
@@ -487,7 +480,7 @@ class ProgramViewSet(
         methods=["get"],
         url_path="payments/count",
     )
-    def payments_count(self, request: Request, *args, **kwargs) -> Response:
+    def payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
         filterset = PaymentSearchFilter(
@@ -530,7 +523,7 @@ class ProgramCycleViewSet(
     filterset_class = ProgramCycleFilter
 
     @etag_decorator(ProgramCycleKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=ProgramCycleKeyConstructor())
+    @cached_response(key_func=ProgramCycleKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -592,6 +585,6 @@ class BeneficiaryGroupViewSet(
     filterset_class = UpdatedAtFilter
 
     @etag_decorator(BeneficiaryGroupKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=BeneficiaryGroupKeyConstructor())
+    @cached_response(key_func=BeneficiaryGroupKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)

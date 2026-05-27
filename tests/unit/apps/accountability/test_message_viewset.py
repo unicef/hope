@@ -18,7 +18,6 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
@@ -63,13 +62,11 @@ def authenticated_superuser_client(api_client, superuser):
 
 @pytest.fixture
 def program_active(business_area):
-    program = ProgramFactory(
+    return ProgramFactory(
         name="Test Active Program",
         business_area=business_area,
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 @pytest.fixture
@@ -312,7 +309,7 @@ def url_list(business_area, program_active):
         "api:accountability:messages-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -323,7 +320,7 @@ def url_count(business_area, program_active):
         "api:accountability:messages-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
 
@@ -334,7 +331,7 @@ def url_details(business_area, program_active, msg_1):
         "api:accountability:messages-detail",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
             "pk": str(msg_1.pk),
         },
     )
@@ -855,7 +852,7 @@ def test_sample_size(
         "api:accountability:messages-sample-size",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program_active.slug,
+            "program_code": program_active.code,
         },
     )
     data = {

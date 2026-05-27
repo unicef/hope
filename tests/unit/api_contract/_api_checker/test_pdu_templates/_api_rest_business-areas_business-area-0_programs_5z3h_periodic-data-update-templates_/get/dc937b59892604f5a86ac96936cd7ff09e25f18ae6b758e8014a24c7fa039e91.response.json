@@ -20,8 +20,8 @@
                 "number_of_records": 10,
                 "created_at": "2025-01-01T00:00:00Z",
                 "created_by": "",
-                "status": "NOT_SCHEDULED",
-                "status_display": "Not scheduled",
+                "status": "TO_EXPORT",
+                "status_display": "To export",
                 "can_export": true,
                 "admin_url": "/api/unicorn/periodic_data_update/pduxlsxtemplate/2/change/"
             }

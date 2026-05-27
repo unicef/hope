@@ -6,7 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface SaveKoboVariables {
   businessAreaSlug: string;
-  programSlug: string;
+  programCode: string;
   koboAssetId: string;
   onlyActiveSubmissions: boolean;
   pullPictures: boolean;
@@ -28,7 +28,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
       return RestService.restBusinessAreasProgramsKoboImportDataUploadSaveKoboImportDataCreate(
         {
           businessAreaSlug: variables.businessAreaSlug,
-          programSlug: variables.programSlug,
+          programCode: variables.programCode,
           requestBody: {
             uid: variables.koboAssetId,
             onlyActiveSubmissions: variables.onlyActiveSubmissions,

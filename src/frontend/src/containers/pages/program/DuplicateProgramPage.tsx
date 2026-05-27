@@ -51,7 +51,7 @@ const DuplicateProgramPage = (): ReactElement => {
     mutationFn: (programData: ProgramCopy) => {
       return RestService.restBusinessAreasProgramsCopyCreate({
         businessAreaSlug: businessArea,
-        slug: id,
+        code: id,
         requestBody: programData,
       });
     },
@@ -74,7 +74,7 @@ const DuplicateProgramPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
-        slug: id,
+        code: id,
       }),
   });
 
@@ -187,7 +187,7 @@ const DuplicateProgramPage = (): ReactElement => {
 
     try {
       const programData = {
-        programmeCode: requestValues.programmeCode,
+        code: requestValues.code,
         name: requestValues.name,
         sector: requestValues.sector,
         description: requestValues.description,
@@ -214,14 +214,14 @@ const DuplicateProgramPage = (): ReactElement => {
 
       const response = await copyProgram(programData);
       showMessage('Programme created.');
-      // Extract program slug from response.message
+      // Extract program code from response.message
       //@ts-ignore
-      const slugMatch = (response.message as string).match(
-        /New Program slug: ([^\s]+)/,
+      const codeMatch = (response.message as string).match(
+        /New Program code: ([^\s]+)/,
       );
-      const newSlug = slugMatch ? slugMatch[1] : null;
-      if (newSlug) {
-        navigate(`/${baseUrl}/details/${newSlug}`);
+      const newCode = codeMatch ? codeMatch[1] : null;
+      if (newCode) {
+        navigate(`/${baseUrl}/details/${newCode}`);
       }
     } catch (e: any) {
       showApiErrorMessages(
@@ -263,7 +263,7 @@ const DuplicateProgramPage = (): ReactElement => {
     editMode: false,
     isActive: false,
     name: `Copy of Programme: (${name})`,
-    programmeCode: null,
+    code: null,
     startDate,
     endDate,
     sector,
@@ -290,7 +290,7 @@ const DuplicateProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
-      'programmeCode',
+      'code',
       'startDate',
       'endDate',
       'sector',

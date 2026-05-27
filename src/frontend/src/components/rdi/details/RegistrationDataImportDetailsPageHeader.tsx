@@ -42,7 +42,7 @@ const RegistrationDataImportDetailsPageHeader = ({
 }: RegistrationDataImportDetailsPageHeaderPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode } = useBaseUrl();
   const confirm = useConfirmation();
   const navigate = useNavigate();
   const client = useQueryClient();
@@ -53,7 +53,7 @@ const RegistrationDataImportDetailsPageHeader = ({
         {
           id: registration.id,
           businessAreaSlug,
-          programSlug,
+          programCode,
           requestBody: data,
         },
       );
@@ -110,7 +110,7 @@ const RegistrationDataImportDetailsPageHeader = ({
     case RegistrationDataImportStatusEnum.IN_REVIEW:
       buttons = (
         <div>
-          {canMerge && canRefuse && (
+          {!registration.countryWorkspaceId && canMerge && canRefuse && (
             <LoadingButton
               loading={refuseLoading}
               onClick={() => setShowRefuseRdiForm(true)}
@@ -122,7 +122,7 @@ const RegistrationDataImportDetailsPageHeader = ({
               {t('Refuse Import')}
             </LoadingButton>
           )}
-          {canMerge && (
+          {!registration.countryWorkspaceId && canMerge && (
             <MergeButtonContainer>
               <MergeRegistrationDataImportDialog registration={registration} />
             </MergeButtonContainer>
@@ -134,7 +134,7 @@ const RegistrationDataImportDetailsPageHeader = ({
       buttons = (
         <div>
           {canRefuse && eraseButton}
-          {canRerunDedupe && (
+          {!registration.countryWorkspaceId && canRerunDedupe && (
             <MergeButtonContainer>
               <RerunDedupe registration={registration} />
             </MergeButtonContainer>

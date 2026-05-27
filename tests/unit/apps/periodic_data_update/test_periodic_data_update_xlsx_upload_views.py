@@ -104,7 +104,7 @@ def url_list(business_area: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-uploads-list",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -115,7 +115,7 @@ def url_count(business_area: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-uploads-count",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -126,7 +126,7 @@ def url_upload(business_area: BusinessArea, program1: Program) -> str:
         "api:periodic-data-update:periodic-data-update-uploads-upload",
         kwargs={
             "business_area_slug": business_area.slug,
-            "program_slug": program1.slug,
+            "program_code": program1.code,
         },
     )
 
@@ -391,6 +391,7 @@ def test_upload_periodic_data_update_upload(
     program1: Program,
     url_upload: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -448,7 +449,8 @@ def test_upload_periodic_data_update_upload(
         tmp_file.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-    response = authenticated_client.post(url_upload, {"file": simple_file}, format="multipart")
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_upload, {"file": simple_file}, format="multipart")
 
     assert response.status_code == status.HTTP_202_ACCEPTED
 

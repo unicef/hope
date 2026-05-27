@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Exists, F, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.api.serializers import PartnerForProgramSerializer
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -26,6 +27,11 @@ from hope.models import (
     ProgramCycle,
     RegistrationDataImport,
 )
+
+if TYPE_CHECKING:
+    import datetime
+
+    from rest_framework.utils.serializer_helpers import ReturnDict
 
 
 def validate_cycle_timeframes_overlapping(
@@ -55,13 +61,13 @@ def validate_cycle_timeframes_overlapping(
         raise serializers.ValidationError("Programme Cycles' timeframes must not overlap with the provided dates.")
 
 
-def validate_programme_code(programme_code: str) -> str:
-    programme_code = programme_code.upper()
-    if not re.match(r"^[A-Z0-9\-]{4}$", programme_code):
+def validate_code(code: str) -> str:
+    if not re.match(r"^[a-z0-9\-]{4}$", code):
         raise serializers.ValidationError(
-            "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -"
+            "Programme code should be exactly 4 characters long"
+            " and may only contain lowercase letters, digits and character: -"
         )
-    return programme_code
+    return code
 
 
 def validate_data_collecting_type(data_collecting_type: DataCollectingType, business_area_slug: str) -> None:
@@ -164,8 +170,8 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
     def get_program(self) -> Program:
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-        program_slug = request.parser_context["kwargs"]["program_slug"]
-        return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
+        program_code = request.parser_context["kwargs"]["program_code"]
+        return get_object_or_404(Program, business_area__slug=business_area_slug, code=program_code)
 
     def validate_title(self, value: str) -> str:
         program = self.get_program()
@@ -175,7 +181,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
         return value
 
     @staticmethod
-    def _validate_cycle_start_date(start_date, program):
+    def _validate_cycle_start_date(start_date: datetime.date, program: Program) -> None:
         if program.end_date:
             if not (program.start_date <= start_date <= program.end_date):
                 raise serializers.ValidationError(
@@ -187,7 +193,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
             )
 
     @staticmethod
-    def _validate_cycle_end_date(end_date, start_date, program):
+    def _validate_cycle_end_date(end_date: datetime.date, start_date: datetime.date, program: Program) -> None:
         if not program.end_date and end_date < program.start_date:
             raise serializers.ValidationError(
                 {"end_date": "Programme Cycle end date cannot be before programme start date."}
@@ -243,18 +249,22 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
         return value
 
     @staticmethod
-    def _parse_program_dates(program):
-        program_start_date = (
+    def _parse_program_dates(program: Program) -> tuple[datetime.date, datetime.date | None]:
+        program_start_date: datetime.date | None = (
             parse_date(program.start_date) if isinstance(program.start_date, str) else program.start_date
         )
-        program_end_date = (
+        program_end_date: datetime.date | None = (
             (parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date)
             if program.end_date
             else None
         )
+        if program_start_date is None:
+            raise ValueError("program_start_date must not be None")
         return program_start_date, program_end_date
 
-    def _validate_update_start_date(self, start_date, program_start_date, program_end_date):
+    def _validate_update_start_date(
+        self, start_date: datetime.date, program_start_date: datetime.date, program_end_date: datetime.date | None
+    ) -> None:
         if program_end_date:
             if not (program_start_date <= start_date <= program_end_date):
                 raise serializers.ValidationError(
@@ -267,7 +277,13 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
         elif self.instance.end_date and start_date > self.instance.end_date:
             raise serializers.ValidationError({"start_date": "Programme Cycle start date must be before the end date."})
 
-    def _validate_update_end_date(self, end_date, start_date, program_start_date, program_end_date):
+    def _validate_update_end_date(
+        self,
+        end_date: datetime.date,
+        start_date: datetime.date | None,
+        program_start_date: datetime.date,
+        program_end_date: datetime.date | None,
+    ) -> None:
         if program_end_date and not (program_start_date <= end_date <= program_end_date):
             raise serializers.ValidationError(
                 {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
@@ -323,8 +339,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
-            "programme_code",
-            "slug",
+            "code",
             "name",
             "start_date",
             "end_date",
@@ -346,8 +361,9 @@ class ProgramListSerializer(serializers.ModelSerializer):
 
 
 class ProgramOnlyNameSerializer(serializers.ModelSerializer):
-    class Meta(ProgramListSerializer.Meta):
-        fields = ("id", "name", "slug")
+    class Meta:
+        model = Program
+        fields = ("id", "name", "code")
 
 
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
@@ -432,7 +448,7 @@ class PDUDataCreateSerializer(serializers.Serializer):
 
 
 class PDUFieldsCreateSerializer(serializers.Serializer):
-    label = serializers.CharField()  # type: ignore
+    label = serializers.CharField()  # type: ignore[assignment]
     pdu_data = PDUDataCreateSerializer()
 
 
@@ -441,13 +457,12 @@ class PDUFieldsUpdateSerializer(PDUFieldsCreateSerializer):
 
 
 class ProgramCreateSerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
+    code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
     partners = PartnersDataSerializer(many=True, write_only=True)
     pdu_fields = PDUFieldsCreateSerializer(many=True)
-    slug = serializers.CharField(read_only=True)
     version = serializers.IntegerField(read_only=True)
     status = serializers.CharField(read_only=True)
     reconciliation_window_in_days = serializers.IntegerField(default=0)
@@ -457,9 +472,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
-            "programme_code",
+            "code",
             "name",
-            "slug",
             "sector",
             "description",
             "budget",
@@ -487,11 +501,11 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Programme with this name already exists in this business area.")
         return value
 
-    def validate_programme_code(self, value: str | None) -> str | None:
+    def validate_code(self, value: str | None) -> str | None:
         if value:
-            value = validate_programme_code(value)
+            value = validate_code(value)
             business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-            if Program.objects.filter(business_area__slug=business_area_slug, programme_code=value).exists():
+            if Program.objects.filter(business_area__slug=business_area_slug, code=value).exists():
                 raise serializers.ValidationError("Programme code is already used.")
         return value
 
@@ -541,20 +555,21 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            FlexibleAttribute.objects.select_related("pdu_data")
+            .filter(type=FlexibleAttribute.PDU, program=obj)
+            .order_by("name"),
             many=True,
         ).data
         return representation
 
 
 class ProgramUpdateSerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(read_only=True)
+    code = serializers.CharField(read_only=True)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
     pdu_fields = PDUFieldsUpdateSerializer(many=True)
     version = serializers.IntegerField(required=False)
-    slug = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
     partner_access = serializers.CharField(read_only=True)
     reconciliation_window_in_days = serializers.IntegerField(required=False, default=0)
@@ -563,9 +578,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = (
-            "programme_code",
+            "code",
             "name",
-            "slug",
             "sector",
             "description",
             "budget",
@@ -664,7 +678,9 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            FlexibleAttribute.objects.select_related("pdu_data")
+            .filter(type=FlexibleAttribute.PDU, program=obj)
+            .order_by("name"),
             many=True,
         ).data
         return representation
@@ -696,7 +712,7 @@ class ProgramUpdatePartnerAccessSerializer(serializers.ModelSerializer):
 
 
 class ProgramCopySerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
+    code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
@@ -706,7 +722,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = (
-            "programme_code",
+            "code",
             "name",
             "sector",
             "description",
@@ -723,10 +739,10 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             "partner_access",
         )
 
-    def validate_programme_code(self, value: str | None) -> str | None:
+    def validate_code(self, value: str | None) -> str | None:
         if value:
-            value = validate_programme_code(value)
-            if Program.objects.filter(business_area=self.instance.business_area, programme_code=value).exists():
+            value = validate_code(value)
+            if Program.objects.filter(business_area=self.instance.business_area, code=value).exists():
                 raise serializers.ValidationError("Programme code is already used.")
         return value
 
@@ -790,8 +806,9 @@ class ProgramChoicesSerializer(serializers.Serializer):
 
     def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         request = self.context.get("request", {})
-        return list(
-            DataCollectingType.objects.filter(
+        return [
+            dict(row)
+            for row in DataCollectingType.objects.filter(
                 Q(
                     Q(
                         limit_to__slug=request.parser_context["kwargs"]["business_area_slug"],
@@ -806,7 +823,7 @@ class ProgramChoicesSerializer(serializers.Serializer):
             .annotate(value=F("code"))
             .values("name", "value", "description", "type")
             .order_by("name")
-        )
+        ]
 
     def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.PARTNER_ACCESS_CHOICE)
@@ -825,8 +842,7 @@ class ProgramSmallSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
-            "programme_code",
-            "slug",
+            "code",
             "name",
             "status",
             "screen_beneficiary",

@@ -142,7 +142,7 @@ class TestRuleMixin:
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
-    def _proccesing_selection(self, context, form, rule, selection):
+    def _proccesing_selection(self, context: dict, form: "RuleTestForm", rule: Any, selection: str) -> tuple:
         if selection == "optFile":
             data = form.cleaned_data.get("file")
             title = f"Test result for '{rule}' using file"

@@ -46,16 +46,16 @@ export function OpenTargetPopulationHeaderButtons({
   const { mutateAsync: rebuild, isPending: loadingRebuild } = useMutation({
     mutationFn: ({
       businessAreaSlug,
-      programSlug,
+      programCode,
       id,
     }: {
       businessAreaSlug: string;
-      programSlug: string;
+      programCode: string;
       id: string;
     }) =>
       RestService.restBusinessAreasProgramsTargetPopulationsRebuildRetrieve({
         businessAreaSlug,
-        programSlug,
+        programCode,
         id,
       }),
     onSuccess: () => {
@@ -126,7 +126,7 @@ export function OpenTargetPopulationHeaderButtons({
             onClick={() =>
               rebuild({
                 businessAreaSlug: businessArea,
-                programSlug: programId,
+                programCode: programId,
                 id: targetPopulation.id,
               })
             }

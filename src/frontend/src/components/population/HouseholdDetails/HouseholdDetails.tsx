@@ -148,6 +148,11 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid size={3}>
+            <LabelizedField label={t('Facility Name')}>
+              {household?.facilityName}
+            </LabelizedField>
+          </Grid>
+          <Grid size={3}>
             <LabelizedField label={t('LENGTH OF TIME SINCE ARRIVAL')}>
               {household?.flexFields?.months_displaced_h_f}
             </LabelizedField>

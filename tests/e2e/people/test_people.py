@@ -12,16 +12,17 @@ from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.people.people import People
 from e2e.page_object.people.people_details import PeopleDetails
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.household import (
-    create_household,
-    create_individual_document,
+from extras.test_utils.factories import (
+    DataCollectingTypeFactory,
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramFactory,
 )
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
+from hope.apps.household.const import HOST, SEEING
 from hope.models import (
-    HOST,
-    SEEING,
     BeneficiaryGroup,
     BusinessArea,
     DataCollectingType,
@@ -29,6 +30,7 @@ from hope.models import (
     Payment,
     Program,
 )
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
 
@@ -44,24 +46,26 @@ def social_worker_program() -> Program:
 def add_people(social_worker_program: Program) -> List:
     ba = social_worker_program.business_area
     with transaction.atomic():
-        household, individuals = create_household(
-            household_args={
-                "business_area": ba,
-                "program": social_worker_program,
-                "residence_status": HOST,
-            },
-            individual_args={
-                "full_name": "Stacey Freeman",
-                "given_name": "Stacey",
-                "middle_name": "",
-                "family_name": "Freeman",
-                "business_area": ba,
-                "observed_disability": [SEEING],
-            },
+        hoh = IndividualFactory(
+            full_name="Stacey Freeman",
+            household=None,
+            business_area=ba,
+            program=social_worker_program,
+            given_name="Stacey",
+            middle_name="",
+            family_name="Freeman",
+            observed_disability=[SEEING],
         )
-        individual = individuals[0]
-        create_individual_document(individual)
-    return [individual, household]
+        household = HouseholdFactory(
+            program=social_worker_program,
+            business_area=ba,
+            residence_status=HOST,
+            head_of_household=hoh,
+        )
+        hoh.household = household
+        hoh.save()
+        DocumentFactory(individual=hoh)
+    return [hoh, household]
 
 
 @pytest.fixture
@@ -80,8 +84,9 @@ def add_people_with_payment_record(add_people: List) -> Payment:
         parent=payment_plan,
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
-        currency="PLN",
+        currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+        collector=add_people[0],
     )
     add_people[1].total_cash_received_usd = 21.36
     add_people[1].save()
@@ -90,39 +95,41 @@ def add_people_with_payment_record(add_people: List) -> Payment:
 
 def get_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.STANDARD,
     status: str = Program.DRAFT,
-) -> Program:
+) -> object:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
 
 
 def get_social_program_with_dct_type_and_name(
     name: str,
-    programme_code: str,
+    code: str,
     dct_type: str = DataCollectingType.Type.SOCIAL,
     status: str = Program.DRAFT,
-) -> Program:
-    dct = DataCollectingTypeFactory(type=dct_type)
+) -> object:
+    dct = DataCollectingType.objects.filter(type=dct_type).first()
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     return ProgramFactory(
         name=name,
-        programme_code=programme_code,
+        code=code,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
 
 
@@ -256,7 +263,6 @@ class TestPeople:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_individual_tab().click()
         page_grievance_new_ticket.get_individual_table_rows(0).click()
-        page_grievance_details_page.screenshot(screenshot_path, "0")
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()

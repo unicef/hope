@@ -21,6 +21,7 @@ class FspNameMapping(models.Model):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return self.external_name  # pragma: no cover

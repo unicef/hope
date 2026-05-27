@@ -1,9 +1,8 @@
-from datetime import datetime
 import random
 from time import sleep
 
 from dateutil.relativedelta import relativedelta
-from flaky import flaky
+from django.utils import timezone
 import pytest
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -14,14 +13,14 @@ from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from e2e.page_object.programme_management.programme_management import (
     ProgrammeManagement,
 )
-from extras.test_utils.old_factories.account import (
+from extras.test_utils.factories import (
+    DataCollectingTypeFactory,
     PartnerFactory,
+    ProgramFactory,
+    RegistrationDataImportFactory,
     RoleAssignmentFactory,
     RoleFactory,
 )
-from extras.test_utils.old_factories.core import DataCollectingTypeFactory
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import RegistrationDataImportFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, Program
 
 pytestmark = pytest.mark.django_db()
@@ -62,8 +61,8 @@ def create_program(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
-        start_date=datetime.now() - relativedelta(months=1),
-        end_date=datetime.now() + relativedelta(months=1),
+        start_date=timezone.now() - relativedelta(months=1),
+        end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
         budget=100,
@@ -134,7 +133,6 @@ class TestProgrammeManagement:
         # 3rd step (Partners)
         page_programme_management.get_button_save().click()
         # Check Details page
-        page_programme_management.screenshot(screenshot_path, "test_create_programme")
         page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
         assert "DRAFT" in page_programme_details.get_program_status().text
         assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
@@ -204,7 +202,6 @@ class TestProgrammeManagement:
         page_programme_management.get_button_save().click()
         # Check Details page
         page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
-        page_programme_details.screenshot(screenshot_path, "0")
         assert "DRAFT" in page_programme_details.get_program_status().text
         assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
         assert test_data["endDate"].date_in_text_format in page_programme_details.get_label_end_date().text
@@ -450,7 +447,6 @@ class TestProgrammeManagement:
         with pytest.raises(NoSuchElementException):
             assert "UNHCR" in page_programme_details.get_label_partner_name().text
 
-    @flaky(max_runs=3, min_passes=1)
     def test_create_programme_cancel_scenario(
         self,
         page_programme_management: ProgrammeManagement,
@@ -651,8 +647,8 @@ class TestManualCalendar:
         page_programme_management.get_button_save().click()
         # Check Details page
         page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
-        assert str(datetime.now().strftime("15 %b %Y")) in page_programme_details.get_label_start_date().text
-        end_date = datetime.now() + relativedelta(months=1)
+        assert str(timezone.now().strftime("15 %b %Y")) in page_programme_details.get_label_start_date().text
+        end_date = timezone.now() + relativedelta(months=1)
         assert str(end_date.strftime("25 %b %Y")) in page_programme_details.get_label_end_date().text
 
     @pytest.mark.parametrize(
@@ -844,7 +840,6 @@ class TestManualCalendar:
             By.CSS_SELECTOR, "[data-cy='label-partner-name']"
         )
         assert len(partner_name_elements_new) == 3
-        page_programme_details.screenshot(screenshot_path, "partner_name_elements_new.png")
         assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)

@@ -41,6 +41,7 @@ def from_input_to_targeting_criteria(
             payment_plan=payment_plan,
             household_ids=household_ids,
             individual_ids=individual_ids,
+            alternative_collectors_ids=rule.get("alternative_collectors_ids", ""),
         )
         tc_rule.save()
         for hh_filter in households_filters_blocks:

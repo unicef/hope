@@ -10,6 +10,7 @@ class AccountType(models.Model):
 
     class Meta:
         app_label = "payment"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return self.key
@@ -18,6 +19,6 @@ class AccountType(models.Model):
     def get_targeting_field_names(cls) -> list[str]:
         return [
             f"{_account_type.key}__{field_name}"
-            for _account_type in cls.objects.all()
+            for _account_type in cls.objects.order_by("key")
             for field_name in _account_type.unique_fields
         ]
