@@ -16,7 +16,7 @@ jobs:
       CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
       SECRET_KEY: ci-secret-key-for-schema-generation
       PYTHONPATH: ./src
-      ELASTICSEARCH_SYNONYMS_FILE: ./src/data/synonyms.txt
+      ELASTICSEARCH_SYNONYMS_FILE: ${{ github.workspace }}/src/data/synonyms.txt
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

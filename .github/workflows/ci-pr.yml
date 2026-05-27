@@ -28,10 +28,12 @@ jobs:
   mypy:
     uses: ./.github/workflows/mypy.yml
   tests:
+    needs: [generate-types]
     uses: ./.github/workflows/tests.yml
     secrets: inherit
   pragma:
     uses: ./.github/workflows/pragma.yml
   build:
+    needs: [generate-types]
     uses: ./.github/workflows/build-and-push.yml
     secrets: inherit
