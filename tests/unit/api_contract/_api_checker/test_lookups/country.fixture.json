@@ -2,7 +2,7 @@
     "country": {
         "master": {
             "model": "geo.country",
-            "pk": "413370ef-192d-49fc-9856-c136611546e1",
+            "pk": "3db05d2f-e30d-469b-93aa-27606dbb6d8c",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
