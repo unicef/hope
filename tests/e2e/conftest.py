@@ -142,7 +142,10 @@ def seed_currencies() -> None:
 
     mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
     Currency.objects.bulk_create(
-        [Currency(code=code, name=name, is_crypto=is_crypto) for code, name, is_crypto in mod.CURRENCIES],
+        [
+            Currency(code=code, name=name, is_crypto=is_crypto, active=True, vision_code=code)
+            for code, name, is_crypto in mod.CURRENCIES
+        ],
         ignore_conflicts=True,
     )
 
