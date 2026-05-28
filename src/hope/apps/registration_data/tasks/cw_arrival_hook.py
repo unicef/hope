@@ -25,6 +25,11 @@ PERSISTED_FINDINGS_STATUS_CODES = (
 
 class CwArrivalHookTask:
     def execute(self, registration_data_import_id: str) -> None:
+        logger.info(
+            f"RDI:{registration_data_import_id} CW arrival hook temporarily disabled for Dedupe Engine compatibility."
+        )
+        return
+
         rdi = RegistrationDataImport.objects.select_related("program").get(pk=registration_data_import_id)
         logger.info(
             f"RDI:{registration_data_import_id} CW arrival hook starting "

@@ -67,7 +67,6 @@ def people_ids(
                     "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                 }
             ],
-            "country_workspace_id": "cw-delegate-john",
         },
         {
             "residence_status": "IDP",
@@ -77,7 +76,6 @@ def people_ids(
             "birth_date": "1990-01-01",
             "sex": "FEMALE",
             "type": "",
-            "country_workspace_id": "cw-delegate-mary",
         },
         {
             "residence_status": "IDP",
@@ -87,7 +85,6 @@ def people_ids(
             "birth_date": "1980-01-01",
             "sex": "MALE",
             "type": NON_BENEFICIARY,
-            "country_workspace_id": "cw-delegate-jack",
         },
     ]
     url = reverse("api:rdi-push-people", args=[business_area.slug, str(rdi_loading.id)])

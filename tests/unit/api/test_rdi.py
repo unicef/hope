@@ -37,7 +37,6 @@ def test_create_rdi(
         "collect_data_policy": "FULL",
         "program": str(program.id),
         "imported_by_email": imported_by_user.email,
-        "country_workspace_id": "cw-create-rdi-baseline",
     }
 
     response = token_api_client.post(url, data, format="json")
@@ -62,7 +61,6 @@ def test_create_rdi_permission_denied_for_invalid_email(
         "collect_data_policy": "FULL",
         "program": str(program.id),
         "imported_by_email": "nonexistentuser@example.com",
-        "country_workspace_id": "cw-bad-email-baseline",
     }
 
     response = token_api_client.post(url, data, format="json")
@@ -101,7 +99,6 @@ def test_create_rdi_biometric_deduplication_status(
         "collect_data_policy": "FULL",
         "program": str(biometric_program.id),
         "imported_by_email": imported_by_user.email,
-        "country_workspace_id": "cw-biometric-baseline",
     }
 
     response = token_api_client.post(url, data, format="json")
