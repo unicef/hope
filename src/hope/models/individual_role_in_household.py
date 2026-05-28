@@ -1,6 +1,6 @@
 from django.db import models
 
-from hope.models.household import ROLE_CHOICE
+from hope.apps.household.const import ROLE_CHOICE
 from hope.models.utils import AbstractSyncable, PendingManager, SoftDeletableMergeStatusModel, TimeStampedUUIDModel
 
 

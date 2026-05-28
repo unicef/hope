@@ -8,18 +8,22 @@ from rest_framework.response import Response
 from hope.api.endpoints.base import HOPEAPIView
 from hope.api.endpoints.serializers import (
     CountrySerializer,
+    CurrencySerializer,
     FinancialInstitutionListSerializer,
 )
 from hope.api.filters import CountryFilter, FinancialInstitutionFilter
-from hope.apps.household.const import RESIDENCE_STATUS_CHOICE
-from hope.models import (
+from hope.apps.household.const import (
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEX_CHOICE,
+)
+from hope.models import (
     Country,
+    Currency,
     FinancialInstitution,
     Program,
 )
@@ -44,6 +48,16 @@ class CountryAPIView(HOPEAPIView, ListAPIView):
         "name",
         "short_name",
         "iso_num",
+    )
+
+
+class CurrencyAPIView(HOPEAPIView, ListAPIView):
+    queryset = Currency.objects.all().order_by("code")
+    serializer_class = CurrencySerializer
+    filter_backends = (OrderingFilter, SearchFilter)
+    search_fields = (
+        "code",
+        "name",
     )
 
 
