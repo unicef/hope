@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.models import BusinessArea, Program, RegistrationDataImport, User
 
-pytestmark = [pytest.mark.django_db, pytest.mark.skip(reason="country_workspace_id temporarily disabled")]
+pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def test_cw_push_payload_country_workspace_id_maps_to_country_workspace_id(
 ) -> None:
     payload = {**cw_create_payload, "country_workspace_id": "cw-correlation-abc-123"}
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(9):
         response = token_api_client.post(cw_create_url, payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
@@ -43,6 +43,7 @@ def test_cw_push_payload_country_workspace_id_maps_to_country_workspace_id(
     assert rdi.country_workspace_id == "cw-correlation-abc-123"
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_without_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
@@ -55,6 +56,7 @@ def test_cw_push_without_country_workspace_id_returns_400(
     assert RegistrationDataImport.objects.filter(name=cw_create_payload["name"]).count() == 0
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_with_blank_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
@@ -68,6 +70,7 @@ def test_cw_push_with_blank_country_workspace_id_returns_400(
     assert "country_workspace_id" in response.json()
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_duplicate_country_workspace_id_rejected(
     token_api_client: APIClient,
     cw_create_url: str,
