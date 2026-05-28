@@ -466,6 +466,8 @@ def test_payment_instruction_inline_hides_download_column_for_non_pg_plan(
 
     assert "download_link" not in inline.get_fields(request, payment_plan)
     assert "download_link" not in inline.get_readonly_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" not in inline.get_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" not in inline.get_readonly_fields(request, payment_plan)
 
 
 def test_payment_instruction_inline_shows_download_column_for_pg_plan(admin_user, payment_gateway_fsp) -> None:
@@ -479,6 +481,8 @@ def test_payment_instruction_inline_shows_download_column_for_pg_plan(admin_user
 
     assert "download_link" in inline.get_fields(request, payment_plan)
     assert "download_link" in inline.get_readonly_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" in inline.get_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" in inline.get_readonly_fields(request, payment_plan)
 
 
 def test_payment_instruction_inline_download_link_returns_anchor_with_permission(

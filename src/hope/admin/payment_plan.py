@@ -57,24 +57,27 @@ class PaymentInstructionInline(admin.TabularInline):
     model = PaymentPlanSplit
     extra = 0
     can_delete = False
-    base_fields = (
+    common_fields = (
         "id",
         "order",
         "split_type",
-        "sent_to_payment_gateway",
     )
-    fields = readonly_fields = (*base_fields, "download_link")
+    payment_gateway_fields = (
+        "sent_to_payment_gateway",
+        "download_link",
+    )
+    fields = readonly_fields = (*common_fields, *payment_gateway_fields)
     verbose_name_plural = "Payment Instructions"
 
     def get_fields(self, request: HttpRequest, obj: PaymentPlan | None = None) -> tuple[str, ...]:
         if obj and obj.is_payment_gateway:
-            return (*self.base_fields, "download_link")
-        return self.base_fields
+            return (*self.common_fields, *self.payment_gateway_fields)
+        return self.common_fields
 
     def get_readonly_fields(self, request: HttpRequest, obj: PaymentPlan | None = None) -> tuple[str, ...]:
         if obj and obj.is_payment_gateway:
-            return (*self.base_fields, "download_link")
-        return self.base_fields
+            return (*self.common_fields, *self.payment_gateway_fields)
+        return self.common_fields
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         self._request = request
