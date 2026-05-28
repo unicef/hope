@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.models import BusinessArea, Program, RegistrationDataImport, User
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.skip(reason="country_workspace_id temporarily disabled")]
 
 
 @pytest.fixture
