@@ -10,15 +10,25 @@ jobs:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
       REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
-      CACHE_LOCATION: redis://localhost:6379/1
-      CELERY_BROKER_URL: redis://localhost:6379/0
-      CELERY_RESULT_BACKEND: redis://localhost:6379/0
-      CONSTANCE_REDIS_CONNECTION: redis://localhost:6379/0
       SECRET_KEY: ci-secret-key-for-schema-generation
       DEBUG: "True"
       ALLOWED_HOSTS: "*"
+      CACHE_ENABLED: "False"
       PYTHONPATH: ./src
       ELASTICSEARCH_SYNONYMS_FILE: ${{ github.workspace }}/src/data/synonyms.txt
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: aurora
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -30,7 +40,6 @@ jobs:
             build-essential \
             libjpeg-dev \
             zlib1g-dev \
-            postgresql-client \
             libpq-dev \
             python3-psycopg2 \
             python3-gdal \
@@ -42,31 +51,6 @@ jobs:
             libpango-1.0-0 \
             libpangocairo-1.0-0 \
             shared-mime-info
-
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
-      - name: Launch services with Docker Compose
-        run: docker-compose -f development_tools/compose.yml up -d db redis
-
-      - name: Wait for Postgres to be ready
-        run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
-            echo "Waiting for Postgres..."
-            sleep 2
-          done
-
-      - name: Create database
-        run: PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE aurora;"
-
-      - name: Wait for Redis to be ready
-        run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
-            echo "Waiting for Redis..."
-            sleep 2
-          done
 
       - name: Install Python & UV
         uses: astral-sh/setup-uv@v6
