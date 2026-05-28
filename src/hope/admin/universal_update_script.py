@@ -1,14 +1,15 @@
 from typing import Any, Iterator
 
-from admin_extra_buttons.buttons import ButtonWidget
+from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import admin
-from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.admin.widgets import AutocompleteSelect, FilteredSelectMultiple
 from django.contrib.postgres.forms import SimpleArrayField
-from django.db.models import QuerySet
-from django.http import HttpRequest
+from django.db.models import Q, QuerySet
+from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.urls import path, reverse
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.universal_update_script.celery_tasks import (
@@ -21,7 +22,35 @@ from hope.apps.universal_update_script.universal_individual_update_service.all_u
     household_fields,
     individual_fields,
 )
-from hope.models import AccountType, DocumentType, UniversalUpdate
+from hope.models import AccountType, DocumentType, Program, UniversalUpdate
+
+PROGRAM_AUTOCOMPLETE_URL_SUFFIX = "program_autocomplete"
+
+
+def format_program_label(program: Program) -> str:
+    """Disambiguate same-named programmes across business areas."""
+    return f"{program.name} — {program.business_area.name} ({program.code})"
+
+
+class ProgramAutocompleteSelect(AutocompleteSelect):
+    """Program autocomplete scoped to UniversalUpdateAdmin.
+
+    The stock admin autocomplete is served by ProgramAdmin, which lists removed
+    programmes (SoftDeletableAdminMixin uses ``all_objects``) — picking one then
+    fails save validation. This widget targets a UniversalUpdateAdmin-local
+    endpoint backed by ``Program.objects``, so only saveable programmes appear.
+    """
+
+    def get_url(self) -> str:
+        meta = UniversalUpdate._meta
+        return reverse(f"admin:{meta.app_label}_{meta.model_name}_{PROGRAM_AUTOCOMPLETE_URL_SUFFIX}")
+
+
+class ProgramChoiceField(forms.ModelChoiceField):
+    """Programme choice field whose option labels carry the business area."""
+
+    def label_from_instance(self, obj: Any) -> str:
+        return format_program_label(obj)
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
@@ -175,6 +204,45 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         ),
     )
 
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "program":
+            kwargs["queryset"] = Program.objects.select_related("business_area")
+            kwargs["widget"] = ProgramAutocompleteSelect(db_field, self.admin_site)
+            kwargs["form_class"] = ProgramChoiceField
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_urls(self) -> list[Any]:
+        info = self.model._meta.app_label, self.model._meta.model_name
+        custom_urls = [
+            path(
+                "program-autocomplete/",
+                self.admin_site.admin_view(self.program_autocomplete_view),
+                name=f"{info[0]}_{info[1]}_{PROGRAM_AUTOCOMPLETE_URL_SUFFIX}",
+            ),
+        ]
+        return custom_urls + super().get_urls()
+
+    def program_autocomplete_view(self, request: HttpRequest) -> JsonResponse:
+        # Backed by Program.objects (excludes removed/invisible) so the picker
+        # only ever offers programmes that will pass save validation.
+        page_size = 20
+        programs = Program.objects.select_related("business_area").order_by("business_area__name", "name", "code")
+        if term := request.GET.get("term"):
+            # AND the words, OR across name / code / business area — mirrors the
+            # multi-word behaviour of the stock admin autocomplete search.
+            for word in term.split():
+                programs = programs.filter(
+                    Q(name__icontains=word) | Q(code__icontains=word) | Q(business_area__name__icontains=word)
+                )
+        try:
+            page = max(int(request.GET.get("page", 1)), 1)
+        except (TypeError, ValueError):
+            page = 1
+        start = (page - 1) * page_size
+        chunk = list(programs[start : start + page_size + 1])
+        results = [{"id": str(program.pk), "text": format_program_label(program)} for program in chunk[:page_size]]
+        return JsonResponse({"results": results, "pagination": {"more": len(chunk) > page_size}})
+
     def logs_property(self, obj: UniversalUpdate) -> str:
         return obj.logs or "-"
 
@@ -193,7 +261,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     celery_tasks_results_ids.short_description = "Async Result IDs"
 
     @staticmethod
-    def start_universal_update_task_visible(btn: ButtonWidget) -> bool:
+    def start_universal_update_task_visible(btn: StandardButton) -> bool:
         universal_update = get_object_or_404(UniversalUpdate, pk=btn.request.resolver_match.kwargs["object_id"])
         return bool(universal_update.update_file)
 

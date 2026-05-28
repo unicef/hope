@@ -87,6 +87,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
+    country_workspace_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=150)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -235,7 +236,11 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
     @extend_schema(request=PushPeopleSerializer)
     @atomic()
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
-        serializer = PushPeopleSerializer(data=request.data, many=True)
+        serializer = PushPeopleSerializer(
+            data=request.data,
+            many=True,
+            context={"is_coming_from_cw": self.selected_rdi.is_coming_from_cw},
+        )
         if serializer.is_valid():
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)
 

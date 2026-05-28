@@ -1135,6 +1135,20 @@ def test_generate_xlsx_with_auth_code(
 
         payment.status = Payment.STATUS_SENT_TO_PG
         payment.save()
+        response_4 = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+            format="json",
+        )
+
+        assert response_4.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
+            in response_4.data
+        )
+
+        payment.status = Payment.STATUS_SENT_TO_FSP
+        payment.save()
         response_ok = payment_plan_actions_context["client"].post(
             payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
             {"fsp_xlsx_template_id": fsp_xlsx_template_id},

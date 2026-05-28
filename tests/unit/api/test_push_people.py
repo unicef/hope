@@ -102,6 +102,7 @@ def test_upload_single_person(token_api_client, push_people_url, program, rdi, a
             "sex": "NOT_COLLECTED",
             "type": "",
             "program": str(program.id),
+            "country_workspace_id": "cw-single-1",
         }
     ]
     response = token_api_client.post(push_people_url, data, format="json")
@@ -150,6 +151,7 @@ def test_upload_multiple_people_with_documents(
                 }
             ],
             "program": str(program.id),
+            "country_workspace_id": "cw-multi-john",
         },
         {
             "residence_status": "IDP",
@@ -160,6 +162,7 @@ def test_upload_multiple_people_with_documents(
             "sex": "FEMALE",
             "type": "",
             "program": str(program.id),
+            "country_workspace_id": "cw-multi-mary",
         },
     ]
     response = token_api_client.post(push_people_url, data, format="json")
@@ -205,6 +208,7 @@ def test_upload_with_errors(token_api_client, push_people_url, program, afghanis
                 }
             ],
             "program": str(program.id),
+            "country_workspace_id": "cw-err-john",
         },
         {
             "residence_status": "IDP",
@@ -213,6 +217,7 @@ def test_upload_with_errors(token_api_client, push_people_url, program, afghanis
             "full_name": "Mary Doe",
             "sex": "FEMALE",
             "program": str(program.id),
+            "country_workspace_id": "cw-err-mary",
         },
     ]
     response = token_api_client.post(push_people_url, data, format="json")
@@ -268,6 +273,7 @@ def test_upload_single_person_with_phone_number(
             "type": "",
             field_name: phone_number,
             "program": str(program.id),
+            "country_workspace_id": "cw-phone-1",
         }
     ]
     response = token_api_client.post(push_people_url, data, format="json")
@@ -304,6 +310,7 @@ def test_push_single_person_with_village(
             "sex": "MALE",
             "type": "",
             "program": str(program.id),
+            "country_workspace_id": "cw-village-1",
         }
     ]
     response = token_api_client.post(push_people_url, data, format="json")
@@ -331,6 +338,7 @@ def test_push_single_person_with_admin_areas(token_api_client, push_people_url, 
             "admin3": "",
             "admin4": None,
             "program": str(program.id),
+            "country_workspace_id": "cw-admin-1",
         }
     ]
     response = token_api_client.post(push_people_url, data, format="json")
@@ -394,6 +402,7 @@ def common_serializer_data() -> dict[str, str]:
         "full_name": "John Doe",
         "sex": "MALE",
         "country_origin": "",
+        "country_workspace_id": "cw-serializer-1",
     }
 
 
@@ -409,3 +418,30 @@ def test_people_serializer_disability(common_serializer_data, disability_value, 
     serializer = PushPeopleSerializer(data={**common_serializer_data, "disability": disability_value})
     serializer.is_valid()
     assert serializer.validated_data.get("disability") == expected
+
+
+def test_push_single_person_stores_country_workspace_id(
+    token_api_client, push_people_url, program, rdi, afghanistan_country
+) -> None:
+    data = [
+        {
+            "residence_status": "IDP",
+            "village": "village1",
+            "country": "AF",
+            "full_name": "John Doe",
+            "birth_date": "2000-01-01",
+            "sex": "MALE",
+            "type": "",
+            "program": str(program.id),
+            "country_workspace_id": "42",
+        }
+    ]
+    response = token_api_client.post(push_people_url, data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    response_json = response.json()
+
+    rdi_obj = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
+    assert rdi_obj is not None
+    ind = PendingIndividual.objects.filter(registration_data_import=rdi_obj).first()
+    assert ind is not None
+    assert ind.country_workspace_id == "42"
