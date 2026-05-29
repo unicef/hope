@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import IO, TYPE_CHECKING, Any, cast
 
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
@@ -35,18 +36,19 @@ class FollowUpInstructionService:
 
     def _get_applicable_source_payment_plans(self, payment_plan_group_ids: list[str]) -> list[PaymentPlan]:
         self._get_source_groups(payment_plan_group_ids)
-        already_used_source_ids = PaymentPlan.objects.filter(
-            source_payment_plan__isnull=False,
-            follow_up_instruction__program=self.program,
-        ).values_list("source_payment_plan_id", flat=True)
+        follow_up_children = PaymentPlan.objects.filter(
+            source_payment_plan_id=OuterRef("pk"),
+            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        )
         source_plans = (
             PaymentPlan.objects.filter(
                 payment_plan_group_id__in=payment_plan_group_ids,
                 program_cycle__program=self.program,
+                plan_type=PaymentPlan.PlanType.REGULAR,
             )
-            .exclude(plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+            .annotate(has_follow_up_child=Exists(follow_up_children))
             .exclude(follow_up_instruction__isnull=False)
-            .exclude(id__in=already_used_source_ids)
+            .filter(has_follow_up_child=False)
             .select_related(
                 "business_area",
                 "currency",

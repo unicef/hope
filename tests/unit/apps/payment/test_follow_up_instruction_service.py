@@ -182,7 +182,7 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
     assert all(child.plan_type == PaymentPlan.PlanType.FOLLOW_UP for child in child_plans)
 
 
-def test_create_excludes_source_plans_already_used_by_another_instruction(
+def test_create_excludes_source_plans_with_existing_follow_up_child(
     user,
     program,
     cycle,
@@ -236,6 +236,106 @@ def test_create_excludes_source_plans_already_used_by_another_instruction(
     child_plans = list(instruction.payment_plans.all())
     assert len(child_plans) == 1
     assert child_plans[0].source_payment_plan_id == source_two.id
+
+
+def test_create_excludes_source_plans_with_manual_follow_up_child(
+    user,
+    program,
+    cycle,
+    business_area,
+    currency,
+    delivery_mechanism,
+    fsp,
+):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    source_one = _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    source_two = _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_payment_plan=source_one,
+    )
+
+    instruction = FollowUpInstructionService(program).create(
+        user=user,
+        payment_plan_group_ids=[str(group.id)],
+        dispersion_start_date=source_two.dispersion_start_date + timedelta(days=1),
+        dispersion_end_date=source_two.dispersion_end_date + timedelta(days=1),
+    )
+
+    child_plans = list(instruction.payment_plans.all())
+    assert len(child_plans) == 1
+    assert child_plans[0].source_payment_plan_id == source_two.id
+
+
+def test_create_does_not_exclude_source_plans_with_top_up_child(
+    user,
+    program,
+    cycle,
+    business_area,
+    currency,
+    delivery_mechanism,
+    fsp,
+):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    source_one = _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    source_two = _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_payment_plan=source_one,
+    )
+
+    instruction = FollowUpInstructionService(program).create(
+        user=user,
+        payment_plan_group_ids=[str(group.id)],
+        dispersion_start_date=source_one.dispersion_start_date + timedelta(days=1),
+        dispersion_end_date=source_one.dispersion_end_date + timedelta(days=1),
+    )
+
+    child_plans = list(instruction.payment_plans.order_by("source_payment_plan_id"))
+    assert len(child_plans) == 2
+    assert [child.source_payment_plan_id for child in child_plans] == [source_one.id, source_two.id]
 
 
 def test_create_raises_validation_error_when_no_applicable_source_plans(
