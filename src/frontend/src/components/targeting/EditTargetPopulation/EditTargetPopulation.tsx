@@ -55,7 +55,6 @@ const EditTargetPopulation = ({
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const [cycleChanged, setCycleChanged] = useState(false);
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [modalCycle, setModalCycle] = useState<{ value: string; name: string }>(
     {
@@ -170,7 +169,10 @@ const EditTargetPopulation = ({
         `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
     }
-    if (cycleChanged && !values.paymentPlanGroupId?.value) {
+    if (
+      values.programCycleId.value !== paymentPlan.programCycle.id &&
+      !values.paymentPlanGroupId?.value
+    ) {
       errors.paymentPlanGroupId = { value: 'Payment Plan Group is required' };
     }
     return errors;
@@ -197,7 +199,10 @@ const EditTargetPopulation = ({
         exclusionReason: values.exclusionReason,
         fspId: values.targetingCriteria[0]?.fsp || null,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
-        ...(cycleChanged && {
+        ...((values.programCycleId.value !== paymentPlan.programCycle.id ||
+          (values.paymentPlanGroupId?.value &&
+            values.paymentPlanGroupId.value !==
+              (paymentPlan.paymentPlanGroup?.id ?? ''))) && {
           programCycleId: values.programCycleId.value,
           paymentPlanGroupId: values.paymentPlanGroupId.value,
         }),
@@ -265,12 +270,8 @@ const EditTargetPopulation = ({
                       e ?? { value: '', name: '' },
                     );
                     if (e?.value && e.value !== paymentPlan.programCycle.id) {
-                      await setFieldValue('paymentPlanGroupId', {
-                        value: '',
-                        name: '',
-                      });
+                      await setFieldValue('paymentPlanGroupId', { value: '', name: '' });
                       setModalCycle(e);
-                      setCycleChanged(true);
                       setCreateGroupModalOpen(true);
                     }
                   }}
@@ -309,7 +310,19 @@ const EditTargetPopulation = ({
             </Grid>
             <CreatePaymentPlanGroupModal
               open={createGroupModalOpen}
-              onClose={() => setCreateGroupModalOpen(false)}
+              onClose={() => {
+                setCreateGroupModalOpen(false);
+                // If cycle was changed from initial but no group created yet, revert cycle
+                if (
+                  values.programCycleId.value !== paymentPlan.programCycle.id &&
+                  !values.paymentPlanGroupId?.value
+                ) {
+                  setFieldValue('programCycleId', {
+                    value: paymentPlan.programCycle.id,
+                    name: paymentPlan.programCycle.title,
+                  });
+                }
+              }}
               cycleId={modalCycle.value}
               cycleTitle={modalCycle.name}
               onSuccess={(group) => {
@@ -317,7 +330,6 @@ const EditTargetPopulation = ({
                   value: group.id,
                   name: group.name,
                 });
-                setCycleChanged(true);
                 setCreateGroupModalOpen(false);
               }}
             />
