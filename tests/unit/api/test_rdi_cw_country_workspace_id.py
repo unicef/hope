@@ -43,7 +43,6 @@ def test_cw_push_payload_country_workspace_id_maps_to_country_workspace_id(
     assert rdi.country_workspace_id == "cw-correlation-abc-123"
 
 
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_without_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
@@ -56,7 +55,6 @@ def test_cw_push_without_country_workspace_id_returns_400(
     assert RegistrationDataImport.objects.filter(name=cw_create_payload["name"]).count() == 0
 
 
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_with_blank_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
@@ -70,7 +68,6 @@ def test_cw_push_with_blank_country_workspace_id_returns_400(
     assert "country_workspace_id" in response.json()
 
 
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_duplicate_country_workspace_id_rejected(
     token_api_client: APIClient,
     cw_create_url: str,
