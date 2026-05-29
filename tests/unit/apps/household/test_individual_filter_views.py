@@ -34,7 +34,7 @@ from hope.apps.household.const import (
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import BusinessArea, Individual, MergeStatusModel, Program
 
-pytestmark = [pytest.mark.django_db]
+pytestmark = pytest.mark.django_db
 
 
 def _create_test_individuals(
