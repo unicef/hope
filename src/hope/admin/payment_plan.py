@@ -52,7 +52,10 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED  # pragma: no cover
+    return payment_plan.is_payment_gateway and payment_plan.status in [
+        PaymentPlan.Status.ACCEPTED,
+        PaymentPlan.Status.FINISHED,
+    ]
 
 
 def can_regenerate_export_file_per_fsp(payment_plan: PaymentPlan) -> bool:
