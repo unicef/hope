@@ -715,6 +715,10 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                     "id",
                     filter=Q(status__in=tuple(set(Payment.FAILED_STATUSES) - {Payment.STATUS_NOT_DISTRIBUTED})),
                 ),
+                pg_xlsx_export_blocking_count=Count(
+                    "id",
+                    filter=Q(status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG)),
+                ),
                 pending_count=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
                 error_count=Count("id", filter=Q(status=Payment.STATUS_ERROR)),
                 total_count=Count("id"),
@@ -830,7 +834,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
                     return False
-                return self._payments_summary(obj)["pending_count"] == 0
+                return self._payments_summary(obj)["pg_xlsx_export_blocking_count"] == 0
 
             if not user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, obj.business_area):
                 return False
