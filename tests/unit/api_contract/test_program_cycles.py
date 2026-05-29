@@ -25,7 +25,7 @@ def business_area(request, db):
 
 @frozenfixture()
 def program(request, db, business_area):
-    return ProgramFactory(business_area=business_area)
+    return ProgramFactory(business_area=business_area, cycle=False)
 
 
 @frozenfixture()

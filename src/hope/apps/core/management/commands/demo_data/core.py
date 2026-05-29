@@ -1,179 +1,5 @@
-import random
-from typing import Any, List
-
-import factory
-from factory import fuzzy
-from factory.django import DjangoModelFactory
-from faker import Faker
-
-from hope.apps.periodic_data_update.utils import field_label_to_field_name
-from hope.models import (
-    BusinessArea,
-    Country,
-    CountryCodeMap,
-    DataCollectingType,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
-    PeriodicFieldData,
-    Program,
-    StorageFile,
-)
-
-faker = Faker()
-
-
-def create_afghanistan() -> BusinessArea:
-    return BusinessArea.objects.get_or_create(
-        code="0060",
-        defaults={
-            "code": "0060",
-            "name": "Afghanistan",
-            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            "region_code": "64",
-            "region_name": "SAR",
-            "slug": "afghanistan",
-            "has_data_sharing_agreement": True,
-            "kobo_token": "XXX",
-            "active": True,  # Set active=True for tests
-        },
-    )[0]
-
-
-def create_ukraine() -> BusinessArea:
-    return BusinessArea.objects.create(
-        code="4410",
-        name="Ukraine",
-        long_name="UKRAINE",
-        region_code="66",
-        region_name="ECAR",
-        slug="ukraine",
-        has_data_sharing_agreement=True,
-        kobo_token="YYY",
-    )
-
-
-def create_kenya() -> BusinessArea:
-    return BusinessArea.objects.create(
-        code="2400",
-        name="Kenya",
-        long_name="THE REPUBLIC OF KENYA",
-        region_code="63",
-        region_name="ESAR",
-        slug="kenya",
-        has_data_sharing_agreement=True,
-        kobo_token="ZZZ",
-    )
-
-
-class StorageFileFactory(DjangoModelFactory):
-    class Meta:
-        model = StorageFile
-
-    business_area = factory.LazyAttribute(lambda _: BusinessArea.objects.first())
-
-
-class DataCollectingTypeFactory(DjangoModelFactory):
-    class Meta:
-        model = DataCollectingType
-        django_get_or_create = ("label", "code")
-
-    label = factory.Faker("text", max_nb_chars=30)
-    code = factory.Faker("text", max_nb_chars=30)
-    type = DataCollectingType.Type.STANDARD
-    description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
-    individual_filters_available = True
-    household_filters_available = True
-
-    @factory.post_generation
-    def business_areas(self, create: Any, extracted: List[Any], **kwargs: Any) -> None:
-        if not create:
-            return
-
-        if extracted:
-            for business_area in extracted:
-                self.limit_to.add(business_area)
-
-
-class PeriodicFieldDataFactory(DjangoModelFactory):
-    subtype = fuzzy.FuzzyChoice([choice[0] for choice in PeriodicFieldData.TYPE_CHOICES])
-    rounds_names = factory.LazyAttribute(
-        lambda _: [factory.Faker("word").evaluate(None, None, {"locale": None}) for _ in range(random.randint(1, 10))]
-    )
-    number_of_rounds = factory.LazyAttribute(lambda o: len(o.rounds_names))
-
-    class Meta:
-        model = PeriodicFieldData
-
-
-class FlexibleAttributeForPDUFactory(DjangoModelFactory):
-    associated_with = FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-    label = factory.Faker("word")
-    name = factory.LazyAttribute(lambda instance: field_label_to_field_name(instance.label))
-    type = FlexibleAttribute.PDU
-    pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
-
-    class Meta:
-        model = FlexibleAttribute
-
-    @factory.lazy_attribute
-    def program(self) -> Any:
-        from extras.test_utils.old_factories.program import ProgramFactory
-
-        return ProgramFactory()
-
-    @classmethod
-    def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
-        label = kwargs.pop("label", None)
-        kwargs["label"] = {"English(EN)": label}
-        return super()._create(target_class, *args, **kwargs)
-
-
-class FlexibleAttributeFactory(DjangoModelFactory):
-    name = factory.Sequence(lambda n: f"test_field_{n}")
-    label = factory.LazyAttribute(lambda o: {"English(EN)": o.name})
-    type = FlexibleAttribute.STRING
-    associated_with = FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-
-    class Meta:
-        model = FlexibleAttribute
-
-
-class FlexibleAttributeChoiceFactory(DjangoModelFactory):
-    list_name = factory.Sequence(lambda n: f"list_{n}")
-    name = factory.Sequence(lambda n: f"choice_{n}")
-    label = factory.LazyAttribute(lambda o: {"English(EN)": o.name})
-
-    class Meta:
-        model = FlexibleAttributeChoice
-
-
-def create_pdu_flexible_attribute(
-    label: str,
-    subtype: str,
-    number_of_rounds: int,
-    rounds_names: list[str],
-    program: Program,
-) -> FlexibleAttribute:
-    name = field_label_to_field_name(label)
-    flexible_attribute = FlexibleAttribute.objects.create(
-        type=FlexibleAttribute.PDU,
-        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
-        label={"English(EN)": label},
-        name=name,
-        program=program,
-    )
-    flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
-        subtype=subtype, number_of_rounds=number_of_rounds, rounds_names=rounds_names
-    )
-    flexible_attribute.save()
-    return flexible_attribute
-
-
-def generate_country_codes() -> None:
-    for country in Country.objects.all():
-        CountryCodeMap.objects.get_or_create(country=country, defaults={"ca_code": country.iso_code3})
-
+from extras.test_utils.factories import DataCollectingTypeFactory, PartnerFactory
+from hope.models import BusinessArea, Country, CountryCodeMap, DataCollectingType
 
 business_area_short_name_code_map = {
     "Analysis,Planning & Monitoring": "456C",
@@ -342,6 +168,18 @@ business_area_short_name_code_map = {
 }
 
 
+def generate_unicef_partners() -> None:
+    unicef_main_partner = PartnerFactory(name="UNICEF")
+    PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
+    PartnerFactory(name="UNHCR")
+    PartnerFactory(name="WFP")
+
+
+def generate_country_codes() -> None:
+    for country in Country.objects.all():
+        CountryCodeMap.objects.get_or_create(country=country, defaults={"ca_code": country.iso_code3})
+
+
 def generate_business_areas() -> None:
     for country_name, ba_code in business_area_short_name_code_map.items():
         if country := Country.objects.filter(short_name=country_name).first():
@@ -374,7 +212,7 @@ def generate_business_areas() -> None:
 
 
 def generate_data_collecting_types() -> None:
-    all_ba_id_list = list(BusinessArea.objects.all().values_list("id", flat=True))
+    all_ba_id_list = BusinessArea.objects.all().values_list("id", flat=True)
     data_collecting_types = [
         {
             "label": "Partial",
@@ -403,27 +241,10 @@ def generate_data_collecting_types() -> None:
     ]
 
     for data_dict in data_collecting_types:
-        DataCollectingTypeFactory(
+        dct = DataCollectingTypeFactory(
             label=data_dict["label"],
             code=data_dict["code"],
-            business_areas=all_ba_id_list,
             type=data_dict["type"],
             household_filters_available=bool(data_dict["type"] == DataCollectingType.Type.STANDARD.value),
         )
-
-
-def generate_pdu_data() -> None:
-    test_program = Program.objects.get(business_area__slug="afghanistan", name="Test Program")
-    group = FlexibleAttributeGroup.objects.create(name="Group 1", label={"english": "english"})
-    pdu_data = PeriodicFieldData.objects.create(
-        subtype="STRING",
-        number_of_rounds=12,
-        rounds_names=["test1", "test2", "test3..."],
-    )
-    FlexibleAttributeForPDUFactory(
-        program=test_program,
-        pdu_data=pdu_data,
-        label="Test pdu 1",
-        hint={"English(EN)": "Test pdu 1"},
-        group=group,
-    )
+        dct.limit_to.add(*all_ba_id_list)

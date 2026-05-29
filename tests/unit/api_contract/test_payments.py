@@ -8,7 +8,7 @@ from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFacto
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualRoleInHouseholdFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -44,7 +44,7 @@ def role_assignment(request, db, superuser, business_area, role):
 
 @frozenfixture()
 def payment_plan(request, db, business_area, program, superuser):
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     return PaymentPlanFactory(business_area=business_area, program_cycle=cycle, created_by=superuser)
 
 

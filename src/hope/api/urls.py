@@ -73,6 +73,11 @@ urlpatterns = [
         name="country-list",
     ),
     path(
+        "lookups/currency/",
+        endpoints.lookups.CurrencyAPIView().as_view(),
+        name="currency-list",
+    ),
+    path(
         "lookups/financial-institution/",
         endpoints.lookups.FinancialInstitutionAPIView().as_view(),
         name="financial-institution-list",

@@ -17,6 +17,7 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
@@ -183,6 +184,26 @@ def test_payment_plan_create(user):
     assert isinstance(payment_plan, PaymentPlan)
 
 
+def test_is_payment_gateway_and_all_sent_to_fsp_false_for_sent_to_payment_gateway(payment_plan):
+    PaymentFactory(parent=payment_plan)
+    payment_plan.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.use_payment_gateway = True
+    payment_plan.save(update_fields=["financial_service_provider", "use_payment_gateway"])
+    payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_PG)
+
+    assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is False
+
+
+def test_is_payment_gateway_and_all_sent_to_fsp_true_for_sent_to_fsp(payment_plan):
+    PaymentFactory(parent=payment_plan)
+    payment_plan.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.use_payment_gateway = True
+    payment_plan.save(update_fields=["financial_service_provider", "use_payment_gateway"])
+    payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_FSP)
+
+    assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is True
+
+
 def test_update_population_count_fields(payment_plan):
     hoh1 = IndividualFactory(
         household=None,
@@ -263,7 +284,7 @@ def test_not_excluded_payments():
 
 
 def test_can_be_locked():
-    program = ProgramFactory()
+    program = ProgramFactory(cycle=False)
     program_cycle = ProgramCycleFactory(program=program, end_date=now().date() + timedelta(days=30))
 
     payment_plan = PaymentPlanFactory(
@@ -485,7 +506,7 @@ def test_has_payments_reconciliation_overdue():
 
 
 def test_manager_annotations_pp_conflicts():
-    program = ProgramFactory()
+    program = ProgramFactory(cycle=False)
     program_cycle = ProgramCycleFactory(program=program, end_date=now().date() + timedelta(days=30))
 
     pp1 = PaymentPlanFactory(

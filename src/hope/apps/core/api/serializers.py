@@ -53,6 +53,12 @@ class ChoiceSerializer(serializers.Serializer):
     value = serializers.CharField()
 
 
+class CurrencyChoiceSerializer(ChoiceSerializer):
+    value = serializers.CharField(source="code")
+    vision_code = serializers.CharField()
+    active = serializers.BooleanField()
+
+
 class GetKoboAssetListSerializer(serializers.Serializer):
     only_deployed = serializers.BooleanField(default=False)
 

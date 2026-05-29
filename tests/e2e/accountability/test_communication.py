@@ -5,8 +5,7 @@ from e2e.page_object.accountability.communication import AccountabilityCommunica
 from e2e.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
-from extras.test_utils.old_factories.accountability import CommunicationMessageFactory
-from extras.test_utils.old_factories.payment import PaymentPlanFactory
+from extras.test_utils.factories import CommunicationMessageFactory, PaymentPlanFactory
 from hope.models import BusinessArea, DataCollectingType, Message, PaymentPlan, Program, User
 
 pytestmark = pytest.mark.django_db()
@@ -24,13 +23,13 @@ def add_accountability_communication_message() -> Message:
     program = Program.objects.get(name="Test Program")
     cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
+        name="Test Accountability Payment Plan",
         status=PaymentPlan.Status.TP_LOCKED,
         created_by=user,
         business_area=ba,
         program_cycle=cycle,
     )
     return CommunicationMessageFactory(
-        unicef_id="MSG-24-0666",
         title="You got credit of USD 100",
         body="Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC",
         business_area=ba,
@@ -83,7 +82,10 @@ class TestSmokeAccountabilityCommunication:
         page_accountability_communication.select_global_program_filter("Test Program")
         page_accountability_communication.get_nav_accountability().click()
         page_accountability_communication.get_rows()[0].click()
-        assert "MSG-24-0666" in page_accountability_communication_details.get_page_header_title().text
+        assert (
+            add_accountability_communication_message.unicef_id
+            in page_accountability_communication_details.get_page_header_title().text
+        )
         created_by = add_accountability_communication_message.created_by
         assert (
             f"{created_by.first_name} {created_by.last_name}"

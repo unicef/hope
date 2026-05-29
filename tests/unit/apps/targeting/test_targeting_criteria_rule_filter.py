@@ -1,10 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
-from pytz import utc
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -14,7 +13,6 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentPlanFactory,
     PeriodicFieldDataFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -46,13 +44,11 @@ def user():
 
 @pytest.fixture
 def program(business_area):
-    program = ProgramFactory(
+    return ProgramFactory(
         business_area=business_area,
         name="Program Active",
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 @pytest.fixture
@@ -89,7 +85,7 @@ def households(business_area, program):
             program=program,
             size=size,
             residence_status=residence_status,
-            first_registration_date=timezone.make_aware(datetime.strptime(first_registration_date, "%Y-%m-%d"), utc),
+            first_registration_date=timezone.make_aware(datetime.strptime(first_registration_date, "%Y-%m-%d"), UTC),
         )
         if birth_date:
             individual = hh.head_of_household
@@ -180,7 +176,7 @@ def households_pdu(user, business_area):
         name="Test Program for PDU Flex Rule Filter",
         business_area=business_area,
     )
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
 
     # Create PDU flex fields
     pdu_string = FlexibleAttributeForPDUFactory(

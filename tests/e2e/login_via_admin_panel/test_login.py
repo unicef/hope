@@ -3,20 +3,23 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.admin_panel.admin_panel import AdminPanel
-from extras.test_utils.old_factories.account import UserFactory
+from extras.test_utils.factories import UserFactory
 from hope.models import User
 
 pytestmark = pytest.mark.django_db()
 
 
 def create_normal_user() -> User:
-    return UserFactory.create(
+
+    user = UserFactory.create(
         is_superuser=False,
         is_staff=True,
         username="normal_user",
-        password="normal_password",
         email="normal@user.com",
     )
+    user.set_password("normal_password")
+    user.save()
+    return user
 
 
 class TestAdminPanel:
