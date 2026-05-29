@@ -459,6 +459,39 @@ def test_import_row_updates_payment_when_only_extras_change(
     assert payment.extras == {"custom": "val"}
 
 
+def test_validate_rows_skips_already_reconciled_payment(
+    payment_plan_finished: PaymentPlan,
+    payment_for_extras: Payment,
+) -> None:
+    payment = payment_for_extras
+    payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    payment.save(update_fields=["status"])
+
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
+    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
+    import_service.payments_dict = {str(payment.pk): payment}
+    import_service.payment_ids = [str(payment.pk)]
+
+    Row = namedtuple("Row", ["value", "coordinate"])
+    row = [
+        Row(str(payment.pk), "A2"),
+        Row("450", "B2"),
+        Row("2024-01-01", "C2"),
+    ]
+
+    class Worksheet:
+        @staticmethod
+        def iter_rows(min_row: int = 2):
+            return [row]
+
+    import_service.ws_payments = Worksheet()
+
+    import_service._validate_rows()
+
+    assert import_service.is_updated is False
+    assert import_service.errors == []
+
+
 def test_validate_delivery_date_wrong_value(
     payment_plan_finished: PaymentPlan,
     payment_for_extras: Payment,

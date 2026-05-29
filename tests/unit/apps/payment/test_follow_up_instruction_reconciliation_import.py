@@ -538,6 +538,44 @@ def test_validation_reports_error_when_delivered_exceeds_entitlement(
     assert any("bigger than" in e.message.lower() for e in service.errors)
 
 
+def test_validation_skips_household_row_when_any_payment_is_already_reconciled(
+    instruction,
+    instruction_payments,
+    delivery_template,
+):
+    payment_one, _payment_two, payment_three = instruction_payments
+    payment_one.delivered_quantity = payment_one.entitlement_quantity
+    payment_one.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    payment_one.save(update_fields=["delivered_quantity", "status"])
+
+    workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
+    worksheet = workbook.active
+    headers = [cell.value for cell in worksheet[1]]
+    household_col = headers.index("household_id") + 1
+    delivered_col = headers.index("delivered_quantity") + 1
+
+    for row_idx in range(2, worksheet.max_row + 1):
+        household_id = str(worksheet.cell(row=row_idx, column=household_col).value)
+        if household_id == payment_one.household.unicef_id:
+            worksheet.cell(row=row_idx, column=delivered_col).value = "120.00"
+        elif household_id == payment_three.household.unicef_id:
+            worksheet.cell(row=row_idx, column=delivered_col).value = "10.00"
+
+    with NamedTemporaryFile(suffix=".xlsx") as tmp:
+        workbook.save(tmp.name)
+        tmp.seek(0)
+        service = XlsxFollowUpInstructionReconciliationImportService(
+            instruction, ContentFile(tmp.read(), name="skip-reconciled-household.xlsx")
+        )
+
+    service.open_workbook()
+    service.validate()
+
+    assert not service.errors
+    assert payment_one.household.unicef_id not in service.household_updates
+    assert service.household_updates == {payment_three.household.unicef_id: Decimal("10.00")}
+
+
 def test_validation_skips_row_when_delivered_quantity_is_empty(
     instruction,
     instruction_payments,
