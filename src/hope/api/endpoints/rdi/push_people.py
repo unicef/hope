@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.common import (
+    CountryWorkspaceIdConditionalMixin,
     DisabilityChoiceField,
     NullableChoiceField,
 )
@@ -58,7 +60,22 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
     pass
 
 
-class PushPeopleSerializer(serializers.ModelSerializer):
+class PushPeopleListSerializer(serializers.ListSerializer):
+    def validate(self, attrs: list[dict]) -> list[dict]:
+        cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
+        duplicates = sorted(cw_id for cw_id, count in Counter(cw_ids).items() if count > 1)
+        if duplicates:
+            raise serializers.ValidationError(
+                {
+                    "country_workspace_id": [
+                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicates)}."
+                    ]
+                }
+            )
+        return attrs
+
+
+class PushPeopleSerializer(CountryWorkspaceIdConditionalMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.MultipleChoiceField(
@@ -105,6 +122,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PendingIndividual
+        list_serializer_class = PushPeopleListSerializer
         exclude = [
             "id",
             "registration_data_import",

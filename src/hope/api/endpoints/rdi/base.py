@@ -29,7 +29,7 @@ class RDISerializer(serializers.ModelSerializer):
     )
     imported_by_email = serializers.EmailField(required=True, write_only=True)
     country_workspace_id = serializers.CharField(
-        required=False,
+        required=True,
         allow_blank=False,
         max_length=255,
     )
@@ -37,6 +37,11 @@ class RDISerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationDataImport
         fields = ("name", "program", "imported_by_email", "country_workspace_id")
+
+    def validate_country_workspace_id(self, value: str) -> str:
+        if RegistrationDataImport.objects.filter(country_workspace_id=value).exists():
+            raise serializers.ValidationError("country_workspace_id must be unique")
+        return value
 
     def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)

@@ -20,6 +20,7 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.common import (
+    CountryWorkspaceIdConditionalMixin,
     DisabilityChoiceField,
     NullableChoiceField,
 )
@@ -124,7 +125,7 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class IndividualSerializer(serializers.ModelSerializer):
+class IndividualSerializer(CountryWorkspaceIdConditionalMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
