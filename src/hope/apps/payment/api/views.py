@@ -1014,6 +1014,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         serializer = self.get_serializer(
             data=request.data,
         )
@@ -1059,6 +1061,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         old_payment_plan = copy_model_object(payment_plan)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
@@ -1091,6 +1095,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("User can only import for LOCKED Payment Plan")
         if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
@@ -1142,6 +1148,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         serializer = self.get_serializer(
             data=request.data,
         )
