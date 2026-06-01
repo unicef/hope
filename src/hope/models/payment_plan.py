@@ -567,6 +567,12 @@ class PaymentPlan(
         db_index=True,
         help_text="Payment Plan type [sys]",
     )
+    export_tag = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
+    )
     exclude_household_error = models.TextField(
         blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
     )
