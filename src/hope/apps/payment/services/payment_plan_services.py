@@ -37,7 +37,7 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_delivery_from_xlsx_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
-    prepare_follow_up_payment_plan_async_task,
+    prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
     send_payment_notification_emails_async_task,
     send_payment_plan_delivery_xlsx_password_async_task,
@@ -78,6 +78,7 @@ from hope.models import (
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
+    from django.db.models import QuerySet
 
     from hope.models import FollowUpInstruction
 
@@ -535,7 +536,9 @@ class PaymentPlanService:
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
-        payments_queryset = payment_plan.eligible_payments.select_related("household_snapshot").all()
+        payments_queryset = payment_plan.eligible_payments.select_related(
+            "household_snapshot", "currency", "delivery_type"
+        ).all()
         paginator = Paginator(payments_queryset, 500)
         for page_number in paginator.page_range:
             payments = paginator.page(page_number).object_list
@@ -918,21 +921,77 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db()
         return self.payment_plan
 
-    def create_follow_up_payments(self) -> None:
+    def _create_child_payment_plan(
+        self,
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
+        plan_type: str,
+        name_suffix: str,
+    ) -> PaymentPlan:
+        """Create a child Payment Plan (follow-up / top-up / top-up amendment) of the current plan.
+
+        Shared core for all three flows: the child inherits the source plan's group,
+        purposes, currency, dates, delivery mechanism and FSP, and is created OPEN.
+        """
+        source_pp = self.payment_plan
+        child_pp = PaymentPlan.objects.create(
+            name=source_pp.name + name_suffix,  # type: ignore[operator]
+            status=PaymentPlan.Status.OPEN,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+            built_at=timezone.now(),
+            status_date=timezone.now(),
+            plan_type=plan_type,
+            source_payment_plan=source_pp,
+            business_area=source_pp.business_area,
+            created_by=user,
+            program_cycle=source_pp.program_cycle,
+            currency=source_pp.currency,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+            start_date=source_pp.start_date,
+            end_date=source_pp.end_date,
+            use_payment_gateway=source_pp.use_payment_gateway,
+            delivery_mechanism=source_pp.delivery_mechanism,
+            financial_service_provider=source_pp.financial_service_provider,
+            payment_plan_group=source_pp.payment_plan_group,
+        )
+        self.copy_target_criteria(source_pp, child_pp)
+        child_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
+        return child_pp
+
+    def _copy_payments(
+        self,
+        source_payments: "QuerySet[Payment]",
+        *,
+        copy_entitlement: bool,
+        is_follow_up: bool,
+    ) -> None:
+        """Copy the given source payments into this child plan.
+
+        Shared core for all three flows. FollowUp copies the entitlement of each
+        source payment; TopUp / TopUp amendment leave it empty (``None``) — the
+        operator sets it later with the standard entitlement tools.
+        """
+        if self.payment_plan.payment_items.exists():
+            # Re-entry guard: the async copy job can be redelivered after a successful
+            # commit (acks_late). If payments already exist, the copy ran — skip it
+            # instead of hitting the payment_plan_and_household unique constraint.
+            return
+
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
         self.payment_plan.save(update_fields=["exchange_rate", "updated_at"])
-        payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
 
         if not (split := self.payment_plan.splits.first()):
             split = PaymentPlanSplit.objects.create(payment_plan=self.payment_plan)
 
-        follow_up_payments = [
+        copied_payments = [
             Payment(
                 parent=self.payment_plan,
                 parent_split=split,
                 source_payment=payment,
                 program_id=self.payment_plan.program_cycle.program_id,
-                is_follow_up=True,
+                is_follow_up=is_follow_up,
                 business_area_id=payment.business_area_id,
                 status=Payment.STATUS_PENDING,
                 status_date=timezone.now(),
@@ -941,16 +1000,48 @@ class PaymentPlanService:
                 collector_id=payment.collector_id,
                 collector_type=payment.collector_type,
                 currency=payment.currency,
-                entitlement_quantity=payment.entitlement_quantity,
-                entitlement_quantity_usd=payment.entitlement_quantity_usd,
+                entitlement_quantity=payment.entitlement_quantity if copy_entitlement else None,
+                entitlement_quantity_usd=payment.entitlement_quantity_usd if copy_entitlement else None,
                 financial_service_provider=self.payment_plan.financial_service_provider,
                 delivery_type=self.payment_plan.delivery_mechanism,
             )
-            for payment in payments_to_copy
+            for payment in source_payments
         ]
-        Payment.objects.bulk_create(follow_up_payments)
+        Payment.objects.bulk_create(copied_payments)
         create_payment_plan_snapshot_data(self.payment_plan)
         PaymentPlanService.generate_signature(self.payment_plan)
+
+    def create_follow_up_payments(self) -> None:
+        self._copy_payments(
+            self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up(),
+            copy_entitlement=True,
+            is_follow_up=True,
+        )
+
+    def create_top_up_payments(self) -> None:
+        self._copy_payments(
+            self.payment_plan.source_payment_plan.eligible_payments_for_top_up(),
+            copy_entitlement=False,
+            is_follow_up=False,
+        )
+
+    def create_top_up_amendment_payments(self) -> None:
+        self._copy_payments(
+            self.payment_plan.source_payment_plan.eligible_payments_for_top_up_amendment(),
+            copy_entitlement=False,
+            is_follow_up=False,
+        )
+
+    def create_child_plan_payments(self) -> None:
+        match self.payment_plan.plan_type:
+            case PaymentPlan.PlanType.FOLLOW_UP:
+                self.create_follow_up_payments()
+            case PaymentPlan.PlanType.TOP_UP:
+                self.create_top_up_payments()
+            case PaymentPlan.PlanType.TOP_UP_AMENDMENT:
+                self.create_top_up_amendment_payments()
+            case _:
+                raise ValidationError(f"Unsupported child payment plan type: {self.payment_plan.plan_type}")
 
     @transaction.atomic
     def create_follow_up(
@@ -968,41 +1059,85 @@ class PaymentPlanService:
         if not source_pp.unsuccessful_payments_for_follow_up().exists():
             raise ValidationError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
-        follow_up_pp = PaymentPlan.objects.create(
-            name=source_pp.name + " Follow Up",  # type: ignore[operator]
-            status=PaymentPlan.Status.OPEN,
-            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
-            built_at=timezone.now(),
-            status_date=timezone.now(),
-            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-            source_payment_plan=source_pp,
-            business_area=source_pp.business_area,
-            created_by=user,
-            program_cycle=source_pp.program_cycle,
-            currency=source_pp.currency,
-            dispersion_start_date=dispersion_start_date,
-            dispersion_end_date=dispersion_end_date,
-            start_date=source_pp.start_date,
-            end_date=source_pp.end_date,
-            use_payment_gateway=source_pp.use_payment_gateway,
-            delivery_mechanism=source_pp.delivery_mechanism,
-            financial_service_provider=source_pp.financial_service_provider,
-            payment_plan_group=source_pp.payment_plan_group,
-            follow_up_instruction=follow_up_instruction,
+        follow_up_pp = self._create_child_payment_plan(
+            user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.FOLLOW_UP, " Follow Up"
         )
-        (self.copy_target_criteria(source_pp, follow_up_pp),)
-        follow_up_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
-
-        transaction.on_commit(lambda: prepare_follow_up_payment_plan_async_task(follow_up_pp))
-
+        if follow_up_instruction is not None:
+            follow_up_pp.follow_up_instruction = follow_up_instruction
+            follow_up_pp.save(update_fields=["follow_up_instruction", "updated_at"])
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(follow_up_pp))
         return follow_up_pp
+
+    @transaction.atomic
+    def create_top_up(
+        self,
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
+    ) -> PaymentPlan:
+        source_pp = self.payment_plan
+
+        if source_pp.plan_type != PaymentPlan.PlanType.REGULAR:
+            raise ValidationError(
+                f"Top-up Payment Plan can only be created from a Standard plan, got {source_pp.plan_type}"
+            )
+
+        if not source_pp.eligible_payments_for_top_up().exists():
+            raise ValidationError("Cannot create a top-up for a payment plan with no eligible payments")
+
+        top_up_pp = self._create_child_payment_plan(
+            user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP, " Top Up"
+        )
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(top_up_pp))
+        return top_up_pp
+
+    @transaction.atomic
+    def create_top_up_amendment(
+        self,
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
+    ) -> PaymentPlan:
+        source_pp = self.payment_plan
+
+        if source_pp.plan_type != PaymentPlan.PlanType.TOP_UP:
+            raise ValidationError(f"Top-up Amendment can only be created from a Top Up plan, got {source_pp.plan_type}")
+
+        if not source_pp.eligible_payments_for_top_up_amendment().exists():
+            raise ValidationError("Cannot create a top-up amendment for a payment plan with no eligible payments")
+
+        amendment_pp = self._create_child_payment_plan(
+            user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP_AMENDMENT, " Amendment"
+        )
+        transaction.on_commit(lambda: prepare_child_payment_plan_async_task(amendment_pp))
+        return amendment_pp
+
+    def create_child_plan(
+        self,
+        *,
+        plan_type: "PaymentPlan.PlanType",
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
+    ) -> PaymentPlan:
+        match plan_type:
+            case PaymentPlan.PlanType.FOLLOW_UP:
+                return self.create_follow_up(user, dispersion_start_date, dispersion_end_date)
+            case PaymentPlan.PlanType.TOP_UP:
+                return self.create_top_up(user, dispersion_start_date, dispersion_end_date)
+            case PaymentPlan.PlanType.TOP_UP_AMENDMENT:
+                return self.create_top_up_amendment(user, dispersion_start_date, dispersion_end_date)
+            case _:
+                raise ValidationError(f"Unsupported child payment plan type: {plan_type}")
 
     def recalculate_signatures_in_batch(self, batch_size: int = 500) -> None:
         payment_plan = self.payment_plan
         payments_ids = list(payment_plan.eligible_payments.values_list("id", flat=True))
         for batch_start in range(0, len(payments_ids), batch_size):
             batched_ids = payments_ids[batch_start : batch_start + batch_size]
-            payments = Payment.objects.filter(id__in=batched_ids).select_related("household_snapshot", "currency")
+            payments = Payment.objects.filter(id__in=batched_ids).select_related(
+                "household_snapshot", "currency", "delivery_type"
+            )
             for payment in payments:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))

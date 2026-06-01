@@ -753,6 +753,8 @@ class PaymentPlanViewSet(
         "retrieve": PaymentPlanDetailSerializer,
         "create": PaymentPlanCreateUpdateSerializer,
         "create_follow_up": PaymentPlanCreateFollowUpSerializer,
+        "create_top_up": PaymentPlanCreateFollowUpSerializer,
+        "create_top_up_amendment": PaymentPlanCreateFollowUpSerializer,
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
@@ -779,6 +781,8 @@ class PaymentPlanViewSet(
         ],
         "create": [Permissions.PM_CREATE],
         "create_follow_up": [Permissions.PM_CREATE],
+        "create_top_up": [Permissions.PM_CREATE],
+        "create_top_up_amendment": [Permissions.PM_CREATE],
         "partial_update": [Permissions.PM_CREATE],
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
@@ -849,6 +853,31 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
+    def _create_child_plan_response(self, request: Request, plan_type: "PaymentPlan.PlanType") -> Response:
+        """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions."""
+        payment_plan = self.get_object()
+        user = request.user
+        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
+        serializer.is_valid(raise_exception=True)
+        child_pp = PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=plan_type,
+            user=user,
+            dispersion_start_date=serializer.validated_data["dispersion_start_date"],
+            dispersion_end_date=serializer.validated_data["dispersion_end_date"],
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=user,
+            programs=child_pp.program,
+            old_object=None,
+            new_object=child_pp,
+        )
+        return Response(
+            data=PaymentPlanDetailSerializer(child_pp, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
+
     @extend_schema(
         request=PaymentPlanCreateFollowUpSerializer,
         responses={201: PaymentPlanDetailSerializer},
@@ -856,28 +885,25 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="create-follow-up")
     @transaction.atomic
     def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        user = request.user
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
-        serializer.is_valid(raise_exception=True)
-        follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
-            user,
-            serializer.validated_data["dispersion_start_date"],
-            serializer.validated_data["dispersion_end_date"],
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=user,
-            programs=follow_up_pp.program,
-            old_object=None,
-            new_object=follow_up_pp,
-        )
-        response_serializer = PaymentPlanDetailSerializer(follow_up_pp, context={"request": request})
-        return Response(
-            data=response_serializer.data,
-            status=status.HTTP_201_CREATED,
-        )
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.FOLLOW_UP)
+
+    @extend_schema(
+        request=PaymentPlanCreateFollowUpSerializer,
+        responses={201: PaymentPlanDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="create-top-up")
+    @transaction.atomic
+    def create_top_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP)
+
+    @extend_schema(
+        request=PaymentPlanCreateFollowUpSerializer,
+        responses={201: PaymentPlanDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="create-top-up-amendment")
+    @transaction.atomic
+    def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1020,6 +1046,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         serializer = self.get_serializer(
             data=request.data,
         )
@@ -1065,6 +1093,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         old_payment_plan = copy_model_object(payment_plan)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
@@ -1097,6 +1127,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("User can only import for LOCKED Payment Plan")
         if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
@@ -1148,6 +1180,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         serializer = self.get_serializer(
             data=request.data,
         )

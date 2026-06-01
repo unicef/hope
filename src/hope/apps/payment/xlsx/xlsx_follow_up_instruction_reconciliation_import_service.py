@@ -122,6 +122,14 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self.household_ids_from_xlsx.append(household_unicef_id)
         return household_unicef_id
 
+    def _should_skip_household_row(self, household_unicef_id: str | None) -> bool:
+        if household_unicef_id is None:
+            return True
+        return any(
+            payment.delivered_quantity is not None and payment.status not in Payment.PENDING_STATUSES
+            for payment in self.payments_by_household_unicef_id.get(household_unicef_id, [])
+        )
+
     def _validate_delivered_quantity(self, row: tuple[Cell, ...], household_unicef_id: str | None) -> None:
         if household_unicef_id is None:
             return
@@ -177,6 +185,8 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
             if not any(cell.value for cell in row):
                 continue
             household_unicef_id = self._validate_household_unicef_id(row)
+            if self._should_skip_household_row(household_unicef_id):
+                continue
             self._validate_delivered_quantity(row, household_unicef_id)
 
     def validate(self) -> None:

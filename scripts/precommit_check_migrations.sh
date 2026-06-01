@@ -8,12 +8,17 @@ COMPOSE=(docker compose -f development_tools/compose.yml -f development_tools/co
 UNTRACKED_MIGRATIONS=$(git ls-files --others --exclude-standard -- src/hope/ 2>/dev/null || true)
 export UNTRACKED_MIGRATIONS
 
-if "${COMPOSE[@]}" ps --status running --services 2>/dev/null | grep -qx backend; then
+if [[ -n "${LINT_NOT_ON_DOCKER:-}" ]]; then
+    if command -v uv >/dev/null 2>&1; then
+        exec uv run python manage.py check_missing_migrations
+    fi
+elif "${COMPOSE[@]}" ps --status running --services 2>/dev/null | grep -qx backend; then
     exec "${COMPOSE[@]}" exec -T -e UNTRACKED_MIGRATIONS backend python manage.py check_missing_migrations
 elif command -v uv >/dev/null 2>&1; then
     exec uv run python manage.py check_missing_migrations
-else
-    cat >&2 <<EOF
+fi
+
+cat >&2 <<EOF
 ERROR: cannot run Django missing-migrations check.
 
 Need ONE of:
@@ -25,5 +30,4 @@ Need ONE of:
 Bypass for this commit:
   SKIP=django-makemigrations-check git commit ...
 EOF
-    exit 1
-fi
+exit 1

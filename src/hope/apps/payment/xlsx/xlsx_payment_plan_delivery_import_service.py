@@ -107,6 +107,14 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             )
         self.payment_ids_from_xlsx.append(cell.value)
 
+    def _should_skip_row(self, payment_id: str | None) -> bool:
+        if payment_id is None:
+            return True
+        payment = self.payments_dict.get(payment_id)
+        return payment is None or (
+            payment.delivered_quantity is not None and payment.status not in Payment.PENDING_STATUSES
+        )
+
     def _validate_delivered_quantity(self, row: Row) -> None:
         """Define when possible for a user to upload a file.
 
@@ -227,6 +235,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 continue
 
             self._validate_payment_id(row)
+            payment_id = row[self.xlsx_headers.index("payment_id")].value
+            if self._should_skip_row(payment_id):
+                continue
             self._validate_delivered_quantity(row)
             self._validate_delivery_date(row)
             self._validate_reason_for_unsuccessful_payment(row)
@@ -339,7 +350,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
 
     def _import_row(self, row: Row, exchange_rate: Decimal | float | None) -> None:
         payment_id = row[self.xlsx_headers.index("payment_id")].value
-        if payment_id is None:
+        if self._should_skip_row(payment_id):
             return  # safety check
         payment = self.payments_dict[payment_id]
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value

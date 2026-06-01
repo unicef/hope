@@ -34,7 +34,7 @@ def tp_purpose(business_area: BusinessArea) -> PaymentPlanPurpose:
 @pytest.fixture
 def targeting_program(business_area: BusinessArea, tp_purpose: PaymentPlanPurpose) -> Program:
     # Program.clean() requires at least one purpose before status=ACTIVE save
-    prog = ProgramFactory(business_area=business_area, status=Program.DRAFT)
+    prog = ProgramFactory(business_area=business_area, status=Program.DRAFT, cycle=False)
     prog.payment_plan_purposes.add(tp_purpose)
     prog.status = Program.ACTIVE
     prog.save()

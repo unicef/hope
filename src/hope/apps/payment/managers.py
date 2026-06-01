@@ -90,6 +90,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 ~Q(status__in=Payment.FAILED_STATUSES),
                 Exists(shared_purpose),
                 parent__status=PaymentPlan.Status.OPEN,
+                parent__plan_type=OuterRef("parent__plan_type"),
                 household=OuterRef("household"),
             )
         )
@@ -108,6 +109,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 ~Q(status__in=Payment.FAILED_STATUSES),
                 Q(parent__status__in=PaymentPlan.HARD_CONFLICT_STATUSES),
                 Q(household=OuterRef("household")) & Q(conflicted=False),
+                Q(parent__plan_type=OuterRef("parent__plan_type")),
                 Exists(shared_purpose),
             )
         )

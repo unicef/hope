@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
     FileTempFactory,
+    FollowUpInstructionFactory,
     PartnerFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
@@ -166,7 +167,7 @@ def test_list_payment_plans(
         etag = response.headers["etag"]
 
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 6
 
     with CaptureQueriesContext(connection) as ctx:
         response = managerial_context["client"].get(managerial_context["url"])
@@ -176,7 +177,7 @@ def test_list_payment_plans(
         etag_second_call = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
         assert etag_second_call == etag
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 6
 
 
 def test_list_payment_plans_approval_process_data(
@@ -287,6 +288,41 @@ def test_bulk_action(
     managerial_context["payment_plan2"].refresh_from_db()
     assert managerial_context["payment_plan1"].status == PaymentPlan.Status.IN_AUTHORIZATION
     assert managerial_context["payment_plan2"].status == PaymentPlan.Status.IN_AUTHORIZATION
+
+
+def test_bulk_action_raises_for_instruction_managed(
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    create_partner_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+    create_partner_role_with_permissions(
+        managerial_context["partner"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+    instruction = FollowUpInstructionFactory(
+        program=managerial_context["program1"],
+        business_area=managerial_context["business_area"],
+        created_by=managerial_context["user"],
+    )
+    pp = managerial_context["payment_plan1"]
+    pp.follow_up_instruction = instruction
+    pp.save(update_fields=["follow_up_instruction"])
+
+    response = managerial_context["client"].post(
+        managerial_context["bulk_url"],
+        data={"ids": [str(pp.id)], "action": PaymentPlan.Action.APPROVE.value},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "This Payment Plan is managed by a Follow Up Instruction." in str(response.data)
 
 
 def test_bulk_action_no_approve_permissions(

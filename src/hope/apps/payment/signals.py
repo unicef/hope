@@ -20,6 +20,8 @@ def create_default_payment_plan_group(
 @receiver(post_save, sender=PaymentPlanGroup)
 @receiver(post_delete, sender=PaymentPlanGroup)
 def increment_payment_plan_group_list_cache(sender: Any, instance: PaymentPlanGroup, **kwargs: dict) -> None:
+    if kwargs.get("raw"):
+        return
     program = instance.cycle.program
     business_area_slug = program.business_area.slug
     program_code = program.code

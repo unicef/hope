@@ -1,6 +1,10 @@
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DividerLine } from '@core/DividerLine';
+import { FieldBorder } from '@core/FieldBorder';
+import { GreyText } from '@core/GreyText';
+import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -14,10 +18,10 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  TextField,
   Typography,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation } from '@tanstack/react-query';
 import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
@@ -31,40 +35,73 @@ import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useProgramContext } from '../../../programContext';
 
-export interface CreateTopUpPaymentPlanProps {
+type Variant = 'followup' | 'topup' | 'amendment';
+
+export interface CreateChildPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
+  variant: Variant;
 }
 
-export function CreateTopUpPaymentPlan({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  paymentPlan: _paymentPlan,
-}: CreateTopUpPaymentPlanProps): ReactElement {
+/**
+ * Shared dialog for creating a child Payment Plan from the current one:
+ * Follow-up, Top-Up or Top-Up Amendment. The flows differ only in labels,
+ * endpoint and navigation target. The withdrawn/unsuccessful warnings are
+ * specific to Follow-up (it may only be started for unsuccessful payments).
+ */
+export function CreateChildPaymentPlan({
+  paymentPlan,
+  variant,
+}: CreateChildPaymentPlanProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, selectedProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { mutateAsync: createTopUpPaymentPlan, isPending: loadingCreate } =
+  const isFollowUp = variant === 'followup';
+  const labels = {
+    followup: {
+      button: t('Create Follow-up PP'),
+      title: t('Create Follow-up Payment Plan'),
+    },
+    topup: {
+      button: t('Create Top-Up PP'),
+      title: t('Create Top-Up Payment Plan'),
+    },
+    amendment: {
+      button: t('Create Top-Up Amendment'),
+      title: t('Create Top-Up Amendment Payment Plan'),
+    },
+  }[variant];
+  const detailPath = isFollowUp ? 'followup-payment-plans' : 'payment-plans';
+
+  const { mutateAsync: createChildPaymentPlan, isPending: loadingCreate } =
     useMutation({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      mutationFn: (_requestBody: {
+      mutationFn: (requestBody: {
         dispersionStartDate: string;
         dispersionEndDate: string;
-        totalEntitledQuantityUsd: string;
-      }): Promise<PaymentPlanDetail> => {
-        // TODO: implement when backend create-top-up endpoint is ready
-        // const { businessArea, programId } = useBaseUrl(); — restore in hook call
-        // return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
-        //   businessAreaSlug: businessArea,
-        //   id: _paymentPlan.id,
-        //   programCode: programId,
-        //   requestBody: _requestBody,
-        // });
-        return Promise.reject(
-          new Error('Top-up payment plan creation is not yet available'),
+      }) => {
+        const params = {
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programCode: programId,
+          requestBody,
+        };
+        if (variant === 'followup') {
+          return RestService.restBusinessAreasProgramsPaymentPlansCreateFollowUpCreate(
+            params,
+          );
+        }
+        if (variant === 'amendment') {
+          return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpAmendmentCreate(
+            params,
+          );
+        }
+        return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate(
+          params,
         );
       },
     });
@@ -72,9 +109,6 @@ export function CreateTopUpPaymentPlan({
   if (permissions === null) return null;
 
   const validationSchema = Yup.object().shape({
-    totalEntitledQuantityUsd: Yup.number()
-      .required(t('Total Entitled Quantity is required'))
-      .positive(t('Total Entitled Quantity must be greater than 0')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -97,7 +131,6 @@ export function CreateTopUpPaymentPlan({
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    totalEntitledQuantityUsd: undefined,
     dispersionStartDate: null,
     dispersionEndDate: null,
   };
@@ -111,16 +144,13 @@ export function CreateTopUpPaymentPlan({
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
 
-      const requestBody = {
+      const res = await createChildPaymentPlan({
         dispersionStartDate,
         dispersionEndDate,
-        totalEntitledQuantityUsd: String(values.totalEntitledQuantityUsd),
-      };
-
-      const res = await createTopUpPaymentPlan(requestBody);
+      });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
-      navigate(`/${baseUrl}/payment-module/payment-plans/${res.id}`);
+      navigate(`/${baseUrl}/payment-module/${detailPath}/${res.id}`);
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
@@ -134,7 +164,7 @@ export function CreateTopUpPaymentPlan({
       validateOnChange
       validateOnBlur
     >
-      {({ submitForm, values, handleChange, handleBlur, errors, touched }) => (
+      {({ submitForm, values }) => (
         <Form>
           <Box p={2}>
             <Button
@@ -147,7 +177,7 @@ export function CreateTopUpPaymentPlan({
                 !isActiveProgram
               }
             >
-              {t('Create Top-Up PP')}
+              {labels.button}
             </Button>
           </Box>
           <Dialog
@@ -157,40 +187,67 @@ export function CreateTopUpPaymentPlan({
             maxWidth="md"
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t('Create Top-Up Payment Plan')}</DialogTitle>
+              <DialogTitle>{labels.title}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
                 <Box p={5}>
+                  {isFollowUp && (
+                    <>
+                      <Box display="flex" flexDirection="column">
+                        {paymentPlan.unsuccessfulPaymentsCount === 0 && (
+                          <Box mb={2}>
+                            <FieldBorder color="#FF0200">
+                              <GreyText>
+                                {t(
+                                  'Follow-up Payment Plan might be started just for unsuccessful payments',
+                                )}
+                              </GreyText>
+                            </FieldBorder>
+                          </Box>
+                        )}
+                        {paymentPlan.totalWithdrawnHouseholdsCount > 0 && (
+                          <Box mb={4}>
+                            <FieldBorder color="#FF0200">
+                              <GreyText>
+                                {t(
+                                  `Withdrawn ${beneficiaryGroup?.groupLabel} cannot be added into follow-up payment plan`,
+                                )}
+                              </GreyText>
+                            </FieldBorder>
+                          </Box>
+                        )}
+                      </Box>
+                      <Grid container spacing={3}>
+                        <Grid size={{ xs: 6 }}>
+                          <Box mt={2}>
+                            <Typography>
+                              {t('Main Payment Plan Details')}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6 }} />
+                        <Grid size={{ xs: 6 }}>
+                          <LabelizedField label={t('Unsuccessful payments')}>
+                            {paymentPlan.unsuccessfulPaymentsCount}
+                          </LabelizedField>
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <LabelizedField
+                            label={t(
+                              `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
+                            )}
+                          >
+                            {paymentPlan.totalWithdrawnHouseholdsCount}
+                          </LabelizedField>
+                        </Grid>
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <DividerLine />
+                      </Grid>
+                    </>
+                  )}
                   <Box mb={3}>
-                    <Typography>{t('Set the Total Amount')}</Typography>
-                  </Box>
-                  <Grid container spacing={3}>
-                    <Grid size={{ xs: 6 }}>
-                      <TextField
-                        name="totalEntitledQuantityUsd"
-                        label={t('Total Entitled Quantity (USD)')}
-                        type="number"
-                        required
-                        fullWidth
-                        disabled={loadingCreate}
-                        value={values.totalEntitledQuantityUsd ?? ''}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={
-                          touched.totalEntitledQuantityUsd &&
-                          Boolean(errors.totalEntitledQuantityUsd)
-                        }
-                        helperText={
-                          touched.totalEntitledQuantityUsd &&
-                          errors.totalEntitledQuantityUsd
-                        }
-                        inputProps={{ min: 0, step: '0.01' }}
-                        data-cy="input-total-entitled-quantity-usd"
-                      />
-                    </Grid>
-                  </Grid>
-                  <Box mt={4} mb={3}>
                     <Typography>{t('Set the Dispersion Dates')}</Typography>
                   </Box>
                   <Grid container spacing={3}>

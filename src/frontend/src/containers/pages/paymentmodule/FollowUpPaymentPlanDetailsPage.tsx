@@ -4,7 +4,6 @@ import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPa
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
-import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
@@ -65,8 +64,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
 
   const { status } = paymentPlan;
 
-  const shouldDisplayEntitlement = status !== PaymentPlanStatusEnum.OPEN;
-
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
@@ -88,9 +85,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       <AcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayFundsCommitment && (
         <FundsCommitmentSection paymentPlan={paymentPlan} />
-      )}
-      {shouldDisplayEntitlement && (
-        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />

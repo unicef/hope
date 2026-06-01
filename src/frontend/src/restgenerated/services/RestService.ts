@@ -4929,8 +4929,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -5064,8 +5065,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -5297,8 +5299,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -10398,8 +10401,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -11076,6 +11080,66 @@ export class RestService {
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsPaymentPlansCreateTopUpCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+        requestBody: PaymentPlanCreateFollowUp,
+    }): CancelablePromise<PaymentPlanDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/create-top-up/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansCreateTopUpAmendmentCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programCode: string,
+        requestBody: PaymentPlanCreateFollowUp,
+    }): CancelablePromise<PaymentPlanDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/create-top-up-amendment/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanDetail
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate({
         businessAreaSlug,
         id,
@@ -11680,8 +11744,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -11819,8 +11884,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -11960,8 +12026,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -12668,8 +12735,9 @@ export class RestService {
          * * `REGULAR` - Regular
          * * `TOP_UP` - Top Up
          * * `FOLLOW_UP` - Follow Up
+         * * `TOP_UP_AMENDMENT` - Top Up Amendment
          */
-        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP',
+        planType?: 'FOLLOW_UP' | 'REGULAR' | 'TOP_UP' | 'TOP_UP_AMENDMENT',
         /**
          * Filter by program code
          */
@@ -15843,6 +15911,19 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/payment-plan-status/',
+        });
+    }
+    /**
+     * Return choices used in the system like statuses, currencies.
+     *
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentPlanTypeList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-plan-type/',
         });
     }
     /**

@@ -26,6 +26,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
@@ -37,13 +38,15 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
     ProgramFactory,
     TargetingCriteriaRuleFactory,
+    TargetingIndividualBlockRuleFilterFactory,
+    TargetingIndividualRuleFilterBlockFactory,
     UserFactory,
 )
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_async_task,
+    prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -61,6 +64,7 @@ from hope.models import (
     ProgramCycle,
     Role,
     RoleAssignment,
+    TargetingIndividualBlockRuleFilter,
     User,
 )
 
@@ -562,7 +566,7 @@ def test_create_follow_up_pp(
     assert pp.child_plans.count() == 1
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_follow_up_payment_plan_async_task(follow_up_pp)
+        prepare_child_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -595,9 +599,9 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(73):
+    with django_assert_num_queries(77):
         with django_capture_on_commit_callbacks(execute=True):
-            prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
+            prepare_child_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -620,6 +624,113 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
         PaymentPlanService(payment_plan).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     assert error.value.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
+
+
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment"),
+    ],
+)
+def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    expected_child_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with mock.patch.object(PaymentPlanService, method_name, return_value=expected_child_plan) as service_method:
+        result = PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=plan_type,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert result == expected_child_plan
+    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date)
+
+
+def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=PaymentPlan.PlanType.REGULAR,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
+
+
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments"),
+    ],
+)
+def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+
+    with mock.patch.object(PaymentPlanService, method_name) as service_method:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    service_method.assert_called_once_with()
+
+
+def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
 
 
 def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any, cycle: ProgramCycle) -> None:
@@ -1909,3 +2020,78 @@ def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: P
     service._set_program_cycle({"program_cycle_id": str(cycle.pk)})
     pp.refresh_from_db()
     assert pp.program_cycle == cycle
+
+
+def test_execute_update_status_action_raises_when_instruction_managed(
+    payment_plan_base: PaymentPlan,
+    user: User,
+) -> None:
+    instruction = FollowUpInstructionFactory(
+        business_area=payment_plan_base.business_area,
+        program=payment_plan_base.program,
+        created_by=user,
+    )
+    payment_plan_base.follow_up_instruction = instruction
+    payment_plan_base.save(update_fields=["follow_up_instruction"])
+
+    with pytest.raises(ValidationError, match="This Payment Plan is managed by a Follow Up Instruction."):
+        PaymentPlanService(payment_plan_base).execute_update_status_action(input_data={"action": "LOCK"}, user=user)
+
+
+def test_validate_delivery_export_template_exists_raises_when_fsp_is_none(
+    cycle: ProgramCycle,
+    business_area: Any,
+) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        financial_service_provider=None,
+        delivery_mechanism=None,
+    )
+
+    with pytest.raises(
+        ValidationError,
+        match="Payment plan delivery export requires a Financial Service Provider and Delivery Mechanism.",
+    ):
+        PaymentPlanService(pp)._validate_delivery_export_template_exists(fsp_xlsx_template_id=None)
+
+
+def test_validate_delivery_export_template_exists_raises_when_template_id_not_found(
+    payment_plan_base: PaymentPlan,
+) -> None:
+    nonexistent_id = str(uuid.uuid4())
+
+    with pytest.raises(
+        ValidationError,
+        match="Payment plan delivery export requires an existing FSP XLSX Template.",
+    ):
+        PaymentPlanService(payment_plan_base)._validate_delivery_export_template_exists(
+            fsp_xlsx_template_id=nonexistent_id
+        )
+
+
+def test_validate_delivery_export_template_exists_raises_when_no_fsp_dm_template(
+    payment_plan_base: PaymentPlan,
+) -> None:
+    with pytest.raises(
+        ValidationError,
+        match="Payment plan delivery export requires an FSP XLSX Template for the selected",
+    ):
+        PaymentPlanService(payment_plan_base)._validate_delivery_export_template_exists(fsp_xlsx_template_id=None)
+
+
+def test_copy_target_criteria_copies_individual_block_filters(
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    source_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
+    target_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
+    rule = TargetingCriteriaRuleFactory(payment_plan=source_pp)
+    ind_block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=rule)
+    TargetingIndividualBlockRuleFilterFactory(individuals_filters_block=ind_block)
+
+    PaymentPlanService.copy_target_criteria(source_pp, target_pp)
+
+    target_rule = target_pp.rules.get()
+    target_block = target_rule.individuals_filters_blocks.get()
+    assert TargetingIndividualBlockRuleFilter.objects.filter(individuals_filters_block=target_block).count() == 1

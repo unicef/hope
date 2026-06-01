@@ -86,6 +86,7 @@ export type PaymentPlanDetail = {
      * * `REGULAR` - Regular
      * * `TOP_UP` - Top Up
      * * `FOLLOW_UP` - Follow Up
+     * * `TOP_UP_AMENDMENT` - Top Up Amendment
      */
     planType?: PlanTypeEnum;
     readonly followUps: Array<FollowUpPaymentPlan>;
@@ -129,7 +130,6 @@ export type PaymentPlanDetail = {
     endDate?: string | null;
     programCycle: ProgramCycleSmall;
     readonly isPaymentGateway: boolean;
-    readonly isInstructionManaged: boolean;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
     importedFileName: string;
@@ -158,6 +158,7 @@ export type PaymentPlanDetail = {
     readonly excludedIndividuals: Record<string, any>;
     readonly canCreateFollowUp: boolean;
     readonly canCreateTopUp: boolean;
+    readonly canCreateTopUpAmendment: boolean;
     readonly totalWithdrawnHouseholdsCount: number;
     readonly unsuccessfulPaymentsCount: number;
     canSendToPaymentGateway: boolean;

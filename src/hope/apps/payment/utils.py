@@ -61,10 +61,12 @@ def to_decimal(received_amount: Decimal | float | int | str | None) -> Decimal |
     if received_amount is None or str(received_amount).strip() == "":
         return None
 
-    if isinstance(received_amount, str):
-        received_amount = float(received_amount.strip())
-
-    return Decimal(f"{round(received_amount, 2):.2f}")
+    try:
+        if isinstance(received_amount, str):
+            received_amount = float(received_amount.strip())
+        return Decimal(f"{round(received_amount, 2):.2f}")
+    except ValueError:
+        return None
 
 
 @no_type_check

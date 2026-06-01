@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PartnerFactory,
     PaymentFactory,
@@ -630,6 +631,102 @@ def test_get_can_split(
     assert response.status_code == status.HTTP_200_OK
     payment_plan = response.json()
     assert payment_plan["can_split"] is False
+
+
+def test_get_can_split_returns_false_when_instruction_managed(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    instruction = FollowUpInstructionFactory(
+        program=payment_plan_detail_context["program_active"],
+        business_area=payment_plan_detail_context["business_area"],
+    )
+    pp = payment_plan_detail_context["pp"]
+    pp.follow_up_instruction = instruction
+    pp.status = PaymentPlan.Status.ACCEPTED
+    pp.save()
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_split"] is False
+
+
+def test_get_can_export_xlsx_returns_false_when_instruction_managed(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    instruction = FollowUpInstructionFactory(
+        program=payment_plan_detail_context["program_active"],
+        business_area=payment_plan_detail_context["business_area"],
+    )
+    pp = payment_plan_detail_context["pp"]
+    pp.follow_up_instruction = instruction
+    pp.status = PaymentPlan.Status.ACCEPTED
+    pp.save()
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_export_xlsx"] is False
+
+
+def test_get_can_download_xlsx_returns_false_when_instruction_managed(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    instruction = FollowUpInstructionFactory(
+        program=payment_plan_detail_context["program_active"],
+        business_area=payment_plan_detail_context["business_area"],
+    )
+    pp = payment_plan_detail_context["pp"]
+    pp.follow_up_instruction = instruction
+    pp.status = PaymentPlan.Status.ACCEPTED
+    pp.save()
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_download_xlsx"] is False
+
+
+def test_get_can_send_xlsx_password_returns_false_when_instruction_managed(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    instruction = FollowUpInstructionFactory(
+        program=payment_plan_detail_context["program_active"],
+        business_area=payment_plan_detail_context["business_area"],
+    )
+    pp = payment_plan_detail_context["pp"]
+    pp.follow_up_instruction = instruction
+    pp.status = PaymentPlan.Status.ACCEPTED
+    pp.save()
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["can_send_xlsx_password"] is False
 
 
 def test_filter_by_status(payment_plan_filter_context: dict[str, Any]) -> None:

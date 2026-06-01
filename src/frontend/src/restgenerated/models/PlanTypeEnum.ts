@@ -6,9 +6,11 @@
  * * `REGULAR` - Regular
  * * `TOP_UP` - Top Up
  * * `FOLLOW_UP` - Follow Up
+ * * `TOP_UP_AMENDMENT` - Top Up Amendment
  */
 export enum PlanTypeEnum {
     REGULAR = 'REGULAR',
     TOP_UP = 'TOP_UP',
     FOLLOW_UP = 'FOLLOW_UP',
+    TOP_UP_AMENDMENT = 'TOP_UP_AMENDMENT',
 }
