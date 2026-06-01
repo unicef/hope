@@ -32,6 +32,7 @@ from .core import (
     PeriodicAsyncJobFactory,
     PeriodicFieldDataFactory,
     StorageFileFactory,
+    SurprisePageConfigFactory,
     UniversalUpdateFactory,
     XLSXKoboTemplateFactory,
 )
@@ -242,6 +243,7 @@ __all__ = [
     "SanctionListIndividualFactory",
     "SanctionListIndividualNationalitiesFactory",
     "StorageFileFactory",
+    "SurprisePageConfigFactory",
     "SurveyFactory",
     "TargetingCriteriaRuleFactory",
     "TargetingCriteriaRuleFilterFactory",
