@@ -372,10 +372,11 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     usd = CurrencyFactory(code="USD", name="United States Dollar")
     purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=afghanistan)
     program.payment_plan_purposes.add(purpose)
-    default_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name="Default Group")
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    pp_name = "Test Payment Plan"
+    pp_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp_name} Group")
     payment_plan = PaymentPlan.objects.update_or_create(
-        name="Test Payment Plan",
+        name=pp_name,
         pk=payment_plan_pk,
         business_area=afghanistan,
         currency=usd,
@@ -384,7 +385,7 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
-        payment_plan_group=default_group,
+        payment_plan_group=pp_group,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
@@ -426,8 +427,10 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     )
     payment_plan.update_population_count_fields()
     # add one more PP
+    pp2_name = "Test TP for PM (just click rebuild)"
+    pp2_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp2_name} Group")
     pp2 = PaymentPlan.objects.update_or_create(
-        name="Test TP for PM (just click rebuild)",
+        name=pp2_name,
         status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
         currency=usd,
@@ -436,7 +439,7 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
-        payment_plan_group=default_group,
+        payment_plan_group=pp2_group,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
@@ -524,9 +527,10 @@ def generate_reconciled_payment_plan() -> None:
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     usd = CurrencyFactory(code="USD", name="United States Dollar")
     program_cycle = program.cycles.first()
-    default_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name="Default Group")
+    reconciled_name = "Reconciled Payment Plan"
+    reconciled_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{reconciled_name} Group")
     payment_plan = PaymentPlan.objects.update_or_create(
-        name="Reconciled Payment Plan",
+        name=reconciled_name,
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
         currency=usd,
@@ -536,7 +540,7 @@ def generate_reconciled_payment_plan() -> None:
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
         program_cycle=program_cycle,
-        payment_plan_group=default_group,
+        payment_plan_group=reconciled_group,
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         plan_type=PaymentPlan.PlanType.REGULAR,
