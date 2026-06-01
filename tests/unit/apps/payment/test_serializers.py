@@ -418,6 +418,36 @@ def test_payment_plan_detail_can_export_xlsx(payment_plan_detail_context: dict[s
     assert data["can_export_xlsx"] is False
 
 
+@pytest.mark.parametrize(
+    ("payment_status", "expected_result"),
+    [
+        (Payment.STATUS_SENT_TO_PG, False),
+        (Payment.STATUS_SENT_TO_FSP, True),
+    ],
+)
+def test_payment_plan_detail_can_export_xlsx_for_payment_gateway_statuses(
+    payment_plan_detail_context: dict[str, Any],
+    payment_status: str,
+    expected_result: bool,
+) -> None:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    user = payment_plan_detail_context["user"]
+    business_area = payment_plan_detail_context["business_area"]
+    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
+    payment_plan.save(update_fields=["status", "financial_service_provider"])
+    payment_plan.eligible_payments.update(status=payment_status)
+
+    role = RoleFactory(
+        name="Role with Permissions in BA",
+        permissions=[Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value],
+    )
+    RoleAssignmentFactory(user=user, role=role, business_area=business_area)
+
+    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
+    assert data["can_export_xlsx"] is expected_result
+
+
 def test_payment_plan_detail_can_download_xlsx(payment_plan_detail_context: dict[str, Any]) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
