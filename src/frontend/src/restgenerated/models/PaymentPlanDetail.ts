@@ -55,6 +55,9 @@ export type PaymentPlanDetail = {
      * Total Individuals Count [sys]
      */
     totalIndividualsCount?: number;
+    /**
+     * The currency code following the ISO 4217 standard (e.g. USD, EUR)
+     */
     readonly currency: string | null;
     /**
      * Targeting level exclusion IDs

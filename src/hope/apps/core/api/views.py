@@ -20,6 +20,7 @@ from hope.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
     CollectorAttributeSerializer,
+    CurrencyChoiceSerializer,
     FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
@@ -140,14 +141,13 @@ class ChoicesViewSet(ViewSet):
     Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
     """
 
-    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @extend_schema(responses={200: CurrencyChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="currencies")
     def currencies(self, request: Request) -> Response:
         from hope.models.currency import Currency
 
-        choices = Currency.objects.values_list("code", "name").order_by("code")
-        resp = ChoiceSerializer(to_choice_object(list(choices)), many=True).data
-        return Response(resp)
+        currencies = Currency.objects.filter(active=True).order_by("code")
+        return Response(CurrencyChoiceSerializer(currencies, many=True).data)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="payment-plan-status")

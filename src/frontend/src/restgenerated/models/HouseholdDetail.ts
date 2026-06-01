@@ -45,6 +45,9 @@ export type HouseholdDetail = {
      * Household children disabled count
      */
     childrenDisabledCount?: number | null;
+    /**
+     * The currency code following the ISO 4217 standard (e.g. USD, EUR)
+     */
     readonly currency: string | null;
     /**
      * Household first registration date [sys]

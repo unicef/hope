@@ -1,4 +1,3 @@
-from collections import Counter
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -13,7 +12,6 @@ from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.common import (
-    CountryWorkspaceIdConditionalMixin,
     DisabilityChoiceField,
     NullableChoiceField,
 )
@@ -23,9 +21,7 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializerUpload,
 )
-from hope.apps.household.const import RESIDENCE_STATUS_CHOICE
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models import (
+from hope.apps.household.const import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -34,7 +30,11 @@ from hope.models import (
     NON_BENEFICIARY,
     NOT_DISABLED,
     OBSERVED_DISABILITY_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
+)
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
     Area,
     Country,
     Grant,
@@ -58,22 +58,7 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
     pass
 
 
-class PushPeopleListSerializer(serializers.ListSerializer):
-    def validate(self, attrs: list[dict]) -> list[dict]:
-        cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
-        duplicates = sorted(cw_id for cw_id, count in Counter(cw_ids).items() if count > 1)
-        if duplicates:
-            raise serializers.ValidationError(
-                {
-                    "country_workspace_id": [
-                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicates)}."
-                    ]
-                }
-            )
-        return attrs
-
-
-class PushPeopleSerializer(CountryWorkspaceIdConditionalMixin, serializers.ModelSerializer):
+class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.MultipleChoiceField(
@@ -120,7 +105,6 @@ class PushPeopleSerializer(CountryWorkspaceIdConditionalMixin, serializers.Model
 
     class Meta:
         model = PendingIndividual
-        list_serializer_class = PushPeopleListSerializer
         exclude = [
             "id",
             "registration_data_import",

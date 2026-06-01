@@ -43,6 +43,9 @@ export type PaymentDetail = {
     deliveryType?: string | null;
     status?: PaymentStatusEnum;
     readonly statusDisplay: string;
+    /**
+     * The currency code following the ISO 4217 standard (e.g. USD, EUR)
+     */
     readonly currency: string | null;
     readonly fspAuthCode: string;
     readonly hohId: any;

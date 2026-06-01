@@ -367,6 +367,8 @@ def test_post_regenerate_export_xlsx_with_template(
     [
         (PaymentPlan.Status.ACCEPTED, True, True),
         (PaymentPlan.Status.ACCEPTED, False, False),
+        (PaymentPlan.Status.FINISHED, True, True),
+        (PaymentPlan.Status.FINISHED, False, False),
         (PaymentPlan.Status.OPEN, True, False),
         (PaymentPlan.Status.OPEN, False, False),
     ],

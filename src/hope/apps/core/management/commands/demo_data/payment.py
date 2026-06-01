@@ -25,13 +25,11 @@ from extras.test_utils.factories import (
     TargetingCriteriaRuleFilterFactory,
 )
 from hope.apps.core.management.commands.demo_data.household import create_household
+from hope.apps.household.const import MALE, ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
 from hope.models import (
-    MALE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
     AccountType,
     Area,
     BusinessArea,
