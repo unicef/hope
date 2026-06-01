@@ -1032,6 +1032,17 @@ class PaymentPlanService:
             is_follow_up=False,
         )
 
+    def create_child_plan_payments(self) -> None:
+        match self.payment_plan.plan_type:
+            case PaymentPlan.PlanType.FOLLOW_UP:
+                self.create_follow_up_payments()
+            case PaymentPlan.PlanType.TOP_UP:
+                self.create_top_up_payments()
+            case PaymentPlan.PlanType.TOP_UP_AMENDMENT:
+                self.create_top_up_amendment_payments()
+            case _:
+                raise ValidationError(f"Unsupported child payment plan type: {self.payment_plan.plan_type}")
+
     @transaction.atomic
     def create_follow_up(
         self,
@@ -1100,6 +1111,24 @@ class PaymentPlanService:
         )
         transaction.on_commit(lambda: prepare_child_payment_plan_async_task(amendment_pp))
         return amendment_pp
+
+    def create_child_plan(
+        self,
+        *,
+        plan_type: "PaymentPlan.PlanType",
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
+    ) -> PaymentPlan:
+        match plan_type:
+            case PaymentPlan.PlanType.FOLLOW_UP:
+                return self.create_follow_up(user, dispersion_start_date, dispersion_end_date)
+            case PaymentPlan.PlanType.TOP_UP:
+                return self.create_top_up(user, dispersion_start_date, dispersion_end_date)
+            case PaymentPlan.PlanType.TOP_UP_AMENDMENT:
+                return self.create_top_up_amendment(user, dispersion_start_date, dispersion_end_date)
+            case _:
+                raise ValidationError(f"Unsupported child payment plan type: {plan_type}")
 
     def recalculate_signatures_in_batch(self, batch_size: int = 500) -> None:
         payment_plan = self.payment_plan

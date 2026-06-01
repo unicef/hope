@@ -622,6 +622,113 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
     assert error.value.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
 
 
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment"),
+    ],
+)
+def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    expected_child_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with mock.patch.object(PaymentPlanService, method_name, return_value=expected_child_plan) as service_method:
+        result = PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=plan_type,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert result == expected_child_plan
+    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date)
+
+
+def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=PaymentPlan.PlanType.REGULAR,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
+
+
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments"),
+    ],
+)
+def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+
+    with mock.patch.object(PaymentPlanService, method_name) as service_method:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    service_method.assert_called_once_with()
+
+
+def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
+
+
 def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,

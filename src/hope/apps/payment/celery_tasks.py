@@ -880,13 +880,6 @@ def prepare_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
     return None
 
 
-CHILD_PLAN_PAYMENTS_METHOD_BY_TYPE: dict[str, str] = {
-    PaymentPlan.PlanType.FOLLOW_UP: "create_follow_up_payments",
-    PaymentPlan.PlanType.TOP_UP: "create_top_up_payments",
-    PaymentPlan.PlanType.TOP_UP_AMENDMENT: "create_top_up_amendment_payments",
-}
-
-
 def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
@@ -901,8 +894,7 @@ def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
         if payment_plan.source_payment_plan_id:
             PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
 
-        payments_method = CHILD_PLAN_PAYMENTS_METHOD_BY_TYPE[payment_plan.plan_type]
-        getattr(PaymentPlanService(payment_plan=payment_plan), payments_method)()
+        PaymentPlanService(payment_plan=payment_plan).create_child_plan_payments()
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()

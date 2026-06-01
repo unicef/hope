@@ -847,23 +847,17 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
-    _CHILD_PLAN_SERVICE_METHOD_BY_TYPE = {
-        PaymentPlan.PlanType.FOLLOW_UP: "create_follow_up",
-        PaymentPlan.PlanType.TOP_UP: "create_top_up",
-        PaymentPlan.PlanType.TOP_UP_AMENDMENT: "create_top_up_amendment",
-    }
-
     def _create_child_plan_response(self, request: Request, plan_type: "PaymentPlan.PlanType") -> Response:
         """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions."""
         payment_plan = self.get_object()
         user = request.user
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
-        service_method_name = self._CHILD_PLAN_SERVICE_METHOD_BY_TYPE[plan_type]
-        child_pp = getattr(PaymentPlanService(payment_plan), service_method_name)(
-            user,
-            serializer.validated_data["dispersion_start_date"],
-            serializer.validated_data["dispersion_end_date"],
+        child_pp = PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=plan_type,
+            user=user,
+            dispersion_start_date=serializer.validated_data["dispersion_start_date"],
+            dispersion_end_date=serializer.validated_data["dispersion_end_date"],
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
