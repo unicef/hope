@@ -349,7 +349,7 @@ class GrievanceTicketViewSet(
                         status=GrievanceTicket.STATUS_CLOSED,
                         then=F("updated_at") - F("created_at"),
                     ),
-                    default=timezone.now() - F("created_at"),  # type: ignore
+                    default=timezone.now() - F("created_at"),
                     output_field=DateField(),
                 ),
                 existing_tickets_count=Coalesce(
@@ -582,7 +582,7 @@ class GrievanceTicketGlobalViewSet(
                         status=GrievanceTicket.STATUS_CLOSED,
                         then=F("updated_at") - F("created_at"),
                     ),
-                    default=timezone.now() - F("created_at"),  # type: ignore
+                    default=timezone.now() - F("created_at"),
                     output_field=DateField(),
                 ),
             )
