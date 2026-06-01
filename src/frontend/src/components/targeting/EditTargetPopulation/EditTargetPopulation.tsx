@@ -2,8 +2,15 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid, Typography } from '@mui/material';
-import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
+import {
+  Box,
+  Button,
+  Divider,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { CreatePaymentPlanGroupModal } from '@components/paymentmodule/CreatePaymentPlanGroupModal';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
@@ -48,7 +55,13 @@ const EditTargetPopulation = ({
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const [cycleChanged, setCycleChanged] = useState(false);
+  const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
+  const [modalCycle, setModalCycle] = useState<{ value: string; name: string }>(
+    {
+      value: paymentPlan.programCycle.id,
+      name: paymentPlan.programCycle.title,
+    },
+  );
 
   const targetingCriteriaCopy =
     paymentPlan.rules.map((rule) => ({
@@ -84,7 +97,8 @@ const EditTargetPopulation = ({
     },
     alternativeCollectorsIds:
       paymentPlan.rules?.[0]?.alternativeCollectorsIds || '',
-    paymentPlanPurposes: paymentPlan.paymentPlanPurposes?.map((p) => p.id) ?? [],
+    paymentPlanPurposes:
+      paymentPlan.paymentPlanPurposes?.map((p) => p.id) ?? [],
   };
 
   const { data: programData } = useQuery<ProgramDetail>({
@@ -132,14 +146,19 @@ const EditTargetPopulation = ({
       },
     });
 
-  const handleValidate = (values): { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } => {
+  const handleValidate = (
+    values,
+  ): { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } => {
     const {
       targetingCriteria,
       householdIds,
       individualIds,
       alternativeCollectorsIds,
     } = values;
-    const errors: { targetingCriteria?: string; paymentPlanGroupId?: { value: string } } = {};
+    const errors: {
+      targetingCriteria?: string;
+      paymentPlanGroupId?: { value: string };
+    } = {};
     if (
       !targetingCriteria.length &&
       !householdIds &&
@@ -150,7 +169,10 @@ const EditTargetPopulation = ({
         `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
     }
-    if (cycleChanged && !values.paymentPlanGroupId?.value) {
+    if (
+      values.programCycleId.value !== paymentPlan.programCycle.id &&
+      !values.paymentPlanGroupId?.value
+    ) {
       errors.paymentPlanGroupId = { value: 'Payment Plan Group is required' };
     }
     return errors;
@@ -177,7 +199,10 @@ const EditTargetPopulation = ({
         exclusionReason: values.exclusionReason,
         fspId: values.targetingCriteria[0]?.fsp || null,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
-        ...(cycleChanged && {
+        ...((values.programCycleId.value !== paymentPlan.programCycle.id ||
+          (values.paymentPlanGroupId?.value &&
+            values.paymentPlanGroupId.value !==
+              (paymentPlan.paymentPlanGroup?.id ?? ''))) && {
           programCycleId: values.programCycleId.value,
           paymentPlanGroupId: values.paymentPlanGroupId.value,
         }),
@@ -240,12 +265,18 @@ const EditTargetPopulation = ({
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
-                    await setFieldValue('programCycleId', e ?? { value: '', name: '' });
-                    await setFieldValue('paymentPlanGroupId', {
-                      value: '',
-                      name: '',
-                    });
-                    setCycleChanged(true);
+                    await setFieldValue(
+                      'programCycleId',
+                      e ?? { value: '', name: '' },
+                    );
+                    if (e?.value && e.value !== paymentPlan.programCycle.id) {
+                      await setFieldValue('paymentPlanGroupId', {
+                        value: '',
+                        name: '',
+                      });
+                      setModalCycle(e);
+                      setCreateGroupModalOpen(true);
+                    }
                   }}
                   required
                   // @ts-ignore
@@ -254,19 +285,45 @@ const EditTargetPopulation = ({
                 />
               </Grid>
               <Grid size={6}>
-                <PaymentPlanGroupAutocompleteRest
-                  value={values.paymentPlanGroupId}
-                  onChange={async (e) => {
-                    await setFieldValue('paymentPlanGroupId', e);
-                  }}
-                  cycleId={values.programCycleId?.value ?? ''}
-                  disabled={!cycleChanged}
-                  required={cycleChanged}
-                  // @ts-ignore
-                  error={errors.paymentPlanGroupId?.value}
-                />
+                <Box display="flex" alignItems="center" gap={2}>
+                  <TextField
+                    label={t('Group')}
+                    value={values.paymentPlanGroupId?.name || ''}
+                    disabled
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                  />
+                  {paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => {
+                        setModalCycle(values.programCycleId);
+                        setCreateGroupModalOpen(true);
+                      }}
+                      data-cy="button-change-group"
+                      sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                    >
+                      {t('Change Group')}
+                    </Button>
+                  )}
+                </Box>
               </Grid>
             </Grid>
+            <CreatePaymentPlanGroupModal
+              open={createGroupModalOpen}
+              onClose={() => setCreateGroupModalOpen(false)}
+              cycleId={modalCycle.value}
+              cycleTitle={modalCycle.name}
+              onSuccess={(group) => {
+                setFieldValue('paymentPlanGroupId', {
+                  value: group.id,
+                  name: group.name,
+                });
+                setCreateGroupModalOpen(false);
+              }}
+            />
             <Grid container spacing={3}>
               <Grid size={6}>
                 <Field

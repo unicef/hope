@@ -10,6 +10,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
+    FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -24,7 +25,16 @@ from extras.test_utils.factories import (
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task_action,
 )
-from hope.models import FollowUpInstruction, Payment, PaymentPlan
+from hope.apps.payment.xlsx.xlsx_follow_up_instruction_base_export_service import (
+    XlsxFollowUpInstructionBaseExportService,
+)
+from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service import (
+    XlsxFollowUpInstructionDeliveryExportService,
+)
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
+    XlsxPaymentPlanDeliveryExportService,
+)
+from hope.models import FileTemp, FollowUpInstruction, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -222,6 +232,97 @@ def test_delivery_export_happy_path_aggregates_households(
     assert rows[shared_household_id]["delivered_quantity"] == Decimal("0.00")
 
 
+class _MinimalExportService(XlsxFollowUpInstructionBaseExportService):
+    filename_prefix = "test"
+
+    def get_source_headers(self) -> list[str]:
+        return ["household_id", "entitlement_quantity", "delivered_quantity"]
+
+    def get_payment_row_data(self, payment: Any) -> dict[str, Any]:
+        return {}
+
+
+def test_get_representative_payment_plan_raises_when_no_child_plans(instruction: Any) -> None:
+    with pytest.raises(ValueError, match="Follow Up Instruction has no child Payment Plans."):
+        _MinimalExportService(instruction)
+
+
+def test_prepare_headers_removes_household_unicef_id(instruction: Any, child_payment_plans: Any) -> None:
+    class _ServiceWithUnicefId(_MinimalExportService):
+        def get_source_headers(self) -> list[str]:
+            return ["household_unicef_id", "entitlement_quantity"]
+
+    service = _ServiceWithUnicefId(instruction)
+
+    assert "household_unicef_id" not in service.headers
+    assert "entitlement_quantity" in service.headers
+
+
+def test_as_decimal_returns_zero_for_none() -> None:
+    service = object.__new__(_MinimalExportService)
+
+    assert service._as_decimal(None) == Decimal(0)
+
+
+def test_as_decimal_returns_zero_for_empty_string() -> None:
+    service = object.__new__(_MinimalExportService)
+
+    assert service._as_decimal("") == Decimal(0)
+
+
+def test_as_decimal_returns_decimal_unchanged() -> None:
+    service = object.__new__(_MinimalExportService)
+
+    assert service._as_decimal(Decimal("3.50")) == Decimal("3.50")
+
+
+def test_as_decimal_converts_string_to_decimal() -> None:
+    service = object.__new__(_MinimalExportService)
+
+    assert service._as_decimal("2.25") == Decimal("2.25")
+
+
+def test_merge_rows_fills_empty_non_summable_field_from_payment_row() -> None:
+    service = object.__new__(_MinimalExportService)
+    service.headers = ["household_id", "entitlement_quantity", "delivery_mechanism"]
+    existing_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(100), "delivery_mechanism": ""}
+    new_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(50), "delivery_mechanism": "Cash"}
+
+    merged = service._merge_rows(existing_row, new_row)
+
+    assert merged["delivery_mechanism"] == "Cash"
+
+
+def test_merge_rows_keeps_existing_non_summable_field_when_already_set() -> None:
+    service = object.__new__(_MinimalExportService)
+    service.headers = ["household_id", "entitlement_quantity", "delivery_mechanism"]
+    existing_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(100), "delivery_mechanism": "Wire"}
+    new_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(50), "delivery_mechanism": "Cash"}
+
+    merged = service._merge_rows(existing_row, new_row)
+
+    assert merged["delivery_mechanism"] == "Wire"
+
+
+def test_save_xlsx_file_removes_existing_export_file(
+    instruction: Any,
+    child_payment_plans: Any,
+    user: Any,
+) -> None:
+    old_file = FileTempFactory()
+    instruction.export_file = old_file
+    instruction.save(update_fields=["export_file"])
+    old_file_id = old_file.pk
+    service = _MinimalExportService(instruction)
+
+    service.save_xlsx_file(user)
+
+    instruction.refresh_from_db()
+    assert not FileTemp.objects.filter(pk=old_file_id).exists()
+    assert instruction.export_file is not None
+    assert instruction.export_file.pk != old_file_id
+
+
 @patch(
     "hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service"
     ".XlsxFollowUpInstructionDeliveryExportService.save_xlsx_file"
@@ -241,3 +342,30 @@ def test_delivery_export_marks_xlsx_export_error_on_exception(
 
     instruction.refresh_from_db(fields=["background_action_status"])
     assert instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+def test_get_source_headers_raises_when_child_plan_has_no_fsp(instruction, child_payment_plans) -> None:
+    plan, _ = child_payment_plans
+    plan.financial_service_provider = None
+    plan.save(update_fields=["financial_service_provider"])
+
+    with pytest.raises(
+        ValueError, match="Child Payment Plans must define Financial Service Provider and Delivery Mechanism."
+    ):
+        XlsxFollowUpInstructionDeliveryExportService(instruction)
+
+
+def test_get_source_headers_raises_when_fsp_xlsx_template_not_found(instruction, child_payment_plans) -> None:
+    with patch.object(XlsxPaymentPlanDeliveryExportService, "get_template", return_value=None):
+        with pytest.raises(ValueError, match="FSP XLSX template not found for child Payment Plan delivery export."):
+            XlsxFollowUpInstructionDeliveryExportService(instruction)
+
+
+def test_get_payment_row_data_raises_when_service_not_initialized(
+    instruction, child_payment_plans, delivery_template
+) -> None:
+    service = XlsxFollowUpInstructionDeliveryExportService(instruction)
+    service.payment_plan_delivery_export_service = None
+
+    with pytest.raises(ValueError, match="Payment Plan delivery export service is not initialized."):
+        service.get_payment_row_data(Mock())

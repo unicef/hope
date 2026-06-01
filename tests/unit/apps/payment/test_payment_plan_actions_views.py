@@ -730,6 +730,75 @@ def test_pp_entitlement_export_xlsx_invalid_status(
     assert "You can only export Payment List for LOCKED Payment Plan" in response.data
 
 
+@pytest.mark.parametrize(
+    ("permission", "url_key", "method", "payload"),
+    [
+        (
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+            "url_apply_steficon",
+            "post",
+            {"engine_formula_rule_id": None},
+        ),
+        (
+            Permissions.PM_VIEW_LIST,
+            "url_export_entitlement_xlsx",
+            "get",
+            None,
+        ),
+        (
+            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            "url_import_entitlement_xlsx",
+            "post",
+            {"file": SimpleUploadedFile("test.xlsx", b"123", content_type="application/vnd.ms-excel")},
+        ),
+        (
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+            "url_import_entitlement_flat_amount",
+            "post",
+            {"flat_amount_value": "100.00"},
+        ),
+    ],
+)
+def test_entitlement_actions_are_blocked_for_follow_up_payment_plans(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    permission: Permissions,
+    url_key: str,
+    method: str,
+    payload: dict[str, Any] | None,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [permission],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
+    payment_plan_actions_context["pp"].plan_type = PaymentPlan.PlanType.FOLLOW_UP
+    payment_plan_actions_context["pp"].save(update_fields=["status", "plan_type"])
+
+    if url_key == "url_apply_steficon":
+        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True, version=99).rule
+        payload = {
+            "engine_formula_rule_id": str(rule_for_pp.pk),
+            "version": payment_plan_actions_context["pp"].version,
+        }
+    elif url_key == "url_import_entitlement_flat_amount":
+        payload = {
+            "flat_amount_value": "100.00",
+            "version": payment_plan_actions_context["pp"].version,
+        }
+
+    response = getattr(payment_plan_actions_context["client"], method)(
+        payment_plan_actions_context[url_key],
+        payload,
+        format="multipart" if url_key == "url_import_entitlement_xlsx" else "json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Entitlement actions are not available for Follow Up Payment Plans." in response.data
+
+
 @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_pp_entitlement_import_xlsx(
     mock_exchange_rate: Any,
