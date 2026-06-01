@@ -31,5 +31,5 @@ class SurprisePageConfig(models.Model):
         self.pk = 1
         super().save(*args, **kwargs)
 
-    def delete(self, *args: Any, **kwargs: Any) -> None:
-        pass
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+        return 0, {}

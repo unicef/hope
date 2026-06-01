@@ -89,7 +89,7 @@ export function SurprisePage(): ReactElement {
   return (
     <Container>
       <Card>
-        <Logo transparent displayLogoWithoutSubtitle height={64} />
+        <Logo transparent={false} displayLogoWithoutSubtitle={false} height={160} />
         <Heading>{heading}</Heading>
         <SubHeading>{subheading}</SubHeading>
         <Photo src={imageSrc} alt="A surprise for you" />
