@@ -76,6 +76,8 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    import uuid
+
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
     from django.db.models import QuerySet
@@ -606,6 +608,7 @@ class PaymentPlanService:
 
             if fsp_id and delivery_mechanism_code:
                 fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
+                PaymentPlanService._check_group_fsp_consistency(payment_plan_group, fsp)
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
                 payment_plan.financial_service_provider = fsp
                 payment_plan.delivery_mechanism = delivery_mechanism
@@ -689,6 +692,7 @@ class PaymentPlanService:
             input_data.pop("currency", None)
 
         self._set_program_cycle(input_data)
+        self._set_group_for_open_pp(input_data)
 
         if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
             vulnerability_filter = True
@@ -725,6 +729,11 @@ class PaymentPlanService:
         if self._update_fsp_and_delivery_mechanism(fsp_id, input_data.get("delivery_mechanism_code")):
             should_rebuild_list = True
 
+        self._check_group_fsp_consistency(
+            self.payment_plan.payment_plan_group,
+            self.payment_plan.financial_service_provider,
+            exclude_pk=self.payment_plan.pk,
+        )
         self.payment_plan.save()
 
         self._update_purposes(input_data.get("payment_plan_purposes"))
@@ -760,6 +769,31 @@ class PaymentPlanService:
             ):
                 raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
             self.payment_plan.payment_plan_group = payment_plan_group
+
+    def _set_group_for_open_pp(self, input_data: dict) -> None:
+        """Allow reassigning the group on an open payment plan without changing its cycle."""
+        if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
+            return
+        payment_plan_group_id = input_data.get("payment_plan_group_id")
+        if not payment_plan_group_id:
+            return
+        # Skip: cycle is changing, _set_program_cycle already handles the group in that case
+        new_cycle_id = input_data.get("program_cycle_id")
+        if new_cycle_id and new_cycle_id != self.payment_plan.program_cycle_id:
+            return
+        if not (
+            payment_plan_group := PaymentPlanGroup.objects.filter(
+                pk=payment_plan_group_id, cycle=self.payment_plan.program_cycle
+            ).first()
+        ):
+            raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+        # Check FSP consistency using the current FSP before _update_fsp_and_delivery_mechanism may clear it.
+        self._check_group_fsp_consistency(
+            payment_plan_group,
+            self.payment_plan.financial_service_provider,
+            exclude_pk=self.payment_plan.pk,
+        )
+        self.payment_plan.payment_plan_group = payment_plan_group
 
     def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
         if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
@@ -823,6 +857,27 @@ class PaymentPlanService:
             targeting_criteria_input["flag_exclude_if_active_adjudication_ticket"] = input_data[
                 "flag_exclude_if_active_adjudication_ticket"
             ]
+
+    @staticmethod
+    def _check_group_fsp_consistency(
+        group: PaymentPlanGroup,
+        fsp: FinancialServiceProvider | None,
+        exclude_pk: "uuid.UUID | None" = None,
+    ) -> None:
+        """Raise ValidationError if fsp conflicts with another plan already in this group."""
+        if fsp is None:
+            return
+        qs = (
+            PaymentPlan.objects.filter(payment_plan_group=group)
+            .exclude(financial_service_provider__isnull=True)
+            .exclude(financial_service_provider=fsp)
+        )
+        if exclude_pk is not None:
+            qs = qs.exclude(pk=exclude_pk)
+        if existing_fsp_name := qs.values_list("financial_service_provider__name", flat=True).first():
+            raise ValidationError(
+                f"Payment plans in the same group must share the same FSP. This group uses FSP '{existing_fsp_name}'."
+            )
 
     def _validate_pp_cycle(self, program_cycle: ProgramCycle) -> None:
         if program_cycle.status == ProgramCycle.FINISHED:

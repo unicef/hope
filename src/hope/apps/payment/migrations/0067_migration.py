@@ -16,7 +16,6 @@ def create_default_purpose_and_backfill(apps, schema_editor):
     BusinessArea = apps.get_model("core", "BusinessArea")  # noqa: N806
     Program = apps.get_model("program", "Program")  # noqa: N806
     PaymentPlan = apps.get_model("payment", "PaymentPlan")  # noqa: N806
-    ProgramCycle = apps.get_model("program", "ProgramCycle")  # noqa: N806
     PaymentPlanGroup = apps.get_model("payment", "PaymentPlanGroup")  # noqa: N806
 
     ProgramThrough = Program.payment_plan_purposes.through  # noqa: N806
@@ -55,24 +54,26 @@ def create_default_purpose_and_backfill(apps, schema_editor):
             ignore_conflicts=True,
         )
 
-    # Cycles without a Default Group
-    cycle_ids_with_group = PaymentPlanGroup.objects.filter(name="Default Group").values_list("cycle_id", flat=True)
+    # Create one group per ungrouped payment plan, named after the plan
+    ungrouped_pps = list(
+        PaymentPlan.objects.filter(payment_plan_group__isnull=True).values_list("id", "name", "program_cycle_id")
+    )
     _bulk_create_in_batches(
         PaymentPlanGroup,
-        (
-            PaymentPlanGroup(cycle_id=pk, name="Default Group")
-            for pk in ProgramCycle.objects.exclude(id__in=cycle_ids_with_group).values_list("id", flat=True)
-        ),
+        (PaymentPlanGroup(cycle_id=cycle_id, name=f"{pp_name} Group") for _, pp_name, cycle_id in ungrouped_pps),
+        ignore_conflicts=True,
     )
-
-    # Ungrouped plans relation to their cycle's Default Group
-    default_groups = {
-        g.cycle_id: g.id for g in PaymentPlanGroup.objects.filter(name="Default Group").only("id", "cycle_id")
+    cycle_ids = {cycle_id for _, _, cycle_id in ungrouped_pps}
+    group_lookup = {
+        (g.cycle_id, g.name): g.id
+        for g in PaymentPlanGroup.objects.filter(cycle_id__in=cycle_ids).only("id", "cycle_id", "name")
     }
-    for cycle_id, group_id in default_groups.items():
-        PaymentPlan.objects.filter(program_cycle_id=cycle_id, payment_plan_group__isnull=True).update(
-            payment_plan_group_id=group_id
-        )
+    pps_to_update = [
+        PaymentPlan(id=pp_id, payment_plan_group_id=group_lookup[cycle_id, f"{pp_name} Group"])
+        for pp_id, pp_name, cycle_id in ungrouped_pps
+        if (cycle_id, f"{pp_name} Group") in group_lookup
+    ]
+    PaymentPlan.objects.bulk_update(pps_to_update, ["payment_plan_group_id"], batch_size=BATCH_SIZE)
 
 
 class Migration(migrations.Migration):

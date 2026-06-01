@@ -400,7 +400,7 @@ def test_create(
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(24):
+        with django_assert_num_queries(25):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,

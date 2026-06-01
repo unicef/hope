@@ -1,19 +1,18 @@
 import calendar
 from collections import defaultdict
+from collections.abc import Iterable
+from itertools import batched
 import json
 import logging
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
     Any,
+    NamedTuple,
     Protocol,
     TypedDict,
     cast,
 )
 from uuid import UUID
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.cache import cache
@@ -135,6 +134,18 @@ class GlobalSummaryDict(TypedDict):
     households: int
 
 
+class CountrySummaryKey(NamedTuple):
+    year: int | None
+    month: int | None
+    admin1: str
+    program: str
+    sector: str
+    fsp: str
+    delivery_type: str
+    status: str
+    currency: str
+
+
 def get_pwd_count_expression() -> models.Expression:
     fields_to_sum = [
         Coalesce(F(f"{field_name}"), 0)
@@ -170,7 +181,9 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def store_data(cls, identifier: str, data: list[dict[str, Any]]) -> None:
         cache_key = cls.get_cache_key(identifier)
-        cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
+        # No expiry: dashboard data should always be available, even if stale.
+        # It is overwritten by the next successful refresh.
+        cache.set(cache_key, json.dumps(data), None)
 
     @classmethod
     def _get_base_payment_queryset(cls, business_area: BusinessArea | None = None) -> models.QuerySet:
@@ -194,6 +207,7 @@ class DashboardCacheBase(Protocol):
                     PaymentPlan.Status.IN_REVIEW,
                     PaymentPlan.Status.ACCEPTED,
                     PaymentPlan.Status.FINISHED,
+                    PaymentPlan.Status.CLOSED,
                 ],
                 program__is_visible=True,
                 parent__is_removed=False,
@@ -218,26 +232,27 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def _get_payment_data(cls, base_queryset: models.QuerySet) -> models.QuerySet:
         date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
-        PLANNED_STATUSES = [  # noqa
+        planned_statuses = [
             PaymentPlan.Status.IN_APPROVAL,
             PaymentPlan.Status.IN_AUTHORIZATION,
             PaymentPlan.Status.IN_REVIEW,
         ]
+        successful_statuses = Payment.DELIVERED_STATUSES
 
         return base_queryset.annotate(
             payment_quantity_usd=models.Case(
-                models.When(delivered_quantity_usd__gt=0, then=F("delivered_quantity_usd")),
+                models.When(status__in=successful_statuses, then=Coalesce(F("delivered_quantity_usd"), Value(0.0))),
                 default=Coalesce(F("entitlement_quantity_usd"), Value(0.0)),
                 output_field=DecimalField(),
             ),
             payment_quantity=models.Case(
-                models.When(delivered_quantity__gt=0, then=F("delivered_quantity")),
+                models.When(status__in=successful_statuses, then=Coalesce(F("delivered_quantity"), Value(0.0))),
                 default=Coalesce(F("entitlement_quantity"), Value(0.0)),
                 output_field=DecimalField(),
             ),
             total_planned_usd_for_this_payment=models.Case(
                 models.When(
-                    parent__status__in=PLANNED_STATUSES,
+                    parent__status__in=planned_statuses,
                     then=Coalesce(F("entitlement_quantity_usd"), Value(0.0)),
                 ),
                 default=Value(0.0),
@@ -371,7 +386,7 @@ class DashboardCacheBase(Protocol):
             total_counts[key] += 1
 
         finished_plans_base = (
-            annotated_plans_qs.filter(parent__payment_verification_plans__status="FINISHED")
+            annotated_plans_qs.filter(parent__payment_verification_plans__status__in=["FINISHED", "CLOSED"])
             .values_list("parent_id", *group_by_annotated_names)
             .distinct()
         )
@@ -382,6 +397,16 @@ class DashboardCacheBase(Protocol):
             finished_counts[key] += 1
 
         return {"total": dict(total_counts), "finished": dict(finished_counts)}
+
+    @classmethod
+    def _iter_payment_data_in_batches(
+        cls,
+        payment_ids: list[UUID],
+        business_area: BusinessArea | None = None,
+    ) -> Iterable[dict[str, Any]]:
+        for batch_ids in batched(payment_ids, DEFAULT_ITERATOR_CHUNK_SIZE, strict=False):
+            batch_qs = cls._get_base_payment_queryset(business_area=business_area).filter(id__in=batch_ids)
+            yield from cls._get_payment_data(batch_qs)
 
     @classmethod
     def refresh_data(cls, identifier: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
@@ -421,32 +446,22 @@ class DashboardDataCache(DashboardCacheBase):
     @classmethod
     def _build_country_summary_results(cls, summary: dict) -> list[dict[str, Any]]:
         results = []
-        for (
-            year,
-            month,
-            admin1,
-            program,
-            sector,
-            fsp,
-            delivery_type,
-            status,
-            currency,
-        ), totals in summary.items():
+        for key, totals in summary.items():
             month_name = "Unknown"
-            if month and 1 <= month <= 12:
-                month_name = calendar.month_name[month]
+            if key.month and 1 <= key.month <= 12:
+                month_name = calendar.month_name[key.month]
 
             results.append(
                 {
-                    "year": year,
+                    "year": key.year,
                     "month": month_name,
-                    "admin1": admin1,
-                    "program": program,
-                    "sector": sector,
-                    "fsp": fsp,
-                    "delivery_types": delivery_type,
-                    "status": status,
-                    "currency": currency,
+                    "admin1": key.admin1,
+                    "program": key.program,
+                    "sector": key.sector,
+                    "fsp": key.fsp,
+                    "delivery_types": key.delivery_type,
+                    "status": key.status,
+                    "currency": key.currency,
                     "total_delivered_quantity_usd": totals["total_usd"],
                     "total_delivered_quantity": totals["total_quantity"],
                     "payments": totals["total_payments"],
@@ -461,6 +476,42 @@ class DashboardDataCache(DashboardCacheBase):
                 }
             )
         return results
+
+    @classmethod
+    def _aggregate_country_payment(
+        cls,
+        payment: dict[str, Any],
+        summary: defaultdict[CountrySummaryKey, CountrySummaryDict],
+        plan_counts: dict[str, dict[tuple, int]],
+        household_map: dict[UUID, dict[str, Any]],
+        seen_households_by_year: defaultdict[Any, set[UUID]],
+    ) -> None:
+        key = CountrySummaryKey(
+            year=payment.get("year"),
+            month=payment.get("month"),
+            admin1=payment.get("admin1_name", "Unknown Admin1"),
+            program=payment.get("program_name", "Unknown Program"),
+            sector=payment.get("sector_name", "Unknown Sector"),
+            fsp=payment.get("fsp_name", "Unknown FSP"),
+            delivery_type=payment.get("delivery_type_name", "Unknown Delivery Type"),
+            status=payment.get("payment_status", "Unknown Status"),
+            currency=payment.get("currency_code", "UNK"),
+        )
+        current_summary = summary[key]
+
+        if current_summary["total_payments"] == 0:
+            current_summary["finished_payment_plans"] = plan_counts["finished"].get(key, 0)
+            current_summary["total_payment_plans"] = plan_counts["total"].get(key, 0)
+
+        current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
+        current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
+        current_summary["total_payments"] += 1
+        current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
+        current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
+
+        household_id = payment.get("household_id_val")
+        payment_year = payment.get("year")
+        cls._summary_count(current_summary, household_id, household_map, payment, seen_households_by_year[payment_year])
 
     @classmethod
     def refresh_data(cls, business_area_slug: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
@@ -494,23 +545,10 @@ class DashboardDataCache(DashboardCacheBase):
 
         if not household_ids:
             final_result_list = existing_data_for_other_years if is_partial_refresh_attempt else []
-            serialized_data = cast(
-                "list[dict[str, Any]]",
-                DashboardBaseSerializer(final_result_list, many=True).data,
-            )
-            cls.store_data(business_area_slug, serialized_data)
-            return serialized_data
+            cls.store_data(business_area_slug, final_result_list)
+            return final_result_list
 
         household_map = cls._get_household_data(household_ids)
-
-        if not base_payments_qs.exists() and is_partial_refresh_attempt:
-            final_result_list = existing_data_for_other_years
-            serialized_data = cast(
-                "list[dict[str, Any]]",
-                DashboardBaseSerializer(final_result_list, many=True).data,
-            )
-            cls.store_data(business_area_slug, serialized_data)
-            return serialized_data
 
         plan_group_fields = [
             "year",
@@ -525,68 +563,27 @@ class DashboardDataCache(DashboardCacheBase):
         ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
-        payment_data_iter: Iterable[dict[str, Any]] = cast(
-            "Iterable[dict[str, Any]]",
-            cls._get_payment_data(base_payments_qs.all()).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE),
+        all_payment_ids = list(base_payments_qs.values_list("id", flat=True))
+        payment_data_iter: Iterable[dict[str, Any]] = cls._iter_payment_data_in_batches(
+            all_payment_ids, business_area=business_area
         )
 
-        summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
+        summary: defaultdict[CountrySummaryKey, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
         seen_households_by_year: defaultdict[Any, set[UUID]] = defaultdict(set)
 
         for payment in payment_data_iter:
-            key = (
-                payment.get("year"),
-                payment.get("month"),
-                payment.get("admin1_name", "Unknown Admin1"),
-                payment.get("program_name", "Unknown Program"),
-                payment.get("sector_name", "Unknown Sector"),
-                payment.get("fsp_name", "Unknown FSP"),
-                payment.get("delivery_type_name", "Unknown Delivery Type"),
-                payment.get("payment_status", "Unknown Status"),
-                payment.get("currency_code", "UNK"),
-            )
-
-            current_summary = summary[key]
-
-            plan_key_values = [
-                payment.get("year"),
-                payment.get("month"),
-                payment.get("admin1_name", "Unknown Admin1"),
-                payment.get("program_name", "Unknown Program"),
-                payment.get("sector_name", "Unknown Sector"),
-                payment.get("fsp_name", "Unknown FSP"),
-                payment.get("delivery_type_name", "Unknown Delivery Type"),
-                payment.get("payment_status", "Unknown Status"),
-                payment.get("currency_code", "UNK"),
-            ]
-            plan_key = tuple(plan_key_values)
-
-            if current_summary["total_payments"] == 0:
-                current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-                current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
-
-            current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
-            current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
-            current_summary["total_payments"] += 1
-            current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
-            current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
-
-            household_id = payment.get("household_id_val")
-            payment_year = payment.get("year")
-            cls._summary_count(
-                current_summary, household_id, household_map, payment, seen_households_by_year[payment_year]
-            )
+            cls._aggregate_country_payment(payment, summary, plan_counts, household_map, seen_households_by_year)
 
         newly_processed_result_list = cls._build_country_summary_results(summary)
 
-        final_result_list = newly_processed_result_list
-        if is_partial_refresh_attempt:
-            final_result_list.extend(existing_data_for_other_years)
-
         serialized_data = cast(
             "list[dict[str, Any]]",
-            DashboardBaseSerializer(final_result_list, many=True).data,
+            DashboardBaseSerializer(newly_processed_result_list, many=True).data,
         )
+
+        if is_partial_refresh_attempt:
+            serialized_data.extend(existing_data_for_other_years)
+
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
 
@@ -754,17 +751,15 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             ]
             plan_counts = cls._get_payment_plan_counts(current_year_payments_qs, plan_group_fields)
 
-            payment_data_iter = cls._get_payment_data(current_year_payments_qs.all()).iterator(
-                chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE
-            )
+            all_payment_ids_for_year = list(current_year_payments_qs.values_list("id", flat=True))
+            payment_data_iter = cls._iter_payment_data_in_batches(all_payment_ids_for_year)
 
             summary_for_year: defaultdict[tuple, GlobalSummaryDict] = defaultdict(cls._create_empty_summary)
             seen_households_for_year: set[UUID] = set()
 
             for payment in payment_data_iter:
-                payment_dict = cast("dict[str, Any]", payment)
                 cls._process_payment_data_iter(
-                    household_map, payment_dict, plan_counts, summary_for_year, seen_households_for_year
+                    household_map, payment, plan_counts, summary_for_year, seen_households_for_year
                 )
 
             for (
@@ -796,17 +791,15 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     }
                 )
 
-        if is_explicit_partial_refresh:
-            final_data_to_cache = all_newly_processed_data + data_from_cache_for_other_years
-        else:
-            final_data_to_cache = all_newly_processed_data
+        serialized_data: list[dict[str, Any]] = list(DashboardBaseSerializer(all_newly_processed_data, many=True).data)
 
-        serialized_data = cast(
-            "list[dict[str, Any]]",
-            DashboardBaseSerializer(final_data_to_cache, many=True).data,
-        )
-        cls.store_data(identifier, serialized_data)
-        return serialized_data
+        if is_explicit_partial_refresh:
+            final_data_to_cache = serialized_data + data_from_cache_for_other_years
+        else:
+            final_data_to_cache = serialized_data
+
+        cls.store_data(identifier, final_data_to_cache)
+        return final_data_to_cache
 
     @classmethod
     def _process_payment_data_iter(

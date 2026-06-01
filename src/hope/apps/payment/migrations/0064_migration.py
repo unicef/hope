@@ -12,6 +12,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RemoveField(
+            model_name="payment",
+            name="currency_old",
+        ),
+        migrations.RemoveField(
+            model_name="paymentplan",
+            name="currency_old",
+        ),
         migrations.CreateModel(
             name="PaymentPlanPurpose",
             fields=[

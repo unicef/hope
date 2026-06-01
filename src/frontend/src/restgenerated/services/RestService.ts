@@ -21,6 +21,7 @@ import type { CheckAgainstSanctionListCreate } from '../models/CheckAgainstSanct
 import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
 import type { CreateGrievanceTicket } from '../models/CreateGrievanceTicket';
+import type { CurrencyChoice } from '../models/CurrencyChoice';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { FeedbackCreate } from '../models/FeedbackCreate';
 import type { FeedbackDetail } from '../models/FeedbackDetail';
@@ -15852,10 +15853,10 @@ export class RestService {
      * Return choices used in the system like statuses, currencies.
      *
      * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
-     * @returns Choice
+     * @returns CurrencyChoice
      * @throws ApiError
      */
-    public static restChoicesCurrenciesList(): CancelablePromise<Array<Choice>> {
+    public static restChoicesCurrenciesList(): CancelablePromise<Array<CurrencyChoice>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/currencies/',

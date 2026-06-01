@@ -829,6 +829,184 @@ def test_update_payment_plan_invalid_data(
     assert "name" in response.data
 
 
+def test_update_payment_plan_group_success(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_UPDATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    tp = target_population_create_update_context["tp"]
+    cycle = target_population_create_update_context["cycle"]
+    new_group = PaymentPlanGroupFactory(cycle=cycle)
+
+    response = target_population_create_update_context["client"].patch(
+        target_population_create_update_context["update_url"],
+        {
+            "program_cycle_id": str(cycle.id),
+            "payment_plan_group_id": str(new_group.id),
+            "version": tp.version,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    tp.refresh_from_db()
+    assert tp.payment_plan_group == new_group
+
+
+def test_update_payment_plan_group_rejects_group_from_wrong_cycle(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_UPDATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    tp = target_population_create_update_context["tp"]
+    cycle = target_population_create_update_context["cycle"]
+    other_cycle = ProgramCycleFactory(program=target_population_create_update_context["program_active"])
+    group_from_other_cycle = PaymentPlanGroupFactory(cycle=other_cycle)
+
+    response = target_population_create_update_context["client"].patch(
+        target_population_create_update_context["update_url"],
+        {
+            "program_cycle_id": str(cycle.id),
+            "payment_plan_group_id": str(group_from_other_cycle.id),
+            "version": tp.version,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment Plan Group does not exist in the given Programme Cycle." in str(response.data)
+
+
+def test_create_tp_rejects_fsp_conflicting_with_group(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_CREATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    purpose = target_population_create_update_context["purpose"]
+    cycle = target_population_create_update_context["cycle"]
+    group = cycle.payment_plan_groups.first()
+    dm = DeliveryMechanismFactory()
+    fsp_in_group = FinancialServiceProviderFactory()
+    PaymentPlanFactory(
+        business_area=target_population_create_update_context["business_area"],
+        program_cycle=cycle,
+        payment_plan_group=group,
+        financial_service_provider=fsp_in_group,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    different_fsp = FinancialServiceProviderFactory()
+
+    response = target_population_create_update_context["client"].post(
+        target_population_create_update_context["create_url"],
+        {
+            "name": "TP conflicting FSP",
+            "program_cycle_id": str(cycle.id),
+            "payment_plan_group_id": str(group.id),
+            "fsp_id": str(different_fsp.id),
+            "delivery_mechanism_code": dm.code,
+            "rules": target_population_create_update_context["rules"],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "payment_plan_purposes": [str(purpose.id)],
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment plans in the same group must share the same FSP." in str(response.data)
+
+
+def test_update_tp_rejects_fsp_conflicting_with_group(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_UPDATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    tp = target_population_create_update_context["tp"]
+    cycle = target_population_create_update_context["cycle"]
+    group = tp.payment_plan_group
+    fsp_in_group = FinancialServiceProviderFactory()
+    dm = DeliveryMechanismFactory()
+    PaymentPlanFactory(
+        business_area=target_population_create_update_context["business_area"],
+        program_cycle=cycle,
+        payment_plan_group=group,
+        financial_service_provider=fsp_in_group,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    different_fsp = FinancialServiceProviderFactory()
+
+    response = target_population_create_update_context["client"].patch(
+        target_population_create_update_context["update_url"],
+        {
+            "fsp_id": str(different_fsp.id),
+            "delivery_mechanism_code": dm.code,
+            "version": tp.version,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment plans in the same group must share the same FSP." in str(response.data)
+
+
+def test_update_tp_rejects_group_change_with_fsp_conflict(
+    target_population_create_update_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        target_population_create_update_context["user"],
+        [Permissions.TARGETING_UPDATE],
+        target_population_create_update_context["business_area"],
+        target_population_create_update_context["program_active"],
+    )
+    tp = target_population_create_update_context["tp"]
+    cycle = target_population_create_update_context["cycle"]
+    tp.financial_service_provider = FinancialServiceProviderFactory()
+    tp.save()
+    new_group = PaymentPlanGroupFactory(cycle=cycle)
+    different_fsp = FinancialServiceProviderFactory()
+    PaymentPlanFactory(
+        business_area=target_population_create_update_context["business_area"],
+        program_cycle=cycle,
+        payment_plan_group=new_group,
+        financial_service_provider=different_fsp,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+
+    response = target_population_create_update_context["client"].patch(
+        target_population_create_update_context["update_url"],
+        {
+            "program_cycle_id": str(cycle.id),
+            "payment_plan_group_id": str(new_group.id),
+            "version": tp.version,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment plans in the same group must share the same FSP." in str(response.data)
+
+
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
