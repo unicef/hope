@@ -29,6 +29,24 @@ class Migration(migrations.Migration):
                         upload_to="surprise/",
                     ),
                 ),
+                (
+                    "heading",
+                    models.CharField(
+                        blank=True,
+                        default="🎉 You found a secret!",
+                        help_text="Main heading shown on the surprise page",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "subheading",
+                    models.CharField(
+                        blank=True,
+                        default="Congratulations, explorer.",
+                        help_text="Subtitle shown below the heading",
+                        max_length=255,
+                    ),
+                ),
             ],
             options={
                 "verbose_name": "Special Page Configuration",
