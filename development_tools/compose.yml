@@ -41,21 +41,23 @@ services:
       retries: 5
 
   elasticsearch:
-    image: bitnamilegacy/elasticsearch:8.14.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
+    command: >
+      bash -c "
+        bin/elasticsearch-plugin install analysis-phonetic --batch --silent 2>/dev/null || true &&
+        exec /usr/local/bin/docker-entrypoint.sh eswrapper
+      "
     environment:
-#      - node.name=es01
-#      - cluster.name=es-docker-cluster
-#      - cluster.initial_master_nodes=es01
-#      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-#      - xpack.security.enabled=false
-      - ELASTICSEARCH_PLUGINS=analysis-phonetic
+      - "xpack.security.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
+      - "discovery.type=single-node"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - data_es:/bitnami/elasticsearch/data
+      - data_es:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
     healthcheck:

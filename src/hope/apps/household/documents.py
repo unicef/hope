@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db.models import QuerySet
 from django_elasticsearch_dsl import Document, fields
-from elasticsearch_dsl import AttrDict
+from elasticsearch.dsl import AttrDict
 
 from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
