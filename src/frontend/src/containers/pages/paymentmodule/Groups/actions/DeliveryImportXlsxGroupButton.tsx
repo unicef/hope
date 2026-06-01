@@ -7,7 +7,9 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
@@ -28,27 +30,14 @@ export function DeliveryImportXlsxGroupButton({
   const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useMutation({
-    // TODO: backend endpoint `delivery-import-xlsx` is not yet merged.
-    // POST /api/rest/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-import-xlsx/
-    // It synchronously validates the upload; on failure it returns 400 with a
-    // list of { sheet, coordinates, message } (XlsxErrorSerializer), which
-    // `getApiErrorMessages` + `XlsxErrorsDisplay` already render below.
-    // When the backend lands:
-    //   1. run `cd src/frontend && bun run generate-rest-api-types-camelcase`
-    //      to regenerate RestService with the new method.
-    //   2. uncomment the call below and delete the placeholder Promise.reject.
-    //   3. import { RestService } from '@restgenerated/services/RestService';
-    //   4. import { getApiErrorMessages } from '@utils/utils';
-    //      and set `setXlsxError(getApiErrorMessages(error))` in onError.
-    mutationFn: (_formData: PaymentPlanImportFile) =>
-      // RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryImportXlsxCreate({
-      //   businessAreaSlug: businessArea,
-      //   id: group?.id,
-      //   programCode: programId,
-      //   formData: _formData,
-      // }),
-      Promise.reject(
-        new Error('delivery-import-xlsx endpoint not yet available'),
+    mutationFn: (formData: PaymentPlanImportFile) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryImportXlsxCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: group?.id,
+          programCode: programId,
+          formData,
+        },
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -60,10 +49,7 @@ export function DeliveryImportXlsxGroupButton({
       showMessage(t('Delivery reconciliation import started'));
     },
     onError: (error: any) => {
-      // TODO: once the endpoint is merged, replace this with
-      // setXlsxError(getApiErrorMessages(error)); to surface the
-      // { sheet, coordinates, message } validation errors.
-      setXlsxError(error?.message ?? t('Import failed'));
+      setXlsxError(getApiErrorMessages(error, t('Import failed')));
     },
   });
 

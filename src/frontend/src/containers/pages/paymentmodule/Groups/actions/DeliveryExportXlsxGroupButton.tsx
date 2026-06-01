@@ -3,6 +3,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
 import { Box } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,21 +22,13 @@ export function DeliveryExportXlsxGroupButton({
   const queryClient = useQueryClient();
 
   const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
-    // TODO: backend endpoint `delivery-export-xlsx` is not yet merged.
-    // POST /api/rest/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-export-xlsx/
-    // When the backend lands:
-    //   1. run `cd src/frontend && bun run generate-rest-api-types-camelcase`
-    //      to regenerate RestService with the new method.
-    //   2. uncomment the call below and delete the placeholder Promise.reject.
-    //   3. import { RestService } from '@restgenerated/index';
     mutationFn: () =>
-      // RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate({
-      //   businessAreaSlug: businessArea,
-      //   programCode: programId,
-      //   id: group?.id,
-      // }),
-      Promise.reject(
-        new Error('delivery-export-xlsx endpoint not yet available'),
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate(
+        {
+          businessAreaSlug: businessArea,
+          programCode: programId,
+          id: group?.id,
+        },
       ),
     onSuccess: () => {
       showMessage(t('Export started'));

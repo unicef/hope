@@ -1,28 +1,15 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Select,
-} from '@mui/material';
-import { GetApp } from '@mui/icons-material';
+import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';
+import { useMutation } from '@tanstack/react-query';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
-import { ReactElement, useState } from 'react';
-import { LoadingComponent } from '@components/core/LoadingComponent';
+import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
@@ -41,9 +28,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   isInstructionManaged = false,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
 
@@ -64,57 +48,15 @@ export function AcceptedPaymentPlanHeaderButtons({
       },
     });
 
-  const { data: templateData, isLoading: loading } = useQuery({
-    queryKey: ['fspXlsxTemplates', businessArea, programId],
-    queryFn: async () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-        },
-      );
-    },
-    enabled: open,
-  });
-
-  const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
-    {
-      mutationFn: () =>
-        RestService.restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: paymentPlan.id,
-          },
-        ),
-      onSuccess: () => {
-        showMessage(t('Password has been sent.'));
-      },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
-      },
-    },
-  );
-
-  const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
-    mutationFn: (variables: { fspXlsxTemplateId?: string }) => {
-      const requestBody: PaymentPlanExportAuthCode = {
-        fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
-      };
-      return RestService.restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxWithAuthCodeCreate(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          id: paymentPlan.id,
-          requestBody,
-        },
-      );
-    },
+  const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: paymentPlan.id,
+      }),
     onSuccess: () => {
-      showMessage(t('Exporting XLSX started'));
-      queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
-      });
+      showMessage(t('Password has been sent.'));
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);
@@ -141,52 +83,6 @@ export function AcceptedPaymentPlanHeaderButtons({
     },
   });
 
-  const shouldDisableExportXlsx =
-    loadingExport ||
-    !paymentPlan.canExportXlsx ||
-    paymentPlan.backgroundActionStatus ===
-      BackgroundActionStatusEnum.XLSX_EXPORTING;
-
-  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
-
-  if (loading) return <LoadingComponent />;
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleTemplateChange = (event) => {
-    setSelectedTemplate(event.target.value);
-  };
-
-  const handleExportAPI = async () => {
-    try {
-      await mutateExport({
-        fspXlsxTemplateId: selectedTemplate,
-      });
-      handleClose();
-    } catch (e: any) {
-      showApiErrorMessages(e, showMessage);
-    }
-  };
-
-  const handleExport = async () => {
-    try {
-      await mutateExport({
-        fspXlsxTemplateId: '',
-      });
-      handleClose();
-    } catch (e: any) {
-      showMessage(
-        e?.body?.errors || e?.message || 'An error occurred while exporting',
-      );
-    }
-  };
-
   return (
     <Box display="flex" alignItems="center">
       <>
@@ -209,23 +105,6 @@ export function AcceptedPaymentPlanHeaderButtons({
             />
           </Box>
         )}
-        {!isInstructionManaged && !paymentPlan.hasPaymentListExportFile && (
-          <Box m={2}>
-            <LoadingButton
-              loading={loadingExport}
-              disabled={shouldDisableExportXlsx}
-              color="primary"
-              variant="contained"
-              startIcon={<GetApp />}
-              data-cy="button-export-xlsx"
-              onClick={
-                paymentPlan.isPaymentGateway ? handleClickOpen : handleExport
-              }
-            >
-              {t('Export Xlsx')}
-            </LoadingButton>
-          </Box>
-        )}
         {canClose && !isInstructionManaged && (
           <Box m={2}>
             <LoadingButton
@@ -239,77 +118,24 @@ export function AcceptedPaymentPlanHeaderButtons({
             </LoadingButton>
           </Box>
         )}
-        {!isInstructionManaged && (
-          <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>{t('Select Template')}</DialogTitle>
-            <DialogContent>
-              <Select
-                value={selectedTemplate}
-                onChange={handleTemplateChange}
-                fullWidth
-                variant="outlined"
-                size="small"
-                data-cy="select-template"
-              >
-                {templateData?.results?.map((template) => (
-                  <MenuItem key={template.id} value={template.id}>
-                    {template.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                data-cy="cancel-button"
-                onClick={handleClose}
-                color="primary"
-              >
-                {t('Cancel')}
-              </Button>
-              <Button
-                onClick={handleExportAPI}
-                data-cy="export-button"
-                color="primary"
-                disabled={!selectedTemplate}
-              >
-                {t('Export Xlsx')}
-              </Button>
-            </DialogActions>
-          </Dialog>
-        )}
-        {paymentPlan.hasPaymentListExportFile && (
-          <>
+        {/* FSP delivery export + download moved to the Group / Batch detail pages. */}
+        {paymentPlan.hasPaymentListExportFile &&
+          paymentPlan.canSendXlsxPassword &&
+          !isInstructionManaged && (
             <Box m={2}>
-              <Button
+              <LoadingButton
+                loading={loadingSend}
+                disabled={loadingSend}
                 color="primary"
-                component="a"
                 variant="contained"
-                data-cy="button-download-xlsx"
-                download
-                href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-                disabled={shouldDisableDownloadXlsx}
-                data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
+                data-cy="button-send-xlsx-password"
+                onClick={() => sendXlsxPassword()}
+                data-perm={PERMISSIONS.PM_SEND_XLSX_PASSWORD}
               >
-                {t('Download XLSX')}
-              </Button>
+                {t('Send Xlsx Password')}
+              </LoadingButton>
             </Box>
-            {paymentPlan.canSendXlsxPassword && !isInstructionManaged && (
-              <Box m={2}>
-                <LoadingButton
-                  loading={loadingSend}
-                  disabled={loadingSend}
-                  color="primary"
-                  variant="contained"
-                  data-cy="button-send-xlsx-password"
-                  onClick={() => sendXlsxPassword()}
-                  data-perm={PERMISSIONS.PM_SEND_XLSX_PASSWORD}
-                >
-                  {t('Send Xlsx Password')}
-                </LoadingButton>
-              </Box>
-            )}
-          </>
-        )}
+          )}
 
         {canSendToPaymentGateway && !isInstructionManaged && (
           <Box m={2}>

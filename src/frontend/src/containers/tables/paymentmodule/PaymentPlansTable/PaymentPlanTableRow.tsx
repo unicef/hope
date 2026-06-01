@@ -26,6 +26,9 @@ export const PaymentPlanTableRow = ({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
+  // `tag` is not yet present in the generated PaymentPlanList type; cast until
+  // the backend exposes it and the REST types are regenerated.
+  const tag = (plan as any).tag as string | null;
   const paymentPlanPath = `/${baseUrl}/payment-module/${
     plan.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
@@ -84,6 +87,19 @@ export const PaymentPlanTableRow = ({
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
+      </TableCell>
+      <TableCell align="left">
+        {tag && plan.paymentPlanGroup?.id ? (
+          <BlackLink
+            to={`/${baseUrl}/payment-module/groups/${
+              plan.paymentPlanGroup.id
+            }/batches/${encodeURIComponent(tag)}`}
+          >
+            {tag}
+          </BlackLink>
+        ) : (
+          '-'
+        )}
       </TableCell>
       <TableCell align="left">
         <LinkedPaymentPlansModal

@@ -47,12 +47,14 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
     // Poll while the group is exporting/importing an XLSX so the page reflects
     // the result (export_file populated, status cleared) without a manual refresh.
     refetchInterval: (query) => {
-      const status = query.state.data?.backgroundActionStatus;
-      const activeStatuses = [
-        PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING,
-        PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION,
-      ];
-      return status && activeStatuses.includes(status) ? 3000 : false;
+      const data = query.state.data;
+      const isExporting =
+        data?.backgroundActionStatusExport ===
+        PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING;
+      const isImporting =
+        data?.backgroundActionStatusImport ===
+        PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION;
+      return isExporting || isImporting ? 3000 : false;
     },
     refetchIntervalInBackground: true,
   });
@@ -105,17 +107,6 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Total Undelivered (USD)')}>
                   {group?.totalUndeliveredQuantityUsd ?? '-'}
-                </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Export File')}>
-                  {group?.exportFile ? (
-                    <a href={group.exportFile} download data-cy="link-export-file">
-                      {t('Download')}
-                    </a>
-                  ) : (
-                    '-'
-                  )}
                 </LabelizedField>
               </Grid>
             </Grid>
