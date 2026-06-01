@@ -17,9 +17,10 @@ def test_save_forces_pk_1() -> None:
 
 
 def test_save_is_singleton() -> None:
-    first = SurprisePageConfigFactory(heading="First")
-    second = SurprisePageConfigFactory(heading="Second")
-    assert first.pk == second.pk == 1
+    SurprisePageConfigFactory(heading="First")
+    second = SurprisePageConfig(heading="Second")
+    second.save()
+    assert second.pk == 1
     assert SurprisePageConfig.objects.count() == 1
     assert SurprisePageConfig.objects.get(pk=1).heading == "Second"
 
