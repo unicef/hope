@@ -244,6 +244,7 @@ class PaymentPlan(
         REGULAR = "REGULAR", "Regular"
         TOP_UP = "TOP_UP", "Top Up"
         FOLLOW_UP = "FOLLOW_UP", "Follow Up"
+        TOP_UP_AMENDMENT = "TOP_UP_AMENDMENT", "Top Up Amendment"
 
     usd_fields = [
         "total_entitled_quantity_usd",
@@ -565,7 +566,7 @@ class PaymentPlan(
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True, help_text="Engine Formula applied date [sys]")
     plan_type = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=PlanType.choices,
         default=PlanType.REGULAR,
         db_index=True,
@@ -762,6 +763,48 @@ class PaymentPlan(
 
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
+
+    def eligible_payments_for_top_up(self) -> "QuerySet":
+        """Select successful + pending payments eligible for top-up.
+
+        Must be called on the source (Standard) Payment Plan. Excludes withdrawn
+        households and beneficiaries that already appear in another TopUp under
+        the same source plan (slide 10 "Not Allowed #1": one top-up per
+        beneficiary per cycle).
+        """
+        top_up_households = Payment.objects.filter(
+            parent__plan_type=PaymentPlan.PlanType.TOP_UP,
+            parent__source_payment_plan=self,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        )
+        return (
+            self.eligible_payments.filter(
+                status__in=Payment.DELIVERED_STATUSES + Payment.PENDING_STATUSES,
+            )
+            .exclude(household__withdrawn=True)
+            .exclude(Exists(top_up_households))
+        )
+
+    def eligible_payments_for_top_up_amendment(self) -> "QuerySet":
+        """Select reconciled (delivered) payments of a TopUp plan eligible for an amendment.
+
+        Must be called on the source TopUp Payment Plan. Excludes withdrawn
+        households and beneficiaries already covered by another Amendment under
+        the same TopUp (one amendment per beneficiary). Unlike top-up eligibility,
+        only delivered/reconciled payments qualify — pending payments do not.
+        """
+        amended_households = Payment.objects.filter(
+            parent__plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+            parent__source_payment_plan=self,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        )
+        return (
+            self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES)
+            .exclude(household__withdrawn=True)
+            .exclude(Exists(amended_households))
+        )
 
     def _get_last_approval_process_data(self) -> ModifiedData:
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()

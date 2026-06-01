@@ -46,7 +46,7 @@ from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_async_task,
+    prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -566,7 +566,7 @@ def test_create_follow_up_pp(
     assert pp.child_plans.count() == 1
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_follow_up_payment_plan_async_task(follow_up_pp)
+        prepare_child_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -599,9 +599,9 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(72):
+    with django_assert_num_queries(77):
         with django_capture_on_commit_callbacks(execute=True):
-            prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
+            prepare_child_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -624,6 +624,113 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
         PaymentPlanService(payment_plan).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     assert error.value.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
+
+
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment"),
+    ],
+)
+def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    expected_child_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with mock.patch.object(PaymentPlanService, method_name, return_value=expected_child_plan) as service_method:
+        result = PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=plan_type,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert result == expected_child_plan
+    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date)
+
+
+def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=PaymentPlan.PlanType.REGULAR,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
+
+
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments"),
+    ],
+)
+def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+
+    with mock.patch.object(PaymentPlanService, method_name) as service_method:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    service_method.assert_called_once_with()
+
+
+def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
 
 
 def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any, cycle: ProgramCycle) -> None:

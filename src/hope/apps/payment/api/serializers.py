@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.settings import api_settings
@@ -629,6 +630,18 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
 
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        dispersion_start_date = attrs["dispersion_start_date"]
+        dispersion_end_date = attrs["dispersion_end_date"]
+        if dispersion_end_date < dispersion_start_date:
+            raise serializers.ValidationError(
+                f"Dispersion End Date [{dispersion_end_date}] cannot be earlier than "
+                f"Dispersion Start Date [{dispersion_start_date}]"
+            )
+        if dispersion_end_date <= timezone.now().date():
+            raise serializers.ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+        return attrs
+
 
 class FollowUpInstructionCreateSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
@@ -839,6 +852,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_individuals = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
     can_create_top_up = serializers.SerializerMethodField()
+    can_create_top_up_amendment = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField()
@@ -888,6 +902,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "excluded_individuals",
             "can_create_follow_up",
             "can_create_top_up",
+            "can_create_top_up_amendment",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
             "can_send_to_payment_gateway",
@@ -1021,10 +1036,10 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
 
     def get_can_create_top_up(self, obj: PaymentPlan) -> bool:
-        return (
-            obj.plan_type != PaymentPlan.PlanType.TOP_UP
-            and obj.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES).exists()
-        )
+        return obj.plan_type == PaymentPlan.PlanType.REGULAR and obj.eligible_payments_for_top_up().exists()
+
+    def get_can_create_top_up_amendment(self, obj: PaymentPlan) -> bool:
+        return obj.plan_type == PaymentPlan.PlanType.TOP_UP and obj.eligible_payments_for_top_up_amendment().exists()
 
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(

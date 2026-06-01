@@ -62,7 +62,7 @@ from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_records_async_task,
     periodic_sync_payment_gateway_records_async_task_action,
     periodic_sync_payment_plan_invoices_western_union_ftp_async_task,
-    prepare_follow_up_payment_plan_async_task,
+    prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
     remove_old_cash_plan_payment_verification_xlsx_async_task,
     remove_old_cash_plan_payment_verification_xlsx_async_task_action,
@@ -191,10 +191,10 @@ def payment_plan_group_with_plans():
             "update_exchange_rate_on_release_payments_async_task",
         ),
         (
-            prepare_follow_up_payment_plan_async_task,
+            prepare_child_payment_plan_async_task,
             AsyncRetryJob,
             lambda payment_plan, user, rule: (payment_plan,),
-            "prepare_follow_up_payment_plan_async_task",
+            "prepare_child_payment_plan_async_task",
         ),
         (
             payment_plan_exclude_beneficiaries_async_task,

@@ -880,32 +880,48 @@ def prepare_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
     return None
 
 
-def prepare_follow_up_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
+def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
-    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
+    with transaction.atomic():
+        payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
+        set_sentry_business_area_tag(payment_plan.business_area.name)
 
-    PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
-    payment_plan.refresh_from_db()
-    payment_plan.update_population_count_fields()
-    payment_plan.update_money_fields()
-    # invalidate cache for program cycle list
-    payment_plan.program_cycle.save()
+        # Lock the source plan so concurrent child-plan copies from the same source
+        # run serially — each one then computes its eligible payments on a consistent
+        # state instead of racing for the "one child per beneficiary" pool.
+        if payment_plan.source_payment_plan_id:
+            PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
+
+        PaymentPlanService(payment_plan=payment_plan).create_child_plan_payments()
+        payment_plan.refresh_from_db()
+        payment_plan.update_population_count_fields()
+        payment_plan.update_money_fields()
+        # invalidate cache for program cycle list
+        payment_plan.program_cycle.save()
+
+        if not payment_plan.payment_items.exists():
+            # The eligible set was emptied between request-time validation and this
+            # copy (e.g. a sibling child plan consumed the same households). Surface
+            # the empty plan as failed instead of leaving it silently OPEN.
+            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+            payment_plan.save(update_fields=["build_status", "updated_at"])
+            logger.warning(f"Child payment plan {payment_plan.id} copied zero payments; marked build_status FAILED.")
     return True
 
 
-def prepare_follow_up_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
+def prepare_child_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
+    """Queue copying of payments for a child plan (follow-up / top-up / top-up amendment)."""
     payment_plan_id = str(payment_plan.id)
     config = {"payment_plan_id": payment_plan_id}
     AsyncRetryJob.queue_task(
         instance=payment_plan,
-        job_name=prepare_follow_up_payment_plan_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.prepare_follow_up_payment_plan_async_task_action",
+        job_name=prepare_child_payment_plan_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.prepare_child_payment_plan_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Prepare follow up payment plan {payment_plan_id}",
+        description=f"Prepare child payment plan {payment_plan_id}",
     )
     return None
 

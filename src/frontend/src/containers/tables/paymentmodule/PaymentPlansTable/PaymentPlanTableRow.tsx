@@ -4,8 +4,10 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { LinkedPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/LinkedPaymentPlansModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 import { TableCell } from '@mui/material';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
@@ -26,9 +28,16 @@ export const PaymentPlanTableRow = ({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
+  const getPlanTypeLabel = usePaymentPlanTypeLabel();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'
+    plan.planType === PlanTypeEnum.FOLLOW_UP
+      ? 'followup-payment-plans'
+      : 'payment-plans'
   }/${plan.id}`;
+  const planTypePrefix =
+    plan.planType && plan.planType !== PlanTypeEnum.REGULAR
+      ? `${getPlanTypeLabel(plan.planType)}: `
+      : '';
   const handleClick = (): void => {
     navigate(paymentPlanPath);
   };
@@ -41,7 +50,7 @@ export const PaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align="left" sx={{ paddingLeft: 4 }}>
-        {plan.planType === 'FOLLOW_UP' ? 'Follow-up: ' : ''}
+        {planTypePrefix}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (

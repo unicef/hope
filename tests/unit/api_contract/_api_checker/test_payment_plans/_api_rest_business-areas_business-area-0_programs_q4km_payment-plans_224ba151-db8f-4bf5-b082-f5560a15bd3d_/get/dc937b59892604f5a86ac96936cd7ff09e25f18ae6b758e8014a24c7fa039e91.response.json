@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "3083"
+        "Content-Length": "3118"
     },
     "data": {
         "id": "224ba151-db8f-4bf5-b082-f5560a15bd3d",
@@ -39,7 +39,7 @@
         },
         "payment_plan_group": {
             "id": "b05e2f4b-8b98-4ff2-b485-d42dc9166a19",
-            "unicef_id": "PPG-12",
+            "unicef_id": "PPG-2",
             "name": "Default Group"
         },
         "version": 1735688653315201,
@@ -52,7 +52,6 @@
             "title": "Programme Cycle 0"
         },
         "is_payment_gateway": false,
-        "is_instruction_managed": false,
         "has_payment_list_export_file": false,
         "has_fsp_delivery_mechanism_xlsx_template": false,
         "imported_file_name": "",
@@ -112,6 +111,7 @@
         "excluded_individuals": [],
         "can_create_follow_up": false,
         "can_create_top_up": false,
+        "can_create_top_up_amendment": false,
         "total_withdrawn_households_count": 0,
         "unsuccessful_payments_count": 0,
         "can_send_to_payment_gateway": false,
