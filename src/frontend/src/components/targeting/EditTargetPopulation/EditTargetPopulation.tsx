@@ -270,7 +270,10 @@ const EditTargetPopulation = ({
                       e ?? { value: '', name: '' },
                     );
                     if (e?.value && e.value !== paymentPlan.programCycle.id) {
-                      await setFieldValue('paymentPlanGroupId', { value: '', name: '' });
+                      await setFieldValue('paymentPlanGroupId', {
+                        value: '',
+                        name: '',
+                      });
                       setModalCycle(e);
                       setCreateGroupModalOpen(true);
                     }
@@ -310,19 +313,7 @@ const EditTargetPopulation = ({
             </Grid>
             <CreatePaymentPlanGroupModal
               open={createGroupModalOpen}
-              onClose={() => {
-                setCreateGroupModalOpen(false);
-                // If cycle was changed from initial but no group created yet, revert cycle
-                if (
-                  values.programCycleId.value !== paymentPlan.programCycle.id &&
-                  !values.paymentPlanGroupId?.value
-                ) {
-                  setFieldValue('programCycleId', {
-                    value: paymentPlan.programCycle.id,
-                    name: paymentPlan.programCycle.title,
-                  });
-                }
-              }}
+              onClose={() => setCreateGroupModalOpen(false)}
               cycleId={modalCycle.value}
               cycleTitle={modalCycle.name}
               onSuccess={(group) => {
