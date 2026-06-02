@@ -668,7 +668,7 @@ def test_required_validator(program: Any) -> None:
 def test_image_validator(program: Any) -> None:
     with mock.patch(
         "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
-        return_value={"test": {"required": False}},
+        return_value={"test": {"required": True}},
     ):
         validator = UploadXLSXInstanceValidator(program)
         sheet = openpyxl.Workbook().active
@@ -700,7 +700,7 @@ def test_image_validator_returns_true_for_required_value(program: Any) -> None:
 def test_image_validator_reraises_and_logs_error(program: Any) -> None:
     with mock.patch(
         "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
-        return_value={"test": {"required": False}},
+        return_value={"test": {"required": True}},
     ):
         validator = UploadXLSXInstanceValidator(program)
         cell = openpyxl.Workbook().active["A1"]
