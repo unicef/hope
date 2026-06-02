@@ -873,7 +873,6 @@ def test_api_add_records_to_payment_instruction(
                     "middle_name": payments[0].collector.middle_name,
                     "first_name": payments[0].collector.given_name,
                     "full_name": payments[0].collector.full_name,
-                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "transfer",
                     "account_type": "bank",
                 },
@@ -942,7 +941,6 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
                     "middle_name": primary_collector.middle_name,
                     "first_name": primary_collector.given_name,
                     "full_name": primary_collector.full_name,
-                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "mobile_money",
                     "account_type": "mobile",
                     "account": {
@@ -1030,7 +1028,6 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
         "middle_name": primary_collector.middle_name,
         "first_name": primary_collector.given_name,
         "full_name": primary_collector.full_name,
-        "destination_currency": payments[0].currency.code if payments[0].currency else None,
         "delivery_mechanism": "transfer_to_account",
         "account_type": "bank",
         "account": {
@@ -1218,7 +1215,7 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
         "config_key": business_area.code,
         "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
-        "country": "AFG",
+        "destination_country": "AF",
         "destination_country_iso_code3": "AFG",
         "destination_country_iso_code2": "AF",
     }
@@ -1239,7 +1236,7 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
         "config_key": business_area.code,
         "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
-        "country": None,
+        "destination_country": None,
     }
 
 
@@ -1254,7 +1251,7 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
 
     payload_without_country = serializer.get_payload(split)
 
-    assert payload_without_country["country"] is None
+    assert payload_without_country["destination_country"] is None
     assert "destination_country_iso_code3" not in payload_without_country
     assert "destination_country_iso_code2" not in payload_without_country
 
@@ -1263,9 +1260,34 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
     payload_with_country = serializer.get_payload(split)
 
     assert payload_with_country["office"] == business_area.slug
-    assert payload_with_country["country"] == "AFG"
+    assert payload_with_country["destination_country"] == "AF"
     assert payload_with_country["destination_country_iso_code3"] == "AFG"
     assert payload_with_country["destination_country_iso_code2"] == "AF"
+
+
+def test_payment_instruction_payload_uses_destination_country_iso_code2(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    from hope.models import Country
+
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+    business_area.payment_countries.add(
+        Country.objects.create(
+            name="Test Country",
+            short_name="Test",
+            iso_code2="AF",
+            iso_code3="AFG",
+            iso_num="9999",
+        )
+    )
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["payload"]["destination_country"] == "AF"
+    assert data["payload"]["destination_country_iso_code3"] == "AFG"
+    assert data["payload"]["destination_country_iso_code2"] == "AF"
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")

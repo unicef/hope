@@ -17,13 +17,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
 from hope.apps.core.utils import FlexFieldsEncoder
-from hope.apps.household.field_validators import validate_originating_id
-from hope.apps.household.mixins import IndividualDeliveryDataMixin
-from hope.apps.household.signals import individual_deleted, individual_withdrawn
-from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
-from hope.models.business_area import BusinessArea
-from hope.models.document import Document
-from hope.models.household import (
+from hope.apps.household.const import (
     BLANK,
     CANNOT_DO,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
@@ -49,8 +43,14 @@ from hope.models.household import (
     UNIQUE,
     UNIQUE_IN_BATCH,
     WORK_STATUS_CHOICE,
-    PendingHousehold,
 )
+from hope.apps.household.field_validators import validate_originating_id
+from hope.apps.household.mixins import IndividualDeliveryDataMixin
+from hope.apps.household.signals import individual_deleted, individual_withdrawn
+from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
+from hope.models.business_area import BusinessArea
+from hope.models.document import Document
+from hope.models.household import PendingHousehold
 from hope.models.utils import (
     AbstractSyncable,
     AdminUrlMixin,
