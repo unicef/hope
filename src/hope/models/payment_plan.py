@@ -599,6 +599,13 @@ class PaymentPlan(
         app_label = "payment"
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["payment_plan_group", "export_tag"],
+                condition=models.Q(export_tag__isnull=False),
+                name="unique_export_tag_per_group",
+            ),
+        ]
         permissions = (
             ("recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),
             ("restart_preparing_payment_plan", "Can restart Preparing Payment Plans"),

@@ -230,5 +230,6 @@ export type PaymentPlanDetail = {
      */
     flatAmountValue?: string | null;
     readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
+    readonly isInstructionManaged: boolean;
 };
 

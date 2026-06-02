@@ -433,6 +433,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "updated_at",
             "program",
             "payment_plan_group",
+            "export_tag",
         )
 
     @staticmethod

@@ -453,6 +453,7 @@ def test_target_population_list_with_permissions(
     assert tp["created_at"] == target_population_list_context["tp"].created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert tp["updated_at"] == target_population_list_context["tp"].updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert tp["created_by"] == target_population_list_context["user"].get_full_name()
+    assert tp["export_tag"] == target_population_list_context["tp"].export_tag
 
 
 def test_target_population_caching(
@@ -691,6 +692,59 @@ def test_filter_by_created_date(target_population_filter_context: dict[str, Any]
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["name"] == tp_2.name
+
+
+def test_filter_by_group_and_export_tag_returns_only_plans_in_same_batch(
+    api_client: Callable,
+    business_area: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    partner = PartnerFactory(name="unittest")
+    user = UserFactory(partner=partner)
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
+    cycle = ProgramCycleFactory(program=program)
+
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    other_group = PaymentPlanGroupFactory(cycle=cycle)
+
+    pp_match = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.TP_OPEN,
+        export_tag=1,
+    )
+    # Same group, different tag
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.TP_OPEN,
+        export_tag=2,
+    )
+    # Same tag, different group
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=other_group,
+        status=PaymentPlan.Status.TP_OPEN,
+        export_tag=1,
+    )
+
+    create_user_role_with_permissions(user, [Permissions.TARGETING_VIEW_LIST], business_area, program)
+    list_url = reverse(
+        "api:payments:target-populations-list",
+        kwargs={"business_area_slug": business_area.slug, "program_code": program.code},
+    )
+
+    response = api_client(user).get(
+        list_url,
+        {"payment_plan_group": str(group.id), "export_tag": 1},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    result_ids = {r["id"] for r in response.data["results"]}
+    assert result_ids == {str(pp_match.id)}
 
 
 @pytest.mark.parametrize(
