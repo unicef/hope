@@ -56,9 +56,7 @@ def payment_verification(business_area: BusinessArea, program: Program) -> Payme
 
 
 @pytest.fixture
-def details(
-    business_area: BusinessArea, payment_verification: PaymentVerification
-) -> TicketPaymentVerificationDetails:
+def details(business_area: BusinessArea, payment_verification: PaymentVerification) -> TicketPaymentVerificationDetails:
     return TicketPaymentVerificationDetailsFactory(
         ticket__status=GrievanceTicket.STATUS_IN_PROGRESS,
         ticket__business_area=business_area,
