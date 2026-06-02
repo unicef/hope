@@ -1539,7 +1539,7 @@ def test_get_batches_returns_empty_when_no_export(cycle: Any, business_area: Any
     assert result == []
 
 
-def test_get_batches_lists_batch_number_and_file(cycle: Any, business_area: Any) -> None:
+def test_get_batches_marks_has_export_file_true_when_file_present(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
     file_temp = FileTempFactory()
     PaymentPlanFactory(
@@ -1547,37 +1547,39 @@ def test_get_batches_lists_batch_number_and_file(cycle: Any, business_area: Any)
         program_cycle=cycle,
         payment_plan_group=group,
         export_tag=1,
-        group_export_file=file_temp,
+        export_file_delivery=file_temp,
     )
+    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=1)
 
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert result == [{"number": 1, "file": file_temp.file.url}]
+    expected_link = reverse("download-payment-plan-group-batch", args=[str(group.id), 1])
+    assert result == [{"export_tag": 1, "has_export_file": True, "export_file_link": expected_link}]
 
 
-def test_get_batches_returns_null_file_when_batch_plan_has_no_file(cycle: Any, business_area: Any) -> None:
+def test_get_batches_marks_has_export_file_false_when_file_missing(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
-        export_tag=2,
-        group_export_file=None,
+        export_tag=1,
+        export_file_delivery=None,
     )
 
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert result == [{"number": 2, "file": None}]
+    assert result == [{"export_tag": 1, "has_export_file": False, "export_file_link": None}]
 
 
-def test_get_batches_orders_by_number(cycle: Any, business_area: Any) -> None:
+def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=2)
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=1)
 
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert [batch["number"] for batch in result] == [1, 2]
+    assert [batch["export_tag"] for batch in result] == [1, 2]
 
 
 def test_delivery_import_xlsx_returns_400_when_no_file(

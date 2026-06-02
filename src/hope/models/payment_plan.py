@@ -573,14 +573,6 @@ class PaymentPlan(
         db_index=True,
         help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
     )
-    group_export_file = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Group delivery export batch XLSX; set on the first plan of the batch [sys]",
-    )
     exclude_household_error = models.TextField(
         blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
     )
@@ -607,13 +599,6 @@ class PaymentPlan(
         app_label = "payment"
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["payment_plan_group", "export_tag"],
-                condition=models.Q(export_tag__isnull=False),
-                name="unique_export_tag_per_group",
-            ),
-        ]
         permissions = (
             ("recalculate_exchange_rate", "Can recalculate USD values based on exchange rate"),
             ("restart_preparing_payment_plan", "Can restart Preparing Payment Plans"),

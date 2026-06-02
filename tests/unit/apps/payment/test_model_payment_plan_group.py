@@ -1,7 +1,13 @@
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 import pytest
 
-from extras.test_utils.factories import PaymentPlanFactory, PaymentPlanGroupFactory, ProgramCycleFactory
+from extras.test_utils.factories import (
+    FileTempFactory,
+    PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+    ProgramCycleFactory,
+)
 from hope.models import PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
@@ -55,3 +61,30 @@ def test_delete_group_succeeds_when_another_remains(cycle, payment_plan_group):
     payment_plan_group.delete()
 
     assert PaymentPlanGroup.objects.filter(cycle=cycle).count() == 1
+
+
+def test_get_batch_export_file_link_returns_url_when_file_present(cycle, payment_plan_group):
+    file_temp = FileTempFactory(file=SimpleUploadedFile("batch-1.xlsx", b"data"))
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=payment_plan_group,
+        export_tag=1,
+        export_file_delivery=file_temp,
+    )
+
+    assert payment_plan_group.get_batch_export_file_link(1) == file_temp.file.url
+
+
+def test_get_batch_export_file_link_returns_none_for_unknown_tag(cycle, payment_plan_group):
+    assert payment_plan_group.get_batch_export_file_link(99) is None
+
+
+def test_get_batch_export_file_link_returns_none_when_plan_has_no_file(cycle, payment_plan_group):
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=payment_plan_group,
+        export_tag=1,
+        export_file_delivery=None,
+    )
+
+    assert payment_plan_group.get_batch_export_file_link(1) is None

@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -1889,8 +1890,9 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):
-    number = serializers.IntegerField()
-    file = serializers.CharField(allow_null=True)
+    export_tag = serializers.IntegerField()
+    has_export_file = serializers.BooleanField()
+    export_file_link = serializers.CharField(allow_null=True)
 
 
 class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
@@ -1919,18 +1921,22 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
     def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:
-        files_by_tag = {
-            plan.export_tag: plan.group_export_file
-            for plan in obj.payment_plans.filter(
-                export_tag__isnull=False, group_export_file__isnull=False
-            ).select_related("group_export_file")
-        }
-        tags = obj.payment_plans.filter(export_tag__isnull=False).values_list("export_tag", flat=True).distinct()
+        tags_with_file = set(
+            obj.payment_plans.filter(export_tag__isnull=False, export_file_delivery__isnull=False).values_list(
+                "export_tag", flat=True
+            )
+        )
+        tags = (
+            obj.payment_plans.filter(export_tag__isnull=False)
+            .order_by()
+            .values_list("export_tag", flat=True)
+            .distinct()
+        )
         batches = []
-        for number in sorted(tags):
-            file_temp = files_by_tag.get(number)
-            file_url = file_temp.file.url if file_temp and file_temp.file else None
-            batches.append({"number": number, "file": file_url})
+        for number in sorted(tag for tag in tags if tag is not None):
+            has_file = number in tags_with_file
+            link = reverse("download-payment-plan-group-batch", args=[str(obj.id), number]) if has_file else None
+            batches.append({"export_tag": number, "has_export_file": has_file, "export_file_link": link})
         return batches
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:

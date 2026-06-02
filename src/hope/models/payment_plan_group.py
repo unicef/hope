@@ -73,6 +73,17 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     def __str__(self) -> str:
         return f"{self.name} for {self.cycle}"
 
+    def get_batch_export_file_link(self, export_tag: int) -> str | None:
+        """Return the download URL of the batch's XLSX, or None if the batch has no stored file.
+
+        A batch is identified by export_tag; every plan in the batch references the same
+        export_file_delivery, so any plan with that tag yields the file.
+        """
+        plan = self.payment_plans.filter(export_tag=export_tag, export_file_delivery__isnull=False).first()
+        if plan is None or not plan.export_file_delivery.file:
+            return None
+        return plan.export_file_delivery.file.url
+
     def sendable_to_payment_gateway_plans(self) -> "QuerySet[PaymentPlan]":
         """Narrow the group's payment plans to the ones that can be sent to the payment gateway.
 

@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
+from hope.models import PaymentPlan, PaymentPlanGroup, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 
 if TYPE_CHECKING:  # pragma: no cover
     from django.http import (
@@ -82,6 +82,32 @@ def download_payment_plan_payment_list(
 
     log_and_raise(
         f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}",
+        error_type=FileNotFoundError,
+    )
+    return None
+
+
+@login_required
+def download_payment_plan_group_batch(
+    request: "HttpRequest", payment_plan_group_id: str, export_tag: int
+) -> Union[
+    "HttpResponseRedirect",
+    "HttpResponsePermanentRedirect",
+]:
+    payment_plan_group = get_object_or_404(PaymentPlanGroup, id=payment_plan_group_id)
+
+    if not request.user.has_perm(
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX.value,
+        payment_plan_group.cycle.program,
+    ):
+        raise PermissionDenied({"required_permissions": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX.value]})
+
+    link = payment_plan_group.get_batch_export_file_link(export_tag)
+    if link is not None:
+        return redirect(link)
+
+    log_and_raise(
+        f"XLSX File not found. PaymentPlanGroup ID: {payment_plan_group.unicef_id}, batch: {export_tag}",
         error_type=FileNotFoundError,
     )
     return None

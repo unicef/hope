@@ -399,31 +399,31 @@ def test_save_xlsx_file_stamps_first_batch_with_tag_one(group_with_one_accepted_
     assert plan.export_tag == 1
 
 
-def test_save_xlsx_file_stores_batch_file_on_first_plan(group_with_one_accepted_plan, user):
+def test_save_xlsx_file_stores_batch_file_on_plan(group_with_one_accepted_plan, user):
     plan = group_with_one_accepted_plan.payment_plans.first()
 
     XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).save_xlsx_file(user)
 
     plan.refresh_from_db()
-    assert plan.group_export_file is not None
-    assert plan.group_export_file.file.name.endswith("_batch_1.xlsx")
+    assert plan.export_file_delivery is not None
+    assert plan.export_file_delivery.file.name.endswith("_batch_1.xlsx")
 
 
 def test_save_xlsx_file_no_eligible_plans_creates_no_file(empty_group, user):
     XlsxPaymentPlanGroupDeliveryExportService(empty_group).save_xlsx_file(user)
 
-    assert not empty_group.payment_plans.filter(group_export_file__isnull=False).exists()
+    assert not empty_group.payment_plans.filter(export_file_delivery__isnull=False).exists()
 
 
-def test_save_xlsx_file_one_batch_tags_all_plans_file_on_first(group_with_two_plans_and_payments, user):
+def test_save_xlsx_file_one_batch_tags_all_plans_and_shares_file(group_with_two_plans_and_payments, user):
     group = group_with_two_plans_and_payments
 
     XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     plans = list(group.payment_plans.order_by("unicef_id"))
     assert all(plan.export_tag == 1 for plan in plans)
-    assert plans[0].group_export_file is not None
-    assert plans[1].group_export_file is None
+    assert all(plan.export_file_delivery is not None for plan in plans)
+    assert plans[0].export_file_delivery_id == plans[1].export_file_delivery_id
 
 
 def test_save_xlsx_file_second_export_increments_tag_and_excludes_first_batch(

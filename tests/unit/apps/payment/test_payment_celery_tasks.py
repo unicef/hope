@@ -1905,8 +1905,8 @@ def test_export_delivery_task_creates_batch_file(payment_plan_group_with_accepte
 
     group.refresh_from_db()
     plan = group.payment_plans.get(export_tag=1)
-    assert plan.group_export_file is not None
-    assert plan.group_export_file.file.name.endswith(".xlsx")
+    assert plan.export_file_delivery is not None
+    assert plan.export_file_delivery.file.name.endswith(".xlsx")
     assert group.background_action_status_export is None
 
 
@@ -1914,7 +1914,7 @@ def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_
     group = payment_plan_group_with_accepted_plan
     queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
     first_plan = group.payment_plans.get(export_tag=1)
-    first_file_id = first_plan.group_export_file_id
+    first_file_id = first_plan.export_file_delivery_id
 
     new_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
@@ -1927,10 +1927,10 @@ def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_
 
     first_plan.refresh_from_db()
     new_plan.refresh_from_db()
-    assert first_plan.group_export_file_id == first_file_id
+    assert first_plan.export_file_delivery_id == first_file_id
     assert first_plan.export_tag == 1
     assert new_plan.export_tag == 2
-    assert new_plan.group_export_file_id is not None
+    assert new_plan.export_file_delivery_id is not None
     assert FileTemp.objects.filter(pk=first_file_id).exists()
 
 

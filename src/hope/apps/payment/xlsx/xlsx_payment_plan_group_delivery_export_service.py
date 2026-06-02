@@ -111,11 +111,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             tmp.seek(0)
             file_temp.file.save(filename, File(tmp))
             with transaction.atomic():
-                exported_plans = list(self.payment_plans)
-                first_plan = next(plan for plan in exported_plans if plan.id in self.exported_plan_ids)
-                first_plan.group_export_file = file_temp
-                first_plan.export_tag = next_tag
-                first_plan.save(update_fields=["group_export_file", "export_tag", "updated_at"])
-                other_ids = [pk for pk in self.exported_plan_ids if pk != first_plan.id]
-                if other_ids:
-                    PaymentPlan.objects.filter(id__in=other_ids).update(export_tag=next_tag)
+                PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
+                    export_tag=next_tag, export_file_delivery=file_temp
+                )
