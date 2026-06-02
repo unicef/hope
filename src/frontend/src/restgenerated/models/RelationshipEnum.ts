@@ -16,6 +16,7 @@
  * * `NEPHEW_NIECE` - Nephew / Niece
  * * `NON_BENEFICIARY` - Not a Family Member. Can only act as a recipient.
  * * `OTHER` - Other
+ * * `REMOVED_BY_COLLISION` - Removed by collision
  * * `SISTERINLAW_BROTHERINLAW` - Sister-in-law / Brother-in-law
  * * `SON_DAUGHTER` - Son / Daughter
  * * `WIFE_HUSBAND` - Wife / Husband
@@ -36,6 +37,7 @@ export enum RelationshipEnum {
     NEPHEW_NIECE = 'NEPHEW_NIECE',
     NON_BENEFICIARY = 'NON_BENEFICIARY',
     OTHER = 'OTHER',
+    REMOVED_BY_COLLISION = 'REMOVED_BY_COLLISION',
     SISTERINLAW_BROTHERINLAW = 'SISTERINLAW_BROTHERINLAW',
     SON_DAUGHTER = 'SON_DAUGHTER',
     WIFE_HUSBAND = 'WIFE_HUSBAND',

@@ -103,6 +103,7 @@ export type IndividualDetail = {
      * * `NEPHEW_NIECE` - Nephew / Niece
      * * `NON_BENEFICIARY` - Not a Family Member. Can only act as a recipient.
      * * `OTHER` - Other
+     * * `REMOVED_BY_COLLISION` - Removed by collision
      * * `SISTERINLAW_BROTHERINLAW` - Sister-in-law / Brother-in-law
      * * `SON_DAUGHTER` - Son / Daughter
      * * `WIFE_HUSBAND` - Wife / Husband

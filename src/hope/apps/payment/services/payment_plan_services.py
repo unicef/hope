@@ -674,13 +674,23 @@ class PaymentPlanService:
 
         self._validate_update_permissions(input_data)
 
-        name = input_data.get("name")
-        vulnerability_score_min = input_data.get("vulnerability_score_min")
-        vulnerability_score_max = input_data.get("vulnerability_score_max")
-        rules = input_data.get("rules")
-        dispersion_start_date = input_data.get("dispersion_start_date")
-        dispersion_end_date = input_data.get("dispersion_end_date")
-        fsp_id = input_data.get("fsp_id")
+        (
+            name,
+            vulnerability_score_min,
+            vulnerability_score_max,
+            rules,
+            dispersion_start_date,
+            dispersion_end_date,
+            fsp_id,
+        ) = (
+            input_data.get("name"),
+            input_data.get("vulnerability_score_min"),
+            input_data.get("vulnerability_score_max"),
+            input_data.get("rules"),
+            input_data.get("dispersion_start_date"),
+            input_data.get("dispersion_end_date"),
+            input_data.get("fsp_id"),
+        )
 
         if name:
             name = self._validate_pp_name(name, program)
@@ -708,8 +718,7 @@ class PaymentPlanService:
             self.payment_plan.rules.all().delete()
             self.create_targeting_criteria(targeting_criteria_input, program)
 
-        excluded_ids = input_data.get("excluded_ids")
-        exclusion_reason = input_data.get("exclusion_reason")
+        excluded_ids, exclusion_reason = input_data.get("excluded_ids"), input_data.get("exclusion_reason")
         if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
             self.payment_plan.excluded_ids = excluded_ids

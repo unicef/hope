@@ -54,7 +54,6 @@ export { ComparisonMethodEnum as ComparisonMethodEnumCamelCase } from './models/
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
 export type { CoreFieldChoice as CoreFieldChoiceCamelCase } from './models/CoreFieldChoice';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
-export { CountriesEnum as CountriesEnumCamelCase } from './models/CountriesEnum';
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
 export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/CountryOriginEnum';
@@ -64,6 +63,7 @@ export type { CreateGrievanceDocument as CreateGrievanceDocumentCamelCase } from
 export type { CreateGrievanceTicket as CreateGrievanceTicketCamelCase } from './models/CreateGrievanceTicket';
 export type { CreateGrievanceTicketExtras as CreateGrievanceTicketExtrasCamelCase } from './models/CreateGrievanceTicketExtras';
 export { CurrenciesEnum as CurrenciesEnumCamelCase } from './models/CurrenciesEnum';
+export type { Currency as CurrencyCamelCase } from './models/Currency';
 export type { CurrencyChoice as CurrencyChoiceCamelCase } from './models/CurrencyChoice';
 export type { DataCollectingType as DataCollectingTypeCamelCase } from './models/DataCollectingType';
 export { DataCollectingTypeTypeEnum as DataCollectingTypeTypeEnumCamelCase } from './models/DataCollectingTypeTypeEnum';
@@ -188,6 +188,7 @@ export type { PaginatedBusinessAreaList as PaginatedBusinessAreaListCamelCase } 
 export type { PaginatedChoiceList as PaginatedChoiceListCamelCase } from './models/PaginatedChoiceList';
 export type { PaginatedCollectorAttributeList as PaginatedCollectorAttributeListCamelCase } from './models/PaginatedCollectorAttributeList';
 export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './models/PaginatedCountryList';
+export type { PaginatedCurrencyList as PaginatedCurrencyListCamelCase } from './models/PaginatedCurrencyList';
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedFieldAttributeList as PaginatedFieldAttributeListCamelCase } from './models/PaginatedFieldAttributeList';
 export type { PaginatedFinancialInstitutionListList as PaginatedFinancialInstitutionListListCamelCase } from './models/PaginatedFinancialInstitutionListList';

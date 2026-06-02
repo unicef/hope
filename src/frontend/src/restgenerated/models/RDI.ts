@@ -6,6 +6,6 @@ export type RDI = {
     name: string;
     program: string;
     importedByEmail: string;
-    countryWorkspaceId: string;
+    countryWorkspaceId?: string;
 };
 

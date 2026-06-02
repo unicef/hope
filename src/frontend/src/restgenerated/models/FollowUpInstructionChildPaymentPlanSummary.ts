@@ -34,6 +34,9 @@ export type FollowUpInstructionChildPaymentPlanSummary = {
      * * `CLOSED` - Closed
      */
     status?: PaymentPlanStatusEnum;
+    /**
+     * The currency code following the ISO 4217 standard (e.g. USD, EUR)
+     */
     readonly currency: string | null;
     readonly sourcePaymentPlanId: string;
     readonly sourcePaymentPlanUnicefId: string;

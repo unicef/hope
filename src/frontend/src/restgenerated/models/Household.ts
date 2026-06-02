@@ -199,10 +199,6 @@ export type Household = {
      */
     childHoh?: boolean | null;
     /**
-     * Household currency (legacy, pending removal)
-     */
-    currencyOld?: string;
-    /**
      * Household unhcr id
      */
     unhcrId?: string;

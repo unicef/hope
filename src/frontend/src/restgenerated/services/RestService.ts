@@ -69,6 +69,7 @@ import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaL
 import type { PaginatedChoiceList } from '../models/PaginatedChoiceList';
 import type { PaginatedCollectorAttributeList } from '../models/PaginatedCollectorAttributeList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
+import type { PaginatedCurrencyList } from '../models/PaginatedCurrencyList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
 import type { PaginatedFinancialInstitutionListList } from '../models/PaginatedFinancialInstitutionListList';
@@ -16187,6 +16188,44 @@ export class RestService {
                 'valid_from_before': validFromBefore,
                 'valid_until_after': validUntilAfter,
                 'valid_until_before': validUntilBefore,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedCurrencyList
+     * @throws ApiError
+     */
+    public static restLookupsCurrencyList({
+        limit,
+        offset,
+        ordering,
+        search,
+    }: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedCurrencyList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/lookups/currency/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'search': search,
             },
         });
     }
