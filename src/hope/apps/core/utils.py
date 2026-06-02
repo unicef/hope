@@ -504,9 +504,8 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
 class SheetImageLoader:
     """Load all images in a sheet."""
 
-    _images = {}
-
     def __init__(self, sheet: "Worksheet") -> None:
+        self._images = {}
         # Holds an array of A-ZZ
         col_holder = list(
             itertools.chain(
