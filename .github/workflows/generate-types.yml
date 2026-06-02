@@ -1,0 +1,111 @@
+name: GENERATE_TYPES
+permissions:
+  contents: read
+on:
+  workflow_call:
+jobs:
+  generate-types:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_DEFAULT_PLATFORM: linux/amd64
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      REP_DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      SECRET_KEY: ci-secret-key-for-schema-generation
+      DEBUG: "True"
+      ALLOWED_HOSTS: "*"
+      CACHE_ENABLED: "False"
+      PYTHONPATH: ./src
+      ELASTICSEARCH_SYNONYMS_FILE: ${{ github.workspace }}/src/data/synonyms.txt
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: aurora
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libjpeg-dev \
+            zlib1g-dev \
+            libpq-dev \
+            python3-psycopg2 \
+            python3-gdal \
+            gdal-bin \
+            libcairo2 \
+            libcairo2-dev \
+            libffi-dev \
+            libgdk-pixbuf2.0-0 \
+            libpango-1.0-0 \
+            libpangocairo-1.0-0 \
+            shared-mime-info
+
+      - name: Install Python & UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+          prune-cache: false
+          cache-local-path: ./uv-cache
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+          python-version: 3.14
+
+      - name: Install dependencies
+        run: uv sync --cache-dir ./uv-cache --frozen
+
+      - name: Run migrations
+        run: uv run python manage.py migrate --run-syncdb
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Start Django backend and wait for readiness
+        run: |
+          nohup uv run python manage.py runserver --classic --noreload 8080 \
+            > runserver.log 2>&1 &
+          echo $! > runserver.pid
+          for i in $(seq 1 60); do
+            if curl -fs http://localhost:8080/api/rest/ > /dev/null; then
+              echo "Backend is up after ${i} attempts."
+              exit 0
+            fi
+            if ! kill -0 "$(cat runserver.pid)" 2>/dev/null; then
+              echo "::error::runserver process exited before becoming ready"
+              cat runserver.log
+              exit 1
+            fi
+            echo "Waiting for backend... (${i}/60)"
+            sleep 2
+          done
+          echo "::error::Backend did not become ready within 120s"
+          cat runserver.log
+          exit 1
+
+      - run: bun install --frozen-lockfile
+        working-directory: src/frontend
+
+      - run: bun run generate-rest-api-types-camelcase
+        working-directory: src/frontend
+
+      - name: Upload generated types
+        uses: actions/upload-artifact@v4
+        with:
+          name: restgenerated-types
+          path: src/frontend/src/restgenerated/
+
+      - run: bun run build
+        working-directory: src/frontend

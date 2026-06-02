@@ -2,6 +2,8 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
+
 const EXCLUDED_CHOICE_ENDPOINTS = [
   'payment-record-delivery-type',
 ];
@@ -9,7 +11,7 @@ const EXCLUDED_CHOICE_ENDPOINTS = [
 // Function to automatically discover all choice endpoints from the OpenAPI spec
 async function discoverChoiceEndpoints() {
   try {
-    const response = await fetch('http://localhost:8080/api/rest/');
+    const response = await fetch(`${BACKEND_URL}/api/rest/`);
     const openApiText = await response.text();
     const openApiSpec = yaml.load(openApiText);
 
@@ -212,7 +214,7 @@ async function fetchChoices() {
     }
     try {
       const response = await fetch(
-        `http://localhost:8080/api/rest/choices/${endpoint}/`,
+        `${BACKEND_URL}/api/rest/choices/${endpoint}/`,
       );
 
       if (!response.ok) {
