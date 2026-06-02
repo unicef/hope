@@ -1888,13 +1888,18 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
         return value
 
 
+class PaymentPlanGroupBatchSerializer(serializers.Serializer):
+    number = serializers.IntegerField()
+    file = serializers.CharField(allow_null=True)
+
+
 class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.SerializerMethodField()
-    delivery_export_file = serializers.SerializerMethodField()
+    batches = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
     background_action_status_export = serializers.CharField(read_only=True, allow_null=True)
     background_action_status_import = serializers.CharField(read_only=True, allow_null=True)
@@ -1906,11 +1911,27 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "total_undelivered_quantity_usd",
             "payment_plans_count",
             "can_send_to_payment_gateway",
-            "delivery_export_file",
+            "batches",
             "delivery_import_file",
             "background_action_status_export",
             "background_action_status_import",
         ]
+
+    @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
+    def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:
+        files_by_tag = {
+            plan.export_tag: plan.group_export_file
+            for plan in obj.payment_plans.filter(
+                export_tag__isnull=False, group_export_file__isnull=False
+            ).select_related("group_export_file")
+        }
+        tags = obj.payment_plans.filter(export_tag__isnull=False).values_list("export_tag", flat=True).distinct()
+        batches = []
+        for number in sorted(tags):
+            file_temp = files_by_tag.get(number)
+            file_url = file_temp.file.url if file_temp and file_temp.file else None
+            batches.append({"number": number, "file": file_url})
+        return batches
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))
@@ -1926,11 +1947,6 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
         return obj.payment_plans.count()
-
-    def get_delivery_export_file(self, obj: PaymentPlanGroup) -> str | None:
-        if obj.delivery_export_file_id and obj.delivery_export_file.file:
-            return obj.delivery_export_file.file.url
-        return None
 
     def get_delivery_import_file(self, obj: PaymentPlanGroup) -> str | None:
         if obj.delivery_import_file_id and obj.delivery_import_file.file:

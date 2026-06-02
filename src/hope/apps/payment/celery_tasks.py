@@ -312,12 +312,6 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
 
     try:
         with transaction.atomic():
-            if payment_plan_group.delivery_export_file_id:
-                old_file = payment_plan_group.delivery_export_file
-                payment_plan_group.delivery_export_file = None
-                payment_plan_group.save(update_fields=["delivery_export_file"])
-                old_file.file.delete(save=False)
-                old_file.delete()
             service = XlsxPaymentPlanGroupDeliveryExportService(payment_plan_group)
             service.save_xlsx_file(user)
             payment_plan_group.background_action_status_export = None

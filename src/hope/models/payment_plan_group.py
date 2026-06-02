@@ -32,14 +32,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         verbose_name=_("Programme Cycle"),
     )
     name = models.CharField(max_length=255, default="Default Group")
-    delivery_export_file = models.ForeignKey(
-        "core.FileTemp",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="+",
-        help_text="Merged XLSX export file [sys]",
-    )
     delivery_import_file = models.ForeignKey(
         "core.FileTemp",
         null=True,

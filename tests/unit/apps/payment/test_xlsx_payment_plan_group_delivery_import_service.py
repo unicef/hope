@@ -41,38 +41,24 @@ def program_cycle(program):
 
 
 @pytest.fixture
-def fsp_one():
+def fsp():
     return FinancialServiceProviderFactory(
-        name="FSP One",
+        name="Group FSP",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         vision_vendor_number="111111111",
     )
 
 
 @pytest.fixture
-def fsp_two():
-    return FinancialServiceProviderFactory(
-        name="FSP Two",
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        vision_vendor_number="222222222",
-    )
-
-
-@pytest.fixture
-def dm_cash():
+def delivery_mechanism():
     return DeliveryMechanismFactory(code="cash", name="Cash", payment_gateway_id="dm-cash")
 
 
 @pytest.fixture
-def dm_voucher():
-    return DeliveryMechanismFactory(code="voucher", name="Voucher", payment_gateway_id="dm-voucher")
-
-
-@pytest.fixture
-def template_one(fsp_one, dm_cash):
+def template(fsp, delivery_mechanism):
     return FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
         xlsx_template=FinancialServiceProviderXlsxTemplateFactory(
             columns=["payment_id", "delivered_quantity", "currency"]
         ),
@@ -80,41 +66,28 @@ def template_one(fsp_one, dm_cash):
 
 
 @pytest.fixture
-def template_two(fsp_two, dm_voucher):
-    return FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=fsp_two,
-        delivery_mechanism=dm_voucher,
-        xlsx_template=FinancialServiceProviderXlsxTemplateFactory(
-            columns=["payment_id", "delivered_quantity", "entitlement_quantity"]
-        ),
-    ).xlsx_template
-
-
-@pytest.fixture
-def group_two_plans_two_fsps(
-    program_cycle, business_area, fsp_one, fsp_two, dm_cash, dm_voucher, template_one, template_two
-):
+def group_two_plans_one_fsp(program_cycle, business_area, fsp, delivery_mechanism, template):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan_one = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
     plan_two = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_two,
-        delivery_mechanism=dm_voucher,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
     payment_one = PaymentFactory(
         parent=plan_one,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
         program=plan_one.program,
         entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("10.00"),
@@ -122,8 +95,8 @@ def group_two_plans_two_fsps(
     PaymentHouseholdSnapshotFactory(payment=payment_one, snapshot_data={})
     payment_two = PaymentFactory(
         parent=plan_two,
-        financial_service_provider=fsp_two,
-        delivery_type=dm_voucher,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
         program=plan_two.program,
         entitlement_quantity=Decimal("200.00"),
         entitlement_quantity_usd=Decimal("20.00"),
@@ -139,20 +112,20 @@ def group_two_plans_two_fsps(
 
 
 @pytest.fixture
-def group_with_plan_without_template(program_cycle, business_area, fsp_one, dm_cash):
+def group_with_plan_without_template(program_cycle, business_area, fsp, delivery_mechanism):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
     payment = PaymentFactory(
         parent=plan,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
         program=plan.program,
         entitlement_quantity=Decimal("100.00"),
     )
@@ -161,20 +134,20 @@ def group_with_plan_without_template(program_cycle, business_area, fsp_one, dm_c
 
 
 @pytest.fixture
-def group_with_open_plan(program_cycle, business_area, fsp_one, dm_cash, template_one):
+def group_with_open_plan(program_cycle, business_area, fsp, delivery_mechanism, template):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     open_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.OPEN,
     )
     payment = PaymentFactory(
         parent=open_plan,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
         program=open_plan.program,
         entitlement_quantity=Decimal("100.00"),
     )
@@ -183,29 +156,53 @@ def group_with_open_plan(program_cycle, business_area, fsp_one, dm_cash, templat
 
 
 @pytest.fixture
-def group_with_xlsx_and_payment_gateway_plans(program_cycle, business_area, fsp_one, dm_cash, template_one):
+def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, delivery_mechanism, template):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    regular_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+    follow_up_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+    return {"group": group, "regular_plan": regular_plan, "follow_up_plan": follow_up_plan}
+
+
+@pytest.fixture
+def group_with_xlsx_and_payment_gateway_plans(program_cycle, business_area, fsp, delivery_mechanism, template):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     xlsx_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
     pg_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_cash,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
         use_payment_gateway=True,
     )
     xlsx_payment = PaymentFactory(
         parent=xlsx_plan,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
         program=xlsx_plan.program,
         entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("10.00"),
@@ -213,8 +210,8 @@ def group_with_xlsx_and_payment_gateway_plans(program_cycle, business_area, fsp_
     PaymentHouseholdSnapshotFactory(payment=xlsx_payment, snapshot_data={})
     pg_payment = PaymentFactory(
         parent=pg_plan,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_cash,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
         program=pg_plan.program,
         entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("10.00"),
@@ -235,13 +232,13 @@ def _make_workbook(headers: list[str], rows: list[list]) -> BytesIO:
     return buffer
 
 
-def test_validate_succeeds_for_correct_union_header_and_rows(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_validate_succeeds_for_correct_header_and_rows(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
     file = _make_workbook(
-        ["payment_id", "delivered_quantity", "currency", "entitlement_quantity"],
+        ["payment_id", "delivered_quantity", "currency"],
         [
-            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD", ""],
-            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "", Decimal("200.00")],
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"],
         ],
     )
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
@@ -251,8 +248,8 @@ def test_validate_succeeds_for_correct_union_header_and_rows(group_two_plans_two
     assert service.errors == []
 
 
-def test_validate_errors_when_required_column_missing(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_validate_errors_when_required_column_missing(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
     file = _make_workbook(
         ["payment_id", "currency"],
         [[str(ctx["payment_one"].unicef_id), "USD"]],
@@ -264,8 +261,8 @@ def test_validate_errors_when_required_column_missing(group_two_plans_two_fsps):
     assert any("delivered_quantity" in error.message for error in service.errors)
 
 
-def test_validate_errors_for_payment_id_belonging_to_no_group_plan(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_validate_errors_for_payment_id_belonging_to_no_group_plan(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
     file = _make_workbook(
         ["payment_id", "delivered_quantity"],
         [
@@ -280,8 +277,8 @@ def test_validate_errors_for_payment_id_belonging_to_no_group_plan(group_two_pla
     assert any("UNKNOWN-ID" in error.message for error in service.errors)
 
 
-def test_validate_errors_on_duplicate_payment_id(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_validate_errors_on_duplicate_payment_id(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
     payment_id = str(ctx["payment_one"].unicef_id)
     file = _make_workbook(
         ["payment_id", "delivered_quantity"],
@@ -297,12 +294,16 @@ def test_validate_errors_on_duplicate_payment_id(group_two_plans_two_fsps):
     assert any("multiple times" in error.message for error in service.errors)
 
 
-def test_validate_errors_when_no_actual_changes(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_validate_errors_when_no_actual_changes(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    already_delivered = ctx["payment_one"]
+    already_delivered.delivered_quantity = Decimal("100.00")
+    already_delivered.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    already_delivered.save(update_fields=["delivered_quantity", "status"])
     file = _make_workbook(
         ["payment_id", "delivered_quantity"],
         [
-            [str(ctx["payment_one"].unicef_id), ""],
+            [str(already_delivered.unicef_id), Decimal("100.00")],
         ],
     )
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
@@ -312,13 +313,13 @@ def test_validate_errors_when_no_actual_changes(group_two_plans_two_fsps):
     assert any("aren't any updates" in error.message for error in service.errors)
 
 
-def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
     file = _make_workbook(
-        ["payment_id", "delivered_quantity", "currency", "entitlement_quantity"],
+        ["payment_id", "delivered_quantity", "currency"],
         [
-            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD", ""],
-            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "", Decimal("200.00")],
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"],
         ],
     )
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
@@ -333,14 +334,13 @@ def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_
     assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
 
 
-def test_plan_without_fsp_template_is_silently_skipped(group_with_plan_without_template):
+def test_plan_without_fsp_template_payments_still_indexed(group_with_plan_without_template):
     ctx = group_with_plan_without_template
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
 
-    assert service.eligible_plans == []
-    assert str(ctx["payment"].unicef_id) not in service.payment_to_plan
+    assert str(ctx["payment"].unicef_id) in service.payment_to_plan
 
 
 def test_open_plans_are_not_indexed(group_with_open_plan):
@@ -349,6 +349,15 @@ def test_open_plans_are_not_indexed(group_with_open_plan):
     service.open_workbook()
 
     assert service.eligible_plans == []
+
+
+def test_follow_up_and_top_up_plans_are_excluded(group_with_follow_up_and_top_up_plans):
+    ctx = group_with_follow_up_and_top_up_plans
+    file = _make_workbook(["payment_id", "delivered_quantity"], [])
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+
+    assert [plan.id for plan in service.payment_plans] == [ctx["regular_plan"].id]
 
 
 def test_payment_gateway_plan_is_skipped_and_its_payments_emit_specific_error(
@@ -373,13 +382,13 @@ def test_payment_gateway_plan_is_skipped_and_its_payments_emit_specific_error(
     )
 
 
-def test_import_rolls_back_all_plans_when_any_plan_fails(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_import_rolls_back_all_plans_when_any_plan_fails(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
     file = _make_workbook(
-        ["payment_id", "delivered_quantity", "currency", "entitlement_quantity"],
+        ["payment_id", "delivered_quantity", "currency"],
         [
-            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD", ""],
-            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "", Decimal("200.00")],
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"],
         ],
     )
     before_one = ctx["payment_one"].delivered_quantity
@@ -407,8 +416,45 @@ def test_import_rolls_back_all_plans_when_any_plan_fails(group_two_plans_two_fsp
     assert ctx["payment_two"].delivered_quantity == before_two
 
 
-def test_payment_belongs_only_to_its_own_plans_fsp_template_columns(group_two_plans_two_fsps):
-    ctx = group_two_plans_two_fsps
+def test_import_payment_list_builds_services_when_validate_not_called(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "currency"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+
+    service.import_payment_list()
+
+    ctx["payment_one"].refresh_from_db()
+    assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
+
+
+def test_validate_row_payment_ids_returns_early_without_worksheet(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(["payment_id", "delivered_quantity"], [])
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.ws = None
+
+    service._validate_row_payment_ids()
+
+    assert service.errors == []
+
+
+def test_row_groups_by_plan_returns_empty_without_worksheet(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(["payment_id", "delivered_quantity"], [])
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.ws = None
+
+    assert service._row_groups_by_plan() == {}
+
+
+def test_rows_are_routed_only_to_their_owning_plan(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
     file = _make_workbook(
         ["payment_id", "delivered_quantity", "currency"],
         [

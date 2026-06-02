@@ -139,13 +139,6 @@ def qcf_report(payment_plan):
 
 
 @pytest.fixture
-def payment_plan_group_with_plans():
-    group = PaymentPlanGroupFactory()
-    PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
-    return group
-
-
-@pytest.fixture
 def group_with_accepted_plan_and_import_file(payment_plan_group_with_accepted_plan):
     group = payment_plan_group_with_accepted_plan
     import_file = FileTempFactory(
@@ -156,19 +149,6 @@ def group_with_accepted_plan_and_import_file(payment_plan_group_with_accepted_pl
     group.background_action_status_import = PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
     group.save(update_fields=["delivery_import_file", "background_action_status_import"])
     return group
-
-
-@pytest.fixture
-def group_with_accepted_plan_and_old_export_file(payment_plan_group_with_accepted_plan):
-    group = payment_plan_group_with_accepted_plan
-    old_file = FileTempFactory(
-        object_id=str(group.pk),
-        content_type=get_content_type_for_model(group),
-    )
-    group.delivery_export_file = old_file
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["delivery_export_file", "background_action_status_export"])
-    return {"group": group, "old_file": old_file}
 
 
 @pytest.fixture
@@ -214,19 +194,6 @@ def payment_plan_group_with_accepted_plan():
         delivery_mechanism=delivery_mechanism,
     )
     return group
-
-
-@pytest.fixture
-def group_with_plans_and_old_export_file(payment_plan_group_with_plans):
-    group = payment_plan_group_with_plans
-    old_file = FileTempFactory(
-        object_id=str(group.pk),
-        content_type=get_content_type_for_model(group),
-    )
-    group.delivery_export_file = old_file
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["delivery_export_file", "background_action_status_export"])
-    return {"group": group, "old_file": old_file}
 
 
 @pytest.mark.parametrize(
@@ -1929,7 +1896,7 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_o
     mock_queue.assert_called_once()
 
 
-def test_export_delivery_task_creates_file(payment_plan_group_with_accepted_plan, user) -> None:
+def test_export_delivery_task_creates_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
     group = payment_plan_group_with_accepted_plan
     group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status_export"])
@@ -1937,21 +1904,34 @@ def test_export_delivery_task_creates_file(payment_plan_group_with_accepted_plan
     queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
 
     group.refresh_from_db()
-    assert group.delivery_export_file is not None
-    assert group.delivery_export_file.file.name.endswith(".xlsx")
+    plan = group.payment_plans.get(export_tag=1)
+    assert plan.group_export_file is not None
+    assert plan.group_export_file.file.name.endswith(".xlsx")
     assert group.background_action_status_export is None
 
 
-def test_export_delivery_task_replaces_existing_file(group_with_accepted_plan_and_old_export_file, user) -> None:
-    group = group_with_accepted_plan_and_old_export_file["group"]
-    old_file = group_with_accepted_plan_and_old_export_file["old_file"]
+def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+    first_plan = group.payment_plans.get(export_tag=1)
+    first_file_id = first_plan.group_export_file_id
 
+    new_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan_group=group,
+        program_cycle=group.cycle,
+        financial_service_provider=first_plan.financial_service_provider,
+        delivery_mechanism=first_plan.delivery_mechanism,
+    )
     queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
 
-    group.refresh_from_db()
-    assert group.delivery_export_file is not None
-    assert group.delivery_export_file_id != old_file.pk
-    assert not FileTemp.objects.filter(pk=old_file.pk).exists()
+    first_plan.refresh_from_db()
+    new_plan.refresh_from_db()
+    assert first_plan.group_export_file_id == first_file_id
+    assert first_plan.export_tag == 1
+    assert new_plan.export_tag == 2
+    assert new_plan.group_export_file_id is not None
+    assert FileTemp.objects.filter(pk=first_file_id).exists()
 
 
 def test_export_delivery_task_sets_error_status_on_failure(payment_plan_group_with_accepted_plan, user) -> None:

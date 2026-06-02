@@ -2692,10 +2692,14 @@ class PaymentPlanGroupViewSet(
         ):
             raise ValidationError("Export already in progress.")
         exportable_plans = payment_plan_group.payment_plans.filter(
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            plan_type=PaymentPlan.PlanType.REGULAR,
+            export_tag__isnull=True,
         )
         if not exportable_plans.exists():
-            raise ValidationError("Export requires at least one payment plan in ACCEPTED or FINISHED status.")
+            raise ValidationError(
+                "Export requires at least one not-yet-exported payment plan in ACCEPTED or FINISHED status."
+            )
         if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
             raise ValidationError("Export failed: there are no eligible payments to export.")
         payment_plan_group.background_action_status_export = (
@@ -2725,7 +2729,8 @@ class PaymentPlanGroupViewSet(
         ):
             raise ValidationError("Import already in progress.")
         importable_plans = payment_plan_group.payment_plans.filter(
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            plan_type=PaymentPlan.PlanType.REGULAR,
         )
         if not importable_plans.exists():
             raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")

@@ -666,17 +666,27 @@ class PaymentPlanService:
                 return True
         return False
 
+    def _set_vulnerability_scores(self, input_data: dict) -> bool:
+        """Apply vulnerability score bounds; return whether either changed."""
+        vulnerability_filter = False
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
+        if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
+            vulnerability_filter = True
+            self.payment_plan.vulnerability_score_min = vulnerability_score_min
+        if vulnerability_score_max != self.payment_plan.vulnerability_score_max:
+            vulnerability_filter = True
+            self.payment_plan.vulnerability_score_max = vulnerability_score_max
+        return vulnerability_filter
+
     def update(self, input_data: dict) -> PaymentPlan:
         program = self.payment_plan.program_cycle.program
         should_update_money_stats = False
         should_rebuild_list = False
-        vulnerability_filter = False
 
         self._validate_update_permissions(input_data)
 
         name = input_data.get("name")
-        vulnerability_score_min = input_data.get("vulnerability_score_min")
-        vulnerability_score_max = input_data.get("vulnerability_score_max")
         rules = input_data.get("rules")
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
@@ -694,12 +704,7 @@ class PaymentPlanService:
         self._set_program_cycle(input_data)
         self._set_group_for_open_pp(input_data)
 
-        if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
-            vulnerability_filter = True
-            self.payment_plan.vulnerability_score_min = vulnerability_score_min
-        if vulnerability_score_max != self.payment_plan.vulnerability_score_max:
-            vulnerability_filter = True
-            self.payment_plan.vulnerability_score_max = vulnerability_score_max
+        vulnerability_filter = self._set_vulnerability_scores(input_data)
 
         if rules and self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
             targeting_criteria_input = {"rules": input_data["rules"]}

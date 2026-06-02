@@ -10,27 +10,27 @@ import openpyxl
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
 from hope.models import (
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentPlan,
 )
 
 if TYPE_CHECKING:
+    from openpyxl.worksheet.worksheet import Worksheet
+
     from hope.models import PaymentPlanGroup
 
 logger = logging.getLogger(__name__)
 
 
 class XlsxPaymentPlanGroupDeliveryImportService:
-    """Import a single-sheet, union-header reconciliation xlsx covering all plans in a group.
+    """Import a single-sheet reconciliation xlsx covering the plans of a single-FSP group.
 
-    Mirrors the single-PaymentPlan importer (XlsxPaymentPlanDeliveryExportService) but spans
-    every ACCEPTED/FINISHED payment plan in the group. Rows are routed to the owning plan by
-    Payment.unicef_id; each plan's rows are projected onto its own FSP template columns and
-    handed to an unmodified XlsxPaymentPlanDeliveryExportService instance.
+    The group is bound to one FSP, so the file has a single flat header (the FSP template's
+    columns). A group may still hold several payment plans sharing that FSP, so rows are routed
+    to their owning plan by Payment.unicef_id; each plan's rows are handed to an unmodified
+    single-plan XlsxPaymentPlanDeliveryImportService.
     """
 
     REQUIRED_COLUMNS = ("payment_id", "delivered_quantity")
@@ -41,30 +41,18 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.errors: list[XlsxError] = []
         self.payment_plans: list[PaymentPlan] = list(
             payment_plan_group.payment_plans.filter(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                plan_type=PaymentPlan.PlanType.REGULAR,
             ).order_by("unicef_id")
         )
         self.eligible_plans: list[PaymentPlan] = []
-        self.plan_template_columns: dict[str, set[str]] = {}
         self.payment_to_plan: dict[str, PaymentPlan] = {}
         self.payment_gateway_payment_ids: set[str] = set()
-        self.union_headers: list[str] = []
+        self.headers: list[str] = []
         self.sheetname: str = ""
-        self.ws = None
+        self.ws: Worksheet | None = None
         self.wb: openpyxl.Workbook | None = None
-        self.per_plan_services: dict[str, XlsxPaymentPlanDeliveryExportService] = {}
-
-    @staticmethod
-    def _resolve_template(payment_plan: PaymentPlan) -> FinancialServiceProviderXlsxTemplate | None:
-        fsp = payment_plan.financial_service_provider
-        delivery_mechanism = payment_plan.delivery_mechanism
-        if not fsp or not delivery_mechanism:
-            return None
-        mapping = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-            financial_service_provider=fsp,
-            delivery_mechanism=delivery_mechanism,
-        ).first()
-        return mapping.xlsx_template if mapping else None
+        self.per_plan_services: dict[str, XlsxPaymentPlanDeliveryImportService] = {}
 
     def _prepare_eligible_plans(self) -> None:
         payment_gateway_plans: list[PaymentPlan] = []
@@ -76,16 +64,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 )
                 payment_gateway_plans.append(payment_plan)
                 continue
-            template = self._resolve_template(payment_plan)
-            if template is None:
-                logger.warning(
-                    f"Skipping Payment Plan {payment_plan.unicef_id}: no FSP XLSX Template for its FSP "
-                    f"and delivery mechanism."
-                )
-                continue
-            export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
-            header_list = export_service.prepare_headers(template)
-            self.plan_template_columns[str(payment_plan.id)] = set(header_list)
             self.eligible_plans.append(payment_plan)
         if payment_gateway_plans:
             self.payment_gateway_payment_ids = {
@@ -110,19 +88,19 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.wb = wb
         self.ws = wb[wb.sheetnames[0]]
         self.sheetname = wb.sheetnames[0]
-        self.union_headers = [cell.value for cell in self.ws[1]]
+        self.headers = [cell.value for cell in self.ws[1]]
         self._prepare_eligible_plans()
         self._build_payment_index()
         return wb
 
     def _validate_required_headers(self) -> bool:
-        missing = [col for col in self.REQUIRED_COLUMNS if col not in self.union_headers]
+        missing = [col for col in self.REQUIRED_COLUMNS if col not in self.headers]
         if missing:
             self.errors.append(
                 XlsxError(
                     self.sheetname,
                     None,
-                    f"Provided headers {self.union_headers} do not match expected headers. "
+                    f"Provided headers {self.headers} do not match expected headers. "
                     f"{list(self.REQUIRED_COLUMNS)} are required headers.",
                 )
             )
@@ -131,8 +109,10 @@ class XlsxPaymentPlanGroupDeliveryImportService:
 
     def _validate_row_payment_ids(self) -> None:
         """Emit XlsxErrors for unknown, payment-gateway, or duplicated payment_id values."""
+        if self.ws is None:
+            return
         seen_ids: set[str] = set()
-        payment_id_idx = self.union_headers.index("payment_id")
+        payment_id_idx = self.headers.index("payment_id")
         for row in self.ws.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
@@ -173,13 +153,14 @@ class XlsxPaymentPlanGroupDeliveryImportService:
     def _row_groups_by_plan(self) -> dict[str, list[tuple]]:
         """Group valid rows by owning plan id.
 
-        Rows with unknown or duplicate payment_id
-        values are skipped silently — validation of those cases is done separately by
-        _validate_row_payment_ids.
+        Rows with unknown or duplicate payment_id values are skipped silently — validation of
+        those cases is done separately by _validate_row_payment_ids.
         """
+        if self.ws is None:
+            return {}
         rows_by_plan: dict[str, list[tuple]] = {}
         seen_ids: set[str] = set()
-        payment_id_idx = self.union_headers.index("payment_id")
+        payment_id_idx = self.headers.index("payment_id")
         for row in self.ws.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
@@ -194,19 +175,13 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             rows_by_plan.setdefault(str(payment_plan.id), []).append(tuple(cell.value for cell in row))
         return rows_by_plan
 
-    def _build_per_plan_workbook(self, payment_plan: PaymentPlan, rows: list[tuple]) -> BytesIO:
-        payment_plan_columns = self.plan_template_columns[str(payment_plan.id)]
-        sub_header = [col for col in self.union_headers if col in payment_plan_columns]
-        for required in self.REQUIRED_COLUMNS:
-            if required not in sub_header:
-                sub_header.insert(0, required)
-        union_index = {col: i for i, col in enumerate(self.union_headers)}
+    def _build_per_plan_workbook(self, rows: list[tuple]) -> BytesIO:
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = self.sheetname or "Sheet"
-        ws.append(sub_header)
+        ws.append(self.headers)
         for row_values in rows:
-            ws.append([row_values[union_index[col]] for col in sub_header])
+            ws.append(list(row_values))
         buffer = BytesIO()
         wb.save(buffer)
         buffer.seek(0)
@@ -218,8 +193,8 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             rows = rows_by_plan.get(str(payment_plan.id), [])
             if not rows:
                 continue
-            sub_workbook_file = self._build_per_plan_workbook(payment_plan, rows)
-            service = XlsxPaymentPlanDeliveryExportService(payment_plan, sub_workbook_file)
+            sub_workbook_file = self._build_per_plan_workbook(rows)
+            service = XlsxPaymentPlanDeliveryImportService(payment_plan, sub_workbook_file)
             service.open_workbook()
             self.per_plan_services[str(payment_plan.id)] = service
 

@@ -2,11 +2,11 @@ from decimal import Decimal
 
 import pytest
 
+from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
@@ -76,68 +76,6 @@ def group_with_one_accepted_plan(program_cycle, business_area, fsp, delivery_mec
         delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
-    return group
-
-
-@pytest.fixture
-def group_with_two_plans_on_distinct_templates(program_cycle, business_area):
-    fsp_one = FinancialServiceProviderFactory(
-        name="FSP One",
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        vision_vendor_number="111111111",
-    )
-    fsp_two = FinancialServiceProviderFactory(
-        name="FSP Two",
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        vision_vendor_number="222222222",
-    )
-    dm_one = DeliveryMechanismFactory(code="cash", name="Cash", payment_gateway_id="dm-cash")
-    dm_two = DeliveryMechanismFactory(code="voucher", name="Voucher", payment_gateway_id="dm-voucher")
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_one,
-        xlsx_template=FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_name"]),
-    )
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=fsp_two,
-        delivery_mechanism=dm_two,
-        xlsx_template=FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "entitlement_quantity"]),
-    )
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    plan_one = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp_one,
-        delivery_mechanism=dm_one,
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    plan_two = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp_two,
-        delivery_mechanism=dm_two,
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    payment_one = PaymentFactory(
-        parent=plan_one,
-        financial_service_provider=fsp_one,
-        delivery_type=dm_one,
-        program=plan_one.program,
-        entitlement_quantity=Decimal("100.00"),
-        entitlement_quantity_usd=Decimal("10.00"),
-    )
-    PaymentHouseholdSnapshotFactory(payment=payment_one, snapshot_data={})
-    payment_two = PaymentFactory(
-        parent=plan_two,
-        financial_service_provider=fsp_two,
-        delivery_type=dm_two,
-        program=plan_two.program,
-        entitlement_quantity=Decimal("200.00"),
-        entitlement_quantity_usd=Decimal("20.00"),
-    )
-    PaymentHouseholdSnapshotFactory(payment=payment_two, snapshot_data={})
     return group
 
 
@@ -374,22 +312,156 @@ def test_payments_grouped_by_plan_and_sorted_within_each_plan(group_with_two_pla
     assert payment_ids_in_order == expected_order
 
 
-def test_header_is_union_of_all_fsp_template_columns(group_with_two_plans_on_distinct_templates):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_on_distinct_templates).generate_workbook()
-    header_row = [cell.value for cell in wb.active[1]]
-
-    assert set(header_row) == {"payment_id", "fsp_name", "entitlement_quantity"}
-    assert len(header_row) == 3
+@pytest.fixture
+def user():
+    return UserFactory()
 
 
-def test_columns_outside_a_plans_template_are_blank_for_its_payments(group_with_two_plans_on_distinct_templates):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_on_distinct_templates).generate_workbook()
-    ws = wb.active
-    headers = [cell.value for cell in ws[1]]
-    fsp_name_col = headers.index("fsp_name") + 1
-    entitlement_col = headers.index("entitlement_quantity") + 1
+@pytest.fixture
+def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    regular_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+    PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+    PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+    )
+    return group, regular_plan
 
-    assert ws.cell(row=2, column=fsp_name_col).value == "FSP One"
-    assert ws.cell(row=2, column=entitlement_col).value == ""
-    assert ws.cell(row=3, column=fsp_name_col).value == ""
-    assert ws.cell(row=3, column=entitlement_col).value == Decimal("200.00")
+
+@pytest.fixture
+def group_with_tagged_and_untagged_plans(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    tagged_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        export_tag=1,
+    )
+    untagged_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        export_tag=None,
+    )
+    return group, tagged_plan, untagged_plan
+
+
+def test_follow_up_and_top_up_plans_are_excluded(group_with_follow_up_and_top_up_plans):
+    group, regular_plan = group_with_follow_up_and_top_up_plans
+
+    service = XlsxPaymentPlanGroupDeliveryExportService(group)
+
+    assert [plan.id for plan in service.payment_plans] == [regular_plan.id]
+
+
+def test_already_tagged_plans_are_excluded_from_export(group_with_tagged_and_untagged_plans):
+    group, _tagged_plan, untagged_plan = group_with_tagged_and_untagged_plans
+
+    service = XlsxPaymentPlanGroupDeliveryExportService(group)
+
+    assert [plan.id for plan in service.payment_plans] == [untagged_plan.id]
+
+
+def test_save_xlsx_file_stamps_first_batch_with_tag_one(group_with_one_accepted_plan, user):
+    plan = group_with_one_accepted_plan.payment_plans.first()
+
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag == 1
+
+
+def test_save_xlsx_file_stores_batch_file_on_first_plan(group_with_one_accepted_plan, user):
+    plan = group_with_one_accepted_plan.payment_plans.first()
+
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.group_export_file is not None
+    assert plan.group_export_file.file.name.endswith("_batch_1.xlsx")
+
+
+def test_save_xlsx_file_no_eligible_plans_creates_no_file(empty_group, user):
+    XlsxPaymentPlanGroupDeliveryExportService(empty_group).save_xlsx_file(user)
+
+    assert not empty_group.payment_plans.filter(group_export_file__isnull=False).exists()
+
+
+def test_save_xlsx_file_one_batch_tags_all_plans_file_on_first(group_with_two_plans_and_payments, user):
+    group = group_with_two_plans_and_payments
+
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
+
+    plans = list(group.payment_plans.order_by("unicef_id"))
+    assert all(plan.export_tag == 1 for plan in plans)
+    assert plans[0].group_export_file is not None
+    assert plans[1].group_export_file is None
+
+
+def test_save_xlsx_file_second_export_increments_tag_and_excludes_first_batch(
+    program_cycle, business_area, fsp, delivery_mechanism, fsp_template, user
+):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    first_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
+    second_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+
+    second_service = XlsxPaymentPlanGroupDeliveryExportService(group)
+    assert [plan.id for plan in second_service.payment_plans] == [second_plan.id]
+    second_service.save_xlsx_file(user)
+
+    first_plan.refresh_from_db()
+    second_plan.refresh_from_db()
+    assert first_plan.export_tag == 1
+    assert second_plan.export_tag == 2
+
+
+def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_plan_without_template, user):
+    plan = group_with_plan_without_template.payment_plans.first()
+
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag is None

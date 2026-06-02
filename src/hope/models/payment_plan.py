@@ -573,6 +573,14 @@ class PaymentPlan(
         db_index=True,
         help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
     )
+    group_export_file = models.ForeignKey(
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+        help_text="Group delivery export batch XLSX; set on the first plan of the batch [sys]",
+    )
     exclude_household_error = models.TextField(
         blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
     )

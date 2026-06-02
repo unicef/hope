@@ -1063,10 +1063,70 @@ def test_export_without_accepted_payment_plan_returns_400(
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Export requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
+    assert "Export requires at least one not-yet-exported payment plan in ACCEPTED or FINISHED status." in str(
+        response.json()
+    )
     mocked_task.assert_not_called()
     group.refresh_from_db()
     assert group.background_action_status_export is None
+
+
+def test_export_excludes_already_tagged_plan_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+        export_tag=1,
+    )
+    PaymentFactory(parent=plan)
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "not-yet-exported" in str(response.json())
+    mocked_task.assert_not_called()
+
+
+def test_export_excludes_follow_up_plan_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+    PaymentFactory(parent=plan)
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "not-yet-exported" in str(response.json())
+    mocked_task.assert_not_called()
 
 
 def test_export_without_eligible_payments_returns_400(
@@ -1470,23 +1530,54 @@ def test_send_group_to_payment_gateway_permissions(
     assert response.status_code == expected_status
 
 
-def test_get_delivery_export_file_returns_none_when_no_export_file(cycle: Any) -> None:
+def test_get_batches_returns_empty_when_no_export(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
-    assert group.export_file_id is None
+    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group)
 
-    result = PaymentPlanGroupDetailSerializer().get_delivery_export_file(group)
+    result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert result is None
+    assert result == []
 
 
-def test_get_delivery_export_file_returns_url_when_file_exists(cycle: Any) -> None:
+def test_get_batches_lists_batch_number_and_file(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
-    group.export_file = FileTempFactory()
-    group.save(update_fields=["export_file"])
+    file_temp = FileTempFactory()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        export_tag=1,
+        group_export_file=file_temp,
+    )
 
-    result = PaymentPlanGroupDetailSerializer().get_delivery_export_file(group)
+    result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert result == group.export_file.file.url
+    assert result == [{"number": 1, "file": file_temp.file.url}]
+
+
+def test_get_batches_returns_null_file_when_batch_plan_has_no_file(cycle: Any, business_area: Any) -> None:
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        export_tag=2,
+        group_export_file=None,
+    )
+
+    result = PaymentPlanGroupDetailSerializer().get_batches(group)
+
+    assert result == [{"number": 2, "file": None}]
+
+
+def test_get_batches_orders_by_number(cycle: Any, business_area: Any) -> None:
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=2)
+    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=1)
+
+    result = PaymentPlanGroupDetailSerializer().get_batches(group)
+
+    assert [batch["number"] for batch in result] == [1, 2]
 
 
 def test_delivery_import_xlsx_returns_400_when_no_file(
@@ -1639,6 +1730,37 @@ def test_delivery_import_xlsx_without_accepted_plan_returns_400(
 
     response = client.post(
         _import_url(business_area.slug, program.code, group_with_locked_plan.id),
+        {"file": test_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Import requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
+
+
+def test_delivery_import_xlsx_with_only_follow_up_plan_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group.id),
         {"file": test_file},
         format="multipart",
     )
