@@ -560,7 +560,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return True
-            return self.image_loader.image_in(cell)  # pragma: no cover
+            return self.image_loader.image_in(cell.coordinate)  # pragma: no cover
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
