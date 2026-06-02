@@ -1931,7 +1931,7 @@ wheels = [
 
 [[package]]
 name = "hope"
-version = "4.16.0"
+version = "4.15.1"
 source = { editable = "." }
 dependencies = [
     { name = "black" },
@@ -2141,7 +2141,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = ">=3.13,<5" },
     { name = "django-countries", specifier = ">=7.3.2,<9" },
     { name = "django-csp", specifier = ">=3.7,<5" },
-    { name = "django-debug-toolbar", specifier = ">=6.0,<6.1" },
+    { name = "django-debug-toolbar", specifier = ">=6,<6.1" },
     { name = "django-elasticsearch-dsl", specifier = ">=8,<9" },
     { name = "django-environ", specifier = ">=0.10,<1" },
     { name = "django-extensions", specifier = ">=3.1.5,<5" },

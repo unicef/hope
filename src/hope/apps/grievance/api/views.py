@@ -19,9 +19,8 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, Extract
+from django.db.models.functions import Coalesce, Extract, Now
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from django.utils.encoding import force_str
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -349,7 +348,7 @@ class GrievanceTicketViewSet(
                         status=GrievanceTicket.STATUS_CLOSED,
                         then=F("updated_at") - F("created_at"),
                     ),
-                    default=timezone.now() - F("created_at"),
+                    default=Now() - F("created_at"),
                     output_field=DateField(),
                 ),
                 existing_tickets_count=Coalesce(
@@ -582,7 +581,7 @@ class GrievanceTicketGlobalViewSet(
                         status=GrievanceTicket.STATUS_CLOSED,
                         then=F("updated_at") - F("created_at"),
                     ),
-                    default=timezone.now() - F("created_at"),
+                    default=Now() - F("created_at"),
                     output_field=DateField(),
                 ),
             )
