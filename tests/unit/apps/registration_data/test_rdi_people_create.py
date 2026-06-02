@@ -237,10 +237,10 @@ def test_execute(
     assert PendingIndividual.objects.count() == 5
 
     individual_data = {
-        "full_name": "Derek Index4",
+        "full_name": "Derek IndexFour",
         "given_name": "Derek",
         "middle_name": "",
-        "family_name": "Index4",
+        "family_name": "IndexFour",
         "sex": "MALE",
         "relationship": "HEAD",
         "birth_date": date(2000, 8, 22),
@@ -267,12 +267,12 @@ def test_execute(
     assert roles.count() == 2
     primary_role = roles.get(role=ROLE_PRIMARY)
     assert primary_role.role == ROLE_PRIMARY
-    assert primary_role.individual.full_name == "Derek Index4"
+    assert primary_role.individual.full_name == "Derek IndexFour"
     alternate_role = roles.get(role=ROLE_ALTERNATE)
     assert alternate_role.role == ROLE_ALTERNATE
-    assert alternate_role.individual.full_name == "Collector ForJanIndex_3"
+    assert alternate_role.individual.full_name == "Collector ForJanIndexThree"
     assert alternate_role.individual.flex_fields["custom_field_i_f"] == 2.99
-    ind_2 = PendingIndividual.objects.get(full_name="Jan    Index3")
+    ind_2 = PendingIndividual.objects.get(full_name="Jan IndexThree")
     hh_2 = ind_2.household
     assert hh_2.facility.name == "NEW SCHOOL 23"
 
@@ -286,9 +286,9 @@ def test_execute(
         assert worker.household is None
 
     assert PendingAccount.objects.count() == 3
-    dmd1 = PendingAccount.objects.get(individual__full_name="Collector ForJanIndex_3")
-    dmd2 = PendingAccount.objects.get(individual__full_name="WorkerCollector ForDerekIndex_4")
-    dmd3 = PendingAccount.objects.get(individual__full_name="Jan    Index3")
+    dmd1 = PendingAccount.objects.get(individual__full_name="Collector ForJanIndexThree")
+    dmd2 = PendingAccount.objects.get(individual__full_name="WorkerCollector ForDerekIndexFour")
+    dmd3 = PendingAccount.objects.get(individual__full_name="Jan IndexThree")
     assert dmd1.rdi_merge_status == MergeStatusModel.PENDING
     assert dmd2.rdi_merge_status == MergeStatusModel.PENDING
     assert dmd3.rdi_merge_status == MergeStatusModel.PENDING

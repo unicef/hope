@@ -105,16 +105,16 @@ def test_add_template_columns(program: Program) -> None:
     assert people_rows[0][10] == "pp_admin3_i_c"
     assert people_rows[1][10] == "Social Worker resides in which admin3? - SELECT_ONE"
 
-    assert people_rows[0][19] == "pp_middle_name_i_c"
-    assert people_rows[1][19] == "Middle name(s) - STRING"
+    assert people_rows[0][21] == "pp_middle_name_i_c"
+    assert people_rows[1][21] == "Middle name(s) - STRING"
 
-    assert people_rows[0][39] == "pp_drivers_license_issuer_i_c"
-    assert people_rows[1][39] == "Issuing country of driver's license - SELECT_ONE"
+    assert people_rows[0][43] == "pp_drivers_license_issuer_i_c"
+    assert people_rows[1][43] == "Issuing country of driver's license - SELECT_ONE"
 
-    assert people_rows[0][69] == "pp_village_i_c"
-    assert people_rows[1][69] == "Village - STRING"
+    assert people_rows[0][73] == "pp_village_i_c"
+    assert people_rows[1][73] == "Village - STRING"
 
-    assert people_rows[0][89] == "pdu_flex_attribute_round_1_collection_date"
+    assert people_rows[0][93] == "pdu_flex_attribute_round_1_collection_date"
 
-    assert people_rows[0][83] == "pp_index_id"
-    assert people_rows[1][83] == "Index ID - INTEGER - required"
+    assert people_rows[0][87] == "pp_index_id"
+    assert people_rows[1][87] == "Index ID - INTEGER - required"

@@ -3,6 +3,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useTranslation } from 'react-i18next';
 import { BlueText, DarkGrey, LightGrey, StyledBox } from '../LookUpStyles';
+import { displayNameWithLatin } from '@utils/utils';
 import { ReactElement } from 'react';
 
 interface LookUpDelegateDisplayProps {
@@ -32,7 +33,7 @@ export const LookUpDelegateDisplay = ({
             {t('Delegate')}:
             <BlueText data-cy="delegate-individual">
               {values.selectedDelegate?.unicefId ||
-                values.selectedDelegate?.fullName ||
+                displayNameWithLatin(values.selectedDelegate, 'fullName') ||
                 '-'}
             </BlueText>
           </Box>
