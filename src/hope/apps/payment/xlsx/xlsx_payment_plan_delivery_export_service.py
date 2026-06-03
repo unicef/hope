@@ -426,22 +426,18 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
                 self.payment_plan.save(update_fields=["background_action_status", "export_file_delivery", "updated_at"])
 
     @staticmethod
-    def send_delivery_passwords(user: "User", payment_plan: PaymentPlan) -> None:
+    def _send_file_passwords(user: "User", file_temp: FileTemp | None, title: str) -> None:
         text_template = "payment/xlsx_file_password_email.txt"
         html_template = "payment/xlsx_file_password_email.html"
-        zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
-            payment_plan.export_file_delivery.password if payment_plan.export_file_delivery else None
-        )
+        zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(file_temp.password if file_temp else None)
         xlsx_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
-            payment_plan.export_file_delivery.xlsx_password if payment_plan.export_file_delivery else None
+            file_temp.xlsx_password if file_temp else None
         )
-
         msg = (
-            f"Payment Plan {payment_plan.unicef_id} Payment List export file's Passwords.\n"
+            f"{title} export file's Passwords.\n"
             f"ZIP file password: {zip_password}\n"
             f"XLSX file password: {xlsx_password}\n"
         )
-
         context = {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
@@ -449,7 +445,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             "message": msg,
             "zip_password": zip_password,
             "xlsx_password": xlsx_password,
-            "title": f"Payment Plan {payment_plan.unicef_id} Payment List file's Passwords",
+            "title": f"{title} file's Passwords",
             "link": "",
         }
         user.email_user(
@@ -457,6 +453,18 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             html_body=render_to_string(html_template, context=context),
             text_body=render_to_string(text_template, context=context),
         )
+
+    @staticmethod
+    def send_delivery_passwords(user: "User", payment_plan: PaymentPlan) -> None:
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(
+            user,
+            payment_plan.export_file_delivery,
+            f"Payment Plan {payment_plan.unicef_id} Payment List",
+        )
+
+    @staticmethod
+    def send_delivery_passwords_for_file(user: "User", file_temp: FileTemp | None, label: str) -> None:
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, label)
 
     @staticmethod
     def _as_plain_text(value: str | bytes | memoryview | None) -> str:

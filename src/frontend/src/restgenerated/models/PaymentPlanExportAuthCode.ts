@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type PaymentPlanExportAuthCode = {
-    fspXlsxTemplateId: string;
+    exportTag: number;
+    fspXlsxTemplateId?: string | null;
 };
 

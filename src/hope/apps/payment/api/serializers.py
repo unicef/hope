@@ -125,7 +125,17 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 
 
 class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
-    fsp_xlsx_template_id = serializers.CharField()
+    export_tag = serializers.IntegerField(min_value=1)
+    fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
+
+
+class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
+    export_tag = serializers.IntegerField(min_value=1)
+
+
+class PaymentPlanGroupBatchExportSerializer(serializers.Serializer):
+    export_tag = serializers.IntegerField(min_value=1)
+    fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):

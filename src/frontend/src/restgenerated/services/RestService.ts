@@ -125,8 +125,10 @@ import type { PaymentPlanCreateUpdate } from '../models/PaymentPlanCreateUpdate'
 import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
 import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExcludeBeneficiaries';
 import type { PaymentPlanExportAuthCode } from '../models/PaymentPlanExportAuthCode';
+import type { PaymentPlanGroupBatchExport } from '../models/PaymentPlanGroupBatchExport';
 import type { PaymentPlanGroupCreate } from '../models/PaymentPlanGroupCreate';
 import type { PaymentPlanGroupDetail } from '../models/PaymentPlanGroupDetail';
+import type { PaymentPlanGroupSendXlsxPassword } from '../models/PaymentPlanGroupSendXlsxPassword';
 import type { PaymentPlanGroupUpdate } from '../models/PaymentPlanGroupUpdate';
 import type { PaymentPlanImportFile } from '../models/PaymentPlanImportFile';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
@@ -4875,6 +4877,7 @@ export class RestService {
         activeProgramsOnly,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         limit,
         name,
@@ -4902,6 +4905,7 @@ export class RestService {
         activeProgramsOnly?: boolean,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         /**
          * Number of results to return per page.
@@ -4986,6 +4990,7 @@ export class RestService {
                 'active_programs_only': activeProgramsOnly,
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'limit': limit,
                 'name': name,
@@ -5021,6 +5026,7 @@ export class RestService {
         activeProgramsOnly,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         name,
         officeSearch,
@@ -5046,6 +5052,7 @@ export class RestService {
         activeProgramsOnly?: boolean,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         name?: string,
         officeSearch?: string,
@@ -5122,6 +5129,7 @@ export class RestService {
                 'active_programs_only': activeProgramsOnly,
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'name': name,
                 'office_search': officeSearch,
@@ -5248,6 +5256,7 @@ export class RestService {
         businessAreaSlug,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         limit,
         name,
@@ -5273,6 +5282,7 @@ export class RestService {
         businessAreaSlug: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         /**
          * Number of results to return per page.
@@ -5355,6 +5365,7 @@ export class RestService {
             query: {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'limit': limit,
                 'name': name,
@@ -10236,6 +10247,66 @@ export class RestService {
         });
     }
     /**
+     * @returns PaymentPlanGroupDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxForBatchCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+        requestBody: PaymentPlanGroupBatchExport,
+    }): CancelablePromise<PaymentPlanGroupDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-export-xlsx-for-batch/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanGroupDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxWithAuthCodeCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+        requestBody: PaymentPlanExportAuthCode,
+    }): CancelablePromise<PaymentPlanGroupDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/delivery-export-xlsx-with-auth-code/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns PaymentPlanImportFile
      * @throws ApiError
      */
@@ -10298,6 +10369,36 @@ export class RestService {
         });
     }
     /**
+     * @returns PaymentPlanGroupDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlanGroupsSendXlsxPasswordCreate({
+        businessAreaSlug,
+        id,
+        programCode,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan Group.
+         */
+        id: string,
+        programCode: string,
+        requestBody: PaymentPlanGroupSendXlsxPassword,
+    }): CancelablePromise<PaymentPlanGroupDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plan-groups/{id}/send-xlsx-password/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_code': programCode,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns CountResponse
      * @throws ApiError
      */
@@ -10349,6 +10450,7 @@ export class RestService {
         programCode,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         limit,
         name,
@@ -10375,6 +10477,7 @@ export class RestService {
         programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         /**
          * Number of results to return per page.
@@ -10458,6 +10561,7 @@ export class RestService {
             query: {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'limit': limit,
                 'name': name,
@@ -11171,92 +11275,6 @@ export class RestService {
      * @returns PaymentPlan
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxRetrieve({
-        businessAreaSlug,
-        id,
-        programCode,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-    }): CancelablePromise<PaymentPlan> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-        });
-    }
-    /**
-     * @returns PaymentPlanExportAuthCode
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansDeliveryExportXlsxWithAuthCodeCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-        requestBody: PaymentPlanExportAuthCode,
-    }): CancelablePromise<PaymentPlanExportAuthCode> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-export-xlsx-with-auth-code/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * @returns PaymentPlanDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansDeliveryImportXlsxCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        formData,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-        formData: PaymentPlanImportFile,
-    }): CancelablePromise<PaymentPlanDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/delivery-import-xlsx/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-            formData: formData,
-            mediaType: 'multipart/form-data',
-        });
-    }
-    /**
-     * @returns PaymentPlan
-     * @throws ApiError
-     */
     public static restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve({
         businessAreaSlug,
         id,
@@ -11586,32 +11604,6 @@ export class RestService {
         });
     }
     /**
-     * @returns PaymentPlan
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve({
-        businessAreaSlug,
-        id,
-        programCode,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programCode: string,
-    }): CancelablePromise<PaymentPlan> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_code}/payment-plans/{id}/send-xlsx-password/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_code': programCode,
-            },
-        });
-    }
-    /**
      * @returns SplitPaymentPlan
      * @throws ApiError
      */
@@ -11702,6 +11694,7 @@ export class RestService {
         programCode,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         name,
         ordering,
@@ -11726,6 +11719,7 @@ export class RestService {
         programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         name?: string,
         /**
@@ -11801,6 +11795,7 @@ export class RestService {
             query: {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,
@@ -11832,6 +11827,7 @@ export class RestService {
         programCode,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         limit,
         name,
@@ -11858,6 +11854,7 @@ export class RestService {
         programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         /**
          * Number of results to return per page.
@@ -11941,6 +11938,7 @@ export class RestService {
             query: {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'limit': limit,
                 'name': name,
@@ -11974,6 +11972,7 @@ export class RestService {
         programCode,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         limit,
         name,
@@ -12000,6 +11999,7 @@ export class RestService {
         programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         /**
          * Number of results to return per page.
@@ -12083,6 +12083,7 @@ export class RestService {
             query: {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'limit': limit,
                 'name': name,
@@ -12693,6 +12694,7 @@ export class RestService {
         programCode,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         name,
         ordering,
@@ -12717,6 +12719,7 @@ export class RestService {
         programCode: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         name?: string,
         /**
@@ -12792,6 +12795,7 @@ export class RestService {
             query: {
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,
@@ -14576,6 +14580,7 @@ export class RestService {
         createdAtLte,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         limit,
         name,
@@ -14605,6 +14610,7 @@ export class RestService {
         createdAtLte?: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         /**
          * Number of results to return per page.
@@ -14682,6 +14688,7 @@ export class RestService {
                 'created_at__lte': createdAtLte,
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'limit': limit,
                 'name': name,
@@ -15057,6 +15064,7 @@ export class RestService {
         createdAtLte,
         deliveryMechanism,
         endDate,
+        exportTag,
         fsp,
         name,
         ordering,
@@ -15084,6 +15092,7 @@ export class RestService {
         createdAtLte?: string,
         deliveryMechanism?: Array<string>,
         endDate?: string,
+        exportTag?: number,
         fsp?: string,
         name?: string,
         /**
@@ -15153,6 +15162,7 @@ export class RestService {
                 'created_at__lte': createdAtLte,
                 'delivery_mechanism': deliveryMechanism,
                 'end_date': endDate,
+                'export_tag': exportTag,
                 'fsp': fsp,
                 'name': name,
                 'ordering': ordering,

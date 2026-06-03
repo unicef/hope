@@ -89,11 +89,6 @@ def payment_plan_url(payment_plan):
             PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
             'id="btn-restart_exporting_template_for_entitlement"',
         ),
-        (
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
-            'id="btn-restart_exporting_payment_plan_list"',
-        ),
     ],
 )
 def test_buttons_are_visible_according_to_status(

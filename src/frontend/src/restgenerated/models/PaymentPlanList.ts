@@ -90,5 +90,9 @@ export type PaymentPlanList = {
     readonly updatedAt: string;
     readonly program: ProgramSmall;
     readonly paymentPlanGroup: PaymentPlanGroupSmall;
+    /**
+     * Group delivery export batch number; set when the plan is included in a group export [sys]
+     */
+    exportTag?: number | null;
 };
 

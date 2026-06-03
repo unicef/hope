@@ -73,6 +73,15 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     def __str__(self) -> str:
         return f"{self.name} for {self.cycle}"
 
+    def can_reexport_batch(self, export_tag: int) -> bool:
+        return (
+            self.background_action_status_export != PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+            and self.payment_plans.filter(
+                export_tag=export_tag,
+                export_file_delivery__isnull=False,
+            ).exists()
+        )
+
     def get_batch_export_file_link(self, export_tag: int) -> str | None:
         """Return the download URL of the batch's XLSX, or None if the batch has no stored file.
 

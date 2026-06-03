@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PaymentPlanGroupBatch } from './PaymentPlanGroupBatch';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 export type PaymentPlanGroupDetail = {
     readonly id: string;
@@ -14,7 +15,7 @@ export type PaymentPlanGroupDetail = {
     readonly totalUndeliveredQuantityUsd: number;
     readonly paymentPlansCount: number;
     readonly canSendToPaymentGateway: boolean;
-    readonly deliveryExportFile: string | null;
+    readonly batches: Array<PaymentPlanGroupBatch>;
     readonly deliveryImportFile: string | null;
     readonly backgroundActionStatusExport: string | null;
     readonly backgroundActionStatusImport: string | null;

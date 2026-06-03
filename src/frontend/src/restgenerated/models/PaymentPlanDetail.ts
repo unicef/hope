@@ -100,6 +100,10 @@ export type PaymentPlanDetail = {
     readonly program: ProgramSmall;
     readonly paymentPlanGroup: PaymentPlanGroupSmall;
     /**
+     * Group delivery export batch number; set when the plan is included in a group export [sys]
+     */
+    exportTag?: number | null;
+    /**
      * record revision number
      */
     version?: number;
@@ -133,6 +137,7 @@ export type PaymentPlanDetail = {
     endDate?: string | null;
     programCycle: ProgramCycleSmall;
     readonly isPaymentGateway: boolean;
+    readonly isInstructionManaged: boolean;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
     importedFileName: string;
@@ -230,6 +235,5 @@ export type PaymentPlanDetail = {
      */
     flatAmountValue?: string | null;
     readonly paymentPlanPurposes: Array<PaymentPlanPurpose>;
-    readonly isInstructionManaged: boolean;
 };
 
