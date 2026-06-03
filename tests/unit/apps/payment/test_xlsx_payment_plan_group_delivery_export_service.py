@@ -8,6 +8,7 @@ from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
@@ -18,7 +19,7 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
     XlsxPaymentPlanGroupDeliveryExportService,
 )
-from hope.models import DataCollectingType, FinancialServiceProvider, PaymentPlan
+from hope.models import DataCollectingType, FinancialServiceProvider, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -466,6 +467,72 @@ def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_p
 
     plan.refresh_from_db()
     assert plan.export_tag is None
+
+
+def test_plan_with_unprocessed_payments_is_skipped_when_template_requires_auth_code(program_cycle, business_area, user):
+    pg_fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="pg-1",
+    )
+    delivery_mechanism = DeliveryMechanismFactory()
+    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_auth_code"])
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=pg_fsp, delivery_mechanism=delivery_mechanism, xlsx_template=template
+    )
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=pg_fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    # payment still PENDING → is_payment_gateway_and_all_sent_to_fsp=False
+    PaymentFactory(parent=plan, financial_service_provider=pg_fsp, status=Payment.STATUS_PENDING)
+
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag is None
+    assert plan.export_file_delivery is None
+
+
+def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(program_cycle, business_area, user):
+    pg_fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="pg-2",
+    )
+    delivery_mechanism = DeliveryMechanismFactory()
+    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_auth_code"])
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=pg_fsp, delivery_mechanism=delivery_mechanism, xlsx_template=template
+    )
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=pg_fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    # payment in DISTRIBUTION_SUCCESS → not blocking → is_payment_gateway_and_all_sent_to_fsp=True
+    PaymentFactory(
+        parent=plan,
+        financial_service_provider=pg_fsp,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+    )
+
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag == 1
+    file_temp = plan.export_file_delivery
+    assert file_temp is not None
+    assert file_temp.file.name.endswith(".zip")
+    assert file_temp.password is not None
+    assert file_temp.xlsx_password is not None
 
 
 def test_get_email_context_returns_user_recipient_fields(group_with_one_accepted_plan, user):

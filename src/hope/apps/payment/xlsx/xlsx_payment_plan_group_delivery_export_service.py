@@ -8,7 +8,9 @@ from django.db import transaction
 from django.db.models import Max
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.crypto import get_random_string
 import openpyxl
+import pyzipper
 
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
@@ -45,6 +47,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         self.export_tag = export_tag
         self.applied_export_tag: int | None = None
         self.payment_generate_token_and_order_numbers = True
+        self.allow_export_fsp_auth_code = False
         if export_tag is not None:
             plan_qs = payment_plan_group.payment_plans.filter(export_tag=export_tag)
         else:
@@ -115,10 +118,17 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                     f"and delivery mechanism."
                 )
                 continue
+            if "fsp_auth_code" in template.columns and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
+                logger.warning(
+                    f"Skipping Payment Plan {payment_plan.unicef_id}: template requires fsp_auth_code "
+                    f"but not all payments have been sent to the payment gateway yet."
+                )
+                continue
             per_fsp_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
             per_fsp_service.prepare_headers(template)
             if not header:
                 header = per_fsp_service.header_list
+                self.allow_export_fsp_auth_code = per_fsp_service.allow_export_fsp_auth_code
             prepared_services.append(per_fsp_service)
             self.exported_plan_ids.append(payment_plan.id)
 
@@ -144,6 +154,13 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         else:
             tag = self._next_export_tag()
         self.applied_export_tag = tag
+
+        if self.allow_export_fsp_auth_code:
+            self._save_xlsx_file_with_auth_code(group, tag, user)
+        else:
+            self._save_plain_xlsx_file(group, tag, user)
+
+    def _save_plain_xlsx_file(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
         filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}.xlsx"
         with NamedTemporaryFile() as tmp:
             file_temp = FileTemp(
@@ -156,10 +173,38 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             file_temp.file.save(filename, File(tmp))
             with transaction.atomic():
                 if self.export_tag is not None:
-                    # re-export: keep existing tags, replace the file on all plans in the batch
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(export_file_delivery=file_temp)
                 else:
-                    # initial export: stamp all plans with the new tag and file
+                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
+                        export_tag=tag, export_file_delivery=file_temp
+                    )
+
+    def _save_xlsx_file_with_auth_code(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
+        zip_password = get_random_string(12)
+        xlsx_password = get_random_string(12)
+        zip_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}.zip"
+        xlsx_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}.xlsx"
+
+        with NamedTemporaryFile(suffix=".zip") as tmp_zip:
+            with pyzipper.AESZipFile(
+                tmp_zip, mode="w", compression=pyzipper.ZIP_DEFLATED, encryption=pyzipper.WZ_AES
+            ) as zf:
+                zf.setpassword(zip_password.encode("utf-8"))
+                XlsxPaymentPlanDeliveryExportService.save_workbook(zf, self.wb, xlsx_filename, xlsx_password)
+
+            file_temp = FileTemp(
+                object_id=str(group.pk),
+                content_type=get_content_type_for_model(group),
+                created_by=user,
+                password=zip_password,
+                xlsx_password=xlsx_password,
+            )
+            tmp_zip.seek(0)
+            file_temp.file.save(zip_filename, File(tmp_zip))
+            with transaction.atomic():
+                if self.export_tag is not None:
+                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(export_file_delivery=file_temp)
+                else:
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
                         export_tag=tag, export_file_delivery=file_temp
                     )

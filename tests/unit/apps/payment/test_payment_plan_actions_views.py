@@ -4,7 +4,6 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable
 from unittest.mock import Mock, patch
-from zipfile import BadZipFile
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model

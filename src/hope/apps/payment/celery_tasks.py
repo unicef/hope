@@ -311,7 +311,7 @@ def send_payment_plan_group_delivery_xlsx_password_async_task_action(job: AsyncR
     plan = group.payment_plans.filter(export_tag=export_tag, export_file_delivery__isnull=False).first()
     if plan is None:
         raise Exception(f"No exported batch file found for group {group.id} with export_tag={export_tag}.")
-    label = f"Payment Plan Group {group.unicef_id or group.id} Batch {export_tag} Payment List"
+    label = f"Payment Plan Group {group.unicef_id} Batch {export_tag} Payment List"
     XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, plan.export_file_delivery, label)
 
 

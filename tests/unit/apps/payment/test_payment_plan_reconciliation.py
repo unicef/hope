@@ -400,7 +400,6 @@ def test_validate_extras_skips_unknown_payment(
     assert import_service.is_updated is False
 
 
-
 def test_validate_rows_skips_already_reconciled_payment(
     payment_plan_finished: PaymentPlan,
     payment_for_extras: Payment,

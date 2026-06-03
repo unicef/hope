@@ -75,7 +75,6 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanGroupCreateSerializer,
     PaymentPlanGroupDeliveryExportSerializer,
     PaymentPlanGroupDetailSerializer,
-    PaymentPlanGroupExportAuthCodeSerializer,
     PaymentPlanGroupListSerializer,
     PaymentPlanGroupSendXlsxPasswordSerializer,
     PaymentPlanGroupUpdateSerializer,
@@ -2489,7 +2488,6 @@ class PaymentPlanGroupViewSet(
         "create": PaymentPlanGroupCreateSerializer,
         "update": PaymentPlanGroupUpdateSerializer,
         "delivery_export_xlsx": PaymentPlanGroupDeliveryExportSerializer,
-        "delivery_export_xlsx_with_auth_code": PaymentPlanGroupExportAuthCodeSerializer,
         "send_xlsx_password": PaymentPlanGroupSendXlsxPasswordSerializer,
         "delivery_import_xlsx": PaymentPlanImportFileSerializer,
     }
@@ -2502,7 +2500,6 @@ class PaymentPlanGroupViewSet(
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
         "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
         "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
-        "delivery_export_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
         "delivery_import_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX],
     }
@@ -2534,12 +2531,16 @@ class PaymentPlanGroupViewSet(
         export_tag = serializer.validated_data["export_tag"]
         fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
 
+        if fsp_xlsx_template_id is not None and not request.user.has_perm(
+            Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value,
+            payment_plan_group.cycle.program,
+        ):
+            raise PermissionDenied(detail={"required_permissions": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value]})
+
         if export_tag is not None:
             if not payment_plan_group.payment_plans.filter(export_tag=export_tag).exists():
                 raise ValidationError(f"No batch found for export_tag={export_tag} in this group.")
         else:
-            # New exports with an FSP template go through delivery-export-xlsx-with-auth-code.
-            fsp_xlsx_template_id = None
             exportable_plans = payment_plan_group.payment_plans.filter(
                 status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
                 plan_type=PaymentPlan.PlanType.REGULAR,
@@ -2557,43 +2558,6 @@ class PaymentPlanGroupViewSet(
         transaction.on_commit(
             lambda: export_payment_plan_group_delivery_xlsx_async_task(
                 payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
-            )
-        )
-        return Response(
-            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @extend_schema(
-        request=PaymentPlanGroupExportAuthCodeSerializer,
-        responses={200: PaymentPlanGroupDetailSerializer},
-    )
-    @action(detail=True, methods=["post"], url_path="delivery-export-xlsx-with-auth-code")
-    def delivery_export_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan_group = self.get_object()
-        if not payment_plan_group.can_start_background_action:
-            raise ValidationError("Another background action is already in progress.")
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
-
-        exportable_plans = payment_plan_group.payment_plans.filter(
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-            plan_type=PaymentPlan.PlanType.REGULAR,
-            export_tag__isnull=True,
-        )
-        if not exportable_plans.exists():
-            raise ValidationError(
-                "Export requires at least one not-yet-exported payment plan in ACCEPTED or FINISHED status."
-            )
-        if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
-            raise ValidationError("Export failed: there are no eligible payments to export.")
-        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-        payment_plan_group.save(update_fields=["background_action_status"])
-        transaction.on_commit(
-            lambda: export_payment_plan_group_delivery_xlsx_async_task(
-                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id
             )
         )
         return Response(

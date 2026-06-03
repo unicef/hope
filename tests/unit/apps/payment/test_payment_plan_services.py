@@ -932,7 +932,6 @@ def test_send_to_payment_gateway(
     assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
 
 
-
 @freeze_time("2020-10-10")
 def test_create_with_program_cycle_validation_error(user: User, business_area: Any) -> None:
     program = ProgramFactory(
@@ -2000,7 +1999,6 @@ def test_execute_update_status_action_raises_when_instruction_managed(
 
     with pytest.raises(ValidationError, match="This Payment Plan is managed by a Follow Up Instruction."):
         PaymentPlanService(payment_plan_base).execute_update_status_action(input_data={"action": "LOCK"}, user=user)
-
 
 
 def test_copy_target_criteria_copies_individual_block_filters(
