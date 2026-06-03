@@ -67,7 +67,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
 
-      - name: Run migrations
+      - name: Create schema from models (skip migrations)
+        env:
+          DJANGO_DISABLE_MIGRATIONS: "1"
         run: uv run python manage.py migrate --run-syncdb
 
       - name: Set up Bun

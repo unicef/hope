@@ -493,6 +493,12 @@ ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 UNICEF_HQ_PARTNER = "UNICEF HQ"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
+if os.environ.get("DJANGO_DISABLE_MIGRATIONS"):
+    class _DisableMigrations:
+        def __contains__(self, _item: str) -> bool: return True
+        def __getitem__(self, _item: str) -> None: return None
+    MIGRATION_MODULES = _DisableMigrations()
+
 
 from hope.config.fragments.celery import *  # noqa: F403, F401, E402
 from hope.config.fragments.constance import *  # noqa: F403, F401, E402
