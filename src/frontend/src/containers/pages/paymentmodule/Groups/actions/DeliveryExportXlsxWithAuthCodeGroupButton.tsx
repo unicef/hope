@@ -15,16 +15,15 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PaymentPlanGroupDetail } from '../types';
 
-interface ExportBatchButtonProps {
-  groupId: string;
-  tag: string;
+interface DeliveryExportXlsxWithAuthCodeGroupButtonProps {
+  group: PaymentPlanGroupDetail | null;
 }
 
-export function ExportBatchButton({
-  groupId,
-  tag,
-}: ExportBatchButtonProps): ReactElement {
+export function DeliveryExportXlsxWithAuthCodeGroupButton({
+  group,
+}: DeliveryExportXlsxWithAuthCodeGroupButtonProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [fspTemplateId, setFspTemplateId] = useState('');
@@ -32,15 +31,14 @@ export function ExportBatchButton({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: exportBatch, isPending: loadingExport } = useMutation({
+  const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
     mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxWithAuthCodeCreate(
         {
           businessAreaSlug: businessArea,
           programCode: programId,
-          id: groupId,
+          id: group?.id,
           requestBody: {
-            exportTag: parseInt(tag, 10),
             fspXlsxTemplateId: fspTemplateId || null,
           },
         },
@@ -48,7 +46,7 @@ export function ExportBatchButton({
     onSuccess: () => {
       showMessage(t('Export started'));
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
+        queryKey: ['paymentPlanGroup', businessArea, programId, group?.id],
       });
       setOpen(false);
       setFspTemplateId('');
@@ -58,22 +56,19 @@ export function ExportBatchButton({
     },
   });
 
-  const isDisabled = !groupId || !tag || loadingExport;
-
   return (
     <>
       <Box m={2}>
-        <LoadingButton
-          loading={loadingExport}
+        <Button
           startIcon={<GetApp />}
           color="primary"
-          variant="contained"
+          variant="outlined"
           onClick={() => setOpen(true)}
-          disabled={isDisabled}
-          data-cy="button-export-batch"
+          disabled={!group}
+          data-cy="button-delivery-export-xlsx-with-auth-code-group"
         >
-          {t('Re-export Batch')}
-        </LoadingButton>
+          {t('Export with Auth Code')}
+        </Button>
       </Box>
       <Dialog
         open={open}
@@ -82,8 +77,8 @@ export function ExportBatchButton({
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitleWrapper data-cy="dialog-export-batch">
-          <DialogTitle>{t('Re-export Batch #{{tag}}', { tag })}</DialogTitle>
+        <DialogTitleWrapper data-cy="dialog-delivery-export-xlsx-with-auth-code-group">
+          <DialogTitle>{t('Export with Auth Code')}</DialogTitle>
           <TextField
             label={t('FSP XLSX Template ID (optional)')}
             value={fspTemplateId}
@@ -105,8 +100,8 @@ export function ExportBatchButton({
               loading={loadingExport}
               color="primary"
               variant="contained"
-              onClick={() => exportBatch()}
-              data-cy="button-export-batch-submit"
+              onClick={() => exportXlsx()}
+              data-cy="button-delivery-export-xlsx-with-auth-code-group-submit"
             >
               {t('EXPORT')}
             </LoadingButton>

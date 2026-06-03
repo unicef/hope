@@ -6,15 +6,18 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DownloadBatchButton } from './actions/DownloadBatchButton';
 import { ExportBatchButton } from './actions/ExportBatchButton';
+import { SendXlsxPasswordBatchButton } from './actions/SendXlsxPasswordBatchButton';
 
 interface BatchDetailsHeaderProps {
   groupId: string;
   tag: string;
+  exportFileLink: string | null;
 }
 
 export function BatchDetailsHeader({
   groupId,
   tag,
+  exportFileLink,
 }: BatchDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -47,8 +50,12 @@ export function BatchDetailsHeader({
       breadCrumbs={breadCrumbsItems}
     >
       <Box display="flex" alignItems="center">
-        <DownloadBatchButton groupId={groupId} tag={tag} />
-        <ExportBatchButton groupId={groupId} tag={tag} />
+        {exportFileLink ? (
+          <DownloadBatchButton exportFileLink={exportFileLink} />
+        ) : (
+          <ExportBatchButton groupId={groupId} tag={tag} />
+        )}
+        <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />
       </Box>
     </PageHeader>
   );

@@ -2,7 +2,10 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { TableWrapper } from '@core/TableWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -25,6 +28,22 @@ const BatchDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const [filter] = useState(initialFilter);
   const permissions = usePermissions();
+  const { businessArea, programId } = useBaseUrl();
+
+  const { data: group } = useQuery({
+    queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
+        businessAreaSlug: businessArea,
+        id: groupId,
+        programCode: programId,
+      }),
+    enabled: !!groupId && !!businessArea && !!programId,
+  });
+
+  const exportFileLink =
+    group?.batches.find((b) => String(b.exportTag) === tag)?.exportFileLink ??
+    null;
 
   if (permissions === null) return null;
   if (
@@ -39,7 +58,7 @@ const BatchDetailsPage = (): ReactElement => {
 
   return (
     <>
-      <BatchDetailsHeader groupId={groupId} tag={tag} />
+      <BatchDetailsHeader groupId={groupId} tag={tag} exportFileLink={exportFileLink} />
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}

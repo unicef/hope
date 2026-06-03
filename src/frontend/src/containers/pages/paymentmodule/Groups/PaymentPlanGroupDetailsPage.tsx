@@ -11,8 +11,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,19 +43,6 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         programCode: programId,
       }),
     enabled: !!groupId && !!businessArea && !!programId,
-    // Poll while the group is exporting/importing an XLSX so the page reflects
-    // the result (export_file populated, status cleared) without a manual refresh.
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      const isExporting =
-        data?.backgroundActionStatusExport ===
-        PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING;
-      const isImporting =
-        data?.backgroundActionStatusImport ===
-        PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION;
-      return isExporting || isImporting ? 3000 : false;
-    },
-    refetchIntervalInBackground: true,
   });
 
   if (permissions === null) return null;
@@ -113,6 +99,40 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
           </OverviewContainer>
         </ContainerColumnWithBorder>
       </Grid>
+      {group?.batches && group.batches.length > 0 && (
+        <Grid size={{ xs: 12 }}>
+          <ContainerColumnWithBorder>
+            <Title>
+              <Typography variant="h6">{t('Batches')}</Typography>
+            </Title>
+            {group.batches.map((batch) => (
+              <Box
+                key={batch.exportTag}
+                display="flex"
+                alignItems="center"
+                gap={2}
+                py={1}
+              >
+                <BlackLink
+                  to={`/${baseUrl}/payment-module/groups/${groupId}/batches/${encodeURIComponent(String(batch.exportTag))}`}
+                >
+                  {t('Batch')} #{batch.exportTag}
+                </BlackLink>
+                {batch.exportFileLink ? (
+                  <Link
+                    href={batch.exportFileLink}
+                    download
+                    underline="hover"
+                    data-cy={`batch-download-link-${batch.exportTag}`}
+                  >
+                    {t('Download')}
+                  </Link>
+                ) : null}
+              </Box>
+            ))}
+          </ContainerColumnWithBorder>
+        </Grid>
+      )}
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}

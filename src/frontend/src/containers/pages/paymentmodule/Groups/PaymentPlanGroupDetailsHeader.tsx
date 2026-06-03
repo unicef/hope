@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
 import { EditGroupName } from './actions/EditGroupName';
 import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroupButton';
+import { DeliveryExportXlsxWithAuthCodeGroupButton } from './actions/DeliveryExportXlsxWithAuthCodeGroupButton';
 import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import { PaymentPlanGroupDetail } from './types';
@@ -49,6 +50,7 @@ export function PaymentPlanGroupDetailsHeader({
       <Box display="flex" alignItems="center">
         <EditGroupName group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
+        <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />
         <DeletePaymentPlanGroup group={group} />
