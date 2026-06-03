@@ -24,7 +24,6 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
-import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
 
 interface PaymentPlanDetailsHeaderProps {
@@ -38,10 +37,9 @@ export const PaymentPlanDetailsHeader = ({
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const getPlanTypeLabel = usePaymentPlanTypeLabel();
   const planTypeLabel =
     paymentPlan.planType && paymentPlan.planType !== PlanTypeEnum.REGULAR
-      ? `${getPlanTypeLabel(paymentPlan.planType)} `
+      ? `${paymentPlan.planType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} `
       : '';
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({

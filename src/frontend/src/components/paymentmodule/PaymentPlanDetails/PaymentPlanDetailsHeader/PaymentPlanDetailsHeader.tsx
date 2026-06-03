@@ -20,6 +20,7 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
@@ -33,6 +34,10 @@ export function PaymentPlanDetailsHeader({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
+  const planTypeLabel =
+    paymentPlan.planType && paymentPlan.planType !== PlanTypeEnum.REGULAR
+      ? `${paymentPlan.planType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} `
+      : '';
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -172,7 +177,7 @@ export function PaymentPlanDetailsHeader({
       title={
         <Box display="flex" alignItems="center">
           <Box display="flex" flexDirection="column">
-            <Box> {t('Payment Plan')} ID: </Box>
+            <Box> {planTypeLabel}{t('Payment Plan')} ID: </Box>
             <Box>
               <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
             </Box>
