@@ -2526,11 +2526,8 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
     def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        if (
-            payment_plan_group.background_action_status_export
-            == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-        ):
-            raise ValidationError("Export already in progress.")
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -2555,10 +2552,8 @@ class PaymentPlanGroupViewSet(
             if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
                 raise ValidationError("Export failed: there are no eligible payments to export.")
 
-        payment_plan_group.background_action_status_export = (
-            PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-        )
-        payment_plan_group.save(update_fields=["background_action_status_export"])
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+        payment_plan_group.save(update_fields=["background_action_status"])
         transaction.on_commit(
             lambda: export_payment_plan_group_delivery_xlsx_async_task(
                 payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
@@ -2576,11 +2571,8 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx-with-auth-code")
     def delivery_export_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        if (
-            payment_plan_group.background_action_status_export
-            == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-        ):
-            raise ValidationError("Export already in progress.")
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -2597,10 +2589,8 @@ class PaymentPlanGroupViewSet(
             )
         if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
             raise ValidationError("Export failed: there are no eligible payments to export.")
-        payment_plan_group.background_action_status_export = (
-            PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-        )
-        payment_plan_group.save(update_fields=["background_action_status_export"])
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+        payment_plan_group.save(update_fields=["background_action_status"])
         transaction.on_commit(
             lambda: export_payment_plan_group_delivery_xlsx_async_task(
                 payment_plan_group, str(request.user.pk), fsp_xlsx_template_id
@@ -2646,11 +2636,8 @@ class PaymentPlanGroupViewSet(
     @transaction.atomic
     def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        if (
-            payment_plan_group.background_action_status_import
-            == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-        ):
-            raise ValidationError("Import already in progress.")
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
         importable_plans = payment_plan_group.payment_plans.filter(
             status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
             plan_type=PaymentPlan.PlanType.REGULAR,
@@ -2684,10 +2671,10 @@ class PaymentPlanGroupViewSet(
             file=file,
         )
         payment_plan_group.delivery_import_file = file_temp
-        payment_plan_group.background_action_status_import = (
-            PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
+        payment_plan_group.background_action_status = (
+            PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
         )
-        payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status_import"])
+        payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status"])
         transaction.on_commit(lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group))
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,

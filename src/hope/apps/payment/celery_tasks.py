@@ -261,8 +261,8 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                     service.generate_token_and_order_numbers(program)
             with transaction.atomic():
                 service.save_xlsx_file(user)
-                payment_plan_group.background_action_status_export = None
-                payment_plan_group.save(update_fields=["background_action_status_export", "updated_at"])
+                payment_plan_group.background_action_status = None
+                payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
             if (
                 service.applied_export_tag is not None
                 and payment_plan_group.cycle.program.business_area.enable_email_notification
@@ -270,10 +270,8 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 send_email_notification(service, user)
         except Exception:
             logger.exception("Export Payment Plan Group Delivery XLSX Error")
-            payment_plan_group.background_action_status_export = (
-                PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
-            )
-            payment_plan_group.save(update_fields=["background_action_status_export", "updated_at"])
+            payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
             raise
 
 
@@ -634,14 +632,12 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file_xlsx)
         service.open_workbook()
         service.import_payment_list()
-        payment_plan_group.background_action_status_import = None
-        payment_plan_group.save(update_fields=["background_action_status_import", "updated_at"])
+        payment_plan_group.background_action_status = None
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
     except Exception:
         logger.exception("Import Payment Plan Group Delivery XLSX Error")
-        payment_plan_group.background_action_status_import = (
-            PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORT_ERROR
-        )
-        payment_plan_group.save(update_fields=["background_action_status_import", "updated_at"])
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
         raise
 
 

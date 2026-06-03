@@ -14,16 +14,19 @@ if TYPE_CHECKING:
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
-    class BackgroundExportActionStatus(models.TextChoices):
+    class BackgroundActionStatus(models.TextChoices):
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
-
-    class BackgroundImportActionStatus(models.TextChoices):
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
         )
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
+
+    BACKGROUND_ACTION_ERROR_STATES = [
+        BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        BackgroundActionStatus.XLSX_IMPORT_ERROR,
+    ]
 
     cycle = models.ForeignKey(
         "program.ProgramCycle",
@@ -40,23 +43,14 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         related_name="+",
         help_text="Uploaded reconciliation XLSX [sys]",
     )
-    background_action_status_export = models.CharField(
+    background_action_status = models.CharField(
         max_length=50,
         default=None,
         db_index=True,
         blank=True,
         null=True,
-        choices=BackgroundExportActionStatus.choices,
-        help_text="Background Action Status for celery export task [sys]",
-    )
-    background_action_status_import = models.CharField(
-        max_length=50,
-        default=None,
-        db_index=True,
-        blank=True,
-        null=True,
-        choices=BackgroundImportActionStatus.choices,
-        help_text="Background Action Status for celery import task [sys]",
+        choices=BackgroundActionStatus.choices,
+        help_text="Background Action Status for celery export/import task [sys]",
     )
 
     class Meta:
@@ -73,9 +67,17 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     def __str__(self) -> str:
         return f"{self.name} for {self.cycle}"
 
+    @property
+    def can_start_background_action(self) -> bool:
+        """Whether a new export/import can start: the group is idle or in an error state."""
+        return (
+            self.background_action_status is None
+            or self.background_action_status in PaymentPlanGroup.BACKGROUND_ACTION_ERROR_STATES
+        )
+
     def can_reexport_batch(self, export_tag: int) -> bool:
         return (
-            self.background_action_status_export != PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+            self.can_start_background_action
             and self.payment_plans.filter(
                 export_tag=export_tag,
                 export_file_delivery__isnull=False,

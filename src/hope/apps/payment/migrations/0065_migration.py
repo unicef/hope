@@ -39,31 +39,18 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "background_action_status_export",
+                    "background_action_status",
                     models.CharField(
                         blank=True,
                         choices=[
                             ("XLSX_EXPORTING", "Exporting XLSX file"),
                             ("XLSX_EXPORT_ERROR", "Export XLSX file Error"),
-                        ],
-                        db_index=True,
-                        default=None,
-                        help_text="Background Action Status for celery export task [sys]",
-                        max_length=50,
-                        null=True,
-                    ),
-                ),
-                (
-                    "background_action_status_import",
-                    models.CharField(
-                        blank=True,
-                        choices=[
                             ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"),
                             ("XLSX_IMPORT_ERROR", "Import XLSX file Error"),
                         ],
                         db_index=True,
                         default=None,
-                        help_text="Background Action Status for celery import task [sys]",
+                        help_text="Background Action Status for celery export/import task [sys]",
                         max_length=50,
                         null=True,
                     ),

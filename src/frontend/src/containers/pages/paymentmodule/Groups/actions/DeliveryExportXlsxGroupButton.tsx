@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
+import { isGroupBackgroundActionBusy } from '../utils';
 
 interface DeliveryExportXlsxGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
@@ -41,7 +42,8 @@ export function DeliveryExportXlsxGroupButton({
     },
   });
 
-  const isDisabled = !group || loadingExport;
+  const isDisabled =
+    !group || loadingExport || isGroupBackgroundActionBusy(group);
 
   return (
     <Box m={2}>

@@ -367,8 +367,8 @@ def test_can_reexport_batch_returns_true_when_batch_has_file_and_no_active_expor
 
 def test_can_reexport_batch_returns_false_when_export_in_progress(group_with_exported_batch) -> None:
     group = group_with_exported_batch
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
 
     assert group.can_reexport_batch(1) is False
 
@@ -397,7 +397,7 @@ def test_reexport_batch_post_sets_exporting_status_queues_task_and_redirects(
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
     group.refresh_from_db()
-    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
     mock_task.assert_called_once()
     called_group, called_user_id, called_template_id, called_tag = mock_task.call_args[0]
     assert called_group.pk == group.pk
@@ -431,8 +431,8 @@ def test_reexport_batch_post_blocked_when_export_already_in_progress(
     mock_task, admin_client, group_with_exported_batch
 ) -> None:
     group = group_with_exported_batch
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
     url = reverse("admin:payment_paymentplangroup_reexport_batch", args=[group.pk])
 
     response = admin_client.post(url, {"export_tag": "1"})
@@ -462,7 +462,7 @@ def test_reexport_batch_requires_restart_exporting_permission(
 @pytest.fixture
 def group_with_exporting_status():
     return PaymentPlanGroupFactory(
-        background_action_status_export=PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING,
+        background_action_status=PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
     )
 
 
@@ -570,6 +570,48 @@ def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_batch_expo
     assert any("Successfully restarted" in str(m) for m in messages_list)
 
 
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
+def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_each_job_independently(
+    mock_task, admin_client, group_with_exporting_status
+) -> None:
+    group = group_with_exporting_status
+    AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        job_name="export_payment_plan_group_delivery_xlsx_async_task",
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": "some-user-id", "export_tag": 3},
+    )
+    AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        job_name="export_payment_plan_group_delivery_xlsx_async_task",
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": "some-user-id", "export_tag": 7},
+    )
+    url = reverse(
+        "admin:payment_paymentplangroup_restart_exporting_delivery_xlsx",
+        args=[group.pk],
+    )
+
+    with (
+        patch("hope.admin.payment_plan.AsyncJob.task_status", new_callable=PropertyMock, return_value=AsyncJob.STARTED),
+        patch("hope.admin.payment_plan.AsyncJob.terminate", autospec=True) as mock_terminate,
+    ):
+        response = admin_client.post(url)
+
+    assert response.status_code == 302
+    assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
+    assert mock_terminate.call_count == 2
+    assert mock_task.call_count == 2
+    requeued_tags = {call[0][3] for call in mock_task.call_args_list}
+    assert requeued_tags == {3, 7}
+    messages_list = list(get_messages(response.wsgi_request))
+    assert any("Successfully restarted" in str(m) for m in messages_list)
+
+
 def test_restart_exporting_delivery_xlsx_requires_permission(
     staff_user, staff_client, group_with_exporting_status
 ) -> None:
@@ -592,7 +634,7 @@ def test_restart_exporting_delivery_xlsx_requires_permission(
 @pytest.fixture
 def group_with_importing_status():
     group = PaymentPlanGroupFactory(
-        background_action_status_import=PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        background_action_status=PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
     )
     file_temp = FileTempFactory()
     group.delivery_import_file = file_temp
@@ -614,7 +656,7 @@ def test_restart_import_reconciliation_get_renders_confirmation(admin_client, gr
 
 def test_restart_import_reconciliation_post_when_no_file_shows_error(admin_client) -> None:
     group = PaymentPlanGroupFactory(
-        background_action_status_import=PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        background_action_status=PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         delivery_import_file=None,
     )
     url = reverse(

@@ -143,8 +143,8 @@ def group_with_accepted_plan_and_import_file(payment_plan_group_with_accepted_pl
         content_type=get_content_type_for_model(group),
     )
     group.delivery_import_file = import_file
-    group.background_action_status_import = PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-    group.save(update_fields=["delivery_import_file", "background_action_status_import"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    group.save(update_fields=["delivery_import_file", "background_action_status"])
     return group
 
 
@@ -1628,8 +1628,8 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_o
 
 def test_export_delivery_task_creates_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
     group = payment_plan_group_with_accepted_plan
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
 
     queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
 
@@ -1637,7 +1637,7 @@ def test_export_delivery_task_creates_batch_file(payment_plan_group_with_accepte
     plan = group.payment_plans.get(export_tag=1)
     assert plan.export_file_delivery is not None
     assert plan.export_file_delivery.file.name.endswith(".xlsx")
-    assert group.background_action_status_export is None
+    assert group.background_action_status is None
 
 
 def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
@@ -1666,8 +1666,8 @@ def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_
 
 def test_export_delivery_task_sets_error_status_on_failure(payment_plan_group_with_accepted_plan, user) -> None:
     group = payment_plan_group_with_accepted_plan
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
 
     with (
         patch(
@@ -1680,7 +1680,7 @@ def test_export_delivery_task_sets_error_status_on_failure(payment_plan_group_wi
         queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
 
     group.refresh_from_db()
-    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORT_ERROR
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
 
 
 def test_export_delivery_task_reexports_existing_batch(payment_plan_group_with_accepted_plan, user) -> None:
@@ -1768,7 +1768,7 @@ def test_import_delivery_group_task_clears_status_on_success(group_with_accepted
         queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
 
     group.refresh_from_db()
-    assert group.background_action_status_import is None
+    assert group.background_action_status is None
 
 
 def test_import_delivery_group_task_sets_error_status_on_failure(
@@ -1785,7 +1785,7 @@ def test_import_delivery_group_task_sets_error_status_on_failure(
             queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
 
     group.refresh_from_db()
-    assert group.background_action_status_import == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORT_ERROR
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
 
 
 def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_plan: Any, user: Any) -> None:

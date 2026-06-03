@@ -78,9 +78,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         from hope.models import Payment
 
         all_eligible = Payment.objects.filter(parent__in=self.payment_plans).eligible()
-        XlsxPaymentPlanDeliveryExportService(self.payment_plans[0]).generate_token_and_order_numbers(
-            all_eligible, program
-        )
+        XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
 
     def get_email_context(self, user: "User") -> dict:
         group = self.payment_plan_group
@@ -91,11 +89,11 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
             "message": (
-                f"Payment Plan Group {group.unicef_id or group.id} Batch {tag} Payment List xlsx file "
+                f"Payment Plan Group {group.unicef_id} Batch {tag} Payment List xlsx file "
                 "was generated and below you have the link to download this file."
             ),
             "link": link or "",
-            "title": f"Payment Plan Group {group.unicef_id or group.id} Batch {tag} Payment List Generated",
+            "title": f"Payment Plan Group {group.unicef_id} Batch {tag} Payment List Generated",
         }
 
     def _next_export_tag(self) -> int:
@@ -146,7 +144,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         else:
             tag = self._next_export_tag()
         self.applied_export_tag = tag
-        filename = f"payment_plan_group_{group.unicef_id or group.id}_payment_list_batch_{tag}.xlsx"
+        filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}.xlsx"
         with NamedTemporaryFile() as tmp:
             file_temp = FileTemp(
                 object_id=str(group.pk),
