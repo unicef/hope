@@ -385,7 +385,7 @@ def test_reexport_batch_get_renders_form(admin_client, group_with_exported_batch
     assert response.status_code == 200
 
 
-@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_for_batch_async_task")
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
 def test_reexport_batch_post_sets_exporting_status_queues_task_and_redirects(
     mock_task, admin_client, group_with_exported_batch
 ) -> None:
@@ -399,7 +399,7 @@ def test_reexport_batch_post_sets_exporting_status_queues_task_and_redirects(
     group.refresh_from_db()
     assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
     mock_task.assert_called_once()
-    called_group, called_user_id, called_tag, called_template_id = mock_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag = mock_task.call_args[0]
     assert called_group.pk == group.pk
     assert called_tag == 1
     assert called_template_id is None
@@ -407,7 +407,7 @@ def test_reexport_batch_post_sets_exporting_status_queues_task_and_redirects(
     assert any("Re-export started" in str(m) for m in messages_list)
 
 
-@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_for_batch_async_task")
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
 def test_reexport_batch_post_blocked_when_no_export_file_for_batch(
     mock_task, admin_client, group_with_exported_batch
 ) -> None:
@@ -426,7 +426,7 @@ def test_reexport_batch_post_blocked_when_no_export_file_for_batch(
     assert any("cannot be re-exported" in str(m) for m in messages_list)
 
 
-@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_for_batch_async_task")
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
 def test_reexport_batch_post_blocked_when_export_already_in_progress(
     mock_task, admin_client, group_with_exported_batch
 ) -> None:
@@ -466,9 +466,7 @@ def group_with_exporting_status():
     )
 
 
-def test_restart_exporting_delivery_xlsx_get_renders_confirmation(
-    admin_client, group_with_exporting_status
-) -> None:
+def test_restart_exporting_delivery_xlsx_get_renders_confirmation(admin_client, group_with_exporting_status) -> None:
     url = reverse(
         "admin:payment_paymentplangroup_restart_exporting_delivery_xlsx",
         args=[group_with_exporting_status.pk],
@@ -493,8 +491,7 @@ def test_restart_exporting_delivery_xlsx_post_when_no_active_job_shows_error(
 
     assert response.status_code == 302
     assert (
-        reverse("admin:payment_paymentplangroup_change", args=[group_with_exporting_status.pk])
-        in response["Location"]
+        reverse("admin:payment_paymentplangroup_change", args=[group_with_exporting_status.pk]) in response["Location"]
     )
     mock_task.assert_not_called()
     messages_list = list(get_messages(response.wsgi_request))
@@ -529,14 +526,15 @@ def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_initial_ex
     assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
     mock_terminate.assert_called_once()
     mock_task.assert_called_once()
-    called_group, called_user_id, called_template_id = mock_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag = mock_task.call_args[0]
     assert called_group.pk == group.pk
     assert called_template_id is None
+    assert called_tag is None
     messages_list = list(get_messages(response.wsgi_request))
     assert any("Successfully restarted" in str(m) for m in messages_list)
 
 
-@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_for_batch_async_task")
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
 def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_batch_export(
     mock_task, admin_client, group_with_exporting_status
 ) -> None:
@@ -545,7 +543,7 @@ def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_batch_expo
         group,
         type=AsyncJobModel.JobType.JOB_TASK,
         repeatable=True,
-        job_name="export_payment_plan_group_delivery_xlsx_for_batch_async_task",
+        job_name="export_payment_plan_group_delivery_xlsx_async_task",
         action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
         config={"payment_plan_group_id": str(group.pk), "user_id": "some-user-id", "export_tag": 2},
     )
@@ -564,7 +562,7 @@ def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_batch_expo
     assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
     mock_terminate.assert_called_once()
     mock_task.assert_called_once()
-    called_group, called_user_id, called_tag, called_template_id = mock_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag = mock_task.call_args[0]
     assert called_group.pk == group.pk
     assert called_tag == 2
     assert called_template_id is None
@@ -602,9 +600,7 @@ def group_with_importing_status():
     return group
 
 
-def test_restart_import_reconciliation_get_renders_confirmation(
-    admin_client, group_with_importing_status
-) -> None:
+def test_restart_import_reconciliation_get_renders_confirmation(admin_client, group_with_importing_status) -> None:
     url = reverse(
         "admin:payment_paymentplangroup_restart_importing_reconciliation_xlsx_file",
         args=[group_with_importing_status.pk],

@@ -2265,7 +2265,7 @@ def test_export_for_batch_returns_200_and_sets_exporting_status(
     )
     group = group_with_tagged_batch
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_for_batch_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(
             _export_batch_url(business_area.slug, program.code, group.id),
             {"export_tag": 5},
@@ -2291,9 +2291,7 @@ def test_export_for_batch_queues_task_without_template_on_commit(
     group = group_with_tagged_batch
 
     with (
-        patch(
-            "hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_for_batch_async_task"
-        ) as mocked_task,
+        patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
         response = client.post(
@@ -2303,7 +2301,7 @@ def test_export_for_batch_queues_task_without_template_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_tag, called_template_id = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_tag == 5
@@ -2325,9 +2323,7 @@ def test_export_for_batch_queues_task_with_template_id_on_commit(
     template = FinancialServiceProviderXlsxTemplateFactory()
 
     with (
-        patch(
-            "hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_for_batch_async_task"
-        ) as mocked_task,
+        patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
         response = client.post(
@@ -2337,7 +2333,7 @@ def test_export_for_batch_queues_task_with_template_id_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_tag, called_template_id = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_tag == 5
@@ -2359,9 +2355,7 @@ def test_export_for_batch_when_already_exporting_returns_400(
     group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status_export"])
 
-    with patch(
-        "hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_for_batch_async_task"
-    ) as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(
             _export_batch_url(business_area.slug, program.code, group.id),
             {"export_tag": 5},
@@ -2385,9 +2379,7 @@ def test_export_for_batch_unknown_tag_returns_400(
     )
     group = group_with_tagged_batch
 
-    with patch(
-        "hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_for_batch_async_task"
-    ) as mocked_task:
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(
             _export_batch_url(business_area.slug, program.code, group.id),
             {"export_tag": 99},
@@ -2441,7 +2433,7 @@ def test_export_for_batch_permissions(
     create_user_role_with_permissions(user, permissions, business_area, program=program)
     group = group_with_tagged_batch
 
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_for_batch_async_task"):
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(
             _export_batch_url(business_area.slug, program.code, group.id),
             {"export_tag": 5},

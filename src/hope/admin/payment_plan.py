@@ -238,7 +238,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
     @button(permission="payment.restart_exporting_payment_plan_list")
     def reexport_batch(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         from hope.apps.payment.celery_tasks import (
-            export_payment_plan_group_delivery_xlsx_for_batch_async_task,
+            export_payment_plan_group_delivery_xlsx_async_task,
         )
 
         group = PaymentPlanGroup.objects.get(pk=pk)
@@ -256,8 +256,8 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
                 group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
                 group.save(update_fields=["background_action_status_export"])
-                export_payment_plan_group_delivery_xlsx_for_batch_async_task(
-                    group, str(request.user.pk), export_tag, fsp_xlsx_template_id
+                export_payment_plan_group_delivery_xlsx_async_task(
+                    group, str(request.user.pk), fsp_xlsx_template_id, export_tag
                 )
                 messages.success(request, f"Re-export started for batch {export_tag}.")
                 return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
@@ -271,27 +271,25 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
         )
 
     @button(
-        visible=lambda btn: btn.original.background_action_status_export
-        == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING,
+        visible=lambda btn: (
+            btn.original.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+        ),
         permission="payment.restart_exporting_payment_plan_list",
     )
     def restart_exporting_delivery_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         from hope.apps.payment.celery_tasks import (
             export_payment_plan_group_delivery_xlsx_async_task,
-            export_payment_plan_group_delivery_xlsx_for_batch_async_task,
         )
 
         if request.method == "POST":
             group = PaymentPlanGroup.objects.get(pk=pk)
 
-            initial_task_name = "export_payment_plan_group_delivery_xlsx_async_task"
-            batch_task_name = "export_payment_plan_group_delivery_xlsx_for_batch_async_task"
             active_jobs = [
                 job
                 for job in AsyncJob.objects.filter(
                     content_type=get_content_type_for_model(group),
                     object_id=str(group.pk),
-                    job_name__in=[initial_task_name, batch_task_name],
+                    job_name="export_payment_plan_group_delivery_xlsx_async_task",
                 )
                 if job.task_status in job.ACTIVE_STATUSES
             ]
@@ -308,12 +306,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
             fsp_xlsx_template_id = config.get("fsp_xlsx_template_id")
             user_id = str(request.user.pk)
 
-            if export_tag is not None:
-                export_payment_plan_group_delivery_xlsx_for_batch_async_task(
-                    group, user_id, export_tag, fsp_xlsx_template_id
-                )
-            else:
-                export_payment_plan_group_delivery_xlsx_async_task(group, user_id, fsp_xlsx_template_id)
+            export_payment_plan_group_delivery_xlsx_async_task(group, user_id, fsp_xlsx_template_id, export_tag)
 
             messages.success(request, "Successfully restarted delivery XLSX export.")
             return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
@@ -326,8 +319,10 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
         )
 
     @button(
-        visible=lambda btn: btn.original.background_action_status_import
-        == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        visible=lambda btn: (
+            btn.original.background_action_status_import
+            == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
+        ),
         permission="payment.restart_importing_reconciliation_xlsx_file",
     )
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: "UUID") -> HttpResponse:

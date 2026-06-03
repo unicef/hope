@@ -35,7 +35,6 @@ from hope.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx_async_task_action,
     export_payment_plan_group_delivery_xlsx_async_task,
     export_payment_plan_group_delivery_xlsx_async_task_action,
-    export_payment_plan_group_delivery_xlsx_for_batch_async_task,
     export_pdf_payment_plan_summary_async_task,
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
@@ -1691,7 +1690,7 @@ def test_export_delivery_task_reexports_existing_batch(payment_plan_group_with_a
     plan = group.payment_plans.get(export_tag=1)
     first_file_id = plan.export_file_delivery_id
 
-    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_for_batch_async_task, group, str(user.pk), 1)
+    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk), export_tag=1)
 
     plan.refresh_from_db()
     assert plan.export_tag == 1
@@ -1702,8 +1701,7 @@ def test_export_delivery_task_reexports_existing_batch(payment_plan_group_with_a
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
 @patch(
-    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service."
-    "XlsxPaymentPlanGroupDeliveryExportService"
+    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service.XlsxPaymentPlanGroupDeliveryExportService"
 )
 def test_export_delivery_task_generates_tokens_and_sends_email_when_enabled(
     mock_service_cls: Mock,
@@ -1732,8 +1730,7 @@ def test_export_delivery_task_generates_tokens_and_sends_email_when_enabled(
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")
 @patch(
-    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service."
-    "XlsxPaymentPlanGroupDeliveryExportService"
+    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service.XlsxPaymentPlanGroupDeliveryExportService"
 )
 def test_export_delivery_task_skips_email_when_notification_disabled(
     mock_service_cls: Mock,

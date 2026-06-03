@@ -72,10 +72,10 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanCreateUpdateSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
-    PaymentPlanGroupExportAuthCodeSerializer,
     PaymentPlanGroupBatchExportSerializer,
     PaymentPlanGroupCreateSerializer,
     PaymentPlanGroupDetailSerializer,
+    PaymentPlanGroupExportAuthCodeSerializer,
     PaymentPlanGroupListSerializer,
     PaymentPlanGroupSendXlsxPasswordSerializer,
     PaymentPlanGroupUpdateSerializer,
@@ -100,7 +100,6 @@ from hope.apps.payment.api.serializers import (
 )
 from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_delivery_xlsx_async_task,
-    export_payment_plan_group_delivery_xlsx_for_batch_async_task,
     export_pdf_payment_plan_summary_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
@@ -2645,8 +2644,8 @@ class PaymentPlanGroupViewSet(
         )
         payment_plan_group.save(update_fields=["background_action_status_export"])
         transaction.on_commit(
-            lambda: export_payment_plan_group_delivery_xlsx_for_batch_async_task(
-                payment_plan_group, str(request.user.pk), export_tag, fsp_xlsx_template_id
+            lambda: export_payment_plan_group_delivery_xlsx_async_task(
+                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
             )
         )
         return Response(

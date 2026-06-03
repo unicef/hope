@@ -281,11 +281,17 @@ def export_payment_plan_group_delivery_xlsx_async_task(
     payment_plan_group: "PaymentPlanGroup",
     user_id: str,
     fsp_xlsx_template_id: str | None = None,
+    export_tag: int | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
     config: dict = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
     if fsp_xlsx_template_id is not None:
         config["fsp_xlsx_template_id"] = fsp_xlsx_template_id
+    if export_tag is not None:
+        config["export_tag"] = export_tag
+        description = f"Re-export payment plan group delivery xlsx batch {export_tag} for {payment_plan_group_id}"
+    else:
+        description = f"Export payment plan group delivery xlsx for {payment_plan_group_id}"
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
         job_name=export_payment_plan_group_delivery_xlsx_async_task.__name__,
@@ -293,32 +299,7 @@ def export_payment_plan_group_delivery_xlsx_async_task(
         instance=payment_plan_group,
         config=config,
         group_key="payment",
-        description=f"Export payment plan group delivery xlsx for {payment_plan_group_id}",
-    )
-
-
-def export_payment_plan_group_delivery_xlsx_for_batch_async_task(
-    payment_plan_group: "PaymentPlanGroup",
-    user_id: str,
-    export_tag: int,
-    fsp_xlsx_template_id: str | None = None,
-) -> None:
-    payment_plan_group_id = str(payment_plan_group.id)
-    config: dict = {
-        "payment_plan_group_id": payment_plan_group_id,
-        "user_id": user_id,
-        "export_tag": export_tag,
-    }
-    if fsp_xlsx_template_id is not None:
-        config["fsp_xlsx_template_id"] = fsp_xlsx_template_id
-    AsyncRetryJob.queue_task(
-        program=payment_plan_group.cycle.program,
-        job_name=export_payment_plan_group_delivery_xlsx_for_batch_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
-        instance=payment_plan_group,
-        config=config,
-        group_key="payment",
-        description=f"Re-export payment plan group delivery xlsx batch {export_tag} for {payment_plan_group_id}",
+        description=description,
     )
 
 
