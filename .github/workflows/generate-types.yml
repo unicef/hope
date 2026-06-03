@@ -67,17 +67,28 @@ jobs:
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
 
-      - name: Pre-create custom collation (normally added by migration 0009)
+      - name: Restore migrated DB cache
+        id: db-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/aurora.sql
+          key: pgdump-v1-${{ hashFiles('src/hope/apps/**/migrations/*.py') }}
+
+      - name: Apply cached DB dump
+        if: steps.db-cache.outputs.cache-hit == 'true'
         env:
           PGPASSWORD: postgres
-        run: |
-          psql -h localhost -U postgres -d aurora -c \
-            "CREATE COLLATION IF NOT EXISTS \"und-ci-det\" (provider = icu, locale = 'und-u-ks-level2', deterministic = true);"
+        run: psql -h localhost -U postgres -d aurora -v ON_ERROR_STOP=1 -f /tmp/aurora.sql
 
-      - name: Create schema from models (skip migrations)
-        env:
-          DJANGO_DISABLE_MIGRATIONS: "1"
+      - name: Run migrations (cache miss only)
+        if: steps.db-cache.outputs.cache-hit != 'true'
         run: uv run python manage.py migrate --run-syncdb
+
+      - name: Dump DB for next run (cache miss only)
+        if: steps.db-cache.outputs.cache-hit != 'true'
+        env:
+          PGPASSWORD: postgres
+        run: pg_dump -h localhost -U postgres -d aurora --no-owner --no-privileges > /tmp/aurora.sql
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
