@@ -706,8 +706,7 @@ class PaymentPlanService:
             self.payment_plan.rules.all().delete()
             self.create_targeting_criteria(targeting_criteria_input, program)
 
-        excluded_ids = input_data.get("excluded_ids")
-        exclusion_reason = input_data.get("exclusion_reason")
+        excluded_ids, exclusion_reason = input_data.get("excluded_ids"), input_data.get("exclusion_reason")
         if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
             self.payment_plan.excluded_ids = excluded_ids
