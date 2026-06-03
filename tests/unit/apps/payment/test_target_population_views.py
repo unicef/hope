@@ -453,7 +453,6 @@ def test_target_population_list_with_permissions(
     assert tp["created_at"] == target_population_list_context["tp"].created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert tp["updated_at"] == target_population_list_context["tp"].updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert tp["created_by"] == target_population_list_context["user"].get_full_name()
-    assert tp["export_tag"] == target_population_list_context["tp"].export_tag
 
 
 def test_target_population_caching(

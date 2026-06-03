@@ -249,11 +249,11 @@ export type { PaymentPlanCreateFollowUp as PaymentPlanCreateFollowUpCamelCase } 
 export type { PaymentPlanCreateUpdate as PaymentPlanCreateUpdateCamelCase } from './models/PaymentPlanCreateUpdate';
 export type { PaymentPlanDetail as PaymentPlanDetailCamelCase } from './models/PaymentPlanDetail';
 export type { PaymentPlanExcludeBeneficiaries as PaymentPlanExcludeBeneficiariesCamelCase } from './models/PaymentPlanExcludeBeneficiaries';
-export type { PaymentPlanExportAuthCode as PaymentPlanExportAuthCodeCamelCase } from './models/PaymentPlanExportAuthCode';
 export type { PaymentPlanGroupBatch as PaymentPlanGroupBatchCamelCase } from './models/PaymentPlanGroupBatch';
 export type { PaymentPlanGroupBatchExport as PaymentPlanGroupBatchExportCamelCase } from './models/PaymentPlanGroupBatchExport';
 export type { PaymentPlanGroupCreate as PaymentPlanGroupCreateCamelCase } from './models/PaymentPlanGroupCreate';
 export type { PaymentPlanGroupDetail as PaymentPlanGroupDetailCamelCase } from './models/PaymentPlanGroupDetail';
+export type { PaymentPlanGroupExportAuthCode as PaymentPlanGroupExportAuthCodeCamelCase } from './models/PaymentPlanGroupExportAuthCode';
 export type { PaymentPlanGroupList as PaymentPlanGroupListCamelCase } from './models/PaymentPlanGroupList';
 export type { PaymentPlanGroupSendXlsxPassword as PaymentPlanGroupSendXlsxPasswordCamelCase } from './models/PaymentPlanGroupSendXlsxPassword';
 export type { PaymentPlanGroupSmall as PaymentPlanGroupSmallCamelCase } from './models/PaymentPlanGroupSmall';

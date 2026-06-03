@@ -124,8 +124,7 @@ class AcceptanceProcessSerializer(serializers.Serializer):
     comment = serializers.CharField(required=False)
 
 
-class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField(min_value=1)
+class PaymentPlanGroupExportAuthCodeSerializer(serializers.Serializer):
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
 
 

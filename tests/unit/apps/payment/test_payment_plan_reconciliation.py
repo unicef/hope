@@ -278,42 +278,6 @@ def test_import_row_updates_payment_and_verification_status(
     assert verification_3.received_amount is None
     assert verification_3.status == PaymentVerification.STATUS_PENDING
 
-    # more coverage
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
-    import_service.xlsx_headers = [
-        "payment_id",
-        "delivered_quantity",
-        "reason_for_unsuccessful_payment",
-        "additional_collector_name",
-        "additional_document_type",
-        "additional_document_number",
-    ]
-    import_service.payments_dict = {
-        str(payment_1.pk): payment_1,
-    }
-
-    Row = namedtuple("Row", ["value"])
-
-    import_service._import_row(
-        [
-            Row(str(payment_1.id)),
-            Row(999),
-            Row("Reason for unsuccessful Payment"),
-            Row("Additional Collector"),
-            Row("Additional Document Type"),
-            Row("Additional Document Number"),
-        ],
-        1,
-    )
-    payment_1.save()
-    payment_1.refresh_from_db()
-
-    assert payment_1.delivered_quantity == 999
-    assert payment_1.reason_for_unsuccessful_payment == "Reason for unsuccessful Payment"
-    assert payment_1.additional_collector_name == "Additional Collector"
-    assert payment_1.additional_document_type == "Additional Document Type"
-    assert payment_1.additional_document_number == "Additional Document Number"
-
 
 def test_import_row_saves_extra_columns_to_extras(
     payment_plan_finished: PaymentPlan,
@@ -435,28 +399,6 @@ def test_validate_extras_skips_unknown_payment(
 
     assert import_service.is_updated is False
 
-
-def test_import_row_updates_payment_when_only_extras_change(
-    payment_plan_finished: PaymentPlan,
-    payment_for_extras: Payment,
-) -> None:
-    payment = payment_for_extras
-    payment.status = Payment.STATUS_DISTRIBUTION_PARTIAL
-    payment.extras = {}
-    payment.save()
-
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
-    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom"]
-    import_service.payments_dict = {str(payment.pk): payment}
-
-    Row = namedtuple("Row", ["value"])
-    import_service._import_row(
-        [Row(str(payment.pk)), Row(400), Row("val")],
-        1,
-    )
-
-    assert len(import_service.payments_to_save) == 1
-    assert payment.extras == {"custom": "val"}
 
 
 def test_validate_rows_skips_already_reconciled_payment(

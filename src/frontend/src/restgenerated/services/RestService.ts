@@ -124,10 +124,10 @@ import type { PaymentPlanCreateFollowUp } from '../models/PaymentPlanCreateFollo
 import type { PaymentPlanCreateUpdate } from '../models/PaymentPlanCreateUpdate';
 import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
 import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExcludeBeneficiaries';
-import type { PaymentPlanExportAuthCode } from '../models/PaymentPlanExportAuthCode';
 import type { PaymentPlanGroupBatchExport } from '../models/PaymentPlanGroupBatchExport';
 import type { PaymentPlanGroupCreate } from '../models/PaymentPlanGroupCreate';
 import type { PaymentPlanGroupDetail } from '../models/PaymentPlanGroupDetail';
+import type { PaymentPlanGroupExportAuthCode } from '../models/PaymentPlanGroupExportAuthCode';
 import type { PaymentPlanGroupSendXlsxPassword } from '../models/PaymentPlanGroupSendXlsxPassword';
 import type { PaymentPlanGroupUpdate } from '../models/PaymentPlanGroupUpdate';
 import type { PaymentPlanImportFile } from '../models/PaymentPlanImportFile';
@@ -10292,7 +10292,7 @@ export class RestService {
          */
         id: string,
         programCode: string,
-        requestBody: PaymentPlanExportAuthCode,
+        requestBody: PaymentPlanGroupExportAuthCode,
     }): CancelablePromise<PaymentPlanGroupDetail> {
         return __request(OpenAPI, {
             method: 'POST',

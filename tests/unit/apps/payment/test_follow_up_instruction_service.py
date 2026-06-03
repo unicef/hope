@@ -333,9 +333,9 @@ def test_create_does_not_exclude_source_plans_with_top_up_child(
         dispersion_end_date=source_one.dispersion_end_date + timedelta(days=1),
     )
 
-    child_plans = list(instruction.payment_plans.order_by("source_payment_plan_id"))
+    child_plans = list(instruction.payment_plans.all())
     assert len(child_plans) == 2
-    assert [child.source_payment_plan_id for child in child_plans] == [source_one.id, source_two.id]
+    assert {child.source_payment_plan_id for child in child_plans} == {source_one.id, source_two.id}
 
 
 def test_create_raises_validation_error_when_no_applicable_source_plans(

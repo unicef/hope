@@ -6,7 +6,6 @@ from unittest.mock import patch
 import uuid
 
 from aniso8601 import parse_date
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.test import override_settings
 from django.utils import timezone
@@ -933,40 +932,6 @@ def test_send_to_payment_gateway(
     assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
 
 
-@mock.patch("hope.apps.payment.services.payment_plan_services.import_payment_plan_delivery_from_xlsx_async_task")
-def test_import_delivery_xlsx(
-    mock_task: Any,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    pp = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=cycle,
-        background_action_status=None,
-    )
-
-    mock_file = SimpleUploadedFile(
-        "test.xlsx",
-        b"test file content",
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-    service = PaymentPlanService(pp)
-
-    with django_capture_on_commit_callbacks(execute=True):
-        result = service.import_delivery_xlsx(user, mock_file)
-
-    assert mock_task.call_count == 1
-
-    pp.refresh_from_db()
-    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
-    assert pp.reconciliation_import_file is not None
-    assert result == pp
-
 
 @freeze_time("2020-10-10")
 def test_create_with_program_cycle_validation_error(user: User, business_area: Any) -> None:
@@ -1152,7 +1117,6 @@ def test_validate_action_not_implemented(payment_plan_base: PaymentPlan, user: U
         "REVIEW",
         "REJECT",
         "SEND_TO_PAYMENT_GATEWAY",
-        "SEND_XLSX_PASSWORD",
     ]
     assert error.value.detail[0] == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
 
@@ -2037,47 +2001,6 @@ def test_execute_update_status_action_raises_when_instruction_managed(
     with pytest.raises(ValidationError, match="This Payment Plan is managed by a Follow Up Instruction."):
         PaymentPlanService(payment_plan_base).execute_update_status_action(input_data={"action": "LOCK"}, user=user)
 
-
-def test_validate_delivery_export_template_exists_raises_when_fsp_is_none(
-    cycle: ProgramCycle,
-    business_area: Any,
-) -> None:
-    pp = PaymentPlanFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        financial_service_provider=None,
-        delivery_mechanism=None,
-    )
-
-    with pytest.raises(
-        ValidationError,
-        match="Payment plan delivery export requires a Financial Service Provider and Delivery Mechanism.",
-    ):
-        PaymentPlanService(pp)._validate_delivery_export_template_exists(fsp_xlsx_template_id=None)
-
-
-def test_validate_delivery_export_template_exists_raises_when_template_id_not_found(
-    payment_plan_base: PaymentPlan,
-) -> None:
-    nonexistent_id = str(uuid.uuid4())
-
-    with pytest.raises(
-        ValidationError,
-        match="Payment plan delivery export requires an existing FSP XLSX Template.",
-    ):
-        PaymentPlanService(payment_plan_base)._validate_delivery_export_template_exists(
-            fsp_xlsx_template_id=nonexistent_id
-        )
-
-
-def test_validate_delivery_export_template_exists_raises_when_no_fsp_dm_template(
-    payment_plan_base: PaymentPlan,
-) -> None:
-    with pytest.raises(
-        ValidationError,
-        match="Payment plan delivery export requires an FSP XLSX Template for the selected",
-    ):
-        PaymentPlanService(payment_plan_base)._validate_delivery_export_template_exists(fsp_xlsx_template_id=None)
 
 
 def test_copy_target_criteria_copies_individual_block_filters(
