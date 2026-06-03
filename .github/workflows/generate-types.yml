@@ -72,7 +72,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/aurora.sql
-          key: pgdump-v1-${{ hashFiles('src/hope/apps/**/migrations/*.py') }}
+          key: pgdump-v1-${{ hashFiles('src/hope/apps/**/migrations/*.py', 'uv.lock') }}
 
       - name: Apply cached DB dump
         if: steps.db-cache.outputs.cache-hit == 'true'
