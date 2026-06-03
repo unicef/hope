@@ -115,13 +115,6 @@ def _send_xlsx_password_url(ba_slug: str, program_code: str, group_id: Any) -> s
     )
 
 
-def _export_batch_url(ba_slug: str, program_code: str, group_id: Any) -> str:
-    return reverse(
-        "api:payments:payment-plan-groups-delivery-export-xlsx-for-batch",
-        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
-    )
-
-
 @pytest.fixture
 def second_cycle_in_program(cycle: Any) -> Any:
     return ProgramCycleFactory(program=cycle.program)
@@ -1194,9 +1187,11 @@ def test_export_queues_async_task_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
+    assert called_template_id is None
+    assert called_tag is None
 
 
 def test_export_rejected_for_group_in_other_business_area(
@@ -2233,8 +2228,7 @@ def test_send_xlsx_password_permissions(
     assert response.status_code == expected_status
 
 
-# --- delivery_export_xlsx_for_batch ---
-# Re-exports an already-tagged batch.
+# --- delivery_export_xlsx with export_tag (re-export an already-tagged batch) ---
 
 
 @pytest.fixture
@@ -2267,7 +2261,7 @@ def test_export_for_batch_returns_200_and_sets_exporting_status(
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(
-            _export_batch_url(business_area.slug, program.code, group.id),
+            _export_url(business_area.slug, program.code, group.id),
             {"export_tag": 5},
         )
 
@@ -2295,7 +2289,7 @@ def test_export_for_batch_queues_task_without_template_on_commit(
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
         response = client.post(
-            _export_batch_url(business_area.slug, program.code, group.id),
+            _export_url(business_area.slug, program.code, group.id),
             {"export_tag": 5},
         )
 
@@ -2327,7 +2321,7 @@ def test_export_for_batch_queues_task_with_template_id_on_commit(
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
         response = client.post(
-            _export_batch_url(business_area.slug, program.code, group.id),
+            _export_url(business_area.slug, program.code, group.id),
             {"export_tag": 5, "fsp_xlsx_template_id": str(template.pk)},
         )
 
@@ -2357,7 +2351,7 @@ def test_export_for_batch_when_already_exporting_returns_400(
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(
-            _export_batch_url(business_area.slug, program.code, group.id),
+            _export_url(business_area.slug, program.code, group.id),
             {"export_tag": 5},
         )
 
@@ -2381,7 +2375,7 @@ def test_export_for_batch_unknown_tag_returns_400(
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(
-            _export_batch_url(business_area.slug, program.code, group.id),
+            _export_url(business_area.slug, program.code, group.id),
             {"export_tag": 99},
         )
 
@@ -2404,7 +2398,7 @@ def test_export_for_batch_zero_tag_returns_400(
     group = group_with_tagged_batch
 
     response = client.post(
-        _export_batch_url(business_area.slug, program.code, group.id),
+        _export_url(business_area.slug, program.code, group.id),
         {"export_tag": 0},
     )
 
@@ -2435,7 +2429,7 @@ def test_export_for_batch_permissions(
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(
-            _export_batch_url(business_area.slug, program.code, group.id),
+            _export_url(business_area.slug, program.code, group.id),
             {"export_tag": 5},
         )
 
