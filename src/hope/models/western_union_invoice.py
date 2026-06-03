@@ -19,7 +19,7 @@ class WesternUnionInvoice(models.Model):
     file = models.ForeignKey(
         FileTemp,
         related_name="+",
-        help_text="WU AD File",
+        help_text="Western Union invoice file",
         on_delete=models.DO_NOTHING,
         null=True,
     )

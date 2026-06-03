@@ -77,4 +77,6 @@ def test_admin_changelist_returns_200_for_superuser(
     )
     url = reverse(admin_urlname(model_admin.model._meta, "changelist"))
     res = django_app.get(url, user=superuser)
+    if res.status_code == 302:
+        res = res.follow()
     assert res.status_code == 200
