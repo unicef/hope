@@ -68,8 +68,8 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         self.countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
         self.all_document_types = DocumentType.get_all_doc_types()
 
+    @staticmethod
     def generate_token_and_order_numbers(
-        self,
         qs: QuerySet[Payment],
         program: Program,
     ) -> None:

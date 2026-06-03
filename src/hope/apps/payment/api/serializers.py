@@ -3,7 +3,7 @@ import json
 from typing import Any, cast
 
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
+from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -1926,26 +1926,28 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
     def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:
-        tags_with_file = set(
-            obj.payment_plans.filter(export_tag__isnull=False, export_file_delivery__isnull=False).values_list(
-                "export_tag", flat=True
-            )
-        )
-        tags = (
+        tags_qs = (
             obj.payment_plans.filter(export_tag__isnull=False)
             .order_by()
-            .values_list("export_tag", flat=True)
-            .distinct()
-        )
-        batches = []
-        for number in sorted(tag for tag in tags if tag is not None):
-            link = (
-                reverse("download-payment-plan-group-batch", args=[str(obj.id), number])
-                if number in tags_with_file
-                else None
+            .values("export_tag")
+            .annotate(
+                has_file=Max(
+                    Case(When(export_file_delivery__isnull=False, then=1), default=0, output_field=IntegerField())
+                )
             )
-            batches.append({"export_tag": number, "export_file_link": link})
-        return batches
+            .order_by("export_tag")
+        )
+        return [
+            {
+                "export_tag": row["export_tag"],
+                "export_file_link": (
+                    reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
+                    if row["has_file"]
+                    else None
+                ),
+            }
+            for row in tags_qs
+        ]
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))

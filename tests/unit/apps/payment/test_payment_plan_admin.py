@@ -570,6 +570,48 @@ def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_batch_expo
     assert any("Successfully restarted" in str(m) for m in messages_list)
 
 
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
+def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_each_job_independently(
+    mock_task, admin_client, group_with_exporting_status
+) -> None:
+    group = group_with_exporting_status
+    AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        job_name="export_payment_plan_group_delivery_xlsx_async_task",
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": "some-user-id", "export_tag": 3},
+    )
+    AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        job_name="export_payment_plan_group_delivery_xlsx_async_task",
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": "some-user-id", "export_tag": 7},
+    )
+    url = reverse(
+        "admin:payment_paymentplangroup_restart_exporting_delivery_xlsx",
+        args=[group.pk],
+    )
+
+    with (
+        patch("hope.admin.payment_plan.AsyncJob.task_status", new_callable=PropertyMock, return_value=AsyncJob.STARTED),
+        patch("hope.admin.payment_plan.AsyncJob.terminate", autospec=True) as mock_terminate,
+    ):
+        response = admin_client.post(url)
+
+    assert response.status_code == 302
+    assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
+    assert mock_terminate.call_count == 2
+    assert mock_task.call_count == 2
+    requeued_tags = {call[0][3] for call in mock_task.call_args_list}
+    assert requeued_tags == {3, 7}
+    messages_list = list(get_messages(response.wsgi_request))
+    assert any("Successfully restarted" in str(m) for m in messages_list)
+
+
 def test_restart_exporting_delivery_xlsx_requires_permission(
     staff_user, staff_client, group_with_exporting_status
 ) -> None:
