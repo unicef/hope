@@ -67,6 +67,13 @@ jobs:
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
 
+      - name: Pre-create custom collation (normally added by migration 0009)
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d aurora -c \
+            "CREATE COLLATION IF NOT EXISTS \"und-ci-det\" (provider = icu, locale = 'und-u-ks-level2', deterministic = true);"
+
       - name: Create schema from models (skip migrations)
         env:
           DJANGO_DISABLE_MIGRATIONS: "1"
