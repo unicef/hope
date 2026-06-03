@@ -1,9 +1,9 @@
+from constance import config
+from django.conf import settings
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from hope.models import SurprisePageConfig
 
 
 class SurprisePageConfigView(APIView):
@@ -11,14 +11,12 @@ class SurprisePageConfigView(APIView):
     authentication_classes = []
 
     def get(self, request: Request) -> Response:
-        try:
-            config = SurprisePageConfig.objects.get(pk=1)
-        except SurprisePageConfig.DoesNotExist:
-            config = None
+        image_path = config.SURPRISE_PAGE_IMAGE
+        image_url = settings.MEDIA_URL + image_path if image_path else None
         return Response(
             {
-                "image": config.image.url if config and config.image else None,
-                "heading": config.heading if config else "",
-                "subheading": config.subheading if config else "",
+                "image": image_url,
+                "heading": config.SURPRISE_PAGE_HEADING,
+                "subheading": config.SURPRISE_PAGE_SUBHEADING,
             }
         )

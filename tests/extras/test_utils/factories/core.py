@@ -26,7 +26,6 @@ from hope.models import (
 )
 from hope.models.async_job import PeriodicAsyncJob
 from hope.models.currency import Currency
-from hope.models.surprise_page_config import SurprisePageConfig
 
 
 class BusinessAreaFactory(DjangoModelFactory):
@@ -188,13 +187,3 @@ class UniversalUpdateFactory(DjangoModelFactory):
         model = UniversalUpdate
 
     program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")
-
-
-class SurprisePageConfigFactory(DjangoModelFactory):
-    class Meta:
-        model = SurprisePageConfig
-        django_get_or_create = ("pk",)
-
-    pk = 1
-    heading = "🎉 You found a secret!"
-    subheading = "Congratulations, explorer."
