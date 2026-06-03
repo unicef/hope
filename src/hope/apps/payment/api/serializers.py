@@ -1914,6 +1914,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
+            "background_action_status",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",

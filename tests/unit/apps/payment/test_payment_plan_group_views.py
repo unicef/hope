@@ -1034,7 +1034,7 @@ def test_export_sets_background_action_status_to_exporting(
 
     assert response.status_code == status.HTTP_200_OK
     group.refresh_from_db()
-    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
 
 
 def test_export_when_already_exporting_returns_400(
@@ -1049,14 +1049,14 @@ def test_export_when_already_exporting_returns_400(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
     group = group_with_accepted_plan_and_payment
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Export already in progress." in str(response.json())
+    assert "Another background action is already in progress." in str(response.json())
     mocked_task.assert_not_called()
 
 
@@ -1082,7 +1082,7 @@ def test_export_without_accepted_payment_plan_returns_400(
     )
     mocked_task.assert_not_called()
     group.refresh_from_db()
-    assert group.background_action_status_export is None
+    assert group.background_action_status is None
 
 
 def test_export_excludes_already_tagged_plan_returns_400(
@@ -1163,7 +1163,7 @@ def test_export_without_eligible_payments_returns_400(
     assert "there are no eligible payments to export." in str(response.json())
     mocked_task.assert_not_called()
     group.refresh_from_db()
-    assert group.background_action_status_export is None
+    assert group.background_action_status is None
 
 
 def test_export_queues_async_task_on_commit(
@@ -1699,10 +1699,7 @@ def test_delivery_import_xlsx_succeeds(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["id"] == str(group.id)
     group.refresh_from_db()
-    assert (
-        group.background_action_status_import
-        == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-    )
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
     assert group.delivery_import_file_id is not None
     mocked_task.assert_not_called()
 
@@ -1719,8 +1716,8 @@ def test_delivery_import_xlsx_when_already_importing_returns_400(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
     )
     group = group_with_accepted_plan
-    group.background_action_status_import = PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-    group.save(update_fields=["background_action_status_import"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    group.save(update_fields=["background_action_status"])
     test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
 
     response = client.post(
@@ -1730,7 +1727,80 @@ def test_delivery_import_xlsx_when_already_importing_returns_400(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Import already in progress." in str(response.json())
+    assert "Another background action is already in progress." in str(response.json())
+
+
+def test_delivery_import_xlsx_when_exporting_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group.id),
+        {"file": test_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Another background action is already in progress." in str(response.json())
+
+
+def test_export_when_importing_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan_and_payment
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Another background action is already in progress." in str(response.json())
+    mocked_task.assert_not_called()
+
+
+def test_export_when_in_error_state_is_allowed(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan_and_payment
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    mocked_task.assert_not_called()
 
 
 def test_delivery_import_xlsx_without_accepted_plan_returns_400(
@@ -1896,10 +1966,7 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
 
     assert response.status_code == status.HTTP_200_OK
     group.refresh_from_db()
-    assert (
-        group.background_action_status_import
-        == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
-    )
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
 
     job = AsyncRetryJob.objects.latest("pk")
     async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
@@ -1909,7 +1976,7 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
     group.refresh_from_db()
     assert payment_one.delivered_quantity == Decimal("75.00")
     assert payment_two.delivered_quantity == Decimal("125.00")
-    assert group.background_action_status_import is None
+    assert group.background_action_status is None
 
 
 # --- delivery_export_xlsx_with_auth_code ---
@@ -1932,7 +1999,7 @@ def test_export_with_auth_code_returns_200_and_sets_exporting_status(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["id"] == str(group.id)
     group.refresh_from_db()
-    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
 
 
 def test_export_with_auth_code_queues_task_without_template_on_commit(
@@ -1999,14 +2066,14 @@ def test_export_with_auth_code_when_already_exporting_returns_400(
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE], business_area, program=program)
     group = group_with_accepted_plan_and_payment
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(_export_auth_code_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Export already in progress." in str(response.json())
+    assert "Another background action is already in progress." in str(response.json())
     mocked_task.assert_not_called()
 
 
@@ -2268,7 +2335,7 @@ def test_export_for_batch_returns_200_and_sets_exporting_status(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["id"] == str(group.id)
     group.refresh_from_db()
-    assert group.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
 
 
 def test_export_for_batch_queues_task_without_template_on_commit(
@@ -2346,8 +2413,8 @@ def test_export_for_batch_when_already_exporting_returns_400(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
     group = group_with_tagged_batch
-    group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status_export"])
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
 
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
         response = client.post(
@@ -2356,7 +2423,7 @@ def test_export_for_batch_when_already_exporting_returns_400(
         )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Export already in progress." in str(response.json())
+    assert "Another background action is already in progress." in str(response.json())
     mocked_task.assert_not_called()
 
 

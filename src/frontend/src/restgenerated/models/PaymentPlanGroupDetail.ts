@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
 import type { PaymentPlanGroupBatch } from './PaymentPlanGroupBatch';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 export type PaymentPlanGroupDetail = {
@@ -10,6 +11,7 @@ export type PaymentPlanGroupDetail = {
     name?: string;
     cycle: ProgramCycleSmall;
     readonly createdAt: string;
+    backgroundActionStatus?: PaymentPlanBackgroundActionStatusEnum | null;
     readonly totalEntitledQuantityUsd: number;
     readonly totalDeliveredQuantityUsd: number;
     readonly totalUndeliveredQuantityUsd: number;
@@ -17,7 +19,5 @@ export type PaymentPlanGroupDetail = {
     readonly canSendToPaymentGateway: boolean;
     readonly batches: Array<PaymentPlanGroupBatch>;
     readonly deliveryImportFile: string | null;
-    readonly backgroundActionStatusExport: string | null;
-    readonly backgroundActionStatusImport: string | null;
 };
 

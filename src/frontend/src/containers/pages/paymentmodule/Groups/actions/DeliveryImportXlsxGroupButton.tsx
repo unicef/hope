@@ -13,6 +13,7 @@ import { getApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
+import { isGroupBackgroundActionBusy } from '../utils';
 
 interface DeliveryImportXlsxGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
@@ -67,7 +68,7 @@ export function DeliveryImportXlsxGroupButton({
           color="primary"
           variant="contained"
           onClick={() => setOpen(true)}
-          disabled={!group}
+          disabled={!group || isGroupBackgroundActionBusy(group)}
           data-cy="button-delivery-import-xlsx-group"
         >
           {t('Upload Reconciliation')}

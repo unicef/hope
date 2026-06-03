@@ -254,8 +254,8 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
                     return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
-                group.background_action_status_export = PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
-                group.save(update_fields=["background_action_status_export"])
+                group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+                group.save(update_fields=["background_action_status"])
                 export_payment_plan_group_delivery_xlsx_async_task(
                     group, str(request.user.pk), fsp_xlsx_template_id, export_tag
                 )
@@ -272,7 +272,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
 
     @button(
         visible=lambda btn: (
-            btn.original.background_action_status_export == PaymentPlanGroup.BackgroundExportActionStatus.XLSX_EXPORTING
+            btn.original.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
         ),
         permission="payment.restart_exporting_payment_plan_list",
     )
@@ -320,8 +320,8 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
 
     @button(
         visible=lambda btn: (
-            btn.original.background_action_status_import
-            == PaymentPlanGroup.BackgroundImportActionStatus.XLSX_IMPORTING_RECONCILIATION
+            btn.original.background_action_status
+            == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
         ),
         permission="payment.restart_importing_reconciliation_xlsx_file",
     )

@@ -43,6 +43,17 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         programCode: programId,
       }),
     enabled: !!groupId && !!businessArea && !!programId,
+    // Poll while the group is exporting/importing an XLSX so the page reflects
+    // the result (export_file populated, status cleared) without a manual refresh.
+    refetchInterval: (query) => {
+      const status = query.state.data?.backgroundActionStatus;
+      const isBusy =
+        status === PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING ||
+        status ===
+          PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION;
+      return isBusy ? 3000 : false;
+    },
+    refetchIntervalInBackground: true,
   });
 
   if (permissions === null) return null;
