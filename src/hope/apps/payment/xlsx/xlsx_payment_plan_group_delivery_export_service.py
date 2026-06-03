@@ -7,6 +7,7 @@ from django.core.files import File
 from django.db import transaction
 from django.db.models import Max
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 import openpyxl
 
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
@@ -84,7 +85,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     def get_email_context(self, user: "User") -> dict:
         group = self.payment_plan_group
         tag = self.applied_export_tag
-        link = group.get_batch_export_file_link(tag) if tag is not None else ""
+        link = reverse("download-payment-plan-group-batch", args=[str(group.id), tag])
         return {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),

@@ -227,18 +227,24 @@ class XlsxPaymentPlanGroupDeliveryImportService:
     def import_payment_list(self) -> None:
         if not self.per_plan_services:
             self._build_per_plan_services()
-        with transaction.atomic():
-            for payment_plan_id, service in self.per_plan_services.items():
-                payment_plan = service.payment_plan
-                service.import_payment_list()
-                payment_plan.remove_export_files()
+        for payment_plan_id, service in self.per_plan_services.items():
+            payment_plan = service.payment_plan
+            try:
+                with transaction.atomic():
+                    service.import_payment_list()
+                    payment_plan.remove_export_files()
+                    flow = PaymentPlanFlow(payment_plan)
+                    flow.background_action_status_none()
+                    payment_plan.update_money_fields()
+                    if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
+                        flow.status_finished()
+                    payment_plan.save()
+                    # invalidate cache for program cycle list
+                    payment_plan.program_cycle.save()
+                    logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
+                    PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
+            except Exception as exc:
+                logger.exception(f"Unexpected error during import of payment plan {payment_plan_id}: {exc}")
                 flow = PaymentPlanFlow(payment_plan)
-                flow.background_action_status_none()
-                payment_plan.update_money_fields()
-                if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
-                    flow.status_finished()
+                flow.background_action_status_xlsx_import_error()
                 payment_plan.save()
-                # invalidate cache for program cycle list
-                payment_plan.program_cycle.save()
-                logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
-                PaymentPlanService(payment_plan).recalculate_signatures_in_batch()

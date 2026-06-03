@@ -1560,7 +1560,7 @@ def test_get_batches_returns_empty_when_no_export(cycle: Any, business_area: Any
     assert result == []
 
 
-def test_get_batches_marks_has_export_file_true_when_file_present(cycle: Any, business_area: Any) -> None:
+def test_get_batches_sets_link_when_file_present(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
     file_temp = FileTempFactory()
     PaymentPlanFactory(
@@ -1575,10 +1575,10 @@ def test_get_batches_marks_has_export_file_true_when_file_present(cycle: Any, bu
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
     expected_link = reverse("download-payment-plan-group-batch", args=[str(group.id), 1])
-    assert result == [{"export_tag": 1, "has_export_file": True, "export_file_link": expected_link}]
+    assert result == [{"export_tag": 1, "export_file_link": expected_link}]
 
 
-def test_get_batches_marks_has_export_file_false_when_file_missing(cycle: Any, business_area: Any) -> None:
+def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
@@ -1590,7 +1590,7 @@ def test_get_batches_marks_has_export_file_false_when_file_missing(cycle: Any, b
 
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert result == [{"export_tag": 1, "has_export_file": False, "export_file_link": None}]
+    assert result == [{"export_tag": 1, "export_file_link": None}]
 
 
 def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> None:
@@ -1918,6 +1918,7 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
 
 
 # --- delivery_export_xlsx_with_auth_code ---
+
 
 def test_export_with_auth_code_returns_200_and_sets_exporting_status(
     client: Any,

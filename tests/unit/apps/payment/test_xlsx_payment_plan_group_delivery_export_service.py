@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
@@ -465,3 +466,39 @@ def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_p
 
     plan.refresh_from_db()
     assert plan.export_tag is None
+
+
+def test_get_email_context_returns_user_recipient_fields(group_with_one_accepted_plan, user):
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan)
+    service.applied_export_tag = 1
+
+    context = service.get_email_context(user)
+
+    assert context["first_name"] == user.first_name
+    assert context["last_name"] == user.last_name
+    assert context["email"] == user.email
+
+
+def test_get_email_context_link_points_to_batch_download(group_with_one_accepted_plan, user):
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan)
+    service.applied_export_tag = 1
+
+    context = service.get_email_context(user)
+
+    expected_link = reverse("download-payment-plan-group-batch", args=[str(group_with_one_accepted_plan.id), 1])
+    assert context["link"] == expected_link
+
+
+def test_get_email_context_message_and_title_carry_group_and_batch(group_with_one_accepted_plan, user):
+    group = group_with_one_accepted_plan
+    service = XlsxPaymentPlanGroupDeliveryExportService(group)
+    service.applied_export_tag = 1
+
+    context = service.get_email_context(user)
+
+    identifier = group.unicef_id or group.id
+    assert context["message"] == (
+        f"Payment Plan Group {identifier} Batch 1 Payment List xlsx file "
+        "was generated and below you have the link to download this file."
+    )
+    assert context["title"] == f"Payment Plan Group {identifier} Batch 1 Payment List Generated"

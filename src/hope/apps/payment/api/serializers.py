@@ -1900,7 +1900,6 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
 
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField()
-    has_export_file = serializers.BooleanField()
     export_file_link = serializers.CharField(allow_null=True)
 
 
@@ -1912,8 +1911,6 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     can_send_to_payment_gateway = serializers.SerializerMethodField()
     batches = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
-    background_action_status_export = serializers.CharField(read_only=True, allow_null=True)
-    background_action_status_import = serializers.CharField(read_only=True, allow_null=True)
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1924,8 +1921,6 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             "can_send_to_payment_gateway",
             "batches",
             "delivery_import_file",
-            "background_action_status_export",
-            "background_action_status_import",
         ]
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
@@ -1943,9 +1938,12 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
         )
         batches = []
         for number in sorted(tag for tag in tags if tag is not None):
-            has_file = number in tags_with_file
-            link = reverse("download-payment-plan-group-batch", args=[str(obj.id), number]) if has_file else None
-            batches.append({"export_tag": number, "has_export_file": has_file, "export_file_link": link})
+            link = (
+                reverse("download-payment-plan-group-batch", args=[str(obj.id), number])
+                if number in tags_with_file
+                else None
+            )
+            batches.append({"export_tag": number, "export_file_link": link})
         return batches
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
