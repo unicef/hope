@@ -41,9 +41,8 @@ const BatchDetailsPage = (): ReactElement => {
     enabled: !!groupId && !!businessArea && !!programId,
   });
 
-  const exportFileLink =
-    group?.batches.find((b) => String(b.exportTag) === tag)?.exportFileLink ??
-    null;
+  const hasExportFile =
+    group?.batches.find((b) => String(b.exportTag) === tag)?.exportFileLink != null;
 
   if (permissions === null) return null;
   if (
@@ -58,7 +57,7 @@ const BatchDetailsPage = (): ReactElement => {
 
   return (
     <>
-      <BatchDetailsHeader groupId={groupId} tag={tag} exportFileLink={exportFileLink} />
+      <BatchDetailsHeader groupId={groupId} tag={tag} hasExportFile={hasExportFile} />
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}

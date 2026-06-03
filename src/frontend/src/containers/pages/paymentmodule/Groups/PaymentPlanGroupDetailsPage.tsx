@@ -120,7 +120,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                 </BlackLink>
                 {batch.exportFileLink ? (
                   <Link
-                    href={batch.exportFileLink}
+                    href={`/api/download-payment-plan-group-batch/${groupId}/${batch.exportTag}`}
                     download
                     underline="hover"
                     data-cy={`batch-download-link-${batch.exportTag}`}

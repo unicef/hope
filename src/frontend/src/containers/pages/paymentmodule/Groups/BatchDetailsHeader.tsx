@@ -11,13 +11,13 @@ import { SendXlsxPasswordBatchButton } from './actions/SendXlsxPasswordBatchButt
 interface BatchDetailsHeaderProps {
   groupId: string;
   tag: string;
-  exportFileLink: string | null;
+  hasExportFile: boolean;
 }
 
 export function BatchDetailsHeader({
   groupId,
   tag,
-  exportFileLink,
+  hasExportFile,
 }: BatchDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -50,8 +50,8 @@ export function BatchDetailsHeader({
       breadCrumbs={breadCrumbsItems}
     >
       <Box display="flex" alignItems="center">
-        {exportFileLink ? (
-          <DownloadBatchButton exportFileLink={exportFileLink} />
+        {hasExportFile ? (
+          <DownloadBatchButton groupId={groupId} tag={tag} />
         ) : (
           <ExportBatchButton groupId={groupId} tag={tag} />
         )}

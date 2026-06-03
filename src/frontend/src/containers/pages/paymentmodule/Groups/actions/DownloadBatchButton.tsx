@@ -4,28 +4,27 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface DownloadBatchButtonProps {
-  exportFileLink: string | null;
+  groupId: string;
+  tag: string;
 }
 
 export function DownloadBatchButton({
-  exportFileLink,
+  groupId,
+  tag,
 }: DownloadBatchButtonProps): ReactElement {
   const { t } = useTranslation();
 
-  // TODO: The backend plans a dedicated /download-payment-plan-group-batch endpoint
-  // (not nested under payment-plan-groups). Once it exists, regenerate REST types
-  // and replace this direct-link approach with the RestService method if needed.
-  // For now we use the exportFileLink URL directly, consistent with FollowUpInstruction.
+  const href = `/api/download-payment-plan-group-batch/${groupId}/${tag}`;
+
   return (
     <Box m={2}>
       <Button
         component="a"
-        href={exportFileLink ?? undefined}
+        href={href}
         download
         startIcon={<GetApp />}
         color="primary"
         variant="outlined"
-        disabled={!exportFileLink}
         data-cy="button-download-batch"
       >
         {t('Download Batch')}
