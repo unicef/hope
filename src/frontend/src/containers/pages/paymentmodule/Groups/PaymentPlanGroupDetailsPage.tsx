@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
+import { isGroupBackgroundActionBusy } from './utils';
 
 const initialFilter = {
   search: '',
@@ -45,14 +46,8 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
     enabled: !!groupId && !!businessArea && !!programId,
     // Poll while the group is exporting/importing an XLSX so the page reflects
     // the result (export_file populated, status cleared) without a manual refresh.
-    refetchInterval: (query) => {
-      const status = query.state.data?.backgroundActionStatus;
-      const isBusy =
-        status === PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING ||
-        status ===
-          PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION;
-      return isBusy ? 3000 : false;
-    },
+    refetchInterval: (query) =>
+      isGroupBackgroundActionBusy(query.state.data ?? null) ? 3000 : false,
     refetchIntervalInBackground: true,
   });
 
