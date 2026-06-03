@@ -13,6 +13,7 @@ omit =
         **/fixtures.py
         */one_time_scripts/*
         */config/settings.py
+        */config/fragments/sentry.py
         */management/commands/*
         */missing_countries.py
         */base_test_case.py
