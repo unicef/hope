@@ -719,16 +719,27 @@ class PaymentPlan(
         self.export_file_entitlement = None
 
     def remove_export_file_delivery(self) -> None:
-        self.export_file_delivery.file.delete(save=False)
-        self.export_file_delivery.delete()
+        # The batch export shares one FileTemp across every plan in the batch (same export_tag).
+        # Detach this plan and hard-delete the file only once no other plan still references it.
+        file_temp_id = self.export_file_delivery_id
         self.export_file_delivery = None
+        if (
+            not file_temp_id
+            or PaymentPlan.all_objects.filter(export_file_delivery_id=file_temp_id).exclude(pk=self.pk).exists()
+        ):
+            return
+        file_temp = FileTemp.objects.filter(pk=file_temp_id).first()
+        if file_temp is not None:
+            file_temp.file.delete(save=False)
+            file_temp.delete()
 
     def remove_export_files(self) -> None:
         # remove export_file_entitlement
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
             self.remove_export_file_entitlement()
-        # remove export_file_delivery
-        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_delivery:
+        # remove export_file_delivery (use the cached id: the FileTemp is shared across the batch
+        # and a sibling may already have deleted it, so don't dereference the FK just to test presence)
+        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_delivery_id:
             self.remove_export_file_delivery()
 
     def remove_imported_file(self) -> None:

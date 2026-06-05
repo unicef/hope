@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 import openpyxl
 import pyzipper
@@ -176,11 +177,14 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             tmp.seek(0)
             file_temp.file.save(filename, File(tmp))
             with transaction.atomic():
+                # bump updated_at so the payment-plan list cache invalidates
                 if self.export_tag is not None:
-                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(export_file_delivery=file_temp)
+                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
+                        export_file_delivery=file_temp, updated_at=timezone.now()
+                    )
                 else:
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
-                        export_tag=tag, export_file_delivery=file_temp
+                        export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
                     )
 
     def _save_xlsx_file_with_auth_code(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
@@ -206,9 +210,12 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             tmp_zip.seek(0)
             file_temp.file.save(zip_filename, File(tmp_zip))
             with transaction.atomic():
+                # bump updated_at so the payment-plan list cache invalidates
                 if self.export_tag is not None:
-                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(export_file_delivery=file_temp)
+                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
+                        export_file_delivery=file_temp, updated_at=timezone.now()
+                    )
                 else:
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
-                        export_tag=tag, export_file_delivery=file_temp
+                        export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
                     )
