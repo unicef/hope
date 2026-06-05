@@ -8,10 +8,8 @@ from celery.exceptions import Retry
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.utils import timezone
 from flags.models import FlagState
-import openpyxl
 import pytest
 
 from extras.test_utils.factories import (
@@ -19,7 +17,7 @@ from extras.test_utils.factories import (
     DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
@@ -32,17 +30,17 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
-    create_payment_plan_delivery_xlsx_async_task,
-    create_payment_plan_delivery_xlsx_async_task_action,
     create_payment_plan_payment_list_xlsx_async_task_action,
     create_payment_verification_plan_xlsx_async_task,
     create_payment_verification_plan_xlsx_async_task_action,
-    export_payment_plan_group_xlsx_async_task,
+    export_payment_plan_group_delivery_xlsx_async_task,
+    export_payment_plan_group_delivery_xlsx_async_task_action,
     export_pdf_payment_plan_summary_async_task,
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
     get_sync_run_rapid_pro_async_task_action,
     import_payment_plan_delivery_from_xlsx_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_custom_exchange_rate_async_task_action,
@@ -69,7 +67,6 @@ from hope.apps.payment.celery_tasks import (
     remove_old_payment_plan_payment_list_xlsx_async_task,
     remove_old_payment_plan_payment_list_xlsx_async_task_action,
     send_payment_notification_emails_async_task,
-    send_payment_plan_delivery_xlsx_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_qcf_report_email_notifications_async_task,
     send_to_payment_gateway_async_task,
@@ -139,21 +136,66 @@ def qcf_report(payment_plan):
 
 
 @pytest.fixture
-def payment_plan_group_with_plans():
+def group_with_accepted_plan_and_import_file(payment_plan_group_with_accepted_plan):
+    group = payment_plan_group_with_accepted_plan
+    import_file = FileTempFactory(
+        object_id=str(group.pk),
+        content_type=get_content_type_for_model(group),
+    )
+    group.delivery_import_file = import_file
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    group.save(update_fields=["delivery_import_file", "background_action_status"])
+    return group
+
+
+@pytest.fixture
+def group_with_two_plans_and_three_payments():
     group = PaymentPlanGroupFactory()
-    PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
+    plan_one = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
+    plan_two = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
+    payment_plan_one_first = PaymentFactory(parent=plan_one)
+    PaymentHouseholdSnapshotFactory(
+        payment=payment_plan_one_first,
+        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN1-A"}},
+    )
+    payment_plan_one_second = PaymentFactory(parent=plan_one)
+    PaymentHouseholdSnapshotFactory(
+        payment=payment_plan_one_second,
+        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN1-B"}},
+    )
+    payment_plan_two_first = PaymentFactory(parent=plan_two)
+    PaymentHouseholdSnapshotFactory(
+        payment=payment_plan_two_first,
+        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN2-A"}},
+    )
+    return {
+        "group": group,
+        "payments": [payment_plan_one_first, payment_plan_one_second, payment_plan_two_first],
+    }
+
+
+@pytest.fixture
+def payment_plan_group_with_accepted_plan():
+    group = PaymentPlanGroupFactory()
+    fsp = FinancialServiceProviderFactory()
+    delivery_mechanism = DeliveryMechanismFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan_group=group,
+        program_cycle=group.cycle,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
     return group
 
 
 @pytest.mark.parametrize(
     ("task", "job_model", "args_builder", "expected_job_name"),
     [
-        (
-            create_payment_plan_delivery_xlsx_async_task,
-            AsyncRetryJob,
-            lambda payment_plan, user, rule: (payment_plan, str(user.pk), None),
-            "create_payment_plan_delivery_xlsx_async_task",
-        ),
         (
             import_payment_plan_payment_list_from_xlsx_async_task,
             AsyncRetryJob,
@@ -201,12 +243,6 @@ def payment_plan_group_with_plans():
             AsyncRetryJob,
             lambda payment_plan, user, rule: (payment_plan, [], ""),
             "payment_plan_exclude_beneficiaries_async_task",
-        ),
-        (
-            send_payment_plan_delivery_xlsx_password_async_task,
-            AsyncRetryJob,
-            lambda payment_plan, user, rule: (payment_plan, str(user.pk)),
-            "send_payment_plan_delivery_xlsx_password_async_task",
         ),
         (
             send_payment_notification_emails_async_task,
@@ -425,124 +461,6 @@ def test_payment_plan_full_rebuild_retry_exception_handling(mock_retry: Mock, mo
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
 
 
-def test_create_payment_plan_delivery_xlsx(
-    financial_service_provider,
-    delivery_mechanism_cash,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
-    fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-    payment_plan.business_area.enable_email_notification = True
-    payment_plan.business_area.save(update_fields=["enable_email_notification"])
-    with (
-        patch.object(
-            PaymentPlan,
-            "is_payment_gateway_and_all_sent_to_fsp",
-            new_callable=PropertyMock,
-        ) as mock_is_payment_gateway_and_all_sent_to_fsp,
-        patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
-            "XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers"
-        ) as mock_generate_tokens,
-        patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
-            "XlsxPaymentPlanDeliveryExportService.send_delivery_passwords"
-        ) as mock_send_passwords,
-        patch("hope.apps.payment.celery_tasks.send_email_notification") as mock_send_email,
-    ):
-        mock_is_payment_gateway_and_all_sent_to_fsp.return_value = True
-        assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
-
-        queue_and_run_retry_task(
-            create_payment_plan_delivery_xlsx_async_task, payment_plan, str(user.pk), str(fsp_template.pk)
-        )
-
-        payment_plan.refresh_from_db()
-        file_obj = FileTemp.objects.get(object_id=payment_plan.id)
-
-        assert payment_plan.background_action_status is None
-        assert payment_plan.has_export_file
-        assert payment_plan.export_file_delivery.file.name.startswith(
-            f"payment_plan_payment_list_{payment_plan.unicef_id}"
-        )
-        assert payment_plan.export_file_delivery.file.name.endswith(".zip")
-        assert file_obj.password is not None
-        assert file_obj.xlsx_password is not None
-        mock_generate_tokens.assert_called_once()
-        mock_send_email.assert_called_once()
-        mock_send_passwords.assert_called_once_with(user, payment_plan)
-
-
-@patch("hope.apps.payment.notifications.MailjetClient.send_email")
-def test_send_payment_plan_delivery_xlsx_password(
-    mock_mailjet_send: Mock,
-    financial_service_provider,
-    delivery_mechanism_cash,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.FINISHED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
-    fsp_template = FinancialServiceProviderXlsxTemplateFactory()
-    with patch.object(
-        PaymentPlan,
-        "is_payment_gateway_and_all_sent_to_fsp",
-        new_callable=PropertyMock,
-    ) as mock_is_payment_gateway_and_all_sent_to_fsp:
-        mock_is_payment_gateway_and_all_sent_to_fsp.return_value = True
-        assert payment_plan.is_payment_gateway_and_all_sent_to_fsp
-
-        queue_and_run_retry_task(
-            create_payment_plan_delivery_xlsx_async_task, payment_plan, str(user.pk), str(fsp_template.pk)
-        )
-        payment_plan.refresh_from_db()
-        file_obj = FileTemp.objects.get(object_id=payment_plan.id)
-
-        assert payment_plan.background_action_status is None
-        assert payment_plan.export_file_delivery == file_obj
-        assert isinstance(file_obj.password, str)
-        assert isinstance(file_obj.xlsx_password, str)
-        assert len(file_obj.xlsx_password) == 12
-        assert len(file_obj.password) == 12
-
-        queue_and_run_retry_task(send_payment_plan_delivery_xlsx_password_async_task, payment_plan, str(user.pk))
-
-        assert mock_mailjet_send.call_count == 3
-
-    from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
-        XlsxPaymentPlanDeliveryExportService,
-    )
-
-    assert XlsxPaymentPlanDeliveryExportService._as_plain_text(memoryview(b"zip-pass")) == "zip-pass"
-    assert XlsxPaymentPlanDeliveryExportService._as_plain_text(b"xlsx-pass") == "xlsx-pass"
-
-
-@patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.models.User")
-def test_send_payment_plan_delivery_xlsx_password_failure(
-    mock_get_user_model: Mock, mock_retry: Mock, mock_logger: Mock
-) -> None:
-    payment_plan = PaymentPlanFactory()
-    mock_retry.side_effect = Retry("retry")
-    mock_get_user_model.objects.get.side_effect = Exception("User not found")
-    with pytest.raises(Retry):
-        queue_and_run_retry_task(
-            send_payment_plan_delivery_xlsx_password_async_task, payment_plan, "invalid-user-id-123"
-        )
-
-    mock_logger.exception.assert_not_called()
-    mock_retry.assert_called_once()
-
-
 @patch("hope.apps.payment.xlsx.xlsx_payment_plan_export_service.XlsxPaymentPlanExportService.save_xlsx_file")
 def test_create_payment_plan_payment_list_xlsx_action_marks_error_on_exception(
     mock_save_xlsx_file: Mock,
@@ -561,36 +479,6 @@ def test_create_payment_plan_payment_list_xlsx_action_marks_error_on_exception(
 
     with pytest.raises(Exception, match="xlsx failed"):
         create_payment_plan_payment_list_xlsx_async_task_action(job)
-
-    payment_plan.refresh_from_db(fields=["background_action_status"])
-    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
-
-
-@patch(
-    "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
-    "XlsxPaymentPlanDeliveryExportService.export_delivery"
-)
-def test_create_payment_plan_delivery_xlsx_action_marks_error_on_exception(
-    mock_export_delivery: Mock,
-    financial_service_provider,
-    delivery_mechanism_cash,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
-    job = AsyncRetryJob.objects.create(
-        type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
-        config={"payment_plan_id": str(payment_plan.pk), "user_id": str(user.pk), "fsp_xlsx_template_id": None},
-    )
-    mock_export_delivery.side_effect = Exception("delivery xlsx failed")
-
-    with pytest.raises(Exception, match="delivery xlsx failed"):
-        create_payment_plan_delivery_xlsx_async_task_action(job)
 
     payment_plan.refresh_from_db(fields=["background_action_status"])
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
@@ -696,113 +584,6 @@ def test_create_payment_plan_payment_list_xlsx_action_skips_email_when_disabled(
 
     mock_save_xlsx_file.assert_called_once_with(user)
     mock_send_email_on_commit.assert_not_called()
-
-
-@patch("hope.apps.payment.celery_tasks.send_email_notification")
-@patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.XlsxPaymentPlanDeliveryExportService")
-def test_create_payment_plan_delivery_xlsx_action_generates_tokens_and_sends_emails(
-    mock_service_cls: Mock,
-    mock_send_email: Mock,
-    financial_service_provider,
-    delivery_mechanism_cash,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
-    payment_plan.business_area.enable_email_notification = True
-    payment_plan.business_area.save(update_fields=["enable_email_notification"])
-    job = AsyncRetryJob.objects.create(
-        type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
-        config={
-            "payment_plan_id": str(payment_plan.pk),
-            "user_id": str(user.pk),
-            "fsp_xlsx_template_id": "template-id",
-        },
-    )
-    mock_service = mock_service_cls.return_value
-    mock_service.payment_generate_token_and_order_numbers = True
-
-    create_payment_plan_delivery_xlsx_async_task_action(job)
-
-    mock_service.generate_token_and_order_numbers.assert_called_once()
-    mock_service.export_delivery.assert_called_once_with(user)
-    mock_send_email.assert_called_once_with(mock_service, user)
-    mock_service.send_delivery_passwords.assert_called_once_with(user, payment_plan)
-
-
-@patch("hope.apps.payment.celery_tasks.send_email_notification")
-@patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.XlsxPaymentPlanDeliveryExportService")
-def test_create_payment_plan_delivery_xlsx_action_skips_tokens_and_password_email_without_template(
-    mock_service_cls: Mock,
-    mock_send_email: Mock,
-    financial_service_provider,
-    delivery_mechanism_cash,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
-    payment_plan.business_area.enable_email_notification = True
-    payment_plan.business_area.save(update_fields=["enable_email_notification"])
-    job = AsyncRetryJob.objects.create(
-        type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
-        config={
-            "payment_plan_id": str(payment_plan.pk),
-            "user_id": str(user.pk),
-            "fsp_xlsx_template_id": None,
-        },
-    )
-    mock_service = mock_service_cls.return_value
-    mock_service.payment_generate_token_and_order_numbers = False
-
-    create_payment_plan_delivery_xlsx_async_task_action(job)
-
-    mock_service.generate_token_and_order_numbers.assert_not_called()
-    mock_service.export_delivery.assert_called_once_with(user)
-    mock_send_email.assert_called_once_with(mock_service, user)
-    mock_service.send_delivery_passwords.assert_not_called()
-
-
-@patch("hope.apps.payment.celery_tasks.send_email_notification")
-@patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.XlsxPaymentPlanDeliveryExportService")
-def test_create_payment_plan_delivery_xlsx_action_skips_emails_when_disabled(
-    mock_service_cls: Mock,
-    mock_send_email: Mock,
-    financial_service_provider,
-    delivery_mechanism_cash,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism_cash,
-    )
-    payment_plan.business_area.enable_email_notification = False
-    payment_plan.business_area.save(update_fields=["enable_email_notification"])
-    job = AsyncRetryJob.objects.create(
-        type=AsyncJobModel.JobType.JOB_TASK,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
-        config={
-            "payment_plan_id": str(payment_plan.pk),
-            "user_id": str(user.pk),
-            "fsp_xlsx_template_id": "template-id",
-        },
-    )
-    mock_service = mock_service_cls.return_value
-    mock_service.payment_generate_token_and_order_numbers = False
-
-    create_payment_plan_delivery_xlsx_async_task_action(job)
-
-    mock_service.export_delivery.assert_called_once_with(user)
-    mock_send_email.assert_not_called()
-    mock_service.send_delivery_passwords.assert_not_called()
 
 
 def test_get_sync_run_rapid_pro_task_queues_retry_job(django_capture_on_commit_callbacks) -> None:
@@ -1845,94 +1626,166 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_o
     mock_queue.assert_called_once()
 
 
-def test_export_task_creates_file(payment_plan_group_with_plans, user) -> None:
-    group = payment_plan_group_with_plans
+def test_export_delivery_task_creates_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
     group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status"])
 
-    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
+    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
 
     group.refresh_from_db()
-    assert group.export_file is not None
-    assert group.export_file.file.name.endswith(".xlsx")
+    plan = group.payment_plans.get(export_tag=1)
+    assert plan.export_file_delivery is not None
+    assert plan.export_file_delivery.file.name.endswith(".xlsx")
     assert group.background_action_status is None
 
 
-def test_export_combines_all_plans_in_group(user) -> None:
-    group = PaymentPlanGroupFactory()
-    plan_one = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
-    plan_two = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, payment_plan_group=group, program_cycle=group.cycle)
-    payment_plan_one_first = PaymentFactory(parent=plan_one)
-    PaymentHouseholdSnapshotFactory(
-        payment=payment_plan_one_first,
-        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN1-A"}},
+def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+    first_plan = group.payment_plans.get(export_tag=1)
+    first_file_id = first_plan.export_file_delivery_id
+
+    new_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan_group=group,
+        program_cycle=group.cycle,
+        financial_service_provider=first_plan.financial_service_provider,
+        delivery_mechanism=first_plan.delivery_mechanism,
     )
-    payment_plan_one_second = PaymentFactory(parent=plan_one)
-    PaymentHouseholdSnapshotFactory(
-        payment=payment_plan_one_second,
-        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN1-B"}},
-    )
-    payment_plan_two_first = PaymentFactory(parent=plan_two)
-    PaymentHouseholdSnapshotFactory(
-        payment=payment_plan_two_first,
-        snapshot_data={"primary_collector": {"unicef_id": "IND-PLAN2-A"}},
-    )
-    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status"])
+    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
 
-    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
-
-    group.refresh_from_db()
-    with default_storage.open(group.export_file.file.name) as f:
-        wb = openpyxl.load_workbook(f)
-    ws = wb.active
-    headers = [cell.value for cell in ws[1]]
-    payment_id_col = headers.index("payment_id") + 1
-    payment_ids_in_sheet = {ws.cell(row=row, column=payment_id_col).value for row in range(2, ws.max_row + 1)}
-
-    assert wb.sheetnames == ["Payment Plan Group - Payment List"]
-    assert ws.max_row == 4
-    assert payment_ids_in_sheet == {
-        payment_plan_one_first.unicef_id,
-        payment_plan_one_second.unicef_id,
-        payment_plan_two_first.unicef_id,
-    }
+    first_plan.refresh_from_db()
+    new_plan.refresh_from_db()
+    assert first_plan.export_file_delivery_id == first_file_id
+    assert first_plan.export_tag == 1
+    assert new_plan.export_tag == 2
+    assert new_plan.export_file_delivery_id is not None
+    assert FileTemp.objects.filter(pk=first_file_id).exists()
 
 
-def test_export_task_replaces_existing_file(payment_plan_group_with_plans, user) -> None:
-    group = payment_plan_group_with_plans
-    old_file = FileTempFactory(
-        object_id=str(group.pk),
-        content_type=get_content_type_for_model(group),
-    )
-    group.export_file = old_file
-    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["export_file", "background_action_status"])
-
-    queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
-
-    group.refresh_from_db()
-    assert group.export_file is not None
-    assert group.export_file_id != old_file.pk
-    assert not FileTemp.objects.filter(pk=old_file.pk).exists()
-
-
-def test_export_task_sets_error_status_on_failure(payment_plan_group_with_plans, user) -> None:
-    group = payment_plan_group_with_plans
+def test_export_delivery_task_sets_error_status_on_failure(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
     group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status"])
 
     with (
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_group_export_service.XlsxPaymentPlanGroupExportService.save_xlsx_file",
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service."
+            "XlsxPaymentPlanGroupDeliveryExportService.save_xlsx_file",
             side_effect=Exception("Export has failed"),
         ),
         pytest.raises(Exception, match="Export has failed"),
     ):
-        queue_and_run_retry_task(export_payment_plan_group_xlsx_async_task, group, str(user.pk))
+        queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
 
     group.refresh_from_db()
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+def test_export_delivery_task_reexports_existing_batch(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+
+    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+    plan = group.payment_plans.get(export_tag=1)
+    first_file_id = plan.export_file_delivery_id
+
+    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk), export_tag=1)
+
+    plan.refresh_from_db()
+    assert plan.export_tag == 1
+    assert plan.export_file_delivery_id is not None
+    assert plan.export_file_delivery_id != first_file_id
+    assert plan.export_file_delivery.file.name.endswith(".xlsx")
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification")
+@patch(
+    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service.XlsxPaymentPlanGroupDeliveryExportService"
+)
+def test_export_delivery_task_generates_tokens_and_sends_email_when_enabled(
+    mock_service_cls: Mock,
+    mock_send_email: Mock,
+    payment_plan_group_with_accepted_plan,
+    user,
+) -> None:
+    group = payment_plan_group_with_accepted_plan
+    group.cycle.program.business_area.enable_email_notification = True
+    group.cycle.program.business_area.save(update_fields=["enable_email_notification"])
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = True
+    mock_service.applied_export_tag = 1
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": str(user.pk)},
+    )
+
+    export_payment_plan_group_delivery_xlsx_async_task_action(job)
+
+    mock_service.generate_token_and_order_numbers.assert_called_once_with(group.cycle.program)
+    mock_service.save_xlsx_file.assert_called_once_with(user)
+    mock_send_email.assert_called_once_with(mock_service, user)
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification")
+@patch(
+    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service.XlsxPaymentPlanGroupDeliveryExportService"
+)
+def test_export_delivery_task_skips_email_when_notification_disabled(
+    mock_service_cls: Mock,
+    mock_send_email: Mock,
+    payment_plan_group_with_accepted_plan,
+    user,
+) -> None:
+    group = payment_plan_group_with_accepted_plan
+    group.cycle.program.business_area.enable_email_notification = False
+    group.cycle.program.business_area.save(update_fields=["enable_email_notification"])
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = True
+    mock_service.applied_export_tag = 1
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": str(user.pk)},
+    )
+
+    export_payment_plan_group_delivery_xlsx_async_task_action(job)
+
+    mock_service.generate_token_and_order_numbers.assert_called_once_with(group.cycle.program)
+    mock_service.save_xlsx_file.assert_called_once_with(user)
+    mock_send_email.assert_not_called()
+
+
+def test_import_delivery_group_task_clears_status_on_success(group_with_accepted_plan_and_import_file, user) -> None:
+    group = group_with_accepted_plan_and_import_file
+
+    with patch(
+        "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service.XlsxPaymentPlanGroupDeliveryImportService"
+    ) as mock_cls:
+        mock_cls.return_value.open_workbook.return_value = None
+        mock_cls.return_value.import_payment_list.return_value = None
+        queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
+
+    group.refresh_from_db()
+    assert group.background_action_status is None
+
+
+def test_import_delivery_group_task_sets_error_status_on_failure(
+    group_with_accepted_plan_and_import_file, user
+) -> None:
+    group = group_with_accepted_plan_and_import_file
+
+    with patch(
+        "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service.XlsxPaymentPlanGroupDeliveryImportService"
+    ) as mock_cls:
+        mock_cls.return_value.open_workbook.return_value = None
+        mock_cls.return_value.import_payment_list.side_effect = Exception("Import has failed")
+        with pytest.raises(Exception, match="Import has failed"):
+            queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
 
 
 def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_plan: Any, user: Any) -> None:

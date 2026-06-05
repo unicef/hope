@@ -3,9 +3,10 @@ import json
 from typing import Any, cast
 
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
+from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -123,8 +124,13 @@ class AcceptanceProcessSerializer(serializers.Serializer):
     comment = serializers.CharField(required=False)
 
 
-class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
-    fsp_xlsx_template_id = serializers.CharField()
+class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
+    export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
+    fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
+
+
+class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
+    export_tag = serializers.IntegerField(min_value=1)
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
@@ -433,6 +439,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "updated_at",
             "program",
             "payment_plan_group",
+            "export_tag",
         )
 
     @staticmethod
@@ -1887,24 +1894,55 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
         return value
 
 
+class PaymentPlanGroupBatchSerializer(serializers.Serializer):
+    export_tag = serializers.IntegerField()
+    export_file_link = serializers.CharField(allow_null=True)
+
+
 class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
-    export_file = serializers.SerializerMethodField()
-    background_action_status = serializers.CharField(read_only=True, allow_null=True)
     can_send_to_payment_gateway = serializers.SerializerMethodField()
+    batches = serializers.SerializerMethodField()
+    delivery_import_file = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
+            "background_action_status",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
             "payment_plans_count",
-            "export_file",
-            "background_action_status",
             "can_send_to_payment_gateway",
+            "batches",
+            "delivery_import_file",
+        ]
+
+    @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
+    def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:
+        tags_qs = (
+            obj.payment_plans.filter(export_tag__isnull=False)
+            .order_by()
+            .values("export_tag")
+            .annotate(
+                has_file=Max(
+                    Case(When(export_file_delivery__isnull=False, then=1), default=0, output_field=IntegerField())
+                )
+            )
+            .order_by("export_tag")
+        )
+        return [
+            {
+                "export_tag": row["export_tag"],
+                "export_file_link": (
+                    reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
+                    if row["has_file"]
+                    else None
+                ),
+            }
+            for row in tags_qs
         ]
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
@@ -1922,9 +1960,9 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
     def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
         return obj.payment_plans.count()
 
-    def get_export_file(self, obj: PaymentPlanGroup) -> str | None:
-        if obj.export_file_id and obj.export_file.file:
-            return obj.export_file.file.url
+    def get_delivery_import_file(self, obj: PaymentPlanGroup) -> str | None:
+        if obj.delivery_import_file_id and obj.delivery_import_file.file:
+            return obj.delivery_import_file.file.url
         return None
 
     def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:

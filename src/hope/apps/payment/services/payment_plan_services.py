@@ -1,12 +1,10 @@
 import datetime
-from functools import partial
 from itertools import groupby
 import logging
-from typing import IO, TYPE_CHECKING, Any, Callable, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Union, cast
 
 from constance import config
 from django.conf import settings
-from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -32,15 +30,12 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    create_payment_plan_delivery_xlsx_async_task,
     create_payment_plan_payment_list_xlsx_async_task,
-    import_payment_plan_delivery_from_xlsx_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
     send_payment_notification_emails_async_task,
-    send_payment_plan_delivery_xlsx_password_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_to_payment_gateway_async_task,
     update_exchange_rate_on_release_payments_async_task,
@@ -58,7 +53,6 @@ from hope.models import (
     BusinessArea,
     Currency,
     DeliveryMechanism,
-    FileTemp,
     FinancialServiceProvider,
     Individual,
     IndividualRoleInHousehold,
@@ -113,7 +107,6 @@ class PaymentPlanService:
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
             PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
-            PaymentPlan.Action.SEND_XLSX_PASSWORD.value: self.send_xlsx_password,
         }
 
     def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> int | None:
@@ -666,31 +659,31 @@ class PaymentPlanService:
                 return True
         return False
 
+    def _set_vulnerability_scores(self, input_data: dict) -> bool:
+        """Apply vulnerability score bounds; return whether either changed."""
+        vulnerability_filter = False
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
+        if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
+            vulnerability_filter = True
+            self.payment_plan.vulnerability_score_min = vulnerability_score_min
+        if vulnerability_score_max != self.payment_plan.vulnerability_score_max:
+            vulnerability_filter = True
+            self.payment_plan.vulnerability_score_max = vulnerability_score_max
+        return vulnerability_filter
+
     def update(self, input_data: dict) -> PaymentPlan:
         program = self.payment_plan.program_cycle.program
         should_update_money_stats = False
         should_rebuild_list = False
-        vulnerability_filter = False
 
         self._validate_update_permissions(input_data)
 
-        (
-            name,
-            vulnerability_score_min,
-            vulnerability_score_max,
-            rules,
-            dispersion_start_date,
-            dispersion_end_date,
-            fsp_id,
-        ) = (
-            input_data.get("name"),
-            input_data.get("vulnerability_score_min"),
-            input_data.get("vulnerability_score_max"),
-            input_data.get("rules"),
-            input_data.get("dispersion_start_date"),
-            input_data.get("dispersion_end_date"),
-            input_data.get("fsp_id"),
-        )
+        name = input_data.get("name")
+        rules = input_data.get("rules")
+        dispersion_start_date = input_data.get("dispersion_start_date")
+        dispersion_end_date = input_data.get("dispersion_end_date")
+        fsp_id = input_data.get("fsp_id")
 
         if name:
             name = self._validate_pp_name(name, program)
@@ -704,12 +697,7 @@ class PaymentPlanService:
         self._set_program_cycle(input_data)
         self._set_group_for_open_pp(input_data)
 
-        if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
-            vulnerability_filter = True
-            self.payment_plan.vulnerability_score_min = vulnerability_score_min
-        if vulnerability_score_max != self.payment_plan.vulnerability_score_max:
-            vulnerability_filter = True
-            self.payment_plan.vulnerability_score_max = vulnerability_score_max
+        vulnerability_filter = self._set_vulnerability_scores(input_data)
 
         if rules and self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
             targeting_criteria_input = {"rules": input_data["rules"]}
@@ -937,52 +925,6 @@ class PaymentPlanService:
 
         create_payment_plan_payment_list_xlsx_async_task(payment_plan=self.payment_plan, user_id=str(user_id))
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
-        return self.payment_plan
-
-    def _validate_delivery_export_template_exists(self, fsp_xlsx_template_id: str | None) -> None:
-        from hope.models import FinancialServiceProviderXlsxTemplate
-
-        fsp = self.payment_plan.financial_service_provider
-        delivery_mechanism = self.payment_plan.delivery_mechanism
-        if fsp is None or delivery_mechanism is None:
-            raise ValidationError(
-                "Payment plan delivery export requires a Financial Service Provider and Delivery Mechanism."
-            )
-        if fsp_xlsx_template_id:
-            if not FinancialServiceProviderXlsxTemplate.objects.filter(pk=fsp_xlsx_template_id).exists():
-                raise ValidationError("Payment plan delivery export requires an existing FSP XLSX Template.")
-            return
-        if fsp.get_xlsx_template(delivery_mechanism) is None:
-            raise ValidationError(
-                "Payment plan delivery export requires an FSP XLSX Template for the selected "
-                "Financial Service Provider and Delivery Mechanism."
-            )
-
-    def export_delivery_xlsx(self, user_id: str, fsp_xlsx_template_id: str | None) -> PaymentPlan:
-        self._validate_delivery_export_template_exists(fsp_xlsx_template_id)
-        flow = PaymentPlanFlow(self.payment_plan)
-        flow.background_action_status_xlsx_exporting()
-        self.payment_plan.save(update_fields=["background_action_status"])
-
-        create_payment_plan_delivery_xlsx_async_task(self.payment_plan, str(user_id), fsp_xlsx_template_id)
-        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_delivery"])
-        return self.payment_plan
-
-    def import_delivery_xlsx(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
-        with transaction.atomic():
-            file_temp = FileTemp.objects.create(
-                object_id=self.payment_plan.pk,
-                content_type=get_content_type_for_model(self.payment_plan),
-                created_by=user,
-                file=file,
-            )
-            flow = PaymentPlanFlow(self.payment_plan)
-            flow.background_action_status_xlsx_importing_reconciliation()
-            self.payment_plan.reconciliation_import_file = file_temp
-            self.payment_plan.save()
-
-            transaction.on_commit(partial(import_payment_plan_delivery_from_xlsx_async_task, self.payment_plan))
-        self.payment_plan.refresh_from_db()
         return self.payment_plan
 
     def _create_child_payment_plan(
@@ -1359,10 +1301,6 @@ class PaymentPlanService:
                     ind_filter.pk = None
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
-
-    def send_xlsx_password(self) -> PaymentPlan:
-        send_payment_plan_delivery_xlsx_password_async_task(self.payment_plan, str(self.user.pk))
-        return self.payment_plan
 
     def close(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.FINISHED:

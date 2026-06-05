@@ -65,9 +65,6 @@ export function PaymentPlanDetailsHeader({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
     permissions,
   );
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
@@ -153,7 +150,6 @@ export function PaymentPlanDetailsHeader({
     case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
           canClose={canClose}

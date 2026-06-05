@@ -5,6 +5,7 @@ import mimetypes
 from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
 from django.db.models import Prefetch, QuerySet
 from django.http import FileResponse, Http404
@@ -71,10 +72,11 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanCreateUpdateSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
-    PaymentPlanExportAuthCodeSerializer,
     PaymentPlanGroupCreateSerializer,
+    PaymentPlanGroupDeliveryExportSerializer,
     PaymentPlanGroupDetailSerializer,
     PaymentPlanGroupListSerializer,
+    PaymentPlanGroupSendXlsxPasswordSerializer,
     PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
@@ -96,8 +98,9 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
-    export_payment_plan_group_xlsx_async_task,
+    export_payment_plan_group_delivery_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_engine_rule_async_task,
@@ -105,6 +108,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
+    send_payment_plan_group_delivery_xlsx_password_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
@@ -126,8 +130,8 @@ from hope.apps.payment.utils import calculate_counts, from_received_to_status
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
-    XlsxPaymentPlanDeliveryImportService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+    XlsxPaymentPlanGroupDeliveryImportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
@@ -141,6 +145,7 @@ from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     BusinessArea,
     DeliveryMechanism,
+    FileTemp,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
@@ -724,10 +729,6 @@ class PaymentPlanViewSet(
         "authorize",
         "mark_as_released",
         "send_to_payment_gateway",
-        "delivery_export_xlsx_with_auth_code",
-        "send_xlsx_password",
-        "delivery_export_xlsx",
-        "delivery_import_xlsx",
         "split",
         "close",
         "abort",
@@ -758,9 +759,7 @@ class PaymentPlanViewSet(
         "approve": AcceptanceProcessSerializer,
         "authorize": AcceptanceProcessSerializer,
         "mark_as_released": AcceptanceProcessSerializer,
-        "delivery_export_xlsx_with_auth_code": PaymentPlanExportAuthCodeSerializer,
         "split": SplitPaymentPlanSerializer,
-        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "abort": PaymentPlanAbortSerializer,
@@ -796,11 +795,7 @@ class PaymentPlanViewSet(
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
-        "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
-        "delivery_export_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
-        "delivery_export_xlsx": [Permissions.PM_VIEW_LIST],
         "split": [Permissions.PM_SPLIT],
-        "delivery_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
@@ -1396,165 +1391,6 @@ class PaymentPlanViewSet(
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["post"], url_path="delivery-export-xlsx-with-auth-code")
-    @transaction.atomic
-    def delivery_export_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
-
-        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING:
-            raise ValidationError("Payment plan delivery export already in progress.")
-
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-        ]:
-            raise ValidationError(
-                "Payment plan delivery export is only available for ACCEPTED or FINISHED Payment Plans."
-            )
-        if payment_plan.export_file_delivery is not None:
-            raise ValidationError("Export failed: Payment Plan already has created exported file.")
-        if fsp_xlsx_template_id and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
-            raise ValidationError(
-                "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
-            )
-
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_delivery_xlsx(
-            str(request.user.pk), fsp_xlsx_template_id
-        )
-
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["get"], url_path="send-xlsx-password")
-    @transaction.atomic
-    def send_xlsx_password(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.SEND_XLSX_PASSWORD},
-            user=request.user,
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="delivery-export-xlsx",
-    )
-    @transaction.atomic
-    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-        ]:
-            raise ValidationError(
-                "Payment plan delivery export is only available for ACCEPTED or FINISHED Payment Plans."
-            )
-        if not payment_plan.eligible_payments:
-            raise ValidationError("Export failed: The Payment List is empty.")
-        old_payment_plan = copy_model_object(payment_plan)
-
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_delivery_xlsx(str(request.user.id), None)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @extend_schema(
-        request=PaymentPlanImportFileSerializer,
-        responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer},
-    )
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="delivery-import-xlsx",
-        parser_classes=[DictDrfNestedParser],
-    )
-    @transaction.atomic
-    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-        ]:
-            raise ValidationError(
-                "Payment plan delivery import is only available for ACCEPTED or FINISHED Payment Plans."
-            )
-        if payment_plan.is_payment_gateway:
-            raise ValidationError(
-                "Manual reconciliation import is not available for payment plans using payment gateway."
-            )
-
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        file = serializer.validated_data["file"]
-        with transaction.atomic():
-            import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file)
-            try:
-                import_service.open_workbook()
-            except BadZipFile:
-                raise ValidationError(
-                    "Wrong file type or password protected .zip file. Upload another file, or remove the password."
-                )
-
-            import_service.validate()
-            if import_service.errors:
-                return Response(
-                    data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            old_payment_plan = copy_model_object(payment_plan)
-
-            payment_plan = PaymentPlanService(payment_plan=payment_plan).import_delivery_xlsx(
-                user=request.user, file=file
-            )
-            log_create(
-                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-                business_area_field="business_area",
-                user=request.user,
-                programs=payment_plan.program.pk,
-                old_object=old_payment_plan,
-                new_object=payment_plan,
-            )
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
@@ -2651,6 +2487,9 @@ class PaymentPlanGroupViewSet(
         "retrieve": PaymentPlanGroupDetailSerializer,
         "create": PaymentPlanGroupCreateSerializer,
         "update": PaymentPlanGroupUpdateSerializer,
+        "delivery_export_xlsx": PaymentPlanGroupDeliveryExportSerializer,
+        "send_xlsx_password": PaymentPlanGroupSendXlsxPasswordSerializer,
+        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
     }
 
     permissions_by_action = {
@@ -2659,8 +2498,10 @@ class PaymentPlanGroupViewSet(
         "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
-        "export": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
+        "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
+        "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
+        "delivery_import_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2675,18 +2516,130 @@ class PaymentPlanGroupViewSet(
             raise ValidationError("Cannot delete the last group in a cycle.")
         instance.delete()
 
-    @action(detail=True, methods=["post"], url_path="export")
-    def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    @extend_schema(
+        request=PaymentPlanGroupDeliveryExportSerializer,
+        responses={200: PaymentPlanGroupDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
+    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        if not payment_plan_group.payment_plans.filter(status=PaymentPlan.Status.LOCKED).exists():
-            raise ValidationError("Export requires at least one payment plan in LOCKED status.")
-        if payment_plan_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING:
-            raise ValidationError("Export already in progress.")
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        export_tag = serializer.validated_data["export_tag"]
+        fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
+
+        if fsp_xlsx_template_id is not None and not request.user.has_perm(
+            Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value,
+            payment_plan_group.cycle.program,
+        ):
+            raise PermissionDenied(detail={"required_permissions": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value]})
+
+        if export_tag is not None:
+            if not payment_plan_group.payment_plans.filter(export_tag=export_tag).exists():
+                raise ValidationError(f"No batch found for export_tag={export_tag} in this group.")
+        else:
+            exportable_plans = payment_plan_group.payment_plans.filter(
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                plan_type=PaymentPlan.PlanType.REGULAR,
+                export_tag__isnull=True,
+            )
+            if not exportable_plans.exists():
+                raise ValidationError(
+                    "Export requires at least one not-yet-exported payment plan in ACCEPTED or FINISHED status."
+                )
+            if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
+                raise ValidationError("Export failed: there are no eligible payments to export.")
+
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        payment_plan_group.save(update_fields=["background_action_status"])
         transaction.on_commit(
-            lambda: export_payment_plan_group_xlsx_async_task(payment_plan_group, str(request.user.pk))
+            lambda: export_payment_plan_group_delivery_xlsx_async_task(
+                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
+            )
         )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=PaymentPlanGroupSendXlsxPasswordSerializer,
+        responses={200: PaymentPlanGroupDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="send-xlsx-password")
+    def send_xlsx_password(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        export_tag = serializer.validated_data["export_tag"]
+
+        if not payment_plan_group.payment_plans.filter(
+            export_tag=export_tag, export_file_delivery__isnull=False
+        ).exists():
+            raise ValidationError(f"No exported batch file found for export_tag={export_tag} in this group.")
+
+        transaction.on_commit(
+            lambda: send_payment_plan_group_delivery_xlsx_password_async_task(
+                payment_plan_group, str(request.user.pk), export_tag
+            )
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="delivery-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
+    )
+    @transaction.atomic
+    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
+        importable_plans = payment_plan_group.payment_plans.filter(
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            plan_type=PaymentPlan.PlanType.REGULAR,
+        )
+        if not importable_plans.exists():
+            raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")
+
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        file = serializer.validated_data["file"]
+
+        import_service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file)
+        try:
+            import_service.open_workbook()
+        except BadZipFile:
+            raise ValidationError(
+                "Wrong file type or password protected .zip file. Upload another file, or remove the password."
+            )
+        import_service.validate()
+        if import_service.errors:
+            return Response(
+                data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file_temp = FileTemp.objects.create(
+            object_id=payment_plan_group.pk,
+            content_type=get_content_type_for_model(payment_plan_group),
+            created_by=request.user,
+            file=file,
+        )
+        payment_plan_group.delivery_import_file = file_temp
+        payment_plan_group.background_action_status = (
+            PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+        )
+        payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status"])
+        transaction.on_commit(lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group))
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
             status=status.HTTP_200_OK,

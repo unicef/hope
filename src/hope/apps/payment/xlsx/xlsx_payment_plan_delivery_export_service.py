@@ -4,24 +4,18 @@ from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, cast
 import zipfile
 
-from django.contrib.admin.options import get_content_type_for_model
-from django.core.files import File
-from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils.crypto import get_random_string
 import msoffcrypto
 import openpyxl
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-import pyzipper
 
 from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
-from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.utils.exceptions import log_and_raise
@@ -34,7 +28,6 @@ from hope.models import (
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
     Program,
 )
 
@@ -68,8 +61,8 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         self.countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
         self.all_document_types = DocumentType.get_all_doc_types()
 
+    @staticmethod
     def generate_token_and_order_numbers(
-        self,
         qs: QuerySet[Payment],
         program: Program,
     ) -> None:
@@ -251,25 +244,6 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         self.header_list = column_list
         return self.header_list
 
-    def add_rows(
-        self,
-        split: PaymentPlanSplit,
-        ws: "Worksheet",
-    ) -> None:
-        qs = (
-            split.split_payment_items.eligible()
-            .select_related(
-                "household_snapshot",
-                "currency",
-                "delivery_type",
-                "financial_service_provider",
-                "parent",
-            )
-            .order_by("unicef_id")
-        )
-        for payment in qs.iterator(chunk_size=self.batch_size):
-            ws.append(self.get_payment_row(payment))
-
     def get_payment_row(self, payment: Payment) -> list[str]:
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
@@ -323,8 +297,8 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             return collector_data.get("flex_fields", {}).get(name, "")
         return snapshot_data.get("flex_fields", {}).get(name, "")
 
+    @staticmethod
     def save_workbook(
-        self,
         zip_file: zipfile.ZipFile,
         wb: "Workbook",
         filename: str,
@@ -347,101 +321,19 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
                 # add xlsx to zip
                 zip_file.writestr(filename, tmp.read())
 
-    def create_workbooks_per_split(
-        self,
-        zip_file: zipfile.ZipFile,
-        password: str | None = None,
-    ) -> None:
-        # there should be only one delivery mechanism/fsp in order to generate split file
-        # this is guarded in SplitPaymentPlanMutation
-
-        fsp_or_none = self.payment_plan.financial_service_provider
-        dm_or_none = self.payment_plan.delivery_mechanism
-        if fsp_or_none is None:
-            raise ValueError("FSP must be set (guarded by SplitPaymentPlanMutation)")
-        if dm_or_none is None:
-            raise ValueError("Delivery mechanism must be set (guarded by SplitPaymentPlanMutation)")
-        fsp: "FinancialServiceProvider" = fsp_or_none
-        delivery_mechanism: DeliveryMechanism = dm_or_none
-        splits = self.payment_plan.splits.all().order_by("order")
-        splits_count = splits.count()
-        for i, split in enumerate(splits):
-            filename = fsp.name
-            if splits_count > 1:
-                filename += f"-chunk{i + 1}"
-            wb, ws_fsp = self.open_workbook(filename)
-            fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            if fsp_xlsx_template is None:
-                raise ValueError("FSP XLSX template not found for Payment Plan delivery export.")
-            ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
-            self.add_rows(split, ws_fsp)
-            self._adjust_column_width_from_col(ws_fsp)
-            workbook_name = (
-                f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism}"
-            )
-            if splits_count > 1:
-                workbook_name += f"_chunk{i + 1}"
-            workbook_name += ".xlsx"
-            self.save_workbook(
-                zip_file,
-                wb,
-                workbook_name,
-                password,
-            )
-
-    def export_delivery(self, user: "User") -> None:
-        with NamedTemporaryFile(suffix=".zip") as tmp_zip:
-            zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
-
-            # generate passwords only if allow_export_fsp_auth_code=True
-            password, xlsx_password, encryption_arg = None, None, {}
-            if self.allow_export_fsp_auth_code:
-                password = get_random_string(12)
-                xlsx_password = get_random_string(12)
-                encryption_arg = {"encryption": pyzipper.WZ_AES}
-
-            with pyzipper.AESZipFile(
-                tmp_zip, mode="w", compression=pyzipper.ZIP_DEFLATED, **encryption_arg
-            ) as zip_file:
-                # set password only for auth code export
-                if self.allow_export_fsp_auth_code:
-                    zip_file.setpassword(password.encode("utf-8"))
-
-                self.create_workbooks_per_split(zip_file, xlsx_password)
-
-            file_temp_obj = FileTemp(
-                object_id=self.payment_plan.pk,
-                content_type=get_content_type_for_model(self.payment_plan),
-                created_by=user,
-                password=password,
-                xlsx_password=xlsx_password,
-            )
-            tmp_zip.seek(0)
-            with transaction.atomic():
-                self.payment_plan.remove_export_files()
-                file_temp_obj.file.save(zip_file_name, File(tmp_zip))
-                self.payment_plan.export_file_delivery = file_temp_obj
-                flow = PaymentPlanFlow(self.payment_plan)
-                flow.background_action_status_none()
-                self.payment_plan.save(update_fields=["background_action_status", "export_file_delivery", "updated_at"])
-
     @staticmethod
-    def send_delivery_passwords(user: "User", payment_plan: PaymentPlan) -> None:
+    def _send_file_passwords(user: "User", file_temp: FileTemp | None, title: str) -> None:
         text_template = "payment/xlsx_file_password_email.txt"
         html_template = "payment/xlsx_file_password_email.html"
-        zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
-            payment_plan.export_file_delivery.password if payment_plan.export_file_delivery else None
-        )
+        zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(file_temp.password if file_temp else None)
         xlsx_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
-            payment_plan.export_file_delivery.xlsx_password if payment_plan.export_file_delivery else None
+            file_temp.xlsx_password if file_temp else None
         )
-
         msg = (
-            f"Payment Plan {payment_plan.unicef_id} Payment List export file's Passwords.\n"
+            f"{title} export file's Passwords.\n"
             f"ZIP file password: {zip_password}\n"
             f"XLSX file password: {xlsx_password}\n"
         )
-
         context = {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
@@ -449,7 +341,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             "message": msg,
             "zip_password": zip_password,
             "xlsx_password": xlsx_password,
-            "title": f"Payment Plan {payment_plan.unicef_id} Payment List file's Passwords",
+            "title": f"{title} file's Passwords",
             "link": "",
         }
         user.email_user(
@@ -457,6 +349,18 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             html_body=render_to_string(html_template, context=context),
             text_body=render_to_string(text_template, context=context),
         )
+
+    @staticmethod
+    def send_delivery_passwords(user: "User", payment_plan: PaymentPlan) -> None:
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(
+            user,
+            payment_plan.export_file_delivery,
+            f"Payment Plan {payment_plan.unicef_id} Payment List",
+        )
+
+    @staticmethod
+    def send_delivery_passwords_for_file(user: "User", file_temp: FileTemp | None, label: str) -> None:
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, label)
 
     @staticmethod
     def _as_plain_text(value: str | bytes | memoryview | None) -> str:

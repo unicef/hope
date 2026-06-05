@@ -61,6 +61,12 @@ export const headCells = [
   },
   {
     disablePadding: false,
+    label: 'Batch',
+    id: 'tag',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Linked Payment Plans',
     id: 'followup-id',
     numeric: false,
@@ -126,6 +132,12 @@ export const headCellsPeople = [
     disablePadding: false,
     label: 'Dispersion End Date',
     id: 'dispersionEndDate',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Batch',
+    id: 'tag',
     numeric: false,
   },
   {

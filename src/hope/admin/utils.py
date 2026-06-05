@@ -247,7 +247,6 @@ class PaymentPlanCeleryTasksMixin:
     import_payment_plan_payment_list_from_xlsx_async_task = "import_payment_plan_payment_list_from_xlsx_async_task"
     import_payment_plan_delivery_from_xlsx_async_task = "import_payment_plan_delivery_from_xlsx_async_task"
     create_payment_plan_payment_list_xlsx_async_task = "create_payment_plan_payment_list_xlsx_async_task"
-    create_payment_plan_delivery_xlsx_async_task = "create_payment_plan_delivery_xlsx_async_task"
 
     url = "admin:payment_paymentplan_change"
 
@@ -379,38 +378,6 @@ class PaymentPlanCeleryTasksMixin:
             request=request,
             action=self.restart_importing_entitlements_xlsx_file,
             message="Do you confirm to restart importing entitlements xlsx file task?",
-        )
-
-    @button(
-        visible=lambda btn: is_exporting_xlsx_file(btn) and is_accepted_payment_plan(btn),
-        enabled=is_enabled,
-        permission="payment.restart_exporting_payment_plan_list",
-    )
-    def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Export payment plan list."""
-        from hope.apps.payment.celery_tasks import (
-            create_payment_plan_delivery_xlsx_async_task,
-        )
-
-        if request.method == "POST":
-            task_name = self.create_payment_plan_delivery_xlsx_async_task
-            payment_plan = PaymentPlan.objects.get(pk=pk)
-            if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
-                create_payment_plan_delivery_xlsx_async_task(payment_plan, str(request.user.id))
-
-                messages.add_message(request, messages.INFO, "Successfully executed.")
-            else:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    f"There is no current {task_name} for this payment plan",
-                )
-            return redirect(reverse(self.url, args=[pk]))
-        return confirm_action(
-            modeladmin=self,
-            request=request,
-            action=self.restart_exporting_payment_plan_list,
-            message="Do you confirm to restart exporting xlsx file task?",
         )
 
     @button(

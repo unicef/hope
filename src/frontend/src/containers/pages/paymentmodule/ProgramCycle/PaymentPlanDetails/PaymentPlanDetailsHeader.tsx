@@ -94,9 +94,6 @@ export const PaymentPlanDetailsHeader = ({
   );
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
@@ -180,7 +177,6 @@ export const PaymentPlanDetailsHeader = ({
     case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           canClose={canClose}
           paymentPlan={paymentPlan}

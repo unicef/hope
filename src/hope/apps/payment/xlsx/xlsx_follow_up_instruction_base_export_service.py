@@ -126,7 +126,7 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         return self.wb
 
     def save_xlsx_file(self, user: User) -> None:
-        filename = f"{self.filename_prefix}_{self.instruction.unicef_id or self.instruction.id}.xlsx"
+        filename = f"{self.filename_prefix}_{self.instruction.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile(suffix=".xlsx") as tmp:
             xlsx_obj = FileTemp(

@@ -207,6 +207,10 @@ class Migration(migrations.Migration):
                             "PM PAYMENT PLAN GROUP EXPORT XLSX",
                         ),
                         (
+                            "PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX",
+                            "PM PAYMENT PLAN GROUP IMPORT XLSX",
+                        ),
+                        (
                             "PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST",
                             "PM PAYMENT PLAN PURPOSE VIEW LIST",
                         ),

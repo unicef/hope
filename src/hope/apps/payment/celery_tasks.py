@@ -226,142 +226,113 @@ def create_follow_up_instruction_delivery_xlsx_async_task(
     )
 
 
-def create_payment_plan_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
-        XlsxPaymentPlanDeliveryExportService,
+def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+        XlsxPaymentPlanGroupDeliveryExportService,
     )
-    from hope.models import PaymentPlan, User
+    from hope.models import PaymentPlanGroup, User
 
-    payment_plan_id = job.config["payment_plan_id"]
-    user = User.objects.get(pk=job.config["user_id"])
-    fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
-    payment_plan = PaymentPlan.objects.select_related("program_cycle__program", "business_area").get(id=payment_plan_id)
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-
+    payment_plan_group_id = job.config["payment_plan_group_id"]
     with cache.lock(
-        f"create_payment_plan_delivery_xlsx_{payment_plan_id}",
+        f"export_payment_plan_group_delivery_xlsx_{payment_plan_group_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
+        payment_plan_group = PaymentPlanGroup.objects.select_related("cycle__program__business_area").get(
+            id=payment_plan_group_id
+        )
+        user = User.objects.get(pk=job.config["user_id"])
+        export_tag = job.config.get("export_tag")
+        fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
         try:
-            service = XlsxPaymentPlanDeliveryExportService(payment_plan, fsp_xlsx_template_id)
-
-            if service.payment_generate_token_and_order_numbers:
+            service = XlsxPaymentPlanGroupDeliveryExportService(
+                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
+            )
+            if service.payment_plans and service.payment_generate_token_and_order_numbers:
+                program = payment_plan_group.cycle.program
                 with (
                     cache.lock(
-                        f"payment_plan_generate_token_and_order_numbers_{str(payment_plan.program.id)}",
+                        f"payment_plan_generate_token_and_order_numbers_{str(program.id)}",
                         blocking_timeout=60 * 10,
                         timeout=60 * 20,
                     ),
                     transaction.atomic(),
                 ):
-                    service.generate_token_and_order_numbers(payment_plan.eligible_payments.all(), payment_plan.program)
-
-            service.export_delivery(user)
-
-            if payment_plan.business_area.enable_email_notification:
+                    service.generate_token_and_order_numbers(program)
+            with transaction.atomic():
+                service.save_xlsx_file(user)
+                payment_plan_group.background_action_status = None
+                payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+            if (
+                service.applied_export_tag is not None
+                and payment_plan_group.cycle.program.business_area.enable_email_notification
+            ):
                 send_email_notification(service, user)
-                if fsp_xlsx_template_id:
-                    service.send_delivery_passwords(user, payment_plan)
         except Exception:
-            logger.exception("Create Payment Plan Delivery XLSX Error")
-            flow = PaymentPlanFlow(payment_plan)
-            flow.background_action_status_xlsx_export_error()
-            payment_plan.save(update_fields=["background_action_status", "updated_at"])
+            logger.exception("Export Payment Plan Group Delivery XLSX Error")
+            payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
             raise
 
 
-def create_payment_plan_delivery_xlsx_async_task(
-    payment_plan: PaymentPlan,
-    user_id: str,
-    fsp_xlsx_template_id: str | None = None,
-) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {
-        "payment_plan_id": payment_plan_id,
-        "user_id": user_id,
-        "fsp_xlsx_template_id": fsp_xlsx_template_id,
-    }
-    AsyncRetryJob.queue_task(
-        instance=payment_plan,
-        job_name=create_payment_plan_delivery_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.create_payment_plan_delivery_xlsx_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Create payment plan delivery xlsx for {payment_plan_id}",
-    )
-
-
-def export_payment_plan_group_xlsx_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.payment.xlsx.xlsx_payment_plan_group_export_service import (
-        XlsxPaymentPlanGroupExportService,
-    )
-    from hope.models import PaymentPlanGroup, User
-
-    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
-    user = User.objects.get(pk=job.config["user_id"])
-
-    try:
-        with transaction.atomic():
-            if payment_plan_group.export_file_id:
-                old_file = payment_plan_group.export_file
-                payment_plan_group.export_file = None
-                payment_plan_group.save(update_fields=["export_file"])
-                old_file.file.delete(save=False)
-                old_file.delete()
-            service = XlsxPaymentPlanGroupExportService(payment_plan_group)
-            service.save_xlsx_file(user)
-            payment_plan_group.background_action_status = None
-            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
-    except Exception:
-        logger.exception("Export Payment Plan Group XLSX Error")
-        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
-        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
-        raise
-
-
-def export_payment_plan_group_xlsx_async_task(
+def export_payment_plan_group_delivery_xlsx_async_task(
     payment_plan_group: "PaymentPlanGroup",
     user_id: str,
+    fsp_xlsx_template_id: str | None = None,
+    export_tag: int | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
-    config = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
+    config: dict = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
+    if fsp_xlsx_template_id is not None:
+        config["fsp_xlsx_template_id"] = fsp_xlsx_template_id
+    if export_tag is not None:
+        config["export_tag"] = export_tag
+        description = f"Re-export payment plan group delivery xlsx batch {export_tag} for {payment_plan_group_id}"
+    else:
+        description = f"Export payment plan group delivery xlsx for {payment_plan_group_id}"
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
-        job_name=export_payment_plan_group_xlsx_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.export_payment_plan_group_xlsx_async_task_action",
+        job_name=export_payment_plan_group_delivery_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
         instance=payment_plan_group,
         config=config,
         group_key="payment",
-        description=f"Export payment plan group xlsx for {payment_plan_group_id}",
+        description=description,
     )
 
 
-def send_payment_plan_delivery_xlsx_password_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import PaymentPlan, User
+def send_payment_plan_group_delivery_xlsx_password_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.models import PaymentPlanGroup, User
 
-    user: User = User.objects.get(pk=job.config["user_id"])
-    payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords(user, payment_plan)
+    group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    user = User.objects.get(pk=job.config["user_id"])
+    export_tag = job.config["export_tag"]
+
+    plan = group.payment_plans.filter(export_tag=export_tag, export_file_delivery__isnull=False).first()
+    if plan is None:
+        raise Exception(f"No exported batch file found for group {group.id} with export_tag={export_tag}.")
+    label = f"Payment Plan Group {group.unicef_id} Batch {export_tag} Payment List"
+    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, plan.export_file_delivery, label)
 
 
-def send_payment_plan_delivery_xlsx_password_async_task(
-    payment_plan: PaymentPlan,
+def send_payment_plan_group_delivery_xlsx_password_async_task(
+    payment_plan_group: "PaymentPlanGroup",
     user_id: str,
+    export_tag: int,
 ) -> None:
-    payment_plan_id = str(payment_plan.id)
     config = {
-        "payment_plan_id": payment_plan_id,
+        "payment_plan_group_id": str(payment_plan_group.id),
         "user_id": user_id,
+        "export_tag": export_tag,
     }
     AsyncRetryJob.queue_task(
-        instance=payment_plan,
-        job_name=send_payment_plan_delivery_xlsx_password_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.send_payment_plan_delivery_xlsx_password_async_task_action",
+        program=payment_plan_group.cycle.program,
+        instance=payment_plan_group,
+        job_name=send_payment_plan_group_delivery_xlsx_password_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.send_payment_plan_group_delivery_xlsx_password_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Send payment plan delivery xlsx password for {payment_plan_id}",
+        description=f"Send group delivery xlsx password for group {payment_plan_group.id} batch {export_tag}",
     )
 
 
@@ -645,6 +616,43 @@ def import_follow_up_instruction_reconciliation_from_xlsx_async_task(
         description=f"Import follow up instruction reconciliation from xlsx for {instruction_id}",
     )
     return None
+
+
+def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+        XlsxPaymentPlanGroupDeliveryImportService,
+    )
+
+    payment_plan_group = PaymentPlanGroup.objects.select_related("delivery_import_file").get(
+        id=job.config["payment_plan_group_id"]
+    )
+
+    try:
+        file_xlsx = payment_plan_group.delivery_import_file.file
+        service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file_xlsx)
+        service.open_workbook()
+        service.import_payment_list()
+        payment_plan_group.background_action_status = None
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+    except Exception:
+        logger.exception("Import Payment Plan Group Delivery XLSX Error")
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        raise
+
+
+def import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group: PaymentPlanGroup) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    config = {"payment_plan_group_id": payment_plan_group_id}
+    AsyncRetryJob.queue_task(
+        program=payment_plan_group.cycle.program,
+        job_name=import_payment_plan_group_delivery_from_xlsx_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task_action",
+        instance=payment_plan_group,
+        config=config,
+        group_key="payment",
+        description=f"Import payment plan group delivery from xlsx for {payment_plan_group_id}",
+    )
 
 
 def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None:
