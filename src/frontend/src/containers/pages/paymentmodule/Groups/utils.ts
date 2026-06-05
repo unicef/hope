@@ -1,4 +1,4 @@
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { PaymentPlanGroupDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanGroupDetailBackgroundActionStatusEnum';
 import { PaymentPlanGroupDetail } from './types';
 
 // A group runs one background XLSX action at a time. Export/import may start only
@@ -9,7 +9,7 @@ export function isGroupBackgroundActionBusy(
 ): boolean {
   const status = group?.backgroundActionStatus;
   return (
-    status === PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING ||
-    status === PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION
+    status === PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_EXPORTING ||
+    status === PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION
   );
 }

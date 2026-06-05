@@ -8,7 +8,7 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -18,8 +18,8 @@ import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const errorStatuses = [
-  BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-  BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+  PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+  PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
 ];
 
 const FollowUpInstructionDetailsPage = (): ReactElement => {
@@ -45,7 +45,7 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
       if (
         data?.backgroundActionStatus &&
         !errorStatuses.includes(
-          data.backgroundActionStatus as BackgroundActionStatusEnum,
+          data.backgroundActionStatus as PaymentPlanBackgroundActionStatusEnum,
         )
       ) {
         return 3000;

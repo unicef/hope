@@ -33,7 +33,7 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
 
   const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
     mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxWithAuthCodeCreate(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate(
         {
           businessAreaSlug: businessArea,
           programCode: programId,
