@@ -1563,7 +1563,7 @@ def test_get_batches_sets_link_when_file_present(cycle: Any, business_area: Any)
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
     expected_link = reverse("download-payment-plan-group-batch", args=[str(group.id), 1])
-    assert result == [{"export_tag": 1, "export_file_link": expected_link}]
+    assert result == [{"export_tag": 1, "export_file_link": expected_link, "has_password": False}]
 
 
 def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: Any) -> None:
