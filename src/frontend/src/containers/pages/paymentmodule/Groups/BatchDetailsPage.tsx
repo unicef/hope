@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { BatchDetailsHeader } from '@containers/pages/paymentmodule/Groups/BatchDetailsHeader';
+import { isGroupBackgroundActionBusy } from './utils';
 
 const initialFilter = {
   search: '',
@@ -39,12 +40,15 @@ const BatchDetailsPage = (): ReactElement => {
         programCode: programId,
       }),
     enabled: !!groupId && !!businessArea && !!programId,
+    refetchInterval: (query) =>
+      isGroupBackgroundActionBusy(query.state.data ?? null) ? 3000 : false,
+    refetchIntervalInBackground: true,
   });
 
-  const hasExportFile =
-    group?.batches.find((b) => String(b.exportTag) === tag)?.exportFileLink != null;
-  const hasPassword =
-    group?.batches.find((b) => String(b.exportTag) === tag)?.hasPassword ?? false;
+  const batch = group?.batches.find((b) => String(b.exportTag) === tag);
+  const hasExportFile = batch?.exportFileLink != null;
+  const hasPassword = batch?.hasPassword ?? false;
+  const isBusy = isGroupBackgroundActionBusy(group ?? null);
 
   if (permissions === null) return null;
   if (
@@ -59,7 +63,7 @@ const BatchDetailsPage = (): ReactElement => {
 
   return (
     <>
-      <BatchDetailsHeader groupId={groupId} tag={tag} hasExportFile={hasExportFile} hasPassword={hasPassword} />
+      <BatchDetailsHeader groupId={groupId} tag={tag} hasExportFile={hasExportFile} hasPassword={hasPassword} isBusy={isBusy} />
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}

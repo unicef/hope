@@ -13,6 +13,7 @@ interface BatchDetailsHeaderProps {
   tag: string;
   hasExportFile: boolean;
   hasPassword: boolean;
+  isBusy: boolean;
 }
 
 export function BatchDetailsHeader({
@@ -20,6 +21,7 @@ export function BatchDetailsHeader({
   tag,
   hasExportFile,
   hasPassword,
+  isBusy,
 }: BatchDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -55,7 +57,7 @@ export function BatchDetailsHeader({
         {hasExportFile ? (
           <DownloadBatchButton groupId={groupId} tag={tag} />
         ) : (
-          <ExportBatchButton groupId={groupId} tag={tag} />
+          <ExportBatchButton groupId={groupId} tag={tag} isBusy={isBusy} />
         )}
         {hasPassword && <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />}
       </Box>

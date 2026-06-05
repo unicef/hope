@@ -21,11 +21,13 @@ import { useTranslation } from 'react-i18next';
 interface ExportBatchButtonProps {
   groupId: string;
   tag: string;
+  isBusy?: boolean;
 }
 
 export function ExportBatchButton({
   groupId,
   tag,
+  isBusy = false,
 }: ExportBatchButtonProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -78,7 +80,7 @@ export function ExportBatchButton({
     },
   });
 
-  const isDisabled = !groupId || !tag || loadingExport;
+  const isDisabled = !groupId || !tag || loadingExport || isBusy;
 
   return (
     <>

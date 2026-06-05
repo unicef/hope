@@ -19,6 +19,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { showApiErrorMessages } from '@utils/utils';
 import { PaymentPlanGroupDetail } from '../types';
+import { isGroupBackgroundActionBusy } from '../utils';
 
 interface DeliveryExportXlsxWithAuthCodeGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
@@ -77,6 +78,8 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
     },
   });
 
+  const isDisabled = !group || loadingExport || isGroupBackgroundActionBusy(group);
+
   return (
     <>
       <Box m={2}>
@@ -85,7 +88,7 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
           color="primary"
           variant="outlined"
           onClick={() => setOpen(true)}
-          disabled={!group}
+          disabled={isDisabled}
           data-cy="button-delivery-export-xlsx-with-auth-code-group"
         >
           {t('Export with Auth Code')}
