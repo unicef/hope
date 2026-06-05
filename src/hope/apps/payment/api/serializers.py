@@ -1897,6 +1897,7 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField()
     export_file_link = serializers.CharField(allow_null=True)
+    has_password = serializers.BooleanField()
 
 
 class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
@@ -1929,7 +1930,14 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
             .annotate(
                 has_file=Max(
                     Case(When(export_file_delivery__isnull=False, then=1), default=0, output_field=IntegerField())
-                )
+                ),
+                has_password=Max(
+                    Case(
+                        When(export_file_delivery__password__isnull=False, then=1),
+                        default=0,
+                        output_field=IntegerField(),
+                    )
+                ),
             )
             .order_by("export_tag")
         )
@@ -1941,6 +1949,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
                     if row["has_file"]
                     else None
                 ),
+                "has_password": bool(row["has_password"]),
             }
             for row in tags_qs
         ]
