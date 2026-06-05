@@ -1,3 +1,4 @@
+import { AdminButton } from '@core/AdminButton';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -46,6 +47,7 @@ export function PaymentPlanGroupDetailsHeader({
         </Box>
       }
       breadCrumbs={breadCrumbsItems}
+      flags={<AdminButton adminUrl={group?.adminUrl} />}
     >
       <Box display="flex" alignItems="center">
         <EditGroupName group={group} />

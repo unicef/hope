@@ -1900,7 +1900,7 @@ class PaymentPlanGroupBatchSerializer(serializers.Serializer):
     has_password = serializers.BooleanField()
 
 
-class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
+class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
@@ -1911,6 +1911,7 @@ class PaymentPlanGroupDetailSerializer(PaymentPlanGroupListSerializer):
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
+            "admin_url",
             "background_action_status",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
