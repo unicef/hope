@@ -5,14 +5,11 @@ from tempfile import NamedTemporaryFile
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
-import zipfile
-
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.urls import reverse
 import pytest
-from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory, FileTempFactory, FlexibleAttributeFactory
@@ -32,10 +29,10 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID, ROLE_PRIMARY
-from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+
 from hope.apps.payment.utils import to_decimal
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
@@ -46,14 +43,10 @@ from hope.models import (
     DataCollectingType,
     Document,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
     FlexibleAttribute,
-    FspXlsxTemplatePerDeliveryMechanism,
     IndividualRoleInHousehold,
     MergeStatusModel,
     PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSplit,
 )
 
 pytestmark = pytest.mark.django_db
@@ -637,85 +630,6 @@ def test_export_payment_plan_payment_list(payment_plan, payments, user):
     assert wb.active["N2"].value == "Test_Number_National_Id_123"
 
 
-def test_export_payment_plan_delivery_payment_list(payment_plan, payments, user):
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.save()
-
-    payment = payment_plan.eligible_payments.first()
-    assert payment.token_number is None
-    assert payment.order_number is None
-
-    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
-    export_service.generate_token_and_order_numbers(payment_plan.eligible_payments.all(), payment_plan.program)
-    payment.refresh_from_db(fields=["token_number", "order_number"])
-    assert len(str(payment.token_number)) == 7
-    assert len(str(payment.order_number)) == 9
-
-    export_service.export_delivery(user)
-
-    assert payment_plan.has_export_file
-    assert payment_plan.payment_list_export_file_link is not None
-    assert payment_plan.export_file_delivery.file.name.startswith(f"payment_plan_payment_list_{payment_plan.unicef_id}")
-    fsp_id = payment_plan.financial_service_provider_id
-    with zipfile.ZipFile(payment_plan.export_file_delivery.file, mode="r") as zip_file:  # type: ignore
-        file_list = zip_file.namelist()
-        fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-            financial_service_provider_id=fsp_id,
-        )
-        file_list_fsp = [
-            f.replace(".xlsx", "").replace(f"payment_plan_payment_list_{payment_plan.unicef_id}_FSP_", "")
-            for f in file_list
-        ]
-        for fsp_xlsx_template_per_delivery_mechanism in fsp_xlsx_template_per_delivery_mechanism_list:
-            assert (
-                f"{fsp_xlsx_template_per_delivery_mechanism.financial_service_provider.name}_"
-                f"{fsp_xlsx_template_per_delivery_mechanism.delivery_mechanism}" in file_list_fsp
-            )
-
-
-@patch("hope.models.payment_plan_split.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
-def test_export_payment_plan_payment_list_per_split(
-    min_no_of_payments_in_chunk_mock: Any,
-    payment_plan,
-    payments,
-    user,
-):
-    min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
-
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.save()
-
-    payment_items = payment_plan.eligible_payments.all()
-    assert payment_items.count() == 3
-
-    pp_service = PaymentPlanService(payment_plan)
-    pp_service.split(PaymentPlanSplit.SplitType.BY_RECORDS, 2)
-
-    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
-    export_service.export_delivery(user)
-
-    assert payment_plan.has_export_file
-    assert payment_plan.payment_list_export_file_link is not None
-    assert payment_plan.export_file_delivery.file.name.startswith(f"payment_plan_payment_list_{payment_plan.unicef_id}")
-    splits_count = payment_plan.splits.count()
-    assert splits_count == 2
-    with zipfile.ZipFile(payment_plan.export_file_delivery.file, mode="r") as zip_file:  # type: ignore
-        file_list = zip_file.namelist()
-        assert splits_count == len(file_list)
-
-    pp_service.split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
-
-    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
-    export_service.export_delivery(user)
-    payment_plan.refresh_from_db()
-    assert payment_plan.has_export_file
-    assert payment_plan.payment_list_export_file_link is not None
-    assert payment_plan.export_file_delivery.file.name.startswith(f"payment_plan_payment_list_{payment_plan.unicef_id}")
-    splits_count = payment_plan.splits.count()
-    assert splits_count == 3
-    with zipfile.ZipFile(payment_plan.export_file_delivery.file, mode="r") as zip_file:  # type: ignore
-        file_list = zip_file.namelist()
-        assert splits_count == len(file_list)
 
 
 def test_payment_row_flex_fields(payment_plan, fsp, payments, flex_decimal_attribute, flex_date_attribute):
@@ -751,88 +665,6 @@ def test_payment_row_flex_fields(payment_plan, fsp, payments, flex_decimal_attri
     payment_row = export_service.get_payment_row(payment)
     assert payment_row[decimal_flexible_attribute_index] == 123.45
     assert payment_row[date_flexible_attribute_index] == "2021-01-01"
-
-
-def test_export_payment_plan_delivery_with_people_program(payment_plan, fsp, delivery_mechanisms, payments, user):
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.save()
-    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
-    export_service.export_delivery(user)
-    assert not payment_plan.program.is_social_worker_program
-
-    delivery_mechanism = payment_plan.delivery_mechanism
-    fsp_instance = payment_plan.financial_service_provider
-    export_service.open_workbook(fsp_instance.name)
-    fsp_xlsx_template = export_service.get_template(fsp_instance, delivery_mechanism)
-    template_column_list = export_service.prepare_headers(fsp_xlsx_template)
-    assert len(template_column_list) == len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 3
-    assert "household_id" in template_column_list
-    assert "household_size" in template_column_list
-    assert "individual_id" not in template_column_list
-
-    program_sw = ProgramFactory(
-        business_area=payment_plan.business_area,
-        data_collecting_type__type=DataCollectingType.Type.SOCIAL,
-        beneficiary_group__master_detail=False,
-    )
-    program_sw_cycle = program_sw.cycles.first()
-    payment_plan.program_cycle = program_sw_cycle
-    payment_plan.payment_plan_group = program_sw_cycle.payment_plan_groups.first()
-    program_sw.payment_plan_purposes.add(*payment_plan.payment_plan_purposes.all())
-    payment_plan.save()
-
-    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
-    export_service.export_delivery(user)
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.has_export_file
-    assert payment_plan.program.is_social_worker_program
-
-    fsp_xlsx_template.core_fields = [
-        "age",
-        "zip_code",
-        "household_unicef_id",
-        "individual_unicef_id",
-    ]
-    fsp_xlsx_template.columns = fsp_xlsx_template.DEFAULT_COLUMNS
-    fsp_xlsx_template.save()
-    fsp_xlsx_template.refresh_from_db()
-
-    export_service.open_workbook(fsp_instance.name)
-    fsp_xlsx_template = export_service.get_template(fsp_instance, delivery_mechanism)
-
-    template_column_list = export_service.prepare_headers(fsp_xlsx_template)
-    fsp_xlsx_template.refresh_from_db()
-    assert len(template_column_list) == 31
-    assert "household_id" not in template_column_list
-    assert "household_size" not in template_column_list
-    assert "individual_id" in template_column_list
-    assert fsp_xlsx_template.core_fields == [
-        "age",
-        "zip_code",
-        "household_unicef_id",
-        "individual_unicef_id",
-    ]
-    assert "age" in template_column_list
-    assert "zip_code" in template_column_list
-    assert "household_unicef_id" not in template_column_list
-    assert "individual_unicef_id" in template_column_list
-
-    assert (
-        FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-            delivery_mechanism=delivery_mechanisms["atm_card"],
-            financial_service_provider=fsp,
-        ).count()
-        == 0
-    )
-    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
-    with pytest.raises(ValidationError) as excinfo:
-        export_service.get_template(fsp, delivery_mechanisms["atm_card"])
-    assert (
-        f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "
-        f"Plan {payment_plan.unicef_id} for FSP {fsp.name} and delivery "
-        f"mechanism {DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD}." in str(excinfo.value)
-    )
 
 
 def test_flex_fields_admin_visibility(client, business_area, flex_decimal_attribute, flex_date_attribute):

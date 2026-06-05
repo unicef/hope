@@ -1578,7 +1578,7 @@ def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: A
 
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert result == [{"export_tag": 1, "export_file_link": None}]
+    assert result == [{"export_tag": 1, "export_file_link": None, "has_password": False}]
 
 
 def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> None:

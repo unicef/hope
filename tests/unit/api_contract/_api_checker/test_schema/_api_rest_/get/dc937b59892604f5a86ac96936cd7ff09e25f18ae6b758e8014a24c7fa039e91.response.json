@@ -33983,11 +33983,6 @@
                             "nullable": true,
                             "description": "Child headed household flag"
                         },
-                        "currency_old": {
-                            "type": "string",
-                            "description": "Household currency (legacy, pending removal)",
-                            "maxLength": 250
-                        },
                         "unhcr_id": {
                             "type": "string",
                             "description": "Household unhcr id",

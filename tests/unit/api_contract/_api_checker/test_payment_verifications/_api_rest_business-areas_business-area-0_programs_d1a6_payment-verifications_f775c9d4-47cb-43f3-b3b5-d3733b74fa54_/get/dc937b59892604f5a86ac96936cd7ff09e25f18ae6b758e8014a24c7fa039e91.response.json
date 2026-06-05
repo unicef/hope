@@ -27,7 +27,6 @@
         "start_date": null,
         "end_date": null,
         "plan_type": "STANDARD",
-                "export_tag": null,
         "version": 1735688653315201
     },
     "content_type": "application/json"
