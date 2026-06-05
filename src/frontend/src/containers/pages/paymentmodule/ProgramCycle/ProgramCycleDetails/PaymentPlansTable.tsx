@@ -1,3 +1,4 @@
+import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
@@ -127,9 +128,11 @@ export const PaymentPlansTable = ({
     replacements,
   );
 
+  const results = dataPaymentPlans?.results ?? [];
+
   return (
     <UniversalRestTable
-      defaultOrderBy="-createdAt"
+      defaultOrderBy="paymentPlanGroup__name,-createdAt"
       title={title}
       headCells={adjustedHeadCells}
       queryVariables={queryVariables}
@@ -140,13 +143,24 @@ export const PaymentPlansTable = ({
       itemsCount={itemsCount}
       page={page}
       setPage={setPage}
-      renderRow={(row: PaymentPlanList) => (
-        <PaymentPlanTableRow
-          key={row.id}
-          paymentPlan={row}
-          canViewDetails={canViewDetails}
-        />
-      )}
+      renderRow={(row: PaymentPlanList) => {
+        const idx = results.indexOf(row);
+        const prev = results[idx - 1];
+        const isNewGroup =
+          idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;
+        return (
+          <>
+            {isNewGroup && (
+              <GroupHeaderRow name={row.paymentPlanGroup?.name} />
+            )}
+            <PaymentPlanTableRow
+              key={row.id}
+              paymentPlan={row}
+              canViewDetails={canViewDetails}
+            />
+          </>
+        );
+      }}
     />
   );
 };

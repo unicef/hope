@@ -45,17 +45,6 @@ export const PaymentPlanTableRow = ({
         />
       </TableCell>
       <TableCell align="left">
-        {paymentPlan.paymentPlanGroup ? (
-          <BlackLink
-            to={`/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`}
-          >
-            {paymentPlan.paymentPlanGroup.name}
-          </BlackLink>
-        ) : (
-          '-'
-        )}
-      </TableCell>
-      <TableCell align="left">
         {paymentPlan.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align="right">
