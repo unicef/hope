@@ -75,6 +75,17 @@ export const PaymentPlanTableRow = ({
       </TableCell>
 
       <TableCell align="left">
+        {paymentPlan.exportTag && paymentPlan.paymentPlanGroup?.id ? (
+          <BlackLink
+            to={`/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}/batches/${paymentPlan.exportTag}`}
+          >
+            {paymentPlan.exportTag}
+          </BlackLink>
+        ) : (
+          '-'
+        )}
+      </TableCell>
+      <TableCell align="left">
         <LinkedPaymentPlansModal
           paymentPlan={paymentPlan}
           canViewDetails={canViewDetails}

@@ -28,9 +28,7 @@ export const PaymentPlanTableRow = ({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
-  // `tag` is not yet present in the generated PaymentPlanList type; cast until
-  // the backend exposes it and the REST types are regenerated.
-  const tag = (plan as any).tag as string | null;
+  const tag = plan.exportTag;
   const getPlanTypeLabel = usePaymentPlanTypeLabel();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
     plan.planType === PlanTypeEnum.FOLLOW_UP
