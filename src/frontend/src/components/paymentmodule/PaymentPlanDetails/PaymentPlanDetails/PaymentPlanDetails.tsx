@@ -33,6 +33,8 @@ const PaymentPlanDetails = ({
     dispersionEndDate,
     exchangeRate,
     followUps,
+    exportTag,
+    paymentPlanGroup,
   } = paymentPlan;
 
   return (
@@ -68,6 +70,32 @@ const PaymentPlanDetails = ({
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Currency')}>
                   {currency}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Group')}>
+                  {paymentPlanGroup ? (
+                    <BlackLink
+                      to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}`}
+                    >
+                      {paymentPlanGroup.name}
+                    </BlackLink>
+                  ) : (
+                    '-'
+                  )}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Export Batch')}>
+                  {exportTag && paymentPlanGroup?.id ? (
+                    <BlackLink
+                      to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}/batches/${exportTag}`}
+                    >
+                      {exportTag}
+                    </BlackLink>
+                  ) : (
+                    '-'
+                  )}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>

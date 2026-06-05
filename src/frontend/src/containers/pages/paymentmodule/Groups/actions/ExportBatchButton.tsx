@@ -3,7 +3,9 @@ import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
+import { showApiErrorMessages } from '@utils/utils';
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -12,7 +14,7 @@ import {
   TextField,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -27,10 +29,28 @@ export function ExportBatchButton({
 }: ExportBatchButtonProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [fspTemplateId, setFspTemplateId] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
+
+  const { data: templatesData } = useQuery({
+    queryKey: ['fspXlsxTemplates', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        limit: 200,
+      }),
+    enabled: open && !!businessArea && !!programId,
+  });
+  const templateOptions = (templatesData?.results ?? []).map((tmpl) => ({
+    id: tmpl.id,
+    label: tmpl.name,
+  }));
 
   const { mutateAsync: exportBatch, isPending: loadingExport } = useMutation({
     mutationFn: () =>
@@ -41,7 +61,7 @@ export function ExportBatchButton({
           id: groupId,
           requestBody: {
             exportTag: parseInt(tag, 10),
-            fspXlsxTemplateId: fspTemplateId || null,
+            fspXlsxTemplateId: selectedTemplate?.id ?? null,
           },
         },
       ),
@@ -51,10 +71,10 @@ export function ExportBatchButton({
         queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
       });
       setOpen(false);
-      setFspTemplateId('');
+      setSelectedTemplate(null);
     },
     onError: (error: any) => {
-      showMessage(error?.message ?? t('Export failed'));
+      showApiErrorMessages(error, showMessage, t('Export failed'));
     },
   });
 
@@ -84,19 +104,26 @@ export function ExportBatchButton({
       >
         <DialogTitleWrapper data-cy="dialog-export-batch">
           <DialogTitle>{t('Re-export Batch #{{tag}}', { tag })}</DialogTitle>
-          <TextField
-            label={t('FSP XLSX Template ID (optional)')}
-            value={fspTemplateId}
-            onChange={(e) => setFspTemplateId(e.target.value)}
-            fullWidth
-            size="small"
+          <Autocomplete
+            options={templateOptions}
+            value={selectedTemplate}
+            onChange={(_, value) => setSelectedTemplate(value)}
+            getOptionLabel={(opt) => opt.label}
+            isOptionEqualToValue={(a, b) => a.id === b.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={t('FSP XLSX Template (optional)')}
+                size="small"
+              />
+            )}
             sx={{ mt: 1 }}
           />
           <DialogActions>
             <Button
               onClick={() => {
                 setOpen(false);
-                setFspTemplateId('');
+                setSelectedTemplate(null);
               }}
             >
               {t('CANCEL')}

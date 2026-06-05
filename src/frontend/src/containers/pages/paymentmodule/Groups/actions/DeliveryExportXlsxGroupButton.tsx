@@ -9,6 +9,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
 import { isGroupBackgroundActionBusy } from '../utils';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface DeliveryExportXlsxGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
@@ -38,7 +39,7 @@ export function DeliveryExportXlsxGroupButton({
       });
     },
     onError: (error: any) => {
-      showMessage(error?.message ?? t('Export failed'));
+      showApiErrorMessages(error, showMessage, t('Export failed'));
     },
   });
 

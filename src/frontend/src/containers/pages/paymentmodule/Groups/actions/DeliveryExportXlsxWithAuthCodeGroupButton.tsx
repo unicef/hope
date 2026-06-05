@@ -4,17 +4,20 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
   DialogActions,
+  DialogContent,
   DialogTitle,
   TextField,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { showApiErrorMessages } from '@utils/utils';
 import { PaymentPlanGroupDetail } from '../types';
 
 interface DeliveryExportXlsxWithAuthCodeGroupButtonProps {
@@ -26,10 +29,28 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
 }: DeliveryExportXlsxWithAuthCodeGroupButtonProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [fspTemplateId, setFspTemplateId] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
+
+  const { data: templatesData } = useQuery({
+    queryKey: ['fspXlsxTemplates', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        limit: 200,
+      }),
+    enabled: open && !!businessArea && !!programId,
+  });
+  const templateOptions = (templatesData?.results ?? []).map((tmpl) => ({
+    id: tmpl.id,
+    label: tmpl.name,
+  }));
 
   const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
     mutationFn: () =>
@@ -39,7 +60,7 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
           programCode: programId,
           id: group?.id,
           requestBody: {
-            fspXlsxTemplateId: fspTemplateId || null,
+            fspXlsxTemplateId: selectedTemplate?.id ?? null,
           },
         },
       ),
@@ -49,10 +70,10 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
         queryKey: ['paymentPlanGroup', businessArea, programId, group?.id],
       });
       setOpen(false);
-      setFspTemplateId('');
+      setSelectedTemplate(null);
     },
     onError: (error: any) => {
-      showMessage(error?.message ?? t('Export failed'));
+      showApiErrorMessages(error, showMessage, t('Export failed'));
     },
   });
 
@@ -79,19 +100,28 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
       >
         <DialogTitleWrapper data-cy="dialog-delivery-export-xlsx-with-auth-code-group">
           <DialogTitle>{t('Export with Auth Code')}</DialogTitle>
-          <TextField
-            label={t('FSP XLSX Template ID (optional)')}
-            value={fspTemplateId}
-            onChange={(e) => setFspTemplateId(e.target.value)}
-            fullWidth
-            size="small"
-            sx={{ mt: 1 }}
-          />
+          <DialogContent>
+            <Autocomplete
+              options={templateOptions}
+              value={selectedTemplate}
+              onChange={(_, value) => setSelectedTemplate(value)}
+              getOptionLabel={(opt) => opt.label}
+              isOptionEqualToValue={(a, b) => a.id === b.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t('FSP XLSX Template (optional)')}
+                  size="small"
+                />
+              )}
+              sx={{ mt: 1 }}
+            />
+          </DialogContent>
           <DialogActions>
             <Button
               onClick={() => {
                 setOpen(false);
-                setFspTemplateId('');
+                setSelectedTemplate(null);
               }}
             >
               {t('CANCEL')}

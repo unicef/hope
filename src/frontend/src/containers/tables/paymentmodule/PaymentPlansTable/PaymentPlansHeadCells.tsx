@@ -61,7 +61,7 @@ export const headCells = [
   },
   {
     disablePadding: false,
-    label: 'Batch',
+    label: 'Export Batch',
     id: 'tag',
     numeric: false,
   },
@@ -136,7 +136,7 @@ export const headCellsPeople = [
   },
   {
     disablePadding: false,
-    label: 'Batch',
+    label: 'Export Batch',
     id: 'tag',
     numeric: false,
   },

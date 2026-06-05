@@ -100,9 +100,7 @@ export const PaymentPlanTableRow = ({
       <TableCell align="left">
         {tag && plan.paymentPlanGroup?.id ? (
           <BlackLink
-            to={`/${baseUrl}/payment-module/groups/${
-              plan.paymentPlanGroup.id
-            }/batches/${encodeURIComponent(tag)}`}
+            to={`/${baseUrl}/payment-module/groups/${plan.paymentPlanGroup.id}/batches/${tag}`}
           >
             {tag}
           </BlackLink>

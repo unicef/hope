@@ -40,6 +40,8 @@ export const PaymentPlanDetails = ({
     followUps,
     topUps,
     program,
+    exportTag,
+    paymentPlanGroup,
   } = paymentPlan;
 
   return (
@@ -79,11 +81,24 @@ export const PaymentPlanDetails = ({
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Group')}>
-                  {paymentPlan.paymentPlanGroup ? (
+                  {paymentPlanGroup ? (
                     <BlackLink
-                      to={`/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`}
+                      to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}`}
                     >
-                      {paymentPlan.paymentPlanGroup.name}
+                      {paymentPlanGroup.name}
+                    </BlackLink>
+                  ) : (
+                    '-'
+                  )}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Export Batch')}>
+                  {exportTag && paymentPlanGroup?.id ? (
+                    <BlackLink
+                      to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}/batches/${exportTag}`}
+                    >
+                      {exportTag}
                     </BlackLink>
                   ) : (
                     '-'
@@ -185,10 +200,7 @@ export const PaymentPlanDetails = ({
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <FieldBorder color="#84A1CA">
-                  <RelatedTopUpPaymentPlans
-                    topUps={topUps}
-                    baseUrl={baseUrl}
-                  />
+                  <RelatedTopUpPaymentPlans topUps={topUps} baseUrl={baseUrl} />
                 </FieldBorder>
               </Grid>
             </Grid>

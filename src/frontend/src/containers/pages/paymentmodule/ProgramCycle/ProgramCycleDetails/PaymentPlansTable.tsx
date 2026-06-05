@@ -48,9 +48,7 @@ export const PaymentPlansTable = ({
       program: programId,
       programCycle: programCycle?.id,
       paymentPlanGroup: paymentPlanGroupId,
-      // `tag` is not yet a supported list filter param; createApiParams drops
-      // empty values and the backend ignores unknown params until it lands.
-      tag,
+      exportTag: tag,
       isPaymentPlan: true,
     }),
     [
