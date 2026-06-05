@@ -1507,9 +1507,9 @@ class CheckRapidProVerificationTask:
 def periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from datetime import datetime, timedelta
 
-    from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+    from hope.apps.payment.services.western_union_reports_service import WesternUnionReportsService
 
-    service = QCFReportsService()
+    service = WesternUnionReportsService()
     service.process_files_since(datetime.now() - timedelta(hours=24))
 
 
@@ -1524,40 +1524,48 @@ def periodic_sync_payment_plan_invoices_western_union_ftp_async_task() -> None:
     )
 
 
-def send_qcf_report_email_notifications_async_task_action(job: AsyncRetryJob) -> None:
+def send_western_union_report_email_notifications_async_task_action(job: AsyncRetryJob) -> None:
     from flags.state import flag_state
 
     if not bool(flag_state("WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED")):
         return
 
-    from hope.apps.payment.services.qcf_reports_service import QCFReportsService
+    from hope.apps.payment.services.western_union_reports_service import WesternUnionReportsService
     from hope.models import WesternUnionPaymentPlanReport
 
-    qcf_report_id = job.config["qcf_report_id"]
+    report_id = job.config.get("western_union_report_id") or job.config["qcf_report_id"]
     with cache.lock(
-        f"send_qcf_email_notifications_{qcf_report_id}",
+        f"send_western_union_report_email_notifications_{report_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
-        qcf_report = WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id)
-        set_sentry_business_area_tag(qcf_report.payment_plan.business_area.name)
+        report = WesternUnionPaymentPlanReport.objects.get(id=report_id)
+        set_sentry_business_area_tag(report.payment_plan.business_area.name)
 
-        service = QCFReportsService()
-        service.send_notification_emails(qcf_report)
-        qcf_report.sent = True
-        qcf_report.save()
+        service = WesternUnionReportsService()
+        service.send_notification_emails(report)
+        report.sent = True
+        report.save()
+
+
+def send_western_union_report_email_notifications_async_task(report_id: str) -> None:
+    config = {"western_union_report_id": report_id}
+    AsyncRetryJob.queue_task(
+        job_name=send_western_union_report_email_notifications_async_task.__name__,
+        program=WesternUnionPaymentPlanReport.objects.get(id=report_id).payment_plan.program,
+        action="hope.apps.payment.celery_tasks.send_western_union_report_email_notifications_async_task_action",
+        config=config,
+        group_key="payment",
+        description=f"Send Western Union report email notifications for {report_id}",
+    )
+
+
+def send_qcf_report_email_notifications_async_task_action(job: AsyncRetryJob) -> None:
+    send_western_union_report_email_notifications_async_task_action(job)
 
 
 def send_qcf_report_email_notifications_async_task(qcf_report_id: str) -> None:
-    config = {"qcf_report_id": qcf_report_id}
-    AsyncRetryJob.queue_task(
-        job_name=send_qcf_report_email_notifications_async_task.__name__,
-        program=WesternUnionPaymentPlanReport.objects.get(id=qcf_report_id).payment_plan.program,
-        action="hope.apps.payment.celery_tasks.send_qcf_report_email_notifications_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Send qcf report email notifications for {qcf_report_id}",
-    )
+    send_western_union_report_email_notifications_async_task(qcf_report_id)
 
 
 def periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action(

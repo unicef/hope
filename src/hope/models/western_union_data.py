@@ -18,7 +18,7 @@ class WesternUnionData(models.Model):
     file = models.ForeignKey(
         FileTemp,
         related_name="+",
-        help_text="WU QCF File",
+        help_text="Western Union data file",
         on_delete=models.DO_NOTHING,
         null=True,
     )

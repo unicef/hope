@@ -284,7 +284,7 @@ class WesternUnionPaymentPlanReportFactory(DjangoModelFactory):
     class Meta:
         model = WesternUnionPaymentPlanReport
 
-    qcf_file = factory.SubFactory(WesternUnionInvoiceFactory)
+    invoice = factory.SubFactory(WesternUnionInvoiceFactory)
     payment_plan = factory.SubFactory(PaymentPlanFactory)
 
 

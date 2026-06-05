@@ -69,6 +69,7 @@ from hope.apps.payment.celery_tasks import (
     send_payment_notification_emails_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_qcf_report_email_notifications_async_task,
+    send_qcf_report_email_notifications_async_task_action,
     send_to_payment_gateway_async_task,
     send_to_payment_gateway_async_task_action,
     update_exchange_rate_on_release_payments_async_task,
@@ -1165,7 +1166,7 @@ def test_remove_old_payment_plan_payment_list_xlsx_action_returns_when_no_old_fi
     mock_logger.info.assert_not_called()
 
 
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.WesternUnionReportsService")
 def test_periodic_sync_payment_plan_invoices_western_union_ftp_runs_service_process_files_since(
     mock_service_cls: Mock,
 ) -> None:
@@ -1178,7 +1179,7 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_runs_service_proc
 
 
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.WesternUnionReportsService")
 def test_periodic_sync_payment_plan_invoices_western_union_ftp_retries_on_exception(
     mock_service_cls: Mock,
     mock_retry: Mock,
@@ -1198,7 +1199,7 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_retries_on_except
     "should_send",
     [True, False],
 )
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.WesternUnionReportsService")
 def test_send_qcf_report_email_notifications(
     mock_service_cls: Mock,
     qcf_report,
@@ -1218,8 +1219,19 @@ def test_send_qcf_report_email_notifications(
     assert qcf_report.sent is should_send
 
 
+@patch("hope.apps.payment.celery_tasks.send_western_union_report_email_notifications_async_task_action")
+def test_send_qcf_report_email_notifications_action_delegates_to_western_union_action(
+    mock_action: Mock,
+) -> None:
+    job = Mock(spec=AsyncRetryJob)
+
+    send_qcf_report_email_notifications_async_task_action(job)
+
+    mock_action.assert_called_once_with(job)
+
+
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.apps.payment.services.qcf_reports_service.QCFReportsService")
+@patch("hope.apps.payment.services.western_union_reports_service.WesternUnionReportsService")
 def test_send_qcf_report_email_notifications_retries_on_exception(
     mock_service_cls: Mock,
     mock_retry: Mock,

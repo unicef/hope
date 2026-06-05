@@ -8,7 +8,7 @@ def migrate_plan_type(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("payment", "0065_migration"),
+        ("payment", "0070_migration"),
     ]
 
     operations = [
