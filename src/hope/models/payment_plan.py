@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, UniqueConstraint, Value
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
@@ -606,13 +606,6 @@ class PaymentPlan(
             ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
             ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
         )
-        constraints = [
-            UniqueConstraint(
-                condition=Q(export_tag__isnull=False),
-                fields=["payment_plan_group", "export_tag"],
-                name="unique_export_tag_per_group",
-            ),
-        ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""

@@ -1,31 +1,198 @@
+import uuid
+
+from django.conf import settings
 from django.db import migrations, models
-
-
-def migrate_plan_type(apps, schema_editor):
-    PaymentPlan = apps.get_model("payment", "PaymentPlan")
-    PaymentPlan.objects.filter(is_follow_up=True).update(plan_type="FOLLOW_UP")
+import django.db.models.deletion
+import model_utils.fields
 
 
 class Migration(migrations.Migration):
     dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("payment", "0066_migration"),
+        ("program", "0019_migration"),
     ]
 
     operations = [
+        migrations.CreateModel(
+            name="FollowUpInstruction",
+            fields=[
+                (
+                    "id",
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "background_action_status",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("XLSX_EXPORTING", "Exporting XLSX"),
+                            ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation from XLSX"),
+                            ("XLSX_EXPORT_ERROR", "Error while exporting XLSX"),
+                            ("XLSX_IMPORT_ERROR", "Error while importing XLSX"),
+                        ],
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                (
+                    "business_area",
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="core.businessarea"),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="created_follow_up_instructions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "export_file",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Export File",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="core.filetemp",
+                    ),
+                ),
+                (
+                    "program",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="follow_up_instructions",
+                        to="program.program",
+                    ),
+                ),
+                (
+                    "reconciliation_import_file",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Reconciliation Import File",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="core.filetemp",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Follow Up Instruction",
+                "verbose_name_plural": "Follow Up Instructions",
+                "ordering": ["created_at"],
+            },
+        ),
         migrations.AddField(
             model_name="paymentplan",
-            name="plan_type",
-            field=models.CharField(
-                choices=[("REGULAR", "Regular"), ("TOP_UP", "Top Up"), ("FOLLOW_UP", "Follow Up")],
-                default="REGULAR",
-                db_index=True,
-                max_length=10,
-                help_text="Payment Plan type [sys]",
+            name="follow_up_instruction",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="payment_plans",
+                to="payment.followupinstruction",
             ),
         ),
-        migrations.RunPython(migrate_plan_type, migrations.RunPython.noop),
-        migrations.RemoveField(
-            model_name="paymentplan",
-            name="is_follow_up",
+        migrations.RunSQL(
+            sql="""
+            DO $$
+            DECLARE business_area_record RECORD;
+            BEGIN
+                FOR business_area_record IN SELECT id FROM core_businessarea LOOP
+                    EXECUTE format(
+                        'CREATE SEQUENCE IF NOT EXISTS follow_up_instruction_business_area_seq_%s',
+                        translate(business_area_record.id::text, '-', '_')
+                    );
+                END LOOP;
+            END;
+            $$;
+            """,
+            reverse_sql="""
+            DO $$
+            DECLARE business_area_record RECORD;
+            BEGIN
+                FOR business_area_record IN SELECT id FROM core_businessarea LOOP
+                    EXECUTE format(
+                        'DROP SEQUENCE IF EXISTS follow_up_instruction_business_area_seq_%s',
+                        translate(business_area_record.id::text, '-', '_')
+                    );
+                END LOOP;
+            END;
+            $$;
+            """,
+        ),
+        migrations.RunSQL(
+            sql="""
+            CREATE OR REPLACE FUNCTION follow_up_instruction_business_area_seq() RETURNS trigger
+                LANGUAGE plpgsql
+                AS $$
+            begin
+                execute format(
+                    'create sequence if not exists follow_up_instruction_business_area_seq_%s',
+                    translate(NEW.id::text, '-','_')
+                );
+                return NEW;
+            end
+            $$;
+            """,
+            reverse_sql="DROP FUNCTION IF EXISTS follow_up_instruction_business_area_seq();",
+        ),
+        migrations.RunSQL(
+            sql="""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_trigger
+                    WHERE tgname = 'follow_up_instruction_business_area_seq'
+                ) THEN
+                    CREATE TRIGGER follow_up_instruction_business_area_seq
+                    AFTER INSERT ON core_businessarea
+                    FOR EACH ROW
+                    EXECUTE PROCEDURE follow_up_instruction_business_area_seq();
+                END IF;
+            END;
+            $$;
+            """,
+            reverse_sql="DROP TRIGGER IF EXISTS follow_up_instruction_business_area_seq ON core_businessarea;",
+        ),
+        migrations.RunSQL(
+            sql="""
+            CREATE OR REPLACE FUNCTION follow_up_instruction_fill_unicef_id_per_business_area_seq() RETURNS trigger
+                LANGUAGE plpgsql
+                AS $$
+                DECLARE businessAreaID varchar;
+                DECLARE businessAreaCode varchar;
+            begin
+                SELECT INTO businessAreaID translate(ba.id::text, '-','_') FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+                SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
+
+                NEW.unicef_id := format(
+                    'FUI-%s-%s-%s',
+                    trim(businessAreaCode),
+                    to_char(NEW.created_at, 'yy'),
+                    trim(replace(to_char(nextval('follow_up_instruction_business_area_seq_' || businessAreaID), '00000000'), ',', '.'))
+                );
+                RETURN NEW;
+            end
+            $$;
+            """,
+            reverse_sql="DROP FUNCTION IF EXISTS follow_up_instruction_fill_unicef_id_per_business_area_seq();",
+        ),
+        migrations.RunSQL(
+            sql="CREATE TRIGGER follow_up_instruction_fill_unicef_id_per_business_area_seq BEFORE INSERT ON payment_followupinstruction FOR EACH ROW EXECUTE PROCEDURE follow_up_instruction_fill_unicef_id_per_business_area_seq();",
+            reverse_sql=(
+                "DROP TRIGGER IF EXISTS follow_up_instruction_fill_unicef_id_per_business_area_seq "
+                "ON payment_followupinstruction;"
+            ),
         ),
     ]
