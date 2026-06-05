@@ -1,4 +1,5 @@
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@core/BlackLink';
@@ -13,10 +14,11 @@ export const PaymentPlanGroupTableRow = ({
   group,
 }: PaymentPlanGroupTableRowProps): ReactElement => {
   const { baseUrl } = useBaseUrl();
+  const navigate = useNavigate();
   const groupPath = `/${baseUrl}/payment-module/groups/${group.id}`;
 
   return (
-    <ClickableTableRow key={group.id}>
+    <ClickableTableRow key={group.id} onClick={() => navigate(groupPath)}>
       <TableCell align="left">{group.cycle?.title || '-'}</TableCell>
       <TableCell align="left" data-cy="payment-plan-group-name">
         <BlackLink to={groupPath}>{group.name}</BlackLink>
