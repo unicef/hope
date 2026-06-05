@@ -14,6 +14,7 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { PROGRAM_STATE_FILTER } from '@utils/constants';
 
 const defaultFilter = {
   search: '',
@@ -26,7 +27,7 @@ const defaultFilter = {
   flags: [],
   orderBy: 'unicef_id',
   status: '',
-  programState: 'active',
+  programState: PROGRAM_STATE_FILTER.ACTIVE,
 };
 
 export function LookUpDelegateModal({

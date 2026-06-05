@@ -27,7 +27,7 @@ from pypdf import PdfReader
 
 from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.celery_tasks import send_qcf_report_email_notifications_async_task
+from hope.apps.payment.celery_tasks import send_western_union_report_email_notifications_async_task
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 from hope.apps.payment.utils import get_link
 from hope.apps.utils.logs import safe_log
@@ -99,7 +99,7 @@ class QCFReportPaymentPlanData:
         self.fees_total = sum(p.fee_amount for p in self.payments_data) or 0
 
 
-class QCFReportsService:
+class WesternUnionReportsService:
     UNMATCHED_INVOICE_ERROR_GRACE_PERIOD = timedelta(days=31)
 
     class QCFReportsServiceError(Exception):
@@ -166,7 +166,7 @@ class QCFReportsService:
             try:
                 self.import_invoice_file(filename, file_like)
             except (
-                QCFReportsService.QCFReportsServiceError,
+                WesternUnionReportsService.QCFReportsServiceError,
                 DatabaseError,
                 ObjectDoesNotExist,
                 OSError,
@@ -184,7 +184,7 @@ class QCFReportsService:
             try:
                 self.import_data_file(filename, file_like)
             except (
-                QCFReportsService.QCFReportsServiceError,
+                WesternUnionReportsService.QCFReportsServiceError,
                 DatabaseError,
                 ObjectDoesNotExist,
                 OSError,
@@ -208,7 +208,7 @@ class QCFReportsService:
             invoice.error_msg = ""
             invoice.save(update_fields=["date", "advice_name", "net_amount", "charges", "status", "error_msg"])
         except (
-            QCFReportsService.QCFReportsServiceError,
+            WesternUnionReportsService.QCFReportsServiceError,
             DatabaseError,
             ObjectDoesNotExist,
             OSError,
@@ -230,7 +230,7 @@ class QCFReportsService:
             data_file.error_msg = ""
             data_file.save(update_fields=["date", "amount", "status", "error_msg"])
         except (
-            QCFReportsService.QCFReportsServiceError,
+            WesternUnionReportsService.QCFReportsServiceError,
             DatabaseError,
             ObjectDoesNotExist,
             OSError,
@@ -251,7 +251,7 @@ class QCFReportsService:
             try:
                 self.reconcile_invoice(invoice)
             except (
-                QCFReportsService.QCFReportsServiceError,
+                WesternUnionReportsService.QCFReportsServiceError,
                 DatabaseError,
                 ObjectDoesNotExist,
                 OSError,
@@ -274,7 +274,7 @@ class QCFReportsService:
                     payment_plan_id_payments_map = self.extract_data_payment_rows(matched_data)
                     self.link_payments_from_data_rows(invoice, payment_plan_id_payments_map)
                 except (
-                    QCFReportsService.QCFReportsServiceError,
+                    WesternUnionReportsService.QCFReportsServiceError,
                     DatabaseError,
                     ObjectDoesNotExist,
                     OSError,
@@ -297,7 +297,7 @@ class QCFReportsService:
                 matched_data.error_msg = ""
                 matched_data.save(update_fields=["status", "error_msg"])
         except (
-            QCFReportsService.QCFReportsServiceError,
+            WesternUnionReportsService.QCFReportsServiceError,
             DatabaseError,
             ObjectDoesNotExist,
             OSError,
@@ -377,26 +377,26 @@ class QCFReportsService:
             payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
             report_name, report = self.generate_report(payment_plan, payment_rows, ad_name_value)
 
-            wu_qcf_report = WesternUnionPaymentPlanReport.objects.create(
-                qcf_file=invoice,
+            wu_report = WesternUnionPaymentPlanReport.objects.create(
+                invoice=invoice,
                 payment_plan=payment_plan,
             )
 
             with NamedTemporaryFile() as tmp:
                 file_temp = FileTemp.objects.create(
-                    object_id=str(wu_qcf_report.pk),
-                    content_type=get_content_type_for_model(wu_qcf_report),
+                    object_id=str(wu_report.pk),
+                    content_type=get_content_type_for_model(wu_report),
                 )
                 report.save(tmp.name)
                 tmp.seek(0)
                 file_temp.file.save(report_name, File(tmp))
-                wu_qcf_report.report_file = file_temp
-                wu_qcf_report.save()
+                wu_report.report_file = file_temp
+                wu_report.save()
 
             if send_notifications:
                 transaction.on_commit(
-                    lambda wu_qcf_report_id=str(wu_qcf_report.id): send_qcf_report_email_notifications_async_task(
-                        wu_qcf_report_id
+                    lambda wu_report_id=str(wu_report.id): send_western_union_report_email_notifications_async_task(
+                        wu_report_id
                     )
                 )
 
@@ -655,9 +655,10 @@ class QCFReportsService:
         payment_rows: list[MatchedDataPaymentRow],
         ad_name_value: str | None = None,
     ) -> tuple[str, openpyxl.Workbook]:
-        no_of_qcf_reports_for_pp = WesternUnionPaymentPlanReport.objects.filter(payment_plan=payment_plan).count()
+        report_count_for_payment_plan = WesternUnionPaymentPlanReport.objects.filter(payment_plan=payment_plan).count()
         report_filename = (
-            f"QCF_{payment_plan.business_area.slug}_{payment_plan.unicef_id}_{no_of_qcf_reports_for_pp + 1}.xlsx"
+            f"WU_REPORT_{payment_plan.business_area.slug}_{payment_plan.unicef_id}_"
+            f"{report_count_for_payment_plan + 1}.xlsx"
         )
 
         funds_commitments_str = ", ".join(
@@ -696,7 +697,7 @@ class QCFReportsService:
     def generate_report_xlsx(self, report_data: QCFReportPaymentPlanData) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws.title = f"QCF Report - {report_data.payment_plan_unicef_id}"
+        ws.title = f"WU Report - {report_data.payment_plan_unicef_id}"[:31]
 
         headers = [
             "Payment ID",
@@ -750,8 +751,8 @@ class QCFReportsService:
             user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
         if users:
-            text_template = "payment/qcf_report_email.txt"
-            html_template = "payment/qcf_report_email.html"
+            text_template = "payment/western_union_report_email.txt"
+            html_template = "payment/western_union_report_email.html"
 
             path_name = "download-payment-plan-invoice-report-pdf"
             payment_plan = report.payment_plan
@@ -771,11 +772,14 @@ class QCFReportsService:
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Payment Plan: {payment_plan_link}",
-                "title": f"Payment Plan {report.report_file.file.name} Western Union QCF Report",
-                "link": f"Western Union QCF Report file: {download_link}",
+                "title": f"Payment Plan {report.report_file.file.name} Western Union report",
+                "link": f"Western Union report file: {download_link}",
             }
             user.email_user(
                 subject=context["title"],
                 html_body=render_to_string(html_template, context=context),
                 text_body=render_to_string(text_template, context=context),
             )
+
+
+QCFReportsService = WesternUnionReportsService
