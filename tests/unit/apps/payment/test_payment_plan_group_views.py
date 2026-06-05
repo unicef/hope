@@ -2309,7 +2309,7 @@ def test_export_for_batch_queues_task_with_template_id_on_commit(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
     group = group_with_tagged_batch
-    template = FinancialServiceProviderXlsxTemplateFactory()
+    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "currency"])
 
     with (
         patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,

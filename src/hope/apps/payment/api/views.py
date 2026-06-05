@@ -2531,11 +2531,13 @@ class PaymentPlanGroupViewSet(
         export_tag = serializer.validated_data["export_tag"]
         fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
 
-        if fsp_xlsx_template_id is not None and not request.user.has_perm(
-            Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value,
-            payment_plan_group.cycle.program,
-        ):
-            raise PermissionDenied(detail={"required_permissions": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value]})
+        if fsp_xlsx_template_id is not None:
+            template = get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=fsp_xlsx_template_id)
+            if "fsp_auth_code" in template.columns and not request.user.has_perm(
+                Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value,
+                payment_plan_group.cycle.program,
+            ):
+                raise PermissionDenied(detail={"required_permissions": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value]})
 
         if export_tag is not None:
             if not payment_plan_group.payment_plans.filter(export_tag=export_tag).exists():

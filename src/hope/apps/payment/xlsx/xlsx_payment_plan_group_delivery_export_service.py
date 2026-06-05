@@ -118,7 +118,11 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                     f"and delivery mechanism."
                 )
                 continue
-            if "fsp_auth_code" in template.columns and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
+            if (
+                payment_plan.is_payment_gateway
+                and "fsp_auth_code" in template.columns
+                and not payment_plan.is_payment_gateway_and_all_sent_to_fsp
+            ):
                 logger.warning(
                     f"Skipping Payment Plan {payment_plan.unicef_id}: template requires fsp_auth_code "
                     f"but not all payments have been sent to the payment gateway yet."
