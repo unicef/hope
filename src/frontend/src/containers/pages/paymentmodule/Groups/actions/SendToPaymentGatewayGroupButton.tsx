@@ -7,6 +7,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
 import { RestService } from '@restgenerated/index';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface SendToPaymentGatewayGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
@@ -37,7 +38,7 @@ export function SendToPaymentGatewayGroupButton({
       });
     },
     onError: (error: any) => {
-      showMessage(error?.message ?? t('Send to Payment Gateway failed'));
+      showApiErrorMessages(error, showMessage, t('Send to Payment Gateway failed'));
     },
   });
 
