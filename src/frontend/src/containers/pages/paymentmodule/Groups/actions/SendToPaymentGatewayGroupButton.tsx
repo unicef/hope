@@ -35,6 +35,8 @@ export function SendToPaymentGatewayGroupButton({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlanGroup', businessArea, programId, group.id],
       });
+      queryClient.invalidateQueries({ queryKey: ['businessAreasPaymentPlans'] });
+      queryClient.invalidateQueries({ queryKey: ['businessAreasProgramsPaymentPlansList'] });
     },
     onError: (error: any) => {
       showMessage(error?.message ?? t('Send to Payment Gateway failed'));

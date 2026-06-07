@@ -164,7 +164,7 @@ export function TargetPopulationTable({
           return (
             <>
               {isNewGroup && (
-                <GroupHeaderRow name={row.paymentPlanGroup?.name} />
+                <GroupHeaderRow name={row.paymentPlanGroup?.name} id={row.paymentPlanGroup?.id} />
               )}
               <TargetPopulationTableRow
                 radioChangeHandler={enableRadioButton && handleRadioChange}

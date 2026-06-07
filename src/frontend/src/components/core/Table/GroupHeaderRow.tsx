@@ -2,12 +2,16 @@ import { ReactElement } from 'react';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import { blue } from '@mui/material/colors';
+import { BlackLink } from '@core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface GroupHeaderRowProps {
   name?: string | null;
+  id?: string | null;
 }
 
-export function GroupHeaderRow({ name }: GroupHeaderRowProps): ReactElement {
+export function GroupHeaderRow({ name, id }: GroupHeaderRowProps): ReactElement {
+  const { baseUrl } = useBaseUrl();
   return (
     <TableRow
       data-cy="group-header-row"
@@ -29,7 +33,16 @@ export function GroupHeaderRow({ name }: GroupHeaderRowProps): ReactElement {
           letterSpacing: '0.02em',
         }}
       >
-        {name ?? 'No Group'}
+        {id ? (
+          <BlackLink
+            to={`/${baseUrl}/payment-module/groups/${id}`}
+            style={{ color: blue[900], fontWeight: 700 }}
+          >
+            {name ?? 'No Group'}
+          </BlackLink>
+        ) : (
+          name ?? 'No Group'
+        )}
       </TableCell>
     </TableRow>
   );

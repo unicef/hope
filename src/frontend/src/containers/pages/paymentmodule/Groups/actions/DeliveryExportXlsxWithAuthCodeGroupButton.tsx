@@ -70,6 +70,8 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlanGroup', businessArea, programId, group?.id],
       });
+      queryClient.invalidateQueries({ queryKey: ['businessAreasPaymentPlans'] });
+      queryClient.invalidateQueries({ queryKey: ['businessAreasProgramsPaymentPlansList'] });
       setOpen(false);
       setSelectedTemplate(null);
     },

@@ -151,7 +151,7 @@ export const PaymentPlansTable = ({
         return (
           <>
             {isNewGroup && (
-              <GroupHeaderRow name={row.paymentPlanGroup?.name} />
+              <GroupHeaderRow name={row.paymentPlanGroup?.name} id={row.paymentPlanGroup?.id} />
             )}
             <PaymentPlanTableRow
               key={row.id}
