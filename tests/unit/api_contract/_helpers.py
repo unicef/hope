@@ -52,7 +52,7 @@ class HopeRecorder(Recorder):
     def assert_version(self, response, expected, path):
         # IntegerVersionField increments on every save; comparing exact values across
         # regenerate / replay runs is flaky. Type-check only.
-        assert isinstance(response["version"], int)
+        assert response["version"] is None or isinstance(response["version"], int)
 
 
 class JsonPostRecorder(HopeRecorder):

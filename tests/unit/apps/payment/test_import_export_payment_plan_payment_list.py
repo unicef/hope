@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
+
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -29,10 +30,8 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID, ROLE_PRIMARY
-
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-
 from hope.apps.payment.utils import to_decimal
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
@@ -628,8 +627,6 @@ def test_export_payment_plan_payment_list(payment_plan, payments, user):
     assert wb.active["F2"].value == "TEST_VILLAGE"
     assert wb.active["N1"].value == "national_id"
     assert wb.active["N2"].value == "Test_Number_National_Id_123"
-
-
 
 
 def test_payment_row_flex_fields(payment_plan, fsp, payments, flex_decimal_attribute, flex_date_attribute):

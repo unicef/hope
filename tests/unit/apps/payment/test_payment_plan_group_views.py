@@ -2046,6 +2046,10 @@ def test_export_with_template_permission_checks(
     create_user_role_with_permissions(user, permissions, business_area, program=program)
     group = group_with_accepted_plan_and_payment
 
+    if "fsp_xlsx_template_id" in body:
+        template = FinancialServiceProviderXlsxTemplateFactory()
+        body = {**body, "fsp_xlsx_template_id": str(template.pk)}
+
     with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
         response = client.post(_export_url(business_area.slug, program.code, group.id), body)
 
