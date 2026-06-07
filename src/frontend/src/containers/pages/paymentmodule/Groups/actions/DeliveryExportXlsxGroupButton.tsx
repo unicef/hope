@@ -37,8 +37,6 @@ export function DeliveryExportXlsxGroupButton({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlanGroup', businessArea, programId, group?.id],
       });
-      queryClient.invalidateQueries({ queryKey: ['businessAreasPaymentPlans'] });
-      queryClient.invalidateQueries({ queryKey: ['businessAreasProgramsPaymentPlansList'] });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage, t('Export failed'));

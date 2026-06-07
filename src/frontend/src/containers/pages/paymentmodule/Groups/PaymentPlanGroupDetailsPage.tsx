@@ -13,12 +13,13 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
 import { isGroupBackgroundActionBusy } from './utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 const initialFilter = {
   search: '',
@@ -35,6 +36,16 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const [filter] = useState(initialFilter);
   const permissions = usePermissions();
+  const queryClient = useQueryClient();
+  const wasBusy = useRef(false);
+  useEffect(() => {
+    const isBusy = isGroupBackgroundActionBusy(group ?? null);
+    if (wasBusy.current && !isBusy) {
+      queryClient.invalidateQueries({ queryKey: ['businessAreasPaymentPlans'] });
+      queryClient.invalidateQueries({ queryKey: ['businessAreasProgramsPaymentPlansList'] });
+    }
+    wasBusy.current = isBusy;
+  }, [group, queryClient]);
   const { data: group, isLoading } = useQuery({
     queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
     queryFn: () =>

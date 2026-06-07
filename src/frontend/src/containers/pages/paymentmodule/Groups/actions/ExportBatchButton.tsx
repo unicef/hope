@@ -72,8 +72,6 @@ export function ExportBatchButton({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
       });
-      queryClient.invalidateQueries({ queryKey: ['businessAreasPaymentPlans'] });
-      queryClient.invalidateQueries({ queryKey: ['businessAreasProgramsPaymentPlansList'] });
       setOpen(false);
       setSelectedTemplate(null);
     },
