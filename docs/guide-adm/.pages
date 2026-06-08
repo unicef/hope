@@ -3,3 +3,4 @@ nav:
   - Technologies: dependencies.md
   - Docker: docker.md
   - Permissions - Changes: permissions-changes.md
+  - ES Step 1 (Bitnami 8.14 → 8.18): es-step-1-bitnami-upgrade.md
