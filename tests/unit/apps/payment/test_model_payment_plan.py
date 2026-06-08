@@ -886,6 +886,7 @@ def test_remove_export_file_delivery_skips_deletion_when_another_plan_references
         status=PaymentPlan.Status.ACCEPTED,
         export_file_delivery=file_temp,
         payment_plan_group=plan_a.payment_plan_group,
+        program_cycle=plan_a.program_cycle,
     )
 
     plan_a.remove_export_file_delivery()

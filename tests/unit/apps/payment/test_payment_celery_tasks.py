@@ -1436,6 +1436,7 @@ def test_send_password_action_sends_passwords_when_plan_found(
     file_temp = FileTempFactory()
     plan = PaymentPlanFactory(
         payment_plan_group=group,
+        program_cycle=group.cycle,
         export_tag=1,
         export_file_delivery=file_temp,
     )
@@ -1456,7 +1457,7 @@ def test_send_password_action_sends_passwords_when_plan_found(
 
 def test_send_password_action_raises_when_no_exported_plan_found(user: Any) -> None:
     group = PaymentPlanGroupFactory()
-    PaymentPlanFactory(payment_plan_group=group, export_tag=1, export_file_delivery=None)
+    PaymentPlanFactory(payment_plan_group=group, program_cycle=group.cycle, export_tag=1, export_file_delivery=None)
     job = AsyncRetryJob.objects.create(
         type=AsyncJobModel.JobType.JOB_TASK,
         action="hope.apps.payment.celery_tasks.send_payment_plan_group_delivery_xlsx_password_async_task_action",
