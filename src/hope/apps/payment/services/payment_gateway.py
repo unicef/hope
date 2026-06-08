@@ -73,12 +73,12 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         business_area = obj.payment_plan.business_area
         payment_country = business_area.payment_countries.first()
         payload = {
-            "destination_currency": obj.payment_plan.currency.vision_code if obj.payment_plan.currency else None,
+            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "user": self.context["user_email"],
             "config_key": business_area.code,
             "delivery_mechanism": obj.payment_plan.delivery_mechanism.code,
             "office": business_area.slug,
-            "destination_country": payment_country.iso_code2 if payment_country else None,
+            "country": payment_country.iso_code3 if payment_country else None,
         }
         if payment_country:  # TODO temporary solution
             payload["destination_country_iso_code3"] = payment_country.iso_code3

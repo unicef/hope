@@ -1215,7 +1215,7 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
         "config_key": business_area.code,
         "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
-        "destination_country": "AF",
+        "country": "AFG",
         "destination_country_iso_code3": "AFG",
         "destination_country_iso_code2": "AF",
     }
@@ -1236,7 +1236,7 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
         "config_key": business_area.code,
         "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
-        "destination_country": None,
+        "country": None,
     }
 
 
@@ -1251,7 +1251,7 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
 
     payload_without_country = serializer.get_payload(split)
 
-    assert payload_without_country["destination_country"] is None
+    assert payload_without_country["country"] is None
     assert "destination_country_iso_code3" not in payload_without_country
     assert "destination_country_iso_code2" not in payload_without_country
 
@@ -1260,7 +1260,7 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
     payload_with_country = serializer.get_payload(split)
 
     assert payload_with_country["office"] == business_area.slug
-    assert payload_with_country["destination_country"] == "AF"
+    assert payload_with_country["country"] == "AFG"
     assert payload_with_country["destination_country_iso_code3"] == "AFG"
     assert payload_with_country["destination_country_iso_code2"] == "AF"
 
@@ -1285,7 +1285,7 @@ def test_payment_instruction_payload_uses_destination_country_iso_code2(
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
-    assert data["payload"]["destination_country"] == "AF"
+    assert data["payload"]["country"] == "AFG"
     assert data["payload"]["destination_country_iso_code3"] == "AFG"
     assert data["payload"]["destination_country_iso_code2"] == "AF"
 
