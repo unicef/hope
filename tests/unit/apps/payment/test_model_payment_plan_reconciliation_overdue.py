@@ -19,6 +19,26 @@ def program_cycle():
     return ProgramCycleFactory()
 
 
+def test_can_send_to_vision_returns_true_when_accepted(program_cycle) -> None:
+    program = ProgramFactory()
+    cycle = program.cycles.first()
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    assert payment_plan.can_send_to_vision is True
+
+
+def test_can_send_to_vision_returns_false_when_not_accepted(program_cycle) -> None:
+    program = ProgramFactory()
+    cycle = program.cycles.first()
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        status=PaymentPlan.Status.DRAFT,
+    )
+    assert payment_plan.can_send_to_vision is False
+
+
 def test_has_payments_reconciliation_overdue_raises_type_error_when_dispersion_start_date_is_none(program_cycle):
     program = ProgramFactory(reconciliation_window_in_days=30)
     cycle = program.cycles.first()

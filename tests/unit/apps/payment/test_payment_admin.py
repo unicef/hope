@@ -48,8 +48,7 @@ def payment():
 
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_record")
-@patch("hope.admin.payment_plan.has_payment_pg_sync_permission", return_value=True)
-def test_payment_post_sync_with_payment_gateway(mock_perm, mock_sync, admin_client, payment) -> None:
+def test_payment_post_sync_with_payment_gateway(mock_sync, admin_client, payment) -> None:
     url = reverse("admin:payment_payment_sync_with_payment_gateway", args=[payment.pk])
     response = admin_client.post(url)
 
@@ -58,8 +57,7 @@ def test_payment_post_sync_with_payment_gateway(mock_perm, mock_sync, admin_clie
     assert reverse("admin:payment_payment_change", args=[payment.pk]) in response["Location"]
 
 
-@patch("hope.admin.payment_plan.has_payment_pg_sync_permission", return_value=True)
-def test_payment_get_sync_with_payment_gateway_confirmation(mock_perm, admin_client, payment) -> None:
+def test_payment_get_sync_with_payment_gateway_confirmation(admin_client, payment) -> None:
     url = reverse("admin:payment_payment_sync_with_payment_gateway", args=[payment.pk])
     response = admin_client.get(url)
 

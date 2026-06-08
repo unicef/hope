@@ -20,8 +20,6 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
-import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
@@ -35,11 +33,6 @@ export function PaymentPlanDetailsHeader({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
-  const getPlanTypeLabel = usePaymentPlanTypeLabel();
-  const planTypeLabel =
-    paymentPlan.planType && paymentPlan.planType !== PlanTypeEnum.REGULAR
-      ? `${getPlanTypeLabel(paymentPlan.planType)} `
-      : '';
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -67,6 +60,12 @@ export function PaymentPlanDetailsHeader({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
     permissions,
   );
+  const canSendToPaymentGateway =
+    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
+    paymentPlan.canSendToPaymentGateway;
+  const canSendToVision =
+    hasPermissions(PERMISSIONS.PM_SEND_PAYMENT_PLAN, permissions) &&
+    paymentPlan.canSendToVision;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
@@ -152,6 +151,8 @@ export function PaymentPlanDetailsHeader({
     case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
+          canSendToPaymentGateway={canSendToPaymentGateway}
+          canSendToVision={canSendToVision}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
           canClose={canClose}
@@ -175,7 +176,7 @@ export function PaymentPlanDetailsHeader({
       title={
         <Box display="flex" alignItems="center">
           <Box display="flex" flexDirection="column">
-            <Box> {planTypeLabel}{t('Payment Plan')} ID: </Box>
+            <Box> {t('Payment Plan')} ID: </Box>
             <Box>
               <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
             </Box>

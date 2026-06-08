@@ -3,13 +3,15 @@ from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
+from zipfile import BadZipFile
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
+from flags.models import FlagState
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -22,7 +24,6 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    FollowUpInstructionFactory,
     FundsCommitmentGroupFactory,
     FundsCommitmentItemFactory,
     PartnerFactory,
@@ -36,7 +37,9 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import (
+    FileTemp,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -75,7 +78,6 @@ def payment_plan_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         currency=currency_pln,
     )
-    purpose = pp.payment_plan_purposes.first()
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program_active.code,
@@ -93,7 +95,6 @@ def payment_plan_actions_context(
         "program_active": program_active,
         "cycle": cycle,
         "pp": pp,
-        "purpose": purpose,
         "url_kwargs_ba_program": url_kwargs_ba_program,
         "url_list": reverse("api:payments:payment-plans-list", kwargs=url_kwargs_ba_program),
         "url_lock": reverse("api:payments:payment-plans-lock", kwargs=url_kwargs),
@@ -121,12 +122,23 @@ def payment_plan_actions_context(
         "url_export_pdf_payment_plan_summary": reverse(
             "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
         ),
+        "url_generate_xlsx_with_auth_code": reverse(
+            "api:payments:payment-plans-generate-xlsx-with-auth-code", kwargs=url_kwargs
+        ),
+        "url_send_xlsx_password": reverse("api:payments:payment-plans-send-xlsx-password", kwargs=url_kwargs),
+        "url_reconciliation_export_xlsx": reverse(
+            "api:payments:payment-plans-reconciliation-export-xlsx", kwargs=url_kwargs
+        ),
+        "url_reconciliation_import_xlsx": reverse(
+            "api:payments:payment-plans-reconciliation-import-xlsx", kwargs=url_kwargs
+        ),
         "url_pp_split": reverse("api:payments:payment-plans-split", kwargs=url_kwargs),
         "url_create_follow_up": reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs),
         "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
         "url_pp_close": reverse("api:payments:payment-plans-close", kwargs=url_kwargs),
         "url_pp_abort": reverse("api:payments:payment-plans-abort", kwargs=url_kwargs),
         "url_pp_reactivate_abort": reverse("api:payments:payment-plans-reactivate-abort", kwargs=url_kwargs),
+        "url_send_to_vision": reverse("api:payments:payment-plans-send-to-vision", kwargs=url_kwargs),
     }
 
 
@@ -707,75 +719,6 @@ def test_pp_entitlement_export_xlsx_invalid_status(
     assert "You can only export Payment List for LOCKED Payment Plan" in response.data
 
 
-@pytest.mark.parametrize(
-    ("permission", "url_key", "method", "payload"),
-    [
-        (
-            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
-            "url_apply_steficon",
-            "post",
-            {"engine_formula_rule_id": None},
-        ),
-        (
-            Permissions.PM_VIEW_LIST,
-            "url_export_entitlement_xlsx",
-            "get",
-            None,
-        ),
-        (
-            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
-            "url_import_entitlement_xlsx",
-            "post",
-            {"file": SimpleUploadedFile("test.xlsx", b"123", content_type="application/vnd.ms-excel")},
-        ),
-        (
-            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
-            "url_import_entitlement_flat_amount",
-            "post",
-            {"flat_amount_value": "100.00"},
-        ),
-    ],
-)
-def test_entitlement_actions_are_blocked_for_follow_up_payment_plans(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    permission: Permissions,
-    url_key: str,
-    method: str,
-    payload: dict[str, Any] | None,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [permission],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
-    payment_plan_actions_context["pp"].plan_type = PaymentPlan.PlanType.FOLLOW_UP
-    payment_plan_actions_context["pp"].save(update_fields=["status", "plan_type"])
-
-    if url_key == "url_apply_steficon":
-        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True, version=99).rule
-        payload = {
-            "engine_formula_rule_id": str(rule_for_pp.pk),
-            "version": payment_plan_actions_context["pp"].version,
-        }
-    elif url_key == "url_import_entitlement_flat_amount":
-        payload = {
-            "flat_amount_value": "100.00",
-            "version": payment_plan_actions_context["pp"].version,
-        }
-
-    response = getattr(payment_plan_actions_context["client"], method)(
-        payment_plan_actions_context[url_key],
-        payload,
-        format="multipart" if url_key == "url_import_entitlement_xlsx" else "json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Entitlement actions are not available for Follow Up Payment Plans." in response.data
-
-
 @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_pp_entitlement_import_xlsx(
     mock_exchange_rate: Any,
@@ -1125,6 +1068,232 @@ def test_pp_send_to_payment_gateway(
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
+        ([Permissions.PM_DOWNLOAD_FSP_AUTH_CODE], status.HTTP_200_OK),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_generate_xlsx_with_auth_code(
+    payment_plan_actions_context: dict[str, Any],
+    permissions: list,
+    expected_status: int,
+    create_user_role_with_permissions: Any,
+) -> None:
+    fsp_xlsx_template_id = FinancialServiceProviderXlsxTemplateFactory().pk
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        permissions,
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    test_file = FileTemp.objects.create(
+        object_id=payment_plan_actions_context["pp"].pk,
+        content_type=get_content_type_for_model(payment_plan_actions_context["pp"]),
+        created_by=payment_plan_actions_context["user"],
+    )
+    fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="123",
+    )
+    PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"])
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
+    payment_plan_actions_context["pp"].financial_service_provider = fsp
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+        {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+        format="json",
+    )
+
+    if expected_status == status.HTTP_200_OK:
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
+
+        payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+        payment_plan_actions_context["pp"].export_file_per_fsp = test_file
+        payment_plan_actions_context["pp"].save()
+        response_2 = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+            format="json",
+        )
+
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Export failed: Payment Plan already has created exported file." in response_2.data
+
+        payment_plan_actions_context["pp"].export_file_per_fsp = None
+        payment_plan_actions_context["pp"].save()
+        payment = PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_PENDING)
+        response_3 = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+            format="json",
+        )
+
+        assert response_3.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
+            in response_3.data
+        )
+
+        payment.status = Payment.STATUS_SENT_TO_PG
+        payment.save()
+        response_4 = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+            format="json",
+        )
+
+        assert response_4.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
+            in response_4.data
+        )
+
+        payment.status = Payment.STATUS_SENT_TO_FSP
+        payment.save()
+        response_ok = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+            {"fsp_xlsx_template_id": fsp_xlsx_template_id},
+            format="json",
+        )
+
+        assert response_ok.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_SEND_XLSX_PASSWORD], status.HTTP_200_OK),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_send_xlsx_password(
+    payment_plan_actions_context: dict[str, Any],
+    permissions: list,
+    expected_status: int,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        permissions,
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+
+    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_send_xlsx_password"])
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
+        ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
+        ([], status.HTTP_403_FORBIDDEN),
+    ],
+)
+def test_reconciliation_export_xlsx(
+    payment_plan_actions_context: dict[str, Any],
+    permissions: list,
+    expected_status: int,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        permissions,
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_PENDING)
+
+    response = payment_plan_actions_context["client"].get(
+        payment_plan_actions_context["url_reconciliation_export_xlsx"]
+    )
+    assert response.status_code == expected_status
+    if expected_status == status.HTTP_200_OK:
+        assert "id" in response.data
+
+        payment_plan_actions_context["pp"].eligible_payments.delete()
+        response_1 = payment_plan_actions_context["client"].get(
+            payment_plan_actions_context["url_reconciliation_export_xlsx"]
+        )
+        assert response_1.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Export failed: The Payment List is empty." in response_1.data
+
+        payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
+        payment_plan_actions_context["pp"].save()
+        response_2 = payment_plan_actions_context["client"].get(
+            payment_plan_actions_context["url_reconciliation_export_xlsx"]
+        )
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response_2.data
+        )
+
+
+def test_pp_reconciliation_import_xlsx_invalid(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.OPEN
+    payment_plan_actions_context["pp"].save()
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"123", content_type="application/vnd.ms-excel")
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        {"file": test_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data[0]
+
+    fsp_api = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="123",
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].financial_service_provider = fsp_api
+    payment_plan_actions_context["pp"].save()
+    response_2 = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        {"file": test_file},
+        format="multipart",
+    )
+    assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+    assert (
+        "Manual reconciliation import is not available for payment plans using payment gateway." in response_2.data[0]
+    )
+
+    fsp_xlsx = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        payment_gateway_id="1234",
+    )
+    payment_plan_actions_context["pp"].financial_service_provider = fsp_xlsx
+    payment_plan_actions_context["pp"].use_payment_gateway = True
+    payment_plan_actions_context["pp"].save(update_fields=["financial_service_provider", "use_payment_gateway"])
+    response_3 = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        {"file": test_file},
+        format="multipart",
+    )
+    assert response_3.status_code == status.HTTP_400_BAD_REQUEST
+    assert (
+        "Manual reconciliation import is not available for payment plans using payment gateway." in response_3.data[0]
+    )
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status"),
+    [
         ([Permissions.PM_SPLIT], status.HTTP_200_OK),
         ([], status.HTTP_403_FORBIDDEN),
     ],
@@ -1266,23 +1435,20 @@ def test_create_follow_up(
         payment_plan_actions_context["url_create_follow_up"],
         {
             "dispersion_start_date": "2024-01-01",
-            "dispersion_end_date": "2099-12-31",
+            "dispersion_end_date": "2026-01-01",
         },
         format="json",
     )
     assert response.status_code == expected_status
 
     if expected_status == status.HTTP_201_CREATED:
-        data = response.json()
-        assert "id" in data
-        assert data["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
-        assert "id" in data["source_payment_plan"]
-        assert data["name"] == "DRAFT PP Follow Up"
-        assert data["dispersion_start_date"] == "2024-01-01"
-        assert data["dispersion_end_date"] == "2099-12-31"
-        assert data["currency"] == "PLN"
-        purpose = payment_plan_actions_context["purpose"]
-        assert data["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
+        assert "id" in response.json()
+        assert response.json()["is_follow_up"] is True
+        assert "id" in response.json()["source_payment_plan"]
+        assert response.json()["name"] == "DRAFT PP Follow Up"
+        assert response.json()["dispersion_start_date"] == "2024-01-01"
+        assert response.json()["dispersion_end_date"] == "2026-01-01"
+        assert response.json()["currency"] == "PLN"
 
 
 @pytest.mark.parametrize(
@@ -1748,6 +1914,122 @@ def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
     assert response.status_code == status.HTTP_200_OK
 
 
+def test_generate_xlsx_with_auth_code_rejects_when_export_in_progress(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    payment_plan_actions_context["pp"].save()
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_generate_xlsx_with_auth_code"],
+        {},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Payment List Per FSP export already in progress." in response.data
+
+
+def _set_pp_for_reconciliation_import(
+    payment_plan_actions_context: dict[str, Any], create_user_role_with_permissions: Any
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    fsp_xlsx = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].financial_service_provider = fsp_xlsx
+    payment_plan_actions_context["pp"].save()
+
+
+def test_reconciliation_import_xlsx_returns_400_when_serializer_invalid(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _set_pp_for_reconciliation_import(payment_plan_actions_context, create_user_role_with_permissions)
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_reconciliation_import_xlsx"],
+        {},
+        format="multipart",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "file" in response.json()
+
+
+def test_reconciliation_import_xlsx_rejects_bad_zip_file(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _set_pp_for_reconciliation_import(payment_plan_actions_context, create_user_role_with_permissions)
+    test_file = SimpleUploadedFile("test.xlsx", b"not-a-zip", content_type="application/vnd.ms-excel")
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanImportPerFspService") as mock_cls:
+        mock_cls.return_value.open_workbook.side_effect = BadZipFile("not a zip")
+        response = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_reconciliation_import_xlsx"],
+            {"file": test_file},
+            format="multipart",
+        )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Wrong file type or password protected" in response.data[0]
+
+
+def test_reconciliation_import_xlsx_returns_400_on_validation_errors(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _set_pp_for_reconciliation_import(payment_plan_actions_context, create_user_role_with_permissions)
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanImportPerFspService") as mock_cls:
+        instance = mock_cls.return_value
+        instance.errors = [XlsxError(sheet="Reconciliation", coordinates="B2", message="Missing column")]
+        response = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_reconciliation_import_xlsx"],
+            {"file": test_file},
+            format="multipart",
+        )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    body = response.json()
+    assert body[0]["sheet"] == "Reconciliation"
+    assert body[0]["message"] == "Missing column"
+
+
+def test_reconciliation_import_xlsx_succeeds(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _set_pp_for_reconciliation_import(payment_plan_actions_context, create_user_role_with_permissions)
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+    pp = payment_plan_actions_context["pp"]
+    with (
+        patch("hope.apps.payment.api.views.XlsxPaymentPlanImportPerFspService") as mock_import_cls,
+        patch("hope.apps.payment.api.views.PaymentPlanService") as mock_service_cls,
+    ):
+        mock_import_cls.return_value.errors = []
+        service = MagicMock()
+        service.import_xlsx_per_fsp.return_value = pp
+        mock_service_cls.return_value = service
+        response = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_reconciliation_import_xlsx"],
+            {"file": test_file},
+            format="multipart",
+        )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["id"] == str(pp.pk)
+    service.import_xlsx_per_fsp.assert_called_once()
+
+
 def test_split_with_split_type_no_split_skips_records_branch(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -1802,26 +2084,126 @@ def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
     assert any(item["name"] == "XLSX_FLAT" for item in body)
 
 
-def test_get_object_raises_for_instruction_managed_blocked_action(
+def _enable_vision_flag() -> None:
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value="True",
+    )
+
+
+def test_send_to_vision_flag_disabled_returns_403(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_LOCK_AND_UNLOCK],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    instruction = FollowUpInstructionFactory(
-        program=payment_plan_actions_context["program_active"],
-        business_area=payment_plan_actions_context["business_area"],
-        created_by=payment_plan_actions_context["user"],
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
     )
-    pp = payment_plan_actions_context["pp"]
-    pp.follow_up_instruction = instruction
-    pp.save(update_fields=["follow_up_instruction"])
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_lock"])
 
+def test_send_to_vision_wrong_status_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.DRAFT
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_send_to_vision_no_permission_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+) -> None:
+    _enable_vision_flag()
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_success(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.return_value = {"status": "ok", "messageId": "test-msg-id"}
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["message"] == "Payment plan sent to Vision successfully: test-msg-id"
+    mock_vision.return_value.send_payment_plan.assert_called_once_with(payment_plan_actions_context["pp"])
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_api_error_returns_400(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIError("boom")
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "This Payment Plan is managed by a Follow Up Instruction." in str(response.data)
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_missing_creds_returns_400(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIMissingCredentialsError("no creds")
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

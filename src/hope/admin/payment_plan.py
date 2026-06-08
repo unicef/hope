@@ -13,12 +13,14 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from flags.state import flag_state
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.forms import BatchReexportForm
+from hope.apps.payment.forms import BatchReexportForm, TemplateSelectForm
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
+from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     AsyncJob,
@@ -59,6 +61,10 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
         return False
 
 
+def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.status == PaymentPlan.Status.ACCEPTED and bool(flag_state("SHOW_SEND_TO_VISION_BUTTON"))
+
+
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
     return payment_plan.is_payment_gateway and payment_plan.status in [
         PaymentPlan.Status.ACCEPTED,
@@ -71,6 +77,10 @@ def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan)
         Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
         payment_plan.program,
     )
+
+
+def can_regenerate_export_file_per_fsp(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.can_regenerate_export_file_per_fsp
 
 
 @admin.register(PaymentPlan)
@@ -169,9 +179,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -190,9 +198,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_missing_records_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -207,6 +213,40 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             request=request,
             action=self.sync_missing_records_with_payment_gateway,
             message="Do you confirm to Sync with Payment Gateway missing Records?",
+        )
+
+    @button(
+        visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
+        permission="payment.view_paymentplan",
+    )
+    def regenerate_export_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        payment_plan = PaymentPlan.objects.get(pk=pk)
+
+        if request.method == "POST":
+            from hope.apps.payment.services.payment_plan_services import (
+                PaymentPlanService,
+            )
+
+            form = TemplateSelectForm(request.POST, payment_plan=payment_plan)
+            if form.is_valid():
+                template_obj = form.cleaned_data.get("template")
+                fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
+                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
+                    str(request.user.pk), fsp_xlsx_template_id
+                )
+                messages.success(request, "Celery task for export regenerate file successfully started.")
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        else:
+            form = TemplateSelectForm(payment_plan=payment_plan)
+
+        return render(
+            request,
+            "admin/payment/regenerate_export_xlsx_form.html",
+            {
+                "form": form,
+                "payment_plan": payment_plan,
+                "title": "Select a template if you want the export to include the FSP Auth Code",
+            },
         )
 
     @button(permission="payment.view_paymentplan")
@@ -228,6 +268,30 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+    @button(
+        visible=lambda btn: can_send_to_vision(btn.original),
+        permission="payment.pm_send_payment_plan",
+    )
+    def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            try:
+                response = VisionAPI().send_payment_plan(payment_plan)
+                self.message_user(
+                    request, f"Payment plan sent to Vision successfully: {response['messageId']}", level="success"
+                )
+            except VisionAPIError as e:
+                self.message_user(request, f"Failed to send to Vision: {e}", level="warning")
+            except VisionAPIMissingCredentialsError as e:
+                self.message_user(request, f"Vision API not configured: {e}", level="error")
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.send_to_vision,
+            message="Do you confirm to send this payment plan to Vision?",
+        )
 
 
 @admin.register(PaymentPlanGroup)
@@ -375,13 +439,6 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
     readonly_fields = ("snapshot_data", "household_id")
 
 
-def has_payment_pg_sync_permission(request: Any, payment: Payment) -> bool:
-    return request.user.has_perm(
-        Permissions.PM_SYNC_PAYMENT_WITH_PG.value,
-        payment.parent.program,
-    )
-
-
 @admin.register(Payment)
 class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id",)
@@ -458,7 +515,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
-        permission=lambda request, payment, *args, **kwargs: has_payment_pg_sync_permission(request, payment),
+        permission="payment.pm_sync_payment_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
