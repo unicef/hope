@@ -129,7 +129,6 @@ dev = [
   "django-stubs>=1.12",
   "django-stubs-ext>=0.7",
   "django-webtest>=1.9.10",
-  "webob>=1.8.10",
   "djangorestframework-stubs>=1.7",
   "drf-api-checker>=0.13",
   "faker>=17",
@@ -173,6 +172,7 @@ dev = [
   "wasmer>=1.1",
   "watchdog>=2.1.8",
   "webdriver-manager>=4.0.2",
+  "webob>=1.8.10",
 ]
 docs = [
   "cairosvg>=2.7.1",
