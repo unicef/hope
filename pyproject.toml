@@ -116,7 +116,7 @@ dependencies = [
   "tomli>=2.0.1,<3",
   "update>=0.0.1,<1",
   "urllib3>=1.26.9,<3",
-  "weasyprint>=60",
+  "weasyprint>=68",
 ]
 
 [dependency-groups]
@@ -129,6 +129,7 @@ dev = [
   "django-stubs>=1.12",
   "django-stubs-ext>=0.7",
   "django-webtest>=1.9.10",
+  "webob>=1.8.10",
   "djangorestframework-stubs>=1.7",
   "drf-api-checker>=0.13",
   "faker>=17",
