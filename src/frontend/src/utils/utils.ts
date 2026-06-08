@@ -15,6 +15,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
+const NEWLINE_RE = /[\r\n]/g;
+
 // Formats a string or array value to Normal Case using lodash's startCase
 export function formatNormalCaseValue(value: string | string[]): string {
   if (typeof value === 'string') {
@@ -585,7 +587,7 @@ export function decodeIdString(idString: string): string | null {
   // Check for valid base64 (length multiple of 4, only base64 chars)
   const base64Pattern = /^[A-Za-z0-9+/=]+$/;
   if (idString.length % 4 !== 0 || !base64Pattern.test(idString)) {
-    const safeId = idString.replace(/[\r\n]/g, '');
+    const safeId = idString.replace(NEWLINE_RE, '');
     console.error('decodeIdString: Not a valid base64 string:', safeId);
     return null;
   }
@@ -593,7 +595,7 @@ export function decodeIdString(idString: string): string | null {
     const decoded = atob(idString);
     return decoded.split(':')[1];
   } catch (e) {
-    const safeId = idString.replace(/[\r\n]/g, '');
+    const safeId = idString.replace(NEWLINE_RE, '');
     console.error('Failed to decode string:', e, safeId);
     return null;
   }

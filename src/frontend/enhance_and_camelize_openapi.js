@@ -3,6 +3,7 @@ import yaml from 'js-yaml';
 import _ from 'lodash';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
+const NEWLINE_RE = NEWLINE_RE;
 
 const EXCLUDED_CHOICE_ENDPOINTS = [
   'payment-record-delivery-type',
@@ -260,10 +261,10 @@ async function fetchChoices() {
       };
 
       console.log(
-        `✓ Successfully fetched ${data.length} choices for ${String(endpoint).replace(/[\r\n]/g, '')} -> ${String(enumName).replace(/[\r\n]/g, '')}`,
+        `✓ Successfully fetched ${data.length} choices for ${String(endpoint).replace(NEWLINE_RE, '')} -> ${String(enumName).replace(NEWLINE_RE, '')}`,
       );
     } catch (error) {
-      console.warn(`Failed to fetch choices for ${String(endpoint).replace(/[\r\n]/g, '')}:`, error.message);
+      console.warn(`Failed to fetch choices for ${String(endpoint).replace(NEWLINE_RE, '')}:`, error.message);
     }
   }
 
