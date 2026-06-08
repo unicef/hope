@@ -11,6 +11,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
+from flags.models import FlagState
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -36,6 +37,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import (
     FileTemp,
     FinancialServiceProvider,
@@ -136,6 +138,7 @@ def payment_plan_actions_context(
         "url_pp_close": reverse("api:payments:payment-plans-close", kwargs=url_kwargs),
         "url_pp_abort": reverse("api:payments:payment-plans-abort", kwargs=url_kwargs),
         "url_pp_reactivate_abort": reverse("api:payments:payment-plans-reactivate-abort", kwargs=url_kwargs),
+        "url_send_to_vision": reverse("api:payments:payment-plans-send-to-vision", kwargs=url_kwargs),
     }
 
 
@@ -2079,3 +2082,128 @@ def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
     body = response.json()
     assert isinstance(body, list)
     assert any(item["name"] == "XLSX_FLAT" for item in body)
+
+
+def _enable_vision_flag() -> None:
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value="True",
+    )
+
+
+def test_send_to_vision_flag_disabled_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_send_to_vision_wrong_status_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.DRAFT
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_send_to_vision_no_permission_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+) -> None:
+    _enable_vision_flag()
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_success(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.return_value = {"status": "ok", "messageId": "test-msg-id"}
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["message"] == "Payment plan sent to Vision successfully: test-msg-id"
+    mock_vision.return_value.send_payment_plan.assert_called_once_with(payment_plan_actions_context["pp"])
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_api_error_returns_400(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIError("boom")
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_missing_creds_returns_400(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIMissingCredentialsError("no creds")
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_PAYMENT_PLAN],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

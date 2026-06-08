@@ -215,6 +215,7 @@ class Payment(
 
     class Meta:
         app_label = "payment"
+        permissions = (("pm_sync_payment_with_pg", "Can sync payment with payment gateway"),)
         constraints = [
             UniqueConstraint(
                 fields=["parent", "household"],

@@ -6,6 +6,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages import get_messages
 from django.urls import reverse
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
@@ -18,7 +19,12 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     UserFactory,
 )
-from hope.admin.payment_plan import can_regenerate_export_file_per_fsp, can_sync_with_payment_gateway
+from hope.admin.payment_plan import (
+    can_regenerate_export_file_per_fsp,
+    can_send_to_vision,
+    can_sync_with_payment_gateway,
+)
+from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import FinancialServiceProvider, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -132,8 +138,7 @@ def payment_gateway_fsp(delivery_mechanism):
 
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_payment_plan")
-@patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
-def test_payment_plan_post_sync_with_payment_gateway(mock_perm, mock_sync, admin_client, payment_plan) -> None:
+def test_payment_plan_post_sync_with_payment_gateway(mock_sync, admin_client, payment_plan) -> None:
     url = reverse(
         "admin:payment_paymentplan_sync_with_payment_gateway",
         args=[payment_plan.pk],
@@ -145,8 +150,7 @@ def test_payment_plan_post_sync_with_payment_gateway(mock_perm, mock_sync, admin
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 
 
-@patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
-def test_payment_plan_get_sync_with_payment_gateway_confirmation(mock_perm, admin_client, payment_plan) -> None:
+def test_payment_plan_get_sync_with_payment_gateway_confirmation(admin_client, payment_plan) -> None:
     url = reverse(
         "admin:payment_paymentplan_sync_with_payment_gateway",
         args=[payment_plan.pk],
@@ -298,10 +302,7 @@ def test_related_configs_warns_and_redirects_when_no_delivery_mechanism(
 
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.add_missing_records_to_payment_instructions")
-@patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
-def test_payment_post_sync_missing_records_with_payment_gateway(
-    mock_perm, mock_sync, admin_client, payment_plan
-) -> None:
+def test_payment_post_sync_missing_records_with_payment_gateway(mock_sync, admin_client, payment_plan) -> None:
     url = reverse(
         "admin:payment_paymentplan_sync_missing_records_with_payment_gateway",
         args=[payment_plan.pk],
@@ -313,8 +314,7 @@ def test_payment_post_sync_missing_records_with_payment_gateway(
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 
 
-@patch("hope.admin.payment_plan.has_payment_plan_pg_sync_permission", return_value=True)
-def test_payment_get_sync_missing_records_with_payment_gateway(mock_perm, admin_client, payment_plan) -> None:
+def test_payment_get_sync_missing_records_with_payment_gateway(admin_client, payment_plan) -> None:
     url = reverse(
         "admin:payment_paymentplan_sync_missing_records_with_payment_gateway",
         args=[payment_plan.pk],
@@ -325,8 +325,7 @@ def test_payment_get_sync_missing_records_with_payment_gateway(mock_perm, admin_
     assert "Do you confirm to Sync with Payment Gateway missing Records?" in response.content.decode("utf-8")
 
 
-@patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
-def test_get_regenerate_export_xlsx_form(mock_perm, admin_client, payment_plan) -> None:
+def test_get_regenerate_export_xlsx_form(admin_client, payment_plan) -> None:
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.get(url)
     assert response.status_code == 200
@@ -335,10 +334,7 @@ def test_get_regenerate_export_xlsx_form(mock_perm, admin_client, payment_plan) 
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
-@patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
-def test_post_regenerate_export_xlsx_without_template(
-    mock_perm, mock_export, admin_client, admin_user, payment_plan
-) -> None:
+def test_post_regenerate_export_xlsx_without_template(mock_export, admin_client, admin_user, payment_plan) -> None:
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.post(url, {"template": ""})
 
@@ -348,9 +344,8 @@ def test_post_regenerate_export_xlsx_without_template(
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.export_xlsx_per_fsp")
-@patch("hope.admin.payment_plan.has_payment_plan_export_per_fsp_permission", return_value=True)
 def test_post_regenerate_export_xlsx_with_template(
-    mock_perm, mock_export, admin_client, admin_user, payment_plan, fsp_template
+    mock_export, admin_client, admin_user, payment_plan, fsp_template
 ) -> None:
     url = reverse("admin:payment_paymentplan_regenerate_export_xlsx", args=[payment_plan.pk])
     response = admin_client.post(url, {"template": fsp_template.id})
@@ -418,3 +413,87 @@ def test_can_regenerate_export_file_per_fsp(
     payment_plan.export_file_per_fsp = file_temp if has_export_file_per_fsp else None
     payment_plan.background_action_status = background_action_status
     assert can_regenerate_export_file_per_fsp(payment_plan) is expected
+
+
+@pytest.mark.parametrize(
+    ("status", "flag_enabled", "expected"),
+    [
+        (PaymentPlan.Status.ACCEPTED, True, True),
+        (PaymentPlan.Status.ACCEPTED, False, False),
+        (PaymentPlan.Status.OPEN, True, False),
+        (PaymentPlan.Status.OPEN, False, False),
+    ],
+)
+def test_can_send_to_vision(payment_plan, status, flag_enabled, expected) -> None:
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value=str(flag_enabled),
+    )
+    payment_plan.status = status
+    payment_plan.save(update_fields=["status"])
+    assert can_send_to_vision(payment_plan) is expected
+
+
+@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
+def test_send_to_vision_post_success(mock_send, admin_client, payment_plan, settings) -> None:
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value="True",
+    )
+    mock_send.return_value = {"messageId": "test-msg-id"}
+    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
+    settings.VISION_API_URL = "http://fake.vision.test/"
+    response = admin_client.post(url)
+    assert response.status_code == 302
+    mock_send.assert_called_once_with(payment_plan)
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert "Payment plan sent to Vision successfully" in str(messages[0])
+
+
+@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
+def test_send_to_vision_handles_api_error(mock_send, admin_client, payment_plan, settings) -> None:
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value="True",
+    )
+    mock_send.side_effect = VisionAPIError("boom")
+    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
+    settings.VISION_API_URL = "http://fake.vision.test/"
+    response = admin_client.post(url)
+    assert response.status_code == 302
+    mock_send.assert_called_once_with(payment_plan)
+    messages = list(get_messages(response.wsgi_request))
+    assert any("Failed to send to Vision" in str(m) for m in messages)
+
+
+@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
+def test_send_to_vision_handles_missing_creds(mock_send, admin_client, payment_plan, settings) -> None:
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value="True",
+    )
+    mock_send.side_effect = VisionAPIMissingCredentialsError("no creds")
+    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
+    settings.VISION_API_URL = "http://fake.vision.test/"
+    response = admin_client.post(url)
+    assert response.status_code == 302
+    mock_send.assert_called_once_with(payment_plan)
+    messages = list(get_messages(response.wsgi_request))
+    assert any("Vision API not configured" in str(m) for m in messages)
+
+
+def test_send_to_vision_get_confirmation(admin_client, payment_plan) -> None:
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value="True",
+    )
+    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
+    response = admin_client.get(url)
+    assert response.status_code == 200
+    assert "Do you confirm to send this payment plan to Vision?" in response.content.decode("utf-8")

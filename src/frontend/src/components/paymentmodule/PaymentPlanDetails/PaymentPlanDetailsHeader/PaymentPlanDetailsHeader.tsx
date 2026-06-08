@@ -63,6 +63,9 @@ export function PaymentPlanDetailsHeader({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
+  const canSendToVision =
+    hasPermissions(PERMISSIONS.PM_SEND_PAYMENT_PLAN, permissions) &&
+    paymentPlan.canSendToVision;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
@@ -149,6 +152,7 @@ export function PaymentPlanDetailsHeader({
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}
+          canSendToVision={canSendToVision}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
           canClose={canClose}

@@ -177,6 +177,11 @@ DEFAULTS = {
     "FTP_WESTERN_UNION_PORT": (int, 22),
     "FTP_WESTERN_UNION_USERNAME": (str, ""),
     "FTP_WESTERN_UNION_PASSWORD": (str, ""),
+    "VISION_API_URL": (str, ""),
+    "VISION_CLIENT_ID": (str, ""),
+    "VISION_CLIENT_SECRET": (str, ""),
+    "VISION_TOKEN_GRANT_TYPE": (str, "client_credentials"),
+    "VISION_DEFAULT_TIMEOUT": (int, 60),
 }
 
 env = SmartEnv(**DEFAULTS)

@@ -29,3 +29,9 @@ def initialize_core_fixtures() -> None:
         value="True",
         required=False,
     )
+    FlagState.objects.get_or_create(
+        name="SHOW_SEND_TO_VISION_BUTTON",
+        condition="boolean",
+        value="True",
+        required=False,
+    )

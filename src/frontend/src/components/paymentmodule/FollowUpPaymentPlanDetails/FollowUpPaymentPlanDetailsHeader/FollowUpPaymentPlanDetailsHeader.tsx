@@ -69,6 +69,9 @@ export function FollowUpPaymentPlanDetailsHeader({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
+  const canSendToVision =
+    hasPermissions(PERMISSIONS.PM_SEND_PAYMENT_PLAN, permissions) &&
+    paymentPlan.canSendToVision;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
@@ -149,6 +152,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}
+          canSendToVision={canSendToVision}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
           canClose={canClose}

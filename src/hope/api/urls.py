@@ -18,6 +18,7 @@ from hope.contrib.aurora.views import (
     ProjectListView,
     RegistrationListView,
 )
+from hope.contrib.vision.views import PaymentPlanCallbackView
 
 app_name = "api"
 
@@ -123,6 +124,18 @@ urlpatterns = [
                     "registrations/",
                     RegistrationListView.as_view(),
                     name="registration-list",
+                ),
+            ]
+        ),
+    ),
+    path(
+        "systems/vision/",
+        include(
+            [
+                path(
+                    "payment-plan-callback/",
+                    PaymentPlanCallbackView.as_view(),
+                    name="payment-plan-callback",
                 ),
             ]
         ),

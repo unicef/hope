@@ -569,6 +569,8 @@ class PaymentPlan(
             ("restart_exporting_template_for_entitlement", "Can restart Exporting Template for Entitlements"),
             ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
             ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
+            ("pm_sync_payment_plan_with_pg", "Can sync payment plan with payment gateway"),
+            ("pm_send_payment_plan", "Can send payment plan to Vision"),
         )
 
     def __str__(self) -> str:
@@ -1023,6 +1025,10 @@ class PaymentPlan(
             sent_to_payment_gateway=False,
         ).exists()
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+
+    @property
+    def can_send_to_vision(self) -> bool:
+        return self.status == PaymentPlan.Status.ACCEPTED
 
     @property
     def has_payments_reconciliation_overdue(self) -> bool:

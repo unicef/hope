@@ -27,6 +27,7 @@ import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
+  canSendToVision: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canClose: boolean;
@@ -34,6 +35,7 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
 
 export function AcceptedPaymentPlanHeaderButtons({
   canSendToPaymentGateway,
+  canSendToVision,
   canSplit,
   paymentPlan,
   canClose,
@@ -138,6 +140,23 @@ export function AcceptedPaymentPlanHeaderButtons({
       showApiErrorMessages(error, showMessage);
     },
   });
+
+  const { mutateAsync: sendToVision, isPending: loadingSendToVision } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansSendToVisionCreate({
+          businessAreaSlug: businessArea,
+          programCode: programId,
+          id: paymentPlan.id,
+          requestBody: {} as any,
+        }),
+      onSuccess: () => {
+        showMessage(t('Sending to Vision started'));
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
 
   const shouldDisableExportXlsx =
     loadingExport ||
@@ -311,6 +330,21 @@ export function AcceptedPaymentPlanHeaderButtons({
               data-perm={PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY}
             >
               {t('Send to FSP')}
+            </Button>
+          </Box>
+        )}
+        {canSendToVision && (
+          <Box m={2}>
+            <Button
+              type="button"
+              color="primary"
+              variant="contained"
+              onClick={() => sendToVision()}
+              data-cy="button-send-to-vision"
+              disabled={loadingSendToVision}
+              data-perm={PERMISSIONS.PM_SEND_PAYMENT_PLAN}
+            >
+              {t('Send to Vision')}
             </Button>
           </Box>
         )}
