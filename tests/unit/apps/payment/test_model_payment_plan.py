@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 import json
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.admin.options import get_content_type_for_model
@@ -27,7 +27,7 @@ from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFact
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
 from hope.apps.payment.flows import PaymentPlanFlow
-from hope.models import Approval, Payment, PaymentPlan, ProgramCycle, Rule
+from hope.models import Approval, FileTemp, Payment, PaymentPlan, ProgramCycle, Rule
 
 pytestmark = pytest.mark.django_db
 
@@ -868,3 +868,63 @@ def test_payment_plan_flow_xlsx_import_error_from_importing_reconciliation() -> 
     )
     PaymentPlanFlow(payment_plan).background_action_status_xlsx_import_error()
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+
+
+def test_remove_export_file_delivery_skips_when_no_file_temp_id() -> None:
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+    # no export_file_delivery set → file_temp_id is None
+    payment_plan.remove_export_file_delivery()
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_delivery is None
+
+
+def test_remove_export_file_delivery_skips_deletion_when_another_plan_references_file() -> None:
+    file_temp = FileTempFactory()
+    plan_a = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
+    plan_b = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        export_file_delivery=file_temp,
+        payment_plan_group=plan_a.payment_plan_group,
+    )
+
+    plan_a.remove_export_file_delivery()
+
+    assert FileTemp.objects.filter(pk=file_temp.pk).exists()
+    assert plan_a.export_file_delivery is None
+    plan_b.refresh_from_db()
+    assert plan_b.export_file_delivery_id == file_temp.pk
+
+
+def test_remove_export_file_delivery_deletes_file_temp_when_last_reference() -> None:
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
+
+    with patch("django.db.models.fields.files.FieldFile.delete"):
+        payment_plan.remove_export_file_delivery()
+
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_delivery is None
+
+
+def test_remove_export_files_removes_delivery_when_accepted_with_file() -> None:
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
+
+    with patch("django.db.models.fields.files.FieldFile.delete"):
+        payment_plan.remove_export_files()
+
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_delivery is None
+
+
+def test_remove_export_files_removes_delivery_when_finished_with_file() -> None:
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, export_file_delivery=file_temp)
+
+    with patch("django.db.models.fields.files.FieldFile.delete"):
+        payment_plan.remove_export_files()
+
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()

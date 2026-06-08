@@ -67,6 +67,7 @@ from hope.apps.payment.celery_tasks import (
     remove_old_payment_plan_payment_list_xlsx_async_task,
     remove_old_payment_plan_payment_list_xlsx_async_task_action,
     send_payment_notification_emails_async_task,
+    send_payment_plan_group_delivery_xlsx_password_async_task_action,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_qcf_report_email_notifications_async_task,
     send_qcf_report_email_notifications_async_task_action,
@@ -1424,6 +1425,50 @@ def test_payment_plan_apply_custom_exchange_rate_action_bulk_updates_in_chunks(
     mock_bulk_update.assert_called_once()
     assert bulk_update_calls == [(1000, ["entitlement_quantity_usd", "delivered_quantity_usd"], 1000)]
     mock_flow_cls.return_value.background_action_status_none.assert_called_once()
+
+
+@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file")
+def test_send_password_action_sends_passwords_when_plan_found(
+    mock_send: Mock,
+    user: Any,
+) -> None:
+    group = PaymentPlanGroupFactory()
+    file_temp = FileTempFactory()
+    plan = PaymentPlanFactory(
+        payment_plan_group=group,
+        export_tag=1,
+        export_file_delivery=file_temp,
+    )
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.send_payment_plan_group_delivery_xlsx_password_async_task_action",
+        config={
+            "payment_plan_group_id": str(group.id),
+            "user_id": str(user.pk),
+            "export_tag": plan.export_tag,
+        },
+    )
+
+    send_payment_plan_group_delivery_xlsx_password_async_task_action(job)
+
+    mock_send.assert_called_once_with(user, file_temp, f"Payment Plan Group {group.unicef_id} Batch 1 Payment List")
+
+
+def test_send_password_action_raises_when_no_exported_plan_found(user: Any) -> None:
+    group = PaymentPlanGroupFactory()
+    PaymentPlanFactory(payment_plan_group=group, export_tag=1, export_file_delivery=None)
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.send_payment_plan_group_delivery_xlsx_password_async_task_action",
+        config={
+            "payment_plan_group_id": str(group.id),
+            "user_id": str(user.pk),
+            "export_tag": 1,
+        },
+    )
+
+    with pytest.raises(Exception, match="No exported batch file found"):
+        send_payment_plan_group_delivery_xlsx_password_async_task_action(job)
 
 
 @patch("hope.models.payment_plan.PaymentPlan.get_unore_exchange_rate")

@@ -794,3 +794,46 @@ def test_headers_for_social_worker_program(payment_plan, xlsx_valid_file):
     assert "household_id" not in import_service.headers
     assert "collector_id" not in export_service.headers
     assert "individual_id" in import_service.headers
+
+
+def test_as_plain_text_returns_empty_string_for_none():
+    assert XlsxPaymentPlanDeliveryExportService._as_plain_text(None) == ""
+
+
+def test_as_plain_text_decodes_bytes():
+    assert XlsxPaymentPlanDeliveryExportService._as_plain_text(b"secret") == "secret"
+
+
+def test_as_plain_text_decodes_memoryview():
+    assert XlsxPaymentPlanDeliveryExportService._as_plain_text(memoryview(b"mv-value")) == "mv-value"
+
+
+def test_as_plain_text_returns_str_unchanged():
+    assert XlsxPaymentPlanDeliveryExportService._as_plain_text("plain") == "plain"
+
+
+def test_send_file_passwords_with_no_file_temp(user):
+    with patch.object(user, "email_user") as mock_email:
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, None, "Test Title")
+
+    mock_email.assert_called_once()
+    call_kwargs = mock_email.call_args[1]
+    assert "Test Title" in call_kwargs["subject"]
+    assert "ZIP file password: \n" in call_kwargs["text_body"]
+    assert "XLSX file password: \n" in call_kwargs["text_body"]
+
+
+def test_send_file_passwords_with_file_temp_sends_passwords(user):
+    file_temp = FileTempFactory()
+    file_temp.password = "zip-pw"
+    file_temp.xlsx_password = "xlsx-pw"
+    file_temp.save()
+
+    with patch.object(user, "email_user") as mock_email:
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, "My Plan")
+
+    mock_email.assert_called_once()
+    call_kwargs = mock_email.call_args[1]
+    assert "My Plan" in call_kwargs["subject"]
+    assert "ZIP file password: zip-pw" in call_kwargs["text_body"]
+    assert "XLSX file password: xlsx-pw" in call_kwargs["text_body"]
