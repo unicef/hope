@@ -13,6 +13,8 @@ import { StatusBox } from '@core/StatusBox';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { LoadingButton } from '@components/core/LoadingButton';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
+import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -35,12 +37,17 @@ export function EditPaymentPlanHeader({
 }: EditPaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { id, planType } = paymentPlan;
+  const getPlanTypeLabel = usePaymentPlanTypeLabel();
+  const planTypeLabel =
+    planType && planType !== PlanTypeEnum.REGULAR
+      ? `${getPlanTypeLabel(planType)} `
+      : '';
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
       to: `/${baseUrl}/payment-module/${
-        planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'
+        planType === PlanTypeEnum.FOLLOW_UP ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },
   ];
@@ -49,12 +56,7 @@ export function EditPaymentPlanHeader({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
-          {t(
-            planType === 'FOLLOW_UP'
-              ? 'Follow-up Payment Plan'
-              : 'Payment Plan',
-          )}{' '}
-          ID {paymentPlan.unicefId}
+          {planTypeLabel}{t('Payment Plan')} ID {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
@@ -81,7 +83,7 @@ export function EditPaymentPlanHeader({
         <Box mr={3}>
           <Button
             component={Link}
-            to={`/${baseUrl}/payment-module/${planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${id}`}
+            to={`/${baseUrl}/payment-module/${planType === PlanTypeEnum.FOLLOW_UP ? 'followup-payment-plans' : 'payment-plans'}/${id}`}
           >
             {t('Cancel')}
           </Button>

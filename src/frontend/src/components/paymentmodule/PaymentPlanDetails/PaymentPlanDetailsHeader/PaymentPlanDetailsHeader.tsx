@@ -21,6 +21,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
+import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
@@ -34,9 +35,10 @@ export function PaymentPlanDetailsHeader({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
+  const getPlanTypeLabel = usePaymentPlanTypeLabel();
   const planTypeLabel =
     paymentPlan.planType && paymentPlan.planType !== PlanTypeEnum.REGULAR
-      ? `${paymentPlan.planType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} `
+      ? `${getPlanTypeLabel(paymentPlan.planType)} `
       : '';
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
