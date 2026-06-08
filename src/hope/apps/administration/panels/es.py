@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
+from elasticsearch.dsl.connections import create_connection
 from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionError, RequestError
-from elasticsearch_dsl.connections import create_connection
 
 from hope.apps.utils.elasticsearch_utils import (
     populate_all_indexes,
@@ -52,7 +52,7 @@ class ElasticsearchPanel:
                         conn.ping()
                     elif opt == "info":
                         conn = create_connection()
-                        logs = conn.info()
+                        logs = conn.info().body
                     elif opt == "rebuild_search_index":
                         rebuild_search_index()
                     elif opt == "populate_all_indexes":
