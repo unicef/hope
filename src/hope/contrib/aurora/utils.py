@@ -74,6 +74,97 @@ def _iter_results(payload: Any) -> list:
     return []
 
 
+def _sync_registration(session: requests.Session, data_reg: Any, prj: Project) -> bool:
+    """Persist one registration and its metadata. Returns True if processed."""
+    if not isinstance(data_reg, dict):
+        logger.warning("Skipping non-dict registration payload: %s", data_reg)
+        return False
+    reg_source_id = data_reg.get("id")
+    if not reg_source_id:
+        logger.warning("Skipping registration with missing id: %s", data_reg)
+        return False
+
+    mt: dict = {}
+    metadata_url = data_reg.get("metadata")
+    if metadata_url:
+        try:
+            mt = _get_json(session, metadata_url)
+        except (ValueError, requests.RequestException):
+            logger.exception("Failed to fetch metadata for registration %s", reg_source_id)
+
+    Registration.objects.update_or_create(
+        source_id=reg_source_id,
+        defaults={
+            "project": prj,
+            "name": data_reg.get("name", ""),
+            "slug": data_reg.get("slug", ""),
+            "metadata": mt,
+        },
+    )
+    return True
+
+
+def _sync_project(session: requests.Session, data_prj: Any, org: Organization) -> dict | None:
+    """Persist one project and its registrations. Returns the annotated project dict or None."""
+    if not isinstance(data_prj, dict):
+        logger.warning("Skipping non-dict project payload: %s", data_prj)
+        return None
+    prj_source_id = data_prj.get("id")
+    regs_url = data_prj.get("registrations")
+    if not prj_source_id or not regs_url:
+        logger.warning("Skipping project with missing id/registrations: %s", data_prj)
+        return None
+
+    prj, __ = Project.objects.update_or_create(
+        source_id=prj_source_id,
+        defaults={"organization": org, "name": data_prj.get("name", "")},
+    )
+
+    try:
+        regs = _get_json(session, regs_url)
+    except requests.RequestException:
+        logger.exception("Failed to fetch registrations for project %s", prj_source_id)
+        data_prj["registrations"] = []
+        return data_prj
+
+    data_prj["registrations"] = []
+    for data_reg in _iter_results(regs):
+        if _sync_registration(session, data_reg, prj):
+            data_prj["registrations"].append(data_reg)
+    return data_prj
+
+
+def _sync_organization(session: requests.Session, data_org: Any) -> dict | None:
+    """Persist one organization and its projects. Returns the annotated org dict or None."""
+    if not isinstance(data_org, dict):
+        logger.warning("Skipping non-dict organization payload: %s", data_org)
+        return None
+    source_id = data_org.get("id")
+    projects_url = data_org.get("projects")
+    if not source_id or not projects_url:
+        logger.warning("Skipping organization with missing id/projects: %s", data_org)
+        return None
+
+    org, __ = Organization.objects.update_or_create(
+        source_id=source_id,
+        defaults={"name": data_org.get("name", ""), "slug": data_org.get("slug", "")},
+    )
+
+    try:
+        prjs = _get_json(session, projects_url)
+    except requests.RequestException:
+        logger.exception("Failed to fetch projects for organization %s", source_id)
+        data_org["projects"] = []
+        return data_org
+
+    data_org["projects"] = []
+    for data_prj in _iter_results(prjs):
+        result = _sync_project(session, data_prj, org)
+        if result is not None:
+            data_org["projects"].append(result)
+    return data_org
+
+
 def fetch_metadata(auth_token: str) -> list:
     session = _get_session(auth_token)
     schema = _get_json(session, config.AURORA_SERVER)
@@ -85,87 +176,9 @@ def fetch_metadata(auth_token: str) -> list:
     page = _get_json(session, org_url)
     ret: list = []
     for data_org in _iter_results(page):
-        if not isinstance(data_org, dict):
-            logger.warning("Skipping non-dict organization payload: %s", data_org)
-            continue
-        source_id = data_org.get("id")
-        projects_url = data_org.get("projects")
-        if not source_id or not projects_url:
-            logger.warning("Skipping organization with missing id/projects: %s", data_org)
-            continue
-
-        ret.append(data_org)
-        org, __ = Organization.objects.update_or_create(
-            source_id=source_id,
-            defaults={
-                "name": data_org.get("name", ""),
-                "slug": data_org.get("slug", ""),
-            },
-        )
-
-        try:
-            prjs = _get_json(session, projects_url)
-        except requests.RequestException:
-            logger.exception("Failed to fetch projects for organization %s", source_id)
-            ret[-1]["projects"] = []
-            continue
-
-        ret[-1]["projects"] = []
-        for data_prj in _iter_results(prjs):
-            if not isinstance(data_prj, dict):
-                logger.warning("Skipping non-dict project payload: %s", data_prj)
-                continue
-            prj_source_id = data_prj.get("id")
-            regs_url = data_prj.get("registrations")
-            if not prj_source_id or not regs_url:
-                logger.warning("Skipping project with missing id/registrations: %s", data_prj)
-                continue
-
-            prj, __ = Project.objects.update_or_create(
-                source_id=prj_source_id,
-                defaults={
-                    "organization": org,
-                    "name": data_prj.get("name", ""),
-                },
-            )
-
-            try:
-                regs = _get_json(session, regs_url)
-            except requests.RequestException:
-                logger.exception("Failed to fetch registrations for project %s", prj_source_id)
-                data_prj["registrations"] = []
-                ret[-1]["projects"].append(data_prj)
-                continue
-
-            data_prj["registrations"] = []
-            for data_reg in _iter_results(regs):
-                if not isinstance(data_reg, dict):
-                    logger.warning("Skipping non-dict registration payload: %s", data_reg)
-                    continue
-                reg_source_id = data_reg.get("id")
-                if not reg_source_id:
-                    logger.warning("Skipping registration with missing id: %s", data_reg)
-                    continue
-
-                mt: dict = {}
-                metadata_url = data_reg.get("metadata")
-                if metadata_url:
-                    try:
-                        mt = _get_json(session, metadata_url)
-                    except (ValueError, requests.RequestException):
-                        logger.exception("Failed to fetch metadata for registration %s", reg_source_id)
-
-                Registration.objects.update_or_create(
-                    source_id=reg_source_id,
-                    defaults={
-                        "project": prj,
-                        "name": data_reg.get("name", ""),
-                        "slug": data_reg.get("slug", ""),
-                        "metadata": mt,
-                    },
-                )
-                data_prj["registrations"].append(data_reg)
-            ret[-1]["projects"].append(data_prj)
+        result = _sync_organization(session, data_org)
+        if result is not None:
+            ret.append(result)
     return ret
 
 

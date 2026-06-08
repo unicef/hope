@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import _ from 'lodash';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
-const NEWLINE_RE = NEWLINE_RE;
+const NEWLINE_RE = /[\r\n]/g;
 
 const EXCLUDED_CHOICE_ENDPOINTS = [
   'payment-record-delivery-type',
