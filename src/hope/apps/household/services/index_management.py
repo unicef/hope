@@ -6,7 +6,6 @@ Simple utilities for managing per-program Elasticsearch indexes.
 import logging
 
 from constance import config
-from django.conf import settings
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import connections
 
@@ -104,7 +103,9 @@ def rebuild_program_indexes(
     if not success:  # pragma: no cover
         return False, f"Create failed: {msg}"
 
-    success, msg = populate_program_indexes(program_id, batch_size, parallel=parallel, thread_count=thread_count, using=using)
+    success, msg = populate_program_indexes(
+        program_id, batch_size, parallel=parallel, thread_count=thread_count, using=using
+    )
     if not success:  # pragma: no cover
         return False, f"Populate failed: {msg}"
 
