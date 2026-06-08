@@ -8,6 +8,7 @@ import logging
 from constance import config
 from django.conf import settings
 from elasticsearch import Elasticsearch
+from elasticsearch_dsl import connections
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.utils.elasticsearch_utils import populate_index
@@ -27,13 +28,13 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
         es.indices.delete(index=concrete, ignore=[404, 400])  # type: ignore[call-arg]
 
 
-def create_program_indexes(program_id: str) -> tuple[bool, str]:
+def create_program_indexes(program_id: str, using: str = "default") -> tuple[bool, str]:
     """Create Elasticsearch indexes for a program."""
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
 
-        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+        es: Elasticsearch = connections.get_connection(using)
 
         if not es.indices.exists(index=individual_doc_class._index._name):
             individual_doc_class._index.create()
@@ -47,13 +48,13 @@ def create_program_indexes(program_id: str) -> tuple[bool, str]:
         return False, str(e)
 
 
-def delete_program_indexes(program_id: str) -> tuple[bool, str]:
+def delete_program_indexes(program_id: str, using: str = "default") -> tuple[bool, str]:
     """Delete Elasticsearch indexes for a program."""
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
 
-        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+        es: Elasticsearch = connections.get_connection(using)
         delete_es_index(es, individual_doc_class._index._name)
         delete_es_index(es, household_doc_class._index._name)
 
@@ -63,7 +64,13 @@ def delete_program_indexes(program_id: str) -> tuple[bool, str]:
         return False, str(e)
 
 
-def populate_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[bool, str]:
+def populate_program_indexes(
+    program_id: str,
+    batch_size: int = 2000,
+    parallel: bool = False,
+    thread_count: int = 4,
+    using: str = "default",
+) -> tuple[bool, str]:
     """Populate Elasticsearch indexes for a program."""
     try:
         individual_doc_class = get_individual_doc(program_id)
@@ -72,8 +79,8 @@ def populate_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[b
         individuals = individual_doc_class().get_queryset()
         households = household_doc_class().get_queryset()
 
-        populate_index(individuals, individual_doc_class, chunk_size=batch_size)
-        populate_index(households, household_doc_class, chunk_size=batch_size)
+        populate_index(individuals, individual_doc_class, parallel=parallel, chunk_size=batch_size)
+        populate_index(households, household_doc_class, parallel=parallel, chunk_size=batch_size)
 
         return True, ""
     except Exception as e:  # pragma: no cover  # noqa
@@ -81,31 +88,37 @@ def populate_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[b
         return False, str(e)
 
 
-def rebuild_program_indexes(program_id: str, batch_size: int = 2000) -> tuple[bool, str]:
+def rebuild_program_indexes(
+    program_id: str,
+    batch_size: int = 2000,
+    parallel: bool = False,
+    thread_count: int = 4,
+    using: str = "default",
+) -> tuple[bool, str]:
     """Rebuild Elasticsearch indexes for a program (delete, create, populate)."""
-    success, msg = delete_program_indexes(program_id)
+    success, msg = delete_program_indexes(program_id, using=using)
     if not success:  # pragma: no cover
         return False, f"Delete failed: {msg}"
 
-    success, msg = create_program_indexes(program_id)
+    success, msg = create_program_indexes(program_id, using=using)
     if not success:  # pragma: no cover
         return False, f"Create failed: {msg}"
 
-    success, msg = populate_program_indexes(program_id, batch_size)
+    success, msg = populate_program_indexes(program_id, batch_size, parallel=parallel, thread_count=thread_count, using=using)
     if not success:  # pragma: no cover
         return False, f"Populate failed: {msg}"
 
     return True, f"Rebuilt indexes for program {program_id}"
 
 
-def check_program_indexes(program_id: str) -> tuple[bool, str]:
+def check_program_indexes(program_id: str, using: str = "default") -> tuple[bool, str]:
     """Return (True, msg) if both indexes exist and counts match, (False, msg) otherwise."""
     if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return False, "Elasticsearch is disabled."
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
-        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+        es: Elasticsearch = connections.get_connection(using)
         for doc in (individual_doc_class, household_doc_class):
             index_name = doc._index._name
             if not es.indices.exists(index=index_name):
