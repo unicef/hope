@@ -171,6 +171,7 @@ export function CreateChildPaymentPlan({
               variant="outlined"
               color="primary"
               onClick={() => setDialogOpen(true)}
+              data-cy={`button-create-${variant}`}
               data-perm={PERMISSIONS.PM_CREATE}
               disabled={
                 !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||

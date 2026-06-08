@@ -167,24 +167,25 @@ def test_follow_up_instruction_full_flow(
     login.open(detail_path)
     login.wait_for_element_visible('[data-cy="button-download-export"]')
 
-    # --- Partial reconciliation: hh_a=140 (full), hh_b left unreconciled, hh_c=0 ---
+    # --- Partial reconciliation: hh_a=140 (full), hh_b and hh_c left unreconciled ---
     instruction = FollowUpInstruction.objects.get(pk=instruction_id)
     partial_path = _build_xlsx_with_deliveries(
         instruction,
-        [Decimal("140.00"), None, Decimal("0.00")],
+        [Decimal("140.00"), None, None],
     )
     _upload_reconciliation_xlsx(login, partial_path)
 
     login.open(detail_path)
-    # hh_b's payment is left unreconciled → plan_one stays Accepted
-    # hh_c is reconciled (0/80) and hh_a fully delivered → plan_two transitions to Finished
+    # hh_b and hh_c are left unreconciled, so neither child plan is fully reconciled
+    # yet → both stay Accepted. Reconciling a payment to 0 would finalize it and lock
+    # the plan against further reconciliation, so hh_c is deferred to the full step below.
     login.wait_for_text("ACCEPTED")
     login.wait_for_text("ACCEPTED", '[data-cy="plan-status-0"]')
-    login.wait_for_text("FINISHED", '[data-cy="plan-status-1"]')
+    login.wait_for_text("ACCEPTED", '[data-cy="plan-status-1"]')
     # plan_one: delivered = hh_a(100); hh_b unreconciled; undelivered = 160 - 100 = 60
     login.wait_for_text("100.00", '[data-cy="plan-delivered-0"]')
     login.wait_for_text("60.00", '[data-cy="plan-undelivered-0"]')
-    # plan_two: delivered = hh_a(40) + hh_c(0) = 40; undelivered = 80
+    # plan_two: delivered = hh_a(40); hh_c unreconciled; undelivered = 120 - 40 = 80
     login.wait_for_text("40.00", '[data-cy="plan-delivered-1"]')
     login.wait_for_text("80.00", '[data-cy="plan-undelivered-1"]')
     # Instruction totals: delivered=140, undelivered=280-140=140
@@ -198,7 +199,7 @@ def test_follow_up_instruction_full_flow(
     login.open(detail_path)
     login.wait_for_element_visible('[data-cy="button-download-export"]')
 
-    # --- Full reconciliation: hh_a=140, hh_b=60 (completes remaining), hh_c=80 ---
+    # --- Full reconciliation: hh_a=140, hh_b=60 and hh_c=80 complete the remaining ---
     instruction.refresh_from_db()
     full_path = _build_xlsx_with_deliveries(
         instruction,
