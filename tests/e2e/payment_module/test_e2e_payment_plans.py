@@ -492,7 +492,8 @@ class TestSmokePaymentModule:
         assert "Total Undelivered Quantity" in page_payment_module.get_table_label()[7].text
         assert "Dispersion Start Date" in page_payment_module.get_table_label()[8].text
         assert "Dispersion End Date" in page_payment_module.get_table_label()[9].text
-        assert "Linked Payment Plans" in page_payment_module.get_table_label()[10].text
+        assert "Export Batch" in page_payment_module.get_table_label()[10].text
+        assert "Linked Payment Plans" in page_payment_module.get_table_label()[11].text
         assert "ACCEPTED" in page_payment_module.get_status_container().text
         assert "Rows per page: 5 1–1 of 1" in page_payment_module.get_table_pagination().text.replace("\n", " ")
 

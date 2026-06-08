@@ -152,7 +152,6 @@ def test_edit_tp_shows_group_and_purpose(
     business_area: BusinessArea,
     targeting_tp: PaymentPlan,
     second_targeting_cycle: ProgramCycle,
-    second_targeting_group: PaymentPlanGroup,
 ) -> None:
     program = targeting_tp.program_cycle.program
     with grant_permission(
@@ -162,6 +161,7 @@ def test_edit_tp_shows_group_and_purpose(
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user", password="testtest2")
@@ -171,20 +171,21 @@ def test_edit_tp_shows_group_and_purpose(
         # Purposes field is shown because targeting_tp is the latest plan in its cycle
         browser.wait_for_element_visible('[data-cy="input-payment-plan-purposes"]')
 
-        # Change cycle — reveals Payment Plan Group selector
+        # Change cycle — opens the create-group modal for the new cycle
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(SECOND_CYCLE_TITLE)
 
-        browser.wait_for_element_visible('[data-cy="filters-payment-plan-group-autocomplete"]')
-        browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
-        browser.select_listbox_element(SECOND_GROUP_NAME)
+        # Create a new group in the selected cycle
+        browser.wait_for_element_visible('[data-cy="input-create-group-name"]')
+        browser.type('input[name="groupName"]', "Edited Group")
+        browser.wait_for_element_clickable('[data-cy="button-create-group-submit"]').click()
 
         browser.wait_for_element_clickable('[data-cy="button-save"]')
         browser.click('[data-cy="button-save"]')
 
         # Wait for edit form to disappear (navigate to detail page on success)
         browser.wait_for_element_absent('[data-cy="edit-target-population-form"]', timeout=20)
-        browser.assert_text(SECOND_GROUP_NAME, 'div[data-cy="label-Payment Plan Group"]')
+        browser.assert_text("Edited Group", 'div[data-cy="label-Payment Plan Group"]')
         browser.assert_text(PURPOSE_NAME, 'div[data-cy="label-Purposes"]')
 
 
