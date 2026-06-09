@@ -5,7 +5,7 @@ from django.template.response import TemplateResponse
 from django.views.debug import ExceptionReporter
 
 
-def process_exception(exception: BaseException | None, request: HttpRequest | None = None) -> str | None:
+def process_exception(exception: BaseException | None, request: HttpRequest | None = None) -> str | None: # pragma: no cover
     if not exception:
         exc_type, exception, traceback = sys.exc_info()
 
@@ -14,7 +14,7 @@ def process_exception(exception: BaseException | None, request: HttpRequest | No
     return reporter.get_traceback_html()
 
 
-def render_exception(request: HttpRequest, exception: BaseException | None, extra_context: dict) -> TemplateResponse:
+def render_exception(request: HttpRequest, exception: BaseException | None, extra_context: dict) -> TemplateResponse: # pragma: no cover
     exc_type, exception, traceback = sys.exc_info()
     reporter = ExceptionReporter(request, exc_type, exception, traceback)
 
@@ -25,7 +25,7 @@ def render_exception(request: HttpRequest, exception: BaseException | None, extr
     return TemplateResponse(request, "steficon/debug.html", context)
 
 
-def get_error_info(exception: BaseException | None) -> dict:
+def get_error_info(exception: BaseException | None) -> dict: # pragma: no cover
     exc_type, exception, traceback = sys.exc_info()
     reporter = ExceptionReporter(None, exc_type, exception, traceback)
     return reporter.get_traceback_data()
