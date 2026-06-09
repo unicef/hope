@@ -1,38 +1,12 @@
 from datetime import date, timedelta
-import json
-from typing import Any, Callable, TypeVar
+from typing import TypeVar
 
-from dateutil.parser import parse
 from django.db.models import QuerySet
-from django.forms import (
-    DateField,
-    DateTimeField,
-    IntegerField,
-)
+from django.forms import IntegerField
 from django.utils import timezone
 from django_filters import Filter
 
 _QS = TypeVar("_QS", bound=QuerySet)
-
-
-def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:
-    if value:
-        clean_data = {}
-        values = json.loads(value)
-        if isinstance(values, dict):
-            for field_name, field_value in values.items():
-                field_instance = field()
-                if isinstance(field_instance, DateTimeField | DateField):
-                    if field_value is None:
-                        continue
-                    parsed_field_value = parse(field_value, fuzzy=True)
-                else:
-                    parsed_field_value = field_value
-                if isinstance(field_instance, IntegerField) and not parsed_field_value:
-                    continue
-                clean_data[field_name] = field_instance.clean(parsed_field_value)
-        return clean_data or None
-    return None
 
 
 def filter_age[QS: QuerySet](field_name: str, qs: QS, min_age: int | None, max_age: int | None) -> QS:
