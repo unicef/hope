@@ -1051,6 +1051,7 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
 
 def test_individual_detail_admin_url(detail_context: dict) -> None:
     ctx = detail_context
+    ctx["user"].is_staff = True
     ctx["user"].is_superuser = True
     ctx["user"].save()
     response = ctx["client"].get(
