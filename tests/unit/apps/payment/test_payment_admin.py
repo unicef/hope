@@ -1,4 +1,3 @@
-import os
 from unittest.mock import patch
 
 from django.urls import reverse
@@ -13,12 +12,9 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def mock_payment_gateway_env_vars() -> None:
-    with patch.dict(
-        os.environ,
-        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
-    ):
-        yield
+def mock_payment_gateway_env_vars(settings) -> None:
+    settings.PAYMENT_GATEWAY_API_KEY = "TEST"
+    settings.PAYMENT_GATEWAY_API_URL = "TEST"
 
 
 @pytest.fixture

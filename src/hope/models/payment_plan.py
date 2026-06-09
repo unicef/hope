@@ -20,6 +20,7 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
 from psycopg2._range import NumericRange
 
@@ -1161,7 +1162,7 @@ class PaymentPlan(
 
     @property
     def can_send_to_vision(self) -> bool:
-        return self.status == PaymentPlan.Status.ACCEPTED
+        return self.status == PaymentPlan.Status.ACCEPTED and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
 
     @property
     def has_payments_reconciliation_overdue(self) -> bool:

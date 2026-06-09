@@ -1613,7 +1613,7 @@ def test_periodic_sync_payment_gateway_fsp_action_runs_service(mock_service_cls:
 def test_periodic_sync_payment_gateway_fsp_action_returns_on_missing_credentials(mock_sync_fsps: Mock) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
-    mock_sync_fsps.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+    mock_sync_fsps.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
 
     assert periodic_sync_payment_gateway_fsp_async_task_action() is None
 
@@ -1645,7 +1645,7 @@ def test_periodic_sync_payment_gateway_account_types_action_returns_on_missing_c
 ) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
-    mock_sync_account_types.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+    mock_sync_account_types.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
 
     assert periodic_sync_payment_gateway_account_types_async_task_action() is None
 

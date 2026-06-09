@@ -47,16 +47,12 @@ class IgnoredFilenamesPair:
 
 class DeduplicationEngineAPI(BaseAPI):
     API_KEY_ENV_NAME = "DEDUPLICATION_ENGINE_API_KEY"
-    API_URL_ENV_NAME = "DEDUPLICATION_ENGINE_API_URL"
+    API_URL_SETTING_NAME = "DEDUPLICATION_ENGINE_API_URL"
 
     class DeduplicationEngineAPIError(Exception):
         pass
 
-    class DeduplicationEngineMissingAPICredentialsError(Exception):
-        pass
-
     API_EXCEPTION_CLASS = DeduplicationEngineAPIError
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = DeduplicationEngineMissingAPICredentialsError
 
     class Endpoints:
         GET_DEDUPLICATION_SETS = "deduplication_sets/"  # GET - List view

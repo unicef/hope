@@ -415,12 +415,9 @@ def test_erase_rdi_with_invalid_status(api_client: APIClient, program: Program, 
     assert not rdi.erased
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 def test_refuse_rdi_without_permission(
     api_client_no_permissions: APIClient,

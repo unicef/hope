@@ -342,7 +342,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               onClick={() => sendToVision()}
               data-cy="button-send-to-vision"
               disabled={loadingSendToVision}
-              data-perm={PERMISSIONS.PM_SEND_PAYMENT_PLAN}
+              data-perm={PERMISSIONS.PM_SEND_TO_VISION}
             >
               {t('Send to Vision')}
             </Button>

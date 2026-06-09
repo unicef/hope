@@ -803,7 +803,7 @@ class PaymentPlanViewSet(
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
-        "send_to_vision": [Permissions.PM_SEND_PAYMENT_PLAN],
+        "send_to_vision": [Permissions.PM_SEND_TO_VISION],
         "custom_exchange_rate": [
             Permissions.PM_CUSTOM_EXCHANGE_RATE,
         ],
@@ -1400,7 +1400,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"], url_path="send-to-vision")
     def send_to_vision(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        if not bool(flag_enabled("SHOW_SEND_TO_VISION_BUTTON", request=request)):
+        if not bool(flag_enabled("VISION_INTEGRATION_ACTIVE", request=request)):
             raise PermissionDenied("Send to Vision feature is not enabled")
 
         payment_plan = self.get_object()

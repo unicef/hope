@@ -366,6 +366,14 @@ def test_payment_plan_list_serializer_created_by(payment_plan_list_context: dict
 
 
 def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: dict[str, Any]) -> None:
+    from flags.models import FlagState
+
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     payment_plan.status = PaymentPlan.Status.ACCEPTED
