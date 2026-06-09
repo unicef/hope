@@ -1788,6 +1788,25 @@ def test_map_financial_institution_pk_and_mapping_found(payment_gateway_setup: d
     assert result["number"] == "123"
 
 
+def test_payment_payload_uses_service_provider_code_from_snapshot(payment_gateway_setup: dict) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    payment.delivery_type = payment_gateway_setup["delivery_mechanisms"]["transfer"]
+    payment.save(update_fields=["delivery_type"])
+    snapshot = payment.household_snapshot
+    snapshot.snapshot_data["primary_collector"]["account_data"] = {
+        "number": "123",
+        "financial_institution_pk": "999",
+        "service_provider_code": "SNAPSHOT_CODE",
+    }
+    snapshot.save(update_fields=["snapshot_data"])
+
+    with patch.object(PaymentSerializer, "_map_financial_institution") as map_financial_institution_mock:
+        payload = PaymentSerializer().get_payload(payment)
+
+    map_financial_institution_mock.assert_not_called()
+    assert payload["account"]["service_provider_code"] == "SNAPSHOT_CODE"
+
+
 def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(
     payment_gateway_setup: dict,
 ) -> None:
