@@ -37,7 +37,6 @@ from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
-    from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
     from hope.models import User
@@ -504,9 +503,8 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
 class SheetImageLoader:
     """Load all images in a sheet."""
 
-    _images = {}
-
     def __init__(self, sheet: "Worksheet") -> None:
+        self._images = {}
         # Holds an array of A-ZZ
         col_holder = list(
             itertools.chain(
@@ -521,11 +519,11 @@ class SheetImageLoader:
             col = col_holder[image.anchor._from.col]
             self._images[f"{col}{row}"] = image._data
 
-    def image_in(self, cell: "Cell") -> bool:
+    def image_in(self, cell: str) -> bool:
         """Check if there's an image in specified cell."""
         return cell in self._images
 
-    def get(self, cell: "Cell") -> Any:
+    def get(self, cell: str) -> Any:
         """Retrieve image data from a cell."""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")
