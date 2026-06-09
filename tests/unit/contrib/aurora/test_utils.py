@@ -168,6 +168,187 @@ def test_fetch_records_creates_new_records(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_missing_organization_key_returns_empty(mock_aurora_client: Any) -> None:
+    schema = {"record": "https://aurora.test/api/records/"}  # no "organization" key
+    mock_aurora_client.get.side_effect = _mock_responses(schema)
+
+    result = fetch_metadata("test-token")
+
+    assert result == []
+    assert Organization.objects.count() == 0
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_skips_non_dict_org(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {"results": ["not-a-dict"]}
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page)
+
+    result = fetch_metadata("test-token")
+
+    assert result == []
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_skips_org_missing_id(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {"results": [{"name": "No ID Org", "slug": "no-id"}]}  # missing "id" and "projects"
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page)
+
+    result = fetch_metadata("test-token")
+
+    assert result == []
+    assert Organization.objects.count() == 0
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_projects_fetch_error_returns_empty_projects(mock_aurora_client: Any, mocker: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {
+        "results": [{"id": 3, "name": "Org C", "slug": "org-c", "projects": "https://aurora.test/api/orgs/3/projects/"}]
+    }
+    mock_session = mock_aurora_client
+    mock_session.get.side_effect = [
+        MagicMock(json=MagicMock(return_value=schema), raise_for_status=MagicMock()),
+        MagicMock(json=MagicMock(return_value=orgs_page), raise_for_status=MagicMock()),
+        MagicMock(raise_for_status=MagicMock(side_effect=__import__("requests").RequestException("timeout"))),
+    ]
+
+    result = fetch_metadata("test-token")
+
+    assert len(result) == 1
+    assert result[0]["projects"] == []
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_skips_non_dict_project(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {
+        "results": [{"id": 4, "name": "Org D", "slug": "org-d", "projects": "https://aurora.test/api/orgs/4/projects/"}]
+    }
+    projects_page = {"results": ["not-a-dict"]}
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page, projects_page)
+
+    result = fetch_metadata("test-token")
+
+    assert result[0]["projects"] == []
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_skips_project_missing_id(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {
+        "results": [{"id": 5, "name": "Org E", "slug": "org-e", "projects": "https://aurora.test/api/orgs/5/projects/"}]
+    }
+    projects_page = {"results": [{"name": "No ID Project"}]}  # missing "id" and "registrations"
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page, projects_page)
+
+    result = fetch_metadata("test-token")
+
+    assert result[0]["projects"] == []
+    assert Project.objects.count() == 0
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_registrations_fetch_error_returns_empty_registrations(mock_aurora_client: Any) -> None:
+    import requests as _requests
+
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {
+        "results": [{"id": 6, "name": "Org F", "slug": "org-f", "projects": "https://aurora.test/api/orgs/6/projects/"}]
+    }
+    projects_page = {
+        "results": [{"id": 60, "name": "Project F", "registrations": "https://aurora.test/api/projects/60/regs/"}]
+    }
+
+    def _side_effect(url: str) -> MagicMock:
+        m = MagicMock()
+        if "orgs/6/projects" in url:
+            m.json.return_value = projects_page
+        elif "projects/60/regs" in url:
+            m.raise_for_status.side_effect = _requests.RequestException("timeout")
+        elif url == "aurora.test/api/":
+            m.json.return_value = schema
+        elif "orgs/" in url:
+            m.json.return_value = orgs_page
+        return m
+
+    mock_aurora_client.get.side_effect = _side_effect
+
+    result = fetch_metadata("test-token")
+
+    assert result[0]["projects"][0]["registrations"] == []
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_skips_non_dict_registration(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {
+        "results": [{"id": 7, "name": "Org G", "slug": "org-g", "projects": "https://aurora.test/api/orgs/7/projects/"}]
+    }
+    projects_page = {
+        "results": [{"id": 70, "name": "Project G", "registrations": "https://aurora.test/api/projects/70/regs/"}]
+    }
+    regs = ["not-a-dict"]
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page, projects_page, regs)
+
+    result = fetch_metadata("test-token")
+
+    assert result[0]["projects"][0]["registrations"] == []
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_skips_registration_missing_id(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {
+        "results": [{"id": 8, "name": "Org H", "slug": "org-h", "projects": "https://aurora.test/api/orgs/8/projects/"}]
+    }
+    projects_page = {
+        "results": [{"id": 80, "name": "Project H", "registrations": "https://aurora.test/api/projects/80/regs/"}]
+    }
+    regs = [{"name": "No ID Reg", "slug": "no-id"}]  # missing "id"
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page, projects_page, regs)
+
+    result = fetch_metadata("test-token")
+
+    assert result[0]["projects"][0]["registrations"] == []
+    assert Registration.objects.count() == 0
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_get_metadata_missing_record_key_returns_empty(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}  # no "record" key
+    mock_aurora_client.get.side_effect = _mock_responses(schema)
+
+    result = get_metadata("test-token")
+
+    assert result == {}
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_records_missing_record_key_returns_zeros(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}  # no "record" key
+    mock_aurora_client.get.side_effect = _mock_responses(schema)
+
+    result = fetch_records("test-token")
+
+    assert result == {"pages": 0, "records": 0, "created": 0, "updated": 0}
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_records_skips_record_missing_id(mock_aurora_client: Any) -> None:
+    schema = {"record": "https://aurora.test/api/records/"}
+    page = {"results": [{"registration": 1, "status": "TO_IMPORT"}]}  # no "id"
+    mock_aurora_client.get.side_effect = _mock_responses(schema, page)
+
+    result = fetch_records("test-token")
+
+    assert result["records"] == 0
+    assert result["created"] == 0
+    assert Record.objects.count() == 0
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
 def test_fetch_records_skips_existing_records(mock_aurora_client: Any) -> None:
     existing = RecordFactory(source_id=99)
     schema = {"record": "https://aurora.test/api/records/"}

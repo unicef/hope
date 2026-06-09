@@ -18,7 +18,6 @@ from hope.apps.payment.utils import (
     get_quantity_in_usd,
     to_decimal,
 )
-from hope.apps.utils.logs import safe_log
 from hope.models import (
     AccountType,
     DeliveryMechanism,
@@ -136,10 +135,10 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                 logger.error(
                     "No Financial Institution Mapping found for"
                     " financial_institution %s, fsp %s, payment %s, collector %s.",
-                    safe_log(financial_institution),
-                    safe_log(obj.financial_service_provider),
+                    financial_institution,
+                    obj.financial_service_provider,
                     obj.id,
-                    safe_log(obj.collector),
+                    obj.collector,
                 )
 
         elif financial_institution_code := account_data.get("code"):
@@ -164,10 +163,10 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                     logger.error(
                         "No Financial Institution Mapping found for"
                         " financial_institution_code %s, fsp %s, payment %s, collector %s.",
-                        safe_log(financial_institution_code),
-                        safe_log(obj.financial_service_provider),
+                        financial_institution_code,
+                        obj.financial_service_provider,
                         obj.id,
-                        safe_log(obj.collector),
+                        obj.collector,
                     )
 
         return account_data
@@ -243,9 +242,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     _quantity,
                 ) = get_payment_delivered_quantity_status_and_value(self.payout_amount, entitlement_quantity)
             except ValueError:
-                logger.warning(
-                    "Invalid delivered_quantity %s for Payment %s", safe_log(self.payout_amount), self.remote_id
-                )
+                logger.warning("Invalid delivered_quantity %s for Payment %s", self.payout_amount, self.remote_id)
                 _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
@@ -261,7 +258,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            logger.warning("Invalid Payment status: %s", safe_log(self.status))
+            logger.warning("Invalid Payment status: %s", self.status)
             hope_status = Payment.STATUS_ERROR
 
         return cast("str", hope_status() if callable(hope_status) else hope_status)

@@ -22,7 +22,6 @@ from hope.apps.registration_data.api.deduplication_engine import (
     SimilarityPair,
 )
 from hope.apps.registration_data.signals import invalidate_rdi_cache
-from hope.apps.utils.logs import safe_log
 from hope.models import (
     DeduplicationEngineSimilarityPair,
     Individual,
@@ -96,7 +95,7 @@ class BiometricDeduplicationService:
                 self.api.bulk_upload_images(program.unicef_id, images)
 
             except self.api.API_EXCEPTION_CLASS:
-                logging.exception("Failed to upload images for RDI %s", safe_log(rdi))
+                logging.exception("Failed to upload images for RDI %s", rdi)
                 rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
                 rdi.save(update_fields=["deduplication_engine_status"])
                 return
@@ -112,13 +111,13 @@ class BiometricDeduplicationService:
             else:
                 logging.error(
                     "Failed to process deduplication set %s. Response[%s]: %s",
-                    safe_log(program.unicef_id),
+                    program.unicef_id,
                     status,
-                    safe_log(response_data),
+                    response_data,
                 )
                 rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
         except DeduplicationEngineAPI.DeduplicationEngineAPIError:
-            logging.exception("Failed to process deduplication set %s", safe_log(program.unicef_id))
+            logging.exception("Failed to process deduplication set %s", program.unicef_id)
             rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
         invalidate_rdi_cache(program.business_area.slug, program.code)
 
@@ -392,14 +391,12 @@ class BiometricDeduplicationService:
                     self.mark_rdis_as_deduplicated(rdis)
                 invalidate_rdi_cache(program.business_area.slug, program.code)
             except Exception:
-                logger.exception("Dedupe Engine processing results error for program %s", safe_log(program))
+                logger.exception("Dedupe Engine processing results error for program %s", program)
                 self.mark_rdis_as_error(rdis)
                 invalidate_rdi_cache(program.business_area.slug, program.code)
 
         elif deduplication_set_data.state == self.DEDUP_STATE_FAILED:
-            logger.error(
-                "Dedupe Engine error for program %s: %s", safe_log(program), safe_log(deduplication_set_data.error)
-            )
+            logger.error("Dedupe Engine error for program %s: %s", program, deduplication_set_data.error)
             self.mark_rdis_as_error(rdis)
             invalidate_rdi_cache(program.business_area.slug, program.code)
 

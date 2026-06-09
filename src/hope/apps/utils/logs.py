@@ -20,13 +20,11 @@ def log_start_and_end[**P, R](func: Callable[P, R]) -> Callable[P, R]:
 
 
 def safe_log(value: Any) -> str:
-    """Strip CR/LF to prevent log forging (CWE-117) when logging user-controlled values.
+    """Strip CR/LF to prevent log forging (CWE-117).
 
-    Use at the call site whenever a log argument originates from outside the codebase
-    (HTTP input, file contents, external API responses, model fields editable by users).
-    Explicit calls are preferred over a global filter because they document intent at
-    the point where the security review matters; ``LogForgingFilter`` below acts as a
-    defense-in-depth safety net for anything missed.
+    ``LogForgingFilter`` covers all ``%s`` log args automatically; call this only
+    when you need sanitization outside of the logging system (e.g. building strings
+    that are later written to files or returned in responses).
     """
     return str(value).replace("\r", "").replace("\n", "")
 
@@ -52,7 +50,7 @@ class LogForgingFilter(logging.Filter):
     Sanitizes only ``record.args`` (the values passed via ``%s`` / ``%(name)s``).
     Leaves ``record.msg`` (hardcoded template), ``record.exc_text`` and
     ``record.exc_info`` (tracebacks) untouched so multi-line content there is
-    preserved. Call sites that want explicit intent should still use ``safe_log()``.
+    preserved.
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
