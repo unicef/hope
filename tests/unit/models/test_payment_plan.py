@@ -21,7 +21,7 @@ def program_cycle():
 
 def test_has_payments_reconciliation_overdue_raises_type_error_when_dispersion_start_date_is_none(program_cycle):
     program = ProgramFactory(reconciliation_window_in_days=30)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         status=PaymentPlan.Status.ACCEPTED,
@@ -34,7 +34,7 @@ def test_has_payments_reconciliation_overdue_raises_type_error_when_dispersion_s
 
 def test_has_payments_reconciliation_overdue_returns_false_when_no_reconciliation_window(program_cycle):
     program = ProgramFactory(reconciliation_window_in_days=0)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         status=PaymentPlan.Status.ACCEPTED,
@@ -46,7 +46,7 @@ def test_has_payments_reconciliation_overdue_returns_false_when_no_reconciliatio
 
 def test_has_payments_reconciliation_overdue_returns_true_when_overdue_and_unreconciled(program_cycle):
     program = ProgramFactory(reconciliation_window_in_days=10)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         status=PaymentPlan.Status.ACCEPTED,

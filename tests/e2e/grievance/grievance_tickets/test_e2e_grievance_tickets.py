@@ -19,18 +19,14 @@ from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_population.households import Households
 from e2e.page_object.programme_population.households_details import HouseholdsDetails
 from e2e.page_object.programme_population.individuals import Individuals
-from extras.test_utils.old_factories.core import (
+from extras.test_utils.factories import (
     DataCollectingTypeFactory,
-    create_afghanistan,
-)
-from extras.test_utils.old_factories.household import (
+    HouseholdFactory,
+    IndividualFactory,
     IndividualRoleInHouseholdFactory,
-    create_household,
-    create_household_and_individuals,
-)
-from extras.test_utils.old_factories.payment import PaymentFactory, PaymentPlanFactory
-from extras.test_utils.old_factories.program import ProgramFactory
-from extras.test_utils.old_factories.registration_data import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    ProgramFactory,
     RegistrationDataImportFactory,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
@@ -39,6 +35,7 @@ from hope.models import (
     Area,
     BeneficiaryGroup,
     BusinessArea,
+    Country,
     DataCollectingType,
     Household,
     Individual,
@@ -56,31 +53,28 @@ def id_to_base64(object_id: str, name: str) -> str:
 
 @pytest.fixture
 def add_grievance() -> None:
-    create_grievance("GRV-0000123")
-    create_grievance("GRV-0000666")
+    create_grievance(name="GRV-0000123")
+    create_grievance(name="GRV-0000666")
 
 
 @pytest.fixture
-def add_households() -> None:
+def add_households(business_area) -> None:
     registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+        imported_by=User.objects.first(), business_area=business_area
     )
-    household, _ = create_household(
-        {
-            "registration_data_import": registration_data_import,
-            "admin2": Area.objects.order_by("?").first(),
-            "program": Program.objects.filter(name="Test Programm").first(),
-        },
-        {"registration_data_import": registration_data_import},
+    program = Program.objects.filter(name="Test Programm").first()
+    IndividualFactory(
+        household=None, business_area=business_area, program=program, registration_data_import=registration_data_import
     )
-
+    household = HouseholdFactory(
+        registration_data_import=registration_data_import, admin2=Area.objects.order_by("?").first(), program=program
+    )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
 
 
 @pytest.fixture
-def create_programs() -> None:
-    business_area = create_afghanistan()
+def create_programs(business_area) -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
@@ -150,6 +144,7 @@ def create_program(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
     )
 
 
@@ -166,35 +161,42 @@ def create_custom_household(
         dct_type=dct_type,
         beneficiary_group_name=beneficiary_group_name,
     )
-    household, _ = create_household_and_individuals(
-        household_data={
-            "unicef_id": "HH-20-0000.0001",
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.0001",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+        residence_status=residence_status,
+        size=3,
+        country_origin=Country.objects.first(),
+    )
+
+    individuals_data = [
+        {
+            "unicef_id": "IND-00-0000.0011",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
-            "program": program,
-            "residence_status": residence_status,
+            "observed_disability": observed_disability,
+            "relationship": "HEAD",
         },
-        individuals_data=[
-            {
-                "unicef_id": "IND-00-0000.0011",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-            {
-                "unicef_id": "IND-00-0000.0022",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-            {
-                "unicef_id": "IND-00-0000.0033",
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-        ],
-    )
+        {
+            "unicef_id": "IND-00-0000.0022",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "observed_disability": observed_disability,
+        },
+        {
+            "unicef_id": "IND-00-0000.0033",
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "observed_disability": observed_disability,
+        },
+    ]
+    for ind_data in individuals_data:
+        IndividualFactory(household=household, program=program, **ind_data)
+
+    household.head_of_household = household.individuals.filter(relationship="HEAD").first()
+    household.save()
     return household
 
 
