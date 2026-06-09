@@ -3,6 +3,7 @@ import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -187,8 +188,8 @@ export function PaymentPlansFilters({
             value={filter.planType ?? ''}
             fullWidth
           >
-            <MenuItem value="FOLLOW_UP">{t('Follow Up')}</MenuItem>
-            <MenuItem value="TOP_UP">{t('Top Up')}</MenuItem>
+            <MenuItem value={PlanTypeEnum.FOLLOW_UP}>{t('Follow Up')}</MenuItem>
+            <MenuItem value={PlanTypeEnum.TOP_UP}>{t('Top Up')}</MenuItem>
           </SelectFilter>
         </Grid>
       </Grid>

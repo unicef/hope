@@ -66,6 +66,7 @@ export function DeletePaymentPlanGroup({
       <Box p={2}>
         <IconButton
           onClick={() => setDeleteDialogOpen(true)}
+          aria-label={t('Delete group')}
           data-cy="button-delete-group"
         >
           <Delete />

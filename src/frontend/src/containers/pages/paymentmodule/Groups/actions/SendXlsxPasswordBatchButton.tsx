@@ -5,6 +5,7 @@ import { Lock } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -34,8 +35,8 @@ export function SendXlsxPasswordBatchButton({
     onSuccess: () => {
       showMessage(t('Password has been sent.'));
     },
-    onError: (error: any) => {
-      showMessage(error?.message ?? t('Failed to send password'));
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage, t('Failed to send password'));
     },
   });
 

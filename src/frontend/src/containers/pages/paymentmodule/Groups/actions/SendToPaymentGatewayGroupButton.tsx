@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
-import { RestService } from '@restgenerated/index';
+import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
 
 interface SendToPaymentGatewayGroupButtonProps {
@@ -37,15 +37,12 @@ export function SendToPaymentGatewayGroupButton({
         queryKey: ['paymentPlanGroup', businessArea, programId, group.id],
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       showApiErrorMessages(error, showMessage, t('Send to Payment Gateway failed'));
     },
   });
 
   if (!group) return null;
-
-
-  const isDisabled = loadingSend;
 
   return (
     <Box m={2}>
@@ -54,7 +51,7 @@ export function SendToPaymentGatewayGroupButton({
         color="primary"
         variant="contained"
         onClick={() => sendToPaymentGateway()}
-        disabled={isDisabled}
+        disabled={loadingSend}
         data-cy="button-send-to-payment-gateway-group"
       >
         {t('Send to Payment Gateway')}

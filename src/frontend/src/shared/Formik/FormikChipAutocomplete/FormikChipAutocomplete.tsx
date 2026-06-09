@@ -1,4 +1,11 @@
-import { Autocomplete, Chip, FormHelperText, TextField, Tooltip } from '@mui/material';
+import {
+  Autocomplete,
+  Chip,
+  FormHelperText,
+  TextField,
+  Tooltip,
+} from '@mui/material';
+import { FieldInputProps, FormikProps } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,18 +15,26 @@ interface Choice {
 }
 
 interface FormikChipAutocompleteProps {
-  field: { name: string; value: string[] };
-  form: {
-    setFieldValue: (name: string, value: any) => void;
-    errors: any;
-    touched: any;
-  };
+  field: FieldInputProps<string[]>;
+  form: FormikProps<unknown>;
   label?: string;
+  /** Options used to resolve the labels of already-selected chips. */
   choices: Choice[];
+  /**
+   * Options shown in the dropdown. Defaults to `choices`; pass separately when
+   * the dropdown is driven by a server-side search but selected chips must keep
+   * their labels from an accumulated set.
+   */
+  options?: Choice[];
   lockedValues?: string[];
   disabled?: boolean;
   required?: boolean;
-  [key: string]: any;
+  loading?: boolean;
+  inputValue?: string;
+  onInputChange?: (value: string) => void;
+  /** Disable client-side filtering when the options are filtered server-side. */
+  serverSide?: boolean;
+  'data-cy'?: string;
 }
 
 export function FormikChipAutocomplete({
@@ -27,12 +42,16 @@ export function FormikChipAutocomplete({
   form,
   label,
   choices,
+  options,
   lockedValues = [],
   disabled,
   required,
-  ...rest
+  loading,
+  inputValue,
+  onInputChange,
+  serverSide = false,
+  'data-cy': dataCy,
 }: FormikChipAutocompleteProps): ReactElement {
-  const dataCy = rest['data-cy'];
   const { t } = useTranslation();
   const error =
     form.touched[field.name] && form.errors[field.name]
@@ -47,10 +66,17 @@ export function FormikChipAutocomplete({
     <>
       <Autocomplete
         multiple
-        options={choices}
+        options={options ?? choices}
         value={selectedOptions}
+        loading={loading}
+        inputValue={inputValue}
+        filterOptions={serverSide ? (opts: Choice[]) => opts : undefined}
+        onInputChange={(_, newVal, reason) => {
+          if (onInputChange && reason !== 'reset') onInputChange(newVal);
+        }}
         isOptionEqualToValue={(opt, val) => opt.value === val.value}
         getOptionLabel={(opt) => opt.name || opt.value}
+        getOptionDisabled={(opt) => lockedValues.includes(opt.value)}
         onChange={(_, newValue: Choice[]) => {
           const newIds = newValue.map((o) => o.value);
           const missing = lockedValues.filter((v) => !newIds.includes(v));
@@ -76,7 +102,9 @@ export function FormikChipAutocomplete({
               >
                 <span>{chip}</span>
               </Tooltip>
-            ) : chip;
+            ) : (
+              chip
+            );
           })
         }
         renderInput={(params) => (

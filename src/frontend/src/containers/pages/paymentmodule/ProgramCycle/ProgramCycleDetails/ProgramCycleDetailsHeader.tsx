@@ -14,6 +14,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
+import { PaymentPlanGroupCreate } from '@restgenerated/models/PaymentPlanGroupCreate';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/index';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -103,7 +104,12 @@ export const ProgramCycleDetailsHeader = ({
       RestService.restBusinessAreasProgramsPaymentPlanGroupsCreate({
         businessAreaSlug: businessArea,
         programCode: programId,
-        requestBody: { name, cycle: programCycle.id } as any,
+        // Generated PaymentPlanGroupCreate marks readonly id/unicefId as
+        // required; only name + cycle are accepted on create.
+        requestBody: {
+          name,
+          cycle: programCycle.id,
+        } as unknown as PaymentPlanGroupCreate,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({

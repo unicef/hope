@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { Fragment, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
@@ -113,7 +113,19 @@ function PaymentPlansTable({
     ? headCellsPeople
     : adjustHeadCells(headCells, beneficiaryGroup, replacements);
 
-  const results = paymentPlansData?.results ?? [];
+  // Ids of the first row in each consecutive group, so the group header renders
+  // exactly once per group boundary (computed once instead of per-row indexOf).
+  const groupStartRowIds = useMemo(() => {
+    const ids = new Set<string>();
+    const rows = paymentPlansData?.results ?? [];
+    rows.forEach((row, idx) => {
+      const prev = rows[idx - 1];
+      if (idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id) {
+        ids.add(row.id);
+      }
+    });
+    return ids;
+  }, [paymentPlansData]);
 
   return (
     <UniversalRestTable
@@ -128,24 +140,17 @@ function PaymentPlansTable({
       itemsCount={itemsCount}
       page={page}
       setPage={setPage}
-      renderRow={(row: PaymentPlanList) => {
-        const idx = results.indexOf(row);
-        const prev = results[idx - 1];
-        const isNewGroup =
-          idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;
-        return (
-          <>
-            {isNewGroup && (
-              <GroupHeaderRow name={row.paymentPlanGroup?.name} id={row.paymentPlanGroup?.id} />
-            )}
-            <PaymentPlanTableRow
-              key={row.id}
-              plan={row}
-              canViewDetails={canViewDetails}
+      renderRow={(row: PaymentPlanList) => (
+        <Fragment key={row.id}>
+          {groupStartRowIds.has(row.id) && (
+            <GroupHeaderRow
+              name={row.paymentPlanGroup?.name}
+              id={row.paymentPlanGroup?.id}
             />
-          </>
-        );
-      }}
+          )}
+          <PaymentPlanTableRow plan={row} canViewDetails={canViewDetails} />
+        </Fragment>
+      )}
     />
   );
 }
