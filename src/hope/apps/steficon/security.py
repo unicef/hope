@@ -6,7 +6,7 @@ from hope.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD,
 logger = logging.getLogger(__name__)
 
 
-def clean_context(context: dict) -> dict | None:  # pragma: no cover
+def clean_context(context: dict) -> dict | None:
     try:
         if config.SAFETY_LEVEL == SAFETY_NONE:
             return context

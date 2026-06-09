@@ -19,6 +19,8 @@ omit =
         */missing_countries.py
         */base_test_case.py
         */wsgi.py
+        */middlewares/silk.py
+        */steficon/debug.py
 
 [report]
 # Regexes for lines to exclude from consideration
