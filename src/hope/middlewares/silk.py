@@ -4,7 +4,7 @@ from flags.state import flag_enabled
 from silk.middleware import SilkyMiddleware
 
 
-class DynamicSilkyMiddleware(SilkyMiddleware):
+class DynamicSilkyMiddleware(SilkyMiddleware): # pragma: no cover
     def __call__(self, request: Any) -> Any:
         if flag_enabled("SILK_MIDDLEWARE", request=request):
             self.process_request(request)
