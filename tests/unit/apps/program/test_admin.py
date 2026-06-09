@@ -367,7 +367,7 @@ def test_form_missing_credentials_blocks_save_and_shows_error(
     data = _program_form_data(program, biometric_deduplication_enabled=True)
     form = ProgramAdminForm(data=data, instance=program)
 
-    error = DeduplicationEngineAPI.DeduplicationEngineMissingAPICredentialsError("Missing credentials")
+    error = DeduplicationEngineAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS("Missing credentials")
     with patch("hope.admin.program.BiometricDeduplicationService", side_effect=error):
         assert not form.is_valid()
 

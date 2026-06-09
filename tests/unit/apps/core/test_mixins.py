@@ -1,35 +1,38 @@
-import os
 from typing import Type
 from unittest.mock import MagicMock, patch
 
+from django.conf import settings
 import pytest
 from requests import Response, Session
 
 from hope.apps.core.api.mixins import BaseAPI
 
 
+class TestAPI(BaseAPI):
+    API_KEY_ENV_NAME = "TEST_API_KEY"
+
+    def get_api_url(self) -> str:
+        return getattr(settings, "TEST_API_URL", "")
+
+    def get_api_key(self) -> str | None:
+        return "test_fake_key"
+
+
 @pytest.fixture
 def api_class() -> Type[BaseAPI]:
-    class TestAPI(BaseAPI):
-        API_KEY_ENV_NAME = "TEST_API_KEY"
-        API_URL_ENV_NAME = "TEST_API_URL"
-
     return TestAPI
 
 
 @pytest.fixture
-def api_instance(api_class: Type[BaseAPI]) -> BaseAPI:
-    with patch.dict(
-        os.environ,
-        {"TEST_API_KEY": "test_fake_key", "TEST_API_URL": "http://test-hope.com"},
-    ):
-        return api_class()
+def api_instance(api_class: Type[BaseAPI], settings) -> BaseAPI:
+    settings.TEST_API_URL = "http://test-hope.com"
+    return api_class()
 
 
-def test_base_api_init_missing_credentials_raises_error(api_class):
-    with patch.dict(os.environ, {"TEST_API_KEY": "", "TEST_API_URL": ""}):
-        with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
-            api_class()
+def test_base_api_init_missing_credentials_raises_error(api_class, settings):
+    settings.TEST_API_URL = ""
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        api_class()
 
     assert "Missing TestAPI Key/URL" in str(exc.value)
 

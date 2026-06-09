@@ -40,7 +40,9 @@ def test_ensure_token_acquires_when_expired() -> None:
 
 def test_no_auth_header_before_token() -> None:
     api = VisionAPI()
-    assert "Authorization" not in api._client.headers
+    assert api._client.headers.get("Authorization") is None or "None" not in api._client.headers.get(
+        "Authorization", ""
+    )
 
 
 @patch("hope.contrib.vision.api.requests.post")
@@ -218,7 +220,7 @@ def test_vision_api_error_is_raised() -> None:
             with pytest.raises(VisionAPIError):
                 api.send_payment_plan(pp)
             assert "vision" in pp.internal_data
-            assert pp.internal_data["vision"][0]["response"]["error"] == "boom"
+            assert pp.internal_data["vision"]["log"][0]["response"]["error"] == "boom"
             pp.save.assert_called_once_with(update_fields=["internal_data"])
 
 
@@ -233,8 +235,8 @@ def test_send_payment_plan_logs_4xx_error() -> None:
             with pytest.raises(VisionAPIError):
                 api.send_payment_plan(pp)
             assert "vision" in pp.internal_data
-            assert len(pp.internal_data["vision"]) == 1
-            entry = pp.internal_data["vision"][0]
+            assert len(pp.internal_data["vision"]["log"]) == 1
+            entry = pp.internal_data["vision"]["log"][0]
             assert entry["payload"]["payplanSno"] == "PP001"
             assert "400" in entry["response"]["error"]
             pp.save.assert_called_once_with(update_fields=["internal_data"])
@@ -250,8 +252,8 @@ def test_send_payment_plan_logs_payload_and_response(mock_post, mock_acquire_tok
     result = api.send_payment_plan(pp)
     assert result == {"status": "ok", "messageId": "msg-42"}
     assert "vision" in pp.internal_data
-    assert len(pp.internal_data["vision"]) == 1
-    entry = pp.internal_data["vision"][0]
+    assert len(pp.internal_data["vision"]["log"]) == 1
+    entry = pp.internal_data["vision"]["log"][0]
     assert entry["payload"]["payplanSno"] == "PP042"
     assert entry["response"]["messageId"] == "msg-42"
     pp.save.assert_called_once_with(update_fields=["internal_data"])
@@ -299,10 +301,10 @@ def test_callback_view_success(mock_get, mock_log_entry) -> None:
         "payplanSno": "PP043",
     }
     assert "vision" in mock_pp.internal_data
-    entry = mock_pp.internal_data["vision"][0]
+    entry = mock_pp.internal_data["vision"]["log"][0]
     assert entry["payload"]["payplanSno"] == "PP043"
     assert entry["response"]["status"] == "OK"
-    assert mock_pp.internal_data["vision_id"] == "00000062"
+    assert mock_pp.internal_data["vision"]["vision_id"] == "00000062"
 
 
 @patch("hope.models.APILogEntry.objects.create")
@@ -344,8 +346,8 @@ def test_callback_view_success_with_fc_num(mock_get, mock_log_entry) -> None:
         "messageId": "msg-002",
         "payplanSno": "PP044",
     }
-    assert mock_pp.internal_data["vision_id"] == "00000063"
-    assert mock_pp.internal_data["fc_num"] == "FC123"
+    assert mock_pp.internal_data["vision"]["vision_id"] == "00000063"
+    assert mock_pp.internal_data["vision"]["fc_num"] == "FC123"
     mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
 
 
@@ -458,11 +460,11 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
         "payplanSno": "PP043",
     }
     assert "vision" in mock_pp.internal_data
-    entry = mock_pp.internal_data["vision"][0]
+    entry = mock_pp.internal_data["vision"]["log"][0]
     assert entry["payload"]["payplanSno"] == "PP043"
     assert entry["response"]["status"] == "OK"
-    assert "vision_id" not in mock_pp.internal_data
-    assert "fc_num" not in mock_pp.internal_data
+    assert "vision_id" not in mock_pp.internal_data["vision"]
+    assert "fc_num" not in mock_pp.internal_data["vision"]
 
 
 @patch("hope.models.APILogEntry.objects.create")

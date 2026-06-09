@@ -452,7 +452,7 @@ FLAGS = {
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
-    "SHOW_SEND_TO_VISION_BUTTON": [{"condition": "boolean", "value": False}],
+    "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
 }
 
 MARKDOWNIFY = {

@@ -53,7 +53,7 @@ def _create_payment_plan(afghanistan, admin_user, program_cycle, status=PaymentP
 
 def test_send_to_vision_button_visible_when_accepted(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
@@ -66,7 +66,7 @@ def test_send_to_vision_button_visible_when_accepted(afghanistan, admin_user, pr
 
 def test_send_to_vision_button_hidden_when_open(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
@@ -79,7 +79,7 @@ def test_send_to_vision_button_hidden_when_open(afghanistan, admin_user, program
 
 def test_send_to_vision_get_returns_confirmation(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )

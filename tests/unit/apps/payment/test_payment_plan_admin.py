@@ -1,5 +1,4 @@
 from decimal import Decimal
-import os
 from unittest.mock import patch
 
 from django.contrib.auth.models import Permission
@@ -31,12 +30,9 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def mock_payment_gateway_env_vars() -> None:
-    with patch.dict(
-        os.environ,
-        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
-    ):
-        yield
+def mock_payment_gateway_env_vars(settings) -> None:
+    settings.PAYMENT_GATEWAY_API_KEY = "TEST"
+    settings.PAYMENT_GATEWAY_API_URL = "TEST"
 
 
 @pytest.fixture
@@ -426,7 +422,7 @@ def test_can_regenerate_export_file_per_fsp(
 )
 def test_can_send_to_vision(payment_plan, status, flag_enabled, expected) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value=str(flag_enabled),
     )
@@ -438,7 +434,7 @@ def test_can_send_to_vision(payment_plan, status, flag_enabled, expected) -> Non
 @patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
 def test_send_to_vision_post_success(mock_send, admin_client, payment_plan, settings) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
@@ -456,7 +452,7 @@ def test_send_to_vision_post_success(mock_send, admin_client, payment_plan, sett
 @patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
 def test_send_to_vision_handles_api_error(mock_send, admin_client, payment_plan, settings) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
@@ -473,7 +469,7 @@ def test_send_to_vision_handles_api_error(mock_send, admin_client, payment_plan,
 @patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
 def test_send_to_vision_handles_missing_creds(mock_send, admin_client, payment_plan, settings) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
@@ -489,7 +485,7 @@ def test_send_to_vision_handles_missing_creds(mock_send, admin_client, payment_p
 
 def test_send_to_vision_get_confirmation(admin_client, payment_plan) -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )

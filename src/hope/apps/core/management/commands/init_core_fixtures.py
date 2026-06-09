@@ -30,7 +30,7 @@ def initialize_core_fixtures() -> None:
         required=False,
     )
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
         required=False,

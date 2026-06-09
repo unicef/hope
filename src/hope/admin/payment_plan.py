@@ -53,7 +53,7 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
 
 
 def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.status == PaymentPlan.Status.ACCEPTED and bool(flag_state("SHOW_SEND_TO_VISION_BUTTON"))
+    return payment_plan.status == PaymentPlan.Status.ACCEPTED and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:

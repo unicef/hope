@@ -2,11 +2,9 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 import requests
-from requests import session
-from requests.adapters import HTTPAdapter
-from urllib3 import Retry
 
 from hope.apps.core.api.mixins import BaseAPI
+from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
 from hope.models import PaymentPlan
 
 
@@ -19,20 +17,15 @@ class VisionAPIMissingCredentialsError(Exception):
 
 
 class VisionAPI(BaseAPI):
-    API_URL_ENV_NAME = "VISION_API_URL"
+    def get_api_url(self) -> str:
+        url = settings.VISION_API_URL
+        if not url:
+            raise VisionAPIMissingCredentialsError("Missing Vision API URL")
+        return url
 
     def __init__(self) -> None:
-        self.api_url = settings.VISION_API_URL
-        if not self.api_url:
-            raise VisionAPIMissingCredentialsError(f"Missing {self.__class__.__name__} URL")
-        self._client = session()
-        retries = Retry(
-            total=3,
-            backoff_factor=1,
-            status_forcelist=[502, 503, 504],
-            allowed_methods=None,
-        )
-        self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
+        super().__init__()
+        self._client.headers.pop("Authorization", None)
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
@@ -83,28 +76,18 @@ class VisionAPI(BaseAPI):
 
     def send_payment_plan(self, payment_plan: PaymentPlan) -> dict:
         self._ensure_token()
-        payload = {
-            "businessArea": payment_plan.business_area.code,
-            "vendorNumber": payment_plan.financial_service_provider.vision_vendor_number,
-            "payplanSno": payment_plan.unicef_id,
-            "payplanDesc": payment_plan.name,
-            "currency": payment_plan.currency.code,
-            "authAmt": payment_plan.total_entitled_quantity,
-            "authAmtUsd": payment_plan.total_entitled_quantity_usd,
-            "status": payment_plan.status,
-            "headVendor": payment_plan.financial_service_provider.name,
-            "creationDate": payment_plan.created_at.strftime("%Y%m%d"),
-        }
+        payload = PaymentPlanPayloadSerializer(payment_plan).data
+        entry = {"payload": {k: str(v) for k, v in payload.items()}, "response": {}}
         try:
             response = self._post_to(self.Endpoints.PP_CREATION, payload)
-            entry = {"payload": {k: str(v) for k, v in payload.items()}, "response": response}
+            entry["response"] = response
         except BaseAPI.APIError as e:
-            entry = {"payload": {k: str(v) for k, v in payload.items()}, "response": {"error": str(e)}}
-            vision_log = payment_plan.internal_data.setdefault("vision", [])
-            vision_log.append(entry)
+            entry["response"] = {"error": str(e)}
+            vision_data = payment_plan.internal_data.setdefault("vision", {})
+            vision_data.setdefault("log", []).append(entry)
             payment_plan.save(update_fields=["internal_data"])
             raise VisionAPIError(str(e)) from e
-        vision_log = payment_plan.internal_data.setdefault("vision", [])
-        vision_log.append(entry)
+        vision_data = payment_plan.internal_data.setdefault("vision", {})
+        vision_data.setdefault("log", []).append(entry)
         payment_plan.save(update_fields=["internal_data"])
         return response

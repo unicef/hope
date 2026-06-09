@@ -2086,7 +2086,7 @@ def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
 
 def _enable_vision_flag() -> None:
     FlagState.objects.get_or_create(
-        name="SHOW_SEND_TO_VISION_BUTTON",
+        name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
@@ -2098,7 +2098,7 @@ def test_send_to_vision_flag_disabled_returns_403(
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_PAYMENT_PLAN],
+        [Permissions.PM_SEND_TO_VISION],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
@@ -2117,7 +2117,7 @@ def test_send_to_vision_wrong_status_returns_403(
     _enable_vision_flag()
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_PAYMENT_PLAN],
+        [Permissions.PM_SEND_TO_VISION],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
@@ -2151,7 +2151,7 @@ def test_send_to_vision_success(
     mock_vision.return_value.send_payment_plan.return_value = {"status": "ok", "messageId": "test-msg-id"}
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_PAYMENT_PLAN],
+        [Permissions.PM_SEND_TO_VISION],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
@@ -2175,7 +2175,7 @@ def test_send_to_vision_api_error_returns_400(
     mock_vision.return_value.send_payment_plan.side_effect = VisionAPIError("boom")
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_PAYMENT_PLAN],
+        [Permissions.PM_SEND_TO_VISION],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
@@ -2197,7 +2197,7 @@ def test_send_to_vision_missing_creds_returns_400(
     mock_vision.return_value.send_payment_plan.side_effect = VisionAPIMissingCredentialsError("no creds")
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_PAYMENT_PLAN],
+        [Permissions.PM_SEND_TO_VISION],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
