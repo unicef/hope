@@ -110,7 +110,7 @@ def download_payment_plan_group_batch(
         f"XLSX File not found. PaymentPlanGroup ID: {payment_plan_group.unicef_id}, batch: {export_tag}",
         error_type=FileNotFoundError,
     )
-    return None  # pragma: no cover
+    return None
 
 
 @login_required
