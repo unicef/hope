@@ -2,7 +2,7 @@
     "payment_plan": {
         "master": {
             "model": "payment.paymentplan",
-            "pk": "fbeb138f-9902-4392-8f70-07f229543b82",
+            "pk": "4004e215-0a90-42c9-a4f4-353d5a63a55f",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
@@ -10,8 +10,8 @@
                 "version": 1735688653315201,
                 "unicef_id": "PP-BA0000-25-00000001",
                 "internal_data": {},
-                "business_area": "cf557c6c-6f4f-41d6-972c-74ee9b501336",
-                "program_cycle": "e8b7eef2-6485-4688-8cf6-b69c53937d74",
+                "business_area": "fbbf51b4-b732-4d5c-a649-b2f9bb1495fd",
+                "program_cycle": "3ad52bad-bdc3-47ca-a066-6e392bfa5c20",
                 "delivery_mechanism": null,
                 "financial_service_provider": null,
                 "imported_file": null,
@@ -21,7 +21,7 @@
                 "reconciliation_import_file": null,
                 "steficon_rule": null,
                 "steficon_rule_targeting": null,
-                "created_by": "588d3dc3-7ae0-477b-8c1e-6f0902f02423",
+                "created_by": "3cdd2d92-c75b-4134-8ceb-b2a28c12238a",
                 "source_payment_plan": null,
                 "storage_file": null,
                 "name": null,
@@ -35,11 +35,15 @@
                 "vulnerability_score_min": null,
                 "vulnerability_score_max": null,
                 "abort_comment": "",
+                "flat_amount_value": null,
                 "status": "OPEN",
                 "background_action_status": null,
                 "build_status": null,
                 "built_at": null,
                 "exchange_rate": null,
+                "custom_exchange_rate": false,
+                "use_payment_gateway": false,
+                "custom_exchange_rate_set_by": null,
                 "female_children_count": 0,
                 "male_children_count": 0,
                 "female_adults_count": 0,
@@ -68,7 +72,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "cf557c6c-6f4f-41d6-972c-74ee9b501336",
+                "pk": "fbbf51b4-b732-4d5c-a649-b2f9bb1495fd",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -94,6 +98,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -109,14 +114,14 @@
             },
             {
                 "model": "program.programcycle",
-                "pk": "e8b7eef2-6485-4688-8cf6-b69c53937d74",
+                "pk": "3ad52bad-bdc3-47ca-a066-6e392bfa5c20",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "version": 1735688653315200,
                     "unicef_id": "PC-BA0000-25-000001",
-                    "title": "Default Programme Cycle",
-                    "program": "0b9f3714-7656-4b89-9014-b145f9f7c0cb",
+                    "title": "Programme Cycle 0",
+                    "program": "a1c8b4c8-fd3d-4e89-8c9d-9a3e9cc31718",
                     "status": "ACTIVE",
                     "start_date": "2025-01-01",
                     "end_date": null,
@@ -125,19 +130,19 @@
             },
             {
                 "model": "program.program",
-                "pk": "0b9f3714-7656-4b89-9014-b145f9f7c0cb",
+                "pk": "a1c8b4c8-fd3d-4e89-8c9d-9a3e9cc31718",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
-                    "version": 1735688653315201,
-                    "data_collecting_type": 39,
-                    "beneficiary_group": "a8229612-5d15-4e95-bced-ff1b50e7e512",
-                    "business_area": "cf557c6c-6f4f-41d6-972c-74ee9b501336",
+                    "version": 1735688653315202,
+                    "data_collecting_type": 38,
+                    "beneficiary_group": "bc1a95c8-632d-426a-9791-10d8de04f2ed",
+                    "business_area": "fbbf51b4-b732-4d5c-a649-b2f9bb1495fd",
                     "name": "Program 0",
+                    "code": "bip8",
                     "status": "ACTIVE",
-                    "code": "8b9g",
                     "description": "",
                     "start_date": "2025-01-01",
                     "end_date": "2026-01-01",
@@ -151,6 +156,7 @@
                     "administrative_areas_of_implementation": "",
                     "biometric_deduplication_enabled": false,
                     "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                    "identification_key_individual_label": null,
                     "is_visible": true,
                     "household_count": 0,
                     "individual_count": 0,
@@ -162,7 +168,7 @@
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 39,
+                "pk": 38,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -177,14 +183,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        39
+                        38
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "a8229612-5d15-4e95-bced-ff1b50e7e512",
+                "pk": "bc1a95c8-632d-426a-9791-10d8de04f2ed",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -198,7 +204,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "588d3dc3-7ae0-477b-8c1e-6f0902f02423",
+                "pk": "3cdd2d92-c75b-4134-8ceb-b2a28c12238a",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -212,7 +218,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 90,
+                    "partner": 88,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -223,7 +229,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 90,
+                "pk": 88,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

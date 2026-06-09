@@ -109,23 +109,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (GENERIC_IMPORT, "Generic Import Service"),
     )
 
-    DEDUP_ENGINE_PENDING = "PENDING"
-    DEDUP_ENGINE_UPLOADED = "UPLOADED"
-    DEDUP_ENGINE_IN_PROGRESS = "IN_PROGRESS"
-    DEDUP_ENGINE_PROCESSING = "PROCESSING"
-    DEDUP_ENGINE_FINISHED = "FINISHED"
-    DEDUP_ENGINE_UPLOAD_ERROR = "UPLOAD_ERROR"
-    DEDUP_ENGINE_ERROR = "ERROR"
-
-    DEDUP_ENGINE_STATUS_CHOICE = (
-        (DEDUP_ENGINE_PENDING, _("Pending")),
-        (DEDUP_ENGINE_UPLOADED, _("Uploaded")),
-        (DEDUP_ENGINE_IN_PROGRESS, _("Started")),
-        (DEDUP_ENGINE_PROCESSING, _("Processing")),
-        (DEDUP_ENGINE_FINISHED, _("Finished")),
-        (DEDUP_ENGINE_ERROR, _("Error")),
-        (DEDUP_ENGINE_UPLOAD_ERROR, _("Upload Error")),
-    )
     name = models.CharField(
         max_length=255,
         unique=True,
@@ -140,13 +123,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         db_collation="und-ci-det",
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
-    deduplication_engine_status = models.CharField(
-        max_length=255,
-        choices=DEDUP_ENGINE_STATUS_CHOICE,
-        blank=True,
-        null=True,
-        default=None,
-    )
     business_area = models.ForeignKey(BusinessArea, null=True, blank=True, on_delete=models.CASCADE)
     # TODO: set to not nullable Program and on_delete=models.PROTECT
     program = models.ForeignKey(
@@ -213,7 +189,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         verbose_name = "Registration data import"
         permissions = (
             ("rerun_rdi", "Can Rerun RDI"),
-            ("fetch_biometric_deduplication_results", "Can Fetch Biometric Duplication Results"),
             ("delete_rdi", "Can Delete RDI"),
             ("delete_merged_rdi", "Can Delete Merged RDI"),
         )
@@ -262,23 +237,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return self.program.biometric_deduplication_enabled
 
     @property
-    def biometric_deduplicated(self) -> str:
-        if self.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED:
-            return "YES"
-        return "NO"
-
-    @property
     def can_merge(self) -> bool:
-        if not self.program.is_active():
-            return False
-
-        is_still_processing = RegistrationDataImport.objects.filter(
-            program=self.program,
-            deduplication_engine_status__in=[
-                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
-            ],
-        ).exists()
-        return not is_still_processing
+        return self.program.is_active()
 
     def update_duplicates_against_population_statistics(self) -> None:
         self.golden_record_duplicates = Individual.objects.filter(

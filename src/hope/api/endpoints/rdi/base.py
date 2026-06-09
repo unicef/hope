@@ -12,11 +12,11 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
+from hope.api.endpoints.base import BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
-from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_async_task
+from hope.apps.registration_data.celery_tasks import process_country_workspace_rdis
 from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
 
 if TYPE_CHECKING:
@@ -40,12 +40,10 @@ class RDISerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)
-        if validated_data.get("program").biometric_deduplication_enabled:
-            validated_data["deduplication_engine_status"] = RegistrationDataImport.DEDUP_ENGINE_PENDING
         return super().create(validated_data)
 
 
-class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
+class CreateRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, CreateAPIView):
     """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
@@ -89,7 +87,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         )
 
 
-class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
+class PushToRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
     """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
@@ -123,7 +121,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
         return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
-class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
+class PushLaxToRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
     """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
@@ -192,7 +190,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         )
 
 
-class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
+class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, UpdateAPIView):
     """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
@@ -220,11 +218,8 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
         self.selected_rdi.number_of_individuals = PendingIndividual.objects.filter(
             registration_data_import=self.selected_rdi
         ).count()
-        if self.selected_rdi.is_coming_from_cw:
-            self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
-            on_commit(lambda: classify_findings_and_schedule_merge_async_task(self.selected_rdi))
-        else:
-            self.selected_rdi.status = RegistrationDataImport.IN_REVIEW
+        self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
+        on_commit(process_country_workspace_rdis)
         self.selected_rdi.save()
 
         return Response(

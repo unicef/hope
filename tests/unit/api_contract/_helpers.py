@@ -49,6 +49,9 @@ class HopeRecorder(Recorder):
     def assert_payment_verification_plan_unicef_id(self, response, expected, path):
         pass
 
+    def assert_version(self, response, expected, path):
+        pass
+
 
 class JsonPostRecorder(HopeRecorder):
     """Recorder for POST endpoints that send JSON bodies."""

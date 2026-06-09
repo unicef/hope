@@ -122,7 +122,7 @@ def lax_push_url(lax_business_area, lax_rdi) -> str:
 
 def test_create_single_individual_success(lax_api_client, lax_push_url, document_type, afghanistan_country):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -141,7 +141,6 @@ def test_create_single_individual_success(lax_api_client, lax_push_url, document
             }
         ],
         "originating_id": "AUR#123#123",
-        "country_workspace_id": "42",
     }
 
     response = lax_api_client.post(lax_push_url, [individual_data], format="json")
@@ -159,14 +158,14 @@ def test_create_single_individual_success(lax_api_client, lax_push_url, document
     assert individual.observed_disability == ["NONE"]
     assert individual.marital_status == "SINGLE"
     assert individual.originating_id == "AUR#123#123"
-    assert individual.country_workspace_id == "42"
+    assert individual.country_workspace_id == "IND001"
 
 
 def test_create_single_individual_account_with_explicit_fi(
     lax_api_client, lax_push_url, bank_account_type, financial_institution
 ):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -203,7 +202,7 @@ def test_create_single_individual_account_defaults_to_generic_bank(
     lax_api_client, lax_push_url, bank_account_type, generic_bank
 ):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -234,7 +233,7 @@ def test_create_single_individual_account_defaults_to_generic_bank(
 def test_create_multiple_individuals_success(lax_api_client, lax_push_url):
     individuals_data = [
         {
-            "individual_id": "IND001",
+            "country_workspace_id": "IND001",
             "full_name": "John Doe",
             "given_name": "John",
             "family_name": "Doe",
@@ -244,7 +243,7 @@ def test_create_multiple_individuals_success(lax_api_client, lax_push_url):
             "marital_status": "SINGLE",
         },
         {
-            "individual_id": "IND002",
+            "country_workspace_id": "IND002",
             "full_name": "Jane Smith",
             "given_name": "Jane",
             "family_name": "Smith",
@@ -266,7 +265,7 @@ def test_create_multiple_individuals_success(lax_api_client, lax_push_url):
 
 def test_create_individual_with_validation_errors(lax_api_client, lax_push_url):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "",
         "given_name": "John",
         "family_name": "Doe",
@@ -288,7 +287,7 @@ def test_create_individual_with_validation_errors(lax_api_client, lax_push_url):
 def test_create_individuals_mixed_success_and_errors(lax_api_client, lax_push_url):
     individuals_data = [
         {
-            "individual_id": "IND001",
+            "country_workspace_id": "IND001",
             "full_name": "John Doe",
             "given_name": "John",
             "family_name": "Doe",
@@ -298,7 +297,7 @@ def test_create_individuals_mixed_success_and_errors(lax_api_client, lax_push_ur
             "marital_status": "SINGLE",
         },
         {
-            "individual_id": "IND002",
+            "country_workspace_id": "IND002",
             "full_name": "",
             "given_name": "Jane",
             "family_name": "Smith",
@@ -334,7 +333,7 @@ def test_rdi_not_found(lax_api_client, lax_business_area):
     )
 
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -354,7 +353,7 @@ def test_rdi_not_in_loading_status(lax_api_client, lax_push_url, lax_rdi):
     lax_rdi.save()
 
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -371,7 +370,7 @@ def test_rdi_not_in_loading_status(lax_api_client, lax_push_url, lax_rdi):
 
 def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program, base64_image):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -397,7 +396,7 @@ def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program,
 
 def test_create_individual_with_disability_certificate_picture(lax_api_client, lax_push_url, lax_program, base64_image):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -425,7 +424,7 @@ def test_create_individual_with_document_image(
     lax_api_client, lax_push_url, lax_program, base64_image, document_type, afghanistan_country
 ):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "given_name": "John",
         "family_name": "Doe",
@@ -463,7 +462,7 @@ def test_retry_with_same_originating_id_does_not_raise_integrity_error(
 ):
     individual_data = [
         {
-            "individual_id": "IND001",
+            "country_workspace_id": "IND001",
             "full_name": "John Doe",
             "given_name": "John",
             "family_name": "Doe",
@@ -485,7 +484,7 @@ def test_retry_with_same_originating_id_does_not_raise_integrity_error(
             ],
         },
         {
-            "individual_id": "IND002",
+            "country_workspace_id": "IND002",
             "full_name": "Jane Doe",
             "given_name": "Jane",
             "family_name": "Doe",
@@ -522,7 +521,7 @@ def test_retry_with_same_originating_id_does_not_raise_integrity_error(
 def test_retry_with_updated_data_reflects_changes(lax_api_client, lax_push_url):
     payload_v1 = [
         {
-            "individual_id": "IND001",
+            "country_workspace_id": "IND001",
             "full_name": "John Doe",
             "given_name": "John",
             "family_name": "Doe",
@@ -537,7 +536,7 @@ def test_retry_with_updated_data_reflects_changes(lax_api_client, lax_push_url):
 
     payload_v2 = [
         {
-            "individual_id": "IND001",
+            "country_workspace_id": "IND001",
             "full_name": "Jonathan Doe",
             "given_name": "Jonathan",
             "family_name": "Doe",
@@ -560,7 +559,7 @@ def test_retry_with_updated_data_reflects_changes(lax_api_client, lax_push_url):
 def test_retry_without_originating_id_creates_duplicates(lax_api_client, lax_push_url):
     payload = [
         {
-            "individual_id": "IND_NO_OID",
+            "country_workspace_id": "IND_NO_OID",
             "full_name": "No Origin",
             "given_name": "No",
             "family_name": "Origin",
@@ -581,7 +580,7 @@ def test_retry_without_originating_id_creates_duplicates(lax_api_client, lax_pus
 def test_phone_number_validation_flags(lax_api_client, lax_push_url):
     individuals_data = [
         {
-            "individual_id": "IND_VALID_PHONE",
+            "country_workspace_id": "IND_VALID_PHONE",
             "full_name": "Valid Phone",
             "given_name": "Valid",
             "family_name": "Phone",
@@ -591,7 +590,7 @@ def test_phone_number_validation_flags(lax_api_client, lax_push_url):
             "phone_no_alternative": "+48500100200",
         },
         {
-            "individual_id": "IND_NO_PHONE",
+            "country_workspace_id": "IND_NO_PHONE",
             "full_name": "No Phone",
             "given_name": "No",
             "family_name": "Phone",
@@ -617,7 +616,7 @@ def test_file_cleanup_on_failure(
     lax_api_client, lax_push_url, lax_rdi, base64_image, document_type, afghanistan_country
 ):
     individual_data = {
-        "individual_id": "IND_CLEANUP",
+        "country_workspace_id": "IND_CLEANUP",
         "full_name": "Jane Doe",
         "given_name": "Jane",
         "family_name": "Doe",
@@ -666,7 +665,7 @@ def test_file_cleanup_on_failure(
 
 def test_create_individual_default_values(lax_api_client, lax_push_url):
     individual_data = {
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
         "full_name": "John Doe",
         "birth_date": "1990-01-01",
     }
@@ -695,7 +694,7 @@ def serializer_common_data() -> dict[str, str]:
     return {
         "birth_date": "2000-01-01",
         "full_name": "John Doe",
-        "individual_id": "IND001",
+        "country_workspace_id": "IND001",
     }
 
 
@@ -732,7 +731,7 @@ def individual_image_flex_attribute(db: Any) -> FlexibleAttribute:
 
 def test_individual_with_image_flex_field(lax_api_client, lax_push_url, base64_image, individual_image_flex_attribute):
     individual_data = {
-        "individual_id": "IND_FLEX_IMG",
+        "country_workspace_id": "IND_FLEX_IMG",
         "full_name": "Flex Image Test",
         "given_name": "Flex",
         "family_name": "Test",
@@ -756,7 +755,7 @@ def test_image_flex_field_cleanup_on_failure(
     lax_api_client, lax_push_url, lax_rdi, base64_image, individual_image_flex_attribute
 ):
     individual_data = {
-        "individual_id": "IND_FLEX_IMG",
+        "country_workspace_id": "IND_FLEX_IMG",
         "full_name": "Flex Image Test",
         "given_name": "Flex",
         "family_name": "Test",
@@ -791,3 +790,71 @@ def test_image_flex_field_cleanup_on_failure(
             for root, _, files in os.walk(media_root):
                 leftover_files.extend(os.path.join(root, f) for f in files)
             assert leftover_files == []
+
+
+# ── country_workspace_id required-field tests ───────────────────────────
+
+
+def test_lax_push_without_country_workspace_id_reports_error(lax_api_client, lax_push_url, afghanistan_country):
+    individual_data = {
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {"country_workspace_id": ["This field is required."]}
+    assert PendingIndividual.objects.count() == 0
+
+
+def test_lax_push_blank_country_workspace_id_reports_error(lax_api_client, lax_push_url, afghanistan_country):
+    individual_data = {
+        "country_workspace_id": "",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {"country_workspace_id": ["This field may not be blank."]}
+    assert PendingIndividual.objects.count() == 0
+
+
+def test_lax_push_null_country_workspace_id_reports_error(lax_api_client, lax_push_url, afghanistan_country):
+    individual_data = {
+        "country_workspace_id": None,
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 1
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {"country_workspace_id": ["This field may not be null."]}
+    assert PendingIndividual.objects.count() == 0

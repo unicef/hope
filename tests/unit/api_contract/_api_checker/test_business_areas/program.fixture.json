@@ -2,19 +2,19 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "547cce92-dc3a-4699-8d91-acb5331a5707",
+            "pk": "c6e37674-9971-4405-979d-6a68eb52efce",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
-                "data_collecting_type": 1,
-                "beneficiary_group": "bcc5b4f2-dcd2-4607-8bdc-7a258166efd0",
-                "business_area": "c7210972-7cea-4929-9055-14b5eb27d11e",
+                "version": 1735688653315201,
+                "data_collecting_type": 7,
+                "beneficiary_group": "63a3720e-330d-4acb-841d-c808ec66cb66",
+                "business_area": "83d21b4b-f115-434c-9523-c729de143399",
                 "name": "Program 0",
+                "code": "bz9f",
                 "status": "ACTIVE",
-                "code": "6jr5",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -41,7 +41,7 @@
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 1,
+                "pk": 7,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -56,14 +56,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        1
+                        7
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "bcc5b4f2-dcd2-4607-8bdc-7a258166efd0",
+                "pk": "63a3720e-330d-4acb-841d-c808ec66cb66",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "c7210972-7cea-4929-9055-14b5eb27d11e",
+                "pk": "83d21b4b-f115-434c-9523-c729de143399",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -103,6 +103,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -113,14 +114,14 @@
                     "biometric_deduplication_threshold": 0.0,
                     "custom_fields": {},
                     "countries": [
-                        "68d47416-e1ec-4c13-b452-a9f5153c3fc0"
+                        "78560fd7-3c35-4f12-b182-53e1c6b9dd42"
                     ],
                     "payment_countries": []
                 }
             },
             {
                 "model": "geo.country",
-                "pk": "68d47416-e1ec-4c13-b452-a9f5153c3fc0",
+                "pk": "78560fd7-3c35-4f12-b182-53e1c6b9dd42",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -130,6 +131,7 @@
                     "iso_code2": "TL",
                     "iso_code3": "TLN",
                     "iso_num": "9999",
+                    "currency": null,
                     "parent": null,
                     "valid_from": "2025-01-01T00:00:00Z",
                     "valid_until": null,

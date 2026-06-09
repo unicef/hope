@@ -2,13 +2,13 @@
     "grievance_ticket": {
         "master": {
             "model": "grievance.grievanceticket",
-            "pk": "6ec138f0-666f-4d5a-9e9e-897b63529e88",
+            "pk": "87d983a5-fadb-4988-8d7b-904d071a7e7b",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "version": 1735688653315200,
                 "unicef_id": "GRV-0000002",
-                "business_area": "c87d223e-90f8-41c6-aa35-0f052d5fbba8",
+                "business_area": "a2e97951-7c08-4367-a771-6714a7250389",
                 "registration_data_import": null,
                 "partner": null,
                 "household_unicef_id": null,
@@ -28,15 +28,15 @@
                 "copied_from": null,
                 "user_modified": null,
                 "last_notification_sent": null,
-                "created_by": "af5f7a8c-b1fd-4f02-b9af-10008d0785fa",
-                "assigned_to": "af5f7a8c-b1fd-4f02-b9af-10008d0785fa",
+                "created_by": "1338e170-5df5-453a-b3f6-b8aca734e8be",
+                "assigned_to": "1338e170-5df5-453a-b3f6-b8aca734e8be",
                 "programs": []
             }
         },
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "c87d223e-90f8-41c6-aa35-0f052d5fbba8",
+                "pk": "a2e97951-7c08-4367-a771-6714a7250389",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -62,6 +62,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -77,7 +78,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "af5f7a8c-b1fd-4f02-b9af-10008d0785fa",
+                "pk": "1338e170-5df5-453a-b3f6-b8aca734e8be",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -91,7 +92,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 58,
+                    "partner": 56,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -102,7 +103,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 58,
+                "pk": 56,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

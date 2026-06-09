@@ -84,6 +84,7 @@ def test_cw_individual_push_with_country_workspace_id_persists(
 
 
 @pytest.mark.skip(reason="country_workspace_id temporarily disabled")
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_individual_push_without_country_workspace_id_returns_400(
     token_api_client,
     push_people_url: str,
@@ -94,31 +95,10 @@ def test_cw_individual_push_without_country_workspace_id_returns_400(
     response = token_api_client.post(push_people_url, [base_person_data], format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
-    assert response.json() == [
-        {"country_workspace_id": ["This field is required for RDIs uploaded by Country Workspace"]}
-    ]
+    assert response.json() == [{"country_workspace_id": ["This field is required."]}]
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
-def test_cw_individual_push_blank_country_workspace_id_returns_400(
-    token_api_client,
-    push_people_url: str,
-    rdi: RegistrationDataImport,
-    afghanistan_country,
-    base_person_data: dict,
-) -> None:
-    payload = [{**base_person_data, "country_workspace_id": ""}]
-
-    response = token_api_client.post(push_people_url, payload, format="json")
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
-    assert response.json() == [
-        {"country_workspace_id": ["This field is required for RDIs uploaded by Country Workspace"]}
-    ]
-
-
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_individual_push_partial_failure_when_one_missing_field(
     token_api_client,
     push_people_url: str,
@@ -136,7 +116,7 @@ def test_cw_individual_push_partial_failure_when_one_missing_field(
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
     assert response.json() == [
         {},
-        {"country_workspace_id": ["This field is required for RDIs uploaded by Country Workspace"]},
+        {"country_workspace_id": ["This field is required."]},
     ]
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 

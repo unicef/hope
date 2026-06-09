@@ -31,6 +31,14 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
+def business_area(business_area: BusinessArea) -> BusinessArea:
+    # rdi-push-lax is restricted to BAs that maintain RDI only through Country Workspace.
+    business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+    business_area.save(update_fields=["ingest_source"])
+    return business_area
+
+
+@pytest.fixture
 def rdi_in_review(business_area: BusinessArea, program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory(
         name="test_push_error_if_not_loading",

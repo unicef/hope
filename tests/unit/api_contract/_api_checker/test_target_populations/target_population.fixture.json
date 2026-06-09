@@ -2,7 +2,7 @@
     "target_population": {
         "master": {
             "model": "payment.paymentplan",
-            "pk": "dc3a1c71-5942-47d6-ae45-7f10f562b9c4",
+            "pk": "6d8a4c3a-6591-4c5c-afcf-676082e59582",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
@@ -10,8 +10,8 @@
                 "version": 1735688653315201,
                 "unicef_id": "PP-BA0000-25-00000001",
                 "internal_data": {},
-                "business_area": "07d51a85-9386-4166-b8f8-7f383e4efdc1",
-                "program_cycle": "8ed26d0a-b925-4020-a25c-c223999e9fcc",
+                "business_area": "da56bfc4-fdc3-4035-9870-f0b4b2d97313",
+                "program_cycle": "60a95938-2e64-407d-965c-5d60dc4a25a6",
                 "delivery_mechanism": null,
                 "financial_service_provider": null,
                 "imported_file": null,
@@ -21,7 +21,7 @@
                 "reconciliation_import_file": null,
                 "steficon_rule": null,
                 "steficon_rule_targeting": null,
-                "created_by": "c2b655d9-3590-4ef5-8c8d-fa5baabb500c",
+                "created_by": "cbe7c567-337b-4b82-a52d-dd53c5a4e217",
                 "source_payment_plan": null,
                 "storage_file": null,
                 "name": null,
@@ -42,6 +42,7 @@
                 "built_at": null,
                 "exchange_rate": null,
                 "custom_exchange_rate": false,
+                "use_payment_gateway": false,
                 "custom_exchange_rate_set_by": null,
                 "female_children_count": 0,
                 "male_children_count": 0,
@@ -71,7 +72,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "07d51a85-9386-4166-b8f8-7f383e4efdc1",
+                "pk": "da56bfc4-fdc3-4035-9870-f0b4b2d97313",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -97,6 +98,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -112,14 +114,14 @@
             },
             {
                 "model": "program.programcycle",
-                "pk": "8ed26d0a-b925-4020-a25c-c223999e9fcc",
+                "pk": "60a95938-2e64-407d-965c-5d60dc4a25a6",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "version": 1735688653315200,
                     "unicef_id": "PC-BA0000-25-000001",
                     "title": "Programme Cycle 0",
-                    "program": "e39414a2-2c0f-4fe9-83d7-bd4ae0e2781b",
+                    "program": "edaed7de-115b-423d-84c2-e12ffd50fb02",
                     "status": "ACTIVE",
                     "start_date": "2025-01-01",
                     "end_date": null,
@@ -128,18 +130,18 @@
             },
             {
                 "model": "program.program",
-                "pk": "e39414a2-2c0f-4fe9-83d7-bd4ae0e2781b",
+                "pk": "edaed7de-115b-423d-84c2-e12ffd50fb02",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
-                    "version": 1735688653315201,
-                    "data_collecting_type": 1701,
-                    "beneficiary_group": "b5d3272f-f3c3-4615-b37c-19a63689414d",
-                    "business_area": "07d51a85-9386-4166-b8f8-7f383e4efdc1",
+                    "version": 1735688653315202,
+                    "data_collecting_type": 6,
+                    "beneficiary_group": "286f2608-2edb-4385-b649-f05cab86aa93",
+                    "business_area": "da56bfc4-fdc3-4035-9870-f0b4b2d97313",
                     "name": "Program 0",
-                    "code": "zudm",
+                    "code": "141n",
                     "status": "ACTIVE",
                     "description": "",
                     "start_date": "2025-01-01",
@@ -166,7 +168,7 @@
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 1701,
+                "pk": 6,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -181,14 +183,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        1701
+                        6
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "b5d3272f-f3c3-4615-b37c-19a63689414d",
+                "pk": "286f2608-2edb-4385-b649-f05cab86aa93",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -202,7 +204,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "c2b655d9-3590-4ef5-8c8d-fa5baabb500c",
+                "pk": "cbe7c567-337b-4b82-a52d-dd53c5a4e217",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -216,7 +218,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 3793,
+                    "partner": 16,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -227,7 +229,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 3793,
+                "pk": 16,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

@@ -2,7 +2,7 @@
     "delivery_mechanism": {
         "master": {
             "model": "payment.deliverymechanism",
-            "pk": "10070359-3843-48c2-869c-3376683c4017",
+            "pk": "23352943-308e-4905-85b4-f569c2e4a187",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",

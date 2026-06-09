@@ -28,8 +28,10 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
             "active",
             "is_accountability_applicable",
             "rdi_import_xlsx_disabled",
+            "ingest_source",
             "countries",
         )
+        read_only_fields = ("ingest_source",)
 
 
 class DataCollectingTypeSerializer(serializers.ModelSerializer):

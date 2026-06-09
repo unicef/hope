@@ -492,13 +492,6 @@ def test_create_enrollment_rdi_returns_merged_rdi(program1: Program, user: User)
     assert rdi.data_source == RegistrationDataImport.ENROLL_FROM_PROGRAM
     assert rdi.program == program1
     assert rdi.business_area == program1.business_area
-    assert rdi.deduplication_engine_status is None
-
-
-def test_create_enrollment_rdi_biometric_sets_dedup_pending(afghanistan: BusinessArea, user: User) -> None:
-    program = ProgramFactory(business_area=afghanistan, biometric_deduplication_enabled=True)
-    rdi = _create_enrollment_rdi(program, str(user.pk))
-    assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

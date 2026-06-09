@@ -13,6 +13,14 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
+def business_area(business_area: BusinessArea) -> BusinessArea:
+    # rdi-create / rdi-complete are gated by CountryWorkspaceOnlyPermission.
+    business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+    business_area.save(update_fields=["ingest_source"])
+    return business_area
+
+
+@pytest.fixture
 def cw_create_url(user_business_area: BusinessArea) -> str:
     return reverse("api:rdi-create", args=[user_business_area.slug])
 
@@ -139,7 +147,7 @@ def test_complete_cw_rdi_enqueues_arrival_hook_on_commit(
 ) -> None:
     url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading_cw.id)])
 
-    with patch("hope.api.endpoints.rdi.base.classify_findings_and_schedule_merge_async_task") as mock_enqueue:
+    with patch("hope.api.endpoints.rdi.base.process_country_workspace_rdis") as mock_enqueue:
         with django_capture_on_commit_callbacks(execute=True):
             response = token_api_client.post(url, {}, format="json")
 
@@ -147,23 +155,3 @@ def test_complete_cw_rdi_enqueues_arrival_hook_on_commit(
     rdi_loading_cw.refresh_from_db()
     assert rdi_loading_cw.status == RegistrationDataImport.MERGE_SCHEDULED
     mock_enqueue.assert_called_once()
-    enqueued_rdi = mock_enqueue.call_args.args[0]
-    assert enqueued_rdi.id == rdi_loading_cw.id
-
-
-def test_complete_non_cw_rdi_does_not_enqueue_arrival_hook(
-    token_api_client: APIClient,
-    user_business_area: BusinessArea,
-    rdi_loading_non_cw: RegistrationDataImport,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading_non_cw.id)])
-
-    with patch("hope.api.endpoints.rdi.base.classify_findings_and_schedule_merge_async_task") as mock_enqueue:
-        with django_capture_on_commit_callbacks(execute=True):
-            response = token_api_client.post(url, {}, format="json")
-
-    assert response.status_code == status.HTTP_200_OK, str(response.json())
-    rdi_loading_non_cw.refresh_from_db()
-    assert rdi_loading_non_cw.status == RegistrationDataImport.IN_REVIEW
-    mock_enqueue.assert_not_called()

@@ -27,6 +27,7 @@ from hope.models import (
     Account,
     AccountType,
     Area,
+    BusinessArea,
     FinancialInstitution,
     Grant,
     PendingAccount,
@@ -36,6 +37,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -255,6 +257,13 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             raise ValidationError("This field is required.")
         return value
 
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        program_business_area: BusinessArea = attrs["program"].business_area
+        if program_business_area.is_rdi_ingest_source_country_workspace_only:
+            raise serializers.ValidationError(ALL_EXCEPT_CW_INGEST_REJECT_MSG)
+        return attrs
+
     @atomic()
     def create(self, validated_data: dict) -> dict:
         created_by = validated_data.pop("user")
@@ -270,8 +279,6 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             business_area=self.business_area,
             program=program,
         )
-        if program.biometric_deduplication_enabled:
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
 
         info = self.save_households(rdi, households)
         rdi.number_of_households = info.households
