@@ -210,6 +210,50 @@ def test_delivery_data_setter(account_setup):
     }
 
 
+def test_get_delivery_mechanism_config_uses_country_specific_config(account_setup):
+    country_config = DeliveryMechanismConfig.objects.create(
+        fsp=account_setup["fsp"],
+        delivery_mechanism=account_setup["dm_atm_card"],
+        country=account_setup["household"].country,
+        required_fields=["country_specific_field"],
+    )
+
+    assert (
+        PaymentDataCollector.get_delivery_mechanism_config(
+            account_setup["fsp"],
+            account_setup["dm_atm_card"],
+            account_setup["individual"],
+        )
+        == country_config
+    )
+
+
+def test_resolve_financial_institution_code_returns_none_without_account_or_financial_institution(account_setup):
+    account = AccountFactory(
+        individual=account_setup["individual"],
+        account_type=account_setup["account_type_bank"],
+        financial_institution=None,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+    assert PaymentDataCollector.resolve_financial_institution_code(account_setup["fsp"], None) is None
+    assert PaymentDataCollector.resolve_financial_institution_code(account_setup["fsp"], account) is None
+
+
+def test_delivery_data_without_account_does_not_add_account_defaults(account_setup):
+    dm_config = account_setup["dm_config"]
+    dm_config.required_fields = ["service_provider_code"]
+    dm_config.save(update_fields=["required_fields"])
+
+    assert PaymentDataCollector.delivery_data(
+        account_setup["fsp"],
+        account_setup["dm_atm_card"],
+        account_setup["individual"],
+    ) == {
+        "service_provider_code": None,
+    }
+
+
 def test_validate_account(account_setup):
     fsp = account_setup["fsp"]
     collector = account_setup["individual"]

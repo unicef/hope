@@ -54,10 +54,14 @@ class PaymentDataCollector(Account):
         if financial_institution.is_generic:
             return None
 
-        return FinancialInstitutionMapping.objects.filter(
-            financial_institution=financial_institution,
-            financial_service_provider=fsp,
-        ).values_list("code", flat=True).first()
+        return (
+            FinancialInstitutionMapping.objects.filter(
+                financial_institution=financial_institution,
+                financial_service_provider=fsp,
+            )
+            .values_list("code", flat=True)
+            .first()
+        )
 
     @classmethod
     def resolve_required_field(
