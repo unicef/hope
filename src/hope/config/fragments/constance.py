@@ -3,6 +3,10 @@ from django.utils.translation import gettext_lazy as _
 
 CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 CONSTANCE_ADDITIONAL_FIELDS = {
+    "image_field": [
+        "django.forms.ImageField",
+        {"required": False},
+    ],
     "percentages": (
         "django.forms.fields.IntegerField",
         {
@@ -224,6 +228,21 @@ Clear Cache,clear-cache/
         False,
         "Enable Elasticsearch usage",
         bool,
+    ),
+    "SURPRISE_PAGE_HEADING": (
+        "🎉 You found a secret!",
+        "Heading shown on the surprise/easter-egg page.",
+        str,
+    ),
+    "SURPRISE_PAGE_SUBHEADING": (
+        "Congratulations, explorer.",
+        "Subheading shown on the surprise/easter-egg page.",
+        str,
+    ),
+    "SURPRISE_PAGE_IMAGE": (
+        "",
+        "Image shown on the surprise/easter-egg page (leave blank for default).",
+        "image_field",
     ),
 }
 

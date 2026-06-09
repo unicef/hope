@@ -10,6 +10,7 @@ from hope.api import endpoints
 from hope.api.endpoints.base import ConstanceSettingsAPIView
 from hope.api.endpoints.beneficiary_ticket import CreateBeneficiaryTicketView
 from hope.api.endpoints.program.views import ProgramGlobalListView
+from hope.api.endpoints.surprise import SurprisePageConfigView
 from hope.apps.core.api.views import ChoicesViewSet
 from hope.apps.steficon.views import RuleEngineViewSet
 from hope.contrib.aurora.views import (
@@ -61,6 +62,7 @@ urlpatterns = [
     path("areas/", endpoints.lookups.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.lookups.AreaTypeList().as_view(), name="areatype-list"),
     path("constance/", ConstanceSettingsAPIView().as_view(), name="constance-list"),
+    path("surprise/", SurprisePageConfigView.as_view(), name="surprise-config"),
     path("engine-rules/", RuleEngineViewSet().as_view(), name="engine-rules-list"),
     path(
         "lookups/document/",
