@@ -1507,10 +1507,12 @@ class CheckRapidProVerificationTask:
 def periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from datetime import datetime, timedelta
 
+    from constance import config
+
     from hope.apps.payment.services.western_union_reports_service import WesternUnionReportsService
 
     service = WesternUnionReportsService()
-    service.process_files_since(datetime.now() - timedelta(hours=24))
+    service.process_files_since(datetime.now() - timedelta(days=config.WU_FTP_SYNC_LOOKBACK_DAYS))
 
 
 @app.task()

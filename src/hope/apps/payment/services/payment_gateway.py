@@ -119,7 +119,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
         financial_institution_pk = account_data.get("financial_institution_pk") or account_data.get(
             "financial_institution"
-        )  # TODO remove account_data.get("financial_institution") later
+        )
         if financial_institution_pk:
             financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
             if financial_institution.is_generic:
@@ -195,7 +195,9 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         }
 
         if account_data:
-            if account_type == "bank":
+            account_data = account_data.copy()
+            if not account_data.get("service_provider_code"):
+                # Backward-compatible fallback for snapshots created before service_provider_code was resolved.
                 account_data = self._map_financial_institution(obj, account_data)
             payload_data["account"] = account_data
 

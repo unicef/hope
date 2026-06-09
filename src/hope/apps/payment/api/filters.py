@@ -296,6 +296,7 @@ class PaymentSearchFilter(FilterSet):
             ("household__unicef_id", "household__unicef_id"),
             ("household__size", "household__size"),
             ("collector__full_name", "collector__full_name"),
+            ("created_at", "created_at"),
         )
     )
 

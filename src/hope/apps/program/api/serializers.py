@@ -153,7 +153,7 @@ class ProgramCycleListSerializer(serializers.ModelSerializer):
 
     def get_admin_url(self, obj: ProgramCycle) -> str | None:
         user = self.context["request"].user
-        return obj.admin_url if user.is_superuser else None
+        return obj.admin_url if user.is_staff else None
 
     def get_can_remove_cycle(self, obj: ProgramCycle) -> bool:
         return obj.can_remove_cycle
