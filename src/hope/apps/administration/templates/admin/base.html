@@ -2,6 +2,9 @@
 
 {% block extrahead %}
  {{ form.media }}
+  <style>
+    #header .theme-toggle { display: none; }
+  </style>
   <script>
    document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('header');
