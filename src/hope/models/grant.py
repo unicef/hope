@@ -15,8 +15,6 @@ class Grant(Enum):
     API_BENEFICIARY_TICKET_CREATE = auto()
     API_GENERIC_IMPORT = auto()
 
-    API_VISION_PAYMENTPLAN = auto()
-
     @classmethod
     def choices(cls) -> tuple[tuple[Any, Any], ...]:
         return tuple((i.value, i.value) for i in cls)

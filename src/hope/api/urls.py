@@ -12,7 +12,6 @@ from hope.api.endpoints.beneficiary_ticket import CreateBeneficiaryTicketView
 from hope.api.endpoints.program.views import ProgramGlobalListView
 from hope.apps.core.api.views import ChoicesViewSet
 from hope.apps.steficon.views import RuleEngineViewSet
-from hope.contrib.api.views import PaymentPlanCallbackView
 from hope.contrib.aurora.views import (
     OrganizationListView,
     ProjectListView,
@@ -122,18 +121,6 @@ urlpatterns = [
                     "registrations/",
                     RegistrationListView.as_view(),
                     name="registration-list",
-                ),
-            ]
-        ),
-    ),
-    path(
-        "systems/vision/",
-        include(
-            [
-                path(
-                    "payment-plan-callback/",
-                    PaymentPlanCallbackView.as_view(),
-                    name="payment-plan-callback",
                 ),
             ]
         ),
