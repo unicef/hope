@@ -472,3 +472,74 @@ def test_rows_are_routed_only_to_their_owning_plan(group_two_plans_one_fsp):
     other = Payment.objects.get(id=ctx["payment_two"].id)
     assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
     assert other.delivered_quantity != Decimal("50.00")
+
+
+def test_validate_row_payment_ids_skips_fully_blank_rows(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    # blank row (all None) between two valid rows — should produce no additional errors
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00")],
+            [],  # blank row — openpyxl appends a row of empty cells
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00")],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    service._validate_row_payment_ids()
+
+    assert service.errors == []
+
+
+def test_validate_row_payment_ids_skips_row_with_null_payment_id(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    # row where payment_id column is None but another column has a value
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [
+            [None, Decimal("50.00")],
+            [str(ctx["payment_one"].unicef_id), Decimal("75.00")],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    service._validate_row_payment_ids()
+
+    assert service.errors == []
+
+
+def test_row_groups_by_plan_skips_fully_blank_rows(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00")],
+            [],  # blank row — skipped
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    result = service._row_groups_by_plan()
+
+    plan_id = str(ctx["plan_one"].id)
+    assert plan_id in result
+    assert len(result[plan_id]) == 1  # only the valid row, not the blank one
+
+
+def test_row_groups_by_plan_skips_row_with_null_payment_id(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [
+            [None, Decimal("99.00")],  # payment_id is None — skipped
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00")],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    result = service._row_groups_by_plan()
+
+    plan_id = str(ctx["plan_one"].id)
+    assert plan_id in result
+    assert len(result[plan_id]) == 1  # the None-id row is not in the result
