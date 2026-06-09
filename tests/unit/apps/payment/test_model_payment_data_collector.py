@@ -211,10 +211,13 @@ def test_delivery_data_setter(account_setup):
 
 
 def test_get_delivery_mechanism_config_uses_country_specific_config(account_setup):
+    country = CountryFactory()
+    account_setup["household"].country = country
+    account_setup["household"].save(update_fields=["country"])
     country_config = DeliveryMechanismConfig.objects.create(
         fsp=account_setup["fsp"],
         delivery_mechanism=account_setup["dm_atm_card"],
-        country=account_setup["household"].country,
+        country=country,
         required_fields=["country_specific_field"],
     )
 
