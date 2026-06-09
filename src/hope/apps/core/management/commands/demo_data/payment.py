@@ -666,6 +666,8 @@ def generate_payment_plan_large() -> None:
             "beneficiary_group": beneficiary_group,
         },
     )[0]
+    default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
+    program.payment_plan_purposes.add(default_purpose)
     program_cycle = ProgramCycleFactory(program=program, title="Large PP Cycle")
 
     rdi = RegistrationDataImportFactory(

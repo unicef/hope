@@ -96,8 +96,10 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
         BeneficiaryGroup,
         DataCollectingType,
         DeduplicationEngineSimilarityPair,
+        PaymentPlanPurpose,
     )
 
+    default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
     dedup_program = ProgramFactory.create(
         name="Dedup Demo Program (sw)",
         code="ddp1",
@@ -119,6 +121,7 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
         cycle__status="DRAFT",
         cycle__start_date="2024-01-01",
         cycle__end_date="2024-12-31",
+        payment_plan_purposes=[default_purpose],
     )
 
     dedup_rdi = RegistrationDataImportFactory.create(
