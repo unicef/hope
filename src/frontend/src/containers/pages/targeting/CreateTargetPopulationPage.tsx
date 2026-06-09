@@ -1,6 +1,7 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { CreatePaymentPlanGroupModal } from '@components/paymentmodule/CreatePaymentPlanGroupModal';
 import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
@@ -8,7 +9,7 @@ import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCr
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -22,7 +23,7 @@ import {
 } from '@utils/targetingUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -95,6 +96,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
         code: programCode,
       }),
   });
+
+  const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
 
   if (permissions === null) return null;
   if (!businessAreaData) return null;
@@ -192,19 +195,44 @@ const CreateTargetPopulationPage = (): ReactElement => {
                   />
                 </Grid>
                 <Grid size={6}>
-                  <PaymentPlanGroupAutocompleteRest
-                    value={values.paymentPlanGroupId}
-                    onChange={async (e) => {
-                      await setFieldValue('paymentPlanGroupId', e);
-                    }}
-                    cycleId={values.programCycleId?.value ?? ''}
-                    disabled={!values.programCycleId?.value}
-                    required
-                    // @ts-ignore
-                    error={errors.paymentPlanGroupId?.value}
-                  />
+                  <Box display="flex" alignItems="flex-start" gap={2}>
+                    <PaymentPlanGroupAutocompleteRest
+                      value={values.paymentPlanGroupId}
+                      onChange={async (e) => {
+                        await setFieldValue('paymentPlanGroupId', e);
+                      }}
+                      cycleId={values.programCycleId?.value ?? ''}
+                      disabled={!values.programCycleId?.value}
+                      required
+                      // @ts-ignore
+                      error={errors.paymentPlanGroupId?.value}
+                    />
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => setCreateGroupModalOpen(true)}
+                      disabled={!values.programCycleId?.value}
+                      data-cy="button-create-group"
+                      sx={{ whiteSpace: 'nowrap', flexShrink: 0, mt: 1 }}
+                    >
+                      {t('Create Group')}
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
+              <CreatePaymentPlanGroupModal
+                open={createGroupModalOpen}
+                onClose={() => setCreateGroupModalOpen(false)}
+                cycleId={values.programCycleId?.value ?? ''}
+                cycleTitle={values.programCycleId?.name ?? ''}
+                onSuccess={(group) => {
+                  setFieldValue('paymentPlanGroupId', {
+                    value: group.id,
+                    name: group.name,
+                  });
+                  setCreateGroupModalOpen(false);
+                }}
+              />
               <Grid container spacing={3}>
                 <Grid size={6}>
                   <Field
