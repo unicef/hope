@@ -7,7 +7,7 @@ import pytest
 
 from extras.test_utils.factories import RecordFactory
 from hope.contrib.aurora.models import Organization, Project, Record, Registration
-from hope.contrib.aurora.utils import fetch_metadata, fetch_records, get_metadata
+from hope.contrib.aurora.utils import _iter_results, fetch_metadata, fetch_records, get_metadata
 
 pytestmark = pytest.mark.django_db
 
@@ -360,3 +360,27 @@ def test_fetch_records_skips_existing_records(mock_aurora_client: Any) -> None:
 
     assert result == {"pages": 1, "records": 1, "created": 0, "updated": 0}
     assert Record.objects.filter(source_id=99).count() == 1
+
+
+def test_iter_results_with_non_list_non_dict_returns_empty() -> None:
+    assert _iter_results("unexpected string") == []
+    assert _iter_results(42) == []
+    assert _iter_results(None) == []
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_registration_without_metadata_url(mock_aurora_client: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {
+        "results": [{"id": 9, "name": "Org I", "slug": "org-i", "projects": "https://aurora.test/api/orgs/9/projects/"}]
+    }
+    projects_page = {
+        "results": [{"id": 90, "name": "Project I", "registrations": "https://aurora.test/api/projects/90/regs/"}]
+    }
+    regs = [{"id": 900, "name": "Reg I", "slug": "reg-i"}]  # no "metadata" key
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page, projects_page, regs)
+
+    fetch_metadata("test-token")
+
+    registration = Registration.objects.get(source_id=900)
+    assert registration.metadata == {}

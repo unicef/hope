@@ -58,6 +58,23 @@ def test_log_forging_filter_sanitizes_dict_args() -> None:
     assert str(record.args["key"]) == "evilvalue"
 
 
+def test_log_forging_filter_unknown_args_type_passes_through() -> None:
+    # args is neither dict nor tuple — filter leaves it untouched (covers elif False branch)
+    record = logging.LogRecord(
+        name="test",
+        level=logging.INFO,
+        pathname="",
+        lineno=0,
+        msg="msg",
+        args=None,
+        exc_info=None,
+    )
+    record.args = "unexpected string args"
+    f = LogForgingFilter()
+    assert f.filter(record) is True
+    assert record.args == "unexpected string args"
+
+
 def test_log_forging_filter_no_args_passes_through() -> None:
     record = logging.LogRecord(
         name="test",
