@@ -25,7 +25,7 @@ class HopeTestBrowser(BaseCase):
         self.maximize_window()
         return super().open(f"{self.live_server_url}{url}")
 
-    def login(self, username: str = "superuser", password: str = "testtest2"):
+    def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
         self.open(f"/api/{settings.ADMIN_PANEL_URL}/")
         self.execute_script(
             """
@@ -41,6 +41,12 @@ class HopeTestBrowser(BaseCase):
         self.type("#id_password", password)
         self.click('#login-form input[type="submit"]')
         self.wait_for_ready_state_complete()
+        # The admin login POST sets the server-side session cookie, so any later
+        # navigation is already authenticated. Callers that navigate straight to a
+        # target page (rather than clicking the drawer nav) can pass
+        # wait_for_drawer=False to skip the root redirect chain and its drawer wait.
+        if not wait_for_drawer:
+            return
         # Django admin login redirects back to /api/admin/, not the SPA.
         # Navigate explicitly to the frontend root.
         self.open("/")
