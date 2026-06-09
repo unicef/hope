@@ -37,14 +37,7 @@ def increment_payment_plan_group_list_cache(sender: Any, instance: PaymentPlanGr
 @receiver(post_save, sender=PaymentPlanPurpose)
 @receiver(post_delete, sender=PaymentPlanPurpose)
 def increment_payment_plan_purpose_list_cache(sender: Any, instance: PaymentPlanPurpose, **kwargs: dict) -> None:
-    business_area_slug = instance.business_area.slug
-
-    def _increment() -> None:
-        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-        version_key = f"{business_area_slug}:{business_area_version}:payment_plan_purposes_list"
-        increment_cache_key(version_key)
-
-    transaction.on_commit(_increment)
+    transaction.on_commit(lambda: increment_cache_key("payment_plan_purposes_list"))
 
 
 @receiver(post_save, sender=PaymentPlan)

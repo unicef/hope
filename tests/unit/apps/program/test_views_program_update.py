@@ -1883,7 +1883,7 @@ def test_update_program_can_add_purposes(
     create_user_role_with_permissions: Callable,
 ) -> None:
     existing_purpose = program.payment_plan_purposes.first()
-    new_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    new_purpose = PaymentPlanPurposeFactory()
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True
     )
@@ -1911,7 +1911,7 @@ def test_update_program_cannot_remove_purpose_in_use_by_payment_plan(
     create_user_role_with_permissions: Callable,
 ) -> None:
     existing_purpose = program.payment_plan_purposes.first()
-    other_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    other_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(other_purpose)
     cycle = ProgramCycleFactory(program=program)
     plan = PaymentPlanFactory(program_cycle=cycle)
@@ -1941,7 +1941,7 @@ def test_update_program_can_remove_unused_purpose(
     create_user_role_with_permissions: Callable,
 ) -> None:
     existing_purpose = program.payment_plan_purposes.first()
-    unused_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    unused_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(unused_purpose)
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True
@@ -1968,7 +1968,7 @@ def test_update_program_rejects_more_than_10_purposes_total(
     create_user_role_with_permissions: Callable,
 ) -> None:
     existing_purpose = program.payment_plan_purposes.first()
-    extra_purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(10)]
+    extra_purposes = [PaymentPlanPurposeFactory() for _ in range(10)]
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True
     )
@@ -1981,7 +1981,7 @@ def test_update_program_rejects_more_than_10_purposes_total(
     assert response.json()["payment_plan_purposes"][0] == "A program can have at most 10 Payment Plan Purposes."
 
 
-def test_update_program_rejects_purpose_from_different_business_area(
+def test_update_program_rejects_purpose_not_allowed_for_business_area(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1990,21 +1990,18 @@ def test_update_program_rejects_purpose_from_different_business_area(
     base_payload_for_update_without_changes: dict,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    existing_purpose = program.payment_plan_purposes.first()
-    other_ba = BusinessAreaFactory(name="Ukraine", slug="ukraine")
-    foreign_purpose = PaymentPlanPurposeFactory(business_area=other_ba)
+    other_ba = BusinessAreaFactory()
+    purpose = PaymentPlanPurposeFactory()
+    purpose.limit_to.add(other_ba)
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_UPDATE], afghanistan, whole_business_area_access=True
     )
-    payload = {
-        **base_payload_for_update_without_changes,
-        "payment_plan_purposes": [str(existing_purpose.id), str(foreign_purpose.id)],
-    }
+    payload = {**base_payload_for_update_without_changes, "payment_plan_purposes": [str(purpose.id)]}
 
     response = authenticated_client.put(update_url, payload)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert (
         response.json()["payment_plan_purposes"][0]
-        == "All Payment Plan Purposes must belong to the program's business area."
+        == "All Payment Plan Purposes must be available for this business area."
     )

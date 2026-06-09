@@ -1,6 +1,6 @@
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, PaymentPlanPurposeFactory
+from extras.test_utils.factories import PaymentPlanPurposeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models import BusinessArea, PaymentPlanPurpose, Program
@@ -23,25 +23,23 @@ TEN_PURPOSE_NAMES = (
 
 
 @pytest.fixture
-def ba_purpose(business_area: BusinessArea) -> PaymentPlanPurpose:
-    return PaymentPlanPurposeFactory(business_area=business_area, name=BA_PURPOSE_NAME)
+def ba_purpose() -> PaymentPlanPurpose:
+    return PaymentPlanPurposeFactory(name=BA_PURPOSE_NAME)
 
 
 @pytest.fixture
-def second_ba_purpose(business_area: BusinessArea) -> PaymentPlanPurpose:
-    return PaymentPlanPurposeFactory(business_area=business_area, name=SECOND_BA_PURPOSE_NAME)
+def second_ba_purpose() -> PaymentPlanPurpose:
+    return PaymentPlanPurposeFactory(name=SECOND_BA_PURPOSE_NAME)
 
 
 @pytest.fixture
 def other_ba_purpose() -> PaymentPlanPurpose:
-    other_ba = BusinessAreaFactory()
-    return PaymentPlanPurposeFactory(business_area=other_ba, name=OTHER_BA_PURPOSE_NAME)
+    return PaymentPlanPurposeFactory(name=OTHER_BA_PURPOSE_NAME)
 
 
 @pytest.fixture
 def purpose() -> PaymentPlanPurpose:
-    ba = BusinessArea.objects.get(slug="afghanistan")
-    return PaymentPlanPurposeFactory(business_area=ba, name=BA_PURPOSE_NAME)
+    return PaymentPlanPurposeFactory(name=BA_PURPOSE_NAME)
 
 
 @pytest.fixture
@@ -60,8 +58,8 @@ def program_with_purpose(business_area: BusinessArea, ba_purpose: PaymentPlanPur
 
 
 @pytest.fixture
-def ten_ba_purposes(business_area: BusinessArea) -> list[PaymentPlanPurpose]:
-    return [PaymentPlanPurposeFactory(business_area=business_area, name=name) for name in TEN_PURPOSE_NAMES]
+def ten_ba_purposes() -> list[PaymentPlanPurpose]:
+    return [PaymentPlanPurposeFactory(name=name) for name in TEN_PURPOSE_NAMES]
 
 
 @pytest.fixture

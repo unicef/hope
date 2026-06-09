@@ -20,7 +20,6 @@ def migrate_plan_type(apps, schema_editor):
 
 def create_default_purpose_and_backfill(apps, schema_editor):
     PaymentPlanPurpose = apps.get_model("payment", "PaymentPlanPurpose")  # noqa: N806
-    BusinessArea = apps.get_model("core", "BusinessArea")  # noqa: N806
     Program = apps.get_model("program", "Program")  # noqa: N806
     PaymentPlan = apps.get_model("payment", "PaymentPlan")  # noqa: N806
     PaymentPlanGroup = apps.get_model("payment", "PaymentPlanGroup")  # noqa: N806
@@ -28,36 +27,30 @@ def create_default_purpose_and_backfill(apps, schema_editor):
     ProgramThrough = Program.payment_plan_purposes.through  # noqa: N806
     PlanThrough = PaymentPlan.payment_plan_purposes.through  # noqa: N806
 
-    for ba in BusinessArea.objects.all():
-        default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area_id=ba.id)
+    default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(
+        name="Default Purpose",
+        defaults={"description": "Default payment plan purpose"},
+    )
 
-        program_ids_with_purpose = ProgramThrough.objects.filter(program__business_area_id=ba.id).values_list(
-            "program_id", flat=True
-        )
-        _bulk_create_in_batches(
-            ProgramThrough,
-            (
-                ProgramThrough(program_id=pk, paymentplanpurpose_id=default_purpose.id)
-                for pk in Program.objects.filter(business_area_id=ba.id)
-                .exclude(id__in=program_ids_with_purpose)
-                .values_list("id", flat=True)
-            ),
-            ignore_conflicts=True,
-        )
+    program_ids_with_purpose = ProgramThrough.objects.values_list("program_id", flat=True)
+    _bulk_create_in_batches(
+        ProgramThrough,
+        (
+            ProgramThrough(program_id=pk, paymentplanpurpose_id=default_purpose.id)
+            for pk in Program.objects.exclude(id__in=program_ids_with_purpose).values_list("id", flat=True)
+        ),
+        ignore_conflicts=True,
+    )
 
-        plan_ids_with_purpose = PlanThrough.objects.filter(paymentplan__business_area_id=ba.id).values_list(
-            "paymentplan_id", flat=True
-        )
-        _bulk_create_in_batches(
-            PlanThrough,
-            (
-                PlanThrough(paymentplan_id=pk, paymentplanpurpose_id=default_purpose.id)
-                for pk in PaymentPlan.objects.filter(business_area_id=ba.id)
-                .exclude(id__in=plan_ids_with_purpose)
-                .values_list("id", flat=True)
-            ),
-            ignore_conflicts=True,
-        )
+    plan_ids_with_purpose = PlanThrough.objects.values_list("paymentplan_id", flat=True)
+    _bulk_create_in_batches(
+        PlanThrough,
+        (
+            PlanThrough(paymentplan_id=pk, paymentplanpurpose_id=default_purpose.id)
+            for pk in PaymentPlan.objects.exclude(id__in=plan_ids_with_purpose).values_list("id", flat=True)
+        ),
+        ignore_conflicts=True,
+    )
 
     ungrouped_pps = list(
         PaymentPlan.objects.filter(payment_plan_group__isnull=True).values_list("id", "name", "program_cycle_id")

@@ -368,7 +368,7 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     )
 
     usd = CurrencyFactory(code="USD", name="United States Dollar")
-    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose", business_area=afghanistan)
+    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
     program.payment_plan_purposes.add(purpose)
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     pp_name = "Test Payment Plan"

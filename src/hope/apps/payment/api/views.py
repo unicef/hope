@@ -7,7 +7,7 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse, Http404
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -27,7 +27,6 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import (
     BaseViewSet,
-    BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
@@ -2679,7 +2678,6 @@ class PaymentPlanGroupViewSet(
 
 class PaymentPlanPurposeViewSet(
     CountActionMixin,
-    BusinessAreaMixin,
     mixins.ListModelMixin,
     BaseViewSet,
 ):
@@ -2688,6 +2686,10 @@ class PaymentPlanPurposeViewSet(
     PERMISSIONS = [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST]
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
+
+    def get_queryset(self) -> QuerySet:
+        ba_slug = self.kwargs.get("business_area_slug")
+        return PaymentPlanPurpose.objects.filter(Q(limit_to__isnull=True) | Q(limit_to__slug=ba_slug)).distinct()
 
     @etag_decorator(PaymentPlanPurposeListKeyConstructor)
     @cached_response(key_func=PaymentPlanPurposeListKeyConstructor())

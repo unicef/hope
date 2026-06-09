@@ -313,7 +313,7 @@ def test_can_be_locked():
         household=payment_1.household,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
-    shared_purpose = PaymentPlanPurposeFactory(business_area=payment_plan.business_area)
+    shared_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(shared_purpose)
     payment_plan.payment_plan_purposes.add(shared_purpose)
     payment_plan_conflicted.payment_plan_purposes.add(shared_purpose)
@@ -596,7 +596,7 @@ def test_manager_annotations_pp_conflicts():
         program_cycle=program_cycle,
         business_area=pp1.business_area,
     )
-    shared_purpose = PaymentPlanPurposeFactory(business_area=pp1.business_area)
+    shared_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(shared_purpose)
     for pp in [pp1, pp2, pp3, pp4]:
         pp.payment_plan_purposes.add(shared_purpose)
@@ -719,7 +719,7 @@ def test_manager_annotations_conflicts_for_follow_up():
         source_payment_plan=pp1,
         program_cycle=program_cycle,
     )
-    shared_purpose = PaymentPlanPurposeFactory(business_area=program_cycle.program.business_area)
+    shared_purpose = PaymentPlanPurposeFactory()
     program_cycle.program.payment_plan_purposes.add(shared_purpose)
     pp2_follow_up.payment_plan_purposes.add(shared_purpose)
     pp3.payment_plan_purposes.add(shared_purpose)
@@ -766,8 +766,8 @@ def test_manager_annotations_conflicts_for_follow_up():
 
 def test_no_conflict_when_plans_have_different_purposes():
     program = ProgramFactory(status="ACTIVE")
-    food = PaymentPlanPurposeFactory(business_area=program.business_area)
-    education = PaymentPlanPurposeFactory(business_area=program.business_area)
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.set([food, education])
     cycle = ProgramCycleFactory(program=program)
     plan_a = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])
@@ -783,8 +783,8 @@ def test_no_conflict_when_plans_have_different_purposes():
 
 def test_conflict_when_plans_share_at_least_one_purpose():
     program = ProgramFactory(status="ACTIVE")
-    food = PaymentPlanPurposeFactory(business_area=program.business_area)
-    education = PaymentPlanPurposeFactory(business_area=program.business_area)
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.set([food, education])
     cycle = ProgramCycleFactory(program=program)
     plan_a = PaymentPlanFactory(
@@ -802,8 +802,8 @@ def test_conflict_when_plans_share_at_least_one_purpose():
 
 def test_beneficiary_allowed_in_single_multi_purpose_plan():
     program = ProgramFactory(status="ACTIVE")
-    food = PaymentPlanPurposeFactory(business_area=program.business_area)
-    education = PaymentPlanPurposeFactory(business_area=program.business_area)
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.set([food, education])
     cycle = ProgramCycleFactory(program=program)
     plan = PaymentPlanFactory(
@@ -819,8 +819,8 @@ def test_beneficiary_allowed_in_single_multi_purpose_plan():
 
 def test_beneficiary_allowed_in_two_separate_single_purpose_plans():
     program = ProgramFactory(status="ACTIVE")
-    food = PaymentPlanPurposeFactory(business_area=program.business_area)
-    education = PaymentPlanPurposeFactory(business_area=program.business_area)
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.set([food, education])
     cycle = ProgramCycleFactory(program=program)
     plan_food = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])
@@ -838,7 +838,7 @@ def test_beneficiary_allowed_in_two_separate_single_purpose_plans():
 
 def test_beneficiary_conflict_in_overlapping_plans():
     program = ProgramFactory(status="ACTIVE")
-    food = PaymentPlanPurposeFactory(business_area=program.business_area)
+    food = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.set([food])
     cycle = ProgramCycleFactory(program=program)
     plan_a = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])

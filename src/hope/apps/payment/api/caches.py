@@ -7,6 +7,7 @@ from hope.api.caches import (
     BusinessAreaAndProgramLastUpdatedKeyBit,
     BusinessAreaKeyBitMixin,
     KeyConstructorMixin,
+    get_or_create_cache_key,
 )
 from hope.models import BusinessArea
 
@@ -23,8 +24,18 @@ class PaymentPlanGroupListKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "payment_plan_groups_list"
 
 
-class PaymentPlanPurposeListKeyBit(BusinessAreaKeyBitMixin):
-    specific_view_cache_key = "payment_plan_purposes_list"
+class PaymentPlanPurposeListVersionsKeyBit(KeyBitBase):
+    def get_data(  # noqa: PLR0913 – override of base method signature
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
+    ) -> str:
+        version = get_or_create_cache_key("payment_plan_purposes_list", 1)
+        return str(version)
 
 
 class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
@@ -72,7 +83,7 @@ class PaymentPlanGroupListKeyConstructor(KeyConstructorMixin):
 
 
 class PaymentPlanPurposeListKeyConstructor(KeyConstructorMixin):
-    payment_plan_purpose_list = PaymentPlanPurposeListKeyBit()
+    payment_plan_purpose_list = PaymentPlanPurposeListVersionsKeyBit()
 
 
 class PaymentVerificationListKeyConstructor(KeyConstructorMixin):

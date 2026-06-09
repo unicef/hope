@@ -75,7 +75,7 @@ def sw_program() -> Program:
         status=Program.ACTIVE,
         beneficiary_group_name="People",
     )
-    purpose = PaymentPlanPurposeFactory(business_area=prog.business_area, name="Test Purpose")
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     prog.payment_plan_purposes.add(purpose)
     PaymentPlanGroupFactory(cycle=prog.cycles.first(), name="Test Group")
     return prog
@@ -88,7 +88,7 @@ def non_sw_program() -> Program:
         dct_type=DataCollectingType.Type.STANDARD,
         status=Program.ACTIVE,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=prog.business_area, name="Test Purpose")
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     prog.payment_plan_purposes.add(purpose)
     PaymentPlanGroupFactory(cycle=prog.cycles.first(), name="Test Group")
     return prog
@@ -112,7 +112,7 @@ def program(business_area: BusinessArea) -> Program:
         end_date=timezone.now() + relativedelta(months=5),
         program=program,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=program.business_area, name="Test Purpose")
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     program.payment_plan_purposes.add(purpose)
     PaymentPlanGroupFactory(cycle=cycle, name="Test Group")
     return program
@@ -403,7 +403,7 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
     fsp_1.delivery_mechanisms.set([dm_cash])
     fsp_1.allowed_business_areas.add(business_area)
 
-    purpose = PaymentPlanPurposeFactory(business_area=business_area, name="Test Purpose")
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
     test_program.payment_plan_purposes.add(purpose)
     group = PaymentPlanGroupFactory(cycle=test_program.cycles.first(), name="Test Group")
 

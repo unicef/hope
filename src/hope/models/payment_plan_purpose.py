@@ -14,24 +14,20 @@ if TYPE_CHECKING:
 
 
 class PaymentPlanPurpose(TimeStampedUUIDModel, UnicefIdentifiedModel):
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE, related_name="payment_plan_purposes"
-    )
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
+    limit_to = models.ManyToManyField(
+        to="core.BusinessArea",
+        related_name="payment_plan_purposes",
+        blank=True,
+    )
 
     class Meta:
         app_label = "payment"
         verbose_name = _("Payment Plan Purpose")
-        constraints = [
-            models.UniqueConstraint(
-                fields=["name", "business_area"],
-                name="unique_paymentplanpurpose_name_business_area",
-            )
-        ]
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.business_area})"
+        return self.name
 
     @staticmethod
     def annotate_usage_in_program(

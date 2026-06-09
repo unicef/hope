@@ -38,7 +38,7 @@ def top_up_view_context(api_client: Callable, business_area: Any) -> dict[str, A
         plan_type=PaymentPlan.PlanType.REGULAR,
         currency=currency,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     regular_pp.payment_plan_purposes.add(purpose)
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     url = reverse(

@@ -42,7 +42,7 @@ def _count_url(ba_slug: str) -> str:
     )
 
 
-def test_list_purposes_filtered_by_business_area(
+def test_list_filters_by_limit_to(
     client: Any,
     user: Any,
     business_area: Any,
@@ -52,19 +52,22 @@ def test_list_purposes_filtered_by_business_area(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
     )
     other_ba = BusinessAreaFactory(slug="other-ba")
-    purpose_in_ba = PaymentPlanPurposeFactory(business_area=business_area, name="Food")
-    PaymentPlanPurposeFactory(business_area=other_ba, name="Education")
+    food = PaymentPlanPurposeFactory(name="Food")
+    shelter = PaymentPlanPurposeFactory(name="Shelter")
+    shelter.limit_to.add(business_area)
+    education = PaymentPlanPurposeFactory(name="Education")
+    education.limit_to.add(other_ba)
 
     response = client.get(_list_url(business_area.slug))
 
     assert response.status_code == status.HTTP_200_OK
-    results = response.json()["results"]
-    assert len(results) == 1
-    assert results[0]["id"] == str(purpose_in_ba.id)
-    assert results[0]["name"] == "Food"
+    result_ids = {r["id"] for r in response.json()["results"]}
+    assert str(food.id) in result_ids
+    assert str(shelter.id) in result_ids
+    assert str(education.id) not in result_ids
 
 
-def test_count_purposes_filtered_by_business_area(
+def test_count_excludes_purposes_restricted_to_other_ba(
     client: Any,
     user: Any,
     business_area: Any,
@@ -74,9 +77,11 @@ def test_count_purposes_filtered_by_business_area(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
     )
     other_ba = BusinessAreaFactory(slug="other-ba")
-    PaymentPlanPurposeFactory(business_area=business_area, name="Food")
-    PaymentPlanPurposeFactory(business_area=business_area, name="Shelter")
-    PaymentPlanPurposeFactory(business_area=other_ba, name="Education")
+    PaymentPlanPurposeFactory(name="Food")
+    shelter = PaymentPlanPurposeFactory(name="Shelter")
+    shelter.limit_to.add(business_area)
+    education = PaymentPlanPurposeFactory(name="Education")
+    education.limit_to.add(other_ba)
 
     response = client.get(_count_url(business_area.slug))
 
@@ -137,8 +142,8 @@ def test_list_caching(
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area, name="Food")
-    PaymentPlanPurposeFactory(business_area=business_area, name="Health")
+    purpose = PaymentPlanPurposeFactory(name="Food")
+    PaymentPlanPurposeFactory(name="Health")
 
     with CaptureQueriesContext(connection) as ctx:
         first = client.get(_list_url(business_area.slug))
@@ -155,7 +160,7 @@ def test_list_caching(
         assert len(ctx.captured_queries) == 2
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        PaymentPlanPurposeFactory(business_area=business_area, name="Shelter")
+        PaymentPlanPurposeFactory(name="Shelter")
 
     with CaptureQueriesContext(connection) as ctx:
         after_create = client.get(_list_url(business_area.slug))
@@ -165,7 +170,7 @@ def test_list_caching(
         etag = after_create.headers["etag"]
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        purpose.name = "Education"
+        purpose.name = "Emergency Cash"
         purpose.save()
 
     with CaptureQueriesContext(connection) as ctx:
@@ -202,9 +207,9 @@ def test_list_purposes_search_by_name(
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
     )
-    PaymentPlanPurposeFactory(business_area=business_area, name="Food Assistance")
-    PaymentPlanPurposeFactory(business_area=business_area, name="Shelter Support")
-    PaymentPlanPurposeFactory(business_area=business_area, name="Education Grant")
+    PaymentPlanPurposeFactory(name="Food Assistance")
+    PaymentPlanPurposeFactory(name="Shelter Support")
+    PaymentPlanPurposeFactory(name="Education Grant")
 
     response = client.get(_list_url(business_area.slug), {"search": "shelter"})
 

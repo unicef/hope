@@ -548,6 +548,13 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("At least one Payment Plan Purpose is required.")
         if len(value) > 10:
             raise serializers.ValidationError("A program can have at most 10 Payment Plan Purposes.")
+        ba_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+        if (
+            PaymentPlanPurpose.objects.filter(id__in={p.pk for p in value})
+            .exclude(Q(limit_to__isnull=True) | Q(limit_to__slug=ba_slug))
+            .exists()
+        ):
+            raise serializers.ValidationError("All Payment Plan Purposes must be available for this business area.")
         return value
 
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -566,18 +573,6 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         data_collecting_type = data["data_collecting_type"]
         beneficiary_group = data["beneficiary_group"]
         validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
-
-        purposes = data["payment_plan_purposes"]
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-        submitted_ids = {p.pk for p in purposes}
-        if (
-            PaymentPlanPurpose.objects.filter(id__in=submitted_ids)
-            .exclude(business_area__slug=business_area_slug)
-            .exists()
-        ):
-            raise serializers.ValidationError(
-                {"payment_plan_purposes": "All Payment Plan Purposes must belong to the program's business area."}
-            )
 
         return data
 
@@ -704,8 +699,13 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             )
         if len(incoming_ids) > 10:
             raise serializers.ValidationError("A program can have at most 10 Payment Plan Purposes.")
-        if any(p.business_area_id != self.instance.business_area_id for p in value):
-            raise serializers.ValidationError("All Payment Plan Purposes must belong to the program's business area.")
+        ba_slug = self.instance.business_area.slug
+        if (
+            PaymentPlanPurpose.objects.filter(id__in=incoming_ids)
+            .exclude(Q(limit_to__isnull=True) | Q(limit_to__slug=ba_slug))
+            .exists()
+        ):
+            raise serializers.ValidationError("All Payment Plan Purposes must be available for this business area.")
         return value
 
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -728,6 +728,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         data_collecting_type = data["data_collecting_type"]
         beneficiary_group = data["beneficiary_group"]
         validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
+
         return data
 
     def to_representation(self, obj: Program) -> dict:

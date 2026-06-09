@@ -1,7 +1,6 @@
 import uuid
 
 from django.db import migrations, models
-import django.db.models.deletion
 import model_utils.fields
 
 
@@ -35,12 +34,12 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
-                ("name", models.CharField(max_length=255)),
+                ("name", models.CharField(max_length=255, unique=True)),
                 ("description", models.TextField(blank=True)),
                 (
-                    "business_area",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                    "limit_to",
+                    models.ManyToManyField(
+                        blank=True,
                         related_name="payment_plan_purposes",
                         to="core.businessarea",
                     ),
@@ -49,13 +48,6 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Payment Plan Purpose",
             },
-        ),
-        migrations.AddConstraint(
-            model_name="paymentplanpurpose",
-            constraint=models.UniqueConstraint(
-                fields=["name", "business_area"],
-                name="unique_paymentplanpurpose_name_business_area",
-            ),
         ),
         migrations.RunSQL(
             sql="ALTER TABLE payment_paymentplanpurpose ADD unicef_id_index SERIAL",

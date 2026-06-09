@@ -39,8 +39,8 @@ def cycle(business_area: Any) -> ProgramCycle:
 
 
 @pytest.fixture
-def purpose(business_area: Any, cycle: ProgramCycle) -> Any:
-    p = PaymentPlanPurposeFactory(business_area=business_area)
+def purpose(cycle: ProgramCycle) -> Any:
+    p = PaymentPlanPurposeFactory()
     cycle.program.payment_plan_purposes.add(p)
     return p
 

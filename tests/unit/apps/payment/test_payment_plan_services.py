@@ -295,7 +295,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     program.status = Program.ACTIVE
     program.save()
 
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
     create_input_data["name"] = "TEST"
     create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=program_cycle).id
@@ -376,7 +376,7 @@ def test_create(
         registration_data_import=hh1.registration_data_import,
     )
 
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
@@ -947,7 +947,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
         end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         status=ProgramCycle.ACTIVE,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
@@ -1031,7 +1031,7 @@ def test_full_rebuild(
         registration_data_import=hh1.registration_data_import,
     )
 
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",

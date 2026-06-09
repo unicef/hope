@@ -277,7 +277,7 @@ def target_population_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     program_active.payment_plan_purposes.add(purpose)
     target_population.payment_plan_purposes.add(purpose)
     url_kwargs = {
@@ -1333,7 +1333,7 @@ def test_copy_tp_rejects_purpose_not_in_program(
     target_population_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
-    unrelated_purpose = PaymentPlanPurposeFactory(business_area=target_population_actions_context["business_area"])
+    unrelated_purpose = PaymentPlanPurposeFactory()
     create_user_role_with_permissions(
         target_population_actions_context["user"],
         [Permissions.TARGETING_DUPLICATE],

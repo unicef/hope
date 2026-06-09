@@ -105,7 +105,9 @@ class PaymentPlanPurposeInline(admin.TabularInline):
         if db_field.name == "paymentplanpurpose":
             obj = getattr(request, "_program_obj", None)
             if obj is not None:
-                kwargs["queryset"] = PaymentPlanPurpose.objects.filter(business_area=obj.business_area)
+                kwargs["queryset"] = PaymentPlanPurpose.objects.filter(
+                    Q(limit_to__isnull=True) | Q(limit_to__slug=obj.business_area.slug)
+                ).distinct()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 

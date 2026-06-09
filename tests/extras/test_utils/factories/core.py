@@ -194,5 +194,4 @@ class PaymentPlanPurposeFactory(DjangoModelFactory):
     class Meta:
         model = PaymentPlanPurpose
 
-    business_area = factory.SubFactory(BusinessAreaFactory)
     name = factory.Sequence(lambda n: f"Purpose {n}")

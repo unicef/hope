@@ -185,7 +185,7 @@ def test_signature_after_prepare_payment_plan(
         }
     ]
 
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": business_area.slug,

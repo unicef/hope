@@ -114,8 +114,8 @@ def bg_sw(db: Any) -> BeneficiaryGroup:
 
 
 @pytest.fixture
-def purpose(afghanistan: BusinessArea) -> PaymentPlanPurpose:
-    return PaymentPlanPurposeFactory(business_area=afghanistan)
+def purpose() -> PaymentPlanPurpose:
+    return PaymentPlanPurposeFactory()
 
 
 @pytest.fixture
@@ -957,8 +957,8 @@ def test_create_program_with_purposes(
     valid_input_data_standard: dict,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    purpose1 = PaymentPlanPurposeFactory(business_area=afghanistan)
-    purpose2 = PaymentPlanPurposeFactory(business_area=afghanistan)
+    purpose1 = PaymentPlanPurposeFactory()
+    purpose2 = PaymentPlanPurposeFactory()
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True
     )
@@ -1038,7 +1038,7 @@ def test_create_program_requires_max_10_purposes(
     valid_input_data_standard: dict,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    purposes = [PaymentPlanPurposeFactory(business_area=afghanistan) for _ in range(11)]
+    purposes = [PaymentPlanPurposeFactory() for _ in range(11)]
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True
     )
@@ -1050,7 +1050,7 @@ def test_create_program_requires_max_10_purposes(
     assert response.json()["payment_plan_purposes"][0] == "A program can have at most 10 Payment Plan Purposes."
 
 
-def test_create_program_rejects_purpose_from_different_business_area(
+def test_create_program_rejects_purpose_not_allowed_for_business_area(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1058,17 +1058,18 @@ def test_create_program_rejects_purpose_from_different_business_area(
     valid_input_data_standard: dict,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    other_ba = BusinessAreaFactory(name="Ukraine", slug="ukraine")
-    foreign_purpose = PaymentPlanPurposeFactory(business_area=other_ba)
+    other_ba = BusinessAreaFactory()
+    purpose = PaymentPlanPurposeFactory()
+    purpose.limit_to.add(other_ba)
     create_user_role_with_permissions(
         user, [Permissions.PROGRAMME_CREATE], afghanistan, whole_business_area_access=True
     )
-    input_data = {**valid_input_data_standard, "payment_plan_purposes": [str(foreign_purpose.id)]}
+    input_data = {**valid_input_data_standard, "payment_plan_purposes": [str(purpose.id)]}
 
     response = authenticated_client.post(list_url, input_data)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert (
         response.json()["payment_plan_purposes"][0]
-        == "All Payment Plan Purposes must belong to the program's business area."
+        == "All Payment Plan Purposes must be available for this business area."
     )

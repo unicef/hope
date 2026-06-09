@@ -93,9 +93,9 @@ class PaymentPlanFactory(DjangoModelFactory):
             self.payment_plan_purposes.set(extracted)
         else:
             program = self.program_cycle.program
-            purpose = program.payment_plan_purposes.filter(business_area=self.business_area).first()
+            purpose = program.payment_plan_purposes.first()
             if purpose is None:
-                purpose = PaymentPlanPurposeFactory(business_area=self.business_area)
+                purpose = PaymentPlanPurposeFactory()
                 program.payment_plan_purposes.add(purpose)
             self.payment_plan_purposes.add(purpose)
 

@@ -402,7 +402,7 @@ def test_program_detail_purpose_is_used_in_pp_flag(
     create_user_role_with_permissions: Callable,
 ) -> None:
     used_purpose = program.payment_plan_purposes.first()
-    unused_purpose = PaymentPlanPurposeFactory(business_area=afghanistan)
+    unused_purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(unused_purpose)
     cycle = ProgramCycleFactory(program=program)
     plan = PaymentPlanFactory(program_cycle=cycle)

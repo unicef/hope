@@ -27,8 +27,8 @@ SECOND_GROUP_NAME = "Second Group"
 
 
 @pytest.fixture
-def tp_purpose(business_area: BusinessArea) -> PaymentPlanPurpose:
-    return PaymentPlanPurposeFactory(business_area=business_area, name=PURPOSE_NAME)
+def tp_purpose() -> PaymentPlanPurpose:
+    return PaymentPlanPurposeFactory(name=PURPOSE_NAME)
 
 
 @pytest.fixture
@@ -88,8 +88,8 @@ def targeting_tp(targeting_group: PaymentPlanGroup, tp_purpose: PaymentPlanPurpo
 
 
 @pytest.fixture
-def other_purpose(business_area: BusinessArea) -> PaymentPlanPurpose:
-    return PaymentPlanPurposeFactory(business_area=business_area, name=OTHER_PURPOSE_NAME)
+def other_purpose() -> PaymentPlanPurpose:
+    return PaymentPlanPurposeFactory(name=OTHER_PURPOSE_NAME)
 
 
 @pytest.fixture

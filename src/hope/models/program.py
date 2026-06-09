@@ -26,6 +26,7 @@ from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_purpose import PaymentPlanPurpose
 from hope.models.sanction_list import SanctionList
 from hope.models.utils import (
     AbstractSyncable,
@@ -262,9 +263,13 @@ class Program(
         if (
             self.pk
             and not self._state.adding
-            and self.payment_plan_purposes.exclude(business_area=self.business_area).exists()
+            and self.payment_plan_purposes.exclude(
+                id__in=PaymentPlanPurpose.objects.filter(
+                    Q(limit_to__isnull=True) | Q(limit_to__slug=self.business_area.slug)
+                ).distinct()
+            ).exists()
         ):
-            raise ValidationError("All Payment Plan Purposes must belong to this program's business area.")
+            raise ValidationError("All Payment Plan Purposes must be available for this program's business area.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()

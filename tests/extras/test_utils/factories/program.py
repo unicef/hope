@@ -37,7 +37,7 @@ class ProgramFactory(DjangoModelFactory):
         if extracted is not None:
             self.payment_plan_purposes.set(extracted)
         else:
-            self.payment_plan_purposes.add(PaymentPlanPurposeFactory(business_area=self.business_area))
+            self.payment_plan_purposes.add(PaymentPlanPurposeFactory())
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: Any, **kwargs: Any) -> None:

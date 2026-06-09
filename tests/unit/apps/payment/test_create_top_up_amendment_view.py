@@ -45,7 +45,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         source_payment_plan=regular_pp,
         currency=currency,
     )
-    purpose = PaymentPlanPurposeFactory(business_area=business_area)
+    purpose = PaymentPlanPurposeFactory()
     top_up_pp.payment_plan_purposes.add(purpose)
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     url = reverse(
