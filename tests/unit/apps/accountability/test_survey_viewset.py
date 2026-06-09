@@ -16,7 +16,6 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     SurveyFactory,
@@ -51,13 +50,11 @@ def authenticated_client(api_client, user):
 
 @pytest.fixture
 def program_active(business_area):
-    program = ProgramFactory(
+    return ProgramFactory(
         name="Test Active Program",
         business_area=business_area,
         status=Program.ACTIVE,
     )
-    ProgramCycleFactory(program=program)
-    return program
 
 
 @pytest.fixture

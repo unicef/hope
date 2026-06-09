@@ -1,12 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from django.utils import timezone
 import pytest
-import pytz
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
+from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
 from hope.models import APIToken, Area, AreaType, Country, FinancialInstitution, Program
@@ -87,6 +87,15 @@ def _fi_response(fi: FinancialInstitution) -> dict:
     }
 
 
+def _currency_response(code: str, name: str, is_crypto: bool, currency_id: int) -> dict:
+    return {
+        "id": currency_id,
+        "code": code,
+        "name": name,
+        "is_crypto": is_crypto,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -108,8 +117,8 @@ def poland_country(db) -> Country:
         iso_code3="POL",
         iso_num="0620",
     )
-    country.valid_from = datetime(2020, 1, 1, tzinfo=pytz.UTC)
-    country.valid_until = datetime(2020, 12, 31, tzinfo=pytz.UTC)
+    country.valid_from = datetime(2020, 1, 1, tzinfo=UTC)
+    country.valid_until = datetime(2020, 12, 31, tzinfo=UTC)
     country.save(update_fields=["valid_from", "valid_until"])
     return country
 
@@ -123,8 +132,8 @@ def afghanistan_country_lookups(db) -> Country:
         iso_code3="AFG",
         iso_num="0004",
     )
-    country.valid_from = datetime(2019, 1, 1, tzinfo=pytz.UTC)
-    country.valid_until = datetime(2021, 12, 31, tzinfo=pytz.UTC)
+    country.valid_from = datetime(2019, 1, 1, tzinfo=UTC)
+    country.valid_until = datetime(2021, 12, 31, tzinfo=UTC)
     country.save(update_fields=["valid_from", "valid_until"])
     return country
 
@@ -132,7 +141,7 @@ def afghanistan_country_lookups(db) -> Country:
 @pytest.fixture
 def area_type_poland(poland_country: Country) -> AreaType:
     at = AreaTypeFactory(name="areatype1", country=poland_country, area_level=1)
-    at.valid_until = datetime(2010, 12, 31, tzinfo=pytz.UTC)
+    at.valid_until = datetime(2010, 12, 31, tzinfo=UTC)
     at.save(update_fields=["valid_until"])
     return at
 
@@ -145,7 +154,7 @@ def area_type_afghanistan(afghanistan_country_lookups: Country, area_type_poland
         area_level=2,
         parent=area_type_poland,
     )
-    at.valid_until = datetime(2010, 12, 31, tzinfo=pytz.UTC)
+    at.valid_until = datetime(2010, 12, 31, tzinfo=UTC)
     at.save(update_fields=["valid_until"])
     return at
 
@@ -153,8 +162,8 @@ def area_type_afghanistan(afghanistan_country_lookups: Country, area_type_poland
 @pytest.fixture
 def area_poland(area_type_poland: AreaType) -> Area:
     area = AreaFactory(name="area1", area_type=area_type_poland)
-    area.valid_from = datetime(2010, 1, 1, tzinfo=pytz.UTC)
-    area.valid_until = datetime(2010, 12, 31, tzinfo=pytz.UTC)
+    area.valid_from = datetime(2010, 1, 1, tzinfo=UTC)
+    area.valid_until = datetime(2010, 12, 31, tzinfo=UTC)
     area.save(update_fields=["valid_from", "valid_until"])
     return area
 
@@ -162,8 +171,8 @@ def area_poland(area_type_poland: AreaType) -> Area:
 @pytest.fixture
 def area_afghanistan(area_type_afghanistan: AreaType, area_poland: Area) -> Area:
     area = AreaFactory(name="area2", area_type=area_type_afghanistan, parent=area_poland)
-    area.valid_from = datetime(2020, 1, 1, tzinfo=pytz.UTC)
-    area.valid_until = datetime(2020, 12, 31, tzinfo=pytz.UTC)
+    area.valid_from = datetime(2020, 1, 1, tzinfo=UTC)
+    area.valid_until = datetime(2020, 12, 31, tzinfo=UTC)
     area.save(update_fields=["valid_from", "valid_until"])
     return area
 
@@ -274,6 +283,39 @@ def test_get_countries_search(
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 1
     assert response.json()["results"][0]["name"] == expected_name
+
+
+# ===========================================================================
+# Currencies
+# ===========================================================================
+
+
+def test_get_currencies(api_client_read: APIClient) -> None:
+    afn = CurrencyFactory(code="AFN", name="Afghani")
+    usd = CurrencyFactory(code="USD", name="United States Dollar")
+
+    url = reverse("api:currency-list")
+    response = api_client_read.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == [
+        _currency_response("AFN", "Afghani", False, afn.id),
+        _currency_response("USD", "United States Dollar", False, usd.id),
+    ]
+    assert "next" in response.json()
+
+
+def test_get_currencies_search(api_client_read: APIClient) -> None:
+    CurrencyFactory(code="AFN", name="Afghani")
+    CurrencyFactory(code="USD", name="United States Dollar")
+    CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True)
+
+    url = reverse("api:currency-list")
+    response = api_client_read.get(url, {"search": "USD"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [item["code"] for item in response.json()["results"]] == ["USD", "USDC"]
+    assert [item["name"] for item in response.json()["results"]] == ["United States Dollar", "USD Coin"]
 
 
 # ===========================================================================

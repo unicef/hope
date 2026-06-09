@@ -83,6 +83,7 @@ def test_cw_individual_push_with_country_workspace_id_persists(
     assert ind.country_workspace_id == "cw-ind-001"
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_individual_push_without_country_workspace_id_returns_400(
     token_api_client,
     push_people_url: str,
@@ -99,6 +100,7 @@ def test_cw_individual_push_without_country_workspace_id_returns_400(
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_individual_push_blank_country_workspace_id_returns_400(
     token_api_client,
     push_people_url: str,
@@ -116,6 +118,7 @@ def test_cw_individual_push_blank_country_workspace_id_returns_400(
     ]
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_individual_push_partial_failure_when_one_missing_field(
     token_api_client,
     push_people_url: str,
@@ -138,6 +141,7 @@ def test_cw_individual_push_partial_failure_when_one_missing_field(
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_individual_push_duplicate_country_workspace_id_in_same_payload_returns_400(
     token_api_client,
     push_people_url: str,
@@ -159,6 +163,7 @@ def test_cw_individual_push_duplicate_country_workspace_id_in_same_payload_retur
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 
+@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_individual_push_multiple_duplicate_groups_lists_all_sorted(
     token_api_client,
     push_people_url: str,

@@ -10,7 +10,7 @@ from extras.test_utils.factories import RecordFactory
 from hope.contrib.aurora.models import Organization, Project, Record, Registration
 from hope.contrib.aurora.utils import fetch_metadata, fetch_records, get_metadata
 
-pytestmark = [pytest.mark.django_db]
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture

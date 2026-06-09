@@ -35,6 +35,7 @@ def currencies():
         CurrencyFactory(code="PLN", name="Polish Zloty"),
         CurrencyFactory(code="USD", name="United States Dollar"),
         CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True),
+        CurrencyFactory(code="OLD", name="Inactive Currency", active=False),
     ]
 
 
@@ -125,15 +126,15 @@ def test_choices_countries_returns_available_countries(authenticated_client, cou
 
 
 @pytest.mark.django_db
-def test_choices_currencies_returns_currencies_from_db(authenticated_client, currencies):
+def test_choices_currencies_returns_only_active_currencies_from_db(authenticated_client, currencies):
     response = authenticated_client.get(reverse("api:choices-currencies"))
 
     assert response.status_code == 200
     assert len(response.data) == 3
     assert response.data == [
-        {"name": "Polish Zloty", "value": "PLN"},
-        {"name": "USD Coin", "value": "USDC"},
-        {"name": "United States Dollar", "value": "USD"},
+        {"name": "Polish Zloty", "value": "PLN", "vision_code": "PLN", "active": True},
+        {"name": "United States Dollar", "value": "USD", "vision_code": "USD", "active": True},
+        {"name": "USD Coin", "value": "USDC", "vision_code": "USDC", "active": True},
     ]
 
 
@@ -145,4 +146,5 @@ def test_choices_currencies_returns_value_name_format(authenticated_client, curr
     for item in response.data:
         assert "value" in item
         assert "name" in item
-        assert len(item) == 2
+        assert "vision_code" in item
+        assert "active" in item

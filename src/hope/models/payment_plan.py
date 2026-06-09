@@ -26,12 +26,13 @@ from psycopg2._range import NumericRange
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hope.apps.household.const import FEMALE, MALE
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.approval import Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
-from hope.models.household import FEMALE, MALE, Household
+from hope.models.household import Household
 from hope.models.individual import Individual
 from hope.models.payment import Payment
 from hope.models.rule import Rule, RuleCommit
@@ -364,12 +365,6 @@ class PaymentPlan(
         blank=True,
         null=True,
         help_text="Payment Plan end date",
-    )
-    currency_old = models.CharField(
-        max_length=5,
-        blank=True,
-        null=True,
-        help_text="Currency (legacy, pending removal)",
     )
     currency = models.ForeignKey(
         "core.Currency",
@@ -851,8 +846,10 @@ class PaymentPlan(
     @property
     def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
         """Export MTCN file xlsx file with password."""
-        all_sent_to_fsp = not self.eligible_payments.filter(status=Payment.STATUS_PENDING).exists()
-        return self.is_payment_gateway and all_sent_to_fsp
+        has_blocking_payments = self.eligible_payments.filter(
+            status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG)
+        ).exists()
+        return self.is_payment_gateway and not has_blocking_payments
 
     @property
     def can_regenerate_export_file_per_fsp(self) -> bool:

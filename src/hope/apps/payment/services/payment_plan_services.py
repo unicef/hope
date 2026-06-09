@@ -518,7 +518,9 @@ class PaymentPlanService:
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
-        payments_queryset = payment_plan.eligible_payments.select_related("household_snapshot").all()
+        payments_queryset = payment_plan.eligible_payments.select_related(
+            "household_snapshot", "currency", "delivery_type"
+        ).all()
         paginator = Paginator(payments_queryset, 500)
         for page_number in paginator.page_range:
             payments = paginator.page(page_number).object_list
@@ -937,7 +939,9 @@ class PaymentPlanService:
         payments_ids = list(payment_plan.eligible_payments.values_list("id", flat=True))
         for batch_start in range(0, len(payments_ids), batch_size):
             batched_ids = payments_ids[batch_start : batch_start + batch_size]
-            payments = Payment.objects.filter(id__in=batched_ids).select_related("household_snapshot", "currency")
+            payments = Payment.objects.filter(id__in=batched_ids).select_related(
+                "household_snapshot", "currency", "delivery_type"
+            )
             for payment in payments:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))
