@@ -21,23 +21,36 @@ def test_sanitized_value_str_passthrough_clean_value() -> None:
 
 def test_log_forging_filter_sanitizes_tuple_args() -> None:
     record = logging.LogRecord(
-        name="test", level=logging.WARNING, pathname="", lineno=0,
-        msg="user %s action %s", args=("evil\nINJECTED", "also\rbad"), exc_info=None,
+        name="test",
+        level=logging.WARNING,
+        pathname="",
+        lineno=0,
+        msg="user %s action %s",
+        args=("evil\nINJECTED", "also\rbad"),
+        exc_info=None,
     )
     f = LogForgingFilter()
     assert f.filter(record) is True
     assert isinstance(record.args, tuple)
     assert str(record.args[0]) == "evilINJECTED"
-    assert str(record.args[1]) == "alsобad".replace("о", "o")  # plain ascii check
+    assert str(record.args[1]) == "alsobad"
     assert "\n" not in str(record.args[0])
     assert "\r" not in str(record.args[1])
 
 
 def test_log_forging_filter_sanitizes_dict_args() -> None:
+    # Pass args=None and assign after construction: Python 3.14 LogRecord.__init__
+    # does args[0] on the dict (single-mapping detection) which raises KeyError.
     record = logging.LogRecord(
-        name="test", level=logging.WARNING, pathname="", lineno=0,
-        msg="%(key)s", args={"key": "evil\nvalue"}, exc_info=None,
+        name="test",
+        level=logging.WARNING,
+        pathname="",
+        lineno=0,
+        msg="%(key)s",
+        args=None,
+        exc_info=None,
     )
+    record.args = {"key": "evil\nvalue"}
     f = LogForgingFilter()
     assert f.filter(record) is True
     assert isinstance(record.args, dict)
@@ -47,8 +60,13 @@ def test_log_forging_filter_sanitizes_dict_args() -> None:
 
 def test_log_forging_filter_no_args_passes_through() -> None:
     record = logging.LogRecord(
-        name="test", level=logging.INFO, pathname="", lineno=0,
-        msg="static message", args=None, exc_info=None,
+        name="test",
+        level=logging.INFO,
+        pathname="",
+        lineno=0,
+        msg="static message",
+        args=None,
+        exc_info=None,
     )
     f = LogForgingFilter()
     assert f.filter(record) is True
@@ -57,8 +75,13 @@ def test_log_forging_filter_no_args_passes_through() -> None:
 
 def test_log_forging_filter_preserves_hardcoded_template_newlines() -> None:
     record = logging.LogRecord(
-        name="test", level=logging.INFO, pathname="", lineno=0,
-        msg="line1\nline2 %s", args=("clean",), exc_info=None,
+        name="test",
+        level=logging.INFO,
+        pathname="",
+        lineno=0,
+        msg="line1\nline2 %s",
+        args=("clean",),
+        exc_info=None,
     )
     f = LogForgingFilter()
     f.filter(record)

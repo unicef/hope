@@ -260,20 +260,12 @@ def test_fetch_metadata_registrations_fetch_error_returns_empty_registrations(mo
     projects_page = {
         "results": [{"id": 60, "name": "Project F", "registrations": "https://aurora.test/api/projects/60/regs/"}]
     }
-
-    def _side_effect(url: str) -> MagicMock:
-        m = MagicMock()
-        if "orgs/6/projects" in url:
-            m.json.return_value = projects_page
-        elif "projects/60/regs" in url:
-            m.raise_for_status.side_effect = _requests.RequestException("timeout")
-        elif url == "aurora.test/api/":
-            m.json.return_value = schema
-        elif "orgs/" in url:
-            m.json.return_value = orgs_page
-        return m
-
-    mock_aurora_client.get.side_effect = _side_effect
+    m_regs = MagicMock()
+    m_regs.raise_for_status.side_effect = _requests.RequestException("timeout")
+    mock_aurora_client.get.side_effect = [
+        *_mock_responses(schema, orgs_page, projects_page),
+        m_regs,
+    ]
 
     result = fetch_metadata("test-token")
 

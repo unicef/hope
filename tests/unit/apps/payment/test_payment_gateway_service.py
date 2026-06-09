@@ -1007,9 +1007,9 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     logger_error_mock.assert_called_once_with(
         "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
         "456",
-        str(payments[0].financial_service_provider),
+        payments[0].financial_service_provider,
         payments[0].id,
-        str(payments[0].collector),
+        payments[0].collector,
     )
     assert post_mock.call_count == 1
 
@@ -1843,10 +1843,10 @@ def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_origi
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
     logger_error_mock.assert_called_once_with(
         "No Financial Institution Mapping found for financial_institution %s, fsp %s, payment %s, collector %s.",
-        str(fi),
-        str(payment.financial_service_provider),
+        fi,
+        payment.financial_service_provider,
         payment.id,
-        str(payment.collector),
+        payment.collector,
     )
     assert result == account_data
 
@@ -1899,8 +1899,8 @@ def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_or
     logger_error_mock.assert_called_once_with(
         "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
         "UNKNOWN_CODE",
-        str(payment.financial_service_provider),
+        payment.financial_service_provider,
         payment.id,
-        str(payment.collector),
+        payment.collector,
     )
     assert result == account_data
