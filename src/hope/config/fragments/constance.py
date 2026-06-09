@@ -76,6 +76,11 @@ CONSTANCE_CONFIG = {
         "Batch size for image upload",
         "positive_integers",
     ),
+    "WU_FTP_SYNC_LOOKBACK_DAYS": (
+        31,
+        "Number of days back to scan Western Union FTP for AD/QCF files during periodic sync",
+        "positive_integers",
+    ),
     "PRODUCTION_SERVER": ("https://hope.unicef.org/api/admin", "", str),
     "KOBO_ADMIN_CREDENTIALS": (
         "",
