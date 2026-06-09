@@ -15,6 +15,7 @@ omit =
         */config/settings.py
         */config/fragments/sentry.py
         */management/commands/*
+        */management/sql.py
         */missing_countries.py
         */base_test_case.py
         */wsgi.py
