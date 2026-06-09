@@ -818,3 +818,20 @@ def test_import_skips_payment_verification_update_when_status_already_matches(
     service.import_payment_list()
 
     assert service.payment_verifications_to_save == []
+
+
+def test_validate_delivered_quantity_returns_early_for_none_household(
+    instruction,
+    instruction_payments,
+    delivery_template,
+):
+    service = XlsxFollowUpInstructionReconciliationImportService(
+        instruction, ContentFile(_build_reconciliation_file(instruction), name="recon.xlsx")
+    )
+    service.open_workbook()
+    row = next(service.ws_payments.iter_rows(min_row=2))
+
+    service._validate_delivered_quantity(row, None)
+
+    assert service.errors == []
+    assert service.household_updates == {}

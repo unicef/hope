@@ -460,6 +460,35 @@ def test_save_xlsx_file_second_export_increments_tag_and_excludes_first_batch(
     assert second_plan.export_tag == 2
 
 
+def test_resolve_template_returns_none_when_plan_has_no_fsp_or_delivery_mechanism(program_cycle, business_area):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=None,
+        delivery_mechanism=None,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group)
+
+    assert service._resolve_template(plan) is None
+
+
+def test_save_xlsx_file_reexport_with_export_tag_replaces_file_and_keeps_tag(group_with_one_accepted_plan, user):
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).save_xlsx_file(user)
+    plan = group_with_one_accepted_plan.payment_plans.first()
+    plan.refresh_from_db()
+    first_file_id = plan.export_file_delivery_id
+    assert plan.export_tag == 1
+
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan, export_tag=1).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag == 1
+    assert plan.export_file_delivery_id != first_file_id
+
+
 def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_plan_without_template, user):
     plan = group_with_plan_without_template.payment_plans.first()
 
@@ -533,6 +562,41 @@ def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(program_cycle, bus
     assert file_temp.file.name.endswith(".zip")
     assert file_temp.password is not None
     assert file_temp.xlsx_password is not None
+
+
+def test_save_xlsx_file_with_auth_code_reexport_with_export_tag_replaces_file_and_keeps_tag(
+    program_cycle, business_area, user
+):
+    pg_fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="pg-3",
+    )
+    delivery_mechanism = DeliveryMechanismFactory()
+    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_auth_code"])
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=pg_fsp, delivery_mechanism=delivery_mechanism, xlsx_template=template
+    )
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=pg_fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(parent=plan, financial_service_provider=pg_fsp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
+    plan.refresh_from_db()
+    first_file_id = plan.export_file_delivery_id
+    assert plan.export_tag == 1
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, export_tag=1).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag == 1
+    assert plan.export_file_delivery_id != first_file_id
 
 
 def test_get_email_context_returns_user_recipient_fields(group_with_one_accepted_plan, user):

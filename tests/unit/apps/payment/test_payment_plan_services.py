@@ -6,6 +6,8 @@ from unittest.mock import patch
 import uuid
 
 from aniso8601 import parse_date
+from django.contrib.contenttypes.models import ContentType
+from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
 from django.test import override_settings
 from django.utils import timezone
@@ -24,6 +26,7 @@ from extras.test_utils.factories import (
     CountryFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
+    FileTempFactory,
     FinancialServiceProviderFactory,
     FollowUpInstructionFactory,
     HouseholdFactory,
@@ -2016,3 +2019,52 @@ def test_copy_target_criteria_copies_individual_block_filters(
     target_rule = target_pp.rules.get()
     target_block = target_rule.individuals_filters_blocks.get()
     assert TargetingIndividualBlockRuleFilter.objects.filter(individuals_filters_block=target_block).count() == 1
+
+
+def test_set_group_for_open_pp_returns_early_when_cycle_is_changing(
+    user: User,
+    business_area: Any,
+    program: Program,
+) -> None:
+    cycle_a = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+    cycle_b = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+    pp = PaymentPlanFactory(
+        created_by=user,
+        business_area=business_area,
+        program_cycle=cycle_a,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    group_in_b = PaymentPlanGroupFactory(cycle=cycle_b)
+    service = PaymentPlanService(pp)
+
+    service._set_group_for_open_pp({"payment_plan_group_id": str(group_in_b.id), "program_cycle_id": cycle_b.id})
+
+    assert pp.payment_plan_group != group_in_b
+
+
+def test_split_removes_existing_export_file_delivery(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    pp = PaymentPlanFactory(
+        created_by=user,
+        business_area=business_area,
+        program_cycle=cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    household = HouseholdFactory(business_area=business_area, program=cycle.program)
+    PaymentFactory(parent=pp, household=household, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    file_temp = FileTempFactory(
+        object_id=pp.pk,
+        content_type=ContentType.objects.get_for_model(pp),
+        created_by=user,
+        file=ContentFile(b"data", "delivery.xlsx"),
+    )
+    pp.export_file_delivery = file_temp
+    pp.save(update_fields=["export_file_delivery"])
+
+    PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+
+    pp.refresh_from_db()
+    assert pp.export_file_delivery is None

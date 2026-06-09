@@ -17,6 +17,8 @@ from extras.test_utils.factories.payment import (
     PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
     XlsxPaymentPlanGroupDeliveryImportService,
 )
@@ -525,6 +527,24 @@ def test_row_groups_by_plan_skips_fully_blank_rows(group_two_plans_one_fsp):
     plan_id = str(ctx["plan_one"].id)
     assert plan_id in result
     assert len(result[plan_id]) == 1  # only the valid row, not the blank one
+
+
+def test_validate_collects_per_plan_header_errors(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "currency"],
+        [[str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+
+    def fake_validate_headers(self):
+        self.errors.append(XlsxError(self.sheetname, None, "bad per-plan header"))
+
+    with patch.object(XlsxPaymentPlanDeliveryImportService, "_validate_headers", fake_validate_headers):
+        service.validate()
+
+    assert any("bad per-plan header" in error.message for error in service.errors)
 
 
 def test_row_groups_by_plan_skips_row_with_null_payment_id(group_two_plans_one_fsp):
