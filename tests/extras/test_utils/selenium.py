@@ -22,7 +22,9 @@ class HopeTestBrowser(BaseCase):
         pass
 
     def open(self, url: str):
-        self.maximize_window()
+        # maximize_window() is a no-op in headless Chrome, leaving the small
+        # default viewport that breaks layout-sensitive click targets on CI.
+        self.set_window_size(1920, 1080)
         return super().open(f"{self.live_server_url}{url}")
 
     def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
