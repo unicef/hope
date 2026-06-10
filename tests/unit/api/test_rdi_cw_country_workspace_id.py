@@ -14,7 +14,6 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def business_area(business_area: BusinessArea) -> BusinessArea:
-    # rdi-create / rdi-complete are gated by CountryWorkspaceOnlyPermission.
     business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
     business_area.save(update_fields=["ingest_source"])
     return business_area
@@ -51,7 +50,6 @@ def test_cw_push_payload_country_workspace_id_maps_to_country_workspace_id(
     assert rdi.country_workspace_id == "cw-correlation-abc-123"
 
 
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_without_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
@@ -64,7 +62,6 @@ def test_cw_push_without_country_workspace_id_returns_400(
     assert RegistrationDataImport.objects.filter(name=cw_create_payload["name"]).count() == 0
 
 
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
 def test_cw_push_with_blank_country_workspace_id_returns_400(
     token_api_client: APIClient,
     cw_create_url: str,
@@ -78,7 +75,7 @@ def test_cw_push_with_blank_country_workspace_id_returns_400(
     assert "country_workspace_id" in response.json()
 
 
-@pytest.mark.skip(reason="country_workspace_id temporarily disabled")
+@pytest.mark.skip("Talk with CW if we need to validate cw ids unique on our side")
 def test_cw_push_duplicate_country_workspace_id_rejected(
     token_api_client: APIClient,
     cw_create_url: str,
@@ -147,7 +144,7 @@ def test_complete_cw_rdi_enqueues_arrival_hook_on_commit(
 ) -> None:
     url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading_cw.id)])
 
-    with patch("hope.api.endpoints.rdi.base.process_country_workspace_rdis") as mock_enqueue:
+    with patch("hope.api.endpoints.rdi.base.process_country_workspace_rdis_task") as mock_enqueue:
         with django_capture_on_commit_callbacks(execute=True):
             response = token_api_client.post(url, {}, format="json")
 

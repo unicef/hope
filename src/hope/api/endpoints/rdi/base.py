@@ -2,7 +2,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
-from django.db.transaction import atomic, on_commit
+from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.http.response import Http404, HttpResponseBase
 from django.utils.functional import cached_property
@@ -16,7 +16,7 @@ from hope.api.endpoints.base import BusinessAreaIngestCWOnlyMixin, HOPEAPIBusine
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
-from hope.apps.registration_data.celery_tasks import process_country_workspace_rdis
+from hope.apps.registration_data.celery_tasks import process_country_workspace_rdis_task
 from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
 
 if TYPE_CHECKING:
@@ -29,8 +29,7 @@ class RDISerializer(serializers.ModelSerializer):
     )
     imported_by_email = serializers.EmailField(required=True, write_only=True)
     country_workspace_id = serializers.CharField(
-        required=False,
-        allow_blank=False,
+        required=True,
         max_length=255,
     )
 
@@ -219,8 +218,8 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
             registration_data_import=self.selected_rdi
         ).count()
         self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
-        on_commit(process_country_workspace_rdis)
         self.selected_rdi.save()
+        process_country_workspace_rdis_task()
 
         return Response(
             [

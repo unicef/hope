@@ -42,7 +42,13 @@ class ProcessCountryWorkspaceRdiTask:
             if rdi is None:
                 return
 
-            if rdi.status == RegistrationDataImport.IMPORT_ERROR and rdi.is_coming_from_cw:
+            if not rdi.is_coming_from_cw:
+                logger.warning(
+                    f"RDI {registration_data_import_id} does not have country_workspace_id and can't be processed."
+                )
+                return
+
+            if rdi.status in (RegistrationDataImport.IMPORT_ERROR, RegistrationDataImport.MERGE_ERROR):
                 self._reset_rdi_state_for_cw_retry(rdi)
 
             rdi.status = RegistrationDataImport.MERGING
@@ -52,22 +58,25 @@ class ProcessCountryWorkspaceRdiTask:
             f"RDI:{registration_data_import_id} CW arrival hook starting "
             f"(country_workspace_id={rdi.country_workspace_id}, status={rdi.status})"
         )
+
+        dedupe_service: BiometricDeduplicationService | None = None
+        findings: list[dict] | None = None
         if rdi.program.biometric_deduplication_enabled:
             dedupe_service = BiometricDeduplicationService()
-            findings = dedupe_service.get_rdi_findings(cast("str", rdi.country_workspace_id))
+            findings = dedupe_service.get_rdi_findings(rdi.country_workspace_id)
 
-            similarity_pairs = self._parse_findings_to_similarity_pairs(findings)
-            dedupe_service.store_similarity_pairs(
-                cast("Program", rdi.program), similarity_pairs, id_field_name="country_workspace_id"
-            )
-            logger.info(
-                f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} similarity pairs from findings"
-            )
-
-            dedupe_service.store_rdi_deduplication_statistics(rdi)
-            logger.info(f"RDI:{registration_data_import_id} stored deduplication statistics")
-
-        self._schedule_merge(rdi)
+        with transaction.atomic():
+            if dedupe_service is not None and findings is not None:
+                similarity_pairs = self._parse_findings_to_similarity_pairs(findings)
+                dedupe_service.store_similarity_pairs(
+                    cast("Program", rdi.program), similarity_pairs, id_field_name="country_workspace_id"
+                )
+                logger.info(
+                    f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} similarity pairs from findings"
+                )
+                dedupe_service.store_rdi_deduplication_statistics(rdi)
+                logger.info(f"RDI:{registration_data_import_id} stored deduplication statistics")
+            transaction.on_commit(lambda: self._schedule_merge(rdi))
 
     def _parse_findings_to_similarity_pairs(self, findings: list[dict]) -> list[SimilarityPair]:
         similarity_pairs: list[SimilarityPair] = []

@@ -492,7 +492,7 @@ def process_country_workspace_rdi_task(registration_data_import: RegistrationDat
     )
 
 
-def process_country_workspace_rdis() -> None:
+def process_country_workspace_rdis_task_action(job: AsyncRetryJob) -> bool:
     rdis = RegistrationDataImport.objects.filter(
         status__in=(
             RegistrationDataImport.MERGE_SCHEDULED,
@@ -503,3 +503,13 @@ def process_country_workspace_rdis() -> None:
     )
     for rdi in rdis:
         process_country_workspace_rdi_task(rdi)
+    return True
+
+
+def process_country_workspace_rdis_task() -> None:
+    AsyncRetryJob.queue_task(
+        job_name=process_country_workspace_rdis_task.__name__,
+        action="hope.apps.registration_data.celery_tasks.process_country_workspace_rdis_task_action",
+        group_key="process_country_workspace_rdis",
+        description="Dispatch Country Workspace RDIs pending merge/retry",
+    )

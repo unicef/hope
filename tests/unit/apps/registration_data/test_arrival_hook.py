@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 import uuid
 
 from celery.exceptions import Retry
+from django.test import TestCase
 import pytest
 from requests.exceptions import RequestException
 
@@ -36,7 +37,11 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+    # The arrival hook enqueues the merge via transaction.on_commit, which never
+    # fires under django_db's rollback wrapping — capture and execute it so the
+    # on_commit path is actually exercised.
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 @pytest.fixture(autouse=True)
@@ -111,7 +116,7 @@ def _finding(first_pk: str, second_pk: str, *, score: float = 0.95, status_code:
     }
 
 
-@patch("hope.apps.registration_data.celery_tasks.process_country_workspace_rdis")
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
 @patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_persists_pairs_and_enqueues_merge(
     mock_get_findings: mock.Mock,
@@ -132,6 +137,7 @@ def test_arrival_hook_persists_pairs_and_enqueues_merge(
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
+    mock_enqueue_merge.assert_called_once()
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
@@ -797,6 +803,61 @@ def test_arrival_hook_skips_merge_when_status_changed_under_lock(
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
+
+
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+def test_arrival_hook_defers_merge_enqueue_until_commit(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+    django_capture_on_commit_callbacks,
+) -> None:
+    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        process_country_workspace_rdi_task(registration_data_import=cw_rdi)
+    job = AsyncRetryJob.objects.latest("pk")
+
+    with django_capture_on_commit_callbacks(execute=False) as callbacks:
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    # Merge is deferred to on_commit — not enqueued inline during the run.
+    mock_enqueue_merge.assert_not_called()
+
+    for callback in callbacks:
+        callback()
+    mock_enqueue_merge.assert_called_once_with(cw_rdi)
+
+
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+def test_arrival_hook_stats_failure_rolls_back_pairs_and_skips_merge(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    mock_retry: Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+) -> None:
+    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_retry.side_effect = Retry("retry")
+
+    with patch(
+        "hope.apps.registration_data.tasks.rdi_country_workspace_process."
+        "BiometricDeduplicationService.store_rdi_deduplication_statistics",
+        side_effect=RuntimeError("stats write failed"),
+    ):
+        with pytest.raises(Retry):
+            queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
+
+    # Pairs written just before the stats failure roll back with it (one transaction).
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    # Merge enqueue is gated on commit, which never happened.
+    mock_enqueue_merge.assert_not_called()
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.IMPORT_ERROR
 
 
 @patch("hope.apps.registration_data.tasks.rdi_country_workspace_process.ProcessCountryWorkspaceRdiTask.execute")
