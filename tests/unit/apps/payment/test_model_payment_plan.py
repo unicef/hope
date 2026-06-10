@@ -544,19 +544,17 @@ def test_has_export_file_returns_true_for_accepted_with_delivery_file():
 
 
 def test_has_export_file_returns_false_on_missing_file_temp():
-    from hope.models.file_temp import FileTemp
-
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
     file_temp = FileTempFactory(
         object_id=payment_plan.pk,
         content_type=get_content_type_for_model(payment_plan),
         created=timezone.now(),
-        file=ContentFile(b"abc", "ent.xlsx"),
+        file=ContentFile(b"abc", "delivery.xlsx"),
     )
-    payment_plan.export_file_entitlement = file_temp
-    payment_plan.save()
-    FileTemp.objects.filter(pk=file_temp.pk).delete()
-    payment_plan.refresh_from_db()
+    file_temp_id = file_temp.pk
+    FileTemp.objects.filter(pk=file_temp_id).delete()
+    # stale FK id on the instance, row already gone -> descriptor raises FileTemp.DoesNotExist
+    payment_plan.export_file_delivery_id = file_temp_id
 
     assert payment_plan.has_export_file is False
 
