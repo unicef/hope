@@ -83,7 +83,7 @@ def test_create_tp_with_group_and_purpose(
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(CYCLE_TITLE)
 
-        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"]')
+        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
         browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
         browser.select_listbox_element(GROUP_NAME)
 
@@ -140,7 +140,7 @@ def test_create_tp_dropdowns_show_only_relevant_options(
 
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(CYCLE_TITLE)
-        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"]')
+        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
         browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
         browser.wait_for_text(GROUP_NAME, 'ul[role="listbox"]')
         browser.assert_text_not_visible(SECOND_GROUP_NAME, 'ul[role="listbox"]')
@@ -218,7 +218,7 @@ def test_duplicate_tp_with_group_and_purpose(
         browser.click('[data-cy="filters-program-cycle-autocomplete"]')
         browser.select_listbox_element(CYCLE_TITLE)
 
-        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"]')
+        browser.wait_for_element_clickable('[data-cy="filters-payment-plan-group-autocomplete"] input')
         browser.click('[data-cy="filters-payment-plan-group-autocomplete"]')
         browser.select_listbox_element(GROUP_NAME)
 
