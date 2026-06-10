@@ -396,7 +396,7 @@ def test_individual_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 4
-        assert len(captured.captured_queries) == 20
+        assert len(captured.captured_queries) == 18
 
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
@@ -1066,6 +1066,31 @@ def test_individual_detail_admin_url(detail_context: dict) -> None:
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["admin_url"] == ctx["individual1"].admin_url
+
+
+def test_individual_list_role_field(list_context: dict, create_user_role_with_permissions: Callable) -> None:
+    # Covers IndividualListSerializer.get_role branches:
+    # - roles is not None and non-empty  → returns role display string  (head of household)
+    # - roles is not None and empty []   → returns None                 (plain member, no role row)
+    ctx = list_context
+    create_user_role_with_permissions(
+        user=ctx["user"],
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+        business_area=ctx["afghanistan"],
+        program=ctx["program"],
+    )
+
+    response = ctx["client"].get(ctx["list_url"])
+    assert response.status_code == status.HTTP_200_OK
+    results_by_id = {r["id"]: r for r in response.json()["results"]}
+
+    # head_of_household has a PRIMARY role → serializer finds it in prefetched_roles
+    head = ctx["individual1_1"]
+    assert results_by_id[str(head.id)]["role"] == "Primary collector"
+
+    # plain member has no IndividualRoleInHousehold → prefetched_roles is [] → role is None
+    member = ctx["individual1_2"]
+    assert results_by_id[str(member.id)]["role"] is None
 
 
 def test_get_individual_photos(detail_context: dict, create_user_role_with_permissions: Callable) -> None:
