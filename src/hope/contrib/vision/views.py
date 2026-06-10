@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from hope.api.auth import HOPEAuthentication
 from hope.api.endpoints.base import HOPEAPIView
-from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
+from hope.contrib.api.serializers.vision import PaymentPlanCallbackResponseSerializer, PaymentPlanPayloadSerializer
 from hope.models import Grant, PaymentPlan
 
 VISION_RESPONSE_OK = "OK"
@@ -47,7 +47,20 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             vision_data.setdefault("log", []).append(
                 {
                     "payload": PaymentPlanPayloadSerializer(payment_plan).data,
-                    "response": dict(response_data),
+                    "response": PaymentPlanCallbackResponseSerializer(
+                        instance={
+                            "business_area": payment_plan.business_area.code,
+                            "vendor_number": payment_plan.financial_service_provider.vision_vendor_number,
+                            "payplan_sno": payment_plan.unicef_id,
+                            "payplan_desc": payment_plan.name,
+                            "currency": payment_plan.currency.code if payment_plan.currency else "",
+                            "auth_amt": str(payment_plan.total_entitled_quantity),
+                            "auth_amt_usd": str(payment_plan.total_entitled_quantity_usd),
+                            "status": payment_plan.status,
+                            "head_vendor": payment_plan.financial_service_provider.name,
+                            "creation_date": payment_plan.created_at.strftime("%Y%m%d"),
+                        }
+                    ).data,
                 }
             )
 

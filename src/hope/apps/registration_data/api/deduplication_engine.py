@@ -46,7 +46,7 @@ class IgnoredFilenamesPair:
 
 
 class DeduplicationEngineAPI(BaseAPI):
-    API_KEY_ENV_NAME = "DEDUPLICATION_ENGINE_API_KEY"
+    API_KEY_SETTING_NAME = "DEDUPLICATION_ENGINE_API_KEY"
     API_URL_SETTING_NAME = "DEDUPLICATION_ENGINE_API_URL"
 
     class DeduplicationEngineAPIError(Exception):

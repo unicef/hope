@@ -303,7 +303,7 @@ def test_callback_view_success(mock_get, mock_log_entry) -> None:
     assert "vision" in mock_pp.internal_data
     entry = mock_pp.internal_data["vision"]["log"][0]
     assert entry["payload"]["payplanSno"] == "PP043"
-    assert entry["response"]["status"] == "OK"
+    assert entry["response"]["status"] == "NEW"
     assert mock_pp.internal_data["vision"]["vision_id"] == "00000062"
 
 
@@ -462,7 +462,7 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
     assert "vision" in mock_pp.internal_data
     entry = mock_pp.internal_data["vision"]["log"][0]
     assert entry["payload"]["payplanSno"] == "PP043"
-    assert entry["response"]["status"] == "OK"
+    assert entry["response"]["status"] == "NEW"
     assert "vision_id" not in mock_pp.internal_data["vision"]
     assert "fc_num" not in mock_pp.internal_data["vision"]
 
