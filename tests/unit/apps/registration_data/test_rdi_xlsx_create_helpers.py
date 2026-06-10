@@ -110,7 +110,7 @@ def test_should_skip_cell_not_in_field_or_complex(task):
 
 
 def test_should_skip_cell_not_required_empty_non_image(task):
-    task.complex_fields = {"individuals": {"some_field": lambda **kw: None}}
+    task.complex_fields = {"individuals": {}}
     task.sheet_title = "individuals"
     with patch.object(type(task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
         result = task._should_skip_cell(
@@ -119,6 +119,18 @@ def test_should_skip_cell_not_required_empty_non_image(task):
             {"type": "STRING", "required": False},
         )
     assert result is True
+
+
+def test_should_skip_cell_complex_field_not_skipped_when_empty(task):
+    task.complex_fields = {"individuals": {"progress_id_photo_i_c": lambda **kw: None}}
+    task.sheet_title = "individuals"
+    with patch.object(type(task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
+        result = task._should_skip_cell(
+            "progress_id_photo_i_c",
+            None,
+            {},
+        )
+    assert result is False
 
 
 def test_should_skip_cell_required_field_not_skipped(task):

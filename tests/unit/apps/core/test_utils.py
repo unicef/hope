@@ -593,23 +593,16 @@ class _StubImage:
         self._data = lambda: payload
 
 
-@pytest.fixture
-def reset_sheet_image_loader():
-    SheetImageLoader._images = {}
-    yield
-    SheetImageLoader._images = {}
-
-
-def test_sheet_image_loader_indexes_images_by_cell(reset_sheet_image_loader):
+def test_sheet_image_loader_indexes_images_by_cell():
     sheet = MagicMock()
     sheet._images = [_StubImage(row=4, col=2, payload=b"x")]
 
-    SheetImageLoader(sheet)
+    loader = SheetImageLoader(sheet)
 
-    assert "C5" in SheetImageLoader._images
+    assert "C5" in loader._images
 
 
-def test_sheet_image_loader_image_in_returns_true_for_known_cell(reset_sheet_image_loader):
+def test_sheet_image_loader_image_in_returns_true_for_known_cell():
     sheet = MagicMock()
     sheet._images = [_StubImage(row=0, col=0, payload=b"x")]
     loader = SheetImageLoader(sheet)
@@ -617,7 +610,7 @@ def test_sheet_image_loader_image_in_returns_true_for_known_cell(reset_sheet_ima
     assert loader.image_in("A1") is True
 
 
-def test_sheet_image_loader_image_in_returns_false_for_unknown_cell(reset_sheet_image_loader):
+def test_sheet_image_loader_image_in_returns_false_for_unknown_cell():
     sheet = MagicMock()
     sheet._images = []
     loader = SheetImageLoader(sheet)
@@ -625,7 +618,7 @@ def test_sheet_image_loader_image_in_returns_false_for_unknown_cell(reset_sheet_
     assert loader.image_in("Z99") is False
 
 
-def test_sheet_image_loader_get_returns_pil_image(reset_sheet_image_loader):
+def test_sheet_image_loader_get_returns_pil_image():
     from PIL import Image as PILImage
 
     buf = io_for_pil()
@@ -638,7 +631,7 @@ def test_sheet_image_loader_get_returns_pil_image(reset_sheet_image_loader):
     assert isinstance(img, PILImage.Image)
 
 
-def test_sheet_image_loader_get_raises_for_missing_cell(reset_sheet_image_loader):
+def test_sheet_image_loader_get_raises_for_missing_cell():
     sheet = MagicMock()
     sheet._images = []
     loader = SheetImageLoader(sheet)
