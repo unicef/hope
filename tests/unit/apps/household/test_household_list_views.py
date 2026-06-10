@@ -800,8 +800,9 @@ def test_household_detail_with_permissions(
 
 def test_household_detail_admin_url(household_detail_context: dict[str, Any]) -> None:
     user = household_detail_context["user"]
+    user.is_staff = True
     user.is_superuser = True
-    user.save(update_fields=["is_superuser"])
+    user.save(update_fields=["is_staff", "is_superuser"])
 
     response = household_detail_context["api_client"].get(
         reverse(

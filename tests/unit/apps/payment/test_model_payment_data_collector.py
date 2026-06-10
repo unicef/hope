@@ -2,11 +2,13 @@ from typing import Any
 
 import pytest
 
+from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import (
     AccountFactory,
     AccountTypeFactory,
     DeliveryMechanismFactory,
+    FinancialInstitutionMappingFactory,
     FinancialServiceProviderFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
@@ -208,6 +210,53 @@ def test_delivery_data_setter(account_setup):
     }
 
 
+def test_get_delivery_mechanism_config_uses_country_specific_config(account_setup):
+    country = CountryFactory()
+    account_setup["household"].country = country
+    account_setup["household"].save(update_fields=["country"])
+    country_config = DeliveryMechanismConfig.objects.create(
+        fsp=account_setup["fsp"],
+        delivery_mechanism=account_setup["dm_atm_card"],
+        country=country,
+        required_fields=["country_specific_field"],
+    )
+
+    assert (
+        PaymentDataCollector.get_delivery_mechanism_config(
+            account_setup["fsp"],
+            account_setup["dm_atm_card"],
+            account_setup["individual"],
+        )
+        == country_config
+    )
+
+
+def test_resolve_financial_institution_code_returns_none_without_account_or_financial_institution(account_setup):
+    account = AccountFactory(
+        individual=account_setup["individual"],
+        account_type=account_setup["account_type_bank"],
+        financial_institution=None,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+    assert PaymentDataCollector.resolve_financial_institution_code(account_setup["fsp"], None) is None
+    assert PaymentDataCollector.resolve_financial_institution_code(account_setup["fsp"], account) is None
+
+
+def test_delivery_data_without_account_does_not_add_account_defaults(account_setup):
+    dm_config = account_setup["dm_config"]
+    dm_config.required_fields = ["service_provider_code"]
+    dm_config.save(update_fields=["required_fields"])
+
+    assert PaymentDataCollector.delivery_data(
+        account_setup["fsp"],
+        account_setup["dm_atm_card"],
+        account_setup["individual"],
+    ) == {
+        "service_provider_code": None,
+    }
+
+
 def test_validate_account(account_setup):
     fsp = account_setup["fsp"]
     collector = account_setup["individual"]
@@ -273,3 +322,90 @@ def test_validate_account(account_setup):
     collector.phone_no = ""
     collector.save(update_fields=["phone_no"])
     assert PaymentDataCollector.validate_account(fsp, account_setup["dm_atm_card"], collector) is False
+
+
+def test_validate_account_resolves_service_provider_code_from_financial_institution(account_setup):
+    fsp = account_setup["fsp"]
+    collector = account_setup["individual"]
+    financial_institution = account_setup["financial_institution"]
+    financial_institution.country = CountryFactory()
+    financial_institution.save(update_fields=["country"])
+    dm_config = account_setup["dm_config"]
+    dm_config.required_fields = ["service_provider_code"]
+    dm_config.save(update_fields=["required_fields"])
+
+    AccountFactory(
+        number="test",
+        data={"provider": "woop"},
+        individual=collector,
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+    assert PaymentDataCollector.validate_account(fsp, account_setup["dm_atm_card"], collector) is False
+
+    FinancialInstitutionMappingFactory(
+        financial_institution=financial_institution,
+        financial_service_provider=fsp,
+        code="WOOP-WU",
+    )
+
+    assert PaymentDataCollector.validate_account(fsp, account_setup["dm_atm_card"], collector) is True
+
+
+def test_delivery_data_stores_resolved_service_provider_code(account_setup):
+    fsp = account_setup["fsp"]
+    collector = account_setup["individual"]
+    financial_institution = account_setup["financial_institution"]
+    financial_institution.country = CountryFactory()
+    financial_institution.save(update_fields=["country"])
+    dm_config = account_setup["dm_config"]
+    dm_config.required_fields = ["provider", "service_provider_code"]
+    dm_config.save(update_fields=["required_fields"])
+
+    account = AccountFactory(
+        number="test",
+        data={"provider": "woop", "service_provider_code": "STALE-CODE"},
+        individual=collector,
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    FinancialInstitutionMappingFactory(
+        financial_institution=financial_institution,
+        financial_service_provider=fsp,
+        code="WOOP-WU",
+    )
+
+    assert PaymentDataCollector.delivery_data(fsp, account_setup["dm_atm_card"], collector) == {
+        "provider": "woop",
+        "service_provider_code": "WOOP-WU",
+        "number": account.number,
+        "financial_institution_name": str(financial_institution.name),
+        "financial_institution_pk": str(financial_institution.id),
+    }
+
+
+def test_delivery_data_uses_existing_service_provider_code_when_financial_institution_code_missing(account_setup):
+    fsp = account_setup["fsp"]
+    collector = account_setup["individual"]
+    dm_config = account_setup["dm_config"]
+    dm_config.required_fields = ["service_provider_code"]
+    dm_config.save(update_fields=["required_fields"])
+
+    account = AccountFactory(
+        number="test",
+        data={"service_provider_code": "EXISTING-CODE"},
+        individual=collector,
+        account_type=account_setup["account_type_bank"],
+        financial_institution=account_setup["financial_institution"],
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+    assert PaymentDataCollector.delivery_data(fsp, account_setup["dm_atm_card"], collector) == {
+        "service_provider_code": "EXISTING-CODE",
+        "number": account.number,
+        "financial_institution_name": str(account_setup["financial_institution"].name),
+        "financial_institution_pk": str(account_setup["financial_institution"].id),
+    }

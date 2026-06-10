@@ -186,6 +186,49 @@ def test_retrieve_program_cycle_with_permission(
     assert response.status_code == status.HTTP_200_OK
 
 
+def test_retrieve_program_cycle_admin_url_for_staff_user(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle1: ProgramCycle,
+    cycle_1_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        business_area=afghanistan,
+        program=program,
+    )
+    user.is_staff = True
+    user.save(update_fields=["is_staff"])
+
+    response = authenticated_client.get(cycle_1_detail_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["admin_url"] == cycle1.admin_url
+
+
+def test_retrieve_program_cycle_admin_url_hidden_for_non_staff_user(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle_1_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        business_area=afghanistan,
+        program=program,
+    )
+
+    response = authenticated_client.get(cycle_1_detail_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["admin_url"] is None
+
+
 def test_retrieve_program_cycle_without_permission(
     authenticated_client: Any,
     user: User,
