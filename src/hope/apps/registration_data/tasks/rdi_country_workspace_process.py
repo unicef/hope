@@ -42,7 +42,7 @@ class ProcessCountryWorkspaceRdiTask:
             if rdi is None:
                 return
 
-            if not rdi.is_coming_from_cw:
+            if rdi.country_workspace_id is None:
                 logger.warning(
                     f"RDI {registration_data_import_id} does not have country_workspace_id and can't be processed."
                 )
