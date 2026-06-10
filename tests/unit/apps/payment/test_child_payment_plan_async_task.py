@@ -111,6 +111,20 @@ def test_action_arrange_eligible_payments_act_run_assert_build_status_ok(
 
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+def test_action_arrange_plan_without_source_act_run_assert_skips_source_lock(
+    get_exchange_rate_mock: Any,
+    regular_pp: PaymentPlan,
+) -> None:
+    with mock.patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService") as service_cls:
+        result = _run_copy_action(regular_pp)
+
+    assert result is True
+    service_cls.assert_called_once_with(payment_plan=regular_pp)
+    service_cls.return_value.create_child_plan_payments.assert_called_once_with()
+
+
+@freeze_time("2023-10-10")
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_action_arrange_eligible_consumed_by_sibling_act_run_assert_build_status_failed(
     get_exchange_rate_mock: Any,
     user: User,

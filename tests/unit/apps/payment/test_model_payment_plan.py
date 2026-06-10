@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 import json
 from unittest.mock import Mock, patch
+import uuid
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.admin.options import get_content_type_for_model
@@ -893,6 +894,15 @@ def test_remove_export_file_delivery_skips_deletion_when_another_plan_references
     assert plan_a.export_file_delivery is None
     plan_b.refresh_from_db()
     assert plan_b.export_file_delivery_id == file_temp.pk
+
+
+def test_remove_export_file_delivery_skips_when_file_temp_missing() -> None:
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+    payment_plan.export_file_delivery_id = uuid.uuid4()
+
+    payment_plan.remove_export_file_delivery()
+
+    assert payment_plan.export_file_delivery is None
 
 
 def test_remove_export_file_delivery_deletes_file_temp_when_last_reference() -> None:

@@ -3,6 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     FileTempFactory,
@@ -108,6 +109,49 @@ def test_download_payment_verification_plan_redirects_with_permission(
     assert payment_verification_file.was_downloaded is True
 
 
+def test_download_payment_verification_plan_non_xlsx_channel_raises(
+    rf,
+    create_user_role_with_permissions,
+    payment_plan_accepted,
+    user,
+):
+    PaymentVerificationSummaryFactory(payment_plan=payment_plan_accepted)
+    verification_plan = PaymentVerificationPlanFactory(
+        payment_plan=payment_plan_accepted,
+        verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+    )
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PAYMENT_VERIFICATION_EXPORT],
+        payment_plan_accepted.business_area,
+    )
+
+    request = rf.get(reverse("download-payment-verification-plan", args=[verification_plan.id]))
+    request.user = user
+
+    with pytest.raises(ValidationError, match="You can only download verification file when XLSX channel is selected"):
+        download_payment_verification_plan(request, str(verification_plan.id))
+
+
+def test_download_payment_verification_plan_missing_file_raises(
+    rf,
+    create_user_role_with_permissions,
+    payment_verification_plan,
+    user,
+):
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PAYMENT_VERIFICATION_EXPORT],
+        payment_verification_plan.payment_plan.business_area,
+    )
+
+    request = rf.get(reverse("download-payment-verification-plan", args=[payment_verification_plan.id]))
+    request.user = user
+
+    with pytest.raises(FileNotFoundError):
+        download_payment_verification_plan(request, str(payment_verification_plan.id))
+
+
 def test_download_payment_plan_payment_list_requires_permission(rf, payment_plan_with_entitlement_file, user):
     request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan_with_entitlement_file.id]))
     request.user = user
@@ -135,6 +179,33 @@ def test_download_payment_plan_payment_list_redirects_with_permission(
 
     assert response.status_code == 302
     assert response.url == payment_plan_with_entitlement_file.payment_list_export_file_link
+
+
+def test_download_payment_plan_payment_list_wrong_status_raises(rf, create_user_role_with_permissions, user):
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_LIST], payment_plan.business_area)
+
+    request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan.id]))
+    request.user = user
+
+    with pytest.raises(
+        ValidationError,
+        match="Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.",
+    ):
+        download_payment_plan_payment_list(request, str(payment_plan.id))
+
+
+def test_download_payment_plan_payment_list_empty_file_raises(rf, create_user_role_with_permissions, user):
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+    payment_plan.export_file_entitlement = FileTempFactory(file="", created_by=user)
+    payment_plan.save()
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_LIST], payment_plan.business_area)
+
+    request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan.id]))
+    request.user = user
+
+    with pytest.raises(ValueError, match="Payment plan export file link must not be None"):
+        download_payment_plan_payment_list(request, str(payment_plan.id))
 
 
 def test_download_payment_plan_summary_pdf_requires_permission(rf, payment_plan_accepted, user):
@@ -168,6 +239,21 @@ def test_download_payment_plan_summary_pdf_redirects_with_permission(
 
     assert response.status_code == 302
     assert response.url == payment_plan_accepted.export_pdf_file_summary.file.url
+
+
+def test_download_payment_plan_summary_pdf_missing_file_raises(
+    rf,
+    create_user_role_with_permissions,
+    payment_plan_accepted,
+    user,
+):
+    create_user_role_with_permissions(user, [Permissions.PM_EXPORT_PDF_SUMMARY], payment_plan_accepted.business_area)
+
+    request = rf.get(reverse("download-payment-plan-summary-pdf", args=[payment_plan_accepted.id]))
+    request.user = user
+
+    with pytest.raises(FileNotFoundError):
+        download_payment_plan_summary_pdf(request, str(payment_plan_accepted.id))
 
 
 @pytest.fixture

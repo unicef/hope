@@ -1815,6 +1815,33 @@ def test_export_delivery_task_skips_email_when_notification_disabled(
     mock_send_email.assert_not_called()
 
 
+@patch("hope.apps.payment.celery_tasks.send_email_notification")
+@patch(
+    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service.XlsxPaymentPlanGroupDeliveryExportService"
+)
+def test_export_delivery_task_skips_token_generation_when_disabled(
+    mock_service_cls: Mock,
+    mock_send_email: Mock,
+    payment_plan_group_with_accepted_plan,
+    user,
+) -> None:
+    group = payment_plan_group_with_accepted_plan
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = False
+    mock_service.applied_export_tag = None
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": str(user.pk)},
+    )
+
+    export_payment_plan_group_delivery_xlsx_async_task_action(job)
+
+    mock_service.generate_token_and_order_numbers.assert_not_called()
+    mock_service.save_xlsx_file.assert_called_once_with(user)
+    mock_send_email.assert_not_called()
+
+
 def test_import_delivery_group_task_clears_status_on_success(group_with_accepted_plan_and_import_file, user) -> None:
     group = group_with_accepted_plan_and_import_file
 
