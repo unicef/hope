@@ -138,3 +138,21 @@ def test_base_api_delete_invalid_json_returns_empty_dict(mock_delete, api_instan
     assert status_code == 200
     assert result == {}
     mock_delete.assert_called_once_with("/test-endpoint", params={"param": "value"})
+
+
+def test_get_api_url_returns_empty_when_setting_name_not_set():
+    api = BaseAPI.__new__(BaseAPI)
+    assert api.get_api_url() == ""
+
+
+class TestAPIMissingKey(BaseAPI):
+    API_KEY_ENV_NAME = "TEST_API_KEY"
+    API_URL_SETTING_NAME = "TEST_API_URL"
+
+
+def test_base_api_init_raises_when_key_missing(settings):
+    settings.TEST_API_URL = "http://test-hope.com"
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        TestAPIMissingKey()
+
+    assert "Missing TestAPIMissingKey Key/URL" in str(exc.value)
