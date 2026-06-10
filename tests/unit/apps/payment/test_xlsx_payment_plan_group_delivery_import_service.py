@@ -563,3 +563,20 @@ def test_row_groups_by_plan_skips_row_with_null_payment_id(group_two_plans_one_f
     plan_id = str(ctx["plan_one"].id)
     assert plan_id in result
     assert len(result[plan_id]) == 1  # the None-id row is not in the result
+
+
+def test_validate_skips_fully_blank_rows(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "currency"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+            [None, None, None],  # fully blank row — skipped without error
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    service.validate()
+
+    assert service.errors == []

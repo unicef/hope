@@ -1,6 +1,6 @@
 import pytest
 
-from extras.test_utils.factories import PaymentPlanPurposeFactory
+from extras.test_utils.factories import BusinessAreaFactory, PaymentPlanPurposeFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models import BusinessArea, PaymentPlanPurpose, Program
@@ -34,7 +34,10 @@ def second_ba_purpose() -> PaymentPlanPurpose:
 
 @pytest.fixture
 def other_ba_purpose() -> PaymentPlanPurpose:
-    return PaymentPlanPurposeFactory(name=OTHER_BA_PURPOSE_NAME)
+    # limit_to a different business area so it is scoped out of the current BA
+    purpose = PaymentPlanPurposeFactory(name=OTHER_BA_PURPOSE_NAME)
+    purpose.limit_to.add(BusinessAreaFactory())
+    return purpose
 
 
 @pytest.fixture
