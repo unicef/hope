@@ -216,9 +216,9 @@
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "unicef_id": "PPP-1",
-                    "business_area": "574206fa-72c4-45b9-b147-ef9204718147",
                     "name": "Purpose 0",
-                    "description": ""
+                    "description": "",
+                    "limit_to": []
                 }
             },
             {

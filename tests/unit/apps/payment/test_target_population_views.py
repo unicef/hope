@@ -1970,9 +1970,9 @@ def test_create_payment_plan_rejects_purpose_not_in_program(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
-    unrelated_purpose = PaymentPlanPurposeFactory(
-        business_area=target_population_create_update_context["business_area"]
-    )
+    other_ba = BusinessAreaFactory(slug="other-ba")
+    unrelated_purpose = PaymentPlanPurposeFactory()
+    unrelated_purpose.limit_to.add(other_ba)
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
         [Permissions.TARGETING_CREATE],
