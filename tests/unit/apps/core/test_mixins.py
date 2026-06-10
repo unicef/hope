@@ -156,3 +156,9 @@ def test_base_api_init_raises_when_key_missing(settings):
         TestAPIMissingKey()
 
     assert "Missing TestAPIMissingKey Key/URL" in str(exc.value)
+
+
+def test_get_api_key_returns_none_when_env_name_not_set():
+    api = BaseAPI.__new__(BaseAPI)
+    assert api.API_KEY_ENV_NAME == ""
+    assert api.get_api_key() is None
