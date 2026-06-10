@@ -325,7 +325,7 @@ class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
 
 
 class PaymentGatewayAPI(BaseAPI):
-    API_KEY_ENV_NAME = "PAYMENT_GATEWAY_API_KEY"
+    API_KEY_SETTING_NAME = "PAYMENT_GATEWAY_API_KEY"
     API_URL_SETTING_NAME = "PAYMENT_GATEWAY_API_URL"
 
     class PaymentGatewayAPIError(Exception):

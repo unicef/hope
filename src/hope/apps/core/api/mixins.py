@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class BaseAPI:
-    API_KEY_ENV_NAME = ""
+    API_KEY_SETTING_NAME = ""
     API_URL_SETTING_NAME = ""
 
     class APIError(Exception):
@@ -39,15 +39,15 @@ class BaseAPI:
         return getattr(settings, self.API_URL_SETTING_NAME, "") if self.API_URL_SETTING_NAME else ""
 
     def get_api_key(self) -> str | None:
-        if self.API_KEY_ENV_NAME:
-            return getattr(settings, self.API_KEY_ENV_NAME, None)
+        if self.API_KEY_SETTING_NAME:
+            return getattr(settings, self.API_KEY_SETTING_NAME, None)
         return None
 
     def __init__(self) -> None:
         self.api_url = self.get_api_url()
         self.api_key = self.get_api_key()
 
-        if not self.api_url or (self.API_KEY_ENV_NAME and not self.api_key):
+        if not self.api_url or (self.API_KEY_SETTING_NAME and not self.api_key):
             raise self.API_MISSING_CREDENTIALS_EXCEPTION_CLASS(f"Missing {self.__class__.__name__} Key/URL")
 
         self._client = session()

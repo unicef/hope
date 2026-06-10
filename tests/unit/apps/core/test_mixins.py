@@ -9,7 +9,7 @@ from hope.apps.core.api.mixins import BaseAPI
 
 
 class TestAPI(BaseAPI):
-    API_KEY_ENV_NAME = "TEST_API_KEY"
+    API_KEY_SETTING_NAME = "TEST_API_KEY"
 
     def get_api_url(self) -> str:
         return getattr(settings, "TEST_API_URL", "")
@@ -146,7 +146,7 @@ def test_get_api_url_returns_empty_when_setting_name_not_set():
 
 
 class TestAPIMissingKey(BaseAPI):
-    API_KEY_ENV_NAME = "TEST_API_KEY"
+    API_KEY_SETTING_NAME = "TEST_API_KEY"
     API_URL_SETTING_NAME = "TEST_API_URL"
 
 
@@ -156,3 +156,9 @@ def test_base_api_init_raises_when_key_missing(settings):
         TestAPIMissingKey()
 
     assert "Missing TestAPIMissingKey Key/URL" in str(exc.value)
+
+
+def test_get_api_key_returns_none_when_env_name_not_set():
+    api = BaseAPI.__new__(BaseAPI)
+    assert api.API_KEY_SETTING_NAME == ""
+    assert api.get_api_key() is None
