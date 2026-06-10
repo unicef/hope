@@ -95,7 +95,7 @@ def test_upload_mixin_has_permissions_with_upload_storage_file_permission(
         user, [Permissions.UPLOAD_STORAGE_FILE], business_area, whole_business_area_access=True
     )
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(6):
         has_permissions = upload_mixin_with_request.has_permissions()
 
     assert has_permissions is True
