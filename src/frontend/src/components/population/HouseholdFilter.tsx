@@ -12,7 +12,7 @@ import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
-import { generateTableOrderOptionsGroup } from '@utils/constants';
+import { generateTableOrderOptionsGroup, PROGRAM_STATE_FILTER } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -207,8 +207,8 @@ export function HouseholdFilters({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value="active">{t('Active Programmes')}</MenuItem>
-              <MenuItem value="all">{t('All Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
             </SelectFilter>
           </Grid>
         )}
