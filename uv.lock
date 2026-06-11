@@ -27,6 +27,18 @@ wheels = [
 ]
 
 [[package]]
+name = "anyio"
+version = "4.13.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "idna" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/19/14/2c5dd9f512b66549ae92767a9c7b330ae88e1932ca57876909410251fe13/anyio-4.13.0.tar.gz", hash = "sha256:334b70e641fd2221c1505b3890c69882fe4a2df910cba14d97019b90b24439dc", size = 231622, upload-time = "2026-03-24T12:59:09.671Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/42/e921fccf5015463e32a3cf6ee7f980a6ed0f395ceeaa45060b61d86486c2/anyio-4.13.0-py3-none-any.whl", hash = "sha256:08b310f9e24a9594186fd75b4f73f4a4152069e3853f1ed8bfbf58369f4ad708", size = 114353, upload-time = "2026-03-24T12:59:08.246Z" },
+]
+
+[[package]]
 name = "argh"
 version = "0.31.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1042,15 +1054,15 @@ wheels = [
 
 [[package]]
 name = "django-elasticsearch-dsl"
-version = "8.1"
+version = "9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "elasticsearch-dsl" },
+    { name = "elasticsearch" },
     { name = "six" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/80/95/0e73390485787f6bd8dae1e53f160c4a691a90238d6ba3959e4a81e6ef87/django_elasticsearch_dsl-8.1.tar.gz", hash = "sha256:609e90e6069849919c9c427411fc697465bb820cb7710fd940d8d600faa5544e", size = 31545, upload-time = "2025-06-23T22:17:32.573Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/98/92/3ea6a083afaccf758d41ff470bc4ff3bfbbfa411ce243816400d48ae42de/django_elasticsearch_dsl-9.0.tar.gz", hash = "sha256:2fb39478fcde20a3ab1b800676e57ef3de15327c0eda16d192aca3823651bdaf", size = 31579, upload-time = "2025-07-23T22:49:39.751Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/10/b783fd87348fd2cb7a29b989b547d4b131d0ca545ca939b1b67b3b7a745c/django_elasticsearch_dsl-8.1-py2.py3-none-any.whl", hash = "sha256:fcd2524fce8feaf1be6898dd18bbcda2d2622f90308ea14ac40a99f5891322e7", size = 20992, upload-time = "2025-06-23T22:17:30.316Z" },
+    { url = "https://files.pythonhosted.org/packages/10/ca/67bc5ca78cdfbb53bd0d8d6cdafef17231241a85c62cc56ab6dae9a9a815/django_elasticsearch_dsl-9.0-py2.py3-none-any.whl", hash = "sha256:728c691d9d2cf413e902444e180cfcccc79adbbe9b59eb82860ea73ae7ef3a9f", size = 20976, upload-time = "2025-07-23T22:49:34.704Z" },
 ]
 
 [[package]]
@@ -1597,41 +1609,32 @@ wheels = [
 
 [[package]]
 name = "elastic-transport"
-version = "8.17.1"
+version = "9.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
+    { name = "sniffio" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/54/d498a766ac8fa475f931da85a154666cc81a70f8eb4a780bc8e4e934e9ac/elastic_transport-8.17.1.tar.gz", hash = "sha256:5edef32ac864dca8e2f0a613ef63491ee8d6b8cfb52881fa7313ba9290cac6d2", size = 73425, upload-time = "2025-03-13T07:28:30.776Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0f/a8/dd1431b95daa54d4859c1d250362433df6df9cfaab7bfac3eafd410d019a/elastic_transport-9.4.1.tar.gz", hash = "sha256:d12c86ea73528690ebf63a488d9ae323292e6aa5ee55e1e29f14293472f4197f", size = 79170, upload-time = "2026-05-25T14:16:47.416Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/cd/b71d5bc74cde7fc6fd9b2ff9389890f45d9762cbbbf81dc5e51fd7588c4a/elastic_transport-8.17.1-py3-none-any.whl", hash = "sha256:192718f498f1d10c5e9aa8b9cf32aed405e469a7f0e9d6a8923431dbb2c59fb8", size = 64969, upload-time = "2025-03-13T07:28:29.031Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/f6/508c1e541b840b6eaf60a46a8994ba55affd07bf6a311cffc860781ae06a/elastic_transport-9.4.1-py3-none-any.whl", hash = "sha256:186a29e6c66ff269487e33f7b17176316e18b6061702c25eb0bb15681302e91d", size = 66229, upload-time = "2026-05-25T14:16:45.882Z" },
 ]
 
 [[package]]
 name = "elasticsearch"
-version = "8.14.0"
+version = "9.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "anyio" },
     { name = "elastic-transport" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/36/63/8dc82cbf1bfbca2a2af8eeaa4a7eccc2cf7a87bf217130f6bc66d33b4d8f/elasticsearch-8.14.0.tar.gz", hash = "sha256:aa2490029dd96f4015b333c1827aa21fd6c0a4d223b00dfb0fe933b8d09a511b", size = 382506, upload-time = "2024-06-06T13:31:10.205Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/09/c9dec8bd95bff6aaa8fe29a834257a6606608d0b2ed9932a1857683f736f/elasticsearch-8.14.0-py3-none-any.whl", hash = "sha256:cef8ef70a81af027f3da74a4f7d9296b390c636903088439087b8262a468c130", size = 480236, upload-time = "2024-06-06T13:31:00.987Z" },
-]
-
-[[package]]
-name = "elasticsearch-dsl"
-version = "8.14.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "elasticsearch" },
     { name = "python-dateutil" },
+    { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f8/a8/ab8bfe07dbd8f3856e98a466fc1c1211bba227de8bce5a9b10a9c7dd6060/elasticsearch-dsl-8.14.0.tar.gz", hash = "sha256:326c6dccf32f1ff3d4c84889388590778444ba18f770adee52f24721cb97c4c7", size = 84710, upload-time = "2024-06-10T10:21:00.341Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/4b/9b753f0a8f56ae508dced2f7ac87bef7a27ce8f890e349e16812e9f7f4fa/elasticsearch-9.4.1.tar.gz", hash = "sha256:1d78fdfba97a903ec35a5eb5808a74e33392b7c620bd5f742d465a3a26c27d75", size = 908138, upload-time = "2026-05-26T16:28:40.132Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/b4/5c5204d00fe12ed8f8d7027d27088029ed4069e1193ae207abf1c5ac44fc/elasticsearch_dsl-8.14.0-py3-none-any.whl", hash = "sha256:99c5cbda28a37eec05ac78e82fdc87e8641eb83956ea63a817bf0e9da3d688dd", size = 92298, upload-time = "2024-06-10T10:20:58.073Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/8e/2c93805e93e724a90156004a9212572ec86473974deede4605a33b8b169a/elasticsearch-9.4.1-py3-none-any.whl", hash = "sha256:71ab71c3d1b20fd88c2922fb82c3277cce7ea03c160686e7b9368b265c2b4cac", size = 993647, upload-time = "2026-05-26T16:28:36.556Z" },
 ]
 
 [[package]]
@@ -1981,7 +1984,7 @@ wheels = [
 
 [[package]]
 name = "hope"
-version = "4.15.3"
+version = "4.15.5"
 source = { editable = "." }
 dependencies = [
     { name = "black" },
@@ -2041,7 +2044,6 @@ dependencies = [
     { name = "drf-spectacular", extra = ["sidecar"] },
     { name = "elastic-transport" },
     { name = "elasticsearch" },
-    { name = "elasticsearch-dsl" },
     { name = "factory-boy" },
     { name = "flower" },
     { name = "gevent" },
@@ -2193,7 +2195,7 @@ requires-dist = [
     { name = "django-countries", specifier = ">=7.3.2,<9" },
     { name = "django-csp", specifier = ">=3.7,<5" },
     { name = "django-debug-toolbar", specifier = ">=4.3,<6.1" },
-    { name = "django-elasticsearch-dsl", specifier = ">=8,<9" },
+    { name = "django-elasticsearch-dsl", specifier = ">=9,<10" },
     { name = "django-environ", specifier = ">=0.10,<1" },
     { name = "django-extensions", specifier = ">=3.1.5,<5" },
     { name = "django-fernet-encrypted-fields", specifier = ">=0.3,<1" },
@@ -2226,9 +2228,8 @@ requires-dist = [
     { name = "drf-jwt", specifier = ">=1.19.2,<2" },
     { name = "drf-nested-routers", specifier = ">=0.94,<1" },
     { name = "drf-spectacular", extras = ["sidecar"], specifier = ">=0.27,<1" },
-    { name = "elastic-transport", specifier = ">=8.13,<9" },
-    { name = "elasticsearch", specifier = "~=8.14.0" },
-    { name = "elasticsearch-dsl", specifier = "~=8.14.0" },
+    { name = "elastic-transport", specifier = ">=9.4.1,<10" },
+    { name = "elasticsearch", specifier = ">=9,<10" },
     { name = "factory-boy", specifier = ">=3,<4" },
     { name = "flower", specifier = ">=2.0.1,<3" },
     { name = "gevent", specifier = "<26" },

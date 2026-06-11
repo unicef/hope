@@ -3,11 +3,12 @@
 Simple utilities for managing per-program Elasticsearch indexes.
 """
 
+import contextlib
 import logging
 
 from constance import config
 from django.conf import settings
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.utils.elasticsearch_utils import populate_index
@@ -24,7 +25,8 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
     if not es.indices.exists(index=index_name):
         return
     for concrete in _resolve_to_concrete_indexes(es, index_name):
-        es.indices.delete(index=concrete, ignore=[404, 400])  # type: ignore[call-arg]
+        with contextlib.suppress(NotFoundError):
+            es.indices.delete(index=concrete)
 
 
 def create_program_indexes(program_id: str) -> tuple[bool, str]:
