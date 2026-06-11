@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Counter
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from django.db.transaction import atomic
@@ -38,6 +38,7 @@ from hope.models import (
     Area,
     Country,
     Grant,
+    Individual,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
@@ -61,12 +62,22 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
 class PushPeopleListSerializer(serializers.ListSerializer):
     def validate(self, attrs: list[dict]) -> list[dict]:
         cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
-        duplicates = sorted(cw_id for cw_id, count in Counter(cw_ids).items() if count > 1)
-        if duplicates:
+        existing_cw_ids = sorted(
+            Individual.all_objects.filter(
+                is_removed=False,
+                withdrawn=False,
+                business_area=self.context["business_area"],
+                country_workspace_id__in=cw_ids,
+            )
+            .values_list("country_workspace_id", flat=True)
+            .distinct()
+        )
+        if existing_cw_ids:
             raise serializers.ValidationError(
                 {
                     "country_workspace_id": [
-                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicates)}."
+                        "Individuals with these country_workspace_id values already exist: "
+                        f"{', '.join(existing_cw_ids[:100])}."
                     ]
                 }
             )
@@ -257,6 +268,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         serializer = PushPeopleSerializer(
             data=request.data,
             many=True,
+            context={"business_area": self.selected_business_area},
         )
         if serializer.is_valid():
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)

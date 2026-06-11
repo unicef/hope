@@ -16,7 +16,6 @@ import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
-import { IngestSourceEnum } from '@restgenerated/models/IngestSourceEnum';
 
 const initialFilter = {
   search: '',
@@ -40,8 +39,7 @@ function PeopleRegistrationDataImportPage(): ReactElement {
         slug: businessAreaSlug,
       }),
   });
-  const isManualIngest =
-    businessAreaData?.ingestSource !== IngestSourceEnum.COUNTRY_WORKSPACE_ONLY;
+  const isManualIngest = businessAreaData?.isManualIngest;
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

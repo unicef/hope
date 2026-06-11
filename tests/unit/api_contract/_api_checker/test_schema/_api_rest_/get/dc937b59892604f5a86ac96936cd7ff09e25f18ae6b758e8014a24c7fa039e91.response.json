@@ -9,7 +9,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "925636"
+        "Content-Length": "925094"
     },
     "data": {
         "openapi": "3.0.3",
@@ -10381,38 +10381,6 @@
                     }
                 }
             },
-            "/api/rest/business-areas/{business_area_slug}/programs/{code}/deduplication_flags/": {
-                "get": {
-                    "operationId": "rest_business_areas_programs_deduplication_flags_retrieve",
-                    "parameters": [
-                        {
-                            "in": "path",
-                            "name": "business_area_slug",
-                            "schema": {
-                                "type": "string"
-                            },
-                            "required": true
-                        },
-                        {
-                            "in": "path",
-                            "name": "code",
-                            "schema": {
-                                "type": "string",
-                                "description": "Program code"
-                            },
-                            "required": true
-                        }
-                    ],
-                    "tags": [
-                        "rest"
-                    ],
-                    "responses": {
-                        "200": {
-                            "description": "No response body"
-                        }
-                    }
-                }
-            },
             "/api/rest/business-areas/{business_area_slug}/programs/{code}/finish/": {
                 "post": {
                     "operationId": "rest_business_areas_programs_finish_create",
@@ -17962,17 +17930,19 @@
                                     "type": "string",
                                     "enum": [
                                         "-collector__full_name",
+                                        "-created_at",
                                         "-household__size",
                                         "-household__unicef_id",
                                         "-unicef_id",
                                         "collector__full_name",
+                                        "created_at",
                                         "household__size",
                                         "household__unicef_id",
                                         "unicef_id"
                                     ]
                                 }
                             },
-                            "description": "Ordering\n\n* `unicef_id` - Unicef id\n* `-unicef_id` - Unicef id (descending)\n* `household__unicef_id` - Household  unicef id\n* `-household__unicef_id` - Household  unicef id (descending)\n* `household__size` - Household  size\n* `-household__size` - Household  size (descending)\n* `collector__full_name` - Collector  full name\n* `-collector__full_name` - Collector  full name (descending)",
+                            "description": "Ordering\n\n* `unicef_id` - Unicef id\n* `-unicef_id` - Unicef id (descending)\n* `household__unicef_id` - Household  unicef id\n* `-household__unicef_id` - Household  unicef id (descending)\n* `household__size` - Household  size\n* `-household__size` - Household  size (descending)\n* `collector__full_name` - Collector  full name\n* `-collector__full_name` - Collector  full name (descending)\n* `created_at` - Created at\n* `-created_at` - Created at (descending)",
                             "explode": false,
                             "style": "form"
                         },
@@ -18241,17 +18211,19 @@
                                     "type": "string",
                                     "enum": [
                                         "-collector__full_name",
+                                        "-created_at",
                                         "-household__size",
                                         "-household__unicef_id",
                                         "-unicef_id",
                                         "collector__full_name",
+                                        "created_at",
                                         "household__size",
                                         "household__unicef_id",
                                         "unicef_id"
                                     ]
                                 }
                             },
-                            "description": "Ordering\n\n* `unicef_id` - Unicef id\n* `-unicef_id` - Unicef id (descending)\n* `household__unicef_id` - Household  unicef id\n* `-household__unicef_id` - Household  unicef id (descending)\n* `household__size` - Household  size\n* `-household__size` - Household  size (descending)\n* `collector__full_name` - Collector  full name\n* `-collector__full_name` - Collector  full name (descending)",
+                            "description": "Ordering\n\n* `unicef_id` - Unicef id\n* `-unicef_id` - Unicef id (descending)\n* `household__unicef_id` - Household  unicef id\n* `-household__unicef_id` - Household  unicef id (descending)\n* `household__size` - Household  size\n* `-household__size` - Household  size (descending)\n* `collector__full_name` - Collector  full name\n* `-collector__full_name` - Collector  full name (descending)\n* `created_at` - Created at\n* `-created_at` - Created at (descending)",
                             "explode": false,
                             "style": "form"
                         },
@@ -30256,12 +30228,8 @@
                         "rdi_import_xlsx_disabled": {
                             "type": "boolean"
                         },
-                        "ingest_source": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/IngestSourceEnum"
-                                }
-                            ],
+                        "is_manual_ingest": {
+                            "type": "boolean",
                             "readOnly": true
                         },
                         "countries": {
@@ -30276,7 +30244,7 @@
                         "code",
                         "countries",
                         "id",
-                        "ingest_source",
+                        "is_manual_ingest",
                         "long_name",
                         "name",
                         "slug"
@@ -36450,14 +36418,6 @@
                             "description": "People update"
                         }
                     }
-                },
-                "IngestSourceEnum": {
-                    "enum": [
-                        "COUNTRY_WORKSPACE_ONLY",
-                        "ALL_EXCEPT_COUNTRY_WORKSPACE"
-                    ],
-                    "type": "string",
-                    "description": "* `COUNTRY_WORKSPACE_ONLY` - Country Workspace only\n* `ALL_EXCEPT_COUNTRY_WORKSPACE` - All except Country Workspace"
                 },
                 "IssueTypeEnum": {
                     "enum": [
@@ -43013,6 +42973,7 @@
                         }
                     },
                     "required": [
+                        "country_workspace_id",
                         "imported_by_email",
                         "name",
                         "program"

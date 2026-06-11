@@ -2,14 +2,14 @@
     "role_assignment": {
         "master": {
             "model": "account.roleassignment",
-            "pk": "2ce68351-ff2f-4fb1-8d26-9903c9a756d1",
+            "pk": "6aafde1a-317c-4710-8351-5d778b43cbff",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
-                "business_area": "83d21b4b-f115-434c-9523-c729de143399",
-                "user": "70f965ff-60f6-4aef-9180-5b19d325bbba",
+                "business_area": "5f07b040-5260-439d-bf79-caf7491345e8",
+                "user": "66f55c7d-734f-436b-9a39-53f41414a6cf",
                 "partner": null,
-                "role": "f13f862f-6c47-42dc-8b9d-d8beb8f70c3b",
+                "role": "c304900c-bf6e-48b1-b9c7-9254f1167d83",
                 "program": null,
                 "expiry_date": null,
                 "group": null
@@ -18,7 +18,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "83d21b4b-f115-434c-9523-c729de143399",
+                "pk": "5f07b040-5260-439d-bf79-caf7491345e8",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -55,14 +55,14 @@
                     "biometric_deduplication_threshold": 0.0,
                     "custom_fields": {},
                     "countries": [
-                        "78560fd7-3c35-4f12-b182-53e1c6b9dd42"
+                        "31b472b1-9bf0-4026-8acf-c3a9cb717c45"
                     ],
                     "payment_countries": []
                 }
             },
             {
                 "model": "geo.country",
-                "pk": "78560fd7-3c35-4f12-b182-53e1c6b9dd42",
+                "pk": "31b472b1-9bf0-4026-8acf-c3a9cb717c45",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -85,7 +85,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "70f965ff-60f6-4aef-9180-5b19d325bbba",
+                "pk": "66f55c7d-734f-436b-9a39-53f41414a6cf",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -99,7 +99,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 18,
+                    "partner": 3,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -110,7 +110,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 18,
+                "pk": 3,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,
@@ -124,7 +124,7 @@
             },
             {
                 "model": "account.role",
-                "pk": "f13f862f-6c47-42dc-8b9d-d8beb8f70c3b",
+                "pk": "c304900c-bf6e-48b1-b9c7-9254f1167d83",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

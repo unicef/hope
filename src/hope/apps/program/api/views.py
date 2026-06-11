@@ -75,7 +75,6 @@ from hope.models import (
     PaymentPlan,
     Program,
     ProgramCycle,
-    RegistrationDataImport,
     log_create,
 )
 
@@ -107,7 +106,6 @@ class ProgramViewSet(
         "copy": [Permissions.PROGRAMME_DUPLICATE],
         "destroy": [Permissions.PROGRAMME_REMOVE],
         "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-        "deduplication_flags": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
         "payments_count": [Permissions.PM_VIEW_PAYMENT_LIST],
     }
@@ -397,25 +395,6 @@ class ProgramViewSet(
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return Response(data=self.get_serializer(instance={}).data)
-
-    @action(detail=True, methods=["get"])
-    def deduplication_flags(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        program = self.get_object()
-        # RDI merge in progress
-        rdi_merging = RegistrationDataImport.objects.filter(
-            program=program,
-            status__in=[
-                RegistrationDataImport.MERGE_SCHEDULED,
-                RegistrationDataImport.MERGING,
-                RegistrationDataImport.MERGE_ERROR,
-            ],
-        ).exists()
-        return Response(
-            {
-                "can_run_deduplication": program.biometric_deduplication_enabled,
-                "is_deduplication_disabled": rdi_merging,
-            }
-        )
 
     @extend_schema(
         parameters=filterset_to_openapi_params(PaymentSearchFilter),

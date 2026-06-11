@@ -2,7 +2,8 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.models import (
@@ -74,7 +75,7 @@ def test_cw_individual_push_with_country_workspace_id_persists(
 ) -> None:
     payload = [{**base_person_data, "country_workspace_id": "cw-ind-001"}]
 
-    with django_assert_num_queries(24):
+    with django_assert_num_queries(26):
         response = token_api_client.post(push_people_url, payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
@@ -119,48 +120,103 @@ def test_cw_individual_push_partial_failure_when_one_missing_field(
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 
-def test_cw_individual_push_duplicate_country_workspace_id_in_same_payload_returns_400(
+def test_cw_individual_push_existing_country_workspace_id_returns_400(
     token_api_client,
     push_people_url: str,
+    business_area: BusinessArea,
+    program: Program,
     rdi: RegistrationDataImport,
     afghanistan_country,
     base_person_data: dict,
 ) -> None:
-    payload = [
-        {**base_person_data, "full_name": "John Doe", "country_workspace_id": "cw-ind-dup"},
-        {**base_person_data, "full_name": "Mary Doe", "country_workspace_id": "cw-ind-dup"},
-    ]
+    IndividualFactory(business_area=business_area, program=program, country_workspace_id="cw-ind-exists")
+    payload = [{**base_person_data, "country_workspace_id": "cw-ind-exists"}]
 
     response = token_api_client.post(push_people_url, payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
     assert response.json() == {
-        "country_workspace_id": ["Duplicate country_workspace_id values in payload: cw-ind-dup."]
+        "country_workspace_id": ["Individuals with these country_workspace_id values already exist: cw-ind-exists."]
     }
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 
-def test_cw_individual_push_multiple_duplicate_groups_lists_all_sorted(
+def test_cw_individual_push_existing_cw_id_in_other_business_area_allowed(
     token_api_client,
     push_people_url: str,
+    program: Program,
     rdi: RegistrationDataImport,
     afghanistan_country,
     base_person_data: dict,
 ) -> None:
+    other_ba = BusinessAreaFactory(name="Ukraine")
+    IndividualFactory(business_area=other_ba, country_workspace_id="cw-ind-other-ba")
+    payload = [{**base_person_data, "country_workspace_id": "cw-ind-other-ba"}]
+
+    response = token_api_client.post(push_people_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    ind = PendingIndividual.objects.filter(registration_data_import=rdi).first()
+    assert ind is not None
+    assert ind.country_workspace_id == "cw-ind-other-ba"
+
+
+def test_cw_individual_push_withdrawn_existing_cw_id_allowed(
+    token_api_client,
+    push_people_url: str,
+    business_area: BusinessArea,
+    program: Program,
+    rdi: RegistrationDataImport,
+    afghanistan_country,
+    base_person_data: dict,
+) -> None:
+    IndividualFactory(
+        business_area=business_area,
+        program=program,
+        country_workspace_id="cw-ind-withdrawn",
+        withdrawn=True,
+    )
+    payload = [{**base_person_data, "country_workspace_id": "cw-ind-withdrawn"}]
+
+    response = token_api_client.post(push_people_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
+
+
+def test_cw_individual_push_error_lists_first_100_existing_duplicates(
+    token_api_client,
+    push_people_url: str,
+    business_area: BusinessArea,
+    program: Program,
+    rdi: RegistrationDataImport,
+    afghanistan_country,
+    base_person_data: dict,
+) -> None:
+    cw_ids = [f"cw-{i:03d}" for i in range(110)]
+    for cw_id in cw_ids:
+        IndividualFactory(
+            business_area=business_area,
+            program=program,
+            registration_data_import=rdi,
+            country_workspace_id=cw_id,
+        )
     payload = [
-        {**base_person_data, "full_name": "Person One", "country_workspace_id": "cw-ind-bbb"},
-        {**base_person_data, "full_name": "Person Two", "country_workspace_id": "cw-ind-aaa"},
-        {**base_person_data, "full_name": "Person Three", "country_workspace_id": "cw-ind-bbb"},
-        {**base_person_data, "full_name": "Person Four", "country_workspace_id": "cw-ind-aaa"},
-        {**base_person_data, "full_name": "Person Five", "country_workspace_id": "cw-ind-ccc"},
+        {**base_person_data, "full_name": f"P{i}", "country_workspace_id": cw_id} for i, cw_id in enumerate(cw_ids)
     ]
 
     response = token_api_client.post(push_people_url, payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
-    assert response.json() == {
-        "country_workspace_id": ["Duplicate country_workspace_id values in payload: cw-ind-aaa, cw-ind-bbb."]
-    }
+    errors = response.json()["country_workspace_id"]
+    assert len(errors) == 1
+    listed = (
+        errors[0]
+        .removeprefix("Individuals with these country_workspace_id values already exist: ")
+        .rstrip(".")
+        .split(", ")
+    )
+    assert listed == [f"cw-{i:03d}" for i in range(100)]
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
 
 

@@ -1,5 +1,4 @@
 import logging
-from typing import cast
 
 from django.db.models import Q, QuerySet
 
@@ -24,8 +23,6 @@ from hope.models.deduplication_engine_similarity_pair import IndividualIdField
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
-
-type DedupPairQS = QuerySet[BiometricDedupeSimilarityPair, BiometricDedupeSimilarityPair]
 
 
 class BiometricDeduplicationService:
@@ -67,11 +64,11 @@ class BiometricDeduplicationService:
 
         for individual in rdi_individuals:
             population_ind_duplicates = population_duplicates.filter(
-                Q(individual1=individual) | Q(individual2=individual),
+                Q(individual1=individual) | Q(individual2=individual)
             )
             golden_results = BiometricDedupeSimilarityPair.serialize_for_individual(
                 individual,
-                cast("DedupPairQS", population_ind_duplicates),
+                population_ind_duplicates,
             )
             individual.biometric_deduplication_golden_record_results = golden_results
             individual.biometric_deduplication_golden_record_status = (
@@ -83,7 +80,7 @@ class BiometricDeduplicationService:
             )
             batch_results = BiometricDedupeSimilarityPair.serialize_for_individual(
                 individual,
-                cast("DedupPairQS", batch_ind_duplicates),
+                batch_ind_duplicates,
             )
             individual.biometric_deduplication_batch_results = batch_results
             individual.biometric_deduplication_batch_status = (
@@ -124,7 +121,7 @@ class BiometricDeduplicationService:
                 )
                 golden_results = BiometricDedupeSimilarityPair.serialize_for_individual(
                     individual,
-                    cast("DedupPairQS", population_ind_duplicates),
+                    population_ind_duplicates,
                 )
                 individual.biometric_deduplication_golden_record_results = golden_results
                 individual.biometric_deduplication_golden_record_status = (

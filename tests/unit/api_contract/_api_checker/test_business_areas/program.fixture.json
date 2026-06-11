@@ -2,18 +2,18 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "c6e37674-9971-4405-979d-6a68eb52efce",
+            "pk": "fe570f70-a690-4e15-af0e-00e52de8d6b4",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
                 "version": 1735688653315201,
-                "data_collecting_type": 7,
-                "beneficiary_group": "63a3720e-330d-4acb-841d-c808ec66cb66",
-                "business_area": "83d21b4b-f115-434c-9523-c729de143399",
+                "data_collecting_type": 1,
+                "beneficiary_group": "72313101-2079-43e3-95aa-96bb27357802",
+                "business_area": "5f07b040-5260-439d-bf79-caf7491345e8",
                 "name": "Program 0",
-                "code": "bz9f",
+                "code": "z0f3",
                 "status": "ACTIVE",
                 "description": "",
                 "start_date": "2025-01-01",
@@ -41,7 +41,7 @@
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 7,
+                "pk": 1,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -56,14 +56,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        7
+                        1
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "63a3720e-330d-4acb-841d-c808ec66cb66",
+                "pk": "72313101-2079-43e3-95aa-96bb27357802",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "83d21b4b-f115-434c-9523-c729de143399",
+                "pk": "5f07b040-5260-439d-bf79-caf7491345e8",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -114,14 +114,14 @@
                     "biometric_deduplication_threshold": 0.0,
                     "custom_fields": {},
                     "countries": [
-                        "78560fd7-3c35-4f12-b182-53e1c6b9dd42"
+                        "31b472b1-9bf0-4026-8acf-c3a9cb717c45"
                     ],
                     "payment_countries": []
                 }
             },
             {
                 "model": "geo.country",
-                "pk": "78560fd7-3c35-4f12-b182-53e1c6b9dd42",
+                "pk": "31b472b1-9bf0-4026-8acf-c3a9cb717c45",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

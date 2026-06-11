@@ -23,7 +23,6 @@ import {
 import { useProgramContext } from 'src/programContext';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
-import { IngestSourceEnum } from '@restgenerated/models/IngestSourceEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 
@@ -165,8 +164,7 @@ export const DrawerItems = ({
   );
 
   const { isAccountabilityApplicable } = businessAreaData;
-  const isManualIngest =
-    businessAreaData.ingestSource !== IngestSourceEnum.COUNTRY_WORKSPACE_ONLY;
+  const isManualIngest = businessAreaData.isManualIngest;
   const flags = {
     isAccountabilityApplicable,
     isManualIngest,

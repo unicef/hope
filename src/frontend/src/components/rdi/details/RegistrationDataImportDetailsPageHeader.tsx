@@ -21,7 +21,6 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { RefuseRdi } from '@restgenerated/models/RefuseRdi';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
-import { IngestSourceEnum } from '@restgenerated/models/IngestSourceEnum';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDataImportDetail;
@@ -54,8 +53,7 @@ const RegistrationDataImportDetailsPageHeader = ({
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({ slug: businessAreaSlug }),
   });
-  const isManualIngest =
-    businessAreaData?.ingestSource !== IngestSourceEnum.COUNTRY_WORKSPACE_ONLY;
+  const isManualIngest = businessAreaData?.isManualIngest;
   const { mutateAsync: refuseMutate, isPending: refuseLoading } = useMutation({
     mutationFn: async (data: RefuseRdi) => {
       return RestService.restBusinessAreasProgramsRegistrationDataImportsRefuseCreate(

@@ -487,13 +487,19 @@ def process_country_workspace_rdi_task(registration_data_import: RegistrationDat
         program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.process_country_workspace_rdi_task_action",
         config={"registration_data_import_id": registration_data_import_id},
-        group_key=f"process_country_workspace_rdi:{registration_data_import_id}",
+        group_key="registration_data",
         description=f"Classify Country Workspace findings and schedule merge for {registration_data_import_id}",
     )
 
 
 def process_country_workspace_rdis_task_action(job: AsyncRetryJob) -> bool:
     rdis = RegistrationDataImport.objects.filter(
+        # How do you check if youre not retrying meeRgE error for 10th time?
+        # WHEN do you want to notify CW about error states?
+        # CW would like to know how many times we're retrying the RDI (webhook TBD)
+        #
+        # RegistrationDataImport.IMPORT_ERROR -> this one probably is not even used in that flow.
+        # It's a state for XLSX import, not for RDI import by CW.
         status__in=(
             RegistrationDataImport.MERGE_SCHEDULED,
             RegistrationDataImport.MERGE_ERROR,
@@ -510,6 +516,7 @@ def process_country_workspace_rdis_task() -> None:
     AsyncRetryJob.queue_task(
         job_name=process_country_workspace_rdis_task.__name__,
         action="hope.apps.registration_data.celery_tasks.process_country_workspace_rdis_task_action",
-        group_key="process_country_workspace_rdis",
+        group_key="registration_data",
         description="Dispatch Country Workspace RDIs pending merge/retry",
+        # tutaj mozna dodac np: co ma sie stac kiedy 3 razy zostalo zretrajowane i sie nie udalo
     )

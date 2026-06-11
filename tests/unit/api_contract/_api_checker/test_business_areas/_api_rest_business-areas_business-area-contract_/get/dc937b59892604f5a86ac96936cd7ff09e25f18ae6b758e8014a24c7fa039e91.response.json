@@ -8,10 +8,10 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "396"
+        "Content-Length": "373"
     },
     "data": {
-        "id": "83d21b4b-f115-434c-9523-c729de143399",
+        "id": "5f07b040-5260-439d-bf79-caf7491345e8",
         "name": "Business Area Contract",
         "code": "BA9000",
         "long_name": "Business Area 0 Long Name",
@@ -21,7 +21,7 @@
         "active": true,
         "is_accountability_applicable": false,
         "rdi_import_xlsx_disabled": false,
-        "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
+        "is_manual_ingest": true,
         "countries": [
             {
                 "name": "Testland",

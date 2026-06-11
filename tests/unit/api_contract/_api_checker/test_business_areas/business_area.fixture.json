@@ -2,7 +2,7 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "83d21b4b-f115-434c-9523-c729de143399",
+            "pk": "5f07b040-5260-439d-bf79-caf7491345e8",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
@@ -39,7 +39,7 @@
                 "biometric_deduplication_threshold": 0.0,
                 "custom_fields": {},
                 "countries": [
-                    "78560fd7-3c35-4f12-b182-53e1c6b9dd42"
+                    "31b472b1-9bf0-4026-8acf-c3a9cb717c45"
                 ],
                 "payment_countries": []
             }
@@ -47,7 +47,7 @@
         "deps": [
             {
                 "model": "geo.country",
-                "pk": "78560fd7-3c35-4f12-b182-53e1c6b9dd42",
+                "pk": "31b472b1-9bf0-4026-8acf-c3a9cb717c45",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

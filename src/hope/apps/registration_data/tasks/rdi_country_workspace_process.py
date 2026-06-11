@@ -24,35 +24,35 @@ PERSISTED_FINDINGS_STATUS_CODES = (
 
 
 class ProcessCountryWorkspaceRdiTask:
+    @transaction.atomic
     def execute(self, registration_data_import_id: str) -> None:
-        with transaction.atomic():
-            rdi = (
-                RegistrationDataImport.objects.select_for_update(skip_locked=True, of=("self",))
-                .select_related("program")
-                .filter(
-                    pk=registration_data_import_id,
-                    status__in=[
-                        RegistrationDataImport.MERGE_SCHEDULED,
-                        RegistrationDataImport.MERGE_ERROR,
-                        RegistrationDataImport.IMPORT_ERROR,
-                    ],
-                )
-                .first()
+        rdi = (
+            RegistrationDataImport.objects.select_for_update(skip_locked=True, of=("self",))
+            .select_related("program")
+            .filter(
+                pk=registration_data_import_id,
+                status__in=[
+                    RegistrationDataImport.MERGE_SCHEDULED,
+                    RegistrationDataImport.MERGE_ERROR,
+                    RegistrationDataImport.IMPORT_ERROR,
+                ],
             )
-            if rdi is None:
-                return
+            .first()
+        )
+        if rdi is None:
+            return
 
-            if rdi.country_workspace_id is None:
-                logger.warning(
-                    f"RDI {registration_data_import_id} does not have country_workspace_id and can't be processed."
-                )
-                return
+        if rdi.country_workspace_id is None:
+            logger.warning(
+                f"RDI {registration_data_import_id} does not have country_workspace_id and can't be processed."
+            )
+            return
 
-            if rdi.status in (RegistrationDataImport.IMPORT_ERROR, RegistrationDataImport.MERGE_ERROR):
-                self._reset_rdi_state_for_cw_retry(rdi)
+        if rdi.status in (RegistrationDataImport.IMPORT_ERROR, RegistrationDataImport.MERGE_ERROR):
+            self._reset_rdi_state_for_cw_retry(rdi)
 
-            rdi.status = RegistrationDataImport.MERGING
-            rdi.save(update_fields=["status"])
+        rdi.status = RegistrationDataImport.MERGING
+        rdi.save(update_fields=["status"])
 
         logger.info(
             f"RDI:{registration_data_import_id} CW arrival hook starting "
@@ -65,8 +65,7 @@ class ProcessCountryWorkspaceRdiTask:
             dedupe_service = BiometricDeduplicationService()
             findings = dedupe_service.get_rdi_findings(rdi.country_workspace_id)
 
-        with transaction.atomic():
-            if dedupe_service is not None and findings is not None:
+            if findings is not None:
                 similarity_pairs = self._parse_findings_to_similarity_pairs(findings)
                 dedupe_service.store_similarity_pairs(
                     cast("Program", rdi.program), similarity_pairs, id_field_name="country_workspace_id"
@@ -76,7 +75,8 @@ class ProcessCountryWorkspaceRdiTask:
                 )
                 dedupe_service.store_rdi_deduplication_statistics(rdi)
                 logger.info(f"RDI:{registration_data_import_id} stored deduplication statistics")
-            transaction.on_commit(lambda: self._schedule_merge(rdi))
+
+        transaction.on_commit(lambda: self._schedule_merge(rdi))
 
     def _parse_findings_to_similarity_pairs(self, findings: list[dict]) -> list[SimilarityPair]:
         similarity_pairs: list[SimilarityPair] = []
