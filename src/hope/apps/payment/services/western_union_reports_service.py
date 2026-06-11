@@ -763,7 +763,7 @@ class WesternUnionReportsService:
 
         for user in users:
             context = {
-                "first_name": getattr(user, "first_name", ""),
+                "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Payment Plan: {payment_plan_link}",

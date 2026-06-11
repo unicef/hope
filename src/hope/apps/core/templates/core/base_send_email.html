@@ -17,11 +17,12 @@
             min-height: 100%;
         }
         header img {
+            display: block;
             width: 100%;
             height: auto;
         }
         main {
-            padding: 0 70px;
+            padding: 20px 70px;
         }
         h1 {
             font-weight: bold;
@@ -68,7 +69,7 @@
 <body>
     <div class="wrapper">
         <header>
-            <img src="{% static 'core/img/hope_email_header.png' %}" alt="HOPE Header Image">
+            <img src="{% static 'core/img/hope_email_header.png' %}" alt="HOPE Header Image" width="600" height="96">
         </header>
 
         <main>
@@ -93,7 +94,7 @@
 
         {% block footer %}
             <footer>
-                <p>If you experience any issues, don't hesitate to reach out to our customer support team</p>
+                <p>This is an automated message. Please do not reply to this email.</p>
             </footer>
         {% endblock footer %}
     </div>
