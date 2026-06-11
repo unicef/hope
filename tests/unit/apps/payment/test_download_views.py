@@ -152,6 +152,30 @@ def test_download_payment_verification_plan_missing_file_raises(
         download_payment_verification_plan(request, str(payment_verification_plan.id))
 
 
+def test_download_payment_verification_plan_already_downloaded_redirects(
+    rf,
+    create_user_role_with_permissions,
+    payment_verification_plan,
+    payment_verification_file,
+    user,
+):
+    payment_verification_file.was_downloaded = True
+    payment_verification_file.save()
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PAYMENT_VERIFICATION_EXPORT],
+        payment_verification_plan.payment_plan.business_area,
+    )
+
+    request = rf.get(reverse("download-payment-verification-plan", args=[payment_verification_plan.id]))
+    request.user = user
+
+    response = download_payment_verification_plan(request, str(payment_verification_plan.id))
+
+    assert response.status_code == 302
+    assert response.url == payment_verification_file.file.url
+
+
 def test_download_payment_plan_payment_list_requires_permission(rf, payment_plan_with_entitlement_file, user):
     request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan_with_entitlement_file.id]))
     request.user = user
@@ -192,6 +216,17 @@ def test_download_payment_plan_payment_list_wrong_status_raises(rf, create_user_
         ValidationError,
         match="Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.",
     ):
+        download_payment_plan_payment_list(request, str(payment_plan.id))
+
+
+def test_download_payment_plan_payment_list_missing_file_raises(rf, create_user_role_with_permissions, user):
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+    create_user_role_with_permissions(user, [Permissions.PM_VIEW_LIST], payment_plan.business_area)
+
+    request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan.id]))
+    request.user = user
+
+    with pytest.raises(FileNotFoundError):
         download_payment_plan_payment_list(request, str(payment_plan.id))
 
 
