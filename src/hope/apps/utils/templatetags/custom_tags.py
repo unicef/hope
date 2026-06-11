@@ -11,5 +11,5 @@ def greeting(first_name: str | None, last_name: str | None) -> str:
     parts are empty — avoiding the double/trailing space that a literal template
     space would leave (e.g. ``"Dear ,"``). Used in both HTML and plain-text emails.
     """
-    name = " ".join(part for part in (first_name, last_name) if part)
+    name = " ".join(str(part) for part in (first_name, last_name) if part)
     return f"Dear {name}," if name else "Dear,"
