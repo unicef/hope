@@ -1,11 +1,1 @@
-{% extends "core/base_send_email.html" %}
-
-{% block body %}
-    <div class="block block_1">
-        <h1 class="title">Dear {{ first_name }}{% if first_name and last_name %} {% endif %}{{ last_name }},</h1>
-        <p>
-            {% block content %}
-            {% endblock content %}
-        </p>
-    </div>
-{% endblock body %}
+{% extends "core/base_greeting_email.html" %}

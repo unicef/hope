@@ -1,0 +1,9 @@
+{% extends "core/base_send_email.html" %}
+{% load custom_tags %}
+
+{% block body %}
+    <div class="block block_1">
+        <h1 class="title">{% greeting first_name last_name %}</h1>
+        {% block content %}{% endblock %}
+    </div>
+{% endblock body %}

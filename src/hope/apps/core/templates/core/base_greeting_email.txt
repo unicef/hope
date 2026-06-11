@@ -1,0 +1,7 @@
+{% load custom_tags %}{% greeting first_name last_name %}
+
+{% block content %}{% endblock %}
+
+If you experience any issues, don't hesitate to reach out to our customer support team.
+
+This is an automated message. Please do not reply to this email.
