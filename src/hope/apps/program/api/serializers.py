@@ -152,7 +152,7 @@ class ProgramCycleListSerializer(serializers.ModelSerializer):
 
     def get_admin_url(self, obj: ProgramCycle) -> str | None:
         user = self.context["request"].user
-        return obj.admin_url if user.is_superuser else None
+        return obj.admin_url if user.is_staff else None
 
     def get_can_remove_cycle(self, obj: ProgramCycle) -> bool:
         return obj.can_remove_cycle
@@ -555,7 +555,9 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            FlexibleAttribute.objects.select_related("pdu_data")
+            .filter(type=FlexibleAttribute.PDU, program=obj)
+            .order_by("name"),
             many=True,
         ).data
         return representation
@@ -676,7 +678,9 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
         representation["pdu_fields"] = PeriodicFieldSerializer(
-            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"),
+            FlexibleAttribute.objects.select_related("pdu_data")
+            .filter(type=FlexibleAttribute.PDU, program=obj)
+            .order_by("name"),
             many=True,
         ).data
         return representation

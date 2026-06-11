@@ -32,7 +32,6 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory
 from extras.test_utils.factories.sanction_list import (
     SanctionListIndividualFactory,
 )
@@ -188,7 +187,7 @@ def tickets(
 ) -> dict:
     data = households_and_individuals
 
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         business_area=afghanistan,
         program_cycle=program_cycle,

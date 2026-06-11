@@ -29,7 +29,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
 )
-from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID, ROLE_PRIMARY
 from hope.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -86,7 +86,7 @@ def program(business_area):
 
 @pytest.fixture
 def program_cycle(program):
-    return ProgramCycleFactory(program=program)
+    return program.cycles.first()
 
 
 @pytest.fixture
@@ -775,7 +775,7 @@ def test_export_payment_plan_per_fsp_with_people_program(payment_plan, fsp, deli
         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
         beneficiary_group__master_detail=False,
     )
-    program_sw_cycle = ProgramCycleFactory(program=program_sw)
+    program_sw_cycle = program_sw.cycles.first()
     payment_plan.program_cycle = program_sw_cycle
     payment_plan.save()
 

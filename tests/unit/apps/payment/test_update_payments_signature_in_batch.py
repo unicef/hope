@@ -8,7 +8,6 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -23,7 +22,7 @@ def payment_plan_context() -> dict[str, Any]:
     business_area = BusinessAreaFactory()
     user = UserFactory()
     program = ProgramFactory(business_area=business_area)
-    cycle = ProgramCycleFactory(program=program)
+    cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2020, 8, 10),
         dispersion_end_date=date(2020, 12, 10),

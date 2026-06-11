@@ -5,7 +5,6 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -38,7 +37,7 @@ def program(business_area):
 
 @pytest.fixture
 def program_cycle(program):
-    return ProgramCycleFactory(program=program)
+    return program.cycles.first()
 
 
 @pytest.fixture
