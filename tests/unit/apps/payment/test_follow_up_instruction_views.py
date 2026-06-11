@@ -385,6 +385,7 @@ def test_create_follow_up_instruction(
     create_user_role_with_permissions(ctx["user"], [Permissions.PM_CREATE], ctx["business_area"], ctx["program"])
     group = PaymentPlanGroupFactory(cycle=ctx["cycle"])
     source_plan = PaymentPlanFactory(
+        name="Source payment plan",
         program_cycle=ctx["cycle"],
         payment_plan_group=group,
         business_area=ctx["business_area"],
