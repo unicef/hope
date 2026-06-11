@@ -112,10 +112,6 @@ class RdiMergeTask:
             dedupe_service = BiometricDeduplicationService()
             dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
             dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
-            dedupe_service.report_ack_to_biometric_deduplication_engine(
-                obj_hct,
-                [str(_id) for _id in individuals_to_merge_ids],
-            )
 
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str

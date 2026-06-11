@@ -2,7 +2,7 @@
     "superuser": {
         "master": {
             "model": "account.user",
-            "pk": "17268f33-35c3-41c3-8848-c75cced5036c",
+            "pk": "b3373b86-615c-4e7f-ad56-c830b9ef6930",
             "fields": {
                 "password": "",
                 "last_login": null,

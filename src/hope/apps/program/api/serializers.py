@@ -25,7 +25,6 @@ from hope.models import (
     PeriodicFieldData,
     Program,
     ProgramCycle,
-    RegistrationDataImport,
 )
 
 if TYPE_CHECKING:
@@ -395,18 +394,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
         )
 
     def get_can_import_rdi(self, obj: Program) -> bool:
-        if obj.biometric_deduplication_enabled:
-            not_merged_rdis = obj.registration_imports.filter(
-                status__in=[RegistrationDataImport.IN_REVIEW],
-                deduplication_engine_status__in=[
-                    RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
-                    RegistrationDataImport.DEDUP_ENGINE_FINISHED,
-                ],
-            )
-            if not_merged_rdis.exists():
-                return False
-
-        return True
+        return obj.business_area.is_rdi_ingest_source_all_except_country_workspace
 
     def get_registration_imports_total_count(self, obj: Program) -> int:
         return obj.registration_imports.count() if hasattr(obj, "registration_imports") else 0

@@ -2,19 +2,19 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "0e109d2b-2ed3-4a49-859d-ef6ebd4fbee5",
+            "pk": "eadcdc8d-2859-4808-9fe3-f95d94076dd0",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
+                "version": 1735688653315201,
                 "data_collecting_type": 5,
-                "beneficiary_group": "13f2eacb-ac0c-4e33-81de-5128323ae333",
-                "business_area": "eba374c8-af94-43f2-bc33-ecda36c7e5f5",
+                "beneficiary_group": "aafd1aef-1744-4e8f-adf5-3b41e4f7c4d1",
+                "business_area": "9b9b5f9c-3059-4fcc-af9a-9ab9b2c754eb",
                 "name": "Program 0",
+                "code": "c6kj",
                 "status": "ACTIVE",
-                "code": "v1nk",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -28,6 +28,7 @@
                 "administrative_areas_of_implementation": "",
                 "biometric_deduplication_enabled": false,
                 "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                "identification_key_individual_label": null,
                 "is_visible": true,
                 "household_count": 0,
                 "individual_count": 0,
@@ -62,7 +63,7 @@
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "13f2eacb-ac0c-4e33-81de-5128323ae333",
+                "pk": "aafd1aef-1744-4e8f-adf5-3b41e4f7c4d1",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -76,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "eba374c8-af94-43f2-bc33-ecda36c7e5f5",
+                "pk": "9b9b5f9c-3059-4fcc-af9a-9ab9b2c754eb",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -102,6 +103,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,

@@ -8,14 +8,14 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "356"
+        "Content-Length": "334"
     },
     "data": {
         "next": "http://testserver/api/rest/lookups/country/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "3db05d2f-e30d-469b-93aa-27606dbb6d8c",
+                "id": "92ec6bcc-cf12-4fd6-90ac-0645e8392d78",
                 "name": "Country 0",
                 "short_name": "Country 0",
                 "iso_code2": "AA",

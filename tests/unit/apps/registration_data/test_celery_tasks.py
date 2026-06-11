@@ -18,9 +18,9 @@ from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
     deduplicate_documents_for_rdi,
-    deduplication_engine_process_async_task,
-    fetch_biometric_deduplication_results_and_process_async_task,
     merge_registration_data_import_async_task,
+    process_country_workspace_rdis_task,
+    process_country_workspace_rdis_task_action,
     pull_kobo_submissions_async_task,
     pull_kobo_submissions_async_task_action,
     rdi_deduplication_async_task,
@@ -32,7 +32,14 @@ from hope.apps.registration_data.celery_tasks import (
     validate_xlsx_import_async_task_action,
 )
 from hope.apps.registration_data.tasks.pull_kobo_submissions import PullKoboSubmissions
-from hope.models import AsyncRetryJob, ImportData, KoboImportData, Program, RegistrationDataImport
+from hope.models import (
+    AsyncRetryJob,
+    BusinessArea,
+    ImportData,
+    KoboImportData,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -707,74 +714,60 @@ def test_pull_kobo_submissions_execute(
     assert str(resp_2["kobo_import_data_id"]) == str(kobo_import_data_without_pics.id)
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@patch("hope.apps.registration_data.celery_tasks.process_country_workspace_rdi_task")
+def test_process_country_workspace_rdis_enqueues_only_cw_eligible(mock_enqueue: Mock) -> None:
+    ba_cw = BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY)
+    ba_non_cw = BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE)
+    program_cw = ProgramFactory(business_area=ba_cw)
+    program_non_cw = ProgramFactory(business_area=ba_non_cw)
+
+    eligible = [
+        RegistrationDataImportFactory(business_area=ba_cw, program=program_cw, status=rdi_status)
+        for rdi_status in (
+            RegistrationDataImport.MERGE_SCHEDULED,
+            RegistrationDataImport.MERGE_ERROR,
+            RegistrationDataImport.IMPORT_ERROR,
+        )
+    ]
+    # CW business area but a status outside the dispatch set.
+    RegistrationDataImportFactory(business_area=ba_cw, program=program_cw, status=RegistrationDataImport.MERGED)
+    # Dispatch-eligible status but non-CW business area (the CW-only exclusion).
+    RegistrationDataImportFactory(
+        business_area=ba_non_cw, program=program_non_cw, status=RegistrationDataImport.MERGE_ERROR
+    )
+
+    result = process_country_workspace_rdis_task_action(Mock(spec=AsyncRetryJob))
+
+    assert result is True
+    enqueued_ids = {call.args[0].id for call in mock_enqueue.call_args_list}
+    assert enqueued_ids == {rdi.id for rdi in eligible}
+
+
+@pytest.mark.parametrize(
+    ("ingest_source", "rdi_status"),
+    [
+        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGE_ERROR),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGED),
+        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGED),
+    ],
 )
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".upload_and_process_deduplication_set"
-)
-def test_deduplication_engine_process_task(
-    mock_upload_and_process: Mock,
+@patch("hope.apps.registration_data.celery_tasks.process_country_workspace_rdi_task")
+def test_process_country_workspace_rdis_skips_ineligible(
+    mock_enqueue: Mock, ingest_source: str, rdi_status: str
 ) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
+    business_area = BusinessAreaFactory(ingest_source=ingest_source)
+    program = ProgramFactory(business_area=business_area)
+    RegistrationDataImportFactory(business_area=business_area, program=program, status=rdi_status)
 
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        deduplication_engine_process_async_task(str(program.id))
+    process_country_workspace_rdis_task_action(Mock(spec=AsyncRetryJob))
+
+    mock_enqueue.assert_not_called()
+
+
+@patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True)
+def test_process_country_workspace_rdis_task_enqueues_instanceless_job(mock_queue: Mock) -> None:
+    process_country_workspace_rdis_task()
+
     job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_upload_and_process.assert_called_once_with(program)
-
-
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process"
-)
-def test_fetch_biometric_deduplication_results_and_process(
-    mock_fetch_biometric_deduplication_results_and_process: Mock,
-) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
-
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        fetch_biometric_deduplication_results_and_process_async_task(str(program.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, None)
-
-
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process"
-)
-def test_fetch_biometric_deduplication_results_and_process_for_rdi(
-    mock_fetch_biometric_deduplication_results_and_process: Mock,
-) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
-    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
-
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        fetch_biometric_deduplication_results_and_process_async_task(str(program.id), str(rdi.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, rdi)
+    assert job.job_name == "process_country_workspace_rdis_task"
+    assert job.action == "hope.apps.registration_data.celery_tasks.process_country_workspace_rdis_task_action"

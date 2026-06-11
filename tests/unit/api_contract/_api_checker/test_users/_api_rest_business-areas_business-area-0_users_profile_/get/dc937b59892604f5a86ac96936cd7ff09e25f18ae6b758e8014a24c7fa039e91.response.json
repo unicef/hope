@@ -4,31 +4,29 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "W/\"profile:701cfe7e-1dfd-4b9c-9e4e-f485da8beb67:1.1\"",
+        "ETag": "W/\"profile:11111111-1111-1111-1111-111111111111:1.1\"",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11956"
+        "Content-Length": "11948"
     },
     "data": {
-        "id": "701cfe7e-1dfd-4b9c-9e4e-f485da8beb67",
+        "id": "11111111-1111-1111-1111-111111111111",
         "username": "user_0",
         "email": "user_0@example.com",
         "first_name": "",
         "last_name": "",
         "is_superuser": true,
-        "job_title": "",
         "partner": {
-            "id": 78,
+            "id": 76,
             "name": "Partner 0"
         },
         "user_roles": [
             {
                 "role": {
                     "name": "Role 0",
-                    
                     "is_visible_on_ui": true,
                     "is_available_for_partner": true
                 },
@@ -41,7 +39,7 @@
         "last_login": null,
         "business_areas": [
             {
-                "id": "e58164a0-3c4a-4ed5-b1f6-46167c746672",
+                "id": "f3cd1f8c-b4ae-4555-b952-fce47749a204",
                 "name": "Business Area 0",
                 "slug": "business-area-0",
                 "permissions": [
@@ -207,7 +205,6 @@
                     "RDI_RERUN_DEDUPE",
                     "RDI_VIEW_DETAILS",
                     "RDI_VIEW_LIST",
-                    "RDI_WEBHOOK_DEDUPLICATION",
                     "RECEIVE_PARSED_WU_QCF",
                     "RECEIVE_PP_OVERDUE_EMAIL",
                     "SEARCH_BUSINESS_AREAS",
@@ -389,7 +386,6 @@
             "RDI_RERUN_DEDUPE",
             "RDI_VIEW_DETAILS",
             "RDI_VIEW_LIST",
-            "RDI_WEBHOOK_DEDUPLICATION",
             "RECEIVE_PARSED_WU_QCF",
             "RECEIVE_PP_OVERDUE_EMAIL",
             "SEARCH_BUSINESS_AREAS",
@@ -405,7 +401,8 @@
             "UPLOAD_STORAGE_FILE",
             "USER_MANAGEMENT_VIEW_LIST"
         ],
-        "cross_area_filter_available": true
+        "cross_area_filter_available": true,
+        "job_title": ""
     },
     "content_type": "application/json"
 }

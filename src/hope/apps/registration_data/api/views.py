@@ -9,11 +9,11 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.caches import cached_response, etag_decorator
+from hope.api.endpoints.base import BusinessAreaIngestAllExceptCWMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
@@ -34,8 +34,6 @@ from hope.apps.registration_data.api.serializers import (
     RegistrationXlsxImportSerializer,
 )
 from hope.apps.registration_data.celery_tasks import (
-    deduplication_engine_process_async_task,
-    fetch_biometric_deduplication_results_and_process_async_task,
     merge_registration_data_import_async_task,
     rdi_deduplication_async_task,
     registration_kobo_import_async_task,
@@ -43,7 +41,6 @@ from hope.apps.registration_data.celery_tasks import (
     registration_xlsx_import_async_task,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 from hope.models import Household, ImportData, Individual, KoboImportData, Program, RegistrationDataImport, log_create
 
@@ -51,6 +48,7 @@ logger = logging.getLogger(__name__)
 
 
 class RegistrationDataImportViewSet(
+    BusinessAreaIngestAllExceptCWMixin,
     ProgramMixin,
     SerializerActionMixin,
     CountActionMixin,
@@ -80,13 +78,11 @@ class RegistrationDataImportViewSet(
         "erase": [Permissions.RDI_REFUSE_IMPORT],
         "refuse": [Permissions.RDI_REFUSE_IMPORT],
         "deduplicate": [Permissions.RDI_RERUN_DEDUPE],
-        "run_deduplication": [Permissions.RDI_RERUN_DEDUPE],
         "status_choices": [
             Permissions.RDI_VIEW_LIST,
         ],
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
-        "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -95,38 +91,6 @@ class RegistrationDataImportViewSet(
     @cached_response(key_func=RDIKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
-
-    @action(detail=False, methods=["POST"], url_path="run-deduplication")
-    def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        if not self.program.biometric_deduplication_enabled:
-            raise ValidationError("Biometric deduplication is not enabled for this program")
-
-        if RegistrationDataImport.objects.filter(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
-        ).exists():
-            raise ValidationError("Deduplication is already in progress for some RDIs")
-
-        deduplication_engine_process_async_task(str(self.program.pk))
-        return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
-
-    @action(
-        detail=False,
-        methods=["GET"],
-        url_path="webhookdeduplication",
-        url_name="webhook-deduplication",
-        permission_classes=[AllowAny],
-    )
-    def webhook_deduplication(
-        self,
-        request: Request,
-        business_area_slug: str,
-        program_code: str,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Response:
-        program = Program.objects.get(business_area__slug=business_area_slug, code=program_code)
-        fetch_biometric_deduplication_results_and_process_async_task(str(program.pk))
-        return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
@@ -198,13 +162,6 @@ class RegistrationDataImportViewSet(
             )
             remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
 
-        if rdi.program.biometric_deduplication_enabled:
-            BiometricDeduplicationService().report_individuals_status(
-                rdi.program,
-                [str(_id) for _id in individuals_to_remove],
-                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
-            )
-
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -256,13 +213,6 @@ class RegistrationDataImportViewSet(
                 individuals_to_remove, get_individual_doc(str(rdi.program.id))
             )
             remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
-
-        if rdi.program.biometric_deduplication_enabled:
-            BiometricDeduplicationService().report_individuals_status(
-                rdi.program,
-                [str(_id) for _id in individuals_to_remove],
-                BiometricDeduplicationService.INDIVIDUALS_REFUSED,
-            )
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
@@ -336,10 +286,7 @@ class RegistrationDataImportViewSet(
         if registration_data_import.number_of_households == 0 and registration_data_import.number_of_individuals == 0:
             raise ValidationError("This action would result in importing 0 households and 0 individuals.")
         registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
-        registration_data_import.deduplication_engine_status = (
-            RegistrationDataImport.DEDUP_ENGINE_PENDING if self.program.biometric_deduplication_enabled else None
-        )
-        registration_data_import.save(update_fields=["status", "deduplication_engine_status"])
+
         transaction.on_commit(
             lambda: registration_program_population_import_async_task(
                 registration_data_import=registration_data_import,
@@ -423,9 +370,6 @@ class RegistrationDataImportViewSet(
             **validated_data,
         )
 
-        if self.program.biometric_deduplication_enabled:
-            registration_data_import.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
-
         registration_data_import.full_clean()
         registration_data_import.save()
 
@@ -503,9 +447,6 @@ class RegistrationDataImportViewSet(
             import_data=import_data_obj,
             **validated_data,
         )
-
-        if self.program.biometric_deduplication_enabled:
-            registration_data_import.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
 
         registration_data_import.full_clean()
         registration_data_import.save()

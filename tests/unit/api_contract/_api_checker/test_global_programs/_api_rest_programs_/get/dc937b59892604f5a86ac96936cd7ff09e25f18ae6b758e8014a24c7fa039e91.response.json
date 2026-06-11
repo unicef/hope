@@ -8,16 +8,16 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "515"
+        "Content-Length": "505"
     },
     "data": {
         "next": "http://testserver/api/rest/programs/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "0b628076-cd9c-459c-af67-88a4e5ebd42b",
+                "id": "c28cf3ea-c579-4670-9e99-be1bc2a3ce71",
                 "name": "Program 0",
-                "code": "6-q7",
+                "code": "c4da",
                 "status": "ACTIVE",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -28,7 +28,7 @@
                 "cash_plus": false,
                 "population_goal": 1000,
                 "business_area_code": "BA0000",
-                "beneficiary_group": "faa27904-7212-472a-b658-02485151f29a",
+                "beneficiary_group": "b4a44ec7-5c61-4a29-b01a-8b085ce20416",
                 "biometric_deduplication_enabled": false
             }
         ]

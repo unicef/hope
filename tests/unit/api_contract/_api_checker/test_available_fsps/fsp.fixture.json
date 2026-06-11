@@ -2,7 +2,7 @@
     "fsp": {
         "master": {
             "model": "payment.financialserviceprovider",
-            "pk": "1f14cbd5-b350-499e-ae6f-09929b794f2c",
+            "pk": "79a3397b-458a-4dc5-ba1a-d11a262c74c1",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
@@ -15,17 +15,17 @@
                 "data_transfer_configuration": {},
                 "payment_gateway_id": null,
                 "allowed_business_areas": [
-                    "eba374c8-af94-43f2-bc33-ecda36c7e5f5"
+                    "9b9b5f9c-3059-4fcc-af9a-9ab9b2c754eb"
                 ],
                 "delivery_mechanisms": [
-                    "10070359-3843-48c2-869c-3376683c4017"
+                    "23352943-308e-4905-85b4-f569c2e4a187"
                 ]
             }
         },
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "eba374c8-af94-43f2-bc33-ecda36c7e5f5",
+                "pk": "9b9b5f9c-3059-4fcc-af9a-9ab9b2c754eb",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -51,6 +51,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -66,7 +67,7 @@
             },
             {
                 "model": "payment.deliverymechanism",
-                "pk": "10070359-3843-48c2-869c-3376683c4017",
+                "pk": "23352943-308e-4905-85b4-f569c2e4a187",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

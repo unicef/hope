@@ -2,16 +2,16 @@
     "message": {
         "master": {
             "model": "accountability.message",
-            "pk": "dc4f42e8-572d-4efe-921d-868ef64e2fed",
+            "pk": "43aafe3d-fc2e-45f7-a053-a83fed5fd4e6",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "unicef_id": "MSG-25-0001",
                 "title": "Message 0",
                 "body": "Message body 0",
-                "created_by": "df7e1ae7-1fd6-44a9-98fc-22b2d761ea27",
+                "created_by": "b7d427f9-669c-405c-be8c-2b3d21210f22",
                 "number_of_recipients": 0,
-                "business_area": "06e0d68e-f5d1-4da7-af5d-db35afe71e4b",
+                "business_area": "cbf4a28f-bf90-4551-a4c0-13b526a1494d",
                 "payment_plan": null,
                 "registration_data_import": null,
                 "sampling_type": "FULL_LIST",
@@ -20,7 +20,7 @@
                 },
                 "random_sampling_arguments": null,
                 "sample_size": 0,
-                "program": "8c7c8d8d-bdb6-4669-8f6f-e3c262675fff",
+                "program": "1a12f9b5-2ed8-46d4-8c45-b56a5b8455c8",
                 "copied_from": null,
                 "households": []
             }
@@ -28,7 +28,7 @@
         "deps": [
             {
                 "model": "account.user",
-                "pk": "df7e1ae7-1fd6-44a9-98fc-22b2d761ea27",
+                "pk": "b7d427f9-669c-405c-be8c-2b3d21210f22",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -42,7 +42,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 41,
+                    "partner": 39,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -53,7 +53,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 41,
+                "pk": 39,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,
@@ -67,7 +67,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "06e0d68e-f5d1-4da7-af5d-db35afe71e4b",
+                "pk": "cbf4a28f-bf90-4551-a4c0-13b526a1494d",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -93,6 +93,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -108,19 +109,19 @@
             },
             {
                 "model": "program.program",
-                "pk": "8c7c8d8d-bdb6-4669-8f6f-e3c262675fff",
+                "pk": "1a12f9b5-2ed8-46d4-8c45-b56a5b8455c8",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
-                    "version": 1735688653315201,
-                    "data_collecting_type": 17,
-                    "beneficiary_group": "469ef6f5-7482-4e80-a594-f1c34b33c158",
-                    "business_area": "06e0d68e-f5d1-4da7-af5d-db35afe71e4b",
+                    "version": 1735688653315202,
+                    "data_collecting_type": 16,
+                    "beneficiary_group": "35207566-2c68-46a2-8de1-68647a9a7023",
+                    "business_area": "cbf4a28f-bf90-4551-a4c0-13b526a1494d",
                     "name": "Program 0",
+                    "code": "awre",
                     "status": "ACTIVE",
-                    "code": "d38a",
                     "description": "",
                     "start_date": "2025-01-01",
                     "end_date": "2026-01-01",
@@ -134,6 +135,7 @@
                     "administrative_areas_of_implementation": "",
                     "biometric_deduplication_enabled": false,
                     "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                    "identification_key_individual_label": null,
                     "is_visible": true,
                     "household_count": 0,
                     "individual_count": 0,
@@ -145,7 +147,7 @@
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 17,
+                "pk": 16,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -160,14 +162,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        17
+                        16
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "469ef6f5-7482-4e80-a594-f1c34b33c158",
+                "pk": "35207566-2c68-46a2-8de1-68647a9a7023",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

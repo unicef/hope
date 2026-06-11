@@ -2,18 +2,18 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "c9bedf37-d0eb-4fd1-81f7-27aa2e448b9a",
+            "pk": "00522ed5-4537-4cfd-b84f-f9615c4c40d8",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
-                "data_collecting_type": 4054,
-                "beneficiary_group": "179d80dd-e536-4f57-842c-6d5bf4ba2d09",
-                "business_area": "54d987f2-fe17-4865-b6d7-fd058a95735a",
+                "version": 1735688653315201,
+                "data_collecting_type": 32,
+                "beneficiary_group": "ba0bf520-5de4-444f-8b11-8e81f32023f2",
+                "business_area": "f2425d73-c16f-4763-9803-19cf0baa0f46",
                 "name": "Program 0",
-                "code": "d1a6",
+                "code": "ktcj",
                 "status": "ACTIVE",
                 "description": "",
                 "start_date": "2025-01-01",
@@ -41,7 +41,7 @@
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 4054,
+                "pk": 32,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -56,14 +56,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        4054
+                        32
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "179d80dd-e536-4f57-842c-6d5bf4ba2d09",
+                "pk": "ba0bf520-5de4-444f-8b11-8e81f32023f2",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "54d987f2-fe17-4865-b6d7-fd058a95735a",
+                "pk": "f2425d73-c16f-4763-9803-19cf0baa0f46",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -103,6 +103,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,

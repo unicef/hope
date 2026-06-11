@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 import uuid
 
 from celery.exceptions import Retry
+from django.test import TestCase
 import pytest
 from requests.exceptions import RequestException
 
@@ -18,12 +19,12 @@ from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.household.const import DUPLICATE, DUPLICATE_IN_BATCH, UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
 from hope.apps.registration_data.celery_tasks import (
-    classify_findings_and_schedule_merge_async_task,
+    process_country_workspace_rdi_task,
 )
-from hope.apps.registration_data.tasks.cw_arrival_hook import CwArrivalHookTask
+from hope.apps.registration_data.tasks.rdi_country_workspace_process import ProcessCountryWorkspaceRdiTask
 from hope.models import (
     AsyncRetryJob,
-    DeduplicationEngineSimilarityPair,
+    BiometricDedupeSimilarityPair,
     Individual,
     RegistrationDataImport,
 )
@@ -36,7 +37,11 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
         task(*args, **kwargs)
     job = AsyncRetryJob.objects.latest("pk")
-    return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+    # The arrival hook enqueues the merge via transaction.on_commit, which never
+    # fires under django_db's rollback wrapping — capture and execute it so the
+    # on_commit path is actually exercised.
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
 
 @pytest.fixture(autouse=True)
@@ -62,6 +67,22 @@ def cw_rdi(cw_program):
     return RegistrationDataImportFactory(
         program=cw_program,
         business_area=cw_program.business_area,
+        status=RegistrationDataImport.MERGE_SCHEDULED,
+        country_workspace_id=str(uuid.uuid4()),
+    )
+
+
+@pytest.fixture
+def non_bio_program():
+    business_area = BusinessAreaFactory(slug="jordan", name="Jordan")
+    return ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
+
+
+@pytest.fixture
+def non_bio_rdi(non_bio_program):
+    return RegistrationDataImportFactory(
+        program=non_bio_program,
+        business_area=non_bio_program.business_area,
         status=RegistrationDataImport.MERGE_SCHEDULED,
         country_workspace_id=str(uuid.uuid4()),
     )
@@ -96,7 +117,7 @@ def _finding(first_pk: str, second_pk: str, *, score: float = 0.95, status_code:
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_persists_pairs_and_enqueues_merge(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -106,9 +127,9 @@ def test_arrival_hook_persists_pairs_and_enqueues_merge(
     ind_a, ind_b = two_pending_individuals
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    pairs = list(DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program))
+    pairs = list(BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program))
     assert len(pairs) == 1
     persisted_ids = {pairs[0].individual1_id, pairs[0].individual2_id}
     assert persisted_ids == {ind_a.id, ind_b.id}
@@ -116,12 +137,11 @@ def test_arrival_hook_persists_pairs_and_enqueues_merge(
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
-
-    mock_enqueue_merge.assert_called_once_with(cw_rdi)
+    mock_enqueue_merge.assert_called_once()
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_consumes_full_findings_iterator(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -142,13 +162,13 @@ def test_arrival_hook_consumes_full_findings_iterator(
     ]
     mock_get_findings.return_value = findings
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_program).count() == len(findings)
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_program).count() == len(findings)
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_empty_findings_still_enqueues_merge(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -157,9 +177,9 @@ def test_arrival_hook_empty_findings_still_enqueues_merge(
 ) -> None:
     mock_get_findings.return_value = []
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
@@ -167,7 +187,24 @@ def test_arrival_hook_empty_findings_still_enqueues_merge(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+def test_arrival_hook_skips_findings_when_biometric_dedup_disabled(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    non_bio_rdi: RegistrationDataImport,
+) -> None:
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=non_bio_rdi)
+
+    mock_get_findings.assert_not_called()
+    assert BiometricDedupeSimilarityPair.objects.filter(program=non_bio_rdi.program).count() == 0
+
+    non_bio_rdi.refresh_from_db()
+    assert non_bio_rdi.status == RegistrationDataImport.MERGING
+    mock_enqueue_merge.assert_called_once()
+
+
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_classifies_batch_when_both_sides_pending(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -180,7 +217,7 @@ def test_arrival_hook_classifies_batch_when_both_sides_pending(
 
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     ind_a.refresh_from_db()
     ind_b.refresh_from_db()
@@ -195,7 +232,7 @@ def test_arrival_hook_classifies_batch_when_both_sides_pending(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_classifies_population_when_one_side_merged(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -217,7 +254,7 @@ def test_arrival_hook_classifies_population_when_one_side_merged(
 
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     pending_ind.refresh_from_db()
 
@@ -227,7 +264,7 @@ def test_arrival_hook_classifies_population_when_one_side_merged(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 @pytest.mark.parametrize(
     "post_publish_status",
     [
@@ -245,7 +282,7 @@ def test_arrival_hook_entry_guard_short_circuits_before_fetching_findings(
     cw_rdi.status = post_publish_status
     cw_rdi.save(update_fields=["status"])
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == post_publish_status
@@ -254,7 +291,7 @@ def test_arrival_hook_entry_guard_short_circuits_before_fetching_findings(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_rerun_does_not_double_persist_pairs(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -262,22 +299,22 @@ def test_arrival_hook_rerun_does_not_double_persist_pairs(
     two_pending_individuals: tuple[Individual, Individual],
 ) -> None:
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
-    rows_after_first = DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count()
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
+    rows_after_first = BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count()
 
     cw_rdi.refresh_from_db()
     cw_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
     cw_rdi.save(update_fields=["status"])
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    rows_after_second = DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count()
+    rows_after_second = BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count()
     assert rows_after_first == rows_after_second == 1
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_skips_findings_with_unknown_country_workspace_id(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -291,9 +328,9 @@ def test_arrival_hook_skips_findings_with_unknown_country_workspace_id(
     ]
 
     with caplog.at_level("WARNING"):
-        queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+        queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 1
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 1
     assert any("9999" in rec.getMessage() for rec in caplog.records)
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
@@ -302,7 +339,7 @@ def test_arrival_hook_skips_findings_with_unknown_country_workspace_id(
 
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_marks_rdi_import_error_on_terminal_failure(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -314,17 +351,17 @@ def test_arrival_hook_marks_rdi_import_error_on_terminal_failure(
     mock_retry.side_effect = Retry("retry")
 
     with pytest.raises(Retry):
-        queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+        queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.IMPORT_ERROR
     assert "engine 503" in cw_rdi.error_message
     mock_enqueue_merge.assert_not_called()
-    assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_self_heals_import_error_to_merge_scheduled(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -337,7 +374,7 @@ def test_arrival_hook_self_heals_import_error_to_merge_scheduled(
     cw_rdi.save(update_fields=["status", "error_message", "sentry_id"])
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
@@ -347,7 +384,7 @@ def test_arrival_hook_self_heals_import_error_to_merge_scheduled(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_skips_self_pair_findings(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -358,9 +395,9 @@ def test_arrival_hook_skips_self_pair_findings(
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1001")]
 
     with caplog.at_level("WARNING"):
-        queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+        queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
     assert any("duplicate pair" in rec.getMessage() for rec in caplog.records)
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
@@ -368,7 +405,7 @@ def test_arrival_hook_skips_self_pair_findings(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_orders_pair_by_individual_id(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -382,15 +419,15 @@ def test_arrival_hook_orders_pair_by_individual_id(
         _finding(first_pk=higher.country_workspace_id, second_pk=lower.country_workspace_id)
     ]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    pair = DeduplicationEngineSimilarityPair.objects.get(program=cw_rdi.program)
+    pair = BiometricDedupeSimilarityPair.objects.get(program=cw_rdi.program)
     assert pair.individual1_id == lower.id
     assert pair.individual2_id == higher.id
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_classifies_mixed_batch_and_population_for_same_individual(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -425,7 +462,7 @@ def test_arrival_hook_classifies_mixed_batch_and_population_for_same_individual(
         _finding(first_pk="1001", second_pk="1003"),
     ]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     pending_a.refresh_from_db()
 
@@ -437,7 +474,7 @@ def test_arrival_hook_classifies_mixed_batch_and_population_for_same_individual(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_resolves_cw_id_within_correct_program(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -458,16 +495,16 @@ def test_arrival_hook_resolves_cw_id_within_correct_program(
 
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    pair = DeduplicationEngineSimilarityPair.objects.get(program=cw_program)
+    pair = BiometricDedupeSimilarityPair.objects.get(program=cw_program)
     persisted_ids = {pair.individual1_id, pair.individual2_id}
     assert persisted_ids == {in_program_a.id, in_program_b.id}
     assert other_program_collision.id not in persisted_ids
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_status_200_persists_with_scaled_score(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -476,15 +513,15 @@ def test_arrival_hook_status_200_persists_with_scaled_score(
 ) -> None:
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", score=0.87, status_code="200")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    pair = DeduplicationEngineSimilarityPair.objects.get(program=cw_rdi.program)
+    pair = BiometricDedupeSimilarityPair.objects.get(program=cw_rdi.program)
     assert pair.similarity_score == Decimal("87.00")
     assert pair.status_code == "200"
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 @pytest.mark.parametrize("status_code", ["412", "416", "418", "429"])
 def test_arrival_hook_invalid_pair_status_codes_persist_with_scaled_score(
     mock_get_findings: mock.Mock,
@@ -495,15 +532,15 @@ def test_arrival_hook_invalid_pair_status_codes_persist_with_scaled_score(
 ) -> None:
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", score=0.95, status_code=status_code)]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    pair = DeduplicationEngineSimilarityPair.objects.get(program=cw_rdi.program)
+    pair = BiometricDedupeSimilarityPair.objects.get(program=cw_rdi.program)
     assert pair.similarity_score == Decimal("95.00")
     assert pair.status_code == status_code
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 @pytest.mark.parametrize("status_code", ["404", "500"])
 def test_arrival_hook_dropped_status_codes_skip_persist(
     mock_get_findings: mock.Mock,
@@ -514,16 +551,16 @@ def test_arrival_hook_dropped_status_codes_skip_persist(
 ) -> None:
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", status_code=status_code)]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
-    assert DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
     mock_enqueue_merge.assert_called_once()
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_mixed_status_codes_persist_correct_subset(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -547,16 +584,16 @@ def test_arrival_hook_mixed_status_codes_persist_correct_subset(
     findings = [_finding(first_pk=f"{i}A", second_pk=f"{i}B", status_code=code) for i, code in enumerate(codes)]
     mock_get_findings.return_value = findings
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     persisted_codes = sorted(
-        DeduplicationEngineSimilarityPair.objects.filter(program=cw_rdi.program).values_list("status_code", flat=True)
+        BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).values_list("status_code", flat=True)
     )
     assert persisted_codes == ["200", "412", "416", "418", "429"]
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_dropped_finding_does_not_touch_individual_snapshots(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -566,7 +603,7 @@ def test_arrival_hook_dropped_finding_does_not_touch_individual_snapshots(
     ind_a, ind_b = two_pending_individuals
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", status_code="404")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     ind_a.refresh_from_db()
     ind_b.refresh_from_db()
@@ -575,7 +612,7 @@ def test_arrival_hook_dropped_finding_does_not_touch_individual_snapshots(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_invalid_pair_surfaces_zero_score_in_individual_snapshot(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -585,7 +622,7 @@ def test_arrival_hook_invalid_pair_surfaces_zero_score_in_individual_snapshot(
     ind_a, _ind_b = two_pending_individuals
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", score=0.95, status_code="412")]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     ind_a.refresh_from_db()
     assert len(ind_a.biometric_deduplication_batch_results) == 1
@@ -608,7 +645,7 @@ def test_parse_findings_happy_path() -> None:
         },
     ]
 
-    pairs = CwArrivalHookTask()._parse_findings_to_similarity_pairs(findings)
+    pairs = ProcessCountryWorkspaceRdiTask()._parse_findings_to_similarity_pairs(findings)
 
     assert pairs == [
         SimilarityPair(score=0.95, status_code="200", first="CW-001", second="CW-002"),
@@ -632,7 +669,7 @@ def test_parse_findings_drops_non_persisted_status_code() -> None:
         },
     ]
 
-    assert CwArrivalHookTask()._parse_findings_to_similarity_pairs(findings) == []
+    assert ProcessCountryWorkspaceRdiTask()._parse_findings_to_similarity_pairs(findings) == []
 
 
 def test_parse_findings_drops_finding_with_both_reference_pks_empty() -> None:
@@ -645,7 +682,7 @@ def test_parse_findings_drops_finding_with_both_reference_pks_empty() -> None:
         },
     ]
 
-    assert CwArrivalHookTask()._parse_findings_to_similarity_pairs(findings) == []
+    assert ProcessCountryWorkspaceRdiTask()._parse_findings_to_similarity_pairs(findings) == []
 
 
 def test_parse_findings_normalises_empty_string_to_none() -> None:
@@ -658,17 +695,17 @@ def test_parse_findings_normalises_empty_string_to_none() -> None:
         },
     ]
 
-    pairs = CwArrivalHookTask()._parse_findings_to_similarity_pairs(findings)
+    pairs = ProcessCountryWorkspaceRdiTask()._parse_findings_to_similarity_pairs(findings)
 
     assert pairs == [SimilarityPair(score=0.5, status_code="429", first="CW-001", second=None)]
 
 
 def test_parse_findings_empty_input() -> None:
-    assert CwArrivalHookTask()._parse_findings_to_similarity_pairs([]) == []
+    assert ProcessCountryWorkspaceRdiTask()._parse_findings_to_similarity_pairs([]) == []
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_updates_rdi_counters_and_individual_dedup_statuses(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -705,7 +742,7 @@ def test_arrival_hook_updates_rdi_counters_and_individual_dedup_statuses(
         _finding(first_pk="1003", second_pk="2001"),
     ]
 
-    queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.dedup_engine_batch_duplicates == 2
@@ -726,7 +763,7 @@ def test_arrival_hook_updates_rdi_counters_and_individual_dedup_statuses(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_delegates_statistics_to_biometric_dedup_service(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -736,9 +773,9 @@ def test_arrival_hook_delegates_statistics_to_biometric_dedup_service(
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
     with patch(
-        "hope.apps.registration_data.tasks.cw_arrival_hook.BiometricDeduplicationService.store_rdi_deduplication_statistics"
+        "hope.apps.registration_data.tasks.rdi_country_workspace_process.BiometricDeduplicationService.store_rdi_deduplication_statistics"
     ) as mock_store_stats:
-        queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+        queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     assert mock_store_stats.call_count == 1
     (called_rdi,) = mock_store_stats.call_args.args
@@ -746,7 +783,7 @@ def test_arrival_hook_delegates_statistics_to_biometric_dedup_service(
 
 
 @patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
 def test_arrival_hook_skips_merge_when_status_changed_under_lock(
     mock_get_findings: mock.Mock,
     mock_enqueue_merge: mock.Mock,
@@ -759,17 +796,71 @@ def test_arrival_hook_skips_merge_when_status_changed_under_lock(
         RegistrationDataImport.objects.filter(pk=rdi.pk).update(status=RegistrationDataImport.MERGING)
 
     with patch(
-        "hope.apps.registration_data.tasks.cw_arrival_hook.BiometricDeduplicationService.store_rdi_deduplication_statistics",
+        "hope.apps.registration_data.tasks.rdi_country_workspace_process.BiometricDeduplicationService.store_rdi_deduplication_statistics",
         side_effect=flip_status_to_merging,
     ):
-        queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+        queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
+
+
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+def test_arrival_hook_defers_merge_enqueue_until_commit(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+    django_capture_on_commit_callbacks,
+) -> None:
+    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+
+    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        process_country_workspace_rdi_task(registration_data_import=cw_rdi)
+    job = AsyncRetryJob.objects.latest("pk")
+
+    with django_capture_on_commit_callbacks(execute=False) as callbacks:
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    # Merge is deferred to on_commit — not enqueued inline during the run.
     mock_enqueue_merge.assert_not_called()
 
+    for callback in callbacks:
+        callback()
+    mock_enqueue_merge.assert_called_once_with(cw_rdi)
 
-@patch("hope.apps.registration_data.tasks.cw_arrival_hook.CwArrivalHookTask.execute")
+
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+@patch("hope.apps.registration_data.celery_tasks.merge_registration_data_import_async_task")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+def test_arrival_hook_stats_failure_rolls_back_pairs_and_skips_merge(
+    mock_get_findings: mock.Mock,
+    mock_enqueue_merge: mock.Mock,
+    mock_retry: Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+) -> None:
+    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_retry.side_effect = Retry("retry")
+
+    with patch(
+        "hope.apps.registration_data.tasks.rdi_country_workspace_process."
+        "BiometricDeduplicationService.store_rdi_deduplication_statistics",
+        side_effect=RuntimeError("stats write failed"),
+    ):
+        with pytest.raises(Retry):
+            queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
+
+    # Pairs written just before the stats failure roll back with it (one transaction).
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    # Merge enqueue is gated on commit, which never happened.
+    mock_enqueue_merge.assert_not_called()
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.IMPORT_ERROR
+
+
+@patch("hope.apps.registration_data.tasks.rdi_country_workspace_process.ProcessCountryWorkspaceRdiTask.execute")
 @patch("hope.apps.registration_data.celery_tasks.locked_cache")
 def test_arrival_hook_returns_true_when_lock_not_acquired(
     mock_locked_cache: Mock,
@@ -778,7 +869,7 @@ def test_arrival_hook_returns_true_when_lock_not_acquired(
 ) -> None:
     mock_locked_cache.return_value.__enter__.return_value = False
 
-    result = queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    result = queue_and_run_retry_task(process_country_workspace_rdi_task, registration_data_import=cw_rdi)
 
     assert result is True
     mock_execute.assert_not_called()

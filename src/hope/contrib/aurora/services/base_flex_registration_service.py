@@ -16,6 +16,7 @@ from hope.contrib.aurora.celery_tasks import process_flex_records_async_task
 from hope.contrib.aurora.models import Record, Registration
 from hope.contrib.aurora.rdi import AuroraProcessor
 from hope.models import BusinessArea, ImportData, PendingHousehold, PendingIndividual, RegistrationDataImport
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -39,6 +40,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         business_area = BusinessArea.objects.get(slug=organization.slug)
 
         self.validate_data_collection_type()
+        self._validate_business_area_can_create_rdi()
 
         number_of_individuals = 0
         number_of_households = 0
@@ -62,9 +64,6 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             status=status,
             program=programme,
             import_data=import_data,
-            deduplication_engine_status=(
-                RegistrationDataImport.DEDUP_ENGINE_PENDING if programme.biometric_deduplication_enabled else None
-            ),
         )
 
     @abc.abstractmethod
@@ -87,6 +86,13 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             raise ValidationError(
                 f"{business_area.slug.capitalize()} is not limited for DataCollectingType: {data_collecting_type.code}"
             )
+
+    def _validate_business_area_can_create_rdi(self) -> None:
+        project = self.registration.project
+        business_area = BusinessArea.objects.get(slug=project.organization.slug)
+
+        if business_area.is_rdi_ingest_source_country_workspace_only:
+            raise ValidationError(ALL_EXCEPT_CW_INGEST_REJECT_MSG)
 
     def process_records(
         self,
