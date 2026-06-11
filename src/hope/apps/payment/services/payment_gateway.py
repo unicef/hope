@@ -72,12 +72,12 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         business_area = obj.payment_plan.business_area
         payment_country = business_area.payment_countries.first()
         payload = {
-            "destination_currency": obj.payment_plan.currency.vision_code if obj.payment_plan.currency else None,
+            "destination_currency": obj.payment_plan.currency.code if obj.payment_plan.currency else None,
             "user": self.context["user_email"],
             "config_key": business_area.code,
             "delivery_mechanism": obj.payment_plan.delivery_mechanism.code,
             "office": business_area.slug,
-            "destination_country": payment_country.iso_code2 if payment_country else None,
+            "country": payment_country.iso_code3 if payment_country else None,
         }
         if payment_country:  # TODO temporary solution
             payload["destination_country_iso_code3"] = payment_country.iso_code3
@@ -119,7 +119,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     def _map_financial_institution(self, obj: Payment, account_data: dict) -> dict:
         financial_institution_pk = account_data.get("financial_institution_pk") or account_data.get(
             "financial_institution"
-        )  # TODO remove account_data.get("financial_institution") later
+        )
         if financial_institution_pk:
             financial_institution = FinancialInstitution.objects.get(pk=financial_institution_pk)
             if financial_institution.is_generic:
@@ -195,7 +195,9 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         }
 
         if account_data:
-            if account_type == "bank":
+            account_data = account_data.copy()
+            if not account_data.get("service_provider_code"):
+                # Backward-compatible fallback for snapshots created before service_provider_code was resolved.
                 account_data = self._map_financial_institution(obj, account_data)
             payload_data["account"] = account_data
 

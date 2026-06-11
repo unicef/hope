@@ -1224,7 +1224,7 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
         "config_key": business_area.code,
         "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
-        "destination_country": "AF",
+        "country": "AFG",
         "destination_country_iso_code3": "AFG",
         "destination_country_iso_code2": "AF",
     }
@@ -1245,7 +1245,7 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
         "config_key": business_area.code,
         "delivery_mechanism": split.payment_plan.delivery_mechanism.code,
         "office": business_area.slug,
-        "destination_country": None,
+        "country": None,
     }
 
 
@@ -1260,7 +1260,7 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
 
     payload_without_country = serializer.get_payload(split)
 
-    assert payload_without_country["destination_country"] is None
+    assert payload_without_country["country"] is None
     assert "destination_country_iso_code3" not in payload_without_country
     assert "destination_country_iso_code2" not in payload_without_country
 
@@ -1269,7 +1269,7 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
     payload_with_country = serializer.get_payload(split)
 
     assert payload_with_country["office"] == business_area.slug
-    assert payload_with_country["destination_country"] == "AF"
+    assert payload_with_country["country"] == "AFG"
     assert payload_with_country["destination_country_iso_code3"] == "AFG"
     assert payload_with_country["destination_country_iso_code2"] == "AF"
 
@@ -1294,7 +1294,7 @@ def test_payment_instruction_payload_uses_destination_country_iso_code2(
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
-    assert data["payload"]["destination_country"] == "AF"
+    assert data["payload"]["country"] == "AFG"
     assert data["payload"]["destination_country_iso_code3"] == "AFG"
     assert data["payload"]["destination_country_iso_code2"] == "AF"
 
@@ -1816,6 +1816,25 @@ def test_map_financial_institution_pk_and_mapping_found(payment_gateway_setup: d
     result = PaymentSerializer()._map_financial_institution(payment, account_data)
     assert result["service_provider_code"] == "BANKA_CODE_FOR_OTHER_FSP"
     assert result["number"] == "123"
+
+
+def test_payment_payload_uses_service_provider_code_from_snapshot(payment_gateway_setup: dict) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    payment.delivery_type = payment_gateway_setup["delivery_mechanisms"]["transfer"]
+    payment.save(update_fields=["delivery_type"])
+    snapshot = payment.household_snapshot
+    snapshot.snapshot_data["primary_collector"]["account_data"] = {
+        "number": "123",
+        "financial_institution_pk": "999",
+        "service_provider_code": "SNAPSHOT_CODE",
+    }
+    snapshot.save(update_fields=["snapshot_data"])
+
+    with patch.object(PaymentSerializer, "_map_financial_institution") as map_financial_institution_mock:
+        payload = PaymentSerializer().get_payload(payment)
+
+    map_financial_institution_mock.assert_not_called()
+    assert payload["account"]["service_provider_code"] == "SNAPSHOT_CODE"
 
 
 def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(
