@@ -236,6 +236,7 @@ class ProgramViewSet(
 
         partners_data = data.pop("partners", [])
         pdu_fields = data.pop("pdu_fields", [])
+        purposes = data.pop("payment_plan_purposes", [])
 
         program = Program(
             **data,
@@ -247,6 +248,7 @@ class ProgramViewSet(
 
         program.full_clean()
         program.save()
+        program.payment_plan_purposes.set(purposes)
 
         ProgramCycle.objects.create(
             program=program,
@@ -285,12 +287,16 @@ class ProgramViewSet(
         data = serializer.validated_data
 
         pdu_fields = data.pop("pdu_fields", [])
+        purposes = data.pop("payment_plan_purposes", None)
 
         for attrib, value in data.items():
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
         program.full_clean()
         program.save()
+
+        if purposes is not None:
+            program.payment_plan_purposes.set(purposes)
 
         FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
         if pdu_fields:
@@ -551,6 +557,9 @@ class ProgramCycleViewSet(
 
         if program_cycle.payment_plans.exists():
             raise ValidationError("Don't allow to delete Cycle with assigned Target Population")
+
+        if program_cycle.payment_plan_groups.exists():
+            raise ValidationError("Don't allow to delete Cycle with assigned Payment Plan Groups")
 
         program_cycle.delete()
 

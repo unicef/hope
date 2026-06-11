@@ -21,7 +21,7 @@ from extras.test_utils.factories import (
     RoleAssignmentFactory,
     RoleFactory,
 )
-from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, Program
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, PaymentPlanPurpose, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -105,6 +105,7 @@ class TestProgrammeManagement:
         page_programme_details: ProgrammeDetails,
         test_data: dict,
         screenshot_path: str,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -120,6 +121,7 @@ class TestProgrammeManagement:
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("Main Menu")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field().click()
@@ -169,6 +171,7 @@ class TestProgrammeManagement:
         page_programme_details: ProgrammeDetails,
         test_data: dict,
         screenshot_path: str,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -194,6 +197,7 @@ class TestProgrammeManagement:
         page_programme_management.get_input_population().send_keys(test_data["populationGoals"])
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -232,6 +236,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -248,6 +253,7 @@ class TestProgrammeManagement:
         page_programme_management.get_input_freq_of_payment_one_off().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -287,6 +293,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -303,6 +310,7 @@ class TestProgrammeManagement:
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -342,6 +350,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -358,6 +367,7 @@ class TestProgrammeManagement:
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -415,6 +425,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -431,6 +442,7 @@ class TestProgrammeManagement:
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -485,6 +497,7 @@ class TestBusinessAreas:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -501,6 +514,7 @@ class TestBusinessAreas:
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()

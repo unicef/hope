@@ -44,8 +44,10 @@ def generate_beneficiary_groups() -> None:
 
 def generate_people_program() -> None:
     from hope.apps.household.const import HOST, SEEING
+    from hope.models import PaymentPlanPurpose
 
     ba = BusinessArea.objects.get(name="Afghanistan")
+    default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
     people_program = ProgramFactory(
         name="Initial_Program_People (sw)",
         status="ACTIVE",
@@ -61,6 +63,7 @@ def generate_people_program() -> None:
         data_collecting_type=DataCollectingType.objects.get(code="partial_individuals"),
         code="abc1",
         beneficiary_group=BeneficiaryGroup.objects.get(name="Social Workers"),
+        payment_plan_purposes=[default_purpose],
     )
     ProgramCycleFactory(
         program=people_program,

@@ -1913,3 +1913,19 @@ def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_or
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
     logger_error_mock.assert_called_once_with(expected_error)
     assert result == account_data
+
+
+@pytest.mark.django_db
+def test_change_payment_instruction_status_returns_none_for_non_payment_gateway_plan() -> None:
+    fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    payment_plan = PaymentPlanFactory(financial_service_provider=fsp, use_payment_gateway=False)
+    split = PaymentPlanSplitFactory(payment_plan=payment_plan)
+    pg_service = PaymentGatewayService()
+    pg_service.api.change_payment_instruction_status = Mock()  # type: ignore
+
+    result = pg_service.change_payment_instruction_status(PaymentInstructionStatus.OPEN, split)
+
+    assert result is None
+    pg_service.api.change_payment_instruction_status.assert_not_called()
