@@ -1,5 +1,4 @@
 from decimal import Decimal
-import os
 from unittest import mock
 from unittest.mock import Mock, patch
 import uuid
@@ -40,15 +39,9 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
 
 
 @pytest.fixture(autouse=True)
-def mock_deduplication_engine_env_vars() -> None:
-    with mock.patch.dict(
-        os.environ,
-        {
-            "DEDUPLICATION_ENGINE_API_KEY": "TEST",
-            "DEDUPLICATION_ENGINE_API_URL": "TEST/",
-        },
-    ):
-        yield
+def mock_deduplication_engine_env_vars(settings) -> None:
+    settings.DEDUPLICATION_ENGINE_API_KEY = "TEST"
+    settings.DEDUPLICATION_ENGINE_API_URL = "TEST/"
 
 
 @pytest.fixture

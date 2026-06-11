@@ -1,7 +1,7 @@
 from functools import cached_property
-import os
 from typing import TYPE_CHECKING, Any, Mapping
 
+from django.conf import settings
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 class BaseAPI:
     API_KEY_ENV_NAME = ""
-    API_URL_ENV_NAME = ""
+    API_URL_SETTING_NAME = ""
 
     class APIError(Exception):
         pass
@@ -35,11 +35,19 @@ class BaseAPI:
     API_EXCEPTION_CLASS = APIError
     API_MISSING_CREDENTIALS_EXCEPTION_CLASS = APIMissingCredentialsError
 
-    def __init__(self) -> None:
-        self.api_key = os.getenv(self.API_KEY_ENV_NAME)
-        self.api_url = os.getenv(self.API_URL_ENV_NAME)
+    def get_api_url(self) -> str:
+        return getattr(settings, self.API_URL_SETTING_NAME, "") if self.API_URL_SETTING_NAME else ""
 
-        if not self.api_key or not self.api_url:
+    def get_api_key(self) -> str | None:
+        if self.API_KEY_ENV_NAME:
+            return getattr(settings, self.API_KEY_ENV_NAME, None)
+        return None
+
+    def __init__(self) -> None:
+        self.api_url = self.get_api_url()
+        self.api_key = self.get_api_key()
+
+        if not self.api_url or (self.API_KEY_ENV_NAME and not self.api_key):
             raise self.API_MISSING_CREDENTIALS_EXCEPTION_CLASS(f"Missing {self.__class__.__name__} Key/URL")
 
         self._client = session()

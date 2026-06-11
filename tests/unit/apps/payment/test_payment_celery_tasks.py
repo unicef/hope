@@ -52,6 +52,7 @@ from hope.apps.payment.celery_tasks import (
     periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
     periodic_sync_payment_gateway_account_types_async_task,
     periodic_sync_payment_gateway_account_types_async_task_action,
+    periodic_sync_payment_gateway_delivery_mechanisms_async_task_action,
     periodic_sync_payment_gateway_fsp_async_task,
     periodic_sync_payment_gateway_fsp_async_task_action,
     periodic_sync_payment_gateway_records_async_task,
@@ -1770,7 +1771,7 @@ def test_periodic_sync_payment_gateway_fsp_action_runs_service(mock_service_cls:
 def test_periodic_sync_payment_gateway_fsp_action_returns_on_missing_credentials(mock_sync_fsps: Mock) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
-    mock_sync_fsps.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+    mock_sync_fsps.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
 
     assert periodic_sync_payment_gateway_fsp_async_task_action() is None
 
@@ -1802,7 +1803,7 @@ def test_periodic_sync_payment_gateway_account_types_action_returns_on_missing_c
 ) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
-    mock_sync_account_types.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+    mock_sync_account_types.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
 
     assert periodic_sync_payment_gateway_account_types_async_task_action() is None
 
@@ -1830,6 +1831,17 @@ def test_periodic_sync_payment_gateway_records_action_runs_service(mock_service_
     mock_service_cls.return_value.sync_records.assert_called_once()
 
 
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_records")
+def test_periodic_sync_payment_gateway_records_action_returns_on_missing_credentials(
+    mock_sync_records: Mock,
+) -> None:
+    from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    mock_sync_records.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
+
+    assert periodic_sync_payment_gateway_records_async_task_action() is None
+
+
 def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
         with django_capture_on_commit_callbacks(execute=True):
@@ -1842,3 +1854,23 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_o
     assert job.group_key == "payment"
     assert job.description == "Periodic sync payment gateway records"
     mock_queue.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
+def test_periodic_sync_payment_gateway_delivery_mechanisms_action_runs_service(
+    mock_service_cls: Mock,
+) -> None:
+    periodic_sync_payment_gateway_delivery_mechanisms_async_task_action()
+
+    mock_service_cls.return_value.sync_delivery_mechanisms.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
+def test_periodic_sync_payment_gateway_delivery_mechanisms_action_returns_on_missing_credentials(
+    mock_sync_delivery_mechanisms: Mock,
+) -> None:
+    from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    mock_sync_delivery_mechanisms.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
+
+    assert periodic_sync_payment_gateway_delivery_mechanisms_async_task_action() is None

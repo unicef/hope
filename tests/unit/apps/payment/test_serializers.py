@@ -358,6 +358,14 @@ def test_payment_plan_list_serializer_created_by(payment_plan_list_context: dict
 
 
 def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: dict[str, Any]) -> None:
+    from flags.models import FlagState
+
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     payment_plan.status = PaymentPlan.Status.ACCEPTED
@@ -378,6 +386,19 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["can_send_xlsx_password"] is False
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
+    assert data["can_send_to_vision"] is True
+
+
+def test_payment_plan_detail_serializer_can_send_to_vision_false(
+    payment_plan_detail_context: dict[str, Any],
+) -> None:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    user = payment_plan_detail_context["user"]
+    payment_plan.status = PaymentPlan.Status.DRAFT
+    payment_plan.save(update_fields=["status"])
+
+    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
+    assert data["can_send_to_vision"] is False
 
 
 def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(

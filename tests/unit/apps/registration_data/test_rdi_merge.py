@@ -3,6 +3,7 @@ from unittest import mock
 from unittest.mock import patch
 
 from django.forms import model_to_dict
+from django.test.utils import override_settings
 from freezegun import freeze_time
 import pytest
 
@@ -548,12 +549,9 @@ def test_merging_external_collector(
         RdiMergeTask().execute(rdi.pk)
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @mock.patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_ack_to_biometric_deduplication_engine"
@@ -599,12 +597,9 @@ def test_merge_biometric_deduplication_non_cw_path(
     }
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @mock.patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_ack_to_biometric_deduplication_engine"
