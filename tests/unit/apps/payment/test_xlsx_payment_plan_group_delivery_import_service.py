@@ -336,6 +336,33 @@ def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_
     assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
 
 
+def test_import_payment_list_keeps_accepted_status_when_plan_not_fully_reconciled(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    PaymentFactory(
+        parent=ctx["plan_one"],
+        financial_service_provider=ctx["plan_one"].financial_service_provider,
+        delivery_type=ctx["plan_one"].delivery_mechanism,
+        program=ctx["plan_one"].program,
+        entitlement_quantity=Decimal("300.00"),
+        entitlement_quantity_usd=Decimal("30.00"),
+        status=Payment.STATUS_PENDING,
+    )
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "currency"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("100.00"), "USD"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    service.validate()
+    assert service.errors == []
+    service.import_payment_list()
+
+    ctx["plan_one"].refresh_from_db()
+    assert ctx["plan_one"].status == PaymentPlan.Status.ACCEPTED
+
+
 def test_plan_without_fsp_template_payments_still_indexed(group_with_plan_without_template):
     ctx = group_with_plan_without_template
     file = _make_workbook(["payment_id", "delivered_quantity"], [])

@@ -262,6 +262,98 @@ def test_reconciliation_import_happy_path_updates_child_payments_and_removes_sta
     assert all(payment_plan.status == PaymentPlan.Status.FINISHED for payment_plan in child_payment_plans)
 
 
+def test_import_household_skips_payment_when_values_unchanged(
+    instruction,
+    child_payment_plans,
+    currency,
+    delivery_mechanism,
+    fsp,
+):
+    plan_one, _ = child_payment_plans
+    household = HouseholdFactory(business_area=plan_one.business_area, program=plan_one.program)
+    PaymentFactory(
+        parent=plan_one,
+        household=household,
+        collector=household.head_of_household,
+        head_of_household=household.head_of_household,
+        program=plan_one.program,
+        currency=currency,
+        delivery_type=delivery_mechanism,
+        financial_service_provider=fsp,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("100.00"),
+        delivered_quantity=Decimal("0.00"),
+        delivered_quantity_usd=Decimal("0.00"),
+        delivery_date=None,
+        status=Payment.STATUS_NOT_DISTRIBUTED,
+    )
+    service = XlsxFollowUpInstructionReconciliationImportService(
+        instruction,
+        ContentFile(b"", name="unused.xlsx"),
+    )
+
+    service._import_household(household.unicef_id, Decimal(0))
+
+    assert service.payments_to_save == []
+
+
+def test_import_payment_list_keeps_finished_plan_status(
+    instruction,
+    cycle,
+    business_area,
+    currency,
+    delivery_mechanism,
+    fsp,
+):
+    plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        follow_up_instruction=instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.FINISHED,
+        exchange_rate=Decimal("1.00"),
+    )
+    household = HouseholdFactory(business_area=plan.business_area, program=plan.program)
+    payment = PaymentFactory(
+        parent=plan,
+        household=household,
+        collector=household.head_of_household,
+        head_of_household=household.head_of_household,
+        program=plan.program,
+        currency=currency,
+        delivery_type=delivery_mechanism,
+        financial_service_provider=fsp,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("100.00"),
+        delivered_quantity=Decimal("0.00"),
+        status=Payment.STATUS_PENDING,
+    )
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["household_id", "delivered_quantity"])
+    worksheet.append([household.unicef_id, "100.00"])
+    with NamedTemporaryFile(suffix=".xlsx") as tmp:
+        workbook.save(tmp.name)
+        tmp.seek(0)
+        service = XlsxFollowUpInstructionReconciliationImportService(
+            instruction,
+            ContentFile(tmp.read(), name="finished-plan-reconciliation.xlsx"),
+        )
+
+    service.open_workbook()
+    service.validate()
+    assert service.errors == []
+    service.import_payment_list()
+
+    payment.refresh_from_db()
+    plan.refresh_from_db()
+    assert payment.delivered_quantity == Decimal("100.00")
+    assert plan.status == PaymentPlan.Status.FINISHED
+
+
 def test_reconciliation_import_validation_rejects_negative_household_total(
     instruction,
     instruction_payments,

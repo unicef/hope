@@ -293,6 +293,17 @@ def test_merge_rows_fills_empty_non_summable_field_from_payment_row() -> None:
     assert merged["delivery_mechanism"] == "Cash"
 
 
+def test_merge_rows_sets_empty_string_when_both_summable_values_empty() -> None:
+    service = object.__new__(_MinimalExportService)
+    service.headers = ["household_id", "entitlement_quantity", "delivered_quantity"]
+    existing_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(100), "delivered_quantity": ""}
+    new_row = {"household_id": "HH-01", "entitlement_quantity": Decimal(50), "delivered_quantity": None}
+
+    merged = service._merge_rows(existing_row, new_row)
+
+    assert merged["delivered_quantity"] == ""
+
+
 def test_merge_rows_keeps_existing_non_summable_field_when_already_set() -> None:
     service = object.__new__(_MinimalExportService)
     service.headers = ["household_id", "entitlement_quantity", "delivery_mechanism"]

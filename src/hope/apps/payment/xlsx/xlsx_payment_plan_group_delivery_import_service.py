@@ -79,9 +79,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         )
         payment_plan_by_id = {str(payment_plan.id): payment_plan for payment_plan in self.eligible_plans}
         for unicef_id, parent_id in payments:
-            payment_plan = payment_plan_by_id.get(str(parent_id))
-            if payment_plan is not None:
-                self.payment_to_plan[str(unicef_id)] = payment_plan
+            self.payment_to_plan[str(unicef_id)] = payment_plan_by_id[str(parent_id)]
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)

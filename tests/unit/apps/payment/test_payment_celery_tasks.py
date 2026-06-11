@@ -17,6 +17,7 @@ from extras.test_utils.factories import (
     DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
@@ -1696,6 +1697,17 @@ def test_export_delivery_task_creates_batch_file(payment_plan_group_with_accepte
     assert plan.export_file_delivery is not None
     assert plan.export_file_delivery.file.name.endswith(".xlsx")
     assert group.background_action_status is None
+
+
+def test_export_delivery_task_queues_job_with_fsp_xlsx_template_id(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+    template = FinancialServiceProviderXlsxTemplateFactory()
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        export_payment_plan_group_delivery_xlsx_async_task(group, str(user.pk), fsp_xlsx_template_id=str(template.pk))
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.config["fsp_xlsx_template_id"] == str(template.pk)
 
 
 def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_accepted_plan, user) -> None:

@@ -460,6 +460,22 @@ def test_save_xlsx_file_second_export_increments_tag_and_excludes_first_batch(
     assert second_plan.export_tag == 2
 
 
+def test_resolve_template_returns_explicitly_requested_template(program_cycle, business_area):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=None,
+        delivery_mechanism=None,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    explicit_template = FinancialServiceProviderXlsxTemplateFactory()
+    service = XlsxPaymentPlanGroupDeliveryExportService(group, fsp_xlsx_template_id=str(explicit_template.pk))
+
+    assert service._resolve_template(plan) == explicit_template
+
+
 def test_resolve_template_returns_none_when_plan_has_no_fsp_or_delivery_mechanism(program_cycle, business_area):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan = PaymentPlanFactory(
