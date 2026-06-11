@@ -2,9 +2,11 @@ from decimal import Decimal
 import os
 from unittest.mock import patch
 
-from django.contrib.auth.models import Permission
+from django.contrib import admin
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages import get_messages
+from django.test import RequestFactory
 from django.urls import reverse
 import pytest
 
@@ -16,10 +18,17 @@ from extras.test_utils.factories import (
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
     UserFactory,
 )
-from hope.admin.payment_plan import can_regenerate_export_file_per_fsp, can_sync_with_payment_gateway
-from hope.models import FinancialServiceProvider, PaymentPlan
+from hope.admin.payment_plan import (
+    PaymentInstructionInline,
+    PaymentPlanAdmin,
+    can_regenerate_export_file_per_fsp,
+    can_sync_with_payment_gateway,
+)
+from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+from hope.models import FinancialServiceProvider, PaymentPlan, RoleAssignment
 
 pytestmark = pytest.mark.django_db
 
@@ -418,3 +427,165 @@ def test_can_regenerate_export_file_per_fsp(
     payment_plan.export_file_per_fsp = file_temp if has_export_file_per_fsp else None
     payment_plan.background_action_status = background_action_status
     assert can_regenerate_export_file_per_fsp(payment_plan) is expected
+
+
+def test_payment_plan_admin_adds_payment_instruction_inline_for_payment_gateway_plan(
+    admin_user, payment_gateway_fsp
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=payment_gateway_fsp.delivery_mechanisms.first(),
+    )
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    model_admin = PaymentPlanAdmin(PaymentPlan, admin.site)
+
+    inline_instances = model_admin.get_inline_instances(request, payment_plan)
+
+    assert any(isinstance(inline, PaymentInstructionInline) for inline in inline_instances)
+
+
+def test_payment_plan_admin_adds_payment_instruction_inline_for_non_pg_plan(
+    admin_user, financial_service_provider
+) -> None:
+    payment_plan = PaymentPlanFactory(financial_service_provider=financial_service_provider)
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    model_admin = PaymentPlanAdmin(PaymentPlan, admin.site)
+
+    inline_instances = model_admin.get_inline_instances(request, payment_plan)
+
+    assert any(isinstance(inline, PaymentInstructionInline) for inline in inline_instances)
+
+
+def test_payment_instruction_inline_hides_download_column_for_non_pg_plan(
+    admin_user, financial_service_provider
+) -> None:
+    payment_plan = PaymentPlanFactory(financial_service_provider=financial_service_provider)
+    inline = PaymentInstructionInline(PaymentPlan, admin.site)
+    request = RequestFactory().get("/")
+    request.user = admin_user
+
+    assert "download_link" not in inline.get_fields(request, payment_plan)
+    assert "download_link" not in inline.get_readonly_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" not in inline.get_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" not in inline.get_readonly_fields(request, payment_plan)
+
+
+def test_payment_instruction_inline_shows_download_column_for_pg_plan(admin_user, payment_gateway_fsp) -> None:
+    payment_plan = PaymentPlanFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=payment_gateway_fsp.delivery_mechanisms.first(),
+    )
+    inline = PaymentInstructionInline(PaymentPlan, admin.site)
+    request = RequestFactory().get("/")
+    request.user = admin_user
+
+    assert "download_link" in inline.get_fields(request, payment_plan)
+    assert "download_link" in inline.get_readonly_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" in inline.get_fields(request, payment_plan)
+    assert "sent_to_payment_gateway" in inline.get_readonly_fields(request, payment_plan)
+
+
+def test_payment_instruction_inline_download_link_returns_anchor_with_permission(
+    staff_user, payment_gateway_fsp
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=payment_gateway_fsp.delivery_mechanisms.first(),
+    )
+    payment_instruction = PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=True)
+
+    content_type = ContentType.objects.get_for_model(PaymentPlan)
+    permission, _ = Permission.objects.get_or_create(
+        content_type=content_type,
+        codename="download_payment_instruction",
+        defaults={"name": "Can download payment instruction from payment gateway"},
+    )
+    staff_user.user_permissions.add(permission)
+
+    inline = PaymentInstructionInline(PaymentPlan, admin.site)
+    inline._request = RequestFactory().get("/")
+    inline._request.user = staff_user
+
+    html = str(inline.download_link(payment_instruction))
+
+    assert PaymentGatewayAPI().get_download_payment_instruction_url(str(payment_instruction.id)) in html
+
+
+def test_payment_instruction_inline_download_link_returns_dash_without_permission(
+    staff_user, payment_gateway_fsp
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=payment_gateway_fsp.delivery_mechanisms.first(),
+    )
+    payment_instruction = PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=True)
+    inline = PaymentInstructionInline(PaymentPlan, admin.site)
+    inline._request = RequestFactory().get("/")
+    inline._request.user = staff_user
+
+    assert inline.download_link(payment_instruction) == "-"
+
+
+def test_payment_instruction_inline_download_link_returns_dash_when_not_sent_to_pg(
+    staff_user, payment_gateway_fsp
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=payment_gateway_fsp.delivery_mechanisms.first(),
+    )
+    payment_instruction = PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+    inline = PaymentInstructionInline(PaymentPlan, admin.site)
+    inline._request = RequestFactory().get("/")
+    inline._request.user = staff_user
+
+    assert inline.download_link(payment_instruction) == "-"
+
+
+def test_payment_instruction_inline_download_link_returns_dash_for_non_pg_plan(
+    staff_user, financial_service_provider, delivery_mechanism
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        financial_service_provider=financial_service_provider,
+        delivery_mechanism=delivery_mechanism,
+    )
+    payment_instruction = PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=True)
+    inline = PaymentInstructionInline(PaymentPlan, admin.site)
+    inline._request = RequestFactory().get("/")
+    inline._request.user = staff_user
+
+    assert inline.download_link(payment_instruction) == "-"
+
+
+def test_payment_instruction_inline_download_link_returns_anchor_with_scoped_permission(
+    staff_user, payment_gateway_fsp
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=payment_gateway_fsp.delivery_mechanisms.first(),
+    )
+    payment_instruction = PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=True)
+
+    content_type = ContentType.objects.get_for_model(PaymentPlan)
+    permission, _ = Permission.objects.get_or_create(
+        content_type=content_type,
+        codename="download_payment_instruction",
+        defaults={"name": "Can download payment instruction from payment gateway"},
+    )
+    group = Group.objects.create(name="payment-instruction-downloaders")
+    group.permissions.add(permission)
+    RoleAssignment.objects.create(
+        user=staff_user,
+        group=group,
+        business_area=payment_plan.business_area,
+        program=None,
+    )
+
+    inline = PaymentInstructionInline(PaymentPlan, admin.site)
+    inline._request = RequestFactory().get("/")
+    inline._request.user = staff_user
+
+    html = str(inline.download_link(payment_instruction))
+
+    assert PaymentGatewayAPI().get_download_payment_instruction_url(str(payment_instruction.id)) in html
