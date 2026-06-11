@@ -46,7 +46,7 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
     selected_individuals_set = {str(i) for i in selected_individual_ids}
     for ticket_details in ticket_details_queryset:
         possible_duplicates_set = {str(i.id) for i in ticket_details.possible_duplicates.all()}.union(
-            {str(ticket_details.golden_records_individual.id)}
+            {str(ticket_details.golden_records_individual_id)}
         )
         intersection = selected_individuals_set.intersection(possible_duplicates_set)
         ticket_details.selected_individuals.add(*intersection)  # type: ignore[arg-type]
