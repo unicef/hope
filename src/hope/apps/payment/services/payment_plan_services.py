@@ -1210,7 +1210,7 @@ class PaymentPlanService:
                 f" reconciliation window of {self.payment_plan.program.reconciliation_window_in_days} days."
                 f" Please take the necessary steps to complete the reconciliation process timely.",
                 "title": f"Payment Plan {self.payment_plan.unicef_id} Reconciliation Overdue",
-                "link": f"Payment Plan: {payment_plan_link}",
+                "link": payment_plan_link,
             }
 
             user.email_user(

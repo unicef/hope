@@ -768,7 +768,7 @@ class WesternUnionReportsService:
                 "email": getattr(user, "email", ""),
                 "message": f"Payment Plan: {payment_plan_link}",
                 "title": f"Payment Plan {report.report_file.file.name} Western Union report",
-                "link": f"Western Union report file: {download_link}",
+                "link": download_link,
             }
             user.email_user(
                 subject=context["title"],

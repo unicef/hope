@@ -2,5 +2,5 @@
 
 {% block content %}
     <p>{{ message }}</p>
-    {% if link %}<p><a href="{{ link }}">{{ link }}</a></p>{% endif %}
+    {% if link %}{% include "core/_email_button.html" with label="Download Report" %}{% endif %}
 {% endblock content %}
