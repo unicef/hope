@@ -1,5 +1,5 @@
 {% extends 'base_notification_email.txt' %}
 
 {% block content %}
-    A Grievance & Feedback ticket {{ ticket_url }} created over {{ days_ago }} days ago requires action and attention
+    A Sensitive Grievance ticket {{ ticket_url }} created over {{ days_ago }} days ago requires action and attention
 {% endblock content %}
