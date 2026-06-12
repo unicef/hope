@@ -1209,6 +1209,8 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == "AFG"
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"] == {
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
@@ -1230,6 +1232,8 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == ""
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"] == {
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
@@ -1285,6 +1289,8 @@ def test_payment_instruction_payload_uses_destination_country_iso_code2(
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == "AFG"
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"]["country"] == "AFG"
     assert data["payload"]["destination_country_iso_code3"] == "AFG"
     assert data["payload"]["destination_country_iso_code2"] == "AF"

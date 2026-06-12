@@ -62,11 +62,15 @@ class PaymentInstructionStatus(Enum):
 class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     external_code = serializers.SerializerMethodField()
-    fsp = serializers.SerializerMethodField()
+    fsp = serializers.CharField(source="payment_plan.financial_service_provider.payment_gateway_id", read_only=True)
     payload = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
+    delivery_mechanism = serializers.CharField(source="payment_plan.delivery_mechanism.code", read_only=True)
 
-    def get_fsp(self, obj: Any) -> str:
-        return obj.payment_plan.financial_service_provider.payment_gateway_id
+    def get_country(self, obj: PaymentPlanSplit) -> str:
+        business_area = obj.payment_plan.business_area
+        payment_country = business_area.payment_countries.first()
+        return payment_country.iso_code3 if payment_country else ""
 
     def get_payload(self, obj: Any) -> dict:
         business_area = obj.payment_plan.business_area
@@ -94,6 +98,8 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
             "external_code",
             "fsp",
             "payload",
+            "country",
+            "delivery_mechanism",
         ]
 
 
