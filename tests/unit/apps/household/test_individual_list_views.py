@@ -1093,6 +1093,30 @@ def test_individual_list_role_field(list_context: dict, create_user_role_with_pe
     assert results_by_id[str(member.id)]["role"] is None
 
 
+def test_individual_list_role_field_no_prefetch(
+    list_context: dict,
+) -> None:
+    # Covers IndividualListSerializer.get_role else-branch (roles is None):
+    # when prefetched_roles is absent the serializer falls back to a DB query.
+    from hope.apps.household.api.serializers.individual import IndividualListSerializer
+
+    ctx = list_context
+    head = ctx["individual1_1"]
+
+    # Ensure the individual has no prefetched_roles attribute (simulates a direct
+    # serializer call without the view's Prefetch annotation).
+    assert not hasattr(head, "prefetched_roles")
+
+    serializer = IndividualListSerializer(head, context={"request": None})
+    assert serializer.data["role"] == "Primary collector"
+
+    member = ctx["individual1_2"]
+    assert not hasattr(member, "prefetched_roles")
+
+    serializer = IndividualListSerializer(member, context={"request": None})
+    assert serializer.data["role"] is None
+
+
 def test_get_individual_photos(detail_context: dict, create_user_role_with_permissions: Callable) -> None:
     ctx = detail_context
     create_user_role_with_permissions(
