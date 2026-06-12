@@ -5,97 +5,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{{ title }}</title>
     <style>
-        html, body {
+        /* Progressive enhancement only — clients that strip the <head> (e.g. Outlook)
+           still get a readable layout from the inline styles on the elements below. */
+        body {
             margin: 0;
             padding: 0;
-            font-size: 16px;
-            height: 100%;
-        }
-        div.wrapper {
-            min-height: 100%;
-        }
-        header img {
-            width: 100%;
-            height: auto;
-        }
-        main {
-            padding: 0 70px;
+            background-color: #f4f4f4;
         }
         h1 {
             font-weight: bold;
             font-size: 16px;
         }
         h1.title {
+            margin-top: 0;
             margin-bottom: 15px;
         }
         div.block {
             padding: 20px;
-            margin-bottom: 20px;
             border: 1px solid rgb(228, 228, 228);
             border-radius: 4px;
         }
         div.block_1 {
             background-color: white;
         }
-        div.block_2 {
-            background-color: rgb(228, 228, 228);
+        ul, ol {
+            margin: 0 0 0 20px;
+            padding: 0;
         }
-        div.block_3 {
-            text-align: center;
-        }
-        ul {
-            list-style: disc;
-            margin-left: 20px;
-        }
-        button {
+        a.button {
             background-color: #033F91;
-            color: white;
-            font-size: 20px;
-            padding: 10px 20px;
-            border: none;
+            color: #ffffff;
+            font-size: 16px;
+            text-decoration: none;
+            padding: 12px 24px;
             border-radius: 4px;
-            cursor: pointer;
+            display: inline-block;
         }
-        footer {
-            text-align: center;
-            padding: 20px;
-            background-color: rgb(228, 228, 228);
+        @media only screen and (max-width: 600px) {
+            .email-main {
+                padding: 20px !important;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="wrapper">
-        <header>
-            <img src="{% static 'core/img/hope_email_header.png' %}" alt="HOPE Header Image">
-        </header>
-
-        <main>
-            {% block body %}
-                <div class="block block_1">
-                    <h1 class="title">Hello,</h1>
-                    <p>Some text here</p>
-                </div>
-                <div class="block block_2">
-                    <h1 class="title">Here's some list:</h1>
-                    <ul>
-                        <li>item 1</li>
-                        <li>item 2</li>
-                    </ul>
-                </div>
-                <div class="block block_3">
-                    <h1 class="title">Please click the button below and complete the process</h1>
-                    <button>ACTIVATE LINK</button>
-                </div>
-            {% endblock body %}
-        </main>
-
-        {% block footer %}
-            <footer>
-                <p>If you experience any issues, don't hesitate to reach out to our customer support team</p>
-            </footer>
-        {% endblock footer %}
-    </div>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #1f1f1f;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 0;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width: 600px; max-width: 600px; background-color: #ffffff;">
+                    <tr>
+                        <td style="padding: 0;">
+                            <img src="{% static 'core/img/hope_email_header.jpg' %}" alt="HOPE Header Image" width="600" height="96" style="display: block; width: 100%; height: auto; border: 0;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="email-main" style="padding: 40px;">
+                            {% block body %}
+                                <div class="block block_1" style="padding: 20px; border: 1px solid rgb(228, 228, 228); border-radius: 4px; background-color: #ffffff;">
+                                    <h1 class="title" style="margin-top: 0; margin-bottom: 15px; font-weight: bold; font-size: 16px;">Hello,</h1>
+                                    <p>Some text here</p>
+                                    <p>
+                                        <a class="button" href="#" style="background-color: #033F91; color: #ffffff; font-size: 16px; text-decoration: none; padding: 12px 24px; border-radius: 4px; display: inline-block;">ACTIVATE LINK</a>
+                                    </p>
+                                </div>
+                            {% endblock body %}
+                        </td>
+                    </tr>
+                    {% block footer %}
+                        <tr>
+                            <td align="center" style="padding: 20px; background-color: rgb(228, 228, 228);">
+                                <p style="margin: 0; font-size: 14px;">This is an automated message. Please do not reply to this email.</p>
+                            </td>
+                        </tr>
+                    {% endblock footer %}
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

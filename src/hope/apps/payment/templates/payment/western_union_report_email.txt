@@ -1,6 +1,4 @@
-Dear {{ first_name }} {{ last_name }},
+{% extends "core/base_greeting_email.txt" %}
 
-{{ message }}
-{{ link }}
-
-Please do not reply to this email
+{% block content %}{{ message }}{% if link %}
+Western Union report file: {{ link }}{% endif %}{% endblock content %}
