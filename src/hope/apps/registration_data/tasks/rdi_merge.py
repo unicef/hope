@@ -211,13 +211,13 @@ class RdiMergeTask:
                     individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct)
                         .select_related("household__admin2", "program", "business_area", "individual_collection")
-                        .select_for_update()
+                        .select_for_update(of=("self",))
                         .order_by("pk")
                     )
                     households = evaluate_qs(
                         Household.objects.filter(registration_data_import=obj_hct)
                         .select_related("household_collection", "business_area")
-                        .select_for_update()
+                        .select_for_update(of=("self",))
                         .order_by("pk")
                     )
 
