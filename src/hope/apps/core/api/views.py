@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from hope.api.caches import cached_response, etag_decorator
+from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
@@ -218,4 +219,10 @@ class ChoicesViewSet(ViewSet):
         countries = Country.objects.all().order_by("name")
         country_tuples = tuple((country.iso_code3, country.name) for country in countries)
         resp = ChoiceSerializer(to_choice_object(list(country_tuples)), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="permissions")
+    def permissions(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(Permissions.choices()), many=True).data
         return Response(resp)

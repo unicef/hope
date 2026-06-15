@@ -22,7 +22,11 @@ import SupervisedUserCircle from '@mui/icons-material/SupervisedUserCircle';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
-import { PERMISSIONS } from '../../../config/permissions';
+import {
+  GRIEVANCES_VIEW_LIST_PERMISSIONS,
+  PERMISSION_MODULES,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import React from 'react';
 
 export type MenuItem = {
@@ -68,7 +72,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/population.*$/,
     icon: <PeopleIcon />,
     collapsable: true,
-    permissionModule: 'POPULATION',
+    permissionModule: PERMISSION_MODULES.POPULATION,
     scopes: [SCOPE_PROGRAM],
     isSocialWorker: false,
     secondaryActions: [
@@ -77,7 +81,7 @@ export const menuItems: MenuItem[] = [
         href: '/population/household',
         selectedRegexp: /^\/population\/household.*$/,
         icon: <PeopleAltRoundedIcon />,
-        permissionModule: 'HOUSEHOLDS',
+        permissionModule: PERMISSION_MODULES.HOUSEHOLDS,
         scopes: [SCOPE_PROGRAM],
         dataPerm: PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
       },
@@ -86,7 +90,7 @@ export const menuItems: MenuItem[] = [
         href: '/population/individuals',
         selectedRegexp: /^\/population\/individuals.*$/,
         icon: <FaceIcon />,
-        permissionModule: 'INDIVIDUALS',
+        permissionModule: PERMISSION_MODULES.INDIVIDUALS,
         scopes: [SCOPE_PROGRAM],
         dataPerm: PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
       },
@@ -97,7 +101,7 @@ export const menuItems: MenuItem[] = [
     href: '/population/people',
     selectedRegexp: /^\/population\/people.*$/,
     icon: <PeopleIcon />,
-    permissionModule: 'POPULATION',
+    permissionModule: PERMISSION_MODULES.POPULATION,
     scopes: [SCOPE_PROGRAM],
     isSocialWorker: true,
     dataPerm: PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
@@ -154,7 +158,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/payment-module.*$/,
     icon: <PaymentIcon />,
     collapsable: true,
-    permissionModule: 'PM',
+    permissionModule: PERMISSION_MODULES.PM,
     scopes: [SCOPE_PROGRAM],
     secondaryActions: [
       {
@@ -166,7 +170,7 @@ export const menuItems: MenuItem[] = [
           PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
           PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
         ],
-        permissionModule: 'PM',
+        permissionModule: PERMISSION_MODULES.PM,
         scopes: [SCOPE_PROGRAM],
         dataPerm: PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
       },
@@ -176,7 +180,7 @@ export const menuItems: MenuItem[] = [
         selectedRegexp: /^\/payment-module\/payment-plans.*$/,
         icon: <PaymentIcon />,
         permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
-        permissionModule: 'PM',
+        permissionModule: PERMISSION_MODULES.PM,
         scopes: [SCOPE_PROGRAM],
         dataPerm: PERMISSIONS.PM_VIEW_LIST,
       },
@@ -221,7 +225,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/grievance\/tickets.*$/,
     icon: <Feedback />,
     collapsable: true,
-    permissionModule: 'GRIEVANCES',
+    permissionModule: PERMISSION_MODULES.GRIEVANCES,
     scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
     secondaryActions: [
       {
@@ -229,27 +233,27 @@ export const menuItems: MenuItem[] = [
         href: '/grievance/tickets/user-generated',
         selectedRegexp: /^\/grievance\/tickets.*$/,
         icon: <ListIcon />,
-        permissionModule: 'GRIEVANCES',
+        permissionModule: PERMISSION_MODULES.GRIEVANCES,
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
-        dataPerm: `${PERMISSIONS.GRIEVANCES_VIEW_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS} ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
+        dataPerm: `${GRIEVANCES_VIEW_LIST_PERMISSIONS.join(', ')}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}, ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
       },
       {
         name: 'Grievance Dashboard',
         href: '/grievance/dashboard',
         selectedRegexp: /^\/grievance\/dashboard.*$/,
         icon: <Assessment />,
-        permissionModule: 'GRIEVANCES',
+        permissionModule: PERMISSION_MODULES.GRIEVANCES,
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
-        dataPerm: PERMISSIONS.GRIEVANCES_VIEW_LIST,
+        dataPerm: GRIEVANCES_VIEW_LIST_PERMISSIONS.join(', '),
       },
       {
         name: 'Feedback',
         href: '/grievance/feedback',
         selectedRegexp: /^\/grievance\/feedback.*$/,
         icon: <RateReviewIcon />,
-        permissionModule: 'GRIEVANCES',
+        permissionModule: PERMISSION_MODULES.GRIEVANCES,
         scopes: [SCOPE_PROGRAM, SCOPE_ALL_PROGRAMS],
-        dataPerm: `${PERMISSIONS.GRIEVANCES_VIEW_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS} ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
+        dataPerm: `${GRIEVANCES_VIEW_LIST_PERMISSIONS.join(', ')}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}, ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}, ${PERMISSIONS.RDI_VIEW_LIST}`,
       },
     ],
   },
@@ -259,7 +263,7 @@ export const menuItems: MenuItem[] = [
     selectedRegexp: /^\/accountability\/communication.*$/,
     icon: <ForumIcon />,
     collapsable: true,
-    permissionModule: 'ACCOUNTABILITY',
+    permissionModule: PERMISSION_MODULES.ACCOUNTABILITY,
     flag: 'isAccountabilityApplicable',
     scopes: [SCOPE_PROGRAM],
     secondaryActions: [
@@ -268,7 +272,7 @@ export const menuItems: MenuItem[] = [
         href: '/accountability/communication',
         selectedRegexp: /^\/accountability\/communication.*$/,
         icon: <MessageIcon />,
-        permissionModule: 'COMMUNICATION_MESSAGE',
+        permissionModule: PERMISSION_MODULES.COMMUNICATION_MESSAGE,
         scopes: [SCOPE_PROGRAM],
         dataPerm: `${PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST}, ${PERMISSIONS.TARGETING_VIEW_LIST}, ${PERMISSIONS.USER_MANAGEMENT_VIEW_LIST}`,
       },
@@ -277,7 +281,7 @@ export const menuItems: MenuItem[] = [
         href: '/accountability/surveys',
         selectedRegexp: /^\/accountability\/surveys.*$/,
         icon: <BallotIcon />,
-        permissionModule: 'SURVEY',
+        permissionModule: PERMISSION_MODULES.SURVEY,
         scopes: [SCOPE_PROGRAM],
         dataPerm: PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST,
       },
