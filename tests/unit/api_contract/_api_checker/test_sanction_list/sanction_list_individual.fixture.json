@@ -2,10 +2,11 @@
     "sanction_list_individual": {
         "master": {
             "model": "sanction_list.sanctionlistindividual",
-            "pk": "49495323-1e4b-4f5e-ab8b-6ebdcf01ef24",
+            "pk": "fac855d2-be91-4742-ace7-f15c668fa136",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
+                "internal_data": {},
                 "first_name": "First0",
                 "second_name": "",
                 "third_name": "",

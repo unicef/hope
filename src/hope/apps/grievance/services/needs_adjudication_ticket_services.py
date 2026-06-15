@@ -24,8 +24,8 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.models import (
+    BiometricDedupeSimilarityPair,
     BusinessArea,
-    DeduplicationEngineSimilarityPair,
     Household,
     Individual,
     RegistrationDataImport,
@@ -81,28 +81,6 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
         _clear_deduplication_individuals_fields(distinct_individuals)  # type: ignore[arg-type]
 
-    # both individuals are distinct, report false positive
-    if (
-        ticket_details.ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
-        and not duplicate_individuals
-        and distinct_individuals
-    ):
-        photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
-        if len(photos) == 2:
-            from hope.apps.registration_data.services.biometric_deduplication import (
-                BiometricDeduplicationService,
-            )
-
-            service = BiometricDeduplicationService()
-            try:
-                service.report_false_positive_duplicate(
-                    photos[0],
-                    photos[1],
-                    ticket_details.ticket.registration_data_import.program,  # type: ignore[arg-type]
-                )
-            except service.api.API_EXCEPTION_CLASS:
-                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
-
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
     ticket_details = grievance_ticket.ticket_details
@@ -137,7 +115,7 @@ def create_grievance_ticket_with_details(
         TicketNeedsAdjudicationDetails,
     )
 
-    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = kwargs.get("dedup_engine_similarity_pair")
+    dedup_engine_similarity_pair: BiometricDedupeSimilarityPair | None = kwargs.get("dedup_engine_similarity_pair")
     possible_duplicates: list[Individual] = kwargs.get("possible_duplicates", [])
     registration_data_import: RegistrationDataImport | None = kwargs.get("registration_data_import")
     is_multiple_duplicates_version: bool = kwargs.get("is_multiple_duplicates_version", False)
@@ -186,7 +164,7 @@ def create_grievance_ticket_with_details(
             dedup_engine_similarity_pair.similarity_score,
             dedup_engine_similarity_pair.similarity_score,
         )
-        if dedup_engine_similarity_pair.status_code != DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value:
+        if dedup_engine_similarity_pair.status_code != BiometricDedupeSimilarityPair.StatusCode.STATUS_200.value:
             ticket.description = (
                 f"Error Status Code: "
                 f"{dedup_engine_similarity_pair.status_code} "
@@ -272,7 +250,7 @@ def create_needs_adjudication_tickets(
 
 
 def create_needs_adjudication_tickets_for_biometrics(
-    deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair],
+    deduplication_pairs: QuerySet[BiometricDedupeSimilarityPair],
     rdi: RegistrationDataImport,
 ) -> None:
     if not deduplication_pairs.exists():

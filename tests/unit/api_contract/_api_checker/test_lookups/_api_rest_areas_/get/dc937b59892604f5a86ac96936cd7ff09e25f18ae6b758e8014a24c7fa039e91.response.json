@@ -15,7 +15,7 @@
         "previous": null,
         "results": [
             {
-                "id": "ce1bd34b-02eb-4d91-ab44-b5bc0981f824",
+                "id": "9437f6be-1fe1-43bb-828e-230fb08b0467",
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "original_id": null,
@@ -31,7 +31,7 @@
                 "tree_id": 1,
                 "level": 0,
                 "parent": null,
-                "area_type": "8af9edc5-e2c1-4fce-99e0-c7418720959f"
+                "area_type": "3f140219-8ee4-411d-9d0f-5d6006999a66"
             }
         ]
     },

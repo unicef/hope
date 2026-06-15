@@ -2,19 +2,19 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "0b628076-cd9c-459c-af67-88a4e5ebd42b",
+            "pk": "c28cf3ea-c579-4670-9e99-be1bc2a3ce71",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
-                "data_collecting_type": 14,
-                "beneficiary_group": "faa27904-7212-472a-b658-02485151f29a",
-                "business_area": "98c0d42f-e71c-4e40-8886-d11cebf8c289",
+                "version": 1735688653315201,
+                "data_collecting_type": 13,
+                "beneficiary_group": "b4a44ec7-5c61-4a29-b01a-8b085ce20416",
+                "business_area": "c8ff87dc-605a-423a-8d7b-4f26fdee4efa",
                 "name": "Program 0",
+                "code": "c4da",
                 "status": "ACTIVE",
-                "code": "6-q7",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -28,6 +28,7 @@
                 "administrative_areas_of_implementation": "",
                 "biometric_deduplication_enabled": false,
                 "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                "identification_key_individual_label": null,
                 "is_visible": true,
                 "household_count": 0,
                 "individual_count": 0,
@@ -40,7 +41,7 @@
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 14,
+                "pk": 13,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -55,14 +56,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        14
+                        13
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "faa27904-7212-472a-b658-02485151f29a",
+                "pk": "b4a44ec7-5c61-4a29-b01a-8b085ce20416",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -76,7 +77,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "98c0d42f-e71c-4e40-8886-d11cebf8c289",
+                "pk": "c8ff87dc-605a-423a-8d7b-4f26fdee4efa",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -102,6 +103,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,

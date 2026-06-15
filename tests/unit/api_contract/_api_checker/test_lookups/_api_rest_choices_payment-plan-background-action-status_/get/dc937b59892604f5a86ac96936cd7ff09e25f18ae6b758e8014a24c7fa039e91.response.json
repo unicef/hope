@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "768"
+        "Content-Length": "1021"
     },
     "data": [
         {
@@ -40,12 +40,12 @@
             "value": "XLSX_IMPORT_ERROR"
         },
         {
-            "name": "Importing Entitlements flat amount",
-            "value": "IMPORTING_ENTITLEMENTS"
-        },
-        {
             "name": "Importing Entitlements XLSX file",
             "value": "XLSX_IMPORTING_ENTITLEMENTS"
+        },
+        {
+            "name": "Importing Entitlements flat amount",
+            "value": "IMPORTING_ENTITLEMENTS"
         },
         {
             "name": "Importing Reconciliation XLSX file",

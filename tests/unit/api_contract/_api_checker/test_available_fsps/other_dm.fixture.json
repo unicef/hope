@@ -2,7 +2,7 @@
     "other_dm": {
         "master": {
             "model": "payment.deliverymechanism",
-            "pk": "535ab9bf-c8dc-4f55-bddc-0869f24bbafd",
+            "pk": "ee7d9074-fec9-4d86-8dbb-317df76f2fba",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",

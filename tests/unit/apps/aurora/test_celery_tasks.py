@@ -729,7 +729,9 @@ def test_fresh_extract_records_task_action_uses_default_record_ids_when_config_i
 
     fresh_extract_records_async_task_action(job)
 
-    mock_extract.assert_called_once_with([record_1.id, record_2.id])
+    mock_extract.assert_called_once()
+    (called_record_ids,) = mock_extract.call_args.args
+    assert sorted(called_record_ids) == sorted([record_1.id, record_2.id])
 
 
 def test_fresh_extract_records_task_schedules_async_job() -> None:

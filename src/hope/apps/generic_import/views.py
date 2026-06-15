@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -10,6 +12,11 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.generic_import.celery_tasks import process_generic_import_async_task
 from hope.apps.generic_import.forms import GenericImportForm
 from hope.models import ImportData, RegistrationDataImport
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
+
+if TYPE_CHECKING:
+    from hope.models.business_area import BusinessArea
+    from hope.models.program import Program
 
 
 class GenericImportUploadView(LoginRequiredMixin, FormView):
@@ -54,8 +61,8 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form: GenericImportForm) -> HttpResponse:
         """Process valid form and trigger import task."""
-        business_area = form.cleaned_data["business_area"]
-        program = form.cleaned_data["program"]
+        business_area: BusinessArea = form.cleaned_data["business_area"]
+        program: Program = form.cleaned_data["program"]
         uploaded_file = form.cleaned_data["file"]
 
         # Verify user has permission for selected BA
@@ -64,6 +71,10 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
                 self.request,
                 f"You do not have permission to import data for {business_area.name}.",
             )
+            return self.form_invalid(form)
+
+        if business_area.is_rdi_ingest_source_country_workspace_only:
+            messages.error(self.request, ALL_EXCEPT_CW_INGEST_REJECT_MSG)
             return self.form_invalid(form)
 
         try:

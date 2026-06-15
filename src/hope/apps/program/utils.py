@@ -322,9 +322,6 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program, u
     rdi = RegistrationDataImport.objects.create(
         name=f"Default RDI for Programme: {new_program.name}",
         status=RegistrationDataImport.MERGED,
-        deduplication_engine_status=(
-            RegistrationDataImport.DEDUP_ENGINE_PENDING if new_program.biometric_deduplication_enabled else None
-        ),
         imported_by=User.objects.get(id=user_id),
         data_source=RegistrationDataImport.PROGRAM_POPULATION,
         number_of_individuals=copy_from_individuals.count(),
@@ -423,9 +420,6 @@ def _prepare_and_save_household_copy(
 def _create_enrollment_rdi(program: Program, user_id: str) -> RegistrationDataImport:
     return RegistrationDataImport.objects.create(
         status=RegistrationDataImport.MERGED,
-        deduplication_engine_status=(
-            RegistrationDataImport.DEDUP_ENGINE_PENDING if program.biometric_deduplication_enabled else None
-        ),
         imported_by=User.objects.get(id=user_id),
         data_source=RegistrationDataImport.ENROLL_FROM_PROGRAM,
         number_of_individuals=0,

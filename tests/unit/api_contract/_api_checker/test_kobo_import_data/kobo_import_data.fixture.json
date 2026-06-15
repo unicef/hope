@@ -2,7 +2,7 @@
     "kobo_import_data": {
         "master": {
             "model": "registration_data.koboimportdata",
-            "pk": "94e136b2-98e8-473f-addb-5ec27d576bad",
+            "pk": "a88860ae-d300-47d2-ac1a-e1b0b7ceca86",
             "fields": {
                 "kobo_asset_id": "test_asset_123",
                 "only_active_submissions": true,
@@ -12,7 +12,7 @@
         "deps": [
             {
                 "model": "registration_data.importdata",
-                "pk": "94e136b2-98e8-473f-addb-5ec27d576bad",
+                "pk": "a88860ae-d300-47d2-ac1a-e1b0b7ceca86",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

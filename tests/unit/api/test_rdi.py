@@ -3,6 +3,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
+from extras.test_utils.factories import RoleFactory, UserFactory
+from extras.test_utils.factories.api import APITokenFactory
+from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -21,8 +24,17 @@ from hope.models import (
     RegistrationDataImport,
     User,
 )
+from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def business_area(business_area: BusinessArea) -> BusinessArea:
+    # rdi-create / rdi-push are gated by CountryWorkspaceOnlyPermission.
+    business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+    business_area.save(update_fields=["ingest_source"])
+    return business_area
 
 
 def test_create_rdi(
@@ -72,44 +84,54 @@ def test_create_rdi_permission_denied_for_invalid_email(
 
 
 @pytest.fixture
+def non_cw_business_area(db) -> BusinessArea:
+    return BusinessAreaFactory(name="Ukraine")
+
+
+@pytest.fixture
+def non_cw_token_api_client(non_cw_business_area: BusinessArea) -> APIClient:
+    grants = [Grant.API_RDI_CREATE.name, Grant.API_RDI_UPLOAD.name]
+    user = UserFactory()
+    role = RoleFactory(name="non-cw-api-role", permissions=grants)
+    user.role_assignments.create(role=role, business_area=non_cw_business_area)
+    token = APITokenFactory(user=user, grants=grants)
+    token.valid_for.set([non_cw_business_area])
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    return client
+
+
+def test_create_rdi_rejected_for_non_cw_business_area(
+    non_cw_token_api_client: APIClient,
+    non_cw_business_area: BusinessArea,
+    imported_by_user: User,
+) -> None:
+    program = ProgramFactory(status=Program.DRAFT, business_area=non_cw_business_area)
+    url = reverse("api:rdi-create", args=[non_cw_business_area.slug])
+    data = {
+        "name": "rejected-non-cw",
+        "collect_data_policy": "FULL",
+        "program": str(program.id),
+        "imported_by_email": imported_by_user.email,
+        "country_workspace_id": "cw-create-rdi-non-cw",
+    }
+
+    response = non_cw_token_api_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
+    assert "This endpoint is available only for business areas that manage RDIs only through Country Workspace" in str(
+        response.json()
+    )
+    assert not RegistrationDataImport.objects.filter(name="rejected-non-cw").exists()
+
+
+@pytest.fixture
 def biometric_program(request, business_area: BusinessArea) -> Program:
     return ProgramFactory(
         status=Program.DRAFT,
         business_area=business_area,
         biometric_deduplication_enabled=request.param,
     )
-
-
-@pytest.mark.parametrize(
-    ("biometric_program", "expected_dedup_status"),
-    [
-        (True, RegistrationDataImport.DEDUP_ENGINE_PENDING),
-        (False, None),
-    ],
-    indirect=["biometric_program"],
-)
-def test_create_rdi_biometric_deduplication_status(
-    token_api_client: APIClient,
-    user_business_area: BusinessArea,
-    biometric_program: Program,
-    expected_dedup_status: str | None,
-    imported_by_user: User,
-) -> None:
-    url = reverse("api:rdi-create", args=[user_business_area.slug])
-    data = {
-        "name": "rdi_biometric_test",
-        "collect_data_policy": "FULL",
-        "program": str(biometric_program.id),
-        "imported_by_email": imported_by_user.email,
-        "country_workspace_id": "cw-biometric-baseline",
-    }
-
-    response = token_api_client.post(url, data, format="json")
-
-    assert response.status_code == status.HTTP_201_CREATED
-    rdi = RegistrationDataImport.objects.filter(name="rdi_biometric_test").first()
-    assert rdi is not None
-    assert rdi.deduplication_engine_status == expected_dedup_status
 
 
 def test_push_creates_household_and_individuals(
@@ -206,6 +228,75 @@ def test_push_creates_household_and_individuals(
 
 
 @pytest.fixture
+def valid_upload_household() -> dict:
+    return {
+        "residence_status": "",
+        "village": "village1",
+        "country": "AF",
+        "members": [
+            {
+                "relationship": HEAD,
+                "full_name": "James Head #1",
+                "birth_date": "2000-01-01",
+                "sex": "MALE",
+                "role": "",
+            },
+            {
+                "relationship": NON_BENEFICIARY,
+                "full_name": "Mary Primary #1",
+                "birth_date": "2000-01-01",
+                "role": ROLE_PRIMARY,
+                "sex": "FEMALE",
+            },
+        ],
+        "size": 1,
+    }
+
+
+def test_upload_rejected_for_cw_only_business_area(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    afghanistan_country,
+    mock_elasticsearch,
+    valid_upload_household: dict,
+) -> None:
+    url = reverse("api:rdi-upload", args=[user_business_area.slug])
+    payload = {
+        "name": "rejected-cw-upload",
+        "program": str(program.id),
+        "households": [valid_upload_household],
+    }
+
+    response = token_api_client.post(url, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
+    assert "Country Workspace" in str(response.json())
+    assert not RegistrationDataImport.objects.filter(name="rejected-cw-upload").exists()
+
+
+def test_upload_succeeds_for_non_cw_business_area(
+    non_cw_token_api_client: APIClient,
+    non_cw_business_area: BusinessArea,
+    afghanistan_country,
+    mock_elasticsearch,
+    valid_upload_household: dict,
+) -> None:
+    program = ProgramFactory(status=Program.DRAFT, business_area=non_cw_business_area)
+    url = reverse("api:rdi-upload", args=[non_cw_business_area.slug])
+    payload = {
+        "name": "accepted-non-cw-upload",
+        "program": str(program.id),
+        "households": [valid_upload_household],
+    }
+
+    response = non_cw_token_api_client.post(url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert RegistrationDataImport.objects.filter(name="accepted-non-cw-upload").exists()
+
+
+@pytest.fixture
 def rdi_in_review(business_area: BusinessArea, program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory(
         business_area=business_area,
@@ -226,19 +317,3 @@ def test_push_returns_404_when_rdi_not_loading(
     response = token_api_client.post(url, [], format="json")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_complete_transitions_rdi_to_in_review(
-    token_api_client: APIClient,
-    user_business_area: BusinessArea,
-    rdi_loading: RegistrationDataImport,
-) -> None:
-    url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading.id)])
-
-    response = token_api_client.post(url, {}, format="json")
-
-    assert response.status_code == status.HTTP_200_OK, str(response.json())
-    data = response.json()
-    assert data[0] == {"id": str(rdi_loading.id), "status": "IN_REVIEW"}
-    rdi_loading.refresh_from_db()
-    assert rdi_loading.status == RegistrationDataImport.IN_REVIEW

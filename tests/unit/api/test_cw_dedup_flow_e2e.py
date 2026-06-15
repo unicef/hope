@@ -13,10 +13,10 @@ from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollec
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hope.models import (
+    BiometricDedupeSimilarityPair,
     BusinessArea,
     Country,
     DataCollectingType,
-    DeduplicationEngineSimilarityPair,
     DocumentType,
     Individual,
     Program,
@@ -29,6 +29,14 @@ pytestmark = [
     pytest.mark.elasticsearch,
     pytest.mark.xdist_group(name="elasticsearch"),
 ]
+
+
+@pytest.fixture
+def business_area(business_area: BusinessArea) -> BusinessArea:
+    # rdi-create / rdi-complete / push endpoints are gated by CountryWorkspaceOnlyPermission.
+    business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+    business_area.save(update_fields=["ingest_source"])
+    return business_area
 
 
 @pytest.fixture
@@ -122,13 +130,9 @@ def _complete_rdi(
     complete_url = reverse("api:rdi-complete", args=[business_area.slug, rdi_id])
     with (
         patch(
-            "hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_group_findings",
+            "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings",
             return_value=cw_findings,
         ) as mock_findings,
-        patch(
-            "hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.approve_group",
-            return_value=({}, 200),
-        ) as mock_approve,
     ):
         with django_assert_num_queries(expected_queries):
             with django_capture_on_commit_callbacks(execute=True):
@@ -136,15 +140,13 @@ def _complete_rdi(
 
     assert resp.status_code == status.HTTP_200_OK, str(resp.json())
     mock_findings.assert_called_once_with(country_workspace_id)
-    mock_approve.assert_called_once_with(country_workspace_id)
 
 
-def _individual_payload(individual_id: str, country_workspace_id: str, document_type_key: str) -> dict[str, Any]:
+def _individual_payload(country_workspace_id: str, document_type_key: str) -> dict[str, Any]:
     return {
-        "individual_id": individual_id,
-        "full_name": f"Person {individual_id}",
-        "given_name": f"Given{individual_id}",
-        "family_name": f"Family{individual_id}",
+        "full_name": f"Person {country_workspace_id}",
+        "given_name": f"Given{country_workspace_id}",
+        "family_name": f"Family{country_workspace_id}",
         "birth_date": "1990-01-01",
         "sex": "MALE",
         "observed_disability": ["NONE"],
@@ -153,7 +155,7 @@ def _individual_payload(individual_id: str, country_workspace_id: str, document_
             {
                 "type": document_type_key,
                 "country": "AF",
-                "document_number": f"DOC-{individual_id}",
+                "document_number": f"DOC-{country_workspace_id}",
                 "issuance_date": "2020-01-01",
                 "expiry_date": "2030-01-01",
             }
@@ -197,18 +199,18 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
     indiv_resp = token_api_client.post(
         push_indiv_url,
         [
-            _individual_payload("IND_A", cw_individual_ids["A"], birth_certificate_doc_type.key),
-            _individual_payload("IND_B", cw_individual_ids["B"], birth_certificate_doc_type.key),
-            _individual_payload("IND_C", cw_individual_ids["C"], birth_certificate_doc_type.key),
+            _individual_payload(cw_individual_ids["A"], birth_certificate_doc_type.key),
+            _individual_payload(cw_individual_ids["B"], birth_certificate_doc_type.key),
+            _individual_payload(cw_individual_ids["C"], birth_certificate_doc_type.key),
         ],
         format="json",
     )
     assert indiv_resp.status_code == status.HTTP_201_CREATED, str(indiv_resp.json())
     assert indiv_resp.data["accepted"] == 3
     id_map = indiv_resp.data["individual_id_mapping"]
-    hoh_unicef_id = id_map["IND_A"]
-    member_b_unicef_id = id_map["IND_B"]
-    member_c_unicef_id = id_map["IND_C"]
+    hoh_unicef_id = id_map["cw-ind-A"]
+    member_b_unicef_id = id_map["cw-ind-B"]
+    member_c_unicef_id = id_map["cw-ind-C"]
 
     push_hh_url = reverse("api:rdi-push-lax-households", args=[user_business_area.slug, rdi_id])
     hh_resp = token_api_client.post(
@@ -238,13 +240,13 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=168,
+        expected_queries=165,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
     assert rdi.status == RegistrationDataImport.MERGED
 
-    pairs = DeduplicationEngineSimilarityPair.objects.filter(program=program)
+    pairs = BiometricDedupeSimilarityPair.objects.filter(program=program)
     assert pairs.count() == 1
     pair = pairs.get()
     paired_cw_ids = {pair.individual1.country_workspace_id, pair.individual2.country_workspace_id}
@@ -353,13 +355,13 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=165,
+        expected_queries=162,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
     assert rdi.status == RegistrationDataImport.MERGED
 
-    pairs = DeduplicationEngineSimilarityPair.objects.filter(program=social_program)
+    pairs = BiometricDedupeSimilarityPair.objects.filter(program=social_program)
     assert pairs.count() == 1
     pair = pairs.get()
     paired_cw_ids = {pair.individual1.country_workspace_id, pair.individual2.country_workspace_id}
