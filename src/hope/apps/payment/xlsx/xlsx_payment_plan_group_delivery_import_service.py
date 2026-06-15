@@ -236,7 +236,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
                     flow.status_finished()
                 payment_plan.save()
-                # invalidate cache for program cycle list
-                payment_plan.program_cycle.save()
                 logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
+            # all plans in the group share one cycle: invalidate the cycle-list cache once
+            self.payment_plan_group.cycle.save()

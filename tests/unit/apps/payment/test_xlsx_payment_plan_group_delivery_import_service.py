@@ -2,6 +2,8 @@ from decimal import Decimal
 from io import BytesIO
 from unittest.mock import patch
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 import openpyxl
 import pytest
 
@@ -22,7 +24,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import Xls
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
     XlsxPaymentPlanGroupDeliveryImportService,
 )
-from hope.models import FinancialServiceProvider, Payment, PaymentPlan
+from hope.models import FinancialServiceProvider, Payment, PaymentPlan, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -334,6 +336,32 @@ def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_
     ctx["payment_two"].refresh_from_db()
     assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
     assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
+
+
+def test_import_updates_shared_program_cycle_only_once_for_two_plans(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "currency"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    service.validate()
+    assert service.errors == []
+    cycle_table = ProgramCycle._meta.db_table
+
+    with CaptureQueriesContext(connection) as captured:
+        service.import_payment_list()
+
+    cycle_updates = [
+        query
+        for query in captured.captured_queries
+        if query["sql"].lstrip().upper().startswith("UPDATE") and cycle_table in query["sql"]
+    ]
+    assert len(cycle_updates) == 1
 
 
 def test_import_payment_list_keeps_accepted_status_when_plan_not_fully_reconciled(group_two_plans_one_fsp):
