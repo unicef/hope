@@ -1,7 +1,9 @@
 from django.urls import reverse
 import pytest
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories import CountryFactory, CurrencyFactory, PartnerFactory, UserFactory
+from hope.apps.account.permissions import Permissions
 from hope.apps.core.languages import LANGUAGES, Languages
 
 # === Fixtures ===
@@ -16,6 +18,11 @@ def user():
 @pytest.fixture
 def authenticated_client(api_client, user):
     return api_client(user)
+
+
+@pytest.fixture
+def anonymous_client():
+    return APIClient()
 
 
 @pytest.fixture
@@ -136,6 +143,27 @@ def test_choices_currencies_returns_only_active_currencies_from_db(authenticated
         {"name": "United States Dollar", "value": "USD", "vision_code": "USD", "active": True},
         {"name": "USD Coin", "value": "USDC", "vision_code": "USDC", "active": True},
     ]
+
+
+@pytest.mark.django_db
+def test_choices_permissions_returns_full_permission_catalog(authenticated_client):
+    response = authenticated_client.get(reverse("api:choices-permissions"))
+
+    assert response.status_code == 200
+    expected_data = sorted(
+        [{"name": permission.value.replace("_", " "), "value": permission.value} for permission in Permissions],
+        key=lambda choice: choice["name"],
+    )
+    assert response.data == expected_data
+
+
+@pytest.mark.django_db
+def test_choices_permissions_allows_unauthenticated_access(anonymous_client):
+    # FE type generation (enhance_and_camelize_openapi.js) fetches this endpoint without credentials
+    response = anonymous_client.get(reverse("api:choices-permissions"))
+
+    assert response.status_code == 200
+    assert len(response.data) == len(Permissions)
 
 
 @pytest.mark.django_db
