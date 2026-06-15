@@ -58,6 +58,7 @@ DEFAULTS = {
     "SENTRY_DSN": (str, ""),
     "SENTRY_ENVIRONMENT": (str, ""),
     "SENTRY_ENABLE_TRACING": (bool, False),
+    "SENTRY_TRACES_SAMPLE_RATE": (float, 1.0),
     "CELERY_BROKER_URL": (str, ""),
     "CELERY_BROKER_VISIBILITY_TIMEOUT": (int, 0),
     "CELERY_RESULT_BACKEND": (str, ""),
