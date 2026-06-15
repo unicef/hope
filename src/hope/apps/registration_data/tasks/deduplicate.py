@@ -125,7 +125,7 @@ class DeduplicateTask:
             "unicef_id",
             "program_id",
         ]
-        individual_qs = individuals.select_related(None).only(*individual_fields).prefetch_related("identities")
+        individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
             deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
             if index % 100 == 0:
@@ -174,7 +174,7 @@ class DeduplicateTask:
             "unicef_id",
             "program_id",
         ]
-        individual_qs = individuals.select_related(None).only(*individual_fields).prefetch_related("identities")
+        individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
             deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
 

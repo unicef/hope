@@ -133,7 +133,7 @@ class RdiMergeTask:
         golden_record_duplicates = Individual.objects.filter(
             registration_data_import=obj_hct,
             deduplication_golden_record_status=DUPLICATE,
-        ).select_related("household__admin2", "program", "business_area")
+        ).select_related("household__admin2", "program")
         logger.info(f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates")
         create_needs_adjudication_tickets(
             golden_record_duplicates,
@@ -147,7 +147,7 @@ class RdiMergeTask:
         needs_adjudication = Individual.objects.filter(
             registration_data_import=obj_hct,
             deduplication_golden_record_status=NEEDS_ADJUDICATION,
-        ).select_related("household__admin2", "program", "business_area")
+        ).select_related("household__admin2", "program")
         logger.info(f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication")
         create_needs_adjudication_tickets(
             needs_adjudication,
@@ -210,7 +210,6 @@ class RdiMergeTask:
 
                     individuals = evaluate_qs(
                         Individual.objects.filter(registration_data_import=obj_hct)
-                        .select_related("household__admin2", "program", "business_area", "individual_collection")
                         .select_for_update(of=("self",))
                         .order_by("pk")
                     )
