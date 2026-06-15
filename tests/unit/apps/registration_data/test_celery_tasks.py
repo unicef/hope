@@ -286,6 +286,8 @@ def test_registration_kobo_import_task_execute_called_once(
     import_data = registration_import_context["import_data"]
     business_area = registration_import_context["business_area"]
     program = registration_import_context["program"]
+    registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+    registration_data_import.save(update_fields=["status"])
 
     mock_task_instance = mock_rdi_kobo_create_task.return_value
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
@@ -316,6 +318,8 @@ def test_registration_kobo_import_task_action_handles_exception(
     import_data = registration_import_context["import_data"]
     business_area = registration_import_context["business_area"]
     program = registration_import_context["program"]
+    registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+    registration_data_import.save(update_fields=["status"])
     job = AsyncRetryJob(
         config={
             "registration_data_import_id": str(registration_data_import.id),
@@ -332,6 +336,72 @@ def test_registration_kobo_import_task_action_handles_exception(
 
     mock_warning.assert_called_once_with(exc)
     mock_handle_rdi_exception.assert_called_once_with(str(registration_data_import.id), exc)
+
+
+@patch("hope.apps.registration_data.celery_tasks.logger.info")
+@patch("hope.apps.registration_data.celery_tasks.locked_cache")
+@patch("hope.apps.registration_data.tasks.rdi_kobo_create.RdiKoboCreateTask")
+def test_registration_kobo_import_task_action_noops_when_lock_not_acquired(
+    mock_rdi_kobo_create_task: Mock,
+    mock_locked_cache: Mock,
+    mock_info: Mock,
+    registration_import_context: dict[str, object],
+) -> None:
+    registration_data_import = registration_import_context["registration_data_import"]
+    import_data = registration_import_context["import_data"]
+    business_area = registration_import_context["business_area"]
+    program = registration_import_context["program"]
+    mock_locked_cache.return_value.__enter__.return_value = False
+    job = AsyncRetryJob(
+        config={
+            "registration_data_import_id": str(registration_data_import.id),
+            "import_data_id": str(import_data.id),
+            "business_area_id": str(business_area.id),
+            "program_id": str(program.id),
+        }
+    )
+
+    result = registration_kobo_import_async_task_action(job)
+
+    assert result is True
+    mock_rdi_kobo_create_task.return_value.execute.assert_not_called()
+    mock_info.assert_called_once_with(
+        f"Task with key registration_kobo_import_async_task {registration_data_import.id} is already running"
+    )
+
+
+@patch("hope.apps.registration_data.celery_tasks.logger.info")
+@patch("hope.apps.registration_data.celery_tasks.locked_cache")
+@patch("hope.apps.registration_data.tasks.rdi_kobo_create.RdiKoboCreateTask")
+def test_registration_kobo_import_task_action_noops_when_status_not_importable(
+    mock_rdi_kobo_create_task: Mock,
+    mock_locked_cache: Mock,
+    mock_info: Mock,
+    registration_import_context: dict[str, object],
+) -> None:
+    registration_data_import = registration_import_context["registration_data_import"]
+    import_data = registration_import_context["import_data"]
+    business_area = registration_import_context["business_area"]
+    program = registration_import_context["program"]
+    mock_locked_cache.return_value.__enter__.return_value = True
+    assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
+    job = AsyncRetryJob(
+        config={
+            "registration_data_import_id": str(registration_data_import.id),
+            "import_data_id": str(import_data.id),
+            "business_area_id": str(business_area.id),
+            "program_id": str(program.id),
+        }
+    )
+
+    result = registration_kobo_import_async_task_action(job)
+
+    assert result is True
+    mock_rdi_kobo_create_task.return_value.execute.assert_not_called()
+    mock_info.assert_called_once_with(
+        f"Rdi is in status {RegistrationDataImport.IN_REVIEW}, expected "
+        f"{RegistrationDataImport.IMPORT_SCHEDULED} or {RegistrationDataImport.IMPORT_ERROR} to import"
+    )
 
 
 @patch("hope.apps.registration_data.tasks.rdi_kobo_create.RdiKoboCreateTask")

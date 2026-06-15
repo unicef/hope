@@ -302,6 +302,77 @@ def test_async_job_queue_returns_none_for_active_jobs() -> None:
 
 
 @pytest.mark.django_db
+def test_requeue_queues_fresh_job_when_none_exists(django_capture_on_commit_callbacks) -> None:
+    pdu_online_edit = PDUOnlineEditFactory()
+
+    with patch.object(AsyncRetryJob, "queue", autospec=True) as mock_queue:
+        with django_capture_on_commit_callbacks(execute=True):
+            job = AsyncRetryJob.requeue(
+                action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+                instance=pdu_online_edit,
+            )
+
+    assert job is not None
+    assert AsyncRetryJob.objects.count() == 1
+    assert job.content_object == pdu_online_edit
+    mock_queue.assert_called_once_with(job)
+
+
+@pytest.mark.django_db
+def test_requeue_terminates_stuck_queued_job_then_queues_fresh() -> None:
+    pdu_online_edit = PDUOnlineEditFactory()
+    stuck = AsyncRetryJob.create_for_instance(
+        pdu_online_edit,
+        action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+        type="JOB_TASK",
+        config={},
+        repeatable=True,
+    )
+
+    with (
+        patch.object(AsyncRetryJob, "task_status", new_callable=PropertyMock, return_value=AsyncRetryJob.QUEUED),
+        patch.object(AsyncRetryJob, "terminate", autospec=True) as mock_terminate,
+        patch.object(AsyncRetryJob, "queue", autospec=True),
+    ):
+        job = AsyncRetryJob.requeue(
+            action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+            instance=pdu_online_edit,
+        )
+
+    mock_terminate.assert_called_once()
+    assert job is not None
+    assert job.pk != stuck.pk
+    assert AsyncRetryJob.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_requeue_skips_and_logs_when_a_job_is_already_running() -> None:
+    pdu_online_edit = PDUOnlineEditFactory()
+    AsyncRetryJob.create_for_instance(
+        pdu_online_edit,
+        action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+        type="JOB_TASK",
+        config={},
+        repeatable=True,
+    )
+
+    with (
+        patch.object(AsyncRetryJob, "task_status", new_callable=PropertyMock, return_value=AsyncRetryJob.STARTED),
+        patch.object(AsyncRetryJob, "terminate", autospec=True) as mock_terminate,
+        patch("hope.models.async_job.logger.error") as mock_log_error,
+    ):
+        result = AsyncRetryJob.requeue(
+            action="unit.apps.core.test_celery_tasks.fake_async_retry_job_success_action",
+            instance=pdu_online_edit,
+        )
+
+    assert result is None
+    mock_terminate.assert_not_called()
+    mock_log_error.assert_called_once()
+    assert AsyncRetryJob.objects.count() == 1
+
+
+@pytest.mark.django_db
 def test_celery_configuration_uses_shared_queue_constants() -> None:
     assert {queue.name for queue in app.conf["task_queues"]} == {
         CELERY_QUEUE_DEFAULT,
