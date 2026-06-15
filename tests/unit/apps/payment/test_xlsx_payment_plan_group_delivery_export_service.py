@@ -16,10 +16,17 @@ from extras.test_utils.factories.payment import (
     PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
     XlsxPaymentPlanGroupDeliveryExportService,
 )
-from hope.models import DataCollectingType, FinancialServiceProvider, Payment, PaymentPlan
+from hope.models import (
+    DataCollectingType,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    Payment,
+    PaymentPlan,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -649,3 +656,44 @@ def test_get_email_context_message_and_title_carry_group_and_batch(group_with_on
         "was generated and below you have the link to download this file."
     )
     assert context["title"] == f"Payment Plan Group {identifier} Batch 1 Payment List Generated"
+
+
+def test_build_shared_lookups_contains_all_reference_tables():
+    lookups = XlsxPaymentPlanDeliveryExportService.build_shared_lookups()
+
+    assert set(lookups) == {
+        "flexible_attributes",
+        "core_fields_attributes",
+        "admin_areas_dict",
+        "countries_dict",
+        "all_document_types",
+    }
+
+
+def test_per_plan_service_uses_provided_shared_lookups_without_reloading(group_with_one_accepted_plan, mocker):
+    plan = group_with_one_accepted_plan.payment_plans.first()
+    shared_lookups = {
+        "flexible_attributes": {"sentinel_attr": object()},
+        "core_fields_attributes": {"sentinel_core": object()},
+        "admin_areas_dict": {"sentinel_area": object()},
+        "countries_dict": {"sentinel_country": object()},
+        "all_document_types": {"sentinel_doc": object()},
+    }
+    areas_spy = mocker.spy(FinancialServiceProviderXlsxTemplate, "get_areas_dict")
+
+    service = XlsxPaymentPlanDeliveryExportService(plan, shared_lookups=shared_lookups)
+
+    assert service.flexible_attributes is shared_lookups["flexible_attributes"]
+    assert service.core_fields_attributes is shared_lookups["core_fields_attributes"]
+    assert service.admin_areas_dict is shared_lookups["admin_areas_dict"]
+    assert service.countries_dict is shared_lookups["countries_dict"]
+    assert service.all_document_types is shared_lookups["all_document_types"]
+    assert areas_spy.call_count == 0
+
+
+def test_group_export_builds_shared_lookups_once_for_multiple_plans(group_with_two_plans_and_payments, mocker):
+    build_spy = mocker.spy(XlsxPaymentPlanDeliveryExportService, "build_shared_lookups")
+
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_and_payments).generate_workbook()
+
+    assert build_spy.call_count == 1

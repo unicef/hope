@@ -38,15 +38,40 @@ logger = logging.getLogger(__name__)
 
 
 class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
-    def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: str | None = None):
+    @staticmethod
+    def build_shared_lookups() -> dict:
+        """Program-global lookups shared by every plan in a group/batch export.
+
+        These reference tables (areas, countries, document types, flexible attributes, core
+        fields) do not depend on the individual payment plan. Building them once and passing them
+        into each per-plan service avoids reloading the full Area/Country/DocumentType tables for
+        every payment plan in a group export.
+        """
+        return {
+            "flexible_attributes": {
+                flexible_attribute.name: flexible_attribute for flexible_attribute in FlexibleAttribute.objects.all()
+            },
+            "core_fields_attributes": FieldFactory(get_core_fields_attributes()).to_dict_by("name"),
+            "admin_areas_dict": FinancialServiceProviderXlsxTemplate.get_areas_dict(),
+            "countries_dict": FinancialServiceProviderXlsxTemplate.get_countries_dict(),
+            "all_document_types": DocumentType.get_all_doc_types(),
+        }
+
+    def __init__(
+        self,
+        payment_plan: PaymentPlan,
+        fsp_xlsx_template_id: str | None = None,
+        shared_lookups: dict | None = None,
+    ):
         self.batch_size = 2000
         self.payment_plan = payment_plan
         self.is_social_worker_program = self.payment_plan.is_social_worker_program
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
-        self.flexible_attributes = {
-            flexible_attribute.name: flexible_attribute for flexible_attribute in FlexibleAttribute.objects.all()
-        }
+        if shared_lookups is None:
+            shared_lookups = self.build_shared_lookups()
+
+        self.flexible_attributes = shared_lookups["flexible_attributes"]
         self.allow_export_fsp_auth_code = self.payment_plan.is_payment_gateway_and_all_sent_to_fsp
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
         self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = None
@@ -56,10 +81,10 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         self.core_fields = []
         self.flex_fields = []
         self.document_fields = []
-        self.core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
-        self.admin_areas_dict = FinancialServiceProviderXlsxTemplate.get_areas_dict()
-        self.countries_dict = FinancialServiceProviderXlsxTemplate.get_countries_dict()
-        self.all_document_types = DocumentType.get_all_doc_types()
+        self.core_fields_attributes = shared_lookups["core_fields_attributes"]
+        self.admin_areas_dict = shared_lookups["admin_areas_dict"]
+        self.countries_dict = shared_lookups["countries_dict"]
+        self.all_document_types = shared_lookups["all_document_types"]
 
     @staticmethod
     def generate_token_and_order_numbers(

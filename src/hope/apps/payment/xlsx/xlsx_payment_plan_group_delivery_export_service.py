@@ -111,6 +111,8 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         prepared_services: list[XlsxPaymentPlanDeliveryExportService] = []
         self.exported_plan_ids = []
 
+        shared_lookups = XlsxPaymentPlanDeliveryExportService.build_shared_lookups()
+
         for payment_plan in self.payment_plans:
             template = self._resolve_template(payment_plan)
             if template is None:
@@ -129,7 +131,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                     f"but not all payments have been sent to the payment gateway yet."
                 )
                 continue
-            per_fsp_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+            per_fsp_service = XlsxPaymentPlanDeliveryExportService(payment_plan, shared_lookups=shared_lookups)
             per_fsp_service.prepare_headers(template)
             if not header:
                 header = per_fsp_service.header_list
