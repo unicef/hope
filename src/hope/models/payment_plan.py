@@ -96,6 +96,8 @@ class PaymentPlan(
             "targeting_criteria_string",
             "excluded_ids",
             "abort_comment",
+            "closure_comment",
+            "closed_by",
             "reconciliation_import_file",
             "flat_amount_value",
             "use_payment_gateway",
@@ -136,6 +138,7 @@ class PaymentPlan(
         ACCEPTED = "ACCEPTED", "Accepted"
         ABORTED = "ABORTED", "Aborted"
         FINISHED = "FINISHED", "Finished"
+        READY_FOR_CLOSURE = "READY_FOR_CLOSURE", "Ready for Closure"
         CLOSED = "CLOSED", "Closed"
 
     PRE_PAYMENT_PLAN_STATUSES = (
@@ -157,6 +160,7 @@ class PaymentPlan(
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
         Status.CLOSED,
     )
 
@@ -323,6 +327,19 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="created_payment_plans",
         help_text="Created by user",
+    )
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="closed_payment_plans",
+        help_text="User who closed the payment plan",
+    )
+    closure_comment = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Justification comment provided at closure",
     )
     source_payment_plan = models.ForeignKey(
         "self",
@@ -680,7 +697,11 @@ class PaymentPlan(
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
             self.remove_export_file_entitlement()
         # remove export_file_per_fsp
-        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
+        if (
+            self.status
+            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
+            and self.export_file_per_fsp
+        ):
             self.remove_export_file_per_fsp()
 
     def remove_imported_file(self) -> None:
@@ -855,7 +876,8 @@ class PaymentPlan(
     def can_regenerate_export_file_per_fsp(self) -> bool:
         """Can regenerate export_file_per_fsp."""
         return (
-            self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
+            self.status
+            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
             and self.export_file_per_fsp is not None
             and self.background_action_status is None
         )
@@ -909,7 +931,13 @@ class PaymentPlan(
     @property
     def currency_exchange_date(self) -> Any:
         if (
-            self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            self.status
+            in [
+                PaymentPlan.Status.ACCEPTED,
+                PaymentPlan.Status.FINISHED,
+                PaymentPlan.Status.READY_FOR_CLOSURE,
+                PaymentPlan.Status.CLOSED,
+            ]
             and (process := self.approval_process.first())
             and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
         ):
@@ -934,6 +962,7 @@ class PaymentPlan(
             if self.status in (
                 PaymentPlan.Status.ACCEPTED,
                 PaymentPlan.Status.FINISHED,
+                PaymentPlan.Status.READY_FOR_CLOSURE,
             ):
                 return self.export_file_per_fsp is not None
             return False
@@ -951,6 +980,7 @@ class PaymentPlan(
             PaymentPlan.Status.LOCKED: "export_file_entitlement",
             PaymentPlan.Status.ACCEPTED: "export_file_per_fsp",
             PaymentPlan.Status.FINISHED: "export_file_per_fsp",
+            PaymentPlan.Status.READY_FOR_CLOSURE: "export_file_per_fsp",
         }
 
         file_field = pp_status_to_file_field.get(self.status)

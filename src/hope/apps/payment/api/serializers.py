@@ -630,6 +630,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     funds_commitments = serializers.SerializerMethodField()
     available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+    payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
+    closed_by = serializers.SerializerMethodField()
     unore_exchange_rate = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
@@ -687,10 +689,19 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "funds_commitments",
             "available_funds_commitments",
             "payment_verification_plans",
+            "payment_verification_summary",
             "admin_url",
             "abort_comment",
+            "closure_comment",
+            "closed_by",
             "flat_amount_value",
         )
+
+    @staticmethod
+    def get_closed_by(obj: PaymentPlan) -> str | None:
+        if not obj.closed_by_id:
+            return None
+        return f"{obj.closed_by.first_name} {obj.closed_by.last_name}"
 
     def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:
         if not obj.currency:
@@ -829,7 +840,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return self._payments_summary(obj)["error_count"]
 
     def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if obj.status in [
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+            PaymentPlan.Status.READY_FOR_CLOSURE,
+        ]:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
@@ -843,7 +858,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return False
 
     def get_can_download_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if obj.status in [
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+            PaymentPlan.Status.READY_FOR_CLOSURE,
+        ]:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
@@ -857,7 +876,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return False
 
     def get_can_send_xlsx_password(self, obj: PaymentPlan) -> bool:
-        if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if obj.status in [
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+            PaymentPlan.Status.READY_FOR_CLOSURE,
+        ]:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, obj.business_area):
@@ -1533,3 +1556,7 @@ class AssignFundsCommitmentsSerializer(serializers.Serializer):
 
 class PaymentPlanAbortSerializer(serializers.Serializer):
     abort_comment = serializers.CharField(max_length=255, required=False)
+
+
+class PaymentPlanCloseSerializer(serializers.Serializer):
+    closure_comment = serializers.CharField(required=False, allow_blank=True, allow_null=True)
