@@ -25,7 +25,7 @@ from hope.apps.program.api.serializers import (
     ProgramCycleUpdateSerializer,
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
-from hope.models import BusinessArea, Partner, PaymentPlan, Program, ProgramCycle, User
+from hope.models import BusinessArea, Partner, PaymentPlan, PaymentPlanGroup, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -472,7 +472,6 @@ def test_delete_program_cycle_with_permission(
     assert bad_response.status_code == status.HTTP_400_BAD_REQUEST
     assert "Don't allow to delete Cycle with assigned Target Population" in bad_response.data
     pp.delete(soft=False)
-    cycle3.payment_plan_groups.all().delete()
 
     response = authenticated_client.delete(url)
     assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -518,7 +517,7 @@ def test_delete_program_cycle_without_permission(
     assert bad_response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_delete_program_cycle_blocked_by_payment_plan_group(
+def test_delete_program_cycle_succeeds_when_only_empty_groups_remain(
     authenticated_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -551,9 +550,9 @@ def test_delete_program_cycle_blocked_by_payment_plan_group(
     )
 
     response = authenticated_client.delete(url)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Don't allow to delete Cycle with assigned Payment Plan Groups" in response.data
-    assert ProgramCycle.objects.filter(id=cycle3.id).exists()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not ProgramCycle.objects.filter(id=cycle3.id).exists()
+    assert not PaymentPlanGroup.objects.filter(id=group.id).exists()
 
 
 def test_filter_by_status(
