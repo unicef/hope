@@ -7,10 +7,10 @@
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "name": "Online Edit 0",
-                "business_area": "e609466f-4754-411e-8ad5-e6362ddad708",
-                "program": "8ed32caf-b7e7-49be-b8cf-3714bbae3cdc",
+                "business_area": "3683ad92-a81f-4485-93d2-6bd78f615d40",
+                "program": "74717522-52b9-4230-b7dc-33b890b86975",
                 "status": "NEW",
-                "created_by": "af831988-1123-4e39-b679-8706f300cf11",
+                "created_by": "89537d10-f9aa-4144-a1e6-a0532878e9b1",
                 "approved_by": null,
                 "approved_at": null,
                 "edit_data": {},
@@ -21,7 +21,7 @@
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "e609466f-4754-411e-8ad5-e6362ddad708",
+                "pk": "3683ad92-a81f-4485-93d2-6bd78f615d40",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -47,6 +47,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -62,19 +63,19 @@
             },
             {
                 "model": "program.program",
-                "pk": "8ed32caf-b7e7-49be-b8cf-3714bbae3cdc",
+                "pk": "74717522-52b9-4230-b7dc-33b890b86975",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
-                    "version": 1735688653315201,
-                    "data_collecting_type": 27,
-                    "beneficiary_group": "f88c93c6-c6b4-414a-8a7d-9a47da7c9693",
-                    "business_area": "e609466f-4754-411e-8ad5-e6362ddad708",
+                    "version": 1735688653315202,
+                    "data_collecting_type": 26,
+                    "beneficiary_group": "e0b20ce0-ea89-4e5b-9ace-7294ba6ffd74",
+                    "business_area": "3683ad92-a81f-4485-93d2-6bd78f615d40",
                     "name": "Program 0",
+                    "code": "i1qc",
                     "status": "ACTIVE",
-                    "code": "679s",
                     "description": "",
                     "start_date": "2025-01-01",
                     "end_date": "2026-01-01",
@@ -88,6 +89,7 @@
                     "administrative_areas_of_implementation": "",
                     "biometric_deduplication_enabled": false,
                     "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                    "identification_key_individual_label": null,
                     "is_visible": true,
                     "household_count": 0,
                     "individual_count": 0,
@@ -99,7 +101,7 @@
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 27,
+                "pk": 26,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -114,14 +116,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        27
+                        26
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "f88c93c6-c6b4-414a-8a7d-9a47da7c9693",
+                "pk": "e0b20ce0-ea89-4e5b-9ace-7294ba6ffd74",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -135,7 +137,7 @@
             },
             {
                 "model": "account.user",
-                "pk": "af831988-1123-4e39-b679-8706f300cf11",
+                "pk": "89537d10-f9aa-4144-a1e6-a0532878e9b1",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -149,7 +151,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 63,
+                    "partner": 61,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -160,7 +162,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 63,
+                "pk": 61,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,

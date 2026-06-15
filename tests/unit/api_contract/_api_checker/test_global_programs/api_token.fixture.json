@@ -4,21 +4,21 @@
             "model": "api.apitoken",
             "pk": 2,
             "fields": {
-                "user": "f2a1d752-f06a-493c-9391-920d5568e93b",
-                "key": "e16a696a12cdd80c51e63be260a6e8082c32b0db",
+                "user": "5af5580e-1263-4c50-9910-564f96f2c794",
+                "key": "3de1b7d9f9ebd760c4827f57caef4181061e4096",
                 "grants": "[\"API_READ_ONLY\"]",
                 "valid_from": "2025-01-01",
                 "valid_to": null,
                 "allowed_ips": null,
                 "valid_for": [
-                    "98c0d42f-e71c-4e40-8886-d11cebf8c289"
+                    "c8ff87dc-605a-423a-8d7b-4f26fdee4efa"
                 ]
             }
         },
         "deps": [
             {
                 "model": "account.user",
-                "pk": "f2a1d752-f06a-493c-9391-920d5568e93b",
+                "pk": "5af5580e-1263-4c50-9910-564f96f2c794",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -32,7 +32,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 34,
+                    "partner": 32,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -43,7 +43,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 34,
+                "pk": 32,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,
@@ -57,7 +57,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "98c0d42f-e71c-4e40-8886-d11cebf8c289",
+                "pk": "c8ff87dc-605a-423a-8d7b-4f26fdee4efa",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -83,6 +83,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,

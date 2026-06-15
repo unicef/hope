@@ -4,7 +4,7 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "fd68b5dcd7de051df4cf637502bc340e",
+        "ETag": "ea90a1c02e06bb8126ed84e7c2c66993",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
@@ -14,10 +14,10 @@
     },
     "data": [
         {
-            "id": "8db538e4-ba8b-44c4-aa21-c7b60e171425",
+            "id": "6f27b9d6-40be-42c4-b6fc-6498cbff43c6",
             "name": "Area 0",
             "p_code": "PC000000",
-            "area_type": "d6efd089-a40d-42d7-b5b5-d6ce5a85e43a",
+            "area_type": "c747b54d-2985-4325-a65b-e1a2fd380e5b",
             "updated_at": "2025-01-01T00:00:00Z"
         }
     ],

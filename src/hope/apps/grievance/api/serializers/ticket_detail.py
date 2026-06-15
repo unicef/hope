@@ -164,7 +164,7 @@ class DeduplicationResultSerializer(serializers.Serializer):
         return None
 
 
-class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
+class BiometricDeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
     id = serializers.CharField()
     photo = serializers.SerializerMethodField()
     full_name = serializers.CharField()
@@ -177,9 +177,9 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
         return individual.photo.url if individual and individual.photo else ""
 
 
-class DeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
-    individual1 = DeduplicationEngineSimilarityPairIndividualSerializer()
-    individual2 = DeduplicationEngineSimilarityPairIndividualSerializer()
+class BiometricDeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
+    individual1 = BiometricDeduplicationEngineSimilarityPairIndividualSerializer()
+    individual2 = BiometricDeduplicationEngineSimilarityPairIndividualSerializer()
     similarity_score = serializers.CharField()
     status_code = serializers.CharField()
 
@@ -196,7 +196,7 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
         else:
             scope = BusinessArea.objects.filter(slug=business_area_slug).first()
         if self.context["request"].user.has_perm(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, scope):
-            return DeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
+            return BiometricDeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
         return {}
 
 

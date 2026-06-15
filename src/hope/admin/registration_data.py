@@ -2,6 +2,7 @@ import logging
 from typing import Any, cast
 
 from admin_extra_buttons.api import confirm_action
+from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
@@ -23,7 +24,6 @@ from hope.apps.household.celery_tasks import enroll_households_to_program_async_
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.forms import MassEnrollForm
 from hope.apps.registration_data.celery_tasks import (
-    fetch_biometric_deduplication_results_and_process_async_task,
     merge_registration_data_import_async_task,
 )
 from hope.apps.utils.elasticsearch_utils import (
@@ -39,8 +39,34 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 
 logger = logging.getLogger(__name__)
+
+
+def is_country_workspace_rdi_rerun_enabled(btn: StandardButton) -> bool:
+    rdi = btn.original
+    return rdi.business_area.is_rdi_ingest_source_country_workspace_only and rdi.status in (
+        RegistrationDataImport.IMPORT_ERROR,
+        RegistrationDataImport.MERGE_ERROR,
+        RegistrationDataImport.MERGE_SCHEDULED,
+    )
+
+
+def is_non_country_workspace_rdi_merge_retry_enabled(btn: StandardButton) -> bool:
+    rdi = btn.original
+    return (
+        rdi.business_area.is_rdi_ingest_source_all_except_country_workspace
+        and rdi.status == RegistrationDataImport.MERGE_ERROR
+    )
+
+
+def is_non_country_workspace_rdi_rerun_enabled(btn: StandardButton) -> bool:
+    rdi = btn.original
+    return (
+        rdi.business_area.is_rdi_ingest_source_all_except_country_workspace
+        and rdi.status == RegistrationDataImport.IMPORT_ERROR
+    )
 
 
 @admin.register(RegistrationDataImport)
@@ -53,14 +79,12 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         "data_source",
         "import_date",
         "imported_by",
-        "deduplication_engine_status",
         "number_of_individuals",
         "number_of_households",
         "screen_beneficiary",
         "pull_pictures",
         "excluded",
         "erased",
-        "deduplication_engine_status",
     )
     search_fields = ("name",)
     list_filter = (
@@ -75,7 +99,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         "pull_pictures",
         "excluded",
         "erased",
-        "deduplication_engine_status",
     )
     date_hierarchy = "updated_at"
     advanced_filter_fields = (
@@ -91,12 +114,15 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @button(
         label="Re-run RDI",
         permission="registration_data.rerun_rdi",
-        enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
+        enabled=is_non_country_workspace_rdi_rerun_enabled,
     )
     def rerun_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         obj = self.get_object(request, pk)
         if obj is None:
             self.message_user(request, "Registration Data Import not found", messages.ERROR)
+            return None
+        if obj.business_area.is_rdi_ingest_source_country_workspace_only:
+            self.message_user(request, ALL_EXCEPT_CW_INGEST_REJECT_MSG, messages.ERROR)
             return None
         try:
             if obj.data_source == RegistrationDataImport.XLS:
@@ -127,7 +153,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @button(
         label="Re-run Merging RDI",
         permission="registration_data.rerun_rdi",
-        enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
+        enabled=is_non_country_workspace_rdi_merge_retry_enabled,
     )
     def rerun_merge_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         try:
@@ -135,13 +161,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             if rdi is None:
                 self.message_user(request, "Registration Data Import not found", messages.ERROR)
                 return None
-            if rdi.is_coming_from_cw:
-                from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_async_task
-
-                classify_findings_and_schedule_merge_async_task(rdi)
-            else:
-                merge_registration_data_import_async_task(rdi)
-
+            merge_registration_data_import_async_task(rdi)
             self.message_user(request, "RDI Merge task has started")
         except OperationalError as e:
             logger.warning(e)
@@ -152,41 +172,28 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             )
         return None
 
-    @staticmethod
-    def fetch_biometric_deduplication_results_visible(rdi: RegistrationDataImport) -> bool:
-        return bool(
-            rdi.program
-            and rdi.program.biometric_deduplication_enabled
-            and rdi.deduplication_engine_status
-            in [RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS, RegistrationDataImport.DEDUP_ENGINE_ERROR]
-        )
-
     @button(
-        label="Fetch Biometric Deduplication Results",
-        visible=lambda btn: RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(btn.original),
-        permission="registration_data.fetch_biometric_deduplication_results",
+        label="Re-run CW RDI Processing",
+        permission="registration_data.rerun_rdi",
+        enabled=is_country_workspace_rdi_rerun_enabled,
     )
-    def fetch_biometric_deduplication_results(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        rdi = self.get_object(request, pk)
-        if rdi is None:
-            self.message_user(request, "Registration Data Import not found", messages.ERROR)
-            return None
-
-        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PROCESSING
-        rdi.save(update_fields=["deduplication_engine_status"])
-
+    def rerun_cw_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         try:
-            fetch_biometric_deduplication_results_and_process_async_task(str(rdi.program_id), str(rdi.id))
-        except Exception as e:  # noqa: BLE001
+            rdi = self.get_object(request, pk)
+            if rdi is None:
+                self.message_user(request, "Registration Data Import not found", messages.ERROR)
+                return None
+            from hope.apps.registration_data.celery_tasks import process_country_workspace_rdi_task
+
+            process_country_workspace_rdi_task(rdi)
+            self.message_user(request, "CW RDI reprocessing task has started")
+        except OperationalError as e:
             logger.warning(e)
             self.message_user(
                 request,
-                "An error occurred while fetching biometric deduplication results",
+                "An error occurred while processing CW RDI task",
                 messages.ERROR,
             )
-            return None
-
-        self.message_user(request, "Biometric deduplication results fetch has been scheduled")
         return None
 
     @staticmethod

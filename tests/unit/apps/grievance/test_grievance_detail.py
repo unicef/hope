@@ -45,7 +45,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.registration_data import DeduplicationEngineSimilarityPairFactory
+from extras.test_utils.factories.registration_data import BiometricDeduplicationEngineSimilarityPairFactory
 from extras.test_utils.factories.sanction_list import (
     SanctionListIndividualDateOfBirthFactory,
     SanctionListIndividualDocumentFactory,
@@ -1598,7 +1598,7 @@ def test_grievance_detail_needs_adjudication(
         photo=ContentFile(b"abc", name="doc_aaa.png"),
     )
 
-    dedup_engine_similarity_pair = DeduplicationEngineSimilarityPairFactory(
+    dedup_engine_similarity_pair = BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=golden_records_individual,
         individual2=duplicate,

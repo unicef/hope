@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.14.*"
 
 [manifest]
@@ -1981,7 +1981,7 @@ wheels = [
 
 [[package]]
 name = "hope"
-version = "4.15.3"
+version = "4.15.4"
 source = { editable = "." }
 dependencies = [
     { name = "black" },

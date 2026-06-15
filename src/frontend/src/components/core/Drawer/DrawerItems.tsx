@@ -164,8 +164,10 @@ export const DrawerItems = ({
   );
 
   const { isAccountabilityApplicable } = businessAreaData;
+  const isManualIngest = businessAreaData.isManualIngest;
   const flags = {
     isAccountabilityApplicable,
+    isManualIngest,
   };
 
   const getInitialHrefForCollapsible = (secondaryActions): string => {

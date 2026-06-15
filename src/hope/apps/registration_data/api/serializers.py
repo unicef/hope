@@ -31,7 +31,6 @@ class RegistrationDataImportListSerializer(serializers.ModelSerializer):
             "import_date",
             "number_of_households",
             "number_of_individuals",
-            "biometric_deduplicated",
             "country_workspace_id",
         )
 
@@ -70,11 +69,9 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             "number_of_households",
             "number_of_individuals",
             "number_of_registered_individuals",
-            "biometric_deduplicated",
             "error_message",
             "can_merge",
             "biometric_deduplication_enabled",
-            "deduplication_engine_status",
             "batch_duplicates_count_and_percentage",
             "batch_unique_count_and_percentage",
             "golden_record_duplicates_count_and_percentage",
