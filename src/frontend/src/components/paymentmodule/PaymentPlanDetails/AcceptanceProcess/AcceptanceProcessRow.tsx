@@ -2,13 +2,23 @@ import { Box, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DividerLine } from '@core/DividerLine';
+import { Missing } from '@core/Missing';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 const StyledBox = styled(Box)`
   width: 100%;
+`;
+
+const GreyText = styled.div`
+  color: #9e9e9e;
+`;
+
+const GreyBox = styled(Box)`
+  background-color: #f4f5f6;
 `;
 
 interface AcceptanceProcessRowProps {
@@ -48,11 +58,16 @@ export function AcceptanceProcessRow({
     }
   };
 
+  const isClosed = paymentPlan.status === PaymentPlanStatusEnum.CLOSED;
+
   return (
     <StyledBox m={5}>
-      <AcceptanceProcessStepper acceptanceProcess={acceptanceProcess} />
+      <AcceptanceProcessStepper
+        acceptanceProcess={acceptanceProcess}
+        paymentPlan={paymentPlan}
+      />
       <Grid container>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${sentForApprovalBy}`}
@@ -62,7 +77,7 @@ export function AcceptanceProcessRow({
             />
           )}
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           {actions.authorization.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for authorization by ${sentForAuthorizationBy}`}
@@ -72,7 +87,7 @@ export function AcceptanceProcessRow({
             />
           )}
         </Grid>
-        <Grid size={{ xs: 4 }}>
+        <Grid size={{ xs: 3 }}>
           {actions.financeRelease.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${sentForFinanceReleaseBy}`}
@@ -80,6 +95,28 @@ export function AcceptanceProcessRow({
               approvals={actions.financeRelease}
               author={sentForFinanceReleaseBy}
             />
+          )}
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          {isClosed && (
+            <Box display="flex" flexDirection="column">
+              <GreyBox
+                display="flex"
+                alignItems="center"
+                ml={3}
+                mr={3}
+                p={3}
+                data-cy="finance-closure-card"
+              >
+                {t('Closed by')} {paymentPlan.closedBy}
+                <Box ml={1}>
+                  {/* TODO: backend does not expose closure date (status_date not in PaymentPlanDetailSerializer) */}
+                  <GreyText>
+                    {t('on')} <Missing />
+                  </GreyText>
+                </Box>
+              </GreyBox>
+            </Box>
           )}
         </Grid>
         {actions.reject.length > 0 && (

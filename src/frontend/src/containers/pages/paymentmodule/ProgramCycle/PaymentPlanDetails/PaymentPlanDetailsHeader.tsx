@@ -1,4 +1,6 @@
 import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
+import { FinishedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
+import { ReadyForClosurePaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/ReadyForClosurePaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
 import { InReviewPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
@@ -94,6 +96,10 @@ export const PaymentPlanDetailsHeader = ({
     paymentPlan.canSendToPaymentGateway;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+  const canMarkReadyForClosure = hasPermissions(
+    PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
+    permissions,
+  );
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
   const canReactivate = hasPermissions(
     PERMISSIONS.PM_REACTIVATE_ABORT,
@@ -171,16 +177,36 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case PaymentPlanStatusEnum.FINISHED:
     case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
-          canClose={canClose}
           paymentPlan={paymentPlan}
         />
       );
+      break;
+    case PaymentPlanStatusEnum.FINISHED:
+      buttons = (
+        <FinishedPaymentPlanHeaderButtons
+          canSendToPaymentGateway={canSendToPaymentGateway}
+          canSplit={canSplit}
+          paymentPlan={paymentPlan}
+          canMarkReadyForClosure={canMarkReadyForClosure}
+        />
+      );
+      break;
+    case PaymentPlanStatusEnum.READY_FOR_CLOSURE:
+      buttons = (
+        <ReadyForClosurePaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canSendBack={canMarkReadyForClosure}
+          canClose={canClose}
+        />
+      );
+      break;
+    case PaymentPlanStatusEnum.CLOSED:
+      buttons = null;
       break;
     case PaymentPlanStatusEnum.ABORTED:
       buttons = (

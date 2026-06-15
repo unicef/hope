@@ -307,6 +307,7 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.gray,
     [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
+    [PaymentPlanStatus.READY_FOR_CLOSURE]: theme.hctPalette.orange,
     [PaymentPlanStatus.CLOSED]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {

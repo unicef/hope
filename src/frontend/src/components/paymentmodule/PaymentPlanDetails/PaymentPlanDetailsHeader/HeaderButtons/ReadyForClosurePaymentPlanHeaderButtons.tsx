@@ -13,35 +13,55 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
-import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';
-import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PERMISSIONS } from 'src/config/permissions';
+import { ClosePaymentPlanDialog } from '../ClosePaymentPlanDialog';
 
-export interface AcceptedPaymentPlanHeaderButtonsProps {
-  canSendToPaymentGateway: boolean;
-  canSplit: boolean;
+export interface ReadyForClosurePaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
+  canSendBack: boolean;
+  canClose: boolean;
 }
 
-export function AcceptedPaymentPlanHeaderButtons({
-  canSendToPaymentGateway,
-  canSplit,
+export function ReadyForClosurePaymentPlanHeaderButtons({
   paymentPlan,
-}: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
+  canSendBack,
+  canClose,
+}: ReadyForClosurePaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: sendBack, isPending: loadingSendBack } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansSendBackToFinishedRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programCode: programId,
+          id: paymentPlan.id,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been sent back.'));
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
 
   const { data: templateData, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates', businessArea, programId],
@@ -100,26 +120,6 @@ export function AcceptedPaymentPlanHeaderButtons({
     },
   });
 
-  const {
-    mutateAsync: sendToPaymentGateway,
-    isPending: LoadingSendToPaymentGateway,
-  } = useMutation({
-    mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayRetrieve(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          id: paymentPlan.id,
-        },
-      ),
-    onSuccess: () => {
-      showMessage(t('Sending to Payment Gateway started'));
-    },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage);
-    },
-  });
-
   const shouldDisableExportXlsx =
     loadingExport ||
     !paymentPlan.canExportXlsx ||
@@ -169,17 +169,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   return (
     <Box display="flex" alignItems="center">
       <>
-        {paymentPlan.canCreateFollowUp && (
-          <Box p={2}>
-            <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
-          </Box>
-        )}
-        <Box p={2}>
-          <SplitIntoPaymentLists
-            paymentPlan={paymentPlan}
-            canSplit={canSplit}
-          />
-        </Box>
         {!paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
             <LoadingButton
@@ -216,11 +205,7 @@ export function AcceptedPaymentPlanHeaderButtons({
             </Select>
           </DialogContent>
           <DialogActions>
-            <Button
-              data-cy="cancel-button"
-              onClick={handleClose}
-              color="primary"
-            >
+            <Button data-cy="cancel-button" onClick={handleClose} color="primary">
               {t('Cancel')}
             </Button>
             <Button
@@ -267,21 +252,39 @@ export function AcceptedPaymentPlanHeaderButtons({
           </>
         )}
 
-        {canSendToPaymentGateway && (
+        {canSendBack && (
           <Box m={2}>
-            <Button
-              type="button"
+            <LoadingButton
               color="primary"
               variant="contained"
-              onClick={() => sendToPaymentGateway()}
-              data-cy="button-send-to-payment-gateway"
-              disabled={LoadingSendToPaymentGateway}
-              data-perm={PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY}
+              data-cy="button-send-back"
+              onClick={() => sendBack()}
+              loading={loadingSendBack}
+              data-perm={PERMISSIONS.PM_MARK_READY_FOR_CLOSURE}
             >
-              {t('Send to FSP')}
+              {t('Send Back')}
+            </LoadingButton>
+          </Box>
+        )}
+
+        {canClose && (
+          <Box m={2}>
+            <Button
+              color="primary"
+              variant="contained"
+              data-cy="button-close"
+              onClick={() => setCloseDialogOpen(true)}
+              data-perm={PERMISSIONS.PM_CLOSE_FINISHED}
+            >
+              {t('Close')}
             </Button>
           </Box>
         )}
+        <ClosePaymentPlanDialog
+          paymentPlan={paymentPlan}
+          open={closeDialogOpen}
+          onClose={() => setCloseDialogOpen(false)}
+        />
       </>
     </Box>
   );

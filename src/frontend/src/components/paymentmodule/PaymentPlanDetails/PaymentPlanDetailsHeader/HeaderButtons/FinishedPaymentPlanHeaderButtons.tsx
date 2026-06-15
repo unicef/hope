@@ -25,23 +25,46 @@ import { showApiErrorMessages } from '@utils/utils';
 import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
 import { PERMISSIONS } from 'src/config/permissions';
 
-export interface AcceptedPaymentPlanHeaderButtonsProps {
+export interface FinishedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
+  canMarkReadyForClosure: boolean;
 }
 
-export function AcceptedPaymentPlanHeaderButtons({
+export function FinishedPaymentPlanHeaderButtons({
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
-}: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
+  canMarkReadyForClosure,
+}: FinishedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: markReadyForClosure, isPending: loadingReadyForClosure } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansReadyForClosureRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            programCode: programId,
+            id: paymentPlan.id,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Payment Plan marked as ready for closure.'));
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        });
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
 
   const { data: templateData, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates', businessArea, programId],
@@ -175,10 +198,7 @@ export function AcceptedPaymentPlanHeaderButtons({
           </Box>
         )}
         <Box p={2}>
-          <SplitIntoPaymentLists
-            paymentPlan={paymentPlan}
-            canSplit={canSplit}
-          />
+          <SplitIntoPaymentLists paymentPlan={paymentPlan} canSplit={canSplit} />
         </Box>
         {!paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
@@ -216,11 +236,7 @@ export function AcceptedPaymentPlanHeaderButtons({
             </Select>
           </DialogContent>
           <DialogActions>
-            <Button
-              data-cy="cancel-button"
-              onClick={handleClose}
-              color="primary"
-            >
+            <Button data-cy="cancel-button" onClick={handleClose} color="primary">
               {t('Cancel')}
             </Button>
             <Button
@@ -280,6 +296,21 @@ export function AcceptedPaymentPlanHeaderButtons({
             >
               {t('Send to FSP')}
             </Button>
+          </Box>
+        )}
+
+        {canMarkReadyForClosure && (
+          <Box m={2}>
+            <LoadingButton
+              color="primary"
+              variant="contained"
+              data-cy="button-set-ready-for-closure"
+              onClick={() => markReadyForClosure()}
+              loading={loadingReadyForClosure}
+              data-perm={PERMISSIONS.PM_MARK_READY_FOR_CLOSURE}
+            >
+              {t('Set Ready for Closure')}
+            </LoadingButton>
           </Box>
         )}
       </>
