@@ -190,6 +190,48 @@ def test_fetch_metadata_skips_non_dict_org(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_skips_non_dict_org_logs_warning(mock_aurora_client: Any, mocker: Any) -> None:
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    orgs_page = {"results": ["not-a-dict"]}
+    mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page)
+    mock_logger = mocker.patch("hope.contrib.aurora.utils.logger")
+
+    fetch_metadata("test-token")
+
+    mock_logger.warning.assert_called_once()
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_metadata_propagates_http_error_on_orgs_page(mock_aurora_client: Any) -> None:
+    import requests as _requests
+
+    schema = {"organization": "https://aurora.test/api/orgs/"}
+    m_orgs = MagicMock()
+    m_orgs.raise_for_status.side_effect = _requests.RequestException("500 Server Error")
+    mock_aurora_client.get.side_effect = [*_mock_responses(schema), m_orgs]
+
+    with pytest.raises(_requests.RequestException):
+        fetch_metadata("test-token")
+
+    assert Organization.objects.count() == 0
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
+def test_fetch_records_propagates_http_error_on_record_page(mock_aurora_client: Any) -> None:
+    import requests as _requests
+
+    schema = {"record": "https://aurora.test/api/records/"}
+    m_page = MagicMock()
+    m_page.raise_for_status.side_effect = _requests.RequestException("503 Service Unavailable")
+    mock_aurora_client.get.side_effect = [*_mock_responses(schema), m_page]
+
+    with pytest.raises(_requests.RequestException):
+        fetch_records("test-token")
+
+    assert Record.objects.count() == 0
+
+
+@override_config(AURORA_SERVER="https://aurora.test/api/")
 def test_fetch_metadata_skips_org_missing_id(mock_aurora_client: Any) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {"results": [{"name": "No ID Org", "slug": "no-id"}]}  # missing "id" and "projects"

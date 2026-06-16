@@ -1,34 +1,4 @@
-"""Aurora API sync helpers.
-
-These functions pull org / project / registration / record data from the Aurora
-HTTP API into local Django models. The Aurora response shape is not part of our
-codebase, so this module is the boundary where remote drift can break the sync.
-
-Known failure modes guarded for here:
-
-* **HTTP errors** — 4xx/5xx responses used to fall through silently because no one
-  called ``raise_for_status()``. Now every fetch goes through ``_get_json`` which
-  raises on non-2xx.
-* **JSON decode** — ``Response.json()`` raises ``ValueError`` on non-JSON bodies
-  (HTML error pages, gateway timeouts). Surfaced as a ``RequestException`` from
-  ``_get_json`` so callers handle it the same way as network failures.
-* **Missing keys / wrong shape** — every dict access is guarded with ``.get()``;
-  malformed orgs / projects / registrations are skipped with a ``logger.warning``
-  instead of crashing the whole sync.
-* **Pagination shape drift** — ``_iter_results`` accepts either ``{"results": […]}``
-  or a bare list. The registrations endpoint historically returned a bare list
-  while orgs / projects paginate; if Aurora ever paginates registrations the
-  same way, the loop now Just Works instead of iterating dict keys.
-
-What is intentionally NOT changed:
-
-* ``fetch_records`` still imports only the first page (the original
-  ``# we want to import only a sample`` comment is preserved verbatim). Removing
-  the cap is a feature decision, not a hardening one.
-* The structure of the return value is unchanged — callers that expect the
-  ``{"pages", "records", "created", "updated"}`` dict and the nested
-  ``ret[-1]["projects"][i]["registrations"]`` list continue to work.
-"""
+"""Aurora API sync helpers: pull org/project/registration/record data into Django models."""
 
 import logging
 from typing import TYPE_CHECKING, Any
