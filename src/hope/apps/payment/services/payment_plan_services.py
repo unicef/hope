@@ -1124,7 +1124,7 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
         return self.payment_plan
 
-    def close(self, closure_comment: str | None = None, user: "User | None" = None) -> PaymentPlan:
+    def close(self, closure_comment: str | None = None, user_id: str | None = None) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
             raise ValidationError(
                 f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
@@ -1135,8 +1135,8 @@ class PaymentPlanService:
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_close()
         self.payment_plan.closure_comment = closure_comment
-        self.payment_plan.closed_by = user
-        self.payment_plan.save(update_fields=("status", "status_date", "closure_comment", "closed_by", "updated_at"))
+        self.payment_plan.closed_by_id = user_id
+        self.payment_plan.save(update_fields=("status", "status_date", "closure_comment", "closed_by_id", "updated_at"))
         self.payment_plan.refresh_from_db(
             fields=["status", "status_date", "closure_comment", "closed_by_id", "updated_at"]
         )

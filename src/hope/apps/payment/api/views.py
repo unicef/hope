@@ -1616,7 +1616,9 @@ class PaymentPlanViewSet(
         closure_comment = serializer.validated_data.get("closure_comment")
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).close(closure_comment=closure_comment, user=request.user)
+        payment_plan = PaymentPlanService(payment_plan).close(
+            closure_comment=closure_comment, user_id=str(request.user.pk)
+        )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
