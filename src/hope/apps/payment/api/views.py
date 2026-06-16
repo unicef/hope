@@ -1341,7 +1341,8 @@ class PaymentPlanViewSet(
             PaymentPlan.Status.READY_FOR_CLOSURE,
         ]:
             raise ValidationError(
-                "Payment List Per FSP export is only available for ACCEPTED, FINISHED or READY_FOR_CLOSURE Payment Plans."
+                "Payment List Per FSP export is only available for "
+                "ACCEPTED, FINISHED or READY_FOR_CLOSURE Payment Plans."
             )
         if payment_plan.export_file_per_fsp is not None:
             raise ValidationError("Export failed: Payment Plan already has created exported file.")
@@ -1403,7 +1404,8 @@ class PaymentPlanViewSet(
             PaymentPlan.Status.READY_FOR_CLOSURE,
         ]:
             raise ValidationError(
-                "Payment List Per FSP export is only available for ACCEPTED, FINISHED or READY_FOR_CLOSURE Payment Plans."
+                "Payment List Per FSP export is only available for "
+                "ACCEPTED, FINISHED or READY_FOR_CLOSURE Payment Plans."
             )
         if not payment_plan.eligible_payments:
             raise ValidationError("Export failed: The Payment List is empty.")

@@ -132,8 +132,11 @@
         "funds_commitments": null,
         "available_funds_commitments": [],
         "payment_verification_plans": [],
+        "payment_verification_summary": null,
         "admin_url": "/api/unicorn/payment/paymentplan/224ba151-db8f-4bf5-b082-f5560a15bd3d/change/",
         "abort_comment": "",
+        "closure_comment": null,
+        "closed_by": null,
         "flat_amount_value": null
     },
     "content_type": "application/json"
