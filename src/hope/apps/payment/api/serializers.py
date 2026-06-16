@@ -694,6 +694,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "abort_comment",
             "closure_comment",
             "closed_by",
+            "status_date",
             "flat_amount_value",
         )
 

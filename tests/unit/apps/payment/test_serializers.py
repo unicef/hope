@@ -378,6 +378,7 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["can_send_xlsx_password"] is False
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
+    assert data["status_date"] is not None
 
 
 def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
