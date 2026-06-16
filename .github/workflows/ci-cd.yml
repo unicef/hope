@@ -19,11 +19,15 @@ jobs:
   generate-types:
     uses: ./.github/workflows/generate-types.yml
   frontend:
+    # Skip on ephemeral-* deploys — only generate-types + build + deploy run there.
+    if: ${{ !startsWith(github.ref_name, 'ephemeral-') }}
     needs: [generate-types]
     uses: ./.github/workflows/frontend-checks.yml
   lint:
+    if: ${{ !startsWith(github.ref_name, 'ephemeral-') }}
     uses: ./.github/workflows/lint.yml
   tests:
+    if: ${{ !startsWith(github.ref_name, 'ephemeral-') }}
     needs: [generate-types]
     uses: ./.github/workflows/tests.yml
     secrets: inherit
@@ -33,6 +37,14 @@ jobs:
       - lint
       - tests
       - frontend
+    # Run once generate-types succeeds and no gate job FAILED. On ephemeral-*
+    # the gate jobs are 'skipped' (not 'failure') so build proceeds; on real
+    # branches a test failure flips this to skip build (and therefore deploy).
+    if: ${{ !cancelled()
+        && needs.generate-types.result == 'success'
+        && needs.lint.result != 'failure'
+        && needs.tests.result != 'failure'
+        && needs.frontend.result != 'failure' }}
     uses: ./.github/workflows/build-and-push.yml
     secrets: inherit
   # trivy:

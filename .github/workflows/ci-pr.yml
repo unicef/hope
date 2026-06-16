@@ -21,17 +21,24 @@ jobs:
   generate-types:
     uses: ./.github/workflows/generate-types.yml
   frontend:
+    # Skip on PRs targeting ephemeral-*. NOTE: use base_ref, not ref_name —
+    # on pull_request events ref_name is "<pr#>/merge" and never matches.
+    if: ${{ !startsWith(github.base_ref, 'ephemeral-') }}
     needs: [generate-types]
     uses: ./.github/workflows/frontend-checks.yml
   lint:
+    if: ${{ !startsWith(github.base_ref, 'ephemeral-') }}
     uses: ./.github/workflows/lint.yml
   mypy:
+    if: ${{ !startsWith(github.base_ref, 'ephemeral-') }}
     uses: ./.github/workflows/mypy.yml
   tests:
+    if: ${{ !startsWith(github.base_ref, 'ephemeral-') }}
     needs: [generate-types]
     uses: ./.github/workflows/tests.yml
     secrets: inherit
   pragma:
+    if: ${{ !startsWith(github.base_ref, 'ephemeral-') }}
     uses: ./.github/workflows/pragma.yml
   build:
     needs: [generate-types]
