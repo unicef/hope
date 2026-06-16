@@ -2,7 +2,6 @@ import { Box, Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DividerLine } from '@core/DividerLine';
-import { Missing } from '@core/Missing';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
 import { ReactElement } from 'react';
@@ -110,9 +109,8 @@ export function AcceptanceProcessRow({
               >
                 {t('Closed by')} {paymentPlan.closedBy}
                 <Box ml={1}>
-                  {/* TODO: backend does not expose closure date (status_date not in PaymentPlanDetailSerializer) */}
                   <GreyText>
-                    {t('on')} <Missing />
+                    {t('on')} {paymentPlan.statusDate}
                   </GreyText>
                 </Box>
               </GreyBox>
