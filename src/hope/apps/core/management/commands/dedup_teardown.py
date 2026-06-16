@@ -40,9 +40,11 @@ from hope.models import (
     HouseholdCollection,
     Individual,
     IndividualCollection,
+    Partner,
     Program,
     ProgramCycle,
     RegistrationDataImport,
+    RoleAssignment,
 )
 
 if TYPE_CHECKING:
@@ -80,6 +82,17 @@ class Command(BaseCommand):
             .values_list("id", flat=True)
             .distinct()
         )
+        # The `business_area_created` signal creates one "UNICEF Partner for <slug>"
+        # sub-partner per BA (plus its RoleAssignment). Deleting the BA does not
+        # reach the Partner, so capture them now — otherwise a same-tag re-run
+        # collides on account_partner_name_key. Capture by exact signal-generated
+        # name to avoid touching the shared UNICEF / UNICEF HQ partners that also
+        # link to these BAs.
+        subpartner_ids = list(
+            Partner.objects.filter(
+                name__in=[f"UNICEF Partner for {slug}" for slug in bas.values_list("slug", flat=True)]
+            ).values_list("id", flat=True)
+        )
 
         for program_id in program_ids:
             delete_program_indexes(str(program_id))
@@ -97,8 +110,13 @@ class Command(BaseCommand):
         # 3) orphaned collections (no business_area FK to reach them).
         HouseholdCollection.objects.filter(id__in=hh_coll_ids).delete()
         IndividualCollection.objects.filter(id__in=ind_coll_ids).delete()
+        # 4) signal-created sub-partners (RoleAssignments first, in case the
+        # BA delete didn't cascade them, then the now-unreferenced partners).
+        RoleAssignment.objects.filter(partner_id__in=subpartner_ids).delete()
+        Partner.objects.filter(id__in=subpartner_ids).delete()
 
         self.stdout.write(
             f"=== DEDUP TEARDOWN DONE === removed {len(ba_ids)} BA(s), {len(program_ids)} program(s), "
-            f"{len(hh_coll_ids)} hh-collection(s), {len(ind_coll_ids)} ind-collection(s)"
+            f"{len(hh_coll_ids)} hh-collection(s), {len(ind_coll_ids)} ind-collection(s), "
+            f"{len(subpartner_ids)} sub-partner(s)"
         )

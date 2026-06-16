@@ -40,6 +40,8 @@ from hope.models import (
     Program,
     ProgramCycle,
     RegistrationDataImport,
+    Role,
+    RoleAssignment,
     User,
 )
 
@@ -92,6 +94,7 @@ class Command(BaseCommand):
         for variant, suffix, ingest_source, biometric in VARIANTS:
             with transaction.atomic():
                 ba = self._create_ba(variant, suffix, ingest_source, tag)
+                self._grant_access(ba)
                 program = self._create_program(ba, tag, biometric)
                 seed_rdi = self._create_seed_rdi(ba, program, tag)
                 population = {}
@@ -122,9 +125,21 @@ class Command(BaseCommand):
             DataCollectingType.objects.filter(code="partial_individuals").first()
             or DataCollectingType.objects.filter(active=True).first()
         )
-        bg = BeneficiaryGroup.objects.filter(name="Social Workers").first() or BeneficiaryGroup.objects.first()
-        if not (dct and bg):
-            raise CommandError(f"Missing reference data on env: dct={dct} bg={bg}")
+        if not dct:
+            raise CommandError("Missing reference data on env: no DataCollectingType found")
+        # Program.clean() requires the pair to match: this command builds
+        # household+individual (master-detail) data, so the beneficiary group's
+        # master_detail must align with the dct type. The dct's `type` is
+        # env-specific (e.g. partial_individuals is SOCIAL in demo data but
+        # STANDARD on deployed envs), so derive the group from it rather than
+        # hardcoding a name that only happens to be valid in one environment.
+        needs_master_detail = dct.type == DataCollectingType.Type.STANDARD
+        bg = BeneficiaryGroup.objects.filter(master_detail=needs_master_detail).first()
+        if not bg:
+            raise CommandError(
+                f"Missing reference data on env: no BeneficiaryGroup with "
+                f"master_detail={needs_master_detail} (required for dct {dct.code!r} type {dct.type})"
+            )
         return dct, bg, Country.objects.first()
 
     # -- builders -----------------------------------------------------------
@@ -145,6 +160,18 @@ class Command(BaseCommand):
             ba.save()
             ba.countries.add(self.country)
         return ba
+
+    def _grant_access(self, ba: BusinessArea) -> None:
+        # Accessible BAs come solely from RoleAssignment (user- or partner-based);
+        # is_superuser does NOT bypass the BA list (User.business_areas). The
+        # business_area_created signal only grants the UNICEF sub-partner / HQ, so
+        # without an explicit user grant these BAs 404 in the frontend for whoever
+        # runs the harness. Grant every active superuser a full-permission role.
+        role = Role.objects.filter(name="Role with all permissions").first()
+        if not role:
+            raise CommandError("Missing reference data on env: Role 'Role with all permissions' not found")
+        for user in User.objects.filter(is_superuser=True, is_active=True):
+            RoleAssignment.objects.get_or_create(user=user, business_area=ba, program=None, defaults={"role": role})
 
     def _create_program(self, ba: BusinessArea, tag: str, biometric: bool) -> Program:
         program = Program.objects.create(
