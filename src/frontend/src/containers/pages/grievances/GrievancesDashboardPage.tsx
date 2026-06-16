@@ -10,12 +10,16 @@ import { TicketsByCategorySection } from '@components/grievances/GrievancesDashb
 import { TicketsByLocationAndCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
 import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { usePermissions } from '@hooks/usePermissions';
+import {
+  GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
+  GRIEVANCES_VIEW_LIST_PERMISSIONS,
+  hasPermissions,
+} from '../../../config/permissions';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PERMISSIONS } from 'src/config/permissions';
 import { formatFigure } from '@utils/utils';
 
 function GrievancesDashboardPage(): ReactElement {
@@ -51,21 +55,17 @@ function GrievancesDashboardPage(): ReactElement {
 
   if (!data || permissions === null) return null;
   if (loading) return <LoadingComponent />;
-  const hasGrievancesViewPermission = permissions.some(
-    (perm) =>
-      perm.includes('GRIEVANCES_VIEW_LIST') ||
-      perm.includes('GRIEVANCES_VIEW_DETAILS'),
+  const grievancesViewPermissions = [
+    ...GRIEVANCES_VIEW_LIST_PERMISSIONS,
+    ...GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
+  ];
+  const hasGrievancesViewPermission = hasPermissions(
+    grievancesViewPermissions,
+    permissions,
   );
 
   if (!hasGrievancesViewPermission)
-    return (
-      <PermissionDenied
-        permission={[
-          PERMISSIONS.GRIEVANCES_VIEW_LIST,
-          PERMISSIONS.GRIEVANCES_VIEW_DETAILS,
-        ]}
-      />
-    );
+    return <PermissionDenied permission={grievancesViewPermissions} />;
 
   const {
     ticketsByCategory,
