@@ -179,7 +179,6 @@ export function ClosePaymentPlanDialog({
                       variant="filled"
                       label={t('Comment (Mandatory)')}
                       component={FormikTextField}
-                      data-cy="input-closure-comment"
                     />
                   </Form>
                 </WarningBox>
