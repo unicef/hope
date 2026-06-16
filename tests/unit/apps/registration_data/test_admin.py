@@ -141,6 +141,7 @@ def test_rerun_rdi_kobo_schedules_async_job(
         import_data_id=str(import_data.id),
         business_area_id=str(afghanistan.id),
         program_id=str(program.id),
+        requeue=True,
     )
 
 

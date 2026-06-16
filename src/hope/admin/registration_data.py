@@ -99,24 +99,23 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             self.message_user(request, "Registration Data Import not found", messages.ERROR)
             return None
         try:
+            common_kwargs = {
+                "registration_data_import": obj,
+                "import_data_id": str(obj.import_data_id),
+                "business_area_id": str(obj.business_area_id),
+                "program_id": str(obj.program_id),
+            }
             if obj.data_source == RegistrationDataImport.XLS:
                 from hope.apps.registration_data.celery_tasks import registration_xlsx_import_async_task
 
-                celery_task = registration_xlsx_import_async_task
+                registration_xlsx_import_async_task(**common_kwargs)
             elif obj.data_source == RegistrationDataImport.KOBO:
                 from hope.apps.registration_data.celery_tasks import registration_kobo_import_async_task
 
-                celery_task = registration_kobo_import_async_task
+                registration_kobo_import_async_task(**common_kwargs, requeue=True)
             else:
                 self.message_user(request, "Cannot rerun RDI if it's not a XLS or KOBO.", messages.ERROR)
                 return None
-
-            celery_task(
-                registration_data_import=obj,
-                import_data_id=str(obj.import_data_id),
-                business_area_id=str(obj.business_area_id),
-                program_id=str(obj.program_id),
-            )
 
             self.message_user(request, "RDI task has started")
         except OperationalError as e:
