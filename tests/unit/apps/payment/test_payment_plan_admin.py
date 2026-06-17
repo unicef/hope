@@ -412,22 +412,24 @@ def test_can_regenerate_export_file_per_fsp(
 
 
 @pytest.mark.parametrize(
-    ("status", "flag_enabled", "expected"),
+    ("status", "flag_enabled", "sent_to_vision", "expected"),
     [
-        (PaymentPlan.Status.ACCEPTED, True, True),
-        (PaymentPlan.Status.ACCEPTED, False, False),
-        (PaymentPlan.Status.OPEN, True, False),
-        (PaymentPlan.Status.OPEN, False, False),
+        (PaymentPlan.Status.ACCEPTED, True, False, True),
+        (PaymentPlan.Status.ACCEPTED, True, True, False),
+        (PaymentPlan.Status.ACCEPTED, False, False, False),
+        (PaymentPlan.Status.OPEN, True, False, False),
+        (PaymentPlan.Status.OPEN, False, False, False),
     ],
 )
-def test_can_send_to_vision(payment_plan, status, flag_enabled, expected) -> None:
+def test_can_send_to_vision(payment_plan, status, flag_enabled, sent_to_vision, expected) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value=str(flag_enabled),
     )
     payment_plan.status = status
-    payment_plan.save(update_fields=["status"])
+    payment_plan.internal_data = {"vision": {"sent": sent_to_vision}}
+    payment_plan.save(update_fields=["status", "internal_data"])
     assert can_send_to_vision(payment_plan) is expected
 
 

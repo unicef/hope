@@ -77,6 +77,21 @@ def test_send_to_vision_button_hidden_when_open(afghanistan, admin_user, program
     assert 'id="btn-send_to_vision"' not in response.content.decode()
 
 
+def test_send_to_vision_button_hidden_when_already_sent(afghanistan, admin_user, program_cycle, admin_client) -> None:
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+    )
+    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.ACCEPTED)
+    pp.internal_data = {"vision": {"sent": True}}
+    pp.save(update_fields=["internal_data"])
+    change_url = reverse("admin:payment_paymentplan_change", args=[pp.pk])
+    response = admin_client.get(change_url)
+    assert response.status_code == 200
+    assert 'id="btn-send_to_vision"' not in response.content.decode()
+
+
 def test_send_to_vision_get_returns_confirmation(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
