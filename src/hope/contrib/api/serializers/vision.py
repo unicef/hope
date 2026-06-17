@@ -2,7 +2,7 @@ from typing import Any
 
 from rest_framework import serializers
 
-from hope.apps.core.utils import to_camel_case, to_snake_case
+from hope.apps.core.utils import to_camel_case
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import PaymentPlan
 
@@ -11,10 +11,6 @@ VISION_CALLBACK_FIELD_OVERRIDES = {
     "vision_payplan_sno": "vision_payplanSno",
     "fc_num": "fc_num",
 }
-
-
-def vision_callback_internal_field_name(field_name: str) -> str:
-    return VISION_CALLBACK_FIELD_OVERRIDES.get(field_name, to_snake_case(field_name))
 
 
 def vision_callback_external_field_name(field_name: str) -> str:
