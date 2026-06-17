@@ -181,6 +181,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                           field.subtype === 'DATE' ? (
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                               <DatePicker
+                                //Necessary for selenium to find the input field
+                                enableAccessibleFieldDOMStructure={false}
                                 value={
                                   field.value ? new Date(field.value) : null
                                 }

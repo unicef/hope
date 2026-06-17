@@ -47,7 +47,7 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   const { mutateAsync: closePaymentPlan, isPending: loadingClose } =
     useMutation({
-      mutationFn: async () => {
+      mutationFn: () => {
         return RestService.restBusinessAreasProgramsPaymentPlansCloseRetrieve({
           businessAreaSlug: businessArea,
           programCode: programId,
