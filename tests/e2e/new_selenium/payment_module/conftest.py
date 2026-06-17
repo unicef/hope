@@ -1,12 +1,15 @@
+from typing import Any
+
 import pytest
 
 from extras.test_utils.factories import (
+    ApprovalProcessFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
     ProgramFactory,
 )
-from hope.models import BusinessArea, PaymentPlan, Program, User
+from hope.models import BusinessArea, PaymentPlan, Program
 
 
 @pytest.fixture
@@ -34,8 +37,7 @@ def ready_for_closure_payment_plan(business_area: BusinessArea) -> PaymentPlan:
 
 
 @pytest.fixture
-def closed_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    user = User.objects.filter(username="superuser").first()
+def closed_payment_plan(business_area: BusinessArea, create_super_user: Any) -> PaymentPlan:
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     pp = PaymentPlanFactory(
         business_area=business_area,
@@ -44,6 +46,7 @@ def closed_payment_plan(business_area: BusinessArea) -> PaymentPlan:
         financial_service_provider=FinancialServiceProviderFactory(),
         delivery_mechanism=DeliveryMechanismFactory(),
     )
-    pp.closed_by = user
+    pp.closed_by = create_super_user
     pp.save(update_fields=["closed_by"])
+    ApprovalProcessFactory(payment_plan=pp)
     return pp
