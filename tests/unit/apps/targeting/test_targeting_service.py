@@ -5,7 +5,6 @@ from django.db.models import Q
 import pytest
 
 from extras.test_utils.factories.household import HouseholdFactory
-
 from hope.apps.core.field_attributes.fields_types import TYPE_SELECT_MANY
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.apps.targeting.services.targeting_service import (

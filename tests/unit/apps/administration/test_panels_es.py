@@ -53,9 +53,7 @@ def test_es_panel_post_info_returns_cluster_info(superuser_client: Client, mocke
 
 def test_es_panel_post_test_connection_pings(superuser_client: Client, mocker: Any) -> None:
     conn = mocker.Mock()
-    create_connection = mocker.patch(
-        "hope.apps.administration.panels.es.create_connection", return_value=conn
-    )
+    create_connection = mocker.patch("hope.apps.administration.panels.es.create_connection", return_value=conn)
 
     response = superuser_client.post(reverse("admin:console-es"), {"action": "test_connection"})
 

@@ -1,10 +1,9 @@
 from typing import Any
 
-import pytest
 from django.conf import settings
+import pytest
 
 from extras.test_utils.factories.program import ProgramFactory
-
 from hope.apps.registration_data.validators import ImportDataInstanceValidator
 from hope.models import Partner, Program
 
