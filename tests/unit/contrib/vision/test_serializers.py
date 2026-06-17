@@ -108,6 +108,7 @@ def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
         "status": "SUCCESS",
         "fc_num": "FC123",
     }
+    assert serializer.validated_message_id == "msg-001"
 
 
 def test_payment_plan_callback_request_serializer_external_payload() -> None:

@@ -150,12 +150,27 @@ class TestAPIMissingKey(BaseAPI):
     API_URL_SETTING_NAME = "TEST_API_URL"
 
 
+class RequiredSettingsAPI(BaseAPI):
+    API_URL_SETTING_NAME = "TEST_API_URL"
+    API_AUTHENTICATION_REQUIRED = False
+    API_REQUIRED_SETTING_NAMES = ("TEST_REQUIRED_SETTING",)
+
+
 def test_base_api_init_raises_when_key_missing(settings):
     settings.TEST_API_URL = "http://test-hope.com"
     with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
         TestAPIMissingKey()
 
     assert "Missing TestAPIMissingKey Key/URL" in str(exc.value)
+
+
+def test_base_api_init_raises_when_required_setting_missing(settings):
+    settings.TEST_API_URL = "http://test-hope.com"
+    settings.TEST_REQUIRED_SETTING = ""
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        RequiredSettingsAPI()
+
+    assert "Missing RequiredSettingsAPI settings: TEST_REQUIRED_SETTING" in str(exc.value)
 
 
 def test_get_api_key_returns_none_when_env_name_not_set():
