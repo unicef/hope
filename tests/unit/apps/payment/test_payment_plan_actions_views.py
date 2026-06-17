@@ -2129,6 +2129,29 @@ def test_send_to_vision_wrong_status_returns_403(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_already_sent_returns_403(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_VISION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].internal_data = {"vision": {"sent": True}}
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    mock_vision.assert_not_called()
+
+
 def test_send_to_vision_no_permission_returns_403(
     payment_plan_actions_context: dict[str, Any],
 ) -> None:

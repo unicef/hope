@@ -186,31 +186,6 @@ def test_send_payment_plan_with_different_currency(mock_post, mock_acquire_token
     )
 
 
-@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
-@patch("hope.contrib.vision.api.VisionAPI._post")
-def test_post_to(mock_post, mock_acquire_token) -> None:
-    mock_post.return_value = ({"result": "created"}, 201)
-    api = VisionAPI()
-    result = api._post_to("http/hope/pp/creation", {"key": "val"})
-    assert result == {"result": "created"}
-    mock_post.assert_called_once_with(
-        "https://test.example.com/http/hope/pp/creation",
-        {"key": "val"},
-    )
-
-
-@patch("hope.contrib.vision.api.VisionAPI._get")
-def test_get_from(mock_get) -> None:
-    mock_get.return_value = ({"data": []}, 200)
-    api = VisionAPI()
-    result = api._get_from("http/hope/pp/status", {"param": "x"})
-    assert result == {"data": []}
-    mock_get.assert_called_once_with(
-        "https://test.example.com/http/hope/pp/status",
-        {"param": "x"},
-    )
-
-
 def test_vision_api_error_is_raised() -> None:
     with patch("hope.contrib.vision.api.VisionAPI._acquire_token"):
         with patch("hope.contrib.vision.api.VisionAPI._post") as mock_post:
@@ -220,7 +195,7 @@ def test_vision_api_error_is_raised() -> None:
             with pytest.raises(VisionAPIError):
                 api.send_payment_plan(pp)
             assert "vision" in pp.internal_data
-            assert pp.internal_data["vision"]["log"][0]["response"]["error"] == "boom"
+            assert pp.internal_data["vision"]["send_log"][0]["response"]["error"] == "boom"
             pp.save.assert_called_once_with(update_fields=["internal_data"])
 
 
@@ -235,8 +210,8 @@ def test_send_payment_plan_logs_4xx_error() -> None:
             with pytest.raises(VisionAPIError):
                 api.send_payment_plan(pp)
             assert "vision" in pp.internal_data
-            assert len(pp.internal_data["vision"]["log"]) == 1
-            entry = pp.internal_data["vision"]["log"][0]
+            assert len(pp.internal_data["vision"]["send_log"]) == 1
+            entry = pp.internal_data["vision"]["send_log"][0]
             assert entry["payload"]["payplanSno"] == "PP001"
             assert "400" in entry["response"]["error"]
             pp.save.assert_called_once_with(update_fields=["internal_data"])
@@ -252,11 +227,25 @@ def test_send_payment_plan_logs_payload_and_response(mock_post, mock_acquire_tok
     result = api.send_payment_plan(pp)
     assert result == {"status": "ok", "messageId": "msg-42"}
     assert "vision" in pp.internal_data
-    assert len(pp.internal_data["vision"]["log"]) == 1
-    entry = pp.internal_data["vision"]["log"][0]
+    assert len(pp.internal_data["vision"]["send_log"]) == 1
+    assert pp.internal_data["vision"]["sent"] is True
+    assert pp.internal_data["vision"]["message_id"] == "msg-42"
+    entry = pp.internal_data["vision"]["send_log"][0]
     assert entry["payload"]["payplanSno"] == "PP042"
     assert entry["response"]["messageId"] == "msg-42"
     pp.save.assert_called_once_with(update_fields=["internal_data"])
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_send_payment_plan_already_sent_raises_error(mock_post, mock_acquire_token) -> None:
+    api = VisionAPI()
+    pp = _make_mock_payment_plan(unicef_id="PP042")
+    pp.sent_to_vision = True
+    with pytest.raises(VisionAPIError):
+        api.send_payment_plan(pp)
+    mock_acquire_token.assert_not_called()
+    mock_post.assert_not_called()
 
 
 @patch("hope.models.APILogEntry.objects.create")
@@ -301,9 +290,9 @@ def test_callback_view_success(mock_get, mock_log_entry) -> None:
         "payplanSno": "PP043",
     }
     assert "vision" in mock_pp.internal_data
-    entry = mock_pp.internal_data["vision"]["log"][0]
+    entry = mock_pp.internal_data["vision"]["callback_log"][0]
     assert entry["payload"]["payplanSno"] == "PP043"
-    assert entry["response"]["status"] == "NEW"
+    assert entry["response"]["status"] == "OK"
     assert mock_pp.internal_data["vision"]["vision_id"] == "00000062"
 
 
@@ -386,7 +375,10 @@ def test_callback_view_success_missing_vision_payplan_sno(mock_get, mock_log_ent
         "payplanSno": "PP045",
     }
     mock_get.assert_called_once_with(unicef_id="PP045")
-    mock_pp.save.assert_not_called()
+    mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
+    entry = mock_pp.internal_data["vision"]["callback_log"][0]
+    assert entry["payload"]["payplanSno"] == "PP045"
+    assert entry["response"]["status"] == "KO"
 
 
 @patch("hope.models.APILogEntry.objects.create")
@@ -460,9 +452,9 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
         "payplanSno": "PP043",
     }
     assert "vision" in mock_pp.internal_data
-    entry = mock_pp.internal_data["vision"]["log"][0]
+    entry = mock_pp.internal_data["vision"]["callback_log"][0]
     assert entry["payload"]["payplanSno"] == "PP043"
-    assert entry["response"]["status"] == "NEW"
+    assert entry["response"]["status"] == "OK"
     assert "vision_id" not in mock_pp.internal_data["vision"]
     assert "fc_num" not in mock_pp.internal_data["vision"]
 

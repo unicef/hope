@@ -18,7 +18,6 @@ class VisionAPIMissingCredentialsError(Exception):
 
 class VisionAPI(BaseAPI):
     API_URL_SETTING_NAME = "VISION_API_URL"
-    API_REQUIRED_SETTING_NAMES = ("VISION_CLIENT_ID", "VISION_CLIENT_SECRET")
     API_AUTHENTICATION_REQUIRED = False
     API_EXCEPTION_CLASS = VisionAPIError
     API_MISSING_CREDENTIALS_EXCEPTION_CLASS = VisionAPIMissingCredentialsError
@@ -72,7 +71,7 @@ class VisionAPI(BaseAPI):
         return vision_data
 
     def send_payment_plan(self, payment_plan: PaymentPlan) -> dict:
-        if payment_plan.sent_to_vision:
+        if getattr(payment_plan, "sent_to_vision", False) is True:
             raise VisionAPIError("Payment plan has already been sent to Vision")
 
         self._ensure_token()
@@ -81,7 +80,7 @@ class VisionAPI(BaseAPI):
         try:
             response, _ = self._post(self.payment_plan_creation_url, payload)
             entry["response"] = response
-        except VisionAPIError as e:
+        except (BaseAPI.APIError, VisionAPIError) as e:
             entry["response"] = {"error": str(e)}
             self._append_send_log(payment_plan, entry)
             payment_plan.save(update_fields=["internal_data"])

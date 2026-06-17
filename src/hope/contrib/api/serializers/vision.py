@@ -46,7 +46,7 @@ class FundsCommitmentSerializer(serializers.Serializer):
 class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     message_id = serializers.CharField(required=False, allow_blank=True)
     payplan_sno = serializers.CharField()
-    vision_payplan_sno = serializers.CharField()
+    vision_payplan_sno = serializers.CharField(required=False, allow_blank=True)
     status = serializers.CharField(required=False, allow_blank=True)
     fc_num = serializers.CharField(required=False, allow_blank=True)
 
@@ -85,8 +85,16 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
             vision_callback_external_field_name(field_name): value for field_name, value in self.validated_data.items()
         }
 
+    def ack_payload(self, status: str) -> dict[str, Any]:
+        validated_data = getattr(self, "_validated_data", {})
+        return {
+            "status": status,
+            "message_id": validated_data.get("message_id") or self.initial_message_id,
+            "payplan_sno": validated_data.get("payplan_sno") or self.initial_payplan_sno,
+        }
 
-class PaymentPlanCallbackResponseSerializer(serializers.Serializer):
+
+class PaymentPlanCallbackAckSerializer(serializers.Serializer):
     status = serializers.CharField()
     message_id = serializers.CharField(allow_blank=True)
     payplan_sno = serializers.CharField(allow_blank=True)
