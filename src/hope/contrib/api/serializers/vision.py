@@ -9,6 +9,7 @@ from hope.models import PaymentPlan
 VISION_CALLBACK_FIELD_OVERRIDES = {
     "vision_payplanSno": "vision_payplan_sno",
     "vision_payplan_sno": "vision_payplanSno",
+    "fc_num": "fc_num",
 }
 
 
