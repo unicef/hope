@@ -12,7 +12,6 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from flags.state import flag_state
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.payment.forms import TemplateSelectForm
@@ -53,7 +52,7 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
 
 
 def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.status == PaymentPlan.Status.ACCEPTED and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
+    return payment_plan.can_send_to_vision
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:

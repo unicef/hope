@@ -17,19 +17,20 @@ class VisionAPIMissingCredentialsError(Exception):
 
 
 class VisionAPI(BaseAPI):
-    def get_api_url(self) -> str:
-        url = settings.VISION_API_URL
-        if not url:
-            raise VisionAPIMissingCredentialsError("Missing Vision API URL")
-        return url
+    API_URL_SETTING_NAME = "VISION_API_URL"
+    API_REQUIRED_SETTING_NAMES = ("VISION_CLIENT_ID", "VISION_CLIENT_SECRET")
+    API_AUTHENTICATION_REQUIRED = False
+    API_EXCEPTION_CLASS = VisionAPIError
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = VisionAPIMissingCredentialsError
 
     def __init__(self) -> None:
         super().__init__()
-        self._client.headers.pop("Authorization", None)
+        base_url = self.api_url.rstrip("/")
+        self.token_url = f"{base_url}/v1/OAuthService/GenerateToken"
+        self.payment_plan_creation_url = f"{base_url}/ps/ezcash/PaymentPlan"
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
-        token_url = f"{self.api_url.rstrip('/')}/v1/OAuthService/GenerateToken"
         client_id = settings.VISION_CLIENT_ID
         client_secret = settings.VISION_CLIENT_SECRET
         grant_type = settings.VISION_TOKEN_GRANT_TYPE
@@ -39,7 +40,7 @@ class VisionAPI(BaseAPI):
             raise VisionAPIMissingCredentialsError("Missing Vision OAuth credentials")
 
         response = requests.post(
-            token_url,
+            self.token_url,
             data={
                 "client_id": client_id,
                 "client_secret": client_secret,
@@ -61,33 +62,33 @@ class VisionAPI(BaseAPI):
         if not self._token_expiry or datetime.now() >= self._token_expiry:
             self._acquire_token()
 
-    class Endpoints:
-        PP_CREATION = "ps/ezcash/PaymentPlan"
+    @staticmethod
+    def _vision_data(payment_plan: PaymentPlan) -> dict:
+        return payment_plan.internal_data.setdefault("vision", {})
 
-    def get_url(self, endpoint: str) -> str:
-        base = self.api_url.rstrip("/")
-        return f"{base}/{endpoint.lstrip('/')}"
-
-    def _post_to(self, endpoint: str, data: dict) -> dict:
-        return self._post(self.get_url(endpoint), data)[0]
-
-    def _get_from(self, endpoint: str, params: dict | None = None) -> dict:
-        return self._get(self.get_url(endpoint), params)[0]
+    def _append_send_log(self, payment_plan: PaymentPlan, entry: dict) -> dict:
+        vision_data = self._vision_data(payment_plan)
+        vision_data.setdefault("send_log", []).append(entry)
+        return vision_data
 
     def send_payment_plan(self, payment_plan: PaymentPlan) -> dict:
+        if payment_plan.sent_to_vision:
+            raise VisionAPIError("Payment plan has already been sent to Vision")
+
         self._ensure_token()
         payload = PaymentPlanPayloadSerializer(payment_plan).data
         entry = {"payload": {k: str(v) for k, v in payload.items()}, "response": {}}
         try:
-            response = self._post_to(self.Endpoints.PP_CREATION, payload)
+            response, _ = self._post(self.payment_plan_creation_url, payload)
             entry["response"] = response
-        except BaseAPI.APIError as e:
+        except VisionAPIError as e:
             entry["response"] = {"error": str(e)}
-            vision_data = payment_plan.internal_data.setdefault("vision", {})
-            vision_data.setdefault("log", []).append(entry)
+            self._append_send_log(payment_plan, entry)
             payment_plan.save(update_fields=["internal_data"])
             raise VisionAPIError(str(e)) from e
-        vision_data = payment_plan.internal_data.setdefault("vision", {})
-        vision_data.setdefault("log", []).append(entry)
+        vision_data = self._append_send_log(payment_plan, entry)
+        vision_data["sent"] = True
+        if message_id := response.get("messageId"):
+            vision_data["message_id"] = message_id
         payment_plan.save(update_fields=["internal_data"])
         return response
