@@ -9,6 +9,7 @@ if DEBUG and not IS_TEST:
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": lambda request: config.SHOW_TOOLBAR,
         "JQUERY_URL": "",
+        "RENDER_PANELS": True,
     }
     DEBUG_TOOLBAR_PANELS = [
         "debug_toolbar.panels.history.HistoryPanel",
