@@ -23,8 +23,8 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
     permission = Grant.API_VISION_PP_CREATE
 
     @staticmethod
-    def _build_response(status_: str, serializer: PaymentPlanCallbackRequestSerializer) -> dict[str, str]:
-        return dict(PaymentPlanCallbackAckSerializer(serializer.ack_payload(status_)).data)
+    def _build_response(vision_status: str, serializer: PaymentPlanCallbackRequestSerializer) -> dict[str, str]:
+        return dict(PaymentPlanCallbackAckSerializer(serializer.ack_payload(vision_status)).data)
 
     @staticmethod
     def _error_response(serializer: PaymentPlanCallbackRequestSerializer) -> Response:
