@@ -544,7 +544,11 @@ class WesternUnionReportsService:
                     try:
                         return self.decode_rows(zip_info.filename, extracted_file.read())
                     except self.QCFReportsServiceError:
-                        logger.warning("Skipping unsupported archive member %s in %s", zip_info.filename, filename)
+                        logger.warning(
+                            "Skipping unsupported archive member %s in %s",
+                            zip_info.filename,
+                            filename,
+                        )
 
         raise self.QCFReportsServiceError(f"Could not parse any supported archive member in {filename}")
 
