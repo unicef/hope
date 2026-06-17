@@ -224,7 +224,7 @@
             "abort_comment": "",
             "closure_comment": null,
             "closed_by": null,
-            "status_date": null,
+            "status_date": "2025-01-01T00:00:00Z",
             "flat_amount_value": null
         },
         "admin_url": "/api/unicorn/payment/payment/480e9f86-3a14-4620-b6eb-0cb5eea687fa/change/",
