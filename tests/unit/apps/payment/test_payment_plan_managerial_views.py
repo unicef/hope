@@ -42,8 +42,8 @@ def managerial_context(
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
     client = api_client(user)
-    program1 = ProgramFactory(business_area=business_area)
-    program2 = ProgramFactory(business_area=business_area)
+    program1 = ProgramFactory(business_area=business_area, cycle=False)
+    program2 = ProgramFactory(business_area=business_area, cycle=False)
     cycle1 = ProgramCycleFactory(program=program1, title="Cycle 1")
     cycle2 = ProgramCycleFactory(program=program2, title="Cycle 2")
     payment_plan1 = PaymentPlanFactory(
@@ -166,7 +166,7 @@ def test_list_payment_plans(
         etag = response.headers["etag"]
 
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 6
 
     with CaptureQueriesContext(connection) as ctx:
         response = managerial_context["client"].get(managerial_context["url"])
@@ -176,7 +176,7 @@ def test_list_payment_plans(
         etag_second_call = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
         assert etag_second_call == etag
-        assert len(ctx.captured_queries) == 8
+        assert len(ctx.captured_queries) == 6
 
 
 def test_list_payment_plans_approval_process_data(

@@ -9,6 +9,7 @@ import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
+import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
@@ -94,7 +95,7 @@ export function LookUpIndividualTable({
       householdId,
       excludedId: excludedId || ticket?.individual?.id || null,
       programId: isAllPrograms ? filter.program : programId,
-      isActiveProgram: filter.programState === 'active' ? true : null,
+      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       withdrawn: false,
       rdiMergeStatus: RdiMergeStatusEnum.MERGED,
     }),

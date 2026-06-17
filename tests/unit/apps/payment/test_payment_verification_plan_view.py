@@ -50,7 +50,7 @@ def user() -> Any:
 
 @pytest.fixture
 def program_active(business_area: Any) -> Program:
-    return ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    return ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
 
 
 @pytest.fixture

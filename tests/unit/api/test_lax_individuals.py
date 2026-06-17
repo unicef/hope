@@ -24,7 +24,15 @@ from extras.test_utils.factories import (
 )
 from hope.api.endpoints.rdi.lax import IndividualSerializer
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.const import DISABLED, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from hope.apps.household.const import (
+    BLANK,
+    DISABLED,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    NONE,
+    NOT_COLLECTED,
+    NOT_DISABLED,
+    NOT_PROVIDED,
+)
 from hope.models import (
     AccountType,
     FinancialInstitution,
@@ -36,7 +44,6 @@ from hope.models import (
     RegistrationDataImport,
 )
 from hope.models.grant import Grant
-from hope.models.household import BLANK, NONE, NOT_COLLECTED, NOT_DISABLED, NOT_PROVIDED
 
 pytestmark = pytest.mark.django_db
 

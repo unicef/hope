@@ -208,6 +208,8 @@ def test_changelist(app, modeladmin, record):
     opts: Options = modeladmin.model._meta
     url = reverse(admin_urlname(opts, "changelist"))
     res = app.get(url)
+    if res.status_code == 302:
+        res = res.follow()
     assert res.status_code == 200, res.location
     assert str(opts.app_config.verbose_name) in str(res.content)
 

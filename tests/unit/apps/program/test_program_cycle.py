@@ -38,6 +38,7 @@ def program(afghanistan: BusinessArea) -> Program:
         business_area=afghanistan,
         start_date="2020-01-01",
         end_date="2099-12-31",
+        cycle=False,
     )
     # Create default cycle for the program
     ProgramCycleFactory(

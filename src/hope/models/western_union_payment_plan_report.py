@@ -6,22 +6,22 @@ from hope.models.western_union_invoice import WesternUnionInvoice
 
 
 class WesternUnionPaymentPlanReport(models.Model):
-    qcf_file = models.ForeignKey(
+    invoice = models.ForeignKey(
         WesternUnionInvoice,
         related_name="reports",
-        help_text="WU QCF File",
+        help_text="Western Union invoice",
         on_delete=models.DO_NOTHING,
     )
     report_file = models.ForeignKey(
         FileTemp,
         related_name="+",
-        help_text="WU QCF Report File",
+        help_text="Western Union report file",
         on_delete=models.DO_NOTHING,
         null=True,
     )
     payment_plan = models.ForeignKey(
         PaymentPlan,
-        related_name="qcf_reports",
+        related_name="western_union_reports",
         on_delete=models.CASCADE,
     )
     sent = models.BooleanField(default=False)
@@ -33,4 +33,4 @@ class WesternUnionPaymentPlanReport(models.Model):
         ordering = ("id",)
 
     def __str__(self) -> str:
-        return f"{self.payment_plan.name} - sent: {self.sent}"
+        return f"{self.invoice} - {self.payment_plan}"

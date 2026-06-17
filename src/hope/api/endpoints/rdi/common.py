@@ -2,7 +2,7 @@ from typing import Any
 
 from rest_framework import serializers
 
-from hope.models import NOT_DISABLED
+from hope.apps.household.const import NOT_DISABLED
 
 
 class NullableChoiceField(serializers.ChoiceField):

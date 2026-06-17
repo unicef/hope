@@ -59,10 +59,10 @@ class IndividualDocument(Document):
             "partner": fields.KeywordField(attr="partner.name", similarity="boolean"),
         }
     )
-    program_id = fields.KeywordField(attr="program.id")
+    program_id = fields.KeywordField(attr="program_id")
     detail_id = fields.TextField()
     program_registration_id = fields.TextField()
-    registration_data_import_id = fields.KeywordField(attr="registration_data_import.id")
+    registration_data_import_id = fields.KeywordField(attr="registration_data_import_id")
     rdi_merge_status = fields.KeywordField()
 
     def prepare_phone_no_text(self, instance: Individual) -> str:
@@ -136,7 +136,7 @@ class HouseholdDocument(Document):
     admin1 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
-    program_id = fields.KeywordField(attr="program.id")
+    program_id = fields.KeywordField(attr="program_id")
     detail_id = fields.TextField()
     program_registration_id = fields.TextField()
 

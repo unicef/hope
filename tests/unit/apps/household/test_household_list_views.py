@@ -25,7 +25,6 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     SurveyFactory,
@@ -598,7 +597,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
     grievance_ticket = GrievanceTicketFactory(household_unicef_id=household.unicef_id)
     GrievanceTicketFactory()
 
-    program_cycle = ProgramCycleFactory(program=program)
+    program_cycle = program.cycles.first()
     PaymentFactory(
         parent=PaymentPlanFactory(program_cycle=program_cycle, business_area=afghanistan),
         currency=CurrencyFactory(code="AFN", name="Afghani"),
@@ -801,8 +800,9 @@ def test_household_detail_with_permissions(
 
 def test_household_detail_admin_url(household_detail_context: dict[str, Any]) -> None:
     user = household_detail_context["user"]
+    user.is_staff = True
     user.is_superuser = True
-    user.save(update_fields=["is_superuser"])
+    user.save(update_fields=["is_staff", "is_superuser"])
 
     response = household_detail_context["api_client"].get(
         reverse(

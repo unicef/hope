@@ -53,6 +53,7 @@ def program(afghanistan: BusinessArea) -> Program:
         start_date="2023-01-01",
         end_date="2099-12-31",
         frequency_of_payments=Program.REGULAR,
+        cycle=False,
     )
     ProgramCycleFactory(
         program=program,
@@ -183,6 +184,49 @@ def test_retrieve_program_cycle_with_permission(
 
     response = authenticated_client.get(cycle_1_detail_url)
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_retrieve_program_cycle_admin_url_for_staff_user(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle1: ProgramCycle,
+    cycle_1_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        business_area=afghanistan,
+        program=program,
+    )
+    user.is_staff = True
+    user.save(update_fields=["is_staff"])
+
+    response = authenticated_client.get(cycle_1_detail_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["admin_url"] == cycle1.admin_url
+
+
+def test_retrieve_program_cycle_admin_url_hidden_for_non_staff_user(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle_1_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        business_area=afghanistan,
+        program=program,
+    )
+
+    response = authenticated_client.get(cycle_1_detail_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["admin_url"] is None
 
 
 def test_retrieve_program_cycle_without_permission(
@@ -1154,7 +1198,7 @@ def test_update_serializer_validate_end_date(
 def test_viewset_delete_non_active_program() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.DRAFT)
+    program = ProgramFactory(status=Program.DRAFT, cycle=False)
     cycle = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
@@ -1164,7 +1208,7 @@ def test_viewset_delete_non_active_program() -> None:
 def test_viewset_delete_non_draft_cycle() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.ACTIVE)
+    program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program, status=ProgramCycle.ACTIVE)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
@@ -1174,7 +1218,7 @@ def test_viewset_delete_non_draft_cycle() -> None:
 def test_viewset_delete_last_cycle() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.ACTIVE)
+    program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     with pytest.raises(ValidationError) as context:
         viewset.perform_destroy(cycle)
@@ -1184,7 +1228,7 @@ def test_viewset_delete_last_cycle() -> None:
 def test_viewset_successful_delete() -> None:
     BusinessAreaFactory(name="Afghanistan")
     viewset = ProgramCycleViewSet()
-    program = ProgramFactory(status=Program.ACTIVE)
+    program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle1 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     cycle2 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     viewset.perform_destroy(cycle1)
