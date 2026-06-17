@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 import pytest
 
 from extras.test_utils.factories import (
@@ -61,6 +63,13 @@ def test_delete_group_succeeds_when_another_remains(cycle, payment_plan_group):
     payment_plan_group.delete()
 
     assert PaymentPlanGroup.objects.filter(cycle=cycle).count() == 1
+
+
+def test_delete_locks_cycle_groups_for_update(cycle, payment_plan_group):
+    with CaptureQueriesContext(connection) as captured:
+        payment_plan_group.delete()
+
+    assert any("for update" in query["sql"].lower() for query in captured.captured_queries)
 
 
 def test_get_batch_export_file_link_returns_url_when_file_present(cycle, payment_plan_group):

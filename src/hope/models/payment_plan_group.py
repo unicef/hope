@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Exists, OuterRef, Q
 from django.utils.translation import gettext_lazy as _
 
@@ -60,9 +60,13 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         ordering = ["created_at"]
 
     def delete(self, *args: object, **kwargs: object) -> tuple[int, dict]:
-        if self.cycle.payment_plan_groups.count() == 1:
-            raise ValidationError("Cannot delete the last group in a cycle.")
-        return super().delete(*args, **kwargs)  # type: ignore
+        with transaction.atomic():
+            cycle_group_pks = list(
+                PaymentPlanGroup.objects.filter(cycle_id=self.cycle_id).values_list("pk", flat=True).select_for_update()
+            )
+            if len(cycle_group_pks) <= 1:
+                raise ValidationError("Cannot delete the last group in a cycle.")
+            return super().delete(*args, **kwargs)  # type: ignore
 
     def __str__(self) -> str:
         return f"{self.name} for {self.cycle}"
