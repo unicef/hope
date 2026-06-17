@@ -28,6 +28,7 @@ from hope.apps.registration_data.celery_tasks import (
     registration_kobo_import_async_task_action,
     registration_kobo_import_hourly_async_task,
     registration_kobo_import_hourly_async_task_action,
+    registration_xlsx_import_async_task,
     validate_xlsx_import_async_task,
     validate_xlsx_import_async_task_action,
 )
@@ -513,6 +514,57 @@ def test_registration_kobo_import_task_uses_requeue_when_requested() -> None:
         patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.requeue") as mock_requeue,
     ):
         registration_kobo_import_async_task(
+            registration_data_import=rdi,
+            import_data_id=str(import_data.id),
+            business_area_id=str(business_area.id),
+            program_id=str(program.id),
+            requeue=True,
+        )
+
+    mock_requeue.assert_called_once()
+    mock_queue_task.assert_not_called()
+
+
+def test_registration_xlsx_import_task_uses_queue_task_by_default() -> None:
+    business_area = BusinessAreaFactory(name="Afghanistan")
+    program = ProgramFactory(business_area=business_area)
+    import_data = ImportDataFactory(business_area_slug=business_area.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        import_data=import_data,
+    )
+
+    with (
+        patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue_task") as mock_queue_task,
+        patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.requeue") as mock_requeue,
+    ):
+        registration_xlsx_import_async_task(
+            registration_data_import=rdi,
+            import_data_id=str(import_data.id),
+            business_area_id=str(business_area.id),
+            program_id=str(program.id),
+        )
+
+    mock_queue_task.assert_called_once()
+    mock_requeue.assert_not_called()
+
+
+def test_registration_xlsx_import_task_uses_requeue_when_requested() -> None:
+    business_area = BusinessAreaFactory(name="Afghanistan")
+    program = ProgramFactory(business_area=business_area)
+    import_data = ImportDataFactory(business_area_slug=business_area.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        import_data=import_data,
+    )
+
+    with (
+        patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue_task") as mock_queue_task,
+        patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.requeue") as mock_requeue,
+    ):
+        registration_xlsx_import_async_task(
             registration_data_import=rdi,
             import_data_id=str(import_data.id),
             business_area_id=str(business_area.id),

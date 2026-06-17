@@ -125,6 +125,7 @@ def registration_xlsx_import_async_task(
     import_data_id: str,
     business_area_id: str,
     program_id: str,
+    requeue: bool = False,
 ) -> None:
     registration_data_import_id = str(registration_data_import.id)
     config = {
@@ -133,7 +134,8 @@ def registration_xlsx_import_async_task(
         "business_area_id": business_area_id,
         "program_id": program_id,
     }
-    AsyncRetryJob.queue_task(
+    enqueue = AsyncRetryJob.requeue if requeue else AsyncRetryJob.queue_task
+    enqueue(
         instance=registration_data_import,
         job_name=registration_xlsx_import_async_task.__name__,
         program=registration_data_import.program,

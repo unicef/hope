@@ -104,6 +104,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 "import_data_id": str(obj.import_data_id),
                 "business_area_id": str(obj.business_area_id),
                 "program_id": str(obj.program_id),
+                "requeue": True,
             }
             if obj.data_source == RegistrationDataImport.XLS:
                 from hope.apps.registration_data.celery_tasks import registration_xlsx_import_async_task
@@ -112,7 +113,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             elif obj.data_source == RegistrationDataImport.KOBO:
                 from hope.apps.registration_data.celery_tasks import registration_kobo_import_async_task
 
-                registration_kobo_import_async_task(**common_kwargs, requeue=True)
+                registration_kobo_import_async_task(**common_kwargs)
             else:
                 self.message_user(request, "Cannot rerun RDI if it's not a XLS or KOBO.", messages.ERROR)
                 return None
