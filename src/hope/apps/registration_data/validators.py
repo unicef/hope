@@ -159,7 +159,7 @@ class ImportDataInstanceValidator:
                 "required": attr.required,
                 "label": attr.label,
                 "hint": attr.hint,
-                "choices": attr.choices.values_list("name", flat=True),
+                "choices": [c.name for c in attr.choices.all()],
                 "associated_with": associated_with,
             }
 

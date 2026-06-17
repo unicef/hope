@@ -21,9 +21,7 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializerUpload,
 )
-from hope.apps.household.const import RESIDENCE_STATUS_CHOICE
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.models import (
+from hope.apps.household.const import (
     BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -32,7 +30,11 @@ from hope.models import (
     NON_BENEFICIARY,
     NOT_DISABLED,
     OBSERVED_DISABILITY_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
+)
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.models import (
     Area,
     Country,
     Grant,

@@ -18,17 +18,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  generate-types:
+    uses: ./.github/workflows/generate-types.yml
   frontend:
+    needs: [generate-types]
     uses: ./.github/workflows/frontend-checks.yml
   lint:
     uses: ./.github/workflows/lint.yml
   mypy:
     uses: ./.github/workflows/mypy.yml
   tests:
+    needs: [generate-types]
     uses: ./.github/workflows/tests.yml
     secrets: inherit
   pragma:
     uses: ./.github/workflows/pragma.yml
   build:
+    needs: [generate-types]
     uses: ./.github/workflows/build-and-push.yml
     secrets: inherit

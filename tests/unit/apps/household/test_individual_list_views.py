@@ -927,7 +927,11 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "label": ctx["national_id_type"].label,
                 "key": ctx["national_id_type"].key,
             },
-            "country": {"id": str(country.id), "name": country.name, "iso_code3": country.iso_code3},
+            "country": {
+                "id": str(country.id),
+                "name": country.name,
+                "iso_code3": country.iso_code3,
+            },
             "document_number": ctx["national_id"].document_number,
             "photo": ctx["national_id"].photo.url,
         },
@@ -938,7 +942,11 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "label": ctx["national_passport_type"].label,
                 "key": ctx["national_passport_type"].key,
             },
-            "country": {"id": str(country.id), "name": country.name, "iso_code3": country.iso_code3},
+            "country": {
+                "id": str(country.id),
+                "name": country.name,
+                "iso_code3": country.iso_code3,
+            },
             "document_number": ctx["national_passport"].document_number,
             "photo": ctx["national_passport"].photo.url,
         },
@@ -949,7 +957,11 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "label": ctx["birth_certificate_type"].label,
                 "key": ctx["birth_certificate_type"].key,
             },
-            "country": {"id": str(country.id), "name": country.name, "iso_code3": country.iso_code3},
+            "country": {
+                "id": str(country.id),
+                "name": country.name,
+                "iso_code3": country.iso_code3,
+            },
             "document_number": ctx["birth_certificate"].document_number,
             "photo": ctx["birth_certificate"].photo.url,
         },
@@ -960,7 +972,11 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "label": ctx["disability_card_type"].label,
                 "key": ctx["disability_card_type"].key,
             },
-            "country": {"id": str(country.id), "name": country.name, "iso_code3": country.iso_code3},
+            "country": {
+                "id": str(country.id),
+                "name": country.name,
+                "iso_code3": country.iso_code3,
+            },
             "document_number": ctx["disability_card"].document_number,
             "photo": ctx["disability_card"].photo.url,
         },
@@ -971,7 +987,11 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "label": ctx["drivers_license_type"].label,
                 "key": ctx["drivers_license_type"].key,
             },
-            "country": {"id": str(country.id), "name": country.name, "iso_code3": country.iso_code3},
+            "country": {
+                "id": str(country.id),
+                "name": country.name,
+                "iso_code3": country.iso_code3,
+            },
             "document_number": ctx["drivers_license"].document_number,
             "photo": ctx["drivers_license"].photo.url,
         },
@@ -982,7 +1002,11 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "label": ctx["tax_id_type"].label,
                 "key": ctx["tax_id_type"].key,
             },
-            "country": {"id": str(country.id), "name": country.name, "iso_code3": country.iso_code3},
+            "country": {
+                "id": str(country.id),
+                "name": country.name,
+                "iso_code3": country.iso_code3,
+            },
             "document_number": ctx["tax_id"].document_number,
             "photo": ctx["tax_id"].photo.url,
         },
@@ -991,7 +1015,11 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
     assert data["identities"] == [
         {
             "id": ctx["identity"].id,
-            "country": {"id": str(country.id), "name": country.name, "iso_code3": country.iso_code3},
+            "country": {
+                "id": str(country.id),
+                "name": country.name,
+                "iso_code3": country.iso_code3,
+            },
             "partner": None,
             "number": ctx["identity"].number,
         }
@@ -1023,6 +1051,7 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
 
 def test_individual_detail_admin_url(detail_context: dict) -> None:
     ctx = detail_context
+    ctx["user"].is_staff = True
     ctx["user"].is_superuser = True
     ctx["user"].save()
     response = ctx["client"].get(

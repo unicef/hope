@@ -16,6 +16,7 @@ import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
+  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -89,7 +90,7 @@ export const GrievancesTable = ({
       urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
       preferredLanguage: filter.preferredLanguage,
       programCode: isAllPrograms ? filter.program : programCode,
-      isActiveProgram: filter.programState === 'active' ? true : null,
+      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
     [

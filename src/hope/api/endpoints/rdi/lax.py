@@ -26,16 +26,20 @@ from hope.api.endpoints.rdi.common import (
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hope.apps.utils.phone import calculate_phone_numbers_validity
-from hope.models import (
+from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
+    NOT_COLLECTED,
     OBSERVED_DISABILITY_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    SEX_CHOICE,
+)
+from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hope.apps.utils.phone import calculate_phone_numbers_validity
+from hope.models import (
     Account,
     AccountType,
     Area,
@@ -52,7 +56,6 @@ from hope.models import (
     PendingIndividual,
     RegistrationDataImport,
 )
-from hope.models.household import NOT_COLLECTED, SEX_CHOICE
 
 if TYPE_CHECKING:
     from uuid import UUID

@@ -48,7 +48,7 @@ def authenticated_client(api_client, user):
 
 @pytest.fixture
 def superuser(partner, business_area):
-    u = UserFactory(partner=partner, first_name="Super", last_name="User", is_superuser=True)
+    u = UserFactory(partner=partner, first_name="Super", last_name="User", is_staff=True, is_superuser=True)
     partner.allowed_business_areas.add(business_area)
     return u
 
