@@ -62,11 +62,15 @@ class PaymentInstructionStatus(Enum):
 class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     external_code = serializers.SerializerMethodField()
-    fsp = serializers.SerializerMethodField()
+    fsp = serializers.CharField(source="payment_plan.financial_service_provider.payment_gateway_id", read_only=True)
     payload = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
+    delivery_mechanism = serializers.CharField(source="payment_plan.delivery_mechanism.code", read_only=True)
 
-    def get_fsp(self, obj: Any) -> str:
-        return obj.payment_plan.financial_service_provider.payment_gateway_id
+    def get_country(self, obj: PaymentPlanSplit) -> str:
+        business_area = obj.payment_plan.business_area
+        payment_country = business_area.payment_countries.first()
+        return payment_country.iso_code3 if payment_country else ""
 
     def get_payload(self, obj: Any) -> dict:
         business_area = obj.payment_plan.business_area
@@ -94,6 +98,8 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
             "external_code",
             "fsp",
             "payload",
+            "country",
+            "delivery_mechanism",
         ]
 
 
@@ -133,11 +139,12 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
             except FinancialInstitutionMapping.DoesNotExist:
                 logger.error(
-                    f"No Financial Institution Mapping found for"
-                    f" financial_institution {financial_institution},"
-                    f" fsp {obj.financial_service_provider},"
-                    f" payment {obj.id},"
-                    f" collector {obj.collector}."
+                    "No Financial Institution Mapping found for"
+                    " financial_institution %s, fsp %s, payment %s, collector %s.",
+                    financial_institution,
+                    obj.financial_service_provider,
+                    obj.id,
+                    obj.collector,
                 )
 
         elif financial_institution_code := account_data.get("code"):
@@ -160,11 +167,12 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
                 except FinancialInstitutionMapping.DoesNotExist:
                     logger.error(
-                        f"No Financial Institution Mapping found for"
-                        f" financial_institution_code {financial_institution_code},"
-                        f" fsp {obj.financial_service_provider},"
-                        f" payment {obj.id},"
-                        f" collector {obj.collector}."
+                        "No Financial Institution Mapping found for"
+                        " financial_institution_code %s, fsp %s, payment %s, collector %s.",
+                        financial_institution_code,
+                        obj.financial_service_provider,
+                        obj.id,
+                        obj.collector,
                     )
 
         return account_data
@@ -240,7 +248,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     _quantity,
                 ) = get_payment_delivered_quantity_status_and_value(self.payout_amount, entitlement_quantity)
             except ValueError:
-                logger.warning(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
+                logger.warning("Invalid delivered_quantity %s for Payment %s", self.payout_amount, self.remote_id)
                 _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
@@ -256,7 +264,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            logger.warning(f"Invalid Payment status: {self.status}")
+            logger.warning("Invalid Payment status: %s", self.status)
             hope_status = Payment.STATUS_ERROR
 
         return cast("str", hope_status() if callable(hope_status) else hope_status)
