@@ -406,6 +406,11 @@ class NewTicket(BaseComponents):
     def get_date_picker_filter(self) -> WebElement:
         return self.wait_for(self.date_picker_filter).find_element("tag name", "input")
 
+    # MUI X v9 date fields have no typeable single input; fill via the visible
+    # field wrapper (see BaseComponents.fill_date_picker).
+    def fill_date_picker_filter(self, value: str) -> None:
+        self.fill_date_picker(self.wait_for(self.date_picker_filter), value)
+
     def get_input_individualdata_blockchainname(self) -> WebElement:
         return self.wait_for(self.input_individualdata_blockchainname)
 

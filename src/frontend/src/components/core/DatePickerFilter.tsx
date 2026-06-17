@@ -22,8 +22,6 @@ export const DatePickerFilter = ({
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
       <FormControl data-cy={calculatedDataCy} size="small">
         <DesktopDatePicker
-          //Necessary for selenium to find the input field
-          enableAccessibleFieldDOMStructure={false}
           slotProps={{ textField: { size: 'small' } }}
           onChange={(value) => {
             if (value instanceof Date && !isNaN(value.getTime())) {

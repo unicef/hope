@@ -24,13 +24,9 @@ def _fill_programme_create_required_fields(
     beneficiary_group: str = "Main Menu",
 ) -> None:
     browser.type('input[name="name"]', name)
-    start_el = browser.find_element('input[name="startDate"]')
-    start_el.click()
-    start_el.send_keys(start_date)
+    browser.fill_date('input[name="startDate"]', start_date)
     browser.click('input[name="name"]')
-    end_el = browser.wait_for_element_clickable('input[name="endDate"]')
-    end_el.click()
-    end_el.send_keys(end_date)
+    browser.fill_date('input[name="endDate"]', end_date)
     browser.click('input[name="name"]')
     browser.select_dropdown_option("sector", sector)
     browser.select_dropdown_option("dataCollectingTypeCode", dct)

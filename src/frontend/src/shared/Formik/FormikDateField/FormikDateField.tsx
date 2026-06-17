@@ -41,8 +41,6 @@ export const FormikDateField = ({
       <DesktopDatePicker
         {...field}
         {...otherProps}
-        //Necessary for selenium to find the input field
-        enableAccessibleFieldDOMStructure={false}
         label={required ? `${otherProps.label}*` : otherProps.label}
         format="yyyy-MM-dd"
         name={field.name}

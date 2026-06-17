@@ -596,14 +596,8 @@ class TestSmokePaymentModule:
         page_new_payment_plan.select_listbox_element(payment_plan.name)
         page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.select_listbox_element("Afghan afghani")
-        page_new_payment_plan.get_input_dispersion_start_date().click()
-        page_new_payment_plan.get_input_dispersion_start_date().send_keys(
-            FormatTime(22, 1, 2026).numerically_formatted_date
-        )
-        page_new_payment_plan.get_input_dispersion_end_date().click()
-        page_new_payment_plan.get_input_dispersion_end_date().send_keys(
-            FormatTime(30, 6, 2030).numerically_formatted_date
-        )
+        page_new_payment_plan.fill_input_dispersion_start_date(FormatTime(22, 1, 2026).numerically_formatted_date)
+        page_new_payment_plan.fill_input_dispersion_end_date(FormatTime(30, 6, 2030).numerically_formatted_date)
         page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.get_button_save_payment_plan().click()
         assert "OPEN" in page_payment_module_details.get_status_container().text
