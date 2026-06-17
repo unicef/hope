@@ -137,6 +137,7 @@
         "abort_comment": "",
         "closure_comment": null,
         "closed_by": null,
+        "status_date": null,
         "flat_amount_value": null
     },
     "content_type": "application/json"

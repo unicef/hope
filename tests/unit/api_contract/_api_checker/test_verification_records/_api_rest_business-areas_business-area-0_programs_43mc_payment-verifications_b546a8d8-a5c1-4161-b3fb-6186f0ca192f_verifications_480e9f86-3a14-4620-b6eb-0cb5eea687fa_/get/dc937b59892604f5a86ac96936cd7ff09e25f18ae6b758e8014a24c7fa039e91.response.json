@@ -224,6 +224,7 @@
             "abort_comment": "",
             "closure_comment": null,
             "closed_by": null,
+            "status_date": null,
             "flat_amount_value": null
         },
         "admin_url": "/api/unicorn/payment/payment/480e9f86-3a14-4620-b6eb-0cb5eea687fa/change/",

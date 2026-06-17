@@ -170,7 +170,6 @@
                     "PM_LOCK_AND_UNLOCK",
                     "PM_LOCK_AND_UNLOCK_FSP",
                     "PM_MARK_PAYMENT_AS_FAILED",
-                    "PM_MARK_READY_FOR_CLOSURE",
                     "PM_PROGRAMME_CYCLE_CREATE",
                     "PM_PROGRAMME_CYCLE_DELETE",
                     "PM_PROGRAMME_CYCLE_UPDATE",
