@@ -1,19 +1,13 @@
-from typing import Any
-
-from django.conf import settings
 import pytest
 
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.registration_data.validators import ImportDataInstanceValidator
-from hope.models import Partner, Program
+from hope.models import Program
 
 
-@pytest.fixture(scope="module")
-def program(django_db_setup: Any, django_db_blocker: Any) -> Program:
-    with django_db_blocker.unblock():
-        unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-        Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
-        return ProgramFactory()
+@pytest.fixture
+def program() -> Program:
+    return ProgramFactory()
 
 
 @pytest.fixture
