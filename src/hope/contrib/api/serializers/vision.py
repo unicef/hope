@@ -53,10 +53,7 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     def to_internal_value(self, data: dict) -> dict[str, Any]:
         field_names: tuple[str, ...] = tuple(self.fields.keys())
         return super().to_internal_value(
-            {
-                field_name: data.get(vision_callback_external_field_name(field_name), "")
-                for field_name in field_names
-            }
+            {field_name: data.get(vision_callback_external_field_name(field_name), "") for field_name in field_names}
         )
 
     def initial_value(self, field_name: str) -> Any:
