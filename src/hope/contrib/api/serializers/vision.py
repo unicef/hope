@@ -2,9 +2,22 @@ from typing import Any
 
 from rest_framework import serializers
 
-from hope.apps.core.utils import to_camel_case
+from hope.apps.core.utils import to_camel_case, to_snake_case
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import PaymentPlan
+
+VISION_CALLBACK_FIELD_OVERRIDES = {
+    "vision_payplanSno": "vision_payplan_sno",
+    "vision_payplan_sno": "vision_payplanSno",
+}
+
+
+def vision_callback_internal_field_name(field_name: str) -> str:
+    return VISION_CALLBACK_FIELD_OVERRIDES.get(field_name, to_snake_case(field_name))
+
+
+def vision_callback_external_field_name(field_name: str) -> str:
+    return VISION_CALLBACK_FIELD_OVERRIDES.get(field_name, to_camel_case(field_name))
 
 
 class FundsCommitmentItemSerializer(serializers.ModelSerializer):
@@ -30,21 +43,60 @@ class FundsCommitmentSerializer(serializers.Serializer):
     funds_commitment_items = FundsCommitmentItemSerializer(many=True)
 
 
-class PaymentPlanCallbackResponseSerializer(serializers.Serializer):
-    business_area = serializers.CharField()
-    vendor_number = serializers.CharField()
+class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
+    message_id = serializers.CharField(required=False, allow_blank=True)
     payplan_sno = serializers.CharField()
-    payplan_desc = serializers.CharField()
-    currency = serializers.CharField()
-    auth_amt = serializers.CharField()
-    auth_amt_usd = serializers.CharField()
+    vision_payplan_sno = serializers.CharField()
+    status = serializers.CharField(required=False, allow_blank=True)
+    fc_num = serializers.CharField(required=False, allow_blank=True)
+
+    def to_internal_value(self, data: dict) -> dict[str, Any]:
+        field_names: tuple[str, ...] = tuple(self.fields.keys())
+        return super().to_internal_value(
+            {
+                field_name: data.get(vision_callback_external_field_name(field_name), "")
+                for field_name in field_names
+            }
+        )
+
+    def initial_value(self, field_name: str) -> Any:
+        return self.initial_data.get(vision_callback_external_field_name(field_name), "")
+
+    @property
+    def initial_message_id(self) -> str:
+        return self.initial_value("message_id")
+
+    @property
+    def initial_payplan_sno(self) -> str:
+        return self.initial_value("payplan_sno")
+
+    @property
+    def validated_message_id(self) -> str:
+        return self.validated_data.get("message_id", "")
+
+    @property
+    def validated_payplan_sno(self) -> str:
+        return self.validated_data.get("payplan_sno", "")
+
+    @property
+    def validated_vision_payplan_sno(self) -> str:
+        return self.validated_data.get("vision_payplan_sno", "")
+
+    @property
+    def external_payload(self) -> dict[str, Any]:
+        return {
+            vision_callback_external_field_name(field_name): value for field_name, value in self.validated_data.items()
+        }
+
+
+class PaymentPlanCallbackResponseSerializer(serializers.Serializer):
     status = serializers.CharField()
-    head_vendor = serializers.CharField()
-    creation_date = serializers.CharField()
+    message_id = serializers.CharField(allow_blank=True)
+    payplan_sno = serializers.CharField(allow_blank=True)
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)
-        return {to_camel_case(k): v for k, v in data.items()}
+        return {vision_callback_external_field_name(field_name): value for field_name, value in data.items()}
 
 
 class PaymentPlanPayloadSerializer(serializers.Serializer):

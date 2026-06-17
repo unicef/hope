@@ -1162,7 +1162,16 @@ class PaymentPlan(
 
     @property
     def can_send_to_vision(self) -> bool:
-        return self.status == PaymentPlan.Status.ACCEPTED and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
+        return (
+            self.status == PaymentPlan.Status.ACCEPTED
+            and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
+            and not self.sent_to_vision
+        )
+
+    @property
+    def sent_to_vision(self) -> bool:
+        vision_data = (self.internal_data or {}).get("vision", {})
+        return isinstance(vision_data, dict) and bool(vision_data.get("sent"))
 
     @property
     def has_payments_reconciliation_overdue(self) -> bool:

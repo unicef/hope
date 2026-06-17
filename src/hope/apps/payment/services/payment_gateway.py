@@ -339,7 +339,7 @@ class PaymentGatewayAPI(BaseAPI):
     class PaymentGatewayAPIError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = PaymentGatewayAPIError  # type: ignore
+    API_EXCEPTION_CLASS = PaymentGatewayAPIError
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
