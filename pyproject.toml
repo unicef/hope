@@ -4,7 +4,7 @@ requires = [ "setuptools", "wheel" ]
 
 [project]
 name = "hope"
-version = "4.15.5"
+version = "4.15.6"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 readme = "README.md"
 license = { text = "None" }
@@ -143,7 +143,7 @@ dev = [
   "parameterized>=0.8.1",
   "parso>=0.8.3",
   "pre-commit>=3.1.1",
-  "pytest>=7.4.4,<10",
+  "pytest>=7.4.4,<9.1",                # todo upgrade
   "pytest-cov>=4.1",
   "pytest-django>=4.5.2",
   "pytest-echo>=1.7.1",
