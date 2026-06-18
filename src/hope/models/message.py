@@ -27,7 +27,7 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         RANDOM = "RANDOM", _("Random sampling")
 
         @staticmethod
-        def get_choices() -> list[tuple[str, str]]:
+        def get_choices() -> list:
             return Message.SamplingChoices.choices
 
     title = models.CharField(max_length=60)

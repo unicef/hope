@@ -9,11 +9,11 @@ class WesternUnionInvoicePayment(models.Model):
     STATUS_PAID_OR_DELIVERED = "2"
     STATUS_CANCELLED = "6"
     STATUS_PURGED = "7"
-    TRANSACTION_STATUS_CHOICES = [
+    TRANSACTION_STATUS_CHOICES = (
         (STATUS_PAID_OR_DELIVERED, "Paid or delivered"),
         (STATUS_CANCELLED, "Cancelled"),
         (STATUS_PURGED, "Purged"),
-    ]
+    )
 
     western_union_invoice = models.ForeignKey(
         "WesternUnionInvoice",

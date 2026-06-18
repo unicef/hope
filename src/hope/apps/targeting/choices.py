@@ -8,5 +8,5 @@ class FlexFieldClassification(models.TextChoices):
     FLEX_FIELD_PDU = "FLEX_FIELD_PDU", _("Flex Field PDU")
 
     @staticmethod
-    def get_choices() -> list[tuple[str, str]]:
+    def get_choices() -> list:
         return FlexFieldClassification.choices

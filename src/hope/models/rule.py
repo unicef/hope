@@ -23,7 +23,7 @@ def get_rule_type_choices() -> tuple:
     return Rule.TYPE_CHOICES
 
 
-def get_languages_choices() -> list:
+def get_languages_choices() -> Sequence[tuple]:
     return Rule.LANGUAGES
 
 

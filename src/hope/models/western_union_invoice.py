@@ -11,11 +11,11 @@ class WesternUnionInvoice(models.Model):
     STATUS_PENDING = "PENDING"
     STATUS_COMPLETED = "COMPLETED"
     STATUS_ERROR = "ERROR"
-    STATUS_CHOICES = [
+    STATUS_CHOICES = (
         (STATUS_PENDING, "Pending"),
         (STATUS_COMPLETED, "Completed"),
         (STATUS_ERROR, "Error"),
-    ]
+    )
 
     name = models.CharField(max_length=255, unique=True)
     is_legacy = models.BooleanField(default=False)
