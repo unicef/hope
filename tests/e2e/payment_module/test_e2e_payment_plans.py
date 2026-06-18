@@ -511,14 +511,14 @@ class TestSmokePaymentModule:
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
         assert "Currency" in page_new_payment_plan.get_input_currency().text
-        assert (
-            "Dispersion Start Date*"
-            in page_new_payment_plan.wait_for(page_new_payment_plan.input_dispersion_start_date).text
-        )
-        assert (
-            "Dispersion End Date*"
-            in page_new_payment_plan.wait_for(page_new_payment_plan.input_dispersion_end_date).text
-        )
+        # MUI renders the required-field asterisk as a thin space (U+2009) + "*";
+        # strip the thin space so the bare-asterisk assertion still matches.
+        assert "Dispersion Start Date*" in page_new_payment_plan.wait_for(
+            page_new_payment_plan.input_dispersion_start_date
+        ).text.replace("\u2009", "")
+        assert "Dispersion End Date*" in page_new_payment_plan.wait_for(
+            page_new_payment_plan.input_dispersion_end_date
+        ).text.replace("\u2009", "")
 
     def test_smoke_details_payment_plan(
         self,

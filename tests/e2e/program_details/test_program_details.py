@@ -666,7 +666,8 @@ class TestProgrammeDetails:
             sleep(0.1)
         assert (
             "Start Date*\nStart date must be after the latest cycle end date."
-            in page_programme_details.get_start_date_cycle_div().text
+            # strip MUI's thin space (U+2009) preceding the required-field asterisk
+            in page_programme_details.get_start_date_cycle_div().text.replace("\u2009", "")
         )
         page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
@@ -704,13 +705,13 @@ class TestProgrammeDetails:
         for _ in range(50):
             if (
                 "Start Date*\nStart Date cannot be before Programme Start Date"
-                in page_programme_details.get_start_date_cycle_div().text
+                in page_programme_details.get_start_date_cycle_div().text.replace("\u2009", "")
             ):
                 break
             sleep(0.1)
         assert (
             "Start Date*\nStart Date cannot be before Programme Start Date"
-            in page_programme_details.get_start_date_cycle_div().text
+            in page_programme_details.get_start_date_cycle_div().text.replace("\u2009", "")
         )
 
         page_programme_details.fill_start_date_cycle((datetime.now() - relativedelta(days=24)).strftime("%Y-%m-%d"))

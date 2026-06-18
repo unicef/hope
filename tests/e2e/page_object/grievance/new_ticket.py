@@ -530,6 +530,11 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.input_file)
 
     def get_input_questionnaire_size(self) -> WebElement:
+        # Questionnaire checkboxes only mount once the household detail query
+        # resolves (LoadingComponent renders until then). Wait for the spinner
+        # to clear before scrolling/clicking, otherwise the checkbox span isn't
+        # in the DOM yet and the wait below times out.
+        self.wait_for_disappear('div[data-cy="loading-container"]')
         self.driver.execute_script(
             """
             container = document.querySelector("div[data-cy='main-content']")
