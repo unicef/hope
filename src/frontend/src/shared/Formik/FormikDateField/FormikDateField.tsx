@@ -41,7 +41,7 @@ export const FormikDateField = ({
       <DesktopDatePicker
         {...field}
         {...otherProps}
-        label={required ? `${otherProps.label}*` : otherProps.label}
+        label={otherProps.label}
         format="yyyy-MM-dd"
         name={field.name}
         slotProps={{
