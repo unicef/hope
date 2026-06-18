@@ -154,15 +154,13 @@ class ProgrammeManagement(BaseComponents):
     def get_input_freq_of_payment_regular(self) -> WebElement:
         return self.wait_for(self.input_freq_of_payment_regular, By.XPATH)
 
-    # The MUI X v9 date field has no visible single input; locate the editable
-    # section list relative to the hidden value input (unique by `name`).
-    section_list_by_name = (
-        "//input[@name='{}']/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]"
-        "//*[contains(@class, 'MuiPickersSectionList-root')]"
-    )
+    # MUI X v9 date fields have no typeable single input. Wait for the visible
+    # input-base box (located via the hidden value input's data-cy), then
+    # fill_date_picker drives its editable section list.
+    date_field_box = "//input[@data-cy='date-input-{}']/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]"
 
     def get_input_start_date(self) -> WebElement:
-        return self.wait_for(self.section_list_by_name.format("startDate"), By.XPATH)
+        return self.wait_for(self.date_field_box.format("startDate"), By.XPATH)
 
     def fill_input_start_date(self, value: str) -> None:
         self.fill_date_picker(self.get_input_start_date(), value)
@@ -201,7 +199,7 @@ class ProgrammeManagement(BaseComponents):
         return self.get_elements(self.label_start_date)[0]
 
     def get_input_end_date(self) -> WebElement:
-        return self.wait_for(self.section_list_by_name.format("endDate"), By.XPATH)
+        return self.wait_for(self.date_field_box.format("endDate"), By.XPATH)
 
     def get_label_end_date(self) -> WebElement:
         return self.wait_for(self.label_end_date)

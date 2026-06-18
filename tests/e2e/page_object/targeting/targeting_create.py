@@ -315,12 +315,12 @@ class TargetingCreate(BaseComponents):
             )
         )
 
-    # MUI X v9 date fields have no typeable single input; locate the visible
-    # section list relative to the hidden value input and fill it.
-    _date_section_list_xpath = (
+    # MUI X v9 date fields have no typeable single input. Wait for the visible
+    # input-base box (located via the hidden value input's data-cy), then
+    # fill_date_picker drives its editable section list.
+    _date_field_box_xpath = (
         "//input[@data-cy='date-input-individualsFiltersBlocks[{0}].individualBlockFilters[{1}].value.{2}']"
         "/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]"
-        "//*[contains(@class, 'MuiPickersSectionList-root')]"
     )
 
     def fill_input_date_individuals_filters_blocks_value_from(
@@ -330,7 +330,7 @@ class TargetingCreate(BaseComponents):
         individual_block_filters_number: int = 0,
     ) -> None:
         element = self.wait_for(
-            self._date_section_list_xpath.format(
+            self._date_field_box_xpath.format(
                 individuals_filters_blocks_number, individual_block_filters_number, "from"
             ),
             By.XPATH,
@@ -344,9 +344,7 @@ class TargetingCreate(BaseComponents):
         individual_block_filters_number: int = 0,
     ) -> None:
         element = self.wait_for(
-            self._date_section_list_xpath.format(
-                individuals_filters_blocks_number, individual_block_filters_number, "to"
-            ),
+            self._date_field_box_xpath.format(individuals_filters_blocks_number, individual_block_filters_number, "to"),
             By.XPATH,
         )
         self.fill_date_picker(element, value)
