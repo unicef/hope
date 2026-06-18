@@ -26,6 +26,10 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         FULL_LIST = "FULL_LIST", _("Full list")
         RANDOM = "RANDOM", _("Random sampling")
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return Message.SamplingChoices.choices
+
     title = models.CharField(max_length=60)
     body = models.TextField(max_length=1000)  # SMS messages are limited to 160 characters
     created_by = models.ForeignKey(
@@ -58,7 +62,7 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     # Sampling (storing sampling params might not be needed)
     sampling_type = models.CharField(
         max_length=50,
-        choices=SamplingChoices.choices,
+        choices=SamplingChoices.get_choices,
         default=SamplingChoices.FULL_LIST,
     )
     full_list_arguments = models.JSONField(blank=True, null=True)

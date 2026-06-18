@@ -16,7 +16,7 @@ class APIToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     key = models.CharField(_("Key"), max_length=40, unique=True, blank=True)
     grants = ChoiceArrayField(
-        models.CharField(choices=Grant.choices(), max_length=255),
+        models.CharField(choices=Grant.choices, max_length=255),
     )
     valid_from = models.DateField(default=timezone.now)
     valid_to = models.DateField(blank=True, null=True)

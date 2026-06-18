@@ -1,6 +1,10 @@
 from django.db import models
 
 
+def get_transaction_status_choices() -> tuple:
+    return WesternUnionInvoicePayment.TRANSACTION_STATUS_CHOICES
+
+
 class WesternUnionInvoicePayment(models.Model):
     STATUS_PAID_OR_DELIVERED = "2"
     STATUS_CANCELLED = "6"
@@ -21,7 +25,7 @@ class WesternUnionInvoicePayment(models.Model):
     )
     transaction_status = models.CharField(
         max_length=1,
-        choices=TRANSACTION_STATUS_CHOICES,
+        choices=get_transaction_status_choices,
         null=True,
         blank=True,
     )
