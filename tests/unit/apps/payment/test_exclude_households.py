@@ -50,9 +50,9 @@ def payment_plan(program_cycle):
 @pytest.fixture
 def payment_plan_data(payment_plan, program):
     households = [
-        HouseholdFactory(program=program),
-        HouseholdFactory(program=program),
-        HouseholdFactory(program=program),
+        HouseholdFactory(program=program, unicef_id="HH-26-0000.0201"),
+        HouseholdFactory(program=program, unicef_id="HH-26-0000.0202"),
+        HouseholdFactory(program=program, unicef_id="HH-26-0000.0203"),
     ]
     payments = [
         PaymentFactory(parent=payment_plan, household=households[0], collector=households[0].head_of_household),

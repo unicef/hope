@@ -128,9 +128,9 @@ def apply_individual_rules(payment_plan):
 
 @pytest.fixture
 def three_households(business_area):
-    hh1 = HouseholdFactory(size=1, residence_status="HOST", business_area=business_area)
-    hh2 = HouseholdFactory(size=2, residence_status="REFUGEE", business_area=business_area)
-    hh3 = HouseholdFactory(size=3, residence_status="REFUGEE", business_area=business_area)
+    hh1 = HouseholdFactory(size=1, residence_status="HOST", business_area=business_area, unicef_id="HH-26-0000.0001")
+    hh2 = HouseholdFactory(size=2, residence_status="REFUGEE", business_area=business_area, unicef_id="HH-26-0000.0002")
+    hh3 = HouseholdFactory(size=3, residence_status="REFUGEE", business_area=business_area, unicef_id="HH-26-0000.0003")
     return hh1, hh2, hh3
 
 
@@ -260,7 +260,7 @@ def test_household_ids(user, business_area, three_households):
 @flaky
 def test_individual_ids(user, business_area, three_households):
     hh1, _, _ = three_households
-    individual = IndividualFactory(household=hh1)
+    individual = IndividualFactory(household=hh1, unicef_id="IND-26-0000.0001")
 
     plan = PaymentPlanFactory(created_by=user, business_area=business_area)
     TargetingCriteriaRule.objects.create(
@@ -273,7 +273,7 @@ def test_individual_ids(user, business_area, three_households):
 
 def test_household_and_individual_ids(user, business_area, three_households):
     hh1, _, _ = three_households
-    individual = IndividualFactory(household=hh1)
+    individual = IndividualFactory(household=hh1, unicef_id="IND-26-0000.0001")
 
     plan = PaymentPlanFactory(created_by=user, business_area=business_area)
     TargetingCriteriaRule.objects.create(
