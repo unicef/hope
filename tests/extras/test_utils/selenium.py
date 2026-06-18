@@ -43,20 +43,15 @@ class HopeTestBrowser(BaseCase):
         self.type("#id_password", password)
         self.click('#login-form input[type="submit"]')
         self.wait_for_ready_state_complete()
-        # The admin login POST sets the server-side session cookie, so any later
-        # navigation is already authenticated. Callers that navigate straight to a
-        # target page (rather than clicking the drawer nav) can pass
-        # wait_for_drawer=False to skip the root redirect chain and its drawer wait.
-        if not wait_for_drawer:
-            return
-        # Django admin login redirects back to /api/admin/, not the SPA.
-        # Navigate explicitly to the frontend root.
-        self.open("/")
-        self.wait_for_ready_state_complete()
-        # wait_for_ready_state_complete only checks document.readyState; the React
-        # app mounts after that. Wait for the authenticated layout's drawer so
-        # callers can click nav items immediately without racing the first paint.
-        self.wait_for_element_visible('[data-cy="drawer-items"]', timeout=30)
+        if wait_for_drawer:
+            # Django admin login redirects back to /api/admin/, not the SPA.
+            # Navigate explicitly to the frontend root.
+            self.open("/")
+            self.wait_for_ready_state_complete()
+            # wait_for_ready_state_complete only checks document.readyState; the React
+            # app mounts after that. Wait for the authenticated layout's drawer so
+            # callers can click nav items immediately without racing the first paint.
+            self.wait_for_element_visible('[data-cy="drawer-items"]', timeout=30)
 
     def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)

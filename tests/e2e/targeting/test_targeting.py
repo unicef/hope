@@ -573,7 +573,7 @@ class TestSmokeTargeting:
         )
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
-        assert "Targeting" in page_targeting.get_title_page().text
+        page_targeting.wait_for_text_title_page("Targeting")
         assert "CREATE NEW" in page_targeting.get_button_create_new().text
         expected_column_names = [
             "Name",

@@ -1845,13 +1845,13 @@ def test_send_notification_emails_sends_to_users_with_permission(
     render_to_string_mock.assert_any_call(
         "payment/western_union_report_email.html",
         context={
-            "first_name": user.first_name,
+            "first_name": user.first_name or user.username,
             "last_name": user.last_name,
             "email": user.email,
             "message": f"Payment Plan: https://example.com/{report.payment_plan.business_area.slug}/programs/"
             f"{report.payment_plan.program.code}/payment-module/payment-plans/{report.payment_plan.id}",
             "title": f"Payment Plan {report.report_file.file.name} Western Union report",
-            "link": "Western Union report file: https://example.com/download/report",
+            "link": "https://example.com/download/report",
         },
     )
 
