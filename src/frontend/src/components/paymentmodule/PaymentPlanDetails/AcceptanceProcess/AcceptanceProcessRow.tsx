@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { DividerLine } from '@core/DividerLine';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -110,7 +111,7 @@ export function AcceptanceProcessRow({
                 {t('Closed by')} {paymentPlan.closedBy}
                 <Box ml={1}>
                   <GreyText>
-                    {t('on')} {paymentPlan.statusDate}
+                    {t('on')} <UniversalMoment>{paymentPlan.statusDate}</UniversalMoment>
                   </GreyText>
                 </Box>
               </GreyBox>
