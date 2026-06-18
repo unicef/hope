@@ -139,11 +139,12 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
             except FinancialInstitutionMapping.DoesNotExist:
                 logger.error(
-                    f"No Financial Institution Mapping found for"
-                    f" financial_institution {financial_institution},"
-                    f" fsp {obj.financial_service_provider},"
-                    f" payment {obj.id},"
-                    f" collector {obj.collector}."
+                    "No Financial Institution Mapping found for"
+                    " financial_institution %s, fsp %s, payment %s, collector %s.",
+                    financial_institution,
+                    obj.financial_service_provider,
+                    obj.id,
+                    obj.collector,
                 )
 
         elif financial_institution_code := account_data.get("code"):
@@ -166,11 +167,12 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
                 except FinancialInstitutionMapping.DoesNotExist:
                     logger.error(
-                        f"No Financial Institution Mapping found for"
-                        f" financial_institution_code {financial_institution_code},"
-                        f" fsp {obj.financial_service_provider},"
-                        f" payment {obj.id},"
-                        f" collector {obj.collector}."
+                        "No Financial Institution Mapping found for"
+                        " financial_institution_code %s, fsp %s, payment %s, collector %s.",
+                        financial_institution_code,
+                        obj.financial_service_provider,
+                        obj.id,
+                        obj.collector,
                     )
 
         return account_data
@@ -246,7 +248,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     _quantity,
                 ) = get_payment_delivered_quantity_status_and_value(self.payout_amount, entitlement_quantity)
             except ValueError:
-                logger.warning(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
+                logger.warning("Invalid delivered_quantity %s for Payment %s", self.payout_amount, self.remote_id)
                 _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
@@ -262,7 +264,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            logger.warning(f"Invalid Payment status: {self.status}")
+            logger.warning("Invalid Payment status: %s", self.status)
             hope_status = Payment.STATUS_ERROR
 
         return cast("str", hope_status() if callable(hope_status) else hope_status)

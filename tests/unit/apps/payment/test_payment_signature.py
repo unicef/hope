@@ -31,7 +31,7 @@ pytestmark = pytest.mark.django_db
 
 
 def calculate_hash_manually(payment: Payment) -> str:
-    sha1 = hashlib.sha1()
+    sha1 = hashlib.blake2b(digest_size=20)
     sha1.update(settings.SECRET_KEY.encode("utf-8"))
     sha1.update(str(payment.parent_id).encode("utf-8"))
     sha1.update(str(payment.conflicted).encode("utf-8"))

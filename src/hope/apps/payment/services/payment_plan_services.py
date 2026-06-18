@@ -326,9 +326,8 @@ class PaymentPlanService:
         # init creation AcceptanceProcess added in send_for_approval()
         approval_process = self.payment_plan.approval_process.first()
         if not approval_process:
-            msg = f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}"
-            logging.exception(msg)
-            raise ValidationError(msg)
+            logging.exception("Approval Process object not found for PaymentPlan %s", self.payment_plan.pk)
+            raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
 
         # validate approval required number and user as well
         self.validate_acceptance_process_approval_count(approval_process)
