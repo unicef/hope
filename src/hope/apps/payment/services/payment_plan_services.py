@@ -313,9 +313,8 @@ class PaymentPlanService:
         # init creation AcceptanceProcess added in send_for_approval()
         approval_process = self.payment_plan.approval_process.first()
         if not approval_process:
-            msg = f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}"
-            logging.exception(msg)
-            raise ValidationError(msg)
+            logging.exception("Approval Process object not found for PaymentPlan %s", self.payment_plan.pk)
+            raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
 
         # validate approval required number and user as well
         self.validate_acceptance_process_approval_count(approval_process)
@@ -1203,14 +1202,14 @@ class PaymentPlanService:
 
         for user in users:
             context = {
-                "first_name": getattr(user, "first_name", ""),
+                "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Please be informed that Payment Plan: {self.payment_plan.unicef_id} has exceeded its"
                 f" reconciliation window of {self.payment_plan.program.reconciliation_window_in_days} days."
                 f" Please take the necessary steps to complete the reconciliation process timely.",
                 "title": f"Payment Plan {self.payment_plan.unicef_id} Reconciliation Overdue",
-                "link": f"Payment Plan: {payment_plan_link}",
+                "link": payment_plan_link,
             }
 
             user.email_user(

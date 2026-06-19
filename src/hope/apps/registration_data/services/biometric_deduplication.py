@@ -95,7 +95,7 @@ class BiometricDeduplicationService:
                 self.api.bulk_upload_images(program.unicef_id, images)
 
             except self.api.API_EXCEPTION_CLASS:
-                logging.exception(f"Failed to upload images for RDI {rdi}")
+                logging.exception("Failed to upload images for RDI %s", rdi)
                 rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
                 rdi.save(update_fields=["deduplication_engine_status"])
                 return
@@ -110,11 +110,14 @@ class BiometricDeduplicationService:
                 rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS)
             else:
                 logging.error(
-                    f"Failed to process deduplication set {program.unicef_id}. Response[{status}]: {response_data}"
+                    "Failed to process deduplication set %s. Response[%s]: %s",
+                    program.unicef_id,
+                    status,
+                    response_data,
                 )
                 rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
         except DeduplicationEngineAPI.DeduplicationEngineAPIError:
-            logging.exception(f"Failed to process deduplication set {program.unicef_id}")
+            logging.exception("Failed to process deduplication set %s", program.unicef_id)
             rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
         invalidate_rdi_cache(program.business_area.slug, program.code)
 
@@ -388,12 +391,12 @@ class BiometricDeduplicationService:
                     self.mark_rdis_as_deduplicated(rdis)
                 invalidate_rdi_cache(program.business_area.slug, program.code)
             except Exception:
-                logger.exception(f"Dedupe Engine processing results error for program {program}")
+                logger.exception("Dedupe Engine processing results error for program %s", program)
                 self.mark_rdis_as_error(rdis)
                 invalidate_rdi_cache(program.business_area.slug, program.code)
 
         elif deduplication_set_data.state == self.DEDUP_STATE_FAILED:
-            logger.error(f"Dedupe Engine error for program {program} \n {deduplication_set_data.error}")
+            logger.error("Dedupe Engine error for program %s: %s", program, deduplication_set_data.error)
             self.mark_rdis_as_error(rdis)
             invalidate_rdi_cache(program.business_area.slug, program.code)
 

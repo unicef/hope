@@ -1450,6 +1450,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.wait_for_page_ready()
 
         page_grievance_new_ticket.get_description().send_keys("Add Individual with Photo - TEST")
         page_grievance_new_ticket.get_date_picker_filter().click()
