@@ -34,9 +34,9 @@ def send_bitcaster_event_task(self: Task, event_name: str, payload: dict[str, An
         if not success:
             logger.warning("Bitcaster client returned false for event '%s'.", event_name)
             raise NotifyError(f"Bitcaster client returned false for event '{event_name}'")
-    except NotifyError as exc:  # pragma: no cover
+    except NotifyError as exc:
         logger.error("Bitcaster send failed for event '%s': %s", event_name, str(exc))
         raise self.retry(exc=exc)
-    except Exception as exc:  # pragma: no cover
+    except Exception as exc:
         logger.exception("Bitcaster send failed for event '%s'.", event_name)
         raise self.retry(exc=exc)

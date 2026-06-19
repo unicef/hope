@@ -113,7 +113,7 @@ class PDUOnlineEditNotification:
         if config.SEND_PDU_ONLINE_EDIT_NOTIFICATION and self.enable_email_notification:
             try:
                 self.email.send_email()
-            except Exception:  # pragma: no cover
+            except Exception:
                 logger.exception("Failed to send PDU Online Edit notification")
                 return
             if bitcaster_enabled():
@@ -139,7 +139,7 @@ class PDUOnlineEditNotification:
                             },
                         )
                     )
-                except Exception:  # pragma: no cover
+                except Exception:
                     logger.exception("Failed to queue PDU Online Edit Bitcaster event")
 
     def _prepare_body_variables(self) -> dict[str, Any]:

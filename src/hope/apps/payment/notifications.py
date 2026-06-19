@@ -112,7 +112,7 @@ class PaymentNotification:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
             try:
                 self.email.send_email()
-            except Exception:  # pragma: no cover
+            except Exception:
                 logger.exception("Failed to send payment plan notification")
                 return
             if bitcaster_enabled():
@@ -139,7 +139,7 @@ class PaymentNotification:
                             },
                         )
                     )
-                except Exception:  # pragma: no cover
+                except Exception:
                     logger.exception("Failed to queue payment plan Bitcaster event")
 
     def _prepare_body_variables(self) -> dict[str, Any]:

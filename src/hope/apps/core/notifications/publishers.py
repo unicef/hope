@@ -115,7 +115,7 @@ def publish_rendered_email_notification(notification: RenderedEmailNotification)
                 },
             )
         )
-    except Exception:  # pragma: no cover
+    except Exception:
         logger.exception("Failed to queue rendered email Bitcaster event")
 
 

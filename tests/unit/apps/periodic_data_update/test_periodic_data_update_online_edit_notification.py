@@ -378,9 +378,7 @@ def test_send_email_notification_does_not_publish_bitcaster_when_flag_disabled(
 ) -> None:
     mock_send = mocker.patch("hope.apps.periodic_data_update.notifications.MailjetClient.send_email")
     mocker.patch("hope.apps.periodic_data_update.notifications.bitcaster_enabled", return_value=False)
-    mock_publish = mocker.patch(
-        "hope.apps.periodic_data_update.notifications.publish_mailjet_template_email_event"
-    )
+    mock_publish = mocker.patch("hope.apps.periodic_data_update.notifications.publish_mailjet_template_email_event")
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
@@ -404,9 +402,7 @@ def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
 ) -> None:
     mock_send = mocker.patch("hope.apps.periodic_data_update.notifications.MailjetClient.send_email")
     mocker.patch("hope.apps.periodic_data_update.notifications.bitcaster_enabled", return_value=True)
-    mock_publish = mocker.patch(
-        "hope.apps.periodic_data_update.notifications.publish_mailjet_template_email_event"
-    )
+    mock_publish = mocker.patch("hope.apps.periodic_data_update.notifications.publish_mailjet_template_email_event")
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
@@ -421,8 +417,7 @@ def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
     event = mock_publish.call_args.args[0]
     assert event.event_name == "pdu.online_edit.sent_for_approval"
     assert (
-        event.idempotency_key
-        == f"pdu.online_edit.sent_for_approval:{pdu_with_authorized_users.id}:SEND_FOR_APPROVAL"
+        event.idempotency_key == f"pdu.online_edit.sent_for_approval:{pdu_with_authorized_users.id}:SEND_FOR_APPROVAL"
     )
     assert event.recipients == pdu_notification.email.recipients
     assert event.subject == pdu_notification.email.subject
