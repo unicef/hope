@@ -57,7 +57,8 @@ def _add_time_series_field(
     browser.click('button[data-cy="button-add-time-series-field"]')
     browser.type(f'input[name="pduFields.{index}.label"]', label)
     browser.select_dropdown_option(f"pduFields.{index}.pduData.subtype", subtype)
-    browser.select_dropdown_option(f"pduFields.{index}.pduData.numberOfRounds", num_rounds)
+    browser.click(f'[data-cy="select-pduFields.{index}.pduData.numberOfRounds"]')
+    browser.select_listbox_element(num_rounds)
     for ri, rname in enumerate(round_names):
         browser.type(f'input[name="pduFields.{index}.pduData.roundsNames.{ri}"]', rname)
 
