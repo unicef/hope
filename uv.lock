@@ -249,6 +249,20 @@ wheels = [
 ]
 
 [[package]]
+name = "bitcaster-sdk"
+version = "0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "humanfriendly" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fb/e8/22bfba9ebfac9e8868c4d48851dbee948d4745ef5cbad5b990318a1b05c0/bitcaster_sdk-0.2.tar.gz", hash = "sha256:917c98c3cb20a1d8ba2d6f873a9614e87350e78a9d6845a1ba0fef2ee5bcb01f", size = 5160, upload-time = "2025-05-13T11:17:46.117Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/fb/83e882bbbc35ed15d68336a8f53583bf45f28478f8c7488d8d3d79cfe7f3/bitcaster_sdk-0.2-py3-none-any.whl", hash = "sha256:b6863cb46ea7bf1d484f255512b6af72945d3920e1d061d39b32b81cde7784ea", size = 7296, upload-time = "2025-05-13T11:17:44.985Z" },
+]
+
+[[package]]
 name = "black"
 version = "26.5.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1984,6 +1998,7 @@ name = "hope"
 version = "4.15.3"
 source = { editable = "." }
 dependencies = [
+    { name = "bitcaster-sdk" },
     { name = "black" },
     { name = "celery", extra = ["redis"] },
     { name = "coreapi" },
@@ -2171,6 +2186,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
+    { name = "bitcaster-sdk", specifier = ">=0.1" },
     { name = "black", specifier = ">=23,<27" },
     { name = "celery", extras = ["redis"], specifier = ">=5.2.7,<6" },
     { name = "coreapi", specifier = ">=2.3.3,<3" },
@@ -2372,6 +2388,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f8/27/e158d86ba1e82967cc2f790b0cb02030d4a8bef58e0c79a8590e9678107f/html2text-2025.4.15.tar.gz", hash = "sha256:948a645f8f0bc3abe7fd587019a2197a12436cd73d0d4908af95bfc8da337588", size = 64316, upload-time = "2025-04-15T04:02:30.045Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1d/84/1a0f9555fd5f2b1c924ff932d99b40a0f8a6b12f6dd625e2a47f415b00ea/html2text-2025.4.15-py3-none-any.whl", hash = "sha256:00569167ffdab3d7767a4cdf589b7f57e777a5ed28d12907d8c58769ec734acc", size = 34656, upload-time = "2025-04-15T04:02:28.44Z" },
+]
+
+[[package]]
+name = "humanfriendly"
+version = "10.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyreadline3", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cc/3f/2c29224acb2e2df4d2046e4c73ee2662023c58ff5b113c4c1adac0886c43/humanfriendly-10.0.tar.gz", hash = "sha256:6b0b831ce8f15f7300721aa49829fc4e83921a9a301cc7f606be6686a2288ddc", size = 360702, upload-time = "2021-09-17T21:40:43.31Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f0/0f/310fb31e39e2d734ccaa2c0fb981ee41f7bd5056ce9bc29b2248bd569169/humanfriendly-10.0-py2.py3-none-any.whl", hash = "sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477", size = 86794, upload-time = "2021-09-17T21:40:39.897Z" },
 ]
 
 [[package]]
