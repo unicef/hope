@@ -26,7 +26,7 @@ class HopeTestBrowser(BaseCase):
         self.maximize_window()
         return super().open(f"{self.live_server_url}{url}")
 
-    def login(self, username: str = "superuser", password: str = "testtest2"):
+    def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
         self.open(f"/api/{settings.ADMIN_PANEL_URL}/")
         self.execute_script(
             """
@@ -42,14 +42,15 @@ class HopeTestBrowser(BaseCase):
         self.type("#id_password", password)
         self.click('#login-form input[type="submit"]')
         self.wait_for_ready_state_complete()
-        # Django admin login redirects back to /api/admin/, not the SPA.
-        # Navigate explicitly to the frontend root.
-        self.open("/")
-        self.wait_for_ready_state_complete()
-        # wait_for_ready_state_complete only checks document.readyState; the React
-        # app mounts after that. Wait for the authenticated layout's drawer so
-        # callers can click nav items immediately without racing the first paint.
-        self.wait_for_element_visible('[data-cy="drawer-items"]', timeout=30)
+        if wait_for_drawer:
+            # Django admin login redirects back to /api/admin/, not the SPA.
+            # Navigate explicitly to the frontend root.
+            self.open("/")
+            self.wait_for_ready_state_complete()
+            # wait_for_ready_state_complete only checks document.readyState; the React
+            # app mounts after that. Wait for the authenticated layout's drawer so
+            # callers can click nav items immediately without racing the first paint.
+            self.wait_for_element_visible('[data-cy="drawer-items"]', timeout=30)
 
     def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)

@@ -498,11 +498,8 @@ class TestBusinessAreas:
         page_programme_management.choose_partner_option("UNHCR")
         page_programme_management.get_label_admin_area().click()
         page_programme_management.choose_area_admin1_by_name("Kabul").click()
-        # ToDo: Create additional waiting mechanism
-        from time import sleep
-
-        sleep(1)
         page_programme_management.get_button_save().click()
+        page_programme_details.wait_for_page_ready()
         # Check Details page
         page_programme_details.wait_for_text_in_any_element("UNHCR", page_programme_details.label_partner_name)
         page_programme_details.wait_for_text_in_any_element("TEST", page_programme_details.label_partner_name)
