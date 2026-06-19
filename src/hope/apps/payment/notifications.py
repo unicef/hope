@@ -127,7 +127,7 @@ class PaymentNotification:
                             recipients=self.email.recipients,
                             subject=self.email.subject,
                             mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
-                            variables=self.email.variables,
+                            variables=self.email.variables or {},
                             ccs=self.email.ccs,
                             metadata={
                                 "business_area": self.payment_plan.business_area.slug,

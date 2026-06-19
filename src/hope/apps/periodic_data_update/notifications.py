@@ -128,7 +128,7 @@ class PDUOnlineEditNotification:
                             recipients=self.email.recipients,
                             subject=self.email.subject,
                             mailjet_template_id=config.MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION,
-                            variables=self.email.variables,
+                            variables=self.email.variables or {},
                             ccs=self.email.ccs,
                             metadata={
                                 "business_area": self.pdu_online_edit.business_area.slug,

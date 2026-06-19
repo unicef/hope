@@ -4,7 +4,8 @@ from hope.apps.core.notifications.bitcaster_client import BitcasterClient
 
 
 class NotificationBackend(Protocol):
-    is_configured: bool
+    @property
+    def is_configured(self) -> bool: ...
 
     def trigger_event(
         self,
