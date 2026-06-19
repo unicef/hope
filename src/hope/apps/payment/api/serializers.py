@@ -841,11 +841,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return self._payments_summary(obj)["error_count"]
 
     def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.status in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-            PaymentPlan.Status.READY_FOR_CLOSURE,
-        ]:
+        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
@@ -859,11 +855,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return False
 
     def get_can_download_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.status in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-            PaymentPlan.Status.READY_FOR_CLOSURE,
-        ]:
+        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
@@ -877,11 +869,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return False
 
     def get_can_send_xlsx_password(self, obj: PaymentPlan) -> bool:
-        if obj.status in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-            PaymentPlan.Status.READY_FOR_CLOSURE,
-        ]:
+        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
             user = self.context.get("request").user
             if obj.is_payment_gateway:
                 if not user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, obj.business_area):

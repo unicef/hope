@@ -1118,7 +1118,7 @@ class PaymentPlanService:
         if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
             raise ValidationError(f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}")
         flow = PaymentPlanFlow(self.payment_plan)
-        flow.status_send_back_to_finished()
+        flow.status_finished()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
         return self.payment_plan

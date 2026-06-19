@@ -45,7 +45,7 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
 
   const { mutateAsync: sendBack, isPending: loadingSendBack } = useMutation({
     mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansSendBackToFinishedRetrieve(
+      RestService.restBusinessAreasProgramsPaymentPlansSendBackToFinishedCreate(
         {
           businessAreaSlug: businessArea,
           programCode: programId,

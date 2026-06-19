@@ -152,6 +152,12 @@ class PaymentPlan(
         Status.DRAFT,
     )
 
+    EXPORTABLE_STATUSES = (
+        Status.ACCEPTED,
+        Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
+    )
+
     HARD_CONFLICT_STATUSES = (
         Status.LOCKED,
         Status.LOCKED_FSP,

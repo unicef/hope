@@ -1335,11 +1335,7 @@ class PaymentPlanViewSet(
         if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING:
             raise ValidationError("Payment List Per FSP export already in progress.")
 
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-            PaymentPlan.Status.READY_FOR_CLOSURE,
-        ]:
+        if payment_plan.status not in PaymentPlan.EXPORTABLE_STATUSES:
             raise ValidationError(
                 "Payment List Per FSP export is only available for "
                 "ACCEPTED, FINISHED or READY_FOR_CLOSURE Payment Plans."
@@ -1398,11 +1394,7 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def reconciliation_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-            PaymentPlan.Status.READY_FOR_CLOSURE,
-        ]:
+        if payment_plan.status not in PaymentPlan.EXPORTABLE_STATUSES:
             raise ValidationError(
                 "Payment List Per FSP export is only available for "
                 "ACCEPTED, FINISHED or READY_FOR_CLOSURE Payment Plans."
@@ -1576,7 +1568,7 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["get"], url_path="ready-for-closure")
+    @action(detail=True, methods=["post"], url_path="ready-for-closure")
     @transaction.atomic
     def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -1592,7 +1584,7 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan marked as ready for closure"})
 
-    @action(detail=True, methods=["get"], url_path="send-back-to-finished")
+    @action(detail=True, methods=["post"], url_path="send-back-to-finished")
     @transaction.atomic
     def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
