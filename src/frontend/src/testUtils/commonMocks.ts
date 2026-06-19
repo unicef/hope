@@ -120,7 +120,7 @@ export const mockRestService = () => {
       restBusinessAreasUsersProfileRetrieve: vi.fn(() =>
         Promise.resolve({
           id: 'test-user',
-          username: 'testuser',
+          username: 'mock-user',
           permissions: ['can_view_programs'],
         }),
       ),

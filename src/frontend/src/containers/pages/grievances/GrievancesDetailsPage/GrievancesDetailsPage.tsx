@@ -16,7 +16,11 @@ import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import {
+  GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
+  hasPermissions,
+  PERMISSIONS,
+} from '../../../../config/permissions';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
 
@@ -66,9 +70,7 @@ const GrievancesDetailsPage = (): ReactElement => {
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error))
-    return (
-      <PermissionDenied permission={PERMISSIONS.GRIEVANCES_VIEW_DETAILS} />
-    );
+    return <PermissionDenied permission={GRIEVANCES_VIEW_DETAILS_PERMISSIONS} />;
 
   if (
     !grievanceTicket ||

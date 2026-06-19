@@ -1002,16 +1002,15 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     assert PaymentHouseholdSnapshot.objects.count() == 2
     payments[0].refresh_from_db()
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        " financial_institution_code 456,"
-        f" fsp {payments[0].financial_service_provider},"
-        f" payment {payments[0].id},"
-        f" collector {payments[0].collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
+        "456",
+        payments[0].financial_service_provider,
+        payments[0].id,
+        payments[0].collector,
+    )
     assert post_mock.call_count == 1
 
     payments[0].financial_service_provider = uba_fsp
@@ -1218,6 +1217,8 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == "AFG"
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"] == {
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
@@ -1239,6 +1240,8 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == ""
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"] == {
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
@@ -1294,6 +1297,8 @@ def test_payment_instruction_payload_uses_destination_country_iso_code2(
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == "AFG"
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"]["country"] == "AFG"
     assert data["payload"]["destination_country_iso_code3"] == "AFG"
     assert data["payload"]["destination_country_iso_code2"] == "AF"
@@ -1848,16 +1853,15 @@ def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_origi
     )
     account_data = {"financial_institution_pk": str(fi.pk)}
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        f" financial_institution {fi},"
-        f" fsp {payment.financial_service_provider},"
-        f" payment {payment.id},"
-        f" collector {payment.collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution %s, fsp %s, payment %s, collector %s.",
+        fi,
+        payment.financial_service_provider,
+        payment.id,
+        payment.collector,
+    )
     assert result == account_data
 
 
@@ -1904,14 +1908,13 @@ def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_or
     payment = payment_gateway_setup["payments"][0]
     account_data = {"code": "UNKNOWN_CODE"}
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        " financial_institution_code UNKNOWN_CODE,"
-        f" fsp {payment.financial_service_provider},"
-        f" payment {payment.id},"
-        f" collector {payment.collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
+        "UNKNOWN_CODE",
+        payment.financial_service_provider,
+        payment.id,
+        payment.collector,
+    )
     assert result == account_data
