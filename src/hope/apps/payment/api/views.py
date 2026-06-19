@@ -1568,7 +1568,7 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["post"], url_path="ready-for-closure")
+    @action(detail=True, methods=["get"], url_path="ready-for-closure")
     @transaction.atomic
     def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -1584,7 +1584,7 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan marked as ready for closure"})
 
-    @action(detail=True, methods=["post"], url_path="send-back-to-finished")
+    @action(detail=True, methods=["get"], url_path="send-back-to-finished")
     @transaction.atomic
     def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()

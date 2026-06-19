@@ -401,11 +401,18 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan.get_unore_exchange_rate.assert_called_once_with()
 
 
-def test_payment_plan_detail_can_export_xlsx(payment_plan_detail_context: dict[str, Any]) -> None:
+@pytest.mark.parametrize(
+    "pp_status",
+    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
+)
+def test_payment_plan_detail_can_export_xlsx(
+    payment_plan_detail_context: dict[str, Any],
+    pp_status: str,
+) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.status = pp_status
     payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
     payment_plan.save(update_fields=["status", "financial_service_provider"])
 
@@ -449,11 +456,18 @@ def test_payment_plan_detail_can_export_xlsx_for_payment_gateway_statuses(
     assert data["can_export_xlsx"] is expected_result
 
 
-def test_payment_plan_detail_can_download_xlsx(payment_plan_detail_context: dict[str, Any]) -> None:
+@pytest.mark.parametrize(
+    "pp_status",
+    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
+)
+def test_payment_plan_detail_can_download_xlsx(
+    payment_plan_detail_context: dict[str, Any],
+    pp_status: str,
+) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.status = pp_status
     payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
     payment_plan.save(update_fields=["status", "financial_service_provider"])
 
@@ -467,11 +481,18 @@ def test_payment_plan_detail_can_download_xlsx(payment_plan_detail_context: dict
     assert data["can_download_xlsx"] is False
 
 
-def test_payment_plan_detail_can_send_xlsx_password(payment_plan_detail_context: dict[str, Any]) -> None:
+@pytest.mark.parametrize(
+    "pp_status",
+    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
+)
+def test_payment_plan_detail_can_send_xlsx_password(
+    payment_plan_detail_context: dict[str, Any],
+    pp_status: str,
+) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.status = pp_status
     payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
     payment_plan.save(update_fields=["status", "financial_service_provider"])
 
