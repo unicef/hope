@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "10415"
+        "Content-Length": "10512"
     },
     "data": {
         "id": "f533f1fa-fbb4-4719-a515-6c99d493fe57",
@@ -71,8 +71,10 @@
             "total_undelivered_quantity": null,
             "dispersion_start_date": "2025-01-01",
             "dispersion_end_date": "2025-01-31",
-            "is_follow_up": false,
+            "plan_type": "STANDARD",
+                "export_tag": null,
             "follow_ups": [],
+            "top_ups": [],
             "created_by": " ",
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
@@ -83,6 +85,11 @@
                 "status": "ACTIVE",
                 "screen_beneficiary": false
             },
+            "payment_plan_group": {
+                "id": "28fb37b3-17dc-4f68-9616-6b687d38658b",
+                "unicef_id": "PPG-0001",
+                "name": "Default Group"
+            },
             "version": 1735688653315203,
             "background_action_status": null,
             "background_action_status_display": null,
@@ -92,6 +99,8 @@
                 "id": "58455199-badf-4828-a15a-aaad78b846f7",
                 "title": "Programme Cycle 0"
             },
+            "is_payment_gateway": false,
+            "is_instruction_managed": false,
             "has_payment_list_export_file": false,
             "has_fsp_delivery_mechanism_xlsx_template": false,
             "imported_file_name": "",
@@ -150,9 +159,9 @@
             "excluded_households": [],
             "excluded_individuals": [],
             "can_create_follow_up": false,
+            "can_create_top_up": false,
             "total_withdrawn_households_count": 0,
             "unsuccessful_payments_count": 0,
-            "is_payment_gateway": false,
             "can_send_to_payment_gateway": false,
             "can_split": false,
             "supporting_documents": [],
@@ -181,7 +190,8 @@
             "payment_verification_plans": [],
             "admin_url": "/api/unicorn/payment/paymentplan/911e9fb2-a41a-4d07-97c2-29722c9d749a/change/",
             "abort_comment": "",
-            "flat_amount_value": null
+            "flat_amount_value": null,
+            "payment_plan_purposes": []
         },
         "admin_url": "/api/unicorn/payment/payment/f533f1fa-fbb4-4719-a515-6c99d493fe57/change/",
         "source_payment": null,

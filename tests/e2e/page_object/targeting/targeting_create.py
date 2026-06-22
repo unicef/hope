@@ -86,6 +86,8 @@ class TargetingCreate(BaseComponents):
     total_number_of_households_count = 'div[data-cy="total-number-of-households-count"]'
     total_number_of_people_count = 'div[data-cy="label-Total Number of People"]'
     select_program_cycle_autocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
+    select_payment_plan_group_autocomplete = 'div[data-cy="filters-payment-plan-group-autocomplete"]'
+    input_payment_plan_purposes = '[data-cy="input-payment-plan-purposes"] input'
     programme_cycle_input = 'div[data-cy="Programme Cycle-input"]'
     select_refugee = 'li[data-cy="select-option-REFUGEE"]'
     field_chooser = 'data-cy="field-chooser-householdsFiltersBlocks[{}]"'
@@ -344,6 +346,12 @@ class TargetingCreate(BaseComponents):
 
     def get_filters_program_cycle_autocomplete(self) -> WebElement:
         return self.wait_for(self.select_program_cycle_autocomplete)
+
+    def get_filters_payment_plan_group_autocomplete(self) -> WebElement:
+        return self.wait_for(self.select_payment_plan_group_autocomplete)
+
+    def get_input_payment_plan_purposes(self) -> WebElement:
+        return self.wait_for(self.input_payment_plan_purposes)
 
     def get_programme_cycle_input(self) -> WebElement:
         return self.wait_for(self.programme_cycle_input)

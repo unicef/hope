@@ -468,7 +468,7 @@ class PaymentGatewayService:
             if validate_response and new_status.value != response_status:
                 raise ValueError(f"Mismatch with: {new_status.value} != {response_status}")
             return response_status
-        return None  # pragma: no cover
+        return None
 
     @staticmethod
     def _handle_pg_errors(response: AddRecordsResponseData, payments: list[Payment]) -> None:

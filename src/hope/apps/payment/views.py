@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import PaymentPlan, PaymentVerificationPlan, WesternUnionPaymentPlanReport
+from hope.models import PaymentPlan, PaymentPlanGroup, PaymentVerificationPlan, WesternUnionPaymentPlanReport
 
 if TYPE_CHECKING:  # pragma: no cover
     from django.http import (
@@ -37,20 +37,19 @@ def download_payment_verification_plan(
     if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
         raise ValidationError("You can only download verification file when XLSX channel is selected")
 
-    if payment_verification_plan.has_xlsx_payment_verification_plan_file:
-        if not payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded:
-            xlsx_file = payment_verification_plan.get_xlsx_verification_file
-            xlsx_file.was_downloaded = True
-            xlsx_file.save()
-        link = payment_verification_plan.xlsx_payment_verification_plan_file_link
-        if link is None:
-            raise ValueError("Payment verification plan XLSX file link must not be None")
-        return redirect(link)
-    log_and_raise(
-        f"XLSX File not found. PaymentVerificationPlan ID: {payment_verification_plan.unicef_id}",
-        error_type=FileNotFoundError,
-    )
-    return None
+    if not payment_verification_plan.has_xlsx_payment_verification_plan_file:
+        log_and_raise(
+            f"XLSX File not found. PaymentVerificationPlan ID: {payment_verification_plan.unicef_id}",
+            error_type=FileNotFoundError,
+        )
+    if not payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded:
+        xlsx_file = payment_verification_plan.get_xlsx_verification_file
+        xlsx_file.was_downloaded = True
+        xlsx_file.save()
+    link = payment_verification_plan.xlsx_payment_verification_plan_file_link
+    if link is None:
+        raise ValueError("Payment verification plan XLSX file link must not be None")
+    return redirect(link)
 
 
 @login_required
@@ -74,17 +73,39 @@ def download_payment_plan_payment_list(
     ):
         raise ValidationError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
 
-    if payment_plan.has_export_file:
-        link = payment_plan.payment_list_export_file_link
-        if link is None:
-            raise ValueError("Payment plan export file link must not be None")
-        return redirect(link)
+    if not payment_plan.has_export_file:
+        log_and_raise(
+            f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}",
+            error_type=FileNotFoundError,
+        )
+    link = payment_plan.payment_list_export_file_link
+    if link is None:
+        raise ValueError("Payment plan export file link must not be None")
+    return redirect(link)
 
-    log_and_raise(
-        f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}",
-        error_type=FileNotFoundError,
-    )
-    return None
+
+@login_required
+def download_payment_plan_group_batch(
+    request: "HttpRequest", payment_plan_group_id: str, export_tag: int
+) -> Union[
+    "HttpResponseRedirect",
+    "HttpResponsePermanentRedirect",
+]:
+    payment_plan_group = get_object_or_404(PaymentPlanGroup, id=payment_plan_group_id)
+
+    if not request.user.has_perm(
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX.value,
+        payment_plan_group.cycle.program,
+    ):
+        raise PermissionDenied({"required_permissions": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX.value]})
+
+    link = payment_plan_group.get_batch_export_file_link(export_tag)
+    if link is None:
+        log_and_raise(
+            f"XLSX File not found. PaymentPlanGroup ID: {payment_plan_group.unicef_id}, batch: {export_tag}",
+            error_type=FileNotFoundError,
+        )
+    return redirect(link)
 
 
 @login_required
@@ -108,14 +129,13 @@ def download_payment_plan_summary_pdf(
     ):  # pragma: no cover
         raise ValidationError("Export PDF is possible only for Payment Plan within status IN_REVIEW/ACCEPTED/FINISHED.")
 
-    if payment_plan.export_pdf_file_summary and payment_plan.export_pdf_file_summary.file:
-        return redirect(payment_plan.export_pdf_file_summary.file.url)
-
-    log_and_raise(
-        f"PDF file not found. PaymentPlan ID: {payment_plan.unicef_id}",
-        error_type=FileNotFoundError,
-    )
-    return None
+    export_pdf_file_summary = payment_plan.export_pdf_file_summary
+    if not (export_pdf_file_summary and export_pdf_file_summary.file):
+        log_and_raise(
+            f"PDF file not found. PaymentPlan ID: {payment_plan.unicef_id}",
+            error_type=FileNotFoundError,
+        )
+    return redirect(export_pdf_file_summary.file.url)
 
 
 @login_required
