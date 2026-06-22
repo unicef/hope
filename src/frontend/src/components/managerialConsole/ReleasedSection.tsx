@@ -50,7 +50,7 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
           newTab={true}
         >
           {params.value}

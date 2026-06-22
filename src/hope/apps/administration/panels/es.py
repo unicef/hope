@@ -41,7 +41,7 @@ class ElasticsearchPanel:
             "ELASTICSEARCH_DSL_AUTOSYNC": settings.ELASTICSEARCH_DSL_AUTOSYNC,
             "ELASTICSEARCH_INDEX_PREFIX": settings.ELASTICSEARCH_INDEX_PREFIX,
         }
-        logs = {}
+        logs: Any = {}
         if request.method == "POST":
             form = EsForm(request.POST)
             if form.is_valid():

@@ -267,7 +267,7 @@ def create_needs_adjudication_tickets(
     )
 
     remove_elasticsearch_documents_by_matching_ids(
-        list(individuals_to_remove_from_es), get_individual_doc(str(individuals_queryset.first().program.id))
+        list(individuals_to_remove_from_es), get_individual_doc(str(individuals_queryset.first().program_id))
     )
 
 

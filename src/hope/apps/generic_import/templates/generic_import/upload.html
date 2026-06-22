@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
             programSelect.innerHTML = '<option value="">{% translate "Loading programs..." %}</option>';
 
             // Fetch programs for selected business area
-            fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/`, {
+            fetch(`/api/rest/business-areas/${encodeURIComponent(businessAreaSlug)}/programs/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Call API endpoint
             const response = await fetch(
-                `/api/rest/business-areas/${businessAreaSlug}/programs/${programCode}/generic-import-upload/upload/`,
+                `/api/rest/business-areas/${encodeURIComponent(businessAreaSlug)}/programs/${encodeURIComponent(programCode)}/generic-import-upload/upload/`,
                 {
                     method: 'POST',
                     body: apiFormData,

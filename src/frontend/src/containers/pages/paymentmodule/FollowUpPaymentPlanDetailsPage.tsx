@@ -4,7 +4,6 @@ import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPa
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
-import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
@@ -13,7 +12,7 @@ import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPla
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
@@ -39,10 +38,10 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     refetchInterval: (query) => {
       const data = query.state.data;
       const errorStatuses = [
-        BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-        BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-        BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
@@ -65,8 +64,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
 
   const { status } = paymentPlan;
 
-  const shouldDisplayEntitlement = status !== PaymentPlanStatusEnum.OPEN;
-
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
@@ -88,9 +85,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       <AcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayFundsCommitment && (
         <FundsCommitmentSection paymentPlan={paymentPlan} />
-      )}
-      {shouldDisplayEntitlement && (
-        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />

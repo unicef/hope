@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "4.15.5",
+  "version": "4.15.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -88,7 +88,7 @@
     "braces": "3.0.3",
     "camelcase": "^9.0.0",
     "cross-spawn": "^7.0.6",
-    "esbuild": "0.27.3",
+    "esbuild": "0.28.1",
     "eslint": "^10.0.2",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "4.4.4",
@@ -115,7 +115,7 @@
     "vite": "^7.3.1",
     "vite-plugin-csp-guard": "3.0.0",
     "vite-tsconfig-paths": "6.1.1",
-    "vitest": "4.0.18",
+    "vitest": "4.1.0",
     "waait": "^1.0.5"
   },
   "overrides": {

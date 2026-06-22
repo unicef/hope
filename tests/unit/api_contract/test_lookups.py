@@ -173,6 +173,11 @@ def test_choices_payment_plan_bg_action_status(superuser):
     recorder.assertGET("/api/rest/choices/payment-plan-background-action-status/")
 
 
+def test_choices_payment_plan_type(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/payment-plan-type/")
+
+
 def test_choices_payment_verification_plan_status(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/payment-verification-plan-status/")
@@ -211,3 +216,8 @@ def test_choices_languages(superuser):
 def test_choices_countries(superuser, country):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/countries/")
+
+
+def test_choices_permissions(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/permissions/")

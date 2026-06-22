@@ -6,6 +6,7 @@ import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import (
+    _active_or_all_programs,
     delete_all_indexes,
     populate_all_indexes,
     rebuild_search_index,
@@ -185,6 +186,30 @@ def test_remove_elasticsearch_documents_by_matching_ids_skips_when_disabled() ->
     remove_elasticsearch_documents_by_matching_ids(["id-1"], mock_document)
 
     mock_document.search.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_active_or_all_programs_returns_only_active_by_default() -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        active = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    qs = _active_or_all_programs()
+
+    assert list(qs.values_list("id", flat=True)) == [active.id]
+
+
+@pytest.mark.django_db
+def test_active_or_all_programs_returns_all_when_include_non_active() -> None:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        ProgramFactory(business_area=ba, status=Program.DRAFT)
+
+    qs = _active_or_all_programs(include_non_active=True)
+
+    assert qs.count() == 2
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)

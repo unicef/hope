@@ -16,22 +16,28 @@ LOGGING: dict[str, Any] = {
             "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
         },
     },
-    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
+        "sanitize_log_forging": {"()": "hope.apps.utils.logs.LogForgingFilter"},
+    },
     "handlers": {
         "default": {
             "level": LOG_LEVEL,
             "class": "logging.StreamHandler",
             "formatter": "standard",
+            "filters": ["sanitize_log_forging"],
         },
         "file": {
             "level": LOG_LEVEL,
             "class": "logging.FileHandler",
             "filename": "debug.log",
+            "filters": ["sanitize_log_forging"],
         },
         "sentry": {
             "level": "ERROR",
             "class": "sentry_sdk.integrations.logging.EventHandler",
             "formatter": "verbose",
+            "filters": ["sanitize_log_forging"],
         },
     },
     "loggers": {

@@ -2,9 +2,12 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { LinkedPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/LinkedPaymentPlansModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, TableCell } from '@mui/material';
+import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
+import { TableCell } from '@mui/material';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
@@ -25,29 +28,19 @@ export const PaymentPlanTableRow = ({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
+  const tag = plan.exportTag;
+  const getPlanTypeLabel = usePaymentPlanTypeLabel();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+    plan.planType === PlanTypeEnum.FOLLOW_UP
+      ? 'followup-payment-plans'
+      : 'payment-plans'
   }/${plan.id}`;
+  const planTypePrefix =
+    plan.planType && plan.planType !== PlanTypeEnum.REGULAR
+      ? `${getPlanTypeLabel(plan.planType)}: `
+      : '';
   const handleClick = (): void => {
     navigate(paymentPlanPath);
-  };
-
-  const followUpLinks = (): ReactElement => {
-    if (!plan.followUps?.length) return <>-</>;
-    return (
-      <Box display="flex" flexDirection="column">
-        {plan.followUps?.map((followUp) => {
-          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`;
-          return (
-            <Box key={followUp?.id} mb={1}>
-              <BlackLink key={followUp?.id} to={followUpPaymentPlanPath}>
-                {followUp?.unicefId}
-              </BlackLink>
-            </Box>
-          );
-        })}
-      </Box>
-    );
   };
 
   return (
@@ -57,8 +50,8 @@ export const PaymentPlanTableRow = ({
       role="checkbox"
       key={plan.id}
     >
-      <TableCell align="left">
-        {plan.isFollowUp ? 'Follow-up: ' : ''}
+      <TableCell align="left" sx={{ paddingLeft: 4 }}>
+        {planTypePrefix}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
@@ -102,7 +95,23 @@ export const PaymentPlanTableRow = ({
       <TableCell align="left">
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">{followUpLinks()}</TableCell>
+      <TableCell align="left">
+        {tag && plan.paymentPlanGroup?.id ? (
+          <BlackLink
+            to={`/${baseUrl}/payment-module/groups/${plan.paymentPlanGroup.id}/batches/${tag}`}
+          >
+            {tag}
+          </BlackLink>
+        ) : (
+          '-'
+        )}
+      </TableCell>
+      <TableCell align="left">
+        <LinkedPaymentPlansModal
+          paymentPlan={plan}
+          canViewDetails={canViewDetails}
+        />
+      </TableCell>
     </ClickableTableRow>
   );
 };

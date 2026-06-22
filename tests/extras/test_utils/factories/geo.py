@@ -11,7 +11,7 @@ from hope.models import Area, AreaType, BusinessArea, Country
 class CountryFactory(DjangoModelFactory):
     class Meta:
         model = Country
-        django_get_or_create = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
+        django_get_or_create = ("iso_code2",)
 
     name = factory.Sequence(lambda n: f"Country {n}")
     short_name = factory.LazyAttribute(lambda o: o.name)
