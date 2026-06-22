@@ -14,8 +14,12 @@ class FinancialInstitution(TimeStampedModel):
         TELCO = "telco", "Telco"
         OTHER = "other", "Other"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return FinancialInstitution.FinancialInstitutionType.choices
+
     name = models.CharField(max_length=255)
-    type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
+    type = models.CharField(max_length=30, choices=FinancialInstitutionType.get_choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
     swift_code = models.CharField(max_length=255, blank=True, null=True)
 

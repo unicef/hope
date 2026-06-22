@@ -77,6 +77,10 @@ class SoftDeletablePendingManager(SoftDeletableManager[_M]):
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
+def get_merge_status_choices() -> tuple:
+    return MergeStatusModel.STATUS_CHOICE
+
+
 class MergeStatusModel(models.Model):
     PENDING = "PENDING"
     MERGED = "MERGED"
@@ -85,7 +89,7 @@ class MergeStatusModel(models.Model):
         (MERGED, _("Merged")),
     )
 
-    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING, blank=True)
+    rdi_merge_status = models.CharField(max_length=10, choices=get_merge_status_choices, default=PENDING, blank=True)
 
     class Meta:
         abstract = True
