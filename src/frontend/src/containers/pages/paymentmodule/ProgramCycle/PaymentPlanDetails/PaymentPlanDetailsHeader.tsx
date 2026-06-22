@@ -23,7 +23,9 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
+import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -36,6 +38,11 @@ export const PaymentPlanDetailsHeader = ({
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+  const getPlanTypeLabel = usePaymentPlanTypeLabel();
+  const planTypeLabel =
+    paymentPlan.planType && paymentPlan.planType !== PlanTypeEnum.REGULAR
+      ? `${getPlanTypeLabel(paymentPlan.planType)} `
+      : '';
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({
     queryKey: ['programCyclesDetails', businessArea, programCycleId, programId],
@@ -89,9 +96,6 @@ export const PaymentPlanDetailsHeader = ({
   );
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
@@ -175,7 +179,6 @@ export const PaymentPlanDetailsHeader = ({
     case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           canClose={canClose}
           paymentPlan={paymentPlan}
@@ -198,6 +201,7 @@ export const PaymentPlanDetailsHeader = ({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
+          {planTypeLabel}
           {t('Payment Plan')} ID:{' '}
           <Box ml={1} mr={2}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>

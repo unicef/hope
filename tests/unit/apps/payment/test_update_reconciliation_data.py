@@ -17,8 +17,8 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    XlsxPaymentPlanDeliveryImportService,
 )
 from hope.models import Approval, PaymentPlan, Program
 
@@ -121,11 +121,11 @@ def test_uploading_delivery_date_with_xlsx(
     with (
         patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service.timezone.now",
             return_value=datetime(2024, 11, 22).replace(tzinfo=UTC),
         ),
     ):
-        import_service = XlsxPaymentPlanImportPerFspService(
+        import_service = XlsxPaymentPlanDeliveryImportService(
             payment_plan_context["payment_plan"],
             file_without_delivery_dates,
         )
@@ -147,7 +147,7 @@ def test_uploading_xlsx_file_with_existing_dates_throws_error(
     file_with_existing_delivery_dates: BytesIO,
 ) -> None:
     with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0):
-        import_service = XlsxPaymentPlanImportPerFspService(
+        import_service = XlsxPaymentPlanDeliveryImportService(
             payment_plan_context["payment_plan"],
             file_with_existing_delivery_dates,
         )
@@ -179,7 +179,7 @@ def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
     with (
         patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0),
     ):
-        import_service = XlsxPaymentPlanImportPerFspService(
+        import_service = XlsxPaymentPlanDeliveryImportService(
             payment_plan_context["payment_plan"],
             file_one_record,
         )
@@ -237,7 +237,7 @@ def test_upload_reference_id(
     payment_2.save(update_fields=["unicef_id"])
 
     with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0):
-        import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file_reference_id)
+        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()
@@ -289,7 +289,7 @@ def test_upload_transaction_status_blockchain_link(
     payment_2.save(update_fields=["unicef_id"])
 
     with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0):
-        import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file_reference_id)
+        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()

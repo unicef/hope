@@ -165,6 +165,12 @@ class ChoicesViewSet(ViewSet):
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-plan-type")
+    def payment_plan_type(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentPlan.PlanType.choices), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="payment-verification-plan-status")
     def payment_verification_plan_status(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.STATUS_CHOICES), many=True).data

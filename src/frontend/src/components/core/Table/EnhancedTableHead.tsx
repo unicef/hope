@@ -104,6 +104,7 @@ export function EnhancedTableHead<T>(
                 padding={headCell.disablePadding ? 'none' : 'normal'}
                 sortDirection={orderBy === headCell.id ? order : false}
                 data-cy={headCell.dataCy}
+                style={headCell.weight !== undefined ? { width: `${headCell.weight}%` } : undefined}
               >
                 {allowSort && !headCell.disableSort ? (
                   <TableSortLabelStyled
