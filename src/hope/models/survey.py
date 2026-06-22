@@ -19,6 +19,14 @@ class SampleFileExpiredError(Exception):
     pass
 
 
+def get_category_choices() -> tuple:
+    return Survey.CATEGORY_CHOICES
+
+
+def get_sampling_choices() -> tuple:
+    return Survey.SAMPLING_CHOICES
+
+
 class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     SAMPLE_FILE_EXPIRATION_IN_DAYS = 30
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -54,7 +62,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
 
     title = models.CharField(max_length=60)
     body = models.TextField(max_length=1000, blank=True, default="")
-    category = models.CharField(max_length=16, choices=CATEGORY_CHOICES)
+    category = models.CharField(max_length=16, choices=get_category_choices)
     number_of_recipients = models.PositiveIntegerField(default=0)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -82,7 +90,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     flow_id = models.CharField(max_length=255, blank=True, null=True)
 
-    sampling_type = models.CharField(max_length=50, choices=SAMPLING_CHOICES, default=SAMPLING_FULL_LIST)
+    sampling_type = models.CharField(max_length=50, choices=get_sampling_choices, default=SAMPLING_FULL_LIST)
     sample_size = models.PositiveIntegerField(default=0)
     sample_file = models.FileField(upload_to="", blank=True, null=True)
     sample_file_generated_at = models.DateTimeField(blank=True, null=True)

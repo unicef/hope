@@ -15,12 +15,16 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         BY_ADMIN_AREA2 = "BY_ADMIN_AREA2", "By Admin Area 2"
         BY_ADMIN_AREA3 = "BY_ADMIN_AREA3", "By Admin Area 3"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PaymentPlanSplit.SplitType.choices
+
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="splits",
     )
-    split_type = models.CharField(choices=SplitType.choices, max_length=24, default=SplitType.NO_SPLIT)
+    split_type = models.CharField(choices=SplitType.get_choices, max_length=24, default=SplitType.NO_SPLIT)
     chunks_no = models.IntegerField(null=True, blank=True)
     sent_to_payment_gateway = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
