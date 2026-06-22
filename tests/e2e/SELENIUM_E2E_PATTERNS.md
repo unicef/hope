@@ -172,18 +172,14 @@ from extras.test_utils.selenium import HopeTestBrowser
 
 pytestmark = pytest.mark.django_db()
 
-# Selectors as module-level constants
-HEADER = 'h5[data-cy="page-header-title"]'
-BTN_ACTION = 'button[data-cy="button-action"]'
-
 
 def test_feature_scenario(login: HopeTestBrowser) -> None:
     # Navigate
     login.click('a[data-cy="nav-Programmes"]')
-    login.wait_for_text("Expected Title", HEADER)
+    login.wait_for_text("Expected Title", 'h5[data-cy="page-header-title"]')
 
     # Interact
-    login.click(BTN_ACTION)
+    login.click('button[data-cy="button-action"]')
     login.type('input[data-cy="input-field"]', "value")
 
     # Assert

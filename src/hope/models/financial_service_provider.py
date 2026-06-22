@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -9,6 +9,9 @@ from django.utils.translation import gettext_lazy as _
 from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
 from hope.models.utils import InternalDataFieldModel, TimeStampedUUIDModel
+
+if TYPE_CHECKING:
+    from hope.models import DeliveryMechanism
 
 
 def get_communication_channel_choices() -> tuple:
@@ -62,7 +65,9 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
     def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
-    def get_xlsx_template(self, delivery_mechanism: str) -> Optional["FinancialServiceProviderXlsxTemplate"]:
+    def get_xlsx_template(
+        self, delivery_mechanism: "DeliveryMechanism"
+    ) -> Optional["FinancialServiceProviderXlsxTemplate"]:
         try:
             return self.xlsx_templates.get(
                 fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=delivery_mechanism

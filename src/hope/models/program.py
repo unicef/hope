@@ -26,6 +26,7 @@ from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_purpose import PaymentPlanPurpose
 from hope.models.sanction_list import SanctionList
 from hope.models.utils import (
     AbstractSyncable,
@@ -250,6 +251,13 @@ class Program(
         help_text="Program sanction lists",
     )
 
+    payment_plan_purposes = models.ManyToManyField(
+        "payment.PaymentPlanPurpose",
+        blank=True,
+        related_name="programs",
+        help_text="Payment plan purposes available within program",
+    )
+
     reconciliation_window_in_days = models.PositiveIntegerField(
         default=0, help_text="Payment Plan reconciliation window in days"
     )
@@ -270,6 +278,18 @@ class Program(
             and not self.beneficiary_group.master_detail
         ):
             raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+        if self.pk and not self._state.adding and not self.payment_plan_purposes.exists():
+            raise ValidationError("Program must have at least one Payment Plan Purpose.")
+        if (
+            self.pk
+            and not self._state.adding
+            and self.payment_plan_purposes.exclude(
+                id__in=PaymentPlanPurpose.objects.filter(
+                    Q(limit_to__isnull=True) | Q(limit_to__slug=self.business_area.slug)
+                ).distinct()
+            ).exists()
+        ):
+            raise ValidationError("All Payment Plan Purposes must be available for this program's business area.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()

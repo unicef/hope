@@ -3,9 +3,11 @@ from typing import Any
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import (
+    BusinessAreaAndProgramKeyBitMixin,
     BusinessAreaAndProgramLastUpdatedKeyBit,
     BusinessAreaKeyBitMixin,
     KeyConstructorMixin,
+    get_or_create_cache_key,
 )
 from hope.models import BusinessArea
 
@@ -16,6 +18,24 @@ class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
 
 class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "payment_plans_list"
+
+
+class PaymentPlanGroupListKeyBit(BusinessAreaAndProgramKeyBitMixin):
+    specific_view_cache_key = "payment_plan_groups_list"
+
+
+class PaymentPlanPurposeListVersionsKeyBit(KeyBitBase):
+    def get_data(  # noqa: PLR0913 – override of base method signature
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
+    ) -> str:
+        version = get_or_create_cache_key("payment_plan_purposes_list", 1)
+        return str(version)
 
 
 class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
@@ -56,6 +76,14 @@ class PaymentPlanListKeyConstructor(KeyConstructorMixin):
 
 class TargetPopulationListKeyConstructor(KeyConstructorMixin):
     target_population_list = TargetPopulationListKeyBit()
+
+
+class PaymentPlanGroupListKeyConstructor(KeyConstructorMixin):
+    payment_plan_group_list = PaymentPlanGroupListKeyBit()
+
+
+class PaymentPlanPurposeListKeyConstructor(KeyConstructorMixin):
+    payment_plan_purpose_list = PaymentPlanPurposeListVersionsKeyBit()
 
 
 class PaymentVerificationListKeyConstructor(KeyConstructorMixin):

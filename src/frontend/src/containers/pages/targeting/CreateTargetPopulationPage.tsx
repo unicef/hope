@@ -1,6 +1,7 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { CreatePaymentPlanGroupModal } from '@components/paymentmodule/CreatePaymentPlanGroupModal';
 import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
@@ -8,10 +9,12 @@ import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCr
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
+import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -20,7 +23,7 @@ import {
 } from '@utils/targetingUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -40,6 +43,10 @@ const CreateTargetPopulationPage = (): ReactElement => {
       value: '',
       name: '',
     },
+    paymentPlanGroupId: {
+      value: '',
+      name: '',
+    },
     excludedIds: '',
     exclusionReason: '',
     flagExcludeIfActiveAdjudicationTicket: false,
@@ -49,6 +56,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     alternativeCollectorsIds: '',
     deliveryMechanism: '',
     fsp: '',
+    paymentPlanPurposes: [] as string[],
   };
   const queryClient = useQueryClient();
   const { mutateAsync: createTargetPopulation, isPending: loadingCreate } =
@@ -89,6 +97,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
       }),
   });
 
+  const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
+
   if (permissions === null) return null;
   if (!businessAreaData) return null;
   if (!program) return null;
@@ -96,6 +106,10 @@ const CreateTargetPopulationPage = (): ReactElement => {
     return <PermissionDenied permission={PERMISSIONS.TARGETING_CREATE} />;
 
   const screenBeneficiary = program?.screenBeneficiary;
+  const programPurposes = (program?.paymentPlanPurposes ?? []).map((p) => ({
+    value: p.id,
+    name: p.name,
+  }));
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Targeting Name is required'))
@@ -106,6 +120,9 @@ const CreateTargetPopulationPage = (): ReactElement => {
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Programme Cycle is required'),
     }),
+    paymentPlanGroupId: Yup.object().shape({
+      value: Yup.string().required('Payment Plan Group is required'),
+    }),
   });
 
   const handleSubmit = async (values: any): Promise<void> => {
@@ -113,6 +130,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     const requestBody = {
       programCycleId: values.programCycleId.value,
+      paymentPlanGroupId: values.paymentPlanGroupId.value,
       name: values.name,
       excludedIds: values.excludedIds,
       exclusionReason: values.exclusionReason,
@@ -121,6 +139,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
       flagExcludeIfActiveAdjudicationTicket:
         values.flagExcludeIfActiveAdjudicationTicket,
       flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
+      paymentPlanPurposes: values.paymentPlanPurposes,
       ...getTargetingCriteriaVariables(values),
     };
 
@@ -156,20 +175,65 @@ const CreateTargetPopulationPage = (): ReactElement => {
               <Box pt={3} pb={3}>
                 <Typography variant="h6">{t('Targeting Criteria')}</Typography>
               </Box>
-              <Grid container mb={5}>
+              <Grid container mb={5} spacing={3}>
                 <Grid size={6}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {
-                      await setFieldValue('programCycleId', e);
+                      await setFieldValue(
+                        'programCycleId',
+                        e ?? { value: '', name: '' },
+                      );
+                      await setFieldValue('paymentPlanGroupId', {
+                        value: '',
+                        name: '',
+                      });
                     }}
                     required
                     // @ts-ignore
                     error={errors.programCycleId?.value}
                   />
                 </Grid>
+                <Grid size={6}>
+                  <Box display="flex" alignItems="flex-start" gap={2}>
+                    <PaymentPlanGroupAutocompleteRest
+                      value={values.paymentPlanGroupId}
+                      onChange={async (e) => {
+                        await setFieldValue('paymentPlanGroupId', e);
+                      }}
+                      cycleId={values.programCycleId?.value ?? ''}
+                      disabled={!values.programCycleId?.value}
+                      required
+                      // @ts-ignore
+                      error={errors.paymentPlanGroupId?.value}
+                    />
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => setCreateGroupModalOpen(true)}
+                      disabled={!values.programCycleId?.value}
+                      data-cy="button-create-group"
+                      sx={{ whiteSpace: 'nowrap', flexShrink: 0, mt: 1 }}
+                    >
+                      {t('Create Group')}
+                    </Button>
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid container>
+              <CreatePaymentPlanGroupModal
+                open={createGroupModalOpen}
+                onClose={() => setCreateGroupModalOpen(false)}
+                cycleId={values.programCycleId?.value ?? ''}
+                cycleTitle={values.programCycleId?.name ?? ''}
+                onSuccess={(group) => {
+                  setFieldValue('paymentPlanGroupId', {
+                    value: group.id,
+                    name: group.name,
+                  });
+                  setCreateGroupModalOpen(false);
+                }}
+              />
+              <Grid container spacing={3}>
                 <Grid size={6}>
                   <Field
                     name="name"
@@ -182,6 +246,18 @@ const CreateTargetPopulationPage = (): ReactElement => {
                     data-cy="input-name"
                   />
                 </Grid>
+                {programPurposes.length > 0 && (
+                  <Grid size={6}>
+                    <Field
+                      name="paymentPlanPurposes"
+                      label={t('Payment Plan Purposes')}
+                      required
+                      choices={programPurposes}
+                      component={FormikChipAutocomplete}
+                      data-cy="input-payment-plan-purposes"
+                    />
+                  </Grid>
+                )}
               </Grid>
               <Box pt={6} pb={6}>
                 <Divider />
