@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CurrencyFactory,
+    DataCollectingTypeFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
@@ -72,7 +73,8 @@ def area_kabul(db):
 @pytest.fixture
 def populate_dashboard_cache(area_kabul):
     def _populate(ba, household_extra_args=None):
-        program = ProgramFactory(business_area=ba)
+        dct = DataCollectingTypeFactory(code="full_collection")
+        program = ProgramFactory(business_area=ba, data_collecting_type=dct)
         household = HouseholdFactory(
             business_area=ba,
             program=program,
@@ -413,3 +415,81 @@ def test_dashboard_reconciliation_verification_consistency(reconciliation_test_d
         "Sum of 'total_payment_plans' should be consistent between country and filtered global dashboards "
         f"(Country: {sum_total_plans_country}, Global: {sum_total_plans_global})"
     )
+
+
+@pytest.mark.django_db
+def test_dashboard_pwd_count_from_individuals(afghanistan, area_kabul, fsp_common, delivery_mechanism_common) -> None:
+    cache.delete(f"dashboard_data_{afghanistan.slug}")
+    from extras.test_utils.factories import IndividualFactory
+    from hope.apps.household.const import DISABLED, NOT_DISABLED, NON_BENEFICIARY
+
+    # Create a program with a non-"full_collection" code
+    dct = DataCollectingTypeFactory(code="other_collection")
+    program = ProgramFactory(business_area=afghanistan, data_collecting_type=dct)
+    
+    # Household has 0 for standard disabled count fields
+    household = HouseholdFactory(
+        business_area=afghanistan,
+        program=program,
+        size=5,
+        female_age_group_0_5_disabled_count=0,
+        female_age_group_6_11_disabled_count=0,
+        male_age_group_60_disabled_count=0,
+        admin1=area_kabul,
+    )
+
+    # 1 active individual with disability=DISABLED
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=DISABLED,
+        withdrawn=False,
+        duplicate=False,
+    )
+    # 1 active individual with disability=NOT_DISABLED
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=NOT_DISABLED,
+        withdrawn=False,
+        duplicate=False,
+    )
+    # 1 withdrawn individual with disability=DISABLED
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=DISABLED,
+        withdrawn=True,
+        duplicate=False,
+    )
+    # 1 active individual with disability=DISABLED, but NON_BENEFICIARY relationship (should be excluded)
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=DISABLED,
+        withdrawn=False,
+        duplicate=False,
+        relationship=NON_BENEFICIARY,
+    )
+
+    PaymentFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        status=Payment.STATUS_SUCCESS,
+        delivery_date=TEST_DATE,
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
+        currency=CurrencyFactory(code="USD"),
+    )
+
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert result is not None
+    assert len(result) == 1
+    # Expected PWD count is 1 (only the first active individual should be counted)
+    assert result[0]["pwd_counts"] == 1
