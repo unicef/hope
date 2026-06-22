@@ -9,6 +9,7 @@ from extras.test_utils.factories import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
+    PaymentPlanGroupFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
     ProgramFactory,
@@ -155,6 +156,7 @@ class TestCreateTargetPopulationTextForm:
 
     def test_clean_criteria_returns_households(self, program, household) -> None:
         cycle = program.cycles.first()
+        payment_plan_group = PaymentPlanGroupFactory(cycle=cycle)
         form = CreateTargetPopulationTextForm(
             data={
                 "action": "create",
@@ -163,6 +165,7 @@ class TestCreateTargetPopulationTextForm:
                 "separator": ",",
                 "criteria": household.unicef_id,
                 "program_cycle": cycle.pk,
+                "payment_plan_group": payment_plan_group.pk,
             },
             program=program,
         )
