@@ -6,11 +6,18 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON_PREFERENCE: only-system
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Install Python & UV
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install UV
         uses: astral-sh/setup-uv@v6
         with:
           version: latest
@@ -20,7 +27,6 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
-          python-version: 3.14
 
       - name: Restore cached vEnv
         id: cache-venv-restore

@@ -360,7 +360,7 @@ def test_entitlement_import_updates_only_modified_rows_for_household_program(
     assert import_service.errors == []
 
     # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
-    with django_assert_num_queries(7):
+    with django_assert_num_queries(3):
         import_service.import_payment_list()
 
     payment_1.refresh_from_db()
@@ -422,7 +422,7 @@ def test_entitlement_import_updates_only_modified_rows_for_social_worker_program
     assert import_service.errors == []
 
     # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
-    with django_assert_num_queries(7):
+    with django_assert_num_queries(3):
         import_service.import_payment_list()
 
     payment_1.refresh_from_db()
