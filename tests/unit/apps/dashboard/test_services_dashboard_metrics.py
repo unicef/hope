@@ -421,12 +421,12 @@ def test_dashboard_reconciliation_verification_consistency(reconciliation_test_d
 def test_dashboard_pwd_count_from_individuals(afghanistan, area_kabul, fsp_common, delivery_mechanism_common) -> None:
     cache.delete(f"dashboard_data_{afghanistan.slug}")
     from extras.test_utils.factories import IndividualFactory
-    from hope.apps.household.const import DISABLED, NOT_DISABLED, NON_BENEFICIARY
+    from hope.apps.household.const import DISABLED, NON_BENEFICIARY, NOT_DISABLED
 
     # Create a program with a non-"full_collection" code
     dct = DataCollectingTypeFactory(code="other_collection")
     program = ProgramFactory(business_area=afghanistan, data_collecting_type=dct)
-    
+
     # Household has 0 for standard disabled count fields
     household = HouseholdFactory(
         business_area=afghanistan,
