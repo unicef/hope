@@ -1199,6 +1199,14 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
     assert isinstance(response_data, PaymentInstructionData)
 
 
+def test_api_get_download_payment_instruction_url() -> None:
+    api = PaymentGatewayAPI()
+
+    response_data = api.get_download_payment_instruction_url("pi-remote-id")
+
+    assert response_data == api.get_url(api.Endpoints.DOWNLOAD_PAYMENT_INSTRUCTION.format(remote_id="pi-remote-id"))
+
+
 def test_payment_instruction_payload_includes_business_area_office_and_payment_country(
     payment_plan_splits: list[PaymentPlanSplit],
 ) -> None:
