@@ -23,6 +23,10 @@ A Payment Plan Purpose defines the intent of a payment — e.g. *Food Assistance
 
 Purposes are managed exclusively through the **Django admin panel** by the Core Team. Programme users cannot create or delete Purposes from the UI.
 
+![Purposes list in Django admin](./_screenshots/groups-and-purposes/purposes-admin.png)
+
+![Adding a new Purpose in Django admin](./_screenshots/groups-and-purposes/purposes-admin-add.png)
+
 The `limit_to` field on each Purpose (an optional multi-select of Business Areas) is reserved for future use to restrict a Purpose's availability to specific offices. Until then, all Purposes are visible to all Business Areas.
 
 ### How Purposes are assigned
@@ -30,8 +34,12 @@ The `limit_to` field on each Purpose (an optional multi-select of Business Areas
 **At Programme level:**
 When creating or editing a Programme, users select one or more Purposes for it (minimum 1, maximum 10). Purposes can be added or removed on update — but a Purpose can only be removed if **no Payment Plan in that Programme currently uses it**.
 
+![Selecting Purposes when creating a Programme](./_screenshots/groups-and-purposes/purposes-program.png)
+
 **At Payment Plan level:**
 Purposes are selected during **Target Population creation** (the first step of the payment plan workflow). Users pick one or more Purposes from those already assigned to the parent Programme (minimum 1). After the Target Population has been created, Purposes may only be edited on the **most recently created** plan in that cycle. Older plans' Purposes are locked.
+
+![Selecting Purposes during Target Population creation](./_screenshots/groups-and-purposes/purposes-tp.png)
 
 Follow-Up, Top-Up, and Top-Up Amendment plans **inherit Purposes automatically** from their source plan — users do not select Purposes when creating these child plan types.
 
@@ -57,6 +65,8 @@ Every Programme Cycle automatically receives a group named **"Default Group"** w
 
 On the **Cycle detail page**, click **"+ Create Payment Plan Group"** and provide a name. The name must be unique within the cycle.
 
+![Creating a new Payment Plan Group](./_screenshots/groups-and-purposes/groups-add.png)
+
 ### Assigning a Payment Plan to a Group
 
 When **creating a Target Population** under a Cycle, the system prompts you to choose:
@@ -66,6 +76,8 @@ When **creating a Target Population** under a Cycle, the system prompts you to c
 
 A Payment Plan belongs to exactly one group. The group can be changed by editing the Target Population — the new group must belong to the same Cycle. If you change the Cycle, you must also select a Group that belongs to the new Cycle.
 
+![Group selection during Target Population creation](./_screenshots/groups-and-purposes/groups-tp.png)
+
 ### Group operations
 
 **Edit name** — the new name must be unique within the Cycle.
@@ -74,16 +86,35 @@ A Payment Plan belongs to exactly one group. The group can be changed by editing
 
 Each batch gets its own **Batch Detail page** (linked from the group) showing the Payment Plans included in that batch, a **Download** button for the XLSX file, and an option to send the file password if the file is password-protected. All past batches are also listed on the Group detail page with individual download links.
 
+
 **Send to Payment Gateway** — sends each qualifying plan in the group to the payment gateway.
 
 **Delete** — only allowed when the group has no Payment Plans attached. A Cycle must always have at least one group, so the last remaining group cannot be deleted.
 
 
+![Group detail page](./_screenshots/groups-and-purposes/groups-detail.png)
+
+![Group batches with download links](./_screenshots/groups-and-purposes/groups-batches.png)
+
+![Batch detail page](./_screenshots/groups-and-purposes/groups-batch-detail.png)
+
+
 ### Navigating Groups in the UI
 
-- **Cycle detail and Payment Plans list** — plans are displayed under a **group section header** that separates each group's plans. The header links to the Group detail page.
+- **Cycle detail and Payment Plans list, Target Populations list** — plans are displayed under a **group section header** that separates each group's plans. The header links to the Group detail page.
+
+  ![Target Populations list with group section headers](./_screenshots/groups-and-purposes/groups-tp-list.png)
+
+
 - **Payment Plan detail** — shows the assigned Group as a labelled field with a link to the Group detail page.
+
+  ![Payment Plan detail showing the assigned Group](./_screenshots/groups-and-purposes/groups-pp-detail.png)
+
+
 - **Payment Plan Groups section** — top-level section in the Payment Module listing all groups (name, UNICEF ID, Cycle, status).
+
+  ![Payment Plan Groups section](./_screenshots/groups-and-purposes/groups-section.png)
+
 
 ---
 
@@ -100,10 +131,12 @@ The status of a Follow-Up Instruction is **derived** from its child Payment Plan
 
 ### Creating a Follow-Up Instruction
 
-Click **"Create Follow-up Instruction"** in the Payment Module. A dialog opens where you:
+Click **"Create Follow-up Instruction"** in the new section Follow-up Instructions under the Payment Module. A dialog opens where you:
 
 1. Select one or more **Payment Plan Groups** from the same Programme.
 2. Set the **dispersion start** and **dispersion end** dates.
+
+![Creating a Follow-Up Instruction](./_screenshots/groups-and-purposes/follow-up.png)
 
 On submit, the system automatically creates a Follow-Up Payment Plan for every eligible source plan found in the selected groups. A source plan qualifies if it:
 
@@ -130,6 +163,13 @@ A **Top-Up Payment Plan** (`plan_type = TOP_UP`) is used to make an additional p
 
 The **"Create Top-Up"** button appears on a Payment Plan when at least one payment in the plan has been fully or partially delivered.
 
+![Creating a Top-Up](./_screenshots/groups-and-purposes/top-ups.png)
+
+![Top-Up detail](./_screenshots/groups-and-purposes/top-ups-detail.png)
+
+![Top-Up displayed in related](./_screenshots/groups-and-purposes/top-ups-displayed-related.png)
+
+
 ### Purpose inheritance
 
 A Top-Up Plan automatically inherits the **same Purposes** as its source plan. Users do not select Purposes when creating a Top-Up.
@@ -139,3 +179,5 @@ A Top-Up Plan automatically inherits the **same Purposes** as its source plan. U
 A **Top-Up Amendment** (`plan_type = TOP_UP_AMENDMENT`) is a secondary correction layer on top of a Top-Up Plan. It is created from a Top-Up Plan (not from a Standard plan) and covers households within that Top-Up that still have outstanding payment amounts after partial delivery.
 
 The **"Create Top-Up Amendment"** button appears on a Top-Up Payment Plan when at least one of its payments qualifies for amendment.
+
+![Top-Up Amendment](./_screenshots/groups-and-purposes/top-up-amendment.png)
