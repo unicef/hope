@@ -1,8 +1,9 @@
-import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -178,26 +179,18 @@ export function PaymentPlansFilters({
             minDateMessage={<span />}
           />
         </Grid>
-        <Grid size={12}>
-          <Box ml={2}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(filter.isFollowUp)}
-                  value={filter.isFollowUp}
-                  color="primary"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleFilterChange('isFollowUp', true);
-                    } else {
-                      handleFilterChange('isFollowUp', false);
-                    }
-                  }}
-                />
-              }
-              label={t('Show only Follow-up plans')}
-            />
-          </Box>
+        <Grid size={3}>
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('planType', e.target.value || null)
+            }
+            label={t('Plan Type')}
+            value={filter.planType ?? ''}
+            fullWidth
+          >
+            <MenuItem value={PlanTypeEnum.FOLLOW_UP}>{t('Follow Up')}</MenuItem>
+            <MenuItem value={PlanTypeEnum.TOP_UP}>{t('Top Up')}</MenuItem>
+          </SelectFilter>
         </Grid>
       </Grid>
     </FiltersSection>

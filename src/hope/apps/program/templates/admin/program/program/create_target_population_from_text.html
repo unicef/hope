@@ -1,4 +1,30 @@
 {% extends "admin_extra_buttons/action_page.html" %}{% load admin_modify admin_urls hope i18n static %}
+{% block extrahead %}{{ block.super }}
+<script>
+(function () {
+  const groupsByCycle = {{ groups_by_cycle_json|safe }};
+  function updateGroups(cycleId) {
+    const sel = document.getElementById('id_payment_plan_group');
+    if (!sel) return;
+    const groups = groupsByCycle[cycleId] || [];
+    sel.innerHTML = '<option value="">---------</option>';
+    groups.forEach(function (g) {
+      const opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = g.name;
+      sel.appendChild(opt);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    const cycleSel = document.getElementById('id_program_cycle');
+    if (!cycleSel) return;
+    updateGroups(cycleSel.value);
+    cycleSel.addEventListener('change', function () { updateGroups(this.value); });
+  });
+})();
+</script>
+{% endblock extrahead %}
+
 {% block action-content %}
   {% if total == 0 %}
     <h1>There are no households in that business area matching your text search</h1>

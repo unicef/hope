@@ -313,7 +313,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             elif isinstance(obj, dict):
                 result = obj.get(nested_field, "")
             else:
-                result = getattr(obj, nested_field, None) or ""
+                value = getattr(obj, nested_field, None)
+                result = "" if value is None else value
         else:
             result = "wrong_column_name"
 
