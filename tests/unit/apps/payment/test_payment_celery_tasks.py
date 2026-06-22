@@ -31,6 +31,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
+    create_payment_plan_payment_list_xlsx_async_task,
     create_payment_plan_payment_list_xlsx_async_task_action,
     create_payment_verification_plan_xlsx_async_task,
     create_payment_verification_plan_xlsx_async_task_action,
@@ -68,6 +69,7 @@ from hope.apps.payment.celery_tasks import (
     remove_old_payment_plan_payment_list_xlsx_async_task,
     remove_old_payment_plan_payment_list_xlsx_async_task_action,
     send_payment_notification_emails_async_task,
+    send_payment_notification_emails_async_task_action,
     send_payment_plan_group_delivery_xlsx_password_async_task_action,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_qcf_report_email_notifications_async_task,
@@ -1940,3 +1942,35 @@ def test_send_to_payment_gateway_action_sets_error_status_on_exception(
 
     payment_plan.refresh_from_db()
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR
+
+
+@patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue_task")
+def test_create_payment_plan_payment_list_xlsx_async_task_queues_job(mock_queue_task: Mock) -> None:
+    payment_plan = PaymentPlanFactory()
+    user = UserFactory()
+
+    create_payment_plan_payment_list_xlsx_async_task(payment_plan, str(user.pk))
+
+    mock_queue_task.assert_called_once()
+    assert mock_queue_task.call_args.kwargs["config"] == {
+        "payment_plan_id": str(payment_plan.id),
+        "user_id": str(user.pk),
+    }
+
+
+def test_send_payment_notification_emails_action_sends_email() -> None:
+    payment_plan = PaymentPlanFactory()
+    user = UserFactory()
+    job = Mock(
+        config={
+            "payment_plan_id": str(payment_plan.id),
+            "action_user_id": str(user.id),
+            "action": "SEND_FOR_APPROVAL",
+            "action_date_formatted": "3 April 2026",
+        }
+    )
+
+    with patch("hope.apps.payment.notifications.PaymentNotification") as mock_notification:
+        send_payment_notification_emails_async_task_action(job)
+
+    mock_notification.return_value.send_email_notification.assert_called_once()
