@@ -19,6 +19,10 @@ class XLSXKoboTemplateManager(models.Manager):
         )
 
 
+def get_kobo_status_choices() -> tuple:
+    return XLSXKoboTemplate.KOBO_FORM_UPLOAD_STATUS_CHOICES
+
+
 class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     SUCCESSFUL = "SUCCESSFUL"
     UPLOADED = "UPLOADED"
@@ -41,7 +45,7 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     )
     file = models.FileField()
     error_description = models.TextField(blank=True)
-    status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
+    status = models.CharField(max_length=200, choices=get_kobo_status_choices)
     template_id = models.CharField(max_length=200, blank=True)
     first_connection_failed_time = models.DateTimeField(null=True, blank=True)
 

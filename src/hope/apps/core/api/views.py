@@ -7,7 +7,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
@@ -142,6 +142,8 @@ class ChoicesViewSet(ViewSet):
     Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
     """
 
+    permission_classes = [AllowAny]
+
     @extend_schema(responses={200: CurrencyChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="currencies")
     def currencies(self, request: Request) -> Response:
@@ -160,6 +162,12 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="payment-plan-background-action-status")
     def payment_plan_background_action_status(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentPlan.BackgroundActionStatus.choices), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-plan-type")
+    def payment_plan_type(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentPlan.PlanType.choices), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

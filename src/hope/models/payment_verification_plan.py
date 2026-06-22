@@ -26,6 +26,18 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def get_status_choices() -> tuple:
+    return PaymentVerificationPlan.STATUS_CHOICES
+
+
+def get_sampling_choices() -> tuple:
+    return PaymentVerificationPlan.SAMPLING_CHOICES
+
+
+def get_verification_channel_choices() -> tuple:
+    return PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES
+
+
 class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -81,10 +93,10 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         on_delete=models.CASCADE,
         related_name="payment_verification_plans",
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
-    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
+    status = models.CharField(max_length=50, choices=get_status_choices, default=STATUS_PENDING, db_index=True)
+    verification_channel = models.CharField(max_length=50, choices=get_verification_channel_choices)
 
-    sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
+    sampling = models.CharField(max_length=50, choices=get_sampling_choices)
     sex_filter = models.CharField(null=True, max_length=10, blank=True)
     activation_date = models.DateTimeField(null=True, blank=True)
     completion_date = models.DateTimeField(null=True, blank=True)
