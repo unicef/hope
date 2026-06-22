@@ -11,9 +11,13 @@ class DataCollectingType(TimeStampedModel):
         STANDARD = "STANDARD", "Standard"
         SOCIAL = "SOCIAL", "Social Workers"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return DataCollectingType.Type.choices
+
     code = models.CharField(max_length=32)
     label = models.CharField(max_length=32, blank=True)
-    type = models.CharField(choices=Type.choices, null=True, blank=True, max_length=32)
+    type = models.CharField(choices=Type.get_choices, null=True, blank=True, max_length=32)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
     deprecated = models.BooleanField(
