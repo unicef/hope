@@ -40,7 +40,7 @@ function PaymentDetailsPage(): ReactElement {
   });
 
   const paymentPlanStatus = payment?.parent?.status;
-  const paymentPlanIsFollowUp = payment?.parent?.isFollowUp;
+  const paymentPlanIsFollowUp = payment?.parent?.planType === 'FOLLOW_UP';
   const permissions = usePermissions();
   const { baseUrl } = useBaseUrl();
   if (loading) return <LoadingComponent />;

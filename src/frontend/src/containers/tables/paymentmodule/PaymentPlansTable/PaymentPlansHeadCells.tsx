@@ -61,7 +61,13 @@ export const headCells = [
   },
   {
     disablePadding: false,
-    label: 'Follow-up Payment Plans',
+    label: 'Export Batch',
+    id: 'tag',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Linked Payment Plans',
     id: 'followup-id',
     numeric: false,
   },
@@ -130,7 +136,13 @@ export const headCellsPeople = [
   },
   {
     disablePadding: false,
-    label: 'Follow-up Payment Plans',
+    label: 'Export Batch',
+    id: 'tag',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Linked Payment Plans',
     id: 'followup-id',
     numeric: false,
   },

@@ -38,7 +38,7 @@ export function PaymentPlanTargeting({
       </Title>
       <OverviewContainer>
         <StyledBox display="flex" flexDirection="column">
-          <Grid container>
+          <Grid container spacing={3}>
             <Grid size={{ xs: 6 }}>
               <Field
                 name="paymentPlanId"

@@ -5,8 +5,9 @@ import mimetypes
 from typing import TYPE_CHECKING, Any, cast
 from zipfile import BadZipFile
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.http import FileResponse, Http404
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -34,13 +35,16 @@ from hope.apps.core.api.mixins import (
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.utils import check_concurrency_version_in_mutation
 from hope.apps.payment.api.caches import (
+    PaymentPlanGroupListKeyConstructor,
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
+    PaymentPlanPurposeListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
 from hope.apps.payment.api.filters import (
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
+    PaymentPlanGroupFilter,
     PaymentPlanOfficeSearchFilter,
     PaymentSearchFilter,
     PaymentVerificationRecordFilter,
@@ -53,6 +57,9 @@ from hope.apps.payment.api.serializers import (
     ApplyEngineFormulaSerializer,
     ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
+    FollowUpInstructionCreateSerializer,
+    FollowUpInstructionDetailSerializer,
+    FollowUpInstructionListSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
     PaymentChoicesSerializer,
@@ -64,7 +71,12 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanCreateUpdateSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
-    PaymentPlanExportAuthCodeSerializer,
+    PaymentPlanGroupCreateSerializer,
+    PaymentPlanGroupDeliveryExportSerializer,
+    PaymentPlanGroupDetailSerializer,
+    PaymentPlanGroupListSerializer,
+    PaymentPlanGroupSendXlsxPasswordSerializer,
+    PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
@@ -85,7 +97,9 @@ from hope.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hope.apps.payment.celery_tasks import (
+    export_payment_plan_group_delivery_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_engine_rule_async_task,
@@ -93,8 +107,10 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
+    send_payment_plan_group_delivery_xlsx_password_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
@@ -110,26 +126,33 @@ from hope.apps.payment.services.verification_plan_status_change_services import 
 )
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
 from hope.apps.payment.utils import calculate_counts, from_received_to_status
+from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
+    XlsxFollowUpInstructionReconciliationImportService,
+)
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+    XlsxPaymentPlanGroupDeliveryImportService,
+)
 from hope.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
-)
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
 )
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
+from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     BusinessArea,
     DeliveryMechanism,
+    FileTemp,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FollowUpInstruction,
     Individual,
     IndividualRoleInHousehold,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
@@ -138,6 +161,7 @@ from hope.models import (
     Rule,
     log_create,
 )
+from hope.models.payment_plan_purpose import PaymentPlanPurpose
 
 if TYPE_CHECKING:
     from hope.models import User
@@ -691,10 +715,29 @@ class PaymentPlanViewSet(
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
+    BLOCKED_ACTIONS_FOR_INSTRUCTION_MANAGED = {
+        "partial_update",
+        "destroy",
+        "lock",
+        "unlock",
+        "lock_fsp",
+        "unlock_fsp",
+        "send_for_approval",
+        "reject",
+        "approve",
+        "authorize",
+        "mark_as_released",
+        "send_to_payment_gateway",
+        "split",
+        "close",
+        "abort",
+        "reactivate_abort",
+    }
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program", "currency")
+        .select_related("program_cycle__program", "currency", "payment_plan_group")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     http_method_names = ["get", "post", "patch", "delete"]
@@ -704,6 +747,8 @@ class PaymentPlanViewSet(
         "retrieve": PaymentPlanDetailSerializer,
         "create": PaymentPlanCreateUpdateSerializer,
         "create_follow_up": PaymentPlanCreateFollowUpSerializer,
+        "create_top_up": PaymentPlanCreateFollowUpSerializer,
+        "create_top_up_amendment": PaymentPlanCreateFollowUpSerializer,
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
@@ -713,9 +758,7 @@ class PaymentPlanViewSet(
         "approve": AcceptanceProcessSerializer,
         "authorize": AcceptanceProcessSerializer,
         "mark_as_released": AcceptanceProcessSerializer,
-        "generate_xlsx_with_auth_code": PaymentPlanExportAuthCodeSerializer,
         "split": SplitPaymentPlanSerializer,
-        "reconciliation_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "abort": PaymentPlanAbortSerializer,
@@ -730,6 +773,8 @@ class PaymentPlanViewSet(
         ],
         "create": [Permissions.PM_CREATE],
         "create_follow_up": [Permissions.PM_CREATE],
+        "create_top_up": [Permissions.PM_CREATE],
+        "create_top_up_amendment": [Permissions.PM_CREATE],
         "partial_update": [Permissions.PM_CREATE],
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
@@ -749,11 +794,7 @@ class PaymentPlanViewSet(
         "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
-        "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
-        "generate_xlsx_with_auth_code": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE],
-        "reconciliation_export_xlsx": [Permissions.PM_VIEW_LIST],
         "split": [Permissions.PM_SPLIT],
-        "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
@@ -766,7 +807,10 @@ class PaymentPlanViewSet(
     }
 
     def get_object(self) -> PaymentPlan:
-        return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+        if payment_plan.is_instruction_managed and self.action in self.BLOCKED_ACTIONS_FOR_INSTRUCTION_MANAGED:
+            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
+        return payment_plan
 
     @etag_decorator(PaymentPlanListKeyConstructor)
     @cached_response(key_func=PaymentPlanListKeyConstructor())
@@ -797,6 +841,31 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
+    def _create_child_plan_response(self, request: Request, plan_type: "PaymentPlan.PlanType") -> Response:
+        """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions."""
+        payment_plan = self.get_object()
+        user = request.user
+        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
+        serializer.is_valid(raise_exception=True)
+        child_pp = PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=plan_type,
+            user=user,
+            dispersion_start_date=serializer.validated_data["dispersion_start_date"],
+            dispersion_end_date=serializer.validated_data["dispersion_end_date"],
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=user,
+            programs=child_pp.program,
+            old_object=None,
+            new_object=child_pp,
+        )
+        return Response(
+            data=PaymentPlanDetailSerializer(child_pp, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
+
     @extend_schema(
         request=PaymentPlanCreateFollowUpSerializer,
         responses={201: PaymentPlanDetailSerializer},
@@ -804,28 +873,25 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="create-follow-up")
     @transaction.atomic
     def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        user = request.user
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
-        serializer.is_valid(raise_exception=True)
-        follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
-            user,
-            serializer.validated_data["dispersion_start_date"],
-            serializer.validated_data["dispersion_end_date"],
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=user,
-            programs=follow_up_pp.program,
-            old_object=None,
-            new_object=follow_up_pp,
-        )
-        response_serializer = PaymentPlanDetailSerializer(follow_up_pp, context={"request": request})
-        return Response(
-            data=response_serializer.data,
-            status=status.HTTP_201_CREATED,
-        )
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.FOLLOW_UP)
+
+    @extend_schema(
+        request=PaymentPlanCreateFollowUpSerializer,
+        responses={201: PaymentPlanDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="create-top-up")
+    @transaction.atomic
+    def create_top_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP)
+
+    @extend_schema(
+        request=PaymentPlanCreateFollowUpSerializer,
+        responses={201: PaymentPlanDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="create-top-up-amendment")
+    @transaction.atomic
+    def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -968,6 +1034,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         serializer = self.get_serializer(
             data=request.data,
         )
@@ -1013,6 +1081,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         old_payment_plan = copy_model_object(payment_plan)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
@@ -1045,6 +1115,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise ValidationError("User can only import for LOCKED Payment Plan")
         if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
@@ -1096,6 +1168,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
         serializer = self.get_serializer(
             data=request.data,
         )
@@ -1321,165 +1395,6 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["post"], url_path="generate-xlsx-with-auth-code")
-    @transaction.atomic
-    def generate_xlsx_with_auth_code(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        fsp_xlsx_template_id = request.data.get("fsp_xlsx_template_id")
-
-        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING:
-            raise ValidationError("Payment List Per FSP export already in progress.")
-
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-        ]:
-            raise ValidationError(
-                "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
-            )
-        if payment_plan.export_file_per_fsp is not None:
-            raise ValidationError("Export failed: Payment Plan already has created exported file.")
-        if fsp_xlsx_template_id and not payment_plan.is_payment_gateway_and_all_sent_to_fsp:
-            raise ValidationError(
-                "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
-            )
-
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-            str(request.user.pk), fsp_xlsx_template_id
-        )
-
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["get"], url_path="send-xlsx-password")
-    @transaction.atomic
-    def send_xlsx_password(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.SEND_XLSX_PASSWORD},
-            user=request.user,
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="reconciliation-export-xlsx",
-    )
-    @transaction.atomic
-    def reconciliation_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-        ]:
-            raise ValidationError(
-                "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
-            )
-        if not payment_plan.eligible_payments:
-            raise ValidationError("Export failed: The Payment List is empty.")
-        old_payment_plan = copy_model_object(payment_plan)
-
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(str(request.user.id), None)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @extend_schema(
-        request=PaymentPlanImportFileSerializer,
-        responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer},
-    )
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="reconciliation-import-xlsx",
-        parser_classes=[DictDrfNestedParser],
-    )
-    @transaction.atomic
-    def reconciliation_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        if payment_plan.status not in [
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED,
-        ]:
-            raise ValidationError(
-                "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
-            )
-        if payment_plan.is_payment_gateway:
-            raise ValidationError(
-                "Manual reconciliation import is not available for payment plans using payment gateway."
-            )
-
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        file = serializer.validated_data["file"]
-        with transaction.atomic():
-            import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
-            try:
-                import_service.open_workbook()
-            except BadZipFile:
-                raise ValidationError(
-                    "Wrong file type or password protected .zip file. Upload another file, or remove the password."
-                )
-
-            import_service.validate()
-            if import_service.errors:
-                return Response(
-                    data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            old_payment_plan = copy_model_object(payment_plan)
-
-            payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
-                user=request.user, file=file
-            )
-            log_create(
-                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-                business_area_field="business_area",
-                user=request.user,
-                programs=payment_plan.program.pk,
-                old_object=old_payment_plan,
-                new_object=payment_plan,
-            )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
     @action(detail=True, methods=["post"])
     @transaction.atomic
     def split(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1631,7 +1546,8 @@ class PaymentPlanGlobalViewSet(
 ):
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("currency")
+        .select_related("currency", "payment_plan_group")
+        .prefetch_related("child_plans")
         .order_by("-created_at")
     )
     serializer_classes_by_action = {
@@ -1640,6 +1556,263 @@ class PaymentPlanGlobalViewSet(
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     program_model_field = "program_cycle__program"
     filterset_class = PaymentPlanOfficeSearchFilter
+
+
+class FollowUpInstructionViewSet(
+    CountActionMixin,
+    ProgramMixin,
+    SerializerActionMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    program_model_field = "program"
+    queryset = (
+        FollowUpInstruction.objects.select_related("business_area", "program", "created_by")
+        .prefetch_related("payment_plans__source_payment_plan", "payment_plans__currency")
+        .order_by("-created_at")
+    )
+    PERMISSIONS = [Permissions.PM_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": FollowUpInstructionListSerializer,
+        "retrieve": FollowUpInstructionDetailSerializer,
+        "create": FollowUpInstructionCreateSerializer,
+        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
+        "reject": AcceptanceProcessSerializer,
+        "approve": AcceptanceProcessSerializer,
+        "authorize": AcceptanceProcessSerializer,
+        "mark_as_released": AcceptanceProcessSerializer,
+        "abort": PaymentPlanAbortSerializer,
+    }
+    permissions_by_action = {
+        "list": [Permissions.PM_VIEW_LIST],
+        "retrieve": [Permissions.PM_VIEW_DETAILS],
+        "create": [Permissions.PM_CREATE],
+        "lock": [Permissions.PM_LOCK_AND_UNLOCK],
+        "unlock": [Permissions.PM_LOCK_AND_UNLOCK],
+        "lock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
+        "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+        "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
+        "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
+        "delivery_export_xlsx": [Permissions.PM_VIEW_LIST],
+        "delivery_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        "close": [Permissions.PM_CLOSE_FINISHED],
+        "abort": [Permissions.PM_ABORT],
+        "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
+    }
+
+    def get_object(self) -> FollowUpInstruction:
+        return get_object_or_404(self.get_queryset(), id=self.kwargs.get("pk"))
+
+    def _detail_response(self, instruction: FollowUpInstruction, status_code: int = status.HTTP_200_OK) -> Response:
+        return Response(
+            data=FollowUpInstructionDetailSerializer(instruction, context={"request": self.request}).data,
+            status=status_code,
+        )
+
+    @staticmethod
+    def _request_user(request: Request) -> "User":
+        return cast("User", request.user)
+
+    @transaction.atomic
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self._request_user(request)
+        instruction = FollowUpInstructionService(self.program).create(
+            user=user,
+            payment_plan_group_ids=[str(group_id) for group_id in serializer.validated_data["payment_plan_group_ids"]],
+            dispersion_start_date=serializer.validated_data["dispersion_start_date"],
+            dispersion_end_date=serializer.validated_data["dispersion_end_date"],
+        )
+        return self._detail_response(instruction, status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["get"])
+    @transaction.atomic
+    def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.LOCK,
+            user,
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["get"])
+    @transaction.atomic
+    def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.UNLOCK,
+            user,
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["get"], url_path="lock-fsp")
+    @transaction.atomic
+    def lock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.LOCK_FSP,
+            user,
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["get"], url_path="unlock-fsp")
+    @transaction.atomic
+    def unlock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.UNLOCK_FSP,
+            user,
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["get"], url_path="send-for-approval")
+    @transaction.atomic
+    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.SEND_FOR_APPROVAL,
+            user,
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.REJECT,
+            user,
+            extra_input_data={"comment": serializer.validated_data.get("comment")},
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.APPROVE,
+            user,
+            extra_input_data={"comment": serializer.validated_data.get("comment")},
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def authorize(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.AUTHORIZE,
+            user,
+            extra_input_data={"comment": serializer.validated_data.get("comment")},
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["post"], url_path="mark-as-released")
+    @transaction.atomic
+    def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
+            PaymentPlan.Action.REVIEW,
+            user,
+            extra_input_data={"comment": serializer.validated_data.get("comment")},
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["get"], url_path="delivery-export-xlsx")
+    @transaction.atomic
+    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        instruction = FollowUpInstructionService(instruction=instruction).delivery_export_xlsx(
+            self._request_user(request)
+        )
+        return self._detail_response(instruction)
+
+    @extend_schema(
+        request=PaymentPlanImportFileSerializer,
+        responses={200: FollowUpInstructionDetailSerializer, 400: XlsxErrorSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="delivery-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
+    )
+    @transaction.atomic
+    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        file = serializer.validated_data["file"]
+
+        import_service = XlsxFollowUpInstructionReconciliationImportService(instruction, file)
+        try:
+            import_service.open_workbook()
+        except BadZipFile:
+            raise ValidationError(
+                "Wrong file type or password protected .zip file. Upload another file, or remove the password."
+            )
+        import_service.validate()
+        if import_service.errors:
+            return Response(
+                data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file.seek(0)
+        instruction = FollowUpInstructionService(instruction=instruction).import_delivery_xlsx(
+            self._request_user(request), file
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["get"])
+    @transaction.atomic
+    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        instruction = FollowUpInstructionService(instruction=instruction).close(self._request_user(request))
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        user = self._request_user(request)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instruction = FollowUpInstructionService(instruction=instruction).abort(
+            user, serializer.validated_data.get("abort_comment")
+        )
+        return self._detail_response(instruction)
+
+    @action(detail=True, methods=["get"], url_path="reactivate-abort")
+    @transaction.atomic
+    def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        instruction = FollowUpInstructionService(instruction=instruction).reactivate_abort(self._request_user(request))
+        return self._detail_response(instruction)
 
 
 class TargetPopulationViewSet(
@@ -1655,7 +1828,9 @@ class TargetPopulationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.all().select_related("currency").order_by("-created_at")
+    queryset = (
+        PaymentPlan.objects.all().select_related("currency", "created_by", "payment_plan_group").order_by("-created_at")
+    )
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
         "list": TargetPopulationListSerializer,
@@ -1847,6 +2022,8 @@ class TargetPopulationViewSet(
             name = serializer.validated_data["name"].strip()
             payment_plan_id = serializer.validated_data["target_population_id"]
             program_cycle_id = serializer.validated_data["program_cycle_id"]
+            payment_plan_group_id = serializer.validated_data["payment_plan_group_id"]
+            purposes = serializer.validated_data["payment_plan_purposes"]
             payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
             program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             program = program_cycle.program
@@ -1857,6 +2034,12 @@ class TargetPopulationViewSet(
                 raise ValidationError(
                     f"Target Population with name: {name} and program cycle: {program_cycle.title} already exists."
                 )
+            if not (
+                payment_plan_group := PaymentPlanGroup.objects.filter(
+                    pk=payment_plan_group_id, cycle=program_cycle
+                ).first()
+            ):
+                raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
 
             payment_plan_copy = PaymentPlan(
                 name=name,
@@ -1877,11 +2060,13 @@ class TargetPopulationViewSet(
                 steficon_rule_targeting=payment_plan.steficon_rule_targeting,
                 steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
                 program_cycle=program_cycle,
+                payment_plan_group=payment_plan_group,
                 financial_service_provider=payment_plan.financial_service_provider,
                 delivery_mechanism=payment_plan.delivery_mechanism,
             )
             PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
             payment_plan_copy.save()
+            payment_plan_copy.payment_plan_purposes.set(purposes)
             payment_plan_copy.refresh_from_db()
 
             transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(payment_plan_copy))
@@ -1984,16 +2169,18 @@ class PaymentPlanManagerialViewSet(
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
         input_data = {"action": action_name, "comment": comment}
-        payment_plans = PaymentPlan.objects.filter(id__in=serializer.validated_data["ids"]).select_related(
+        payment_plans: QuerySet[PaymentPlan] = PaymentPlan.objects.filter(
+            id__in=serializer.validated_data["ids"]
+        ).select_related(
             "program_cycle__program",
             "imported_file",
             "export_file_entitlement",
-            "export_file_per_fsp",
+            "export_file_delivery",
         )
         with transaction.atomic():
             for payment_plan in payment_plans:
                 self._perform_payment_plan_status_action(
-                    payment_plan,
+                    cast("PaymentPlan", payment_plan),
                     input_data,
                     self.business_area,
                     request,
@@ -2009,6 +2196,8 @@ class PaymentPlanManagerialViewSet(
         business_area: BusinessArea,
         request: Request,
     ) -> None:
+        if payment_plan.is_instruction_managed:
+            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
         perm = self._get_action_permission(input_data["action"])
         if not self.request.user.has_perm(
             perm,  # type: ignore
@@ -2021,8 +2210,8 @@ class PaymentPlanManagerialViewSet(
             old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
         if old_payment_plan.export_file_entitlement:
             old_payment_plan.export_file_entitlement = copy_model_object(payment_plan.export_file_entitlement)
-        if old_payment_plan.export_file_per_fsp:
-            old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
+        if old_payment_plan.export_file_delivery:
+            old_payment_plan.export_file_delivery = copy_model_object(payment_plan.export_file_delivery)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input_data, user=request.user
@@ -2274,3 +2463,235 @@ def available_fsps_for_delivery_mechanisms(
 
     serializer = FspChoicesSerializer(list_resp, many=True)
     return Response(serializer.data)
+
+
+class PaymentPlanGroupViewSet(
+    CountActionMixin,
+    SerializerActionMixin,
+    ProgramMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlanGroup.objects.select_related("cycle").order_by("cycle__title", "created_at")
+    program_model_field = "cycle__program"
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PaymentPlanGroupFilter
+
+    serializer_classes_by_action = {
+        "list": PaymentPlanGroupListSerializer,
+        "retrieve": PaymentPlanGroupDetailSerializer,
+        "create": PaymentPlanGroupCreateSerializer,
+        "update": PaymentPlanGroupUpdateSerializer,
+        "delivery_export_xlsx": PaymentPlanGroupDeliveryExportSerializer,
+        "send_xlsx_password": PaymentPlanGroupSendXlsxPasswordSerializer,
+        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
+    }
+
+    permissions_by_action = {
+        "list": [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST],
+        "retrieve": [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL],
+        "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
+        "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
+        "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
+        "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
+        "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
+        "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
+        "delivery_import_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX],
+    }
+
+    @etag_decorator(PaymentPlanGroupListKeyConstructor)
+    @cached_response(key_func=PaymentPlanGroupListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    def perform_destroy(self, instance: PaymentPlanGroup) -> None:
+        if instance.payment_plans.exists():
+            raise ValidationError("Cannot delete a group that has payment plans.")
+        if instance.cycle.payment_plan_groups.count() == 1:
+            raise ValidationError("Cannot delete the last group in a cycle.")
+        instance.delete()
+
+    @extend_schema(
+        request=PaymentPlanGroupDeliveryExportSerializer,
+        responses={200: PaymentPlanGroupDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
+    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        export_tag = serializer.validated_data["export_tag"]
+        fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
+
+        if fsp_xlsx_template_id is not None:
+            template = get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=fsp_xlsx_template_id)
+            if "fsp_auth_code" in template.columns and not request.user.has_perm(
+                Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value,
+                payment_plan_group.cycle.program,
+            ):
+                raise PermissionDenied(detail={"required_permissions": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value]})
+
+        if export_tag is not None:
+            if not payment_plan_group.payment_plans.filter(export_tag=export_tag).exists():
+                raise ValidationError(f"No batch found for export_tag={export_tag} in this group.")
+        else:
+            exportable_plans = payment_plan_group.payment_plans.filter(
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                plan_type=PaymentPlan.PlanType.REGULAR,
+                export_tag__isnull=True,
+            )
+            if not exportable_plans.exists():
+                raise ValidationError(
+                    "Export requires at least one not-yet-exported payment plan in ACCEPTED or FINISHED status."
+                )
+            if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
+                raise ValidationError("Export failed: there are no eligible payments to export.")
+
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+        payment_plan_group.save(update_fields=["background_action_status"])
+        transaction.on_commit(
+            lambda: export_payment_plan_group_delivery_xlsx_async_task(
+                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
+            )
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=PaymentPlanGroupSendXlsxPasswordSerializer,
+        responses={200: PaymentPlanGroupDetailSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="send-xlsx-password")
+    def send_xlsx_password(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        export_tag = serializer.validated_data["export_tag"]
+
+        if not payment_plan_group.payment_plans.filter(
+            export_tag=export_tag, export_file_delivery__isnull=False
+        ).exists():
+            raise ValidationError(f"No exported batch file found for export_tag={export_tag} in this group.")
+
+        transaction.on_commit(
+            lambda: send_payment_plan_group_delivery_xlsx_password_async_task(
+                payment_plan_group, str(request.user.pk), export_tag
+            )
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="delivery-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
+    )
+    @transaction.atomic
+    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
+        importable_plans = payment_plan_group.payment_plans.filter(
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            plan_type=PaymentPlan.PlanType.REGULAR,
+        )
+        if not importable_plans.exists():
+            raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")
+
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        file = serializer.validated_data["file"]
+
+        import_service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file)
+        try:
+            import_service.open_workbook()
+        except BadZipFile:
+            raise ValidationError(
+                "Wrong file type or password protected .zip file. Upload another file, or remove the password."
+            )
+        import_service.validate()
+        if import_service.errors:
+            return Response(
+                data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file_temp = FileTemp.objects.create(
+            object_id=payment_plan_group.pk,
+            content_type=get_content_type_for_model(payment_plan_group),
+            created_by=request.user,
+            file=file,
+        )
+        payment_plan_group.delivery_import_file = file_temp
+        payment_plan_group.background_action_status = (
+            PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+        )
+        payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status"])
+        transaction.on_commit(lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group))
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["post"], url_path="send-to-payment-gateway")
+    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Queue an async send-to-payment-gateway job for the group's sendable payment plans.
+
+        A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
+        gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
+        still has splits not yet sent to the gateway, and is not already being sent. The group object
+        is locked for update to prevent double processing the same objects.
+        """
+        group = self.get_object()
+
+        with transaction.atomic():
+            PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)
+
+            plans = list(group.sendable_to_payment_gateway_plans())
+            if not plans:
+                raise ValidationError("No payment plans can be sent to payment gateway.")
+
+            for plan in plans:
+                PaymentPlanService(plan).execute_update_status_action(
+                    input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
+                    user=request.user,
+                )
+
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class PaymentPlanPurposeViewSet(
+    CountActionMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = PaymentPlanPurpose.objects.all()
+    serializer_class = PaymentPlanPurposeSerializer
+    PERMISSIONS = [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST]
+    filter_backends = (SearchFilter,)
+    search_fields = ("name",)
+
+    def get_queryset(self) -> QuerySet:
+        ba_slug = self.kwargs.get("business_area_slug")
+        return PaymentPlanPurpose.objects.filter(Q(limit_to__isnull=True) | Q(limit_to__slug=ba_slug)).distinct()
+
+    @etag_decorator(PaymentPlanPurposeListKeyConstructor)
+    @cached_response(key_func=PaymentPlanPurposeListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)

@@ -19,6 +19,7 @@ from hope.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    PaymentPlanPurpose,
     PeriodicFieldData,
     StorageFile,
     UniversalUpdate,
@@ -187,3 +188,10 @@ class UniversalUpdateFactory(DjangoModelFactory):
         model = UniversalUpdate
 
     program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")
+
+
+class PaymentPlanPurposeFactory(DjangoModelFactory):
+    class Meta:
+        model = PaymentPlanPurpose
+
+    name = factory.Sequence(lambda n: f"Purpose {n}")
