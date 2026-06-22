@@ -1,5 +1,5 @@
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 export const PROGRAM_STATE_FILTER = {
@@ -20,18 +20,18 @@ export const PAYMENT_PLAN_STATES = {
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: 'Entitlement Formula Run',
-  [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]: 'Entitlement Formula Error',
-  [BackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
-  [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: 'XLSX Export Error',
-  [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
+  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]: 'Entitlement Formula Run',
+  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]: 'Entitlement Formula Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: 'XLSX Export Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
     'XLSX Importing Entitlements',
-  [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
-  [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: 'XLSX Import Error',
-  [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: 'XLSX Import Error',
+  [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
     'Applying Custom Exchange Rate',
-  [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
+  [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
     'Custom Exchange Rate Error',
 };
 

@@ -1,8 +1,6 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Paper, Typography } from '@mui/material';
 import { createApiParams } from '@utils/apiUtils';
@@ -189,13 +187,6 @@ const PaymentsTable = ({
               <Typography data-cy="table-title" variant="h6">
                 {t('Payee List')}
               </Typography>
-              {(paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
-                paymentPlan.status === PaymentPlanStatusEnum.FINISHED) && (
-                <ImportXlsxPaymentPlanPaymentListPerFsp
-                  paymentPlan={paymentPlan}
-                  permissions={permissions}
-                />
-              )}
             </StyledBox>
             <UniversalRestTable
               isOnPaper={false}

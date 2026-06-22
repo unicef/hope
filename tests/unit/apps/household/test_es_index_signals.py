@@ -3,7 +3,7 @@ from django.conf import settings
 from elasticsearch import Elasticsearch
 import pytest
 
-from extras.test_utils.factories import HouseholdFactory, IndividualFactory, ProgramFactory
+from extras.test_utils.factories import HouseholdFactory, IndividualFactory, PaymentPlanPurposeFactory, ProgramFactory
 from hope.apps.household.const import IDP, REFUGEE
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.models import Program
@@ -37,6 +37,7 @@ def _hh_index(program):
 
 def _create_and_activate_program():
     program = ProgramFactory(status=Program.DRAFT)
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
     program.status = Program.ACTIVE
     program.save()
     return program
@@ -52,6 +53,7 @@ def test_program_created_as_draft_does_not_create_indexes():
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_program_status_change_to_active_creates_indexes():
     program = ProgramFactory(status=Program.DRAFT)
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
     assert not _index_exists(_ind_index(program))
     assert not _index_exists(_hh_index(program))
     program.status = Program.ACTIVE
