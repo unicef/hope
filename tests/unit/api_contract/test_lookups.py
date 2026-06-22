@@ -133,19 +133,19 @@ def test_lookups_program_statuses(superuser, api_token):
     recorder.assertGET("/api/rest/lookups/program-statuses/")
 
 
-# ---------------------------------------------------------------------------
-# Default DRF auth (AllowAny, no token needed)
-# ---------------------------------------------------------------------------
-
-
-def test_areas(superuser, area):
-    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+def test_areas(superuser, api_token, area):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser, api_token=api_token)
     recorder.assertGET("/api/rest/areas/")
 
 
-def test_areatypes(superuser, area):
-    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+def test_areatypes(superuser, api_token, area):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser, api_token=api_token)
     recorder.assertGET("/api/rest/areatypes/")
+
+
+# ---------------------------------------------------------------------------
+# Default DRF auth (AllowAny, no token needed)
+# ---------------------------------------------------------------------------
 
 
 def test_engine_rules(superuser, rule):
