@@ -8,6 +8,7 @@ from hope.apps.core.attributes_qet_queries import (
     extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
+    get_collector_has_valid_phone_no_query,
     get_drivers_license_document_number_query,
     get_drivers_licensee_issuer_query,
     get_electoral_card_document_number_query,
@@ -1990,6 +1991,20 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "has_phone_number",
         "scope": [Scope.TARGETING],
         # "snapshot_field":  # TODO: this one is not added in snapshot
+    },
+    {
+        "id": "7c2b9a14-9f3d-4b6e-8a21-3d5f0c1e7b93",
+        "type": TYPE_BOOL,
+        "name": "collector_has_valid_phone_no",
+        "lookup": "collector_has_valid_phone_no",
+        "get_query": get_collector_has_valid_phone_no_query,
+        "label": {"English(EN)": "Has a valid phone number"},
+        "hint": "The household's collector has a valid (primary or alternative) phone number",
+        "required": False,
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "collector_has_valid_phone_no",
+        "scope": [Scope.TARGETING],
     },
     {
         "id": "f4032e4f-00a9-4ed9-bff4-4e47d2f7b4be",
