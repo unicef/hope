@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11269"
+        "Content-Length": "11367"
     },
     "data": {
         "id": "480e9f86-3a14-4620-b6eb-0cb5eea687fa",
@@ -46,7 +46,7 @@
             "id": "a75036e1-8ba4-4695-bdf3-2db11502aa71",
             "received_amount": null,
             "status": "PENDING",
-            "payment_verification_plan_unicef_id": "PVP-1",
+            "payment_verification_plan_unicef_id": "PVP-2",
             "verification_channel": "MANUAL",
             "admin_url": null,
             "version": 1735688653315200,
@@ -74,8 +74,10 @@
             "total_undelivered_quantity": null,
             "dispersion_start_date": "2025-01-01",
             "dispersion_end_date": "2025-01-31",
-            "is_follow_up": false,
+            "plan_type": "REGULAR",
+                "export_tag": null,
             "follow_ups": [],
+            "top_ups": [],
             "created_by": " ",
             "created_at": "2025-01-01T00:00:00Z",
             "updated_at": "2025-01-01T00:00:00Z",
@@ -86,6 +88,11 @@
                 "status": "ACTIVE",
                 "screen_beneficiary": false
             },
+            "payment_plan_group": {
+                "id": "e179bede-27a4-470f-aaa4-1ad441deef02",
+                "unicef_id": "PPG-0001",
+                "name": "Default Group"
+            },
             "version": 1735688653315204,
             "background_action_status": null,
             "background_action_status_display": null,
@@ -95,6 +102,8 @@
                 "id": "a1662f42-d9d7-4daa-b7fc-435587099322",
                 "title": "Programme Cycle 0"
             },
+            "is_payment_gateway": false,
+            "is_instruction_managed": false,
             "has_payment_list_export_file": false,
             "has_fsp_delivery_mechanism_xlsx_template": false,
             "imported_file_name": "",
@@ -153,9 +162,9 @@
             "excluded_households": [],
             "excluded_individuals": [],
             "can_create_follow_up": false,
+            "can_create_top_up": false,
             "total_withdrawn_households_count": 0,
             "unsuccessful_payments_count": 0,
-            "is_payment_gateway": false,
             "can_send_to_payment_gateway": false,
             "can_split": false,
             "supporting_documents": [],
@@ -184,8 +193,7 @@
             "payment_verification_plans": [
                 {
                     "id": "bcde8c43-ddff-4360-8690-842ebf44d10c",
-
-                    "unicef_id": "PVP-1",
+                    "unicef_id": "PVP-2",
                     "status": "PENDING",
                     "status_display": "Pending",
                     "verification_channel": "MANUAL",
@@ -225,7 +233,8 @@
             "closure_comment": null,
             "closed_by": null,
             "status_date": "2025-01-01T00:00:00Z",
-            "flat_amount_value": null
+            "flat_amount_value": null,
+            "payment_plan_purposes": []
         },
         "admin_url": "/api/unicorn/payment/payment/480e9f86-3a14-4620-b6eb-0cb5eea687fa/change/",
         "source_payment": null,

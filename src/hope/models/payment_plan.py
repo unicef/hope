@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.text import Truncator
@@ -251,6 +251,12 @@ class PaymentPlan(
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
         SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
 
+    class PlanType(models.TextChoices):
+        REGULAR = "REGULAR", "Regular"
+        TOP_UP = "TOP_UP", "Top Up"
+        FOLLOW_UP = "FOLLOW_UP", "Follow Up"
+        TOP_UP_AMENDMENT = "TOP_UP_AMENDMENT", "Top Up Amendment"
+
     usd_fields = [
         "total_entitled_quantity_usd",
         "total_entitled_quantity_revised_usd",
@@ -264,6 +270,17 @@ class PaymentPlan(
         related_name="payment_plans",
         on_delete=models.PROTECT,
         help_text="Program Cycle",
+    )
+    payment_plan_group = models.ForeignKey(
+        "payment.PaymentPlanGroup",
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+    )
+    payment_plan_purposes = models.ManyToManyField(
+        "payment.PaymentPlanPurpose",
+        blank=True,
+        related_name="payment_plans",
+        help_text="Payment plan purposes",
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
     financial_service_provider = models.ForeignKey(
@@ -288,13 +305,13 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Export File Entitlement",
     )
-    export_file_per_fsp = models.ForeignKey(
+    export_file_delivery = models.ForeignKey(
         FileTemp,
         null=True,
         blank=True,
         related_name="+",
         on_delete=models.SET_NULL,
-        help_text="Export File per FSP",
+        help_text="Export File Delivery",
     )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     export_pdf_file_summary = models.ForeignKey(
         FileTemp,
@@ -352,8 +369,15 @@ class PaymentPlan(
         null=True,
         blank=True,
         on_delete=models.PROTECT,
-        related_name="follow_ups",
-        help_text="Source Payment Plan (applicable for follow Up Payment Plan)",
+        related_name="child_plans",
+        help_text="Source Payment Plan (applicable for follow-up and top-up Payment Plans)",
+    )
+    follow_up_instruction = models.ForeignKey(
+        "payment.FollowUpInstruction",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
     )
 
     storage_file = models.OneToOneField(
@@ -559,7 +583,19 @@ class PaymentPlan(
         help_text="Engine Formula applied date for targeting [sys]",
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True, help_text="Engine Formula applied date [sys]")
-    is_follow_up = models.BooleanField(default=False, help_text="Follow Up Payment Plan flag [sys]")
+    plan_type = models.CharField(
+        max_length=20,
+        choices=PlanType.choices,
+        default=PlanType.REGULAR,
+        db_index=True,
+        help_text="Payment Plan type [sys]",
+    )
+    export_tag = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
+    )
     exclude_household_error = models.TextField(
         blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
     )
@@ -597,7 +633,9 @@ class PaymentPlan(
     def __str__(self) -> str:
         return self.unicef_id or ""
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def clean(self) -> None:
+        if self.payment_plan_group_id and self.program_cycle_id != self.payment_plan_group.cycle_id:
+            raise ValidationError("PaymentPlan's program_cycle must match its PaymentPlanGroup's cycle.")
         if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
@@ -606,6 +644,16 @@ class PaymentPlan(
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
             )
+        if not self._state.adding:
+            purposes = self.payment_plan_purposes.all()
+            count = purposes.count()
+            if count == 0:
+                raise ValidationError("PaymentPlan must have at least one Payment Plan Purpose.")
+            if purposes.exclude(programs=self.program_cycle.program).exists():
+                raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
         super().save(*args, **kwargs)
 
     def update_population_count_fields(self) -> None:
@@ -693,22 +741,33 @@ class PaymentPlan(
         self.export_file_entitlement.delete()
         self.export_file_entitlement = None
 
-    def remove_export_file_per_fsp(self) -> None:
-        self.export_file_per_fsp.file.delete(save=False)
-        self.export_file_per_fsp.delete()
-        self.export_file_per_fsp = None
+    def remove_export_file_delivery(self) -> None:
+        # The batch export shares one FileTemp across every plan in the batch (same export_tag).
+        # Detach this plan and hard-delete the file only once no other plan still references it.
+        file_temp_id = self.export_file_delivery_id
+        self.export_file_delivery = None
+        if (
+            not file_temp_id
+            or PaymentPlan.all_objects.filter(export_file_delivery_id=file_temp_id).exclude(pk=self.pk).exists()
+        ):
+            return
+        file_temp = FileTemp.objects.filter(pk=file_temp_id).first()
+        if file_temp is not None:
+            file_temp.file.delete(save=False)
+            file_temp.delete()
 
     def remove_export_files(self) -> None:
         # remove export_file_entitlement
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
             self.remove_export_file_entitlement()
-        # remove export_file_per_fsp
+        # remove export_file_delivery (use the cached id: the FileTemp is shared across the batch
+        # and a sibling may already have deleted it, so don't dereference the FK just to test presence)
         if (
             self.status
             in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
-            and self.export_file_per_fsp
+            and self.export_file_delivery_id
         ):
-            self.remove_export_file_per_fsp()
+            self.remove_export_file_delivery()
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
@@ -743,6 +802,48 @@ class PaymentPlan(
 
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
+
+    def eligible_payments_for_top_up(self) -> "QuerySet":
+        """Select successful + pending payments eligible for top-up.
+
+        Must be called on the source (Standard) Payment Plan. Excludes withdrawn
+        households and beneficiaries that already appear in another TopUp under
+        the same source plan (slide 10 "Not Allowed #1": one top-up per
+        beneficiary per cycle).
+        """
+        top_up_households = Payment.objects.filter(
+            parent__plan_type=PaymentPlan.PlanType.TOP_UP,
+            parent__source_payment_plan=self,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        )
+        return (
+            self.eligible_payments.filter(
+                status__in=Payment.DELIVERED_STATUSES + Payment.PENDING_STATUSES,
+            )
+            .exclude(household__withdrawn=True)
+            .exclude(Exists(top_up_households))
+        )
+
+    def eligible_payments_for_top_up_amendment(self) -> "QuerySet":
+        """Select reconciled (delivered) payments of a TopUp plan eligible for an amendment.
+
+        Must be called on the source TopUp Payment Plan. Excludes withdrawn
+        households and beneficiaries already covered by another Amendment under
+        the same TopUp (one amendment per beneficiary). Unlike top-up eligibility,
+        only delivered/reconciled payments qualify — pending payments do not.
+        """
+        amended_households = Payment.objects.filter(
+            parent__plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+            parent__source_payment_plan=self,
+            excluded=False,
+            household_id=OuterRef("household_id"),
+        )
+        return (
+            self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES)
+            .exclude(household__withdrawn=True)
+            .exclude(Exists(amended_households))
+        )
 
     def _get_last_approval_process_data(self) -> ModifiedData:
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
@@ -857,8 +958,20 @@ class PaymentPlan(
     def eligible_payments(self) -> QuerySet:
         return self.payment_items.eligible()
 
+    def _with_no_payment_plan_conflicts(self, qs: QuerySet) -> QuerySet:
+        return qs.annotate(
+            payment_plan_hard_conflicted=Value(False, output_field=models.BooleanField()),
+            payment_plan_hard_conflicted_data=Value([], output_field=models.JSONField()),
+            payment_plan_soft_conflicted=Value(False, output_field=models.BooleanField()),
+            payment_plan_soft_conflicted_data=Value([], output_field=models.JSONField()),
+        )
+
     @property
     def eligible_payments_with_conflicts(self) -> QuerySet:
+        if self.is_instruction_managed:
+            # Follow-up instructions intentionally allow the same household to be paid multiple times
+            # across instruction-managed child plans, so child-plan conflict annotations are bypassed.
+            return self._with_no_payment_plan_conflicts(self.eligible_payments)
         return self.payment_items.eligible_with_conflicts_data(self.program_cycle.id)
 
     @property
@@ -879,12 +992,12 @@ class PaymentPlan(
         return self.is_payment_gateway and not has_blocking_payments
 
     @property
-    def can_regenerate_export_file_per_fsp(self) -> bool:
-        """Can regenerate export_file_per_fsp."""
+    def can_regenerate_delivery_export_file(self) -> bool:
+        """Can regenerate export_file_delivery."""
         return (
             self.status
             in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
-            and self.export_file_per_fsp is not None
+            and self.export_file_delivery is not None
             and self.background_action_status is None
         )
 
@@ -895,6 +1008,10 @@ class PaymentPlan(
         return self.use_payment_gateway or (
             self.financial_service_provider.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
         )
+
+    @property
+    def is_instruction_managed(self) -> bool:
+        return self.follow_up_instruction_id is not None
 
     @property
     def excluded_household_ids_targeting_level(self) -> list[str]:
@@ -960,7 +1077,7 @@ class PaymentPlan(
         """Check if export file exists.
 
         for Locked plan return export_file_entitlement file
-        for Accepted and Finished export_file_per_fsp file
+        for Accepted and Finished export_file_delivery file
         """
         try:
             if self.status == PaymentPlan.Status.LOCKED:
@@ -970,7 +1087,7 @@ class PaymentPlan(
                 PaymentPlan.Status.FINISHED,
                 PaymentPlan.Status.READY_FOR_CLOSURE,
             ):
-                return self.export_file_per_fsp is not None
+                return self.export_file_delivery is not None
             return False
         except FileTemp.DoesNotExist:
             return False
@@ -980,13 +1097,13 @@ class PaymentPlan(
         """Return expor file which is different in various statues.
 
         for Locked plan return export_file_entitlement file link
-        for Accepted and Finished export_file_per_fsp file link
+        for Accepted and Finished export_file_delivery file link
         """
         pp_status_to_file_field: dict[str, str] = {
             PaymentPlan.Status.LOCKED: "export_file_entitlement",
-            PaymentPlan.Status.ACCEPTED: "export_file_per_fsp",
-            PaymentPlan.Status.FINISHED: "export_file_per_fsp",
-            PaymentPlan.Status.READY_FOR_CLOSURE: "export_file_per_fsp",
+            PaymentPlan.Status.ACCEPTED: "export_file_delivery",
+            PaymentPlan.Status.FINISHED: "export_file_delivery",
+            PaymentPlan.Status.READY_FOR_CLOSURE: "export_file_delivery",
         }
 
         file_field = pp_status_to_file_field.get(self.status)
@@ -1053,6 +1170,10 @@ class PaymentPlan(
 
     @property
     def can_send_to_payment_gateway(self) -> bool:
+        # PaymentPlanGroup.sendable_to_payment_gateway_plans mirrors these conditions at the
+        # DB level; keep the two aligned when changing the logic here.
+        if self.is_instruction_managed:
+            return False
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
         has_payment_gateway_fsp = bool(self.financial_service_provider and self.is_payment_gateway)
         has_not_sent_to_payment_gateway_splits = self.splits.filter(

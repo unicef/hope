@@ -7,6 +7,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -15,11 +16,18 @@ from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.forms import TemplateSelectForm
+from hope.apps.payment.forms import BatchReexportForm
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.models import Payment, PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanSupportingDocument
+from hope.models import (
+    AsyncJob,
+    Payment,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+    PaymentPlanGroup,
+    PaymentPlanSupportingDocument,
+)
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -58,20 +66,9 @@ def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
     ]
 
 
-def can_regenerate_export_file_per_fsp(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.can_regenerate_export_file_per_fsp
-
-
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
     return request.user.has_perm(
         Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
-        payment_plan.program,
-    )
-
-
-def has_payment_plan_export_per_fsp_permission(request: Any, payment_plan: PaymentPlan) -> bool:
-    return request.user.has_perm(
-        Permissions.PM_VIEW_LIST.value,
         payment_plan.program,
     )
 
@@ -87,7 +84,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "use_payment_gateway",
         "background_action_status",
         "build_status",
-        "is_follow_up",
+        "plan_type",
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -99,16 +96,35 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
-        "is_follow_up",
+        ("plan_type", ChoicesFieldComboFilter),
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
+    filter_horizontal = ("payment_plan_purposes",)
     inlines = [FundsCommitmentItemInline]
+    raw_id_fields = (
+        "imported_file",
+        "export_file_entitlement",
+        "export_file_delivery",
+        "export_pdf_file_summary",
+        "reconciliation_import_file",
+    )
 
     @button(permission="payment.view_paymentplan")
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> Any:
+        request._payment_plan_obj = obj
+        return super().get_form(request, obj, change, **kwargs)
+
+    def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "payment_plan_purposes":
+            obj = getattr(request, "_payment_plan_obj", None)
+            if obj is not None:
+                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
@@ -194,42 +210,6 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             message="Do you confirm to Sync with Payment Gateway missing Records?",
         )
 
-    @button(
-        visible=lambda btn: btn.original.can_regenerate_export_file_per_fsp,
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_export_per_fsp_permission(
-            request, payment_plan
-        ),
-    )
-    def regenerate_export_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        payment_plan = PaymentPlan.objects.get(pk=pk)
-
-        if request.method == "POST":
-            from hope.apps.payment.services.payment_plan_services import (
-                PaymentPlanService,
-            )
-
-            form = TemplateSelectForm(request.POST, payment_plan=payment_plan)
-            if form.is_valid():
-                template_obj = form.cleaned_data.get("template")
-                fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
-                PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(
-                    str(request.user.pk), fsp_xlsx_template_id
-                )
-                messages.success(request, "Celery task for export regenerate file successfully started.")
-                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-        else:
-            form = TemplateSelectForm(payment_plan=payment_plan)
-
-        return render(
-            request,
-            "admin/payment/regenerate_export_xlsx_form.html",
-            {
-                "form": form,
-                "payment_plan": payment_plan,
-                "title": "Select a template if you want the export to include the FSP Auth Code",
-            },
-        )
-
     @button(permission="payment.view_paymentplan")
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         obj = PaymentPlan.objects.get(pk=pk)
@@ -249,6 +229,146 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+
+@admin.register(PaymentPlanGroup)
+class PaymentPlanGroupAdmin(HOPEModelAdminBase):
+    list_display = ("unicef_id", "name", "cycle")
+    search_fields = ("name", "unicef_id")
+    list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
+
+    @button(permission="payment.view_paymentplan")
+    def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentplan_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
+
+    @button(permission="payment.restart_exporting_payment_plan_list")
+    def reexport_batch(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        from hope.apps.payment.celery_tasks import (
+            export_payment_plan_group_delivery_xlsx_async_task,
+        )
+
+        group = PaymentPlanGroup.objects.get(pk=pk)
+        if request.method == "POST":
+            form = BatchReexportForm(request.POST, payment_plan_group=group)
+            if form.is_valid():
+                export_tag = int(form.cleaned_data["export_tag"])
+                if not group.can_reexport_batch(export_tag):
+                    messages.error(
+                        request,
+                        f"Batch {export_tag} cannot be re-exported: it has no stored export file.",
+                    )
+                    return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+                template_obj = form.cleaned_data.get("template")
+                fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
+                group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+                group.save(update_fields=["background_action_status"])
+                export_payment_plan_group_delivery_xlsx_async_task(
+                    group, str(request.user.pk), fsp_xlsx_template_id, export_tag
+                )
+                messages.success(request, f"Re-export started for batch {export_tag}.")
+                return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+        else:
+            form = BatchReexportForm(payment_plan_group=group)
+
+        return render(
+            request,
+            "admin/payment/reexport_batch_form.html",
+            {"form": form, "payment_plan_group": group, "title": "Re-export a delivered batch"},
+        )
+
+    @button(
+        visible=lambda btn: (
+            btn.original.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+        ),
+        permission="payment.restart_exporting_payment_plan_list",
+    )
+    def restart_exporting_delivery_xlsx(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        from hope.apps.payment.celery_tasks import (
+            export_payment_plan_group_delivery_xlsx_async_task,
+        )
+
+        if request.method == "POST":
+            group = PaymentPlanGroup.objects.get(pk=pk)
+
+            active_jobs = [
+                job
+                for job in AsyncJob.objects.filter(
+                    content_type=get_content_type_for_model(group),
+                    object_id=str(group.pk),
+                    job_name="export_payment_plan_group_delivery_xlsx_async_task",
+                )
+                if job.task_status in job.ACTIVE_STATUSES
+            ]
+
+            if not active_jobs:
+                messages.error(request, "There is no active export job for this payment plan group.")
+                return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+
+            user_id = str(request.user.pk)
+            for job in active_jobs:
+                config = job.config
+                job.terminate()
+                export_payment_plan_group_delivery_xlsx_async_task(
+                    group,
+                    user_id,
+                    config.get("fsp_xlsx_template_id"),
+                    config.get("export_tag"),
+                )
+
+            messages.success(request, "Successfully restarted delivery XLSX export.")
+            return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_exporting_delivery_xlsx,
+            message="Do you confirm to restart exporting delivery XLSX file task?",
+        )
+
+    @button(
+        visible=lambda btn: (
+            btn.original.background_action_status
+            == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+        ),
+        permission="payment.restart_importing_reconciliation_xlsx_file",
+    )
+    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        from hope.apps.payment.celery_tasks import import_payment_plan_group_delivery_from_xlsx_async_task
+
+        if request.method == "POST":
+            group = PaymentPlanGroup.objects.get(pk=pk)
+            if not group.delivery_import_file:
+                messages.error(request, "There is no import file for this payment plan group.")
+                return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+
+            task_name = "import_payment_plan_group_delivery_from_xlsx_async_task"
+            active_jobs = [
+                job
+                for job in AsyncJob.objects.filter(
+                    content_type=get_content_type_for_model(group),
+                    object_id=str(group.pk),
+                    job_name=task_name,
+                )
+                if job.task_status in job.ACTIVE_STATUSES
+            ]
+
+            if active_jobs:
+                for job in active_jobs:
+                    job.terminate()
+                import_payment_plan_group_delivery_from_xlsx_async_task(group)
+                messages.success(request, "Successfully restarted reconciliation import.")
+            else:
+                messages.error(request, f"There is no current {task_name} for this payment plan group.")
+
+            return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_importing_reconciliation_xlsx_file,
+            message="Do you confirm to restart importing reconciliation XLSX file task?",
+        )
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):

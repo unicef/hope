@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "2988"
+        "Content-Length": "3118"
     },
     "data": {
         "id": "224ba151-db8f-4bf5-b082-f5560a15bd3d",
@@ -24,8 +24,10 @@
         "total_undelivered_quantity": null,
         "dispersion_start_date": "2025-01-01",
         "dispersion_end_date": "2025-01-31",
-        "is_follow_up": false,
+        "plan_type": "STANDARD",
+                "export_tag": null,
         "follow_ups": [],
+        "top_ups": [],
         "created_by": " ",
         "created_at": "2025-01-01T00:00:00Z",
         "updated_at": "2025-01-01T00:00:00Z",
@@ -36,6 +38,11 @@
             "status": "ACTIVE",
             "screen_beneficiary": false
         },
+        "payment_plan_group": {
+            "id": "b05e2f4b-8b98-4ff2-b485-d42dc9166a19",
+            "unicef_id": "PPG-2",
+            "name": "Default Group"
+        },
         "version": 1735688653315201,
         "background_action_status": null,
         "background_action_status_display": null,
@@ -45,6 +52,7 @@
             "id": "e309f2ab-c77e-41d7-b012-8cfff299a29a",
             "title": "Programme Cycle 0"
         },
+        "is_payment_gateway": false,
         "has_payment_list_export_file": false,
         "has_fsp_delivery_mechanism_xlsx_template": false,
         "imported_file_name": "",
@@ -103,9 +111,10 @@
         "excluded_households": [],
         "excluded_individuals": [],
         "can_create_follow_up": false,
+        "can_create_top_up": false,
+        "can_create_top_up_amendment": false,
         "total_withdrawn_households_count": 0,
         "unsuccessful_payments_count": 0,
-        "is_payment_gateway": false,
         "can_send_to_payment_gateway": false,
         "can_split": false,
         "supporting_documents": [],
@@ -138,7 +147,8 @@
         "closure_comment": null,
         "closed_by": null,
         "status_date": "2025-01-01T00:00:00Z",
-        "flat_amount_value": null
+        "flat_amount_value": null,
+        "payment_plan_purposes": []
     },
     "content_type": "application/json"
 }

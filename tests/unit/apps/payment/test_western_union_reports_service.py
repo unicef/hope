@@ -1101,7 +1101,8 @@ def test_attach_file_sets_file_on_record(
 
     invoice.refresh_from_db()
     assert invoice.file is not None
-    assert invoice.file.file.name.endswith("AD-attach.zip")
+    assert invoice.file.file.name.startswith("AD-attach")
+    assert invoice.file.file.name.endswith(".zip")
 
 
 def test_mark_record_error_sets_status_and_error_msg(

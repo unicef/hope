@@ -8,7 +8,7 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -46,10 +46,10 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     refetchInterval: (query) => {
       const data = query.state.data;
       const errorStatuses = [
-        BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-        BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-        BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
