@@ -70,7 +70,7 @@ def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
     now = timezone.now()
     sensitive_tickets_one_day_date = now - timedelta(days=1)
     sensitive_tickets_to_notify = (
-        GrievanceTicket.objects.select_related("business_area")
+        GrievanceTicket.objects.select_related("business_area", "assigned_to")
         .exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
             Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=sensitive_tickets_one_day_date))
@@ -81,7 +81,7 @@ def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
 
     other_tickets_30_days_date = now - timedelta(days=30)
     other_tickets_to_notify = (
-        GrievanceTicket.objects.select_related("business_area")
+        GrievanceTicket.objects.select_related("business_area", "assigned_to")
         .exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
             Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=other_tickets_30_days_date))
