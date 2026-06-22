@@ -40,7 +40,7 @@ class GrievanceNotification:
     def _prepare_default_context(self, user_recipient: "User") -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         return {
-            "first_name": user_recipient.first_name,
+            "first_name": user_recipient.first_name or getattr(user_recipient, "username", ""),
             "last_name": user_recipient.last_name,
             "ticket_url": f"{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{self.grievance_ticket.id}",
             "ticket_id": self.grievance_ticket.unicef_id,
