@@ -143,11 +143,6 @@ def test_areatypes(superuser, api_token, area):
     recorder.assertGET("/api/rest/areatypes/")
 
 
-# ---------------------------------------------------------------------------
-# Default DRF auth (AllowAny, no token needed)
-# ---------------------------------------------------------------------------
-
-
 def test_engine_rules(superuser, rule):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/engine-rules/", data={"type": "TARGETING"})
