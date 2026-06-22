@@ -54,6 +54,26 @@ class ProgramManager(SoftDeletableIsVisibleManager.from_queryset(ProgramQuerySet
     pass
 
 
+def get_status_choices() -> tuple:
+    return Program.STATUS_CHOICE
+
+
+def get_frequency_of_payments_choices() -> tuple:
+    return Program.FREQUENCY_OF_PAYMENTS_CHOICE
+
+
+def get_sector_choices() -> tuple:
+    return Program.SECTOR_CHOICE
+
+
+def get_scope_choices() -> tuple:
+    return Program.SCOPE_CHOICE
+
+
+def get_partner_access_choices() -> tuple:
+    return Program.PARTNER_ACCESS_CHOICE
+
+
 class Program(
     SoftDeletableModel,
     TimeStampedUUIDModel,
@@ -161,7 +181,7 @@ class Program(
         db_collation="und-ci-det",
     )
     code = models.CharField(max_length=4, db_index=True, help_text="Program code")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
+    status = models.CharField(max_length=10, choices=get_status_choices, db_index=True, help_text="Program status")
     description = models.CharField(
         blank=True,
         max_length=255,
@@ -170,7 +190,7 @@ class Program(
     )
     start_date = models.DateField(db_index=True, help_text="Program start date")
     end_date = models.DateField(null=True, blank=True, db_index=True, help_text="Program end date")
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True, help_text="Program sector")
+    sector = models.CharField(max_length=50, choices=get_sector_choices, db_index=True, help_text="Program sector")
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=11,
@@ -180,20 +200,20 @@ class Program(
     )
     frequency_of_payments = models.CharField(
         max_length=50,
-        choices=FREQUENCY_OF_PAYMENTS_CHOICE,
+        choices=get_frequency_of_payments_choices,
         help_text="Program frequency of payments",
     )
     scope = models.CharField(
         blank=True,
         null=True,
         max_length=50,
-        choices=SCOPE_CHOICE,
+        choices=get_scope_choices,
         help_text="Program scope",
     )
 
     partner_access = models.CharField(
         max_length=50,
-        choices=PARTNER_ACCESS_CHOICE,
+        choices=get_partner_access_choices,
         default=SELECTED_PARTNERS_ACCESS,
         help_text="Program partner access",
     )
