@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListAPIView
 
+from hope.api.endpoints.base import HOPEAPIView
 from hope.api.filters import AreaFilter, AreaTypeFilter
 from hope.models import Area, AreaType
 
@@ -13,7 +14,7 @@ class AreaSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AreaList(ListAPIView):
+class AreaList(HOPEAPIView, ListAPIView):
     queryset = Area.objects.all().order_by("name")
     serializer_class = AreaSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend, SearchFilter)
@@ -27,7 +28,7 @@ class AreaTypeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AreaTypeList(ListAPIView):
+class AreaTypeList(HOPEAPIView, ListAPIView):
     queryset = AreaType.objects.all().order_by("name")
     serializer_class = AreaTypeSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend, SearchFilter)
