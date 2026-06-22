@@ -1,11 +1,13 @@
 from datetime import datetime
 from tempfile import NamedTemporaryFile
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 
 from hope.apps.account.export_users_xlsx import ExportUsersXlsx
 
 
+@login_required
 def download_exported_users(request: HttpRequest, business_area_slug: str) -> HttpResponse:
     export_class = ExportUsersXlsx(business_area_slug=business_area_slug)
     wb = export_class.get_exported_users_file()
