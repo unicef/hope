@@ -1,3 +1,4 @@
+import logging
 from typing import Any, TypeVar, cast
 
 from concurrency.api import concurrency_disable_increment
@@ -9,6 +10,8 @@ from django_celery_boost.models import AsyncJobModel
 from django_celery_boost.signals import task_queued
 
 from hope.apps.core.celery import CELERY_QUEUE_DEFAULT, CELERY_QUEUE_PERIODIC
+
+logger = logging.getLogger(__name__)
 
 AsyncJobT = TypeVar("AsyncJobT", bound="BaseAsyncJob")
 
@@ -106,6 +109,53 @@ class BaseAsyncJob(AsyncJobModel):
             transaction.on_commit(job.queue)
 
         return job
+
+    @classmethod
+    def requeue(
+        cls: type[AsyncJobT],
+        *,
+        action: str,
+        instance: models.Model,
+        **payload: Any,
+    ) -> AsyncJobT | None:
+        """Queue a task unless one is already running, clearing stuck queued jobs first.
+
+        Find jobs for the same instance and job_name:
+
+        - If one is already running (RECEIVED/STARTED/RETRY), log an error and do
+          nothing - we never start a second run alongside work in progress, nor
+          interrupt it.
+        - Otherwise terminate any job still in the queue (PENDING/QUEUED) so a
+          stale attempt can't run, then queue a fresh one.
+        """
+        job_name = payload.get("job_name") or cls.default_job_name(action)
+        content_type = ContentType.objects.get_for_model(instance)
+        existing = cls.objects.filter(
+            content_type=content_type,
+            object_id=str(instance.pk),
+            job_name=job_name,
+        )
+
+        stuck_in_queue = []
+        for job in existing:
+            status = job.task_status
+            if status in (cls.PENDING, cls.QUEUED):
+                stuck_in_queue.append(job)
+            elif status in cls.ACTIVE_STATUSES:
+                logger.error(
+                    "requeue skipped: a '%s' job (%s) is already running for %s.%s %s (status %s)",
+                    job_name,
+                    job.pk,
+                    content_type.app_label,
+                    content_type.model,
+                    instance.pk,
+                    status,
+                )
+                return None
+
+        for job in stuck_in_queue:
+            job.terminate()
+        return cls.queue_task(action=action, instance=instance, **payload)
 
     def queue(self, use_version: bool = True) -> str | None:
         if self.task_status in self.ACTIVE_STATUSES:
