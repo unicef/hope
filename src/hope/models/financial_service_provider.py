@@ -14,6 +14,10 @@ if TYPE_CHECKING:
     from hope.models import DeliveryMechanism
 
 
+def get_communication_channel_choices() -> tuple:
+    return FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES
+
+
 class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
     COMMUNICATION_CHANNEL_SFTP = "SFTP"
@@ -44,7 +48,7 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         help_text="The maximum amount of money in USD that can be distributed or unlimited if null",
         db_index=True,
     )
-    communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES, db_index=True)
+    communication_channel = models.CharField(max_length=6, choices=get_communication_channel_choices, db_index=True)
     data_transfer_configuration = models.JSONField(
         help_text="JSON configuration for the data transfer mechanism",
         null=True,

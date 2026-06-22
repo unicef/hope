@@ -21,3 +21,13 @@ URGENCY_CHOICES = (
     (URGENCY_URGENT, _("Urgent")),
     (URGENCY_NOT_URGENT, _("Not urgent")),
 )
+
+
+# Callable choices wrappers: passed to model fields as ``choices=get_*_choices`` so that
+# changing the underlying tuple does not generate a (no-op) migration.
+def get_priority_choices() -> tuple:
+    return PRIORITY_CHOICES
+
+
+def get_urgency_choices() -> tuple:
+    return URGENCY_CHOICES

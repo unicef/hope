@@ -5,6 +5,10 @@ from model_utils import Choices
 from hope.models.utils import TimeStampedUUIDModel
 
 
+def get_status_choices() -> tuple:
+    return EntitlementCard.STATUS_CHOICE
+
+
 class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"
     ERRONEOUS = "ERRONEOUS"
@@ -16,7 +20,7 @@ class EntitlementCard(TimeStampedUUIDModel):
     )
     card_number = models.CharField(max_length=255)
     status = models.CharField(
-        choices=STATUS_CHOICE,
+        choices=get_status_choices,
         default=ACTIVE,
         max_length=10,
     )

@@ -32,6 +32,10 @@ def build_summary(payment_plan: Optional["PaymentPlan"]) -> None:
     summary.save()
 
 
+def get_status_choices() -> tuple:
+    return PaymentVerificationSummary.STATUS_CHOICES
+
+
 class PaymentVerificationSummary(TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
@@ -43,7 +47,7 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
     )
     status = models.CharField(
         max_length=50,
-        choices=STATUS_CHOICES,
+        choices=get_status_choices,
         default=STATUS_PENDING,
         verbose_name="Verification status",
         db_index=True,

@@ -32,6 +32,10 @@ class PDUXlsxUpload(TimeStampedModel):
         FAILED = "FAILED", "Failed"
         CANCELED = "CANCELED", "Canceled"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PDUXlsxUpload.Status.choices
+
     template = models.ForeignKey(
         PDUXlsxTemplate,
         on_delete=models.CASCADE,
@@ -39,7 +43,7 @@ class PDUXlsxUpload(TimeStampedModel):
     )
     status = models.CharField(
         max_length=20,
-        choices=Status.choices,
+        choices=Status.get_choices,
         default=Status.PENDING,
     )
     created_by = models.ForeignKey(
