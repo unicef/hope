@@ -66,17 +66,16 @@ export function FollowUpPaymentPlanDetailsHeader({
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
 
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
 
+  const { isInstructionManaged } = paymentPlan;
+
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
@@ -86,7 +85,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'LOCKED':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
@@ -96,7 +95,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'LOCKED_FSP':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
@@ -106,7 +105,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'IN_APPROVAL':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -119,7 +118,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'IN_AUTHORIZATION':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -132,7 +131,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'IN_REVIEW':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -148,10 +147,10 @@ export function FollowUpPaymentPlanDetailsHeader({
     case 'FINISHED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
           canClose={canClose}
+          isInstructionManaged={isInstructionManaged}
         />
       );
       break;

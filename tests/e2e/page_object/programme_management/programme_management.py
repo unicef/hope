@@ -61,6 +61,7 @@ class ProgrammeManagement(BaseComponents):
     select_pdu_fields_object_pdu_data_number_of_rounds = 'div[data-cy="select-pduFields.{}.pduData.numberOfRounds"]'
     input_pdu_fields_rounds_names = 'input[data-cy="input-pduFields.{}.pduData.roundsNames.{}"]'
     button_add_time_series_field = 'button[data-cy="button-add-time-series-field"]'
+    input_payment_plan_purposes = '[data-cy="input-payment-plan-purposes"] input'
 
     def get_step_button_details(self) -> WebElement:
         return self.wait_for(self.step_button_details)
@@ -268,6 +269,10 @@ class ProgrammeManagement(BaseComponents):
 
     def get_input_beneficiary_group(self) -> WebElement:
         return self.wait_for(self.input_beneficiary_group)
+
+    def choose_payment_plan_purpose(self, purpose_name: str) -> None:
+        self.wait_for(self.input_payment_plan_purposes).click()
+        self.select_listbox_element(purpose_name)
 
     def get_table_row_by_program_name(self, program_name: str) -> WebElement:
         return self.wait_for(self.table_row.format(program_name))
