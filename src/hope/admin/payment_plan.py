@@ -105,7 +105,6 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
-        "export_file_per_fsp",
         "export_pdf_file_summary",
         "reconciliation_import_file",
     )
