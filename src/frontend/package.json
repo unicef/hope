@@ -84,7 +84,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "8.56.1",
     "@typescript-eslint/parser": "8.56.1",
-    "@vitejs/plugin-react": "5.1.4",
+    "@vitejs/plugin-react": "6.0.2",
     "braces": "3.0.3",
     "camelcase": "^9.0.0",
     "cross-spawn": "^7.0.6",
