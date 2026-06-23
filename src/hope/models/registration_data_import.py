@@ -51,6 +51,18 @@ COLLECT_TYPES = (
 )
 
 
+def get_status_choices() -> tuple:
+    return RegistrationDataImport.STATUS_CHOICE
+
+
+def get_dedup_engine_status_choices() -> tuple:
+    return RegistrationDataImport.DEDUP_ENGINE_STATUS_CHOICE
+
+
+def get_data_source_choices() -> tuple:
+    return RegistrationDataImport.DATA_SOURCE_CHOICE
+
+
 class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -139,10 +151,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         ],
         db_collation="und-ci-det",
     )
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
+    status = models.CharField(max_length=255, choices=get_status_choices, default=IN_REVIEW, db_index=True)
     deduplication_engine_status = models.CharField(
         max_length=255,
-        choices=DEDUP_ENGINE_STATUS_CHOICE,
+        choices=get_dedup_engine_status_choices,
         blank=True,
         null=True,
         default=None,
@@ -166,7 +178,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     )
     data_source = models.CharField(
         max_length=255,
-        choices=DATA_SOURCE_CHOICE,
+        choices=get_data_source_choices,
     )
     import_data = models.OneToOneField(
         "ImportData",

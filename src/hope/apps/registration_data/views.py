@@ -1,5 +1,6 @@
 from tempfile import NamedTemporaryFile
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 
@@ -9,6 +10,7 @@ from hope.apps.registration_data.services.template_generator_service import (
 from hope.models import Program
 
 
+@login_required
 def download_template(request: HttpRequest, program_id: str) -> HttpResponse:
     mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     filename = "registration_data_import_template.xlsx"

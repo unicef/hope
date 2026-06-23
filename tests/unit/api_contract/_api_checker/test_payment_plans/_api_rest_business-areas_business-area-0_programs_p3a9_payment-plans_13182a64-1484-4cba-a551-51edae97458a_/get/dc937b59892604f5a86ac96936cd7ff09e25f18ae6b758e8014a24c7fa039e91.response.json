@@ -144,6 +144,10 @@
         "payment_verification_plans": [],
         "admin_url": "/api/unicorn/payment/paymentplan/13182a64-1484-4cba-a551-51edae97458a/change/",
         "abort_comment": "",
+        "payment_verification_summary": null,
+        "closure_comment": null,
+        "closed_by": null,
+        "status_date": "2025-01-01T00:00:00Z",
         "flat_amount_value": null,
         "payment_plan_purposes": [
             {

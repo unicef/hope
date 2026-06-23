@@ -96,6 +96,8 @@ class PaymentPlan(
             "targeting_criteria_string",
             "excluded_ids",
             "abort_comment",
+            "closure_comment",
+            "closed_by",
             "reconciliation_import_file",
             "flat_amount_value",
             "use_payment_gateway",
@@ -136,7 +138,12 @@ class PaymentPlan(
         ACCEPTED = "ACCEPTED", "Accepted"
         ABORTED = "ABORTED", "Aborted"
         FINISHED = "FINISHED", "Finished"
+        READY_FOR_CLOSURE = "READY_FOR_CLOSURE", "Ready for Closure"
         CLOSED = "CLOSED", "Closed"
+
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PaymentPlan.Status.choices
 
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
@@ -149,6 +156,12 @@ class PaymentPlan(
         Status.DRAFT,
     )
 
+    EXPORTABLE_STATUSES = (
+        Status.ACCEPTED,
+        Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
+    )
+
     HARD_CONFLICT_STATUSES = (
         Status.LOCKED,
         Status.LOCKED_FSP,
@@ -157,6 +170,7 @@ class PaymentPlan(
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
         Status.CLOSED,
     )
 
@@ -173,6 +187,10 @@ class PaymentPlan(
         BUILD_STATUS_BUILDING = "BUILDING", "Building"
         BUILD_STATUS_FAILED = "FAILED", "Failed"
         BUILD_STATUS_OK = "OK", "Ok"
+
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PaymentPlan.BuildStatus.choices
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -213,6 +231,10 @@ class PaymentPlan(
             "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "Send to Payment Gateway Error",
         )
+
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PaymentPlan.BackgroundActionStatus.choices
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
@@ -341,6 +363,19 @@ class PaymentPlan(
         related_name="created_payment_plans",
         help_text="Created by user",
     )
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="closed_payment_plans",
+        help_text="User who closed the payment plan",
+    )
+    closure_comment = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Justification comment provided at closure",
+    )
     source_payment_plan = models.ForeignKey(
         "self",
         null=True,
@@ -434,7 +469,7 @@ class PaymentPlan(
         max_length=50,
         default=Status.TP_OPEN,
         db_index=True,
-        choices=Status.choices,
+        choices=Status.get_choices,
         help_text="Status [sys]",
     )
     background_action_status = models.CharField(
@@ -443,12 +478,12 @@ class PaymentPlan(
         db_index=True,
         blank=True,
         null=True,
-        choices=BackgroundActionStatus.choices,
+        choices=BackgroundActionStatus.get_choices,
         help_text="Background Action Status for celery task [sys]",
     )
     build_status = models.CharField(
         max_length=50,
-        choices=BuildStatus.choices,
+        choices=BuildStatus.get_choices,
         default=None,
         db_index=True,
         null=True,
@@ -739,7 +774,11 @@ class PaymentPlan(
             self.remove_export_file_entitlement()
         # remove export_file_delivery (use the cached id: the FileTemp is shared across the batch
         # and a sibling may already have deleted it, so don't dereference the FK just to test presence)
-        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_delivery_id:
+        if (
+            self.status
+            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
+            and self.export_file_delivery_id
+        ):
             self.remove_export_file_delivery()
 
     def remove_imported_file(self) -> None:
@@ -968,7 +1007,8 @@ class PaymentPlan(
     def can_regenerate_delivery_export_file(self) -> bool:
         """Can regenerate export_file_delivery."""
         return (
-            self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
+            self.status
+            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
             and self.export_file_delivery is not None
             and self.background_action_status is None
         )
@@ -1026,7 +1066,13 @@ class PaymentPlan(
     @property
     def currency_exchange_date(self) -> Any:
         if (
-            self.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            self.status
+            in [
+                PaymentPlan.Status.ACCEPTED,
+                PaymentPlan.Status.FINISHED,
+                PaymentPlan.Status.READY_FOR_CLOSURE,
+                PaymentPlan.Status.CLOSED,
+            ]
             and (process := self.approval_process.first())
             and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
         ):
@@ -1051,6 +1097,7 @@ class PaymentPlan(
             if self.status in (
                 PaymentPlan.Status.ACCEPTED,
                 PaymentPlan.Status.FINISHED,
+                PaymentPlan.Status.READY_FOR_CLOSURE,
             ):
                 return self.export_file_delivery is not None
             return False
@@ -1068,6 +1115,7 @@ class PaymentPlan(
             PaymentPlan.Status.LOCKED: "export_file_entitlement",
             PaymentPlan.Status.ACCEPTED: "export_file_delivery",
             PaymentPlan.Status.FINISHED: "export_file_delivery",
+            PaymentPlan.Status.READY_FOR_CLOSURE: "export_file_delivery",
         }
 
         file_field = pp_status_to_file_field.get(self.status)

@@ -13,9 +13,14 @@ omit =
         **/fixtures.py
         */one_time_scripts/*
         */config/settings.py
+        */config/fragments/sentry.py
         */management/commands/*
+        */management/sql.py
         */missing_countries.py
         */base_test_case.py
+        */wsgi.py
+        */middlewares/silk.py
+        */steficon/debug.py
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -34,8 +39,10 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
     if TYPE_CHECKING
-    ^\s*(import\s.+|from\s+.+import\s+.+) # skip imports
+    # skip imports
+    ^\s*(import\s.+|from\s+.+import\s+.+)
     logger.exception(e)
+    logging\.getLogger\(__name__\)
 
 fail_under = 15
 
