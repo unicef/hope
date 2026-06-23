@@ -30,7 +30,7 @@ import hope.models.western_union_invoice_payment
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0027_migration"),
-        ("payment", "0065_migration"),
+        ("payment", "0064_migration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
