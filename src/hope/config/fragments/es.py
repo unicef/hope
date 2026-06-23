@@ -4,7 +4,7 @@ from hope.config.env import env
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
 ELASTICSEARCH_INDEX_PREFIX = env("ELASTICSEARCH_INDEX_PREFIX")
 ELASTICSEARCH_DSL = {
-    "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
+    "default": {"hosts": ELASTICSEARCH_HOST, "request_timeout": 30},
 }
 ELASTICSEARCH_BASE_SETTINGS = {"number_of_shards": 1, "number_of_replicas": 0}
 ELASTICSEARCH_SYNONYMS_FILE = env("ELASTICSEARCH_SYNONYMS_FILE")

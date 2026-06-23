@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from constance import config
 from elasticsearch import NotFoundError
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 
 logger = logging.getLogger(__name__)
 
