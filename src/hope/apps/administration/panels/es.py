@@ -52,7 +52,7 @@ class ElasticsearchPanel:
                         conn.ping()
                     elif opt == "info":
                         conn = create_connection()
-                        logs = conn.info().body
+                        logs = conn.info()
                     elif opt == "rebuild_search_index":
                         rebuild_search_index()
                     elif opt == "populate_all_indexes":
