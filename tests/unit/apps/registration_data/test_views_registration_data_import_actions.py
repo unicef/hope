@@ -28,11 +28,14 @@ from extras.test_utils.factories import (
     SanctionListFactory,
     UserFactory,
 )
+from extras.test_utils.factories.api import APITokenFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
+    APIToken,
     BusinessArea,
     DataCollectingType,
+    Grant,
     Household,
     ImportData,
     Individual,
@@ -146,6 +149,23 @@ def api_client_no_permissions(user_no_permissions: User) -> APIClient:
 
 
 @pytest.fixture
+def api_token(user: User, business_area: BusinessArea) -> APIToken:
+    token = APITokenFactory(
+        user=user,
+        grants=[Grant.API_DEDUP_FETCH_FINDINGS.name],
+    )
+    token.valid_for.add(business_area)
+    return token
+
+
+@pytest.fixture
+def token_api_client(api_token: APIToken) -> APIClient:
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + api_token.key)
+    return client
+
+
+@pytest.fixture
 def program_with_sanction_list(business_area: BusinessArea) -> Program:
     program = ProgramFactory(
         name="Test Program",
@@ -207,6 +227,34 @@ def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APICl
     response = api_client.get(url)
     assert response.status_code == status.HTTP_200_OK
     mock_fetch_dedup_results.assert_called_once_with(str(program.pk))
+
+
+@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
+def test_webhook_deduplication_with_api_token(
+    mock_fetch_dedup_results: Mock, token_api_client: APIClient, program: Program
+) -> None:
+    url = reverse(
+        "api:registration-data:registration-data-imports-webhook-deduplication",
+        args=["afghanistan", program.code],
+    )
+    response = token_api_client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    mock_fetch_dedup_results.assert_called_once_with(str(program.pk))
+
+
+def test_webhook_deduplication_with_api_token_missing_grant(
+    api_token: APIToken, business_area: BusinessArea, program: Program
+) -> None:
+    api_token.grants = []
+    api_token.save(update_fields=["grants"])
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + api_token.key)
+    url = reverse(
+        "api:registration-data:registration-data-imports-webhook-deduplication",
+        args=["afghanistan", program.code],
+    )
+    response = client.get(url)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_merge_rdi_without_permission(
