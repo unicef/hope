@@ -123,3 +123,19 @@ def test_works_for_social_worker_people_program() -> None:
     )
     assert hh_valid.pk in included
     assert hh_invalid.pk not in included
+
+
+def test_not_equals_comparison_inverts_the_match() -> None:
+    # The SELECT_ONE field also allows NOT_EQUALS; "NOT_EQUALS has-valid" == "has not valid".
+    hh_valid = HouseholdFactory()
+    _set_phone_validity(hh_valid.head_of_household_id, primary=True, alternative=False)
+    hh_invalid = HouseholdFactory()
+    _set_phone_validity(hh_invalid.head_of_household_id, primary=False, alternative=False)
+
+    pks = set(
+        Household.objects.filter(
+            get_collector_has_valid_phone_no_query("NOT_EQUALS", [True])
+        ).values_list("pk", flat=True)
+    )
+    assert hh_invalid.pk in pks
+    assert hh_valid.pk not in pks

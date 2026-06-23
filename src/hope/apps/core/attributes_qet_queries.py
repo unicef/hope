@@ -279,18 +279,30 @@ def get_has_phone_number_query(_: Any, args: Any, is_social_worker_query: bool =
     return ~Q(**{f"{lookup_prefix}phone_no": ""}) if has_phone_no else Q(**{f"{lookup_prefix}phone_no": ""})
 
 
-def get_collector_has_valid_phone_no_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
-    """Households that have a collector with a valid (primary or alternative) phone number.
+def get_collector_has_valid_phone_no_query(
+    comparison_method: Any, args: Any, is_social_worker_query: bool = False
+) -> Q:
+    """Households filtered by whether a collector has a valid phone number.
 
     "Collector" is any individual with a primary or alternate role on the household — the
     same individuals ``PaymentPlanService._get_collector`` chooses from. Unlike that per-row
     helper, this is a set-based query so it can drive the targeting criteria over the whole
     household queryset. It works the same for standard and social-worker (people) programs,
     since both create ROLE_PRIMARY/ROLE_ALTERNATE roles.
+
+    The backing core field is a SELECT_ONE with explicit "Has"/"Has not" choices, so both
+    directions are supported: the chosen value (``args[0]``) and the comparison method
+    together decide whether to match households that have — or lack — a valid-phone collector.
+
+    ``is_social_worker_query`` is part of the shared get_query signature (the caller always
+    passes it) but is intentionally unused: the query reaches the collector via the household
+    role relationship explicitly, so there is no ``individuals__`` prefix to toggle.
     """
     from hope.models import IndividualRoleInHousehold  # local import to avoid an import cycle
 
     wants_valid = args[0] in [True, "True"]
+    if comparison_method == "NOT_EQUALS":  # SELECT_ONE also allows NOT_EQUALS
+        wants_valid = not wants_valid
     valid_collector = IndividualRoleInHousehold.objects.filter(
         household=OuterRef("pk"),
         role__in=[ROLE_PRIMARY, ROLE_ALTERNATE],
