@@ -432,6 +432,7 @@ class PaymentPlanFlow:
         source=[
             PaymentPlan.Status.ACCEPTED,
             PaymentPlan.Status.FINISHED,
+            PaymentPlan.Status.READY_FOR_CLOSURE,
         ],
         target=PaymentPlan.Status.FINISHED,
     )
@@ -440,6 +441,13 @@ class PaymentPlanFlow:
 
     @status.transition(
         source=PaymentPlan.Status.FINISHED,
+        target=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+    def status_ready_for_closure(self) -> None:
+        self.payment_plan.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlan.Status.READY_FOR_CLOSURE,
         target=PaymentPlan.Status.CLOSED,
     )
     def status_close(self) -> None:

@@ -16,6 +16,8 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatusEnum.IN_REVIEW]: 'In Review',
   [PaymentPlanStatusEnum.ACCEPTED]: 'Accepted',
   [PaymentPlanStatusEnum.FINISHED]: 'Finished',
+  [PaymentPlanStatusEnum.READY_FOR_CLOSURE]: 'Ready for Closure',
+  [PaymentPlanStatusEnum.CLOSED]: 'Closed',
   ['ASSIGNED']: 'Assigned',
 };
 

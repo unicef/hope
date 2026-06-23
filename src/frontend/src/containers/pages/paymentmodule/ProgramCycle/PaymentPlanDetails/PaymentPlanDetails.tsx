@@ -148,14 +148,14 @@ export const PaymentPlanDetails = ({
               <Grid size={{ xs: 3 }}>
                 <Box mr={1}>
                   <LabelizedField label={t('FSP')}>
-                    {paymentPlan.financialServiceProvider.name}
+                    {paymentPlan.financialServiceProvider?.name}
                   </LabelizedField>
                 </Box>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <Box mr={1}>
                   <LabelizedField label={t('Delivery Mechanism')}>
-                    {paymentPlan.deliveryMechanism.name}
+                    {paymentPlan.deliveryMechanism?.name}
                   </LabelizedField>
                 </Box>
               </Grid>
