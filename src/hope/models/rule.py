@@ -19,6 +19,22 @@ from hope.apps.steficon.result import Result
 from hope.apps.steficon.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
+def get_rule_type_choices() -> tuple:
+    return Rule.TYPE_CHOICES
+
+
+def get_languages_choices() -> Sequence[tuple]:
+    return Rule.LANGUAGES
+
+
+def get_rule_security_choices() -> tuple:
+    return (
+        (SAFETY_NONE, "Low"),
+        (SAFETY_STANDARD, "Medium"),
+        (SAFETY_HIGH, "High"),
+    )
+
+
 class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
     TYPE_TARGETING = "TARGETING"
@@ -47,13 +63,9 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)
+    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=get_languages_choices)
     security = models.IntegerField(
-        choices=(
-            (SAFETY_NONE, "Low"),
-            (SAFETY_STANDARD, "Medium"),
-            (SAFETY_HIGH, "High"),
-        ),
+        choices=get_rule_security_choices,
         default=SAFETY_STANDARD,
     )
     created_by = models.ForeignKey(
@@ -65,7 +77,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     type = models.CharField(
-        choices=TYPE_CHOICES,
+        choices=get_rule_type_choices,
         max_length=50,
         default=TYPE_TARGETING,
         help_text="Use Rule for Targeting or Payment Plan",
@@ -229,7 +241,7 @@ class RuleCommit(models.Model):
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
+    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=get_languages_choices)
 
     affected_fields = ArrayField(models.CharField(max_length=100))
     before = JSONField(help_text="The record before change", editable=False, default=dict)

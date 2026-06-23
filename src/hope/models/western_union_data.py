@@ -3,15 +3,19 @@ from django.db import models
 from hope.models.file_temp import FileTemp
 
 
+def get_status_choices() -> tuple:
+    return WesternUnionData.STATUS_CHOICES
+
+
 class WesternUnionData(models.Model):
     STATUS_PENDING = "PENDING"
     STATUS_COMPLETED = "COMPLETED"
     STATUS_ERROR = "ERROR"
-    STATUS_CHOICES = [
+    STATUS_CHOICES = (
         (STATUS_PENDING, "Pending"),
         (STATUS_COMPLETED, "Completed"),
         (STATUS_ERROR, "Error"),
-    ]
+    )
 
     name = models.CharField(max_length=255, unique=True)
     date = models.DateField(null=True, blank=True)
@@ -23,7 +27,7 @@ class WesternUnionData(models.Model):
         null=True,
     )
     amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    status = models.CharField(max_length=20, choices=get_status_choices, default=STATUS_PENDING, db_index=True)
     error_msg = models.TextField(null=True, blank=True)
 
     class Meta:

@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1375"
+        "Content-Length": "1554"
     },
     "data": {
         "id": "dc3a1c71-5942-47d6-ae45-7f10f562b9c4",
@@ -24,8 +24,10 @@
         "total_undelivered_quantity": null,
         "dispersion_start_date": "2025-01-01",
         "dispersion_end_date": "2025-01-31",
-        "is_follow_up": false,
+        "plan_type": "REGULAR",
+                "export_tag": null,
         "follow_ups": [],
+        "top_ups": [],
         "created_by": " ",
         "created_at": "2025-01-01T00:00:00Z",
         "updated_at": "2025-01-01T00:00:00Z",
@@ -35,6 +37,11 @@
             "name": "Program 0",
             "status": "ACTIVE",
             "screen_beneficiary": false
+        },
+        "payment_plan_group": {
+            "id": "251cfde4-439d-470e-905c-b25958ce0d5e",
+            "unicef_id": "PPG-2",
+            "name": "Default Group"
         },
         "background_action_status": null,
         "start_date": null,
@@ -60,7 +67,9 @@
         "screen_beneficiary": false,
         "flag_exclude_if_on_sanction_list": false,
         "flag_exclude_if_active_adjudication_ticket": false,
-        "build_status": null
+        "build_status": null,
+        "payment_plan_purposes": [],
+        "is_purposes_editable": true
     },
     "content_type": "application/json"
 }

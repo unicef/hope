@@ -27,7 +27,7 @@ def individual(business_area):
 @pytest.fixture
 def account_type_bank(business_area):
     return AccountTypeFactory(
-        key="bank",
+        key="bank_unique_fields_test",
         label="Bank",
         unique_fields=[
             "number",
