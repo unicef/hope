@@ -4,13 +4,16 @@ import Stepper from '@mui/material/Stepper';
 import { useTranslation } from 'react-i18next';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptanceProcessStepper({
   acceptanceProcess,
+  paymentPlan,
 }: AcceptanceProcessStepperProps): ReactElement {
   const {
     rejectedOn,
@@ -20,6 +23,7 @@ export function AcceptanceProcessStepper({
     financeReleaseNumberRequired,
   } = acceptanceProcess;
   const { t } = useTranslation();
+  const isClosed = paymentPlan.status === PaymentPlanStatusEnum.CLOSED;
   const steps = [
     {
       name: `${t('Approval')} (${
@@ -43,8 +47,16 @@ export function AcceptanceProcessStepper({
       isCompleted:
         actions.financeRelease.length === financeReleaseNumberRequired,
     },
+    {
+      name: `${t('Finance Closure')} (${isClosed ? 1 : 0}/1)`,
+      hasError: false,
+      isCompleted: isClosed,
+    },
   ];
   const getActiveStep = (): number => {
+    if (isClosed) {
+      return 3;
+    }
     if (actions.authorization.length === authorizationNumberRequired) {
       return 2;
     }
