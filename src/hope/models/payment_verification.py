@@ -10,6 +10,10 @@ from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
 
 
+def get_status_choices() -> tuple:
+    return PaymentVerification.STATUS_CHOICES
+
+
 class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -40,7 +44,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
         related_name="payment_record_verifications",
     )
 
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    status = models.CharField(max_length=50, choices=get_status_choices, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True, blank=True)
     received_amount = models.DecimalField(
         decimal_places=2,

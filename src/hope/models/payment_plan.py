@@ -141,6 +141,10 @@ class PaymentPlan(
         READY_FOR_CLOSURE = "READY_FOR_CLOSURE", "Ready for Closure"
         CLOSED = "CLOSED", "Closed"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PaymentPlan.Status.choices
+
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
@@ -184,6 +188,10 @@ class PaymentPlan(
         BUILD_STATUS_FAILED = "FAILED", "Failed"
         BUILD_STATUS_OK = "OK", "Ok"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PaymentPlan.BuildStatus.choices
+
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
         RULE_ENGINE_ERROR = "RULE_ENGINE_ERROR", "Rule Engine Errored"
@@ -223,6 +231,10 @@ class PaymentPlan(
             "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "Send to Payment Gateway Error",
         )
+
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PaymentPlan.BackgroundActionStatus.choices
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
@@ -457,7 +469,7 @@ class PaymentPlan(
         max_length=50,
         default=Status.TP_OPEN,
         db_index=True,
-        choices=Status.choices,
+        choices=Status.get_choices,
         help_text="Status [sys]",
     )
     background_action_status = models.CharField(
@@ -466,12 +478,12 @@ class PaymentPlan(
         db_index=True,
         blank=True,
         null=True,
-        choices=BackgroundActionStatus.choices,
+        choices=BackgroundActionStatus.get_choices,
         help_text="Background Action Status for celery task [sys]",
     )
     build_status = models.CharField(
         max_length=50,
-        choices=BuildStatus.choices,
+        choices=BuildStatus.get_choices,
         default=None,
         db_index=True,
         null=True,

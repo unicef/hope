@@ -9,11 +9,15 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         VOUCHER = "VOUCHER", "Voucher"
         DIGITAL = "DIGITAL", "Digital"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return DeliveryMechanism.TransferType.choices
+
     payment_gateway_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
     code = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255, unique=True)
     is_active = models.BooleanField(default=True)
-    transfer_type = models.CharField(max_length=255, choices=TransferType.choices, default=TransferType.CASH)
+    transfer_type = models.CharField(max_length=255, choices=TransferType.get_choices, default=TransferType.CASH)
     account_type = models.ForeignKey(
         "payment.AccountType",
         on_delete=models.PROTECT,

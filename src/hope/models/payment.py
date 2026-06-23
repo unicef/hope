@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
-from hope.apps.household.const import ROLE_ALTERNATE, ROLE_CHOICE, ROLE_PRIMARY
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY, get_role_choices
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
 from hope.models.individual import Individual
@@ -27,6 +27,10 @@ from hope.models.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def get_payment_status_choices() -> tuple:
+    return Payment.STATUS_CHOICE
 
 
 class Payment(
@@ -110,7 +114,7 @@ class Payment(
     collector_type = models.CharField(
         max_length=120,
         default=ROLE_PRIMARY,
-        choices=ROLE_CHOICE,
+        choices=get_role_choices,
         help_text="Collector type using for payment, by default is Primary",
     )
     source_payment = models.ForeignKey(
@@ -123,7 +127,7 @@ class Payment(
     is_follow_up = models.BooleanField(default=False)
     status = models.CharField(
         max_length=255,
-        choices=STATUS_CHOICE,
+        choices=get_payment_status_choices,
         default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
