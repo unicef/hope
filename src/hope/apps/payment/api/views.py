@@ -1544,7 +1544,7 @@ class PaymentPlanViewSet(
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         file = serializer.validated_data["file"]
         with transaction.atomic():
-            import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
+            import_service = XlsxPaymentPlanImportService(payment_plan, file)
             try:
                 import_service.open_workbook()
             except BadZipFile:
@@ -1561,9 +1561,17 @@ class PaymentPlanViewSet(
 
             old_payment_plan = copy_model_object(payment_plan)
 
-            payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
-                user=request.user, file=file
+            file_temp = FileTemp.objects.create(
+                object_id=payment_plan.pk,
+                content_type=get_content_type_for_model(payment_plan),
+                created_by=request.user,
+                file=file,
             )
+            flow = PaymentPlanFlow(payment_plan)
+            flow.background_action_status_xlsx_importing_reconciliation()
+            payment_plan.reconciliation_import_file = file_temp
+            payment_plan.save()
+            payment_plan.refresh_from_db(fields=["background_action_status", "reconciliation_import_file"])
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
