@@ -24,6 +24,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
@@ -80,6 +81,11 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
 
+  const shouldDisplayVerificationSummary =
+    status === PaymentPlanStatusEnum.FINISHED ||
+    status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
+    status === PaymentPlanStatusEnum.CLOSED;
+
   const shouldDisplayFundsCommitment =
     status === PaymentPlanStatusEnum.IN_REVIEW ||
     status === PaymentPlanStatusEnum.ACCEPTED ||
@@ -94,6 +100,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       {status !== PaymentPlanStatusEnum.PREPARING && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayVerificationSummary && (
+            <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
+          )}
           {shouldDisplayFundsCommitment && (
             <FundsCommitmentSection paymentPlan={paymentPlan} />
           )}

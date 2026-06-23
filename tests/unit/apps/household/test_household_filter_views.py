@@ -942,9 +942,9 @@ parametrize_search_context = (
             {},
         ),
         (
-            {"search": "456"},
-            {"program_registration_id": "456"},
-            {"program_registration_id": "123"},
+            {"search": "REG-456"},
+            {"program_registration_id": "REG-456"},
+            {"program_registration_id": "REG-123"},
             {},
             {},
         ),

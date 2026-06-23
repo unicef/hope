@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 import pytest
 
 from extras.test_utils.factories import CurrencyFactory
