@@ -9,15 +9,17 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from hope.api.auth import HOPEPermission
 from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     CountActionMixin,
+    PermissionsMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -45,12 +47,22 @@ from hope.apps.registration_data.celery_tasks import (
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
-from hope.models import Household, ImportData, Individual, KoboImportData, Program, RegistrationDataImport, log_create
+from hope.models import (
+    Grant,
+    Household,
+    ImportData,
+    Individual,
+    KoboImportData,
+    Program,
+    RegistrationDataImport,
+    log_create,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class RegistrationDataImportViewSet(
+    PermissionsMixin,
     ProgramMixin,
     SerializerActionMixin,
     CountActionMixin,
@@ -88,7 +100,18 @@ class RegistrationDataImportViewSet(
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
         "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
     }
+    token_permissions_by_action = {
+        "webhook_deduplication": Grant.API_DEDUP_FETCH_FINDINGS,
+    }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
+
+    def get_permissions(self) -> list[BasePermission]:
+        if self.is_external_request():
+            self.permission_classes = [HOPEPermission]
+            self.permission = self.token_permissions_by_action.get(self.action, self.token_permission)
+            return [permission() for permission in self.permission_classes]
+        return super().get_permissions()
+
     filterset_class = RegistrationDataImportFilter
 
     @etag_decorator(RDIKeyConstructor)
@@ -114,7 +137,6 @@ class RegistrationDataImportViewSet(
         methods=["GET"],
         url_path="webhookdeduplication",
         url_name="webhook-deduplication",
-        permission_classes=[AllowAny],
     )
     def webhook_deduplication(
         self,
