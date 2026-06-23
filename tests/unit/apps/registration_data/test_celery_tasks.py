@@ -18,8 +18,6 @@ from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
     deduplicate_documents_for_rdi,
-    deduplication_engine_process_async_task,
-    fetch_biometric_deduplication_results_and_process_async_task,
     merge_registration_data_import_async_task,
     pull_kobo_submissions_async_task,
     pull_kobo_submissions_async_task_action,
@@ -33,7 +31,13 @@ from hope.apps.registration_data.celery_tasks import (
     validate_xlsx_import_async_task_action,
 )
 from hope.apps.registration_data.tasks.pull_kobo_submissions import PullKoboSubmissions
-from hope.models import AsyncRetryJob, ImportData, KoboImportData, Program, RegistrationDataImport
+from hope.models import (
+    AsyncRetryJob,
+    ImportData,
+    KoboImportData,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -878,76 +882,3 @@ def test_pull_kobo_submissions_execute(
     resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics, program)
 
     assert str(resp_2["kobo_import_data_id"]) == str(kobo_import_data_without_pics.id)
-
-
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".upload_and_process_deduplication_set"
-)
-def test_deduplication_engine_process_task(
-    mock_upload_and_process: Mock,
-) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
-
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        deduplication_engine_process_async_task(str(program.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_upload_and_process.assert_called_once_with(program)
-
-
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process"
-)
-def test_fetch_biometric_deduplication_results_and_process(
-    mock_fetch_biometric_deduplication_results_and_process: Mock,
-) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
-
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        fetch_biometric_deduplication_results_and_process_async_task(str(program.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, None)
-
-
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process"
-)
-def test_fetch_biometric_deduplication_results_and_process_for_rdi(
-    mock_fetch_biometric_deduplication_results_and_process: Mock,
-) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
-    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
-
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        fetch_biometric_deduplication_results_and_process_async_task(str(program.id), str(rdi.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, rdi)

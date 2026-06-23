@@ -2,19 +2,19 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "3d7ed624-3cfb-4b5b-96de-82c201faaddd",
+            "pk": "0248e8ee-dc70-4ff0-9ade-f1c698d971a2",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
-                "data_collecting_type": 34,
-                "beneficiary_group": "780d0df7-2372-45f0-b531-6a1ece0eaf88",
-                "business_area": "e58164a0-3c4a-4ed5-b1f6-46167c746672",
+                "version": 1735688653315201,
+                "data_collecting_type": 1,
+                "beneficiary_group": "47db950d-714d-40c6-abba-8e4d44b8844a",
+                "business_area": "fd922c5b-d750-4675-af03-b38ae5c13845",
                 "name": "Program 0",
+                "code": "2ss5",
                 "status": "ACTIVE",
-                "code": "5zn8",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -28,19 +28,23 @@
                 "administrative_areas_of_implementation": "",
                 "biometric_deduplication_enabled": false,
                 "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                "identification_key_individual_label": null,
                 "is_visible": true,
                 "household_count": 0,
                 "individual_count": 0,
                 "reconciliation_window_in_days": 0,
                 "send_reconciliation_window_expiry_notifications": false,
                 "admin_areas": [],
-                "sanction_lists": []
+                "sanction_lists": [],
+                "payment_plan_purposes": [
+                    "a5b4f676-2eab-421b-8ee2-575a3200489c"
+                ]
             }
         },
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 34,
+                "pk": 1,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -55,14 +59,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        34
+                        1
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "780d0df7-2372-45f0-b531-6a1ece0eaf88",
+                "pk": "47db950d-714d-40c6-abba-8e4d44b8844a",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -76,7 +80,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "e58164a0-3c4a-4ed5-b1f6-46167c746672",
+                "pk": "fd922c5b-d750-4675-af03-b38ae5c13845",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -102,6 +106,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -113,6 +118,18 @@
                     "custom_fields": {},
                     "countries": [],
                     "payment_countries": []
+                }
+            },
+            {
+                "model": "payment.paymentplanpurpose",
+                "pk": "a5b4f676-2eab-421b-8ee2-575a3200489c",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPP-17",
+                    "name": "Purpose 0",
+                    "description": "",
+                    "limit_to": []
                 }
             }
         ]

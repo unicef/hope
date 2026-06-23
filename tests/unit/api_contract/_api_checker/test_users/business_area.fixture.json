@@ -2,7 +2,7 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "e58164a0-3c4a-4ed5-b1f6-46167c746672",
+            "pk": "fd922c5b-d750-4675-af03-b38ae5c13845",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
@@ -28,6 +28,7 @@
                 "rapid_pro_messages_token": null,
                 "rapid_pro_survey_token": null,
                 "postpone_deduplication": false,
+                "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                 "deduplication_duplicate_score": 6.0,
                 "deduplication_possible_duplicate_score": 6.0,
                 "deduplication_batch_duplicates_percentage": 50,

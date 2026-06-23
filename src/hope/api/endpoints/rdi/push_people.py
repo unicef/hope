@@ -38,6 +38,7 @@ from hope.models import (
     Area,
     Country,
     Grant,
+    Individual,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
@@ -56,6 +57,31 @@ PEOPLE_TYPE_CHOICES = (
 @extend_schema_field(OpenApiTypes.STR)
 class DynamicAreaChoiceField(serializers.ChoiceField):
     pass
+
+
+class PushPeopleListSerializer(serializers.ListSerializer):
+    def validate(self, attrs: list[dict]) -> list[dict]:
+        cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
+        existing_cw_ids = sorted(
+            Individual.all_objects.filter(
+                is_removed=False,
+                withdrawn=False,
+                business_area=self.context["business_area"],
+                country_workspace_id__in=cw_ids,
+            )
+            .values_list("country_workspace_id", flat=True)
+            .distinct()
+        )
+        if existing_cw_ids:
+            raise serializers.ValidationError(
+                {
+                    "country_workspace_id": [
+                        "Individuals with these country_workspace_id values already exist: "
+                        f"{', '.join(existing_cw_ids[:100])}."
+                    ]
+                }
+            )
+        return attrs
 
 
 class PushPeopleSerializer(serializers.ModelSerializer):
@@ -89,7 +115,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
-    country_workspace_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=150)
+    country_workspace_id = serializers.CharField(required=True, max_length=150)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -105,6 +131,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PendingIndividual
+        list_serializer_class = PushPeopleListSerializer
         exclude = [
             "id",
             "registration_data_import",
@@ -241,7 +268,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         serializer = PushPeopleSerializer(
             data=request.data,
             many=True,
-            context={"is_coming_from_cw": self.selected_rdi.is_coming_from_cw},
+            context={"business_area": self.selected_business_area},
         )
         if serializer.is_valid():
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)

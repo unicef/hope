@@ -32,8 +32,6 @@ from hope.admin.utils import (
 )
 from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.household.services.index_management import check_program_indexes, rebuild_program_indexes
-from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task
 from hope.models import (
     AdminAreaLimitedTo,
@@ -171,39 +169,6 @@ class ProgramAdminForm(forms.ModelForm):
             "send_reconciliation_window_expiry_notifications",
         )
 
-    def _handle_biometric_deduplication_set(self, action: str) -> None:
-        try:
-            service = BiometricDeduplicationService()
-            if action == "create":
-                service.create_deduplication_set(self.instance)
-                if self.instance.pk:
-                    service.mark_rdis_as_pending(self.instance)
-            elif action == "delete":
-                service.delete_deduplication_set(self.instance)
-        except (
-            DeduplicationEngineAPI.API_EXCEPTION_CLASS,
-            DeduplicationEngineAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS,
-        ) as exc:
-            raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
-
-    def clean(self) -> dict[str, Any] | None:
-        cleaned_data = super().clean()
-        if self.errors:
-            return cleaned_data
-
-        if "biometric_deduplication_enabled" in self.changed_data:
-            enable = cleaned_data.get("biometric_deduplication_enabled")
-            if self.instance.pk:
-                original_enabled = self.instance.biometric_deduplication_enabled
-                if enable is True and original_enabled is False:
-                    self._handle_biometric_deduplication_set("create")
-                elif enable is False and original_enabled is True:
-                    self._handle_biometric_deduplication_set("delete")
-            elif enable is True:
-                self._handle_biometric_deduplication_set("create")
-
-        return cleaned_data
-
 
 @admin.register(Program)
 class ProgramAdmin(
@@ -255,6 +220,12 @@ class ProgramAdmin(
             "QuerySet[Program]",
             super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
         )
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Program | None = None) -> tuple[str, ...]:
+        readonly_fields = tuple(super().get_readonly_fields(request, obj))
+        if obj and obj.business_area.is_rdi_ingest_source_all_except_country_workspace:
+            readonly_fields += ("biometric_deduplication_enabled",)
+        return readonly_fields
 
     @button(
         permission="payment.add_paymentplan",
