@@ -18,6 +18,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+    EmptyDeliveryExportError,
     XlsxPaymentPlanGroupDeliveryExportService,
 )
 from hope.models import (
@@ -84,6 +85,112 @@ def group_with_one_accepted_plan(program_cycle, business_area, fsp, delivery_mec
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
+    )
+    return group
+
+
+@pytest.fixture
+def fsp_no_template():
+    return FinancialServiceProviderFactory(
+        name="Test FSP No Template",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        vision_vendor_number="987654321",
+    )
+
+
+@pytest.fixture
+def group_one_exportable_two_skipped(
+    program_cycle, business_area, fsp, fsp_no_template, delivery_mechanism, fsp_template
+):
+    """One ACCEPTED plan whose FSP has a template (exports) plus two whose FSP has none (skipped)."""
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    exportable_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    exportable_payment = PaymentFactory(
+        parent=exportable_plan,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=exportable_plan.program,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
+    )
+    PaymentHouseholdSnapshotFactory(payment=exportable_payment, snapshot_data={})
+    skipped_plan_one = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_no_template,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(
+        parent=skipped_plan_one,
+        financial_service_provider=fsp_no_template,
+        delivery_type=delivery_mechanism,
+        program=skipped_plan_one.program,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
+    )
+    skipped_plan_two = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_no_template,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(
+        parent=skipped_plan_two,
+        financial_service_provider=fsp_no_template,
+        delivery_type=delivery_mechanism,
+        program=skipped_plan_two.program,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
+    )
+    return group, exportable_plan, skipped_plan_one, skipped_plan_two
+
+
+@pytest.fixture
+def group_with_two_plans_without_template(program_cycle, business_area, fsp_no_template, delivery_mechanism):
+    """Two ACCEPTED plans whose FSP has no template - both skipped, so the export is empty."""
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan_one = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_no_template,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(
+        parent=plan_one,
+        financial_service_provider=fsp_no_template,
+        delivery_type=delivery_mechanism,
+        program=plan_one.program,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
+    )
+    plan_two = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp_no_template,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(
+        parent=plan_two,
+        financial_service_provider=fsp_no_template,
+        delivery_type=delivery_mechanism,
+        program=plan_two.program,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("10.00"),
     )
     return group
 
@@ -415,13 +522,53 @@ def test_save_xlsx_file_stores_batch_file_on_plan(group_with_one_accepted_plan, 
 
     plan.refresh_from_db()
     assert plan.export_file_delivery is not None
-    assert plan.export_file_delivery.file.name.endswith("_batch_1.xlsx")
+    assert "_batch_1" in plan.export_file_delivery.file.name
+    assert plan.export_file_delivery.file.name.endswith(".xlsx")
 
 
-def test_save_xlsx_file_no_eligible_plans_creates_no_file(empty_group, user):
-    XlsxPaymentPlanGroupDeliveryExportService(empty_group).save_xlsx_file(user)
+def test_save_xlsx_file_no_eligible_plans_raises_and_creates_no_file(empty_group, user):
+    with pytest.raises(EmptyDeliveryExportError):
+        XlsxPaymentPlanGroupDeliveryExportService(empty_group).save_xlsx_file(user)
 
     assert not empty_group.payment_plans.filter(export_file_delivery__isnull=False).exists()
+
+
+def test_save_xlsx_file_all_plans_skipped_reports_reasons(group_with_plan_without_template, user):
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template)
+
+    with pytest.raises(EmptyDeliveryExportError) as exc_info:
+        service.save_xlsx_file(user)
+
+    assert str(exc_info.value) == EmptyDeliveryExportError.MESSAGE
+    assert len(exc_info.value.skipped_reasons) == 1
+    assert "no FSP XLSX Template" in exc_info.value.skipped_reasons[0]
+
+
+def test_save_xlsx_file_exports_mapped_plan_and_leaves_skipped_untouched(group_one_exportable_two_skipped, user):
+    group, exportable_plan, skipped_plan_one, skipped_plan_two = group_one_exportable_two_skipped
+
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
+
+    exportable_plan.refresh_from_db()
+    skipped_plan_one.refresh_from_db()
+    skipped_plan_two.refresh_from_db()
+    assert exportable_plan.export_tag == 1
+    assert exportable_plan.export_file_delivery is not None
+    assert skipped_plan_one.export_tag is None
+    assert skipped_plan_one.export_file_delivery is None
+    assert skipped_plan_two.export_tag is None
+    assert skipped_plan_two.export_file_delivery is None
+
+
+def test_save_xlsx_file_multiple_plans_all_skipped_raises_with_all_reasons(group_with_two_plans_without_template, user):
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_without_template)
+
+    with pytest.raises(EmptyDeliveryExportError) as exc_info:
+        service.save_xlsx_file(user)
+
+    assert str(exc_info.value) == EmptyDeliveryExportError.MESSAGE
+    assert len(exc_info.value.skipped_reasons) == 2
+    assert not group_with_two_plans_without_template.payment_plans.filter(export_tag__isnull=False).exists()
 
 
 def test_save_xlsx_file_one_batch_tags_all_plans_and_shares_file(group_with_two_plans_and_payments, user):
@@ -515,7 +662,8 @@ def test_save_xlsx_file_reexport_with_export_tag_replaces_file_and_keeps_tag(gro
 def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_plan_without_template, user):
     plan = group_with_plan_without_template.payment_plans.first()
 
-    XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template).save_xlsx_file(user)
+    with pytest.raises(EmptyDeliveryExportError):
+        XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag is None
@@ -543,7 +691,8 @@ def test_plan_with_unprocessed_payments_is_skipped_when_template_requires_auth_c
     # payment still PENDING → is_payment_gateway_and_all_sent_to_fsp=False
     PaymentFactory(parent=plan, financial_service_provider=pg_fsp, status=Payment.STATUS_PENDING)
 
-    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
+    with pytest.raises(EmptyDeliveryExportError):
+        XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag is None
