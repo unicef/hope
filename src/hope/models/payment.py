@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
+from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY, get_role_choices
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
@@ -83,6 +84,24 @@ class Payment(
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
         (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
+    )
+
+    # Only scalar fields: keeping FKs out avoids per-row related-object fetches (N+1) when
+    # diffing thousands of payments in bulk. FK/config changes (FSP, delivery mechanism) are
+    # audited at the PaymentPlan level instead.
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "status_date",
+            "entitlement_quantity",
+            "delivered_quantity",
+            "delivery_date",
+            "fsp_auth_code",
+            "reason_for_unsuccessful_payment",
+            "transaction_reference_id",
+            "excluded",
+            "conflicted",
+        ]
     )
 
     parent = models.ForeignKey(

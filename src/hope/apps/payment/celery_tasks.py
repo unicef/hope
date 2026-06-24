@@ -24,12 +24,14 @@ from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
 from hope.apps.payment.utils import (
+    bulk_log_payment_changes,
     calculate_counts,
     from_received_to_status,
     generate_cache_key,
     get_quantity_in_usd,
     log_payment_plan_change,
     normalize_score,
+    update_payments_and_log,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
@@ -357,7 +359,7 @@ def import_payment_plan_payment_list_from_xlsx_async_task_action(job: AsyncRetry
     service.open_workbook()
     try:
         with transaction.atomic():
-            service.import_payment_list()
+            service.import_payment_list(job.config.get("user_id"))
             payment_plan.imported_file_date = timezone.now()
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_none()
@@ -407,10 +409,14 @@ def payment_plan_set_entitlement_flat_amount_async_task_action(job: AsyncRetryJo
                 exchange_rate=(Decimal(exchange_rate) if exchange_rate is not None else 1),
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
-            payment_plan.eligible_payments.update(
-                entitlement_quantity=flat_amount_value,
-                entitlement_quantity_usd=entitlement_quantity_usd,
-                entitlement_date=timezone.now(),
+            update_payments_and_log(
+                payment_plan.eligible_payments,
+                {"entitlement_quantity": flat_amount_value},
+                job.config.get("user_id"),
+                extra_update={
+                    "entitlement_quantity_usd": entitlement_quantity_usd,
+                    "entitlement_date": timezone.now(),
+                },
             )
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_none()
@@ -427,11 +433,12 @@ def payment_plan_set_entitlement_flat_amount_async_task_action(job: AsyncRetryJo
         raise
 
 
-def payment_plan_set_entitlement_flat_amount_async_task(payment_plan: PaymentPlan) -> None:
+def payment_plan_set_entitlement_flat_amount_async_task(payment_plan: PaymentPlan, user_id: str | None = None) -> None:
     payment_plan_id = str(payment_plan.id)
-    config = {"payment_plan_id": payment_plan_id}
+    config = {"payment_plan_id": payment_plan_id, "user_id": user_id}
     AsyncRetryJob.queue_task(
         instance=payment_plan,
+        owner_id=user_id,
         job_name=payment_plan_set_entitlement_flat_amount_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_set_entitlement_flat_amount_async_task_action",
         config=config,
@@ -525,7 +532,7 @@ def import_payment_plan_delivery_from_xlsx_async_task_action(job: AsyncRetryJob)
         service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_xlsx)
         service.open_workbook()
         with transaction.atomic():
-            service.import_payment_list()
+            service.import_payment_list(job.config.get("user_id"))
             payment_plan.remove_export_files()
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_none()
@@ -674,7 +681,7 @@ def import_payment_plan_group_delivery_from_xlsx_async_task(
     )
 
 
-def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None:
+def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None:  # noqa: PLR0915
     from hope.models import Payment, PaymentPlan, Rule, RuleCommit
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
@@ -708,9 +715,12 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
         pp_exchange_rate = payment_plan.exchange_rate
         pp_currency_exchange_date = payment_plan.currency_exchange_date
 
+        steficon_user_id = job.config.get("user_id")
         updates_buffer = []
+        log_pairs_buffer: list = []
         with transaction.atomic():
             for payment in qs.iterator(chunk_size=bulk_size):
+                old_payment = copy_model_object(payment)
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
 
                 payment.entitlement_quantity = result.value
@@ -722,19 +732,23 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
                 )
                 payment.entitlement_date = now
                 updates_buffer.append(payment)
+                log_pairs_buffer.append((old_payment, payment))
 
                 if len(updates_buffer) >= bulk_size:  # pragma: no cover
                     Payment.signature_manager.bulk_update_with_signature(
                         updates_buffer,
                         ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
                     )
+                    bulk_log_payment_changes(log_pairs_buffer, steficon_user_id)
                     updates_buffer.clear()
+                    log_pairs_buffer.clear()
 
             if updates_buffer:
                 Payment.signature_manager.bulk_update_with_signature(
                     updates_buffer,
                     ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
                 )
+                bulk_log_payment_changes(log_pairs_buffer, steficon_user_id)
 
             payment_plan.steficon_applied_date = now
             flow = PaymentPlanFlow(payment_plan)
@@ -1041,8 +1055,8 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
 
         payments_for_exclude = payment_plan.eligible_payments.filter(**{f"{filter_key}__in": excluding_hh_or_ind_ids})
 
-        payments_for_exclude.update(excluded=True)
-        payments_for_undo_exclude.update(excluded=False)
+        update_payments_and_log(payments_for_exclude, {"excluded": True}, job.config.get("user_id"))
+        update_payments_and_log(payments_for_undo_exclude, {"excluded": False}, job.config.get("user_id"))
 
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()

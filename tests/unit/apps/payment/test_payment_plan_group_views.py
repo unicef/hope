@@ -1878,8 +1878,9 @@ def test_delivery_import_xlsx_queues_async_task_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    (called_group,) = mocked_task.call_args[0]
+    called_group, called_user_id = mocked_task.call_args[0]
     assert called_group.id == group.id
+    assert called_user_id == str(user.pk)
 
 
 @pytest.mark.parametrize(

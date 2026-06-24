@@ -231,7 +231,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             for payment_plan_id, service in self.per_plan_services.items():
                 payment_plan = service.payment_plan
                 old_payment_plan = copy_model_object(payment_plan)
-                service.import_payment_list()
+                service.import_payment_list(user_id)
                 payment_plan.remove_export_files()
                 flow = PaymentPlanFlow(payment_plan)
                 flow.background_action_status_none()

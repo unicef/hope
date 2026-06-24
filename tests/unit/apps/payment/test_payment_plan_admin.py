@@ -141,7 +141,8 @@ def test_payment_plan_post_sync_with_payment_gateway(mock_perm, mock_sync, admin
     )
     response = admin_client.post(url)
 
-    mock_sync.assert_called_once_with(payment_plan)
+    mock_sync.assert_called_once()
+    assert mock_sync.call_args[0][0] == payment_plan
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 

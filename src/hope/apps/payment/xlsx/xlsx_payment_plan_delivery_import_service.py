@@ -11,10 +11,12 @@ from django.utils import timezone
 import openpyxl
 import pytz
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
 from hope.apps.payment.utils import (
+    bulk_log_payment_changes,
     calculate_counts,
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -57,6 +59,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         self.payment_ids: list = list(self.payments_dict.keys())
         self.payment_ids_from_xlsx: list = []
         self.payments_to_save: list = []
+        self.old_payments: dict = {}
         self.payment_verifications_to_save: list = []
         self.required_columns: list[str] = ["payment_id", "delivered_quantity"]
         self.xlsx_headers = []
@@ -266,7 +269,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             self._validate_imported_file()
         self.logger.info("Finished validation")
 
-    def import_payment_list(self) -> None:
+    def import_payment_list(self, user_id: str | None = None) -> None:
         self.logger.info("Starting importing payment list")
         exchange_rate = self.payment_plan.exchange_rate
 
@@ -290,6 +293,10 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 "extras",
             ),
             batch_size=500,
+        )
+        bulk_log_payment_changes(
+            [(self.old_payments[payment.pk], payment) for payment in self.payments_to_save],
+            user_id,
         )
         self.logger.info("Update total cash in households")
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
@@ -387,6 +394,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 or (transaction_status_blockchain_link != payment.transaction_status_blockchain_link)
                 or (new_extras != (payment.extras or {}))
             ):
+                self.old_payments[payment.pk] = copy_model_object(payment)
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=delivered_quantity,

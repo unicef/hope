@@ -16,6 +16,7 @@ from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
 from hope.apps.payment.utils import (
+    bulk_log_payment_changes,
     calculate_counts,
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -43,6 +44,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self.household_ids_from_xlsx: list[str] = []
         self.household_updates: dict[str, Decimal] = {}
         self.payments_to_save: list[Payment] = []
+        self.old_payments: dict = {}
         self.payment_verifications_to_save: list[PaymentVerification] = []
         self.payment_plans_to_update: dict[str, PaymentPlan] = {}
         self.payment_verification_plans_to_update: dict[str, Any] = {}
@@ -251,6 +253,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 or payment.status != status
                 or payment.delivery_date != delivery_date
             ):
+                self.old_payments[payment.pk] = copy_model_object(payment)
                 payment.delivered_quantity = delivered_quantity_value
                 payment.delivered_quantity_usd = delivered_quantity_usd
                 payment.status = status
@@ -269,6 +272,10 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
             self.payments_to_save,
             ("delivered_quantity", "delivered_quantity_usd", "status", "delivery_date"),
             batch_size=500,
+        )
+        bulk_log_payment_changes(
+            [(self.old_payments[payment.pk], payment) for payment in self.payments_to_save],
+            user_id,
         )
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))
