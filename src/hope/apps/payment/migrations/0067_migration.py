@@ -53,7 +53,9 @@ def create_default_purpose_and_backfill(apps, schema_editor):
     )
 
     ungrouped_pps = list(
-        PaymentPlan.objects.filter(payment_plan_group__isnull=True).values_list("id", "name", "program_cycle_id")
+        PaymentPlan.objects.filter(payment_plan_group__isnull=True, is_removed=False).values_list(
+            "id", "name", "program_cycle_id"
+        )
     )
     _bulk_create_in_batches(
         PaymentPlanGroup,
