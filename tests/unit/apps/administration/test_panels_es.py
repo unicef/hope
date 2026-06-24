@@ -42,7 +42,8 @@ def test_es_panel_get_renders_config(superuser_client: Client) -> None:
 
 def test_es_panel_post_info_returns_cluster_info(superuser_client: Client, mocker: Any) -> None:
     conn = mocker.Mock()
-    conn.info.return_value = {"version": {"number": "8.14.0"}}
+    # es-py 9.x wraps responses in an ObjectApiResponse; the panel reads ``.body``.
+    conn.info.return_value = mocker.Mock(body={"version": {"number": "8.14.0"}})
     mocker.patch("hope.apps.administration.panels.es.create_connection", return_value=conn)
 
     response = superuser_client.post(reverse("admin:console-es"), {"action": "info"})
