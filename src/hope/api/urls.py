@@ -4,6 +4,7 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rest_framework.permissions import AllowAny
 from rest_framework.routers import DefaultRouter
 
 from hope.api import endpoints
@@ -26,13 +27,15 @@ router.register(r"choices", ChoicesViewSet, basename="choices")
 
 
 urlpatterns = [
-    re_path("^$", SpectacularAPIView.as_view(), name="schema"),
+    re_path("^$", SpectacularAPIView.as_view(permission_classes=[AllowAny]), name="schema"),
     re_path(
         "^swagger/$",
-        SpectacularSwaggerView.as_view(url_name="api:schema"),
+        SpectacularSwaggerView.as_view(permission_classes=[AllowAny], url_name="api:schema"),
         name="swagger-ui",
     ),
-    re_path("^redoc/$", SpectacularRedocView.as_view(url_name="api:schema"), name="redoc"),
+    re_path(
+        "^redoc/$", SpectacularRedocView.as_view(permission_classes=[AllowAny], url_name="api:schema"), name="redoc"
+    ),
     path("", include("hope.apps.accountability.api.urls", namespace="accountability")),
     path("", include("hope.apps.activity_log.api.urls", namespace="activity-logs")),
     path("", include("hope.apps.core.api.urls", namespace="core")),
