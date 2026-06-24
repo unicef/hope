@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("payment", "0064_migration"),
+        ("payment", "0066_migration"),
         ("program", "0018_migration"),
     ]
 
