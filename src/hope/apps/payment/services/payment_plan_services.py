@@ -417,7 +417,10 @@ class PaymentPlanService:
                 flow.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
                 # AB#272790
-                transaction.on_commit(lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan))
+                release_user_id = str(self.user.pk) if self.user else None
+                transaction.on_commit(
+                    lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
+                )
 
             if approval_type == Approval.REJECT:
                 flow = PaymentPlanFlow(self.payment_plan)

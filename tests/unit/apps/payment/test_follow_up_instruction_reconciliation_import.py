@@ -35,7 +35,7 @@ from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service i
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
-from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentVerification
+from hope.models import FollowUpInstruction, LogEntry, Payment, PaymentPlan, PaymentVerification
 
 pytestmark = pytest.mark.django_db
 
@@ -260,6 +260,37 @@ def test_reconciliation_import_happy_path_updates_child_payments_and_removes_sta
     assert payment_three.delivered_quantity == Decimal("0.00")
     assert payment_three.status == Payment.STATUS_NOT_DISTRIBUTED
     assert all(payment_plan.status == PaymentPlan.Status.FINISHED for payment_plan in child_payment_plans)
+
+
+@pytest.mark.enable_activity_log
+def test_reconciliation_import_creates_activity_log_per_child_plan(
+    user,
+    instruction,
+    child_payment_plans,
+    instruction_payments,
+    delivery_template,
+    django_capture_on_commit_callbacks,
+):
+    instruction.reconciliation_import_file = FileTempFactory(
+        object_id=instruction.pk,
+        created_by=user,
+        file=ContentFile(_build_reconciliation_file(instruction), name="instruction-reconciliation.xlsx"),
+    )
+    instruction.save(update_fields=["reconciliation_import_file", "background_action_status", "updated_at"])
+
+    job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id), "user_id": str(user.id)})
+
+    with patch(
+        "hope.apps.payment.services.payment_plan_services.PaymentPlanService.recalculate_signatures_in_batch"
+    ):
+        with django_capture_on_commit_callbacks(execute=True):
+            import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job)
+
+    child_ids = [payment_plan.id for payment_plan in child_payment_plans]
+    logs = LogEntry.objects.filter(object_id__in=child_ids, action=LogEntry.UPDATE)
+    assert logs.count() == len(child_ids)
+    assert all(log.user == user for log in logs)
+    assert all(log.changes["status"]["to"] == PaymentPlan.Status.FINISHED for log in logs)
 
 
 def test_import_household_skips_payment_when_values_unchanged(

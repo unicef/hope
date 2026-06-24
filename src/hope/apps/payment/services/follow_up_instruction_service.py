@@ -100,11 +100,19 @@ class FollowUpInstructionService:
             created_by=user,
         )
         for source_plan in source_plans:
-            PaymentPlanService(source_plan).create_follow_up(
+            follow_up_payment_plan = PaymentPlanService(source_plan).create_follow_up(
                 user=user,
                 dispersion_start_date=dispersion_start_date,
                 dispersion_end_date=dispersion_end_date,
                 follow_up_instruction=instruction,
+            )
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=user,
+                programs=follow_up_payment_plan.program.pk,
+                old_object=None,
+                new_object=follow_up_payment_plan,
             )
         return instruction
 
@@ -279,6 +287,6 @@ class FollowUpInstructionService:
         flow.background_action_status_xlsx_importing_reconciliation()
         instruction.reconciliation_import_file = file_temp
         instruction.save(update_fields=["background_action_status", "reconciliation_import_file", "updated_at"])
-        import_follow_up_instruction_reconciliation_from_xlsx_async_task(instruction)
+        import_follow_up_instruction_reconciliation_from_xlsx_async_task(instruction, str(user.id))
         instruction.refresh_from_db(fields=["background_action_status", "reconciliation_import_file"])
         return instruction

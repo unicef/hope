@@ -935,6 +935,7 @@ class PaymentPlanViewSet(
             payment_plan,
             serializer.validated_data["excluded_households_ids"],
             serializer.validated_data.get("exclusion_reason", ""),
+            str(request.user.pk),
         )
 
         flow = PaymentPlanFlow(payment_plan)
@@ -1059,7 +1060,10 @@ class PaymentPlanViewSet(
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_steficon_run()
             payment_plan.save()
-            transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule))
+            user_id = str(request.user.pk)
+            transaction.on_commit(
+                lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule, user_id)
+            )
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1146,7 +1150,10 @@ class PaymentPlanViewSet(
             payment_plan.save()
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
-            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan))
+            user_id = str(request.user.pk)
+            transaction.on_commit(
+                lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan, user_id)
+            )
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
@@ -2147,7 +2154,7 @@ class TargetPopulationViewSet(
         tp.steficon_rule_targeting = engine_rule.latest
         tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
         tp.save()
-        payment_plan_apply_steficon_hh_selection_async_task(tp, str(engine_rule.id))
+        payment_plan_apply_steficon_hh_selection_async_task(tp, str(engine_rule.id), str(request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -2681,7 +2688,10 @@ class PaymentPlanGroupViewSet(
             PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
         )
         payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status"])
-        transaction.on_commit(lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group))
+        user_id = str(request.user.pk)
+        transaction.on_commit(
+            lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group, user_id)
+        )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
             status=status.HTTP_200_OK,

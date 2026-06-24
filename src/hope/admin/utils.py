@@ -402,7 +402,7 @@ class PaymentPlanCeleryTasksMixin:
                 return redirect(reverse(self.url, args=[pk]))
 
             if self._terminate_active_payment_plan_jobs(pp, task_name):
-                import_payment_plan_delivery_from_xlsx_async_task(pp)
+                import_payment_plan_delivery_from_xlsx_async_task(pp, str(request.user.pk))
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:

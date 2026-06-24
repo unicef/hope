@@ -10,6 +10,7 @@ from django.db.models import Prefetch
 from django.utils import timezone
 import openpyxl
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
@@ -18,6 +19,7 @@ from hope.apps.payment.utils import (
     calculate_counts,
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
+    log_payment_plan_change,
     to_decimal,
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
@@ -258,7 +260,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 self._update_payment_verification(payment, delivered_quantity_value)
             remaining_quantity -= allocated_quantity
 
-    def import_payment_list(self) -> None:
+    def import_payment_list(self, user_id: str | None = None) -> None:
         self.logger.info("Starting instruction reconciliation import")
         for household_unicef_id, delivered_quantity in self.household_updates.items():
             self._import_household(household_unicef_id, delivered_quantity)
@@ -274,10 +276,12 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
             calculate_counts(payment_verification_plan)
             payment_verification_plan.save()
         for payment_plan in self.payment_plans_to_update.values():
+            old_payment_plan = copy_model_object(payment_plan)
             payment_plan.update_money_fields()
             if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
                 flow = PaymentPlanFlow(payment_plan)
                 flow.status_finished()
                 payment_plan.save()
             payment_plan.program_cycle.save()
+            log_payment_plan_change(payment_plan, old_payment_plan, user_id)
         self.logger.info("Finished instruction reconciliation import")

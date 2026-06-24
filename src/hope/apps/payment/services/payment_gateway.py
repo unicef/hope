@@ -10,12 +10,14 @@ from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
+    log_payment_plan_change,
     to_decimal,
 )
 from hope.models import (
@@ -685,6 +687,7 @@ class PaymentGatewayService:
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.exchange_rate
+            old_payment_plan = copy_model_object(payment_plan)
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
@@ -707,6 +710,7 @@ class PaymentGatewayService:
                     flow = PaymentPlanFlow(payment_plan)
                     flow.status_finished()
                     payment_plan.save()
+                    log_payment_plan_change(payment_plan, old_payment_plan, None)
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
@@ -715,6 +719,7 @@ class PaymentGatewayService:
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
 
+        old_payment_plan = copy_model_object(payment_plan)
         pg_payment_record = self.api.get_record(payment.id)
         if pg_payment_record:
             self.update_payment(
@@ -729,6 +734,7 @@ class PaymentGatewayService:
                 flow = PaymentPlanFlow(payment_plan)
                 flow.status_finished()
                 payment_plan.save()
+                log_payment_plan_change(payment_plan, old_payment_plan, None)
                 for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
                     self.change_payment_instruction_status(
                         PaymentInstructionStatus.FINALIZED,
@@ -738,6 +744,7 @@ class PaymentGatewayService:
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
         exchange_rate = payment_plan.exchange_rate
+        old_payment_plan = copy_model_object(payment_plan)
 
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
@@ -764,6 +771,7 @@ class PaymentGatewayService:
             flow = PaymentPlanFlow(payment_plan)
             flow.status_finished()
             payment_plan.save()
+            log_payment_plan_change(payment_plan, old_payment_plan, None)
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(
                     PaymentInstructionStatus.FINALIZED,

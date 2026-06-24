@@ -7,8 +7,10 @@ from typing import IO, TYPE_CHECKING
 from django.db import transaction
 import openpyxl
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import log_payment_plan_change
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
 from hope.models import (
@@ -222,12 +224,13 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 )
             )
 
-    def import_payment_list(self) -> None:
+    def import_payment_list(self, user_id: str | None = None) -> None:
         if not self.per_plan_services:
             self._build_per_plan_services()
         with transaction.atomic():
             for payment_plan_id, service in self.per_plan_services.items():
                 payment_plan = service.payment_plan
+                old_payment_plan = copy_model_object(payment_plan)
                 service.import_payment_list()
                 payment_plan.remove_export_files()
                 flow = PaymentPlanFlow(payment_plan)
@@ -236,6 +239,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
                     flow.status_finished()
                 payment_plan.save()
+                log_payment_plan_change(payment_plan, old_payment_plan, user_id)
                 logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
             # all plans in the group share one cycle: invalidate the cycle-list cache once

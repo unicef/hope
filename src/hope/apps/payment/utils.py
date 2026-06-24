@@ -17,6 +17,8 @@ from hope.models import (
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
+    User,
+    log_create,
 )
 
 if TYPE_CHECKING:
@@ -24,6 +26,29 @@ if TYPE_CHECKING:
 
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.currency import Currency
+
+
+def log_payment_plan_change(
+    payment_plan: PaymentPlan,
+    old_payment_plan: PaymentPlan,
+    user_id: str | None,
+) -> None:
+    """Create an activity log entry for a PaymentPlan change applied outside a logging view.
+
+    Async tasks and gateway/file sync flows mutate a PaymentPlan after (or without) the
+    dispatching view's ``log_create()`` snapshot, so the actual changes (status, steficon rule,
+    totals, ...) would otherwise go unlogged. ``user_id`` is None for system-initiated runs
+    (periodic gateway sync, rebuild).
+    """
+    user = User.objects.filter(pk=user_id).first() if user_id else None
+    log_create(
+        mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+        business_area_field="business_area",
+        user=user,
+        programs=payment_plan.program.pk,
+        old_object=old_payment_plan,
+        new_object=payment_plan,
+    )
 
 
 def get_number_of_samples(

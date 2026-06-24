@@ -16,6 +16,7 @@ from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
+from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
@@ -27,6 +28,7 @@ from hope.models import (
     PaymentPlan,
     PaymentPlanGroup,
     PaymentPlanSupportingDocument,
+    log_create,
 )
 
 if TYPE_CHECKING:
@@ -117,6 +119,21 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> Any:
         request._payment_plan_obj = obj
         return super().get_form(request, obj, change, **kwargs)
+
+    def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:
+        old_payment_plan = copy_model_object(PaymentPlan.objects.get(pk=obj.pk)) if change and obj.pk else None
+        super().save_model(request, obj, form, change)
+        # skip a no-op log when an edit touched only fields outside ACTIVITY_LOG_MAPPING
+        if old_payment_plan is not None and not create_diff(old_payment_plan, obj, PaymentPlan.ACTIVITY_LOG_MAPPING):
+            return
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=obj.program.pk,
+            old_object=old_payment_plan,
+            new_object=obj,
+        )
 
     def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "payment_plan_purposes":
