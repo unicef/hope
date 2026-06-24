@@ -189,8 +189,12 @@
             "funds_commitments": null,
             "available_funds_commitments": [],
             "payment_verification_plans": [],
+            "payment_verification_summary": null,
             "admin_url": "/api/unicorn/payment/paymentplan/911e9fb2-a41a-4d07-97c2-29722c9d749a/change/",
             "abort_comment": "",
+            "closure_comment": null,
+            "closed_by": null,
+            "status_date": "2025-01-01T00:00:00Z",
             "flat_amount_value": null,
             "payment_plan_purposes": []
         },

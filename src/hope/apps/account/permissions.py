@@ -110,6 +110,7 @@ class Permissions(Enum):
     PM_SYNC_PAYMENT_PLAN_WITH_PG = auto()
     PM_SYNC_PAYMENT_WITH_PG = auto()
     PM_CLOSE_FINISHED = auto()
+    PM_MARK_READY_FOR_CLOSURE = auto()
     PM_ABORT = auto()
     PM_REACTIVATE_ABORT = auto()
     PM_CUSTOM_EXCHANGE_RATE = auto()

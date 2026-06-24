@@ -10,6 +10,8 @@ import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
 import { AcceptedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
+import { FinishedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
+import { ReadyForClosurePaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/ReadyForClosurePaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
 import { InReviewPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
@@ -65,6 +67,10 @@ export function FollowUpPaymentPlanDetailsHeader({
   );
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+  const canMarkReadyForClosure = hasPermissions(
+    PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
+    permissions,
+  );
 
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
@@ -74,6 +80,9 @@ export function FollowUpPaymentPlanDetailsHeader({
     paymentPlan.canSendToVision;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+  const canSendToPaymentGateway =
+    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
+    paymentPlan.canSendToPaymentGateway;
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
 
   let buttons: ReactElement | null = null;
@@ -148,16 +157,37 @@ export function FollowUpPaymentPlanDetailsHeader({
       );
       break;
     case 'ACCEPTED':
-    case 'FINISHED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSendToVision={canSendToVision}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
+
+        />
+      );
+      break;
+    case 'FINISHED':
+      buttons = (
+        <FinishedPaymentPlanHeaderButtons
+          canSendToPaymentGateway={canSendToPaymentGateway}
+          paymentPlan={paymentPlan}
+          canSplit={canSplit}
+          canMarkReadyForClosure={canMarkReadyForClosure}
+        />
+      );
+      break;
+    case 'READY_FOR_CLOSURE':
+      buttons = (
+        <ReadyForClosurePaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canSendBack={canMarkReadyForClosure}
           canClose={canClose}
         />
       );
+      break;
+    case 'CLOSED':
+      buttons = null;
       break;
     default:
       break;

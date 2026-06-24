@@ -221,8 +221,19 @@
                     "admin_url": "/api/unicorn/payment/paymentverificationplan/bcde8c43-ddff-4360-8690-842ebf44d10c/change/"
                 }
             ],
+            "payment_verification_summary": {
+                "id": "67a6fcf2-1d93-4e95-a314-df3dcaf92f41",
+                "status": "PENDING",
+                "activation_date": null,
+                "completion_date": null,
+                "number_of_verification_plans": 1,
+                "status_display": "Pending"
+            },
             "admin_url": "/api/unicorn/payment/paymentplan/b546a8d8-a5c1-4161-b3fb-6186f0ca192f/change/",
             "abort_comment": "",
+            "closure_comment": null,
+            "closed_by": null,
+            "status_date": "2025-01-01T00:00:00Z",
             "flat_amount_value": null,
             "payment_plan_purposes": []
         },
