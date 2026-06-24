@@ -130,6 +130,10 @@ from hope.apps.payment.utils import calculate_counts, from_received_to_status
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+    EmptyDeliveryExportError,
+    XlsxPaymentPlanGroupDeliveryExportService,
+)
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
     XlsxPaymentPlanGroupDeliveryImportService,
 )
@@ -2597,11 +2601,6 @@ class PaymentPlanGroupViewSet(
 
             # Reject up-front if every plan would be filtered out (e.g. no FSP XLSX template mapping),
             # so the user gets the error on click instead of a silently failing background task.
-            from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
-                EmptyDeliveryExportError,
-                XlsxPaymentPlanGroupDeliveryExportService,
-            )
-
             exportable_ids = XlsxPaymentPlanGroupDeliveryExportService(
                 payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
             ).preview_export()

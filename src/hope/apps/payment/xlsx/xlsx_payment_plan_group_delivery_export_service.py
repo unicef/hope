@@ -107,11 +107,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         return None
 
     def preview_export(self) -> list:
-        """Return the ids of plans that would be exported (empty if every plan would be skipped).
-
-        Lets callers (e.g. the export endpoint) detect up-front that an export would produce
-        no rows and reject the request synchronously instead of failing later in the task.
-        """
+        """Return the ids of plans that would be exported (empty if every plan would be skipped)."""
         return [
             payment_plan.id
             for payment_plan in self.payment_plans
