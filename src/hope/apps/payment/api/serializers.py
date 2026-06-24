@@ -1,5 +1,6 @@
 from decimal import Decimal
 import json
+import logging
 from typing import Any, cast
 
 from django.db import transaction
@@ -64,6 +65,8 @@ from hope.models import (
     log_create,
 )
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
@@ -959,7 +962,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:
         if not obj.currency:
             return None
-        return obj.get_unore_exchange_rate()
+        try:
+            return obj.get_unore_exchange_rate()
+        except Exception as e:  # noqa: BLE001
+            # The UNORE exchange rate is fetched from an external API. If that call fails
+            # still load the payment plan instead of 500.
+            logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", obj.pk, e)
+            return None
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
         if not hasattr(self, "_payments_summary_cache"):
