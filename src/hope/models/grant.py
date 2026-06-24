@@ -4,8 +4,9 @@ from typing import Any
 
 @unique
 class Grant(Enum):
-    def _generate_next_value_(self: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
-        return self
+    @staticmethod
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:
+        return name
 
     API_READ_ONLY = auto()
     API_RDI_UPLOAD = auto()

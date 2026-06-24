@@ -45,10 +45,10 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    def __contains__(  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
-        self, key: str, *args: Any, **kwargs: Any
-    ) -> bool:
-        return key.casefold() in (element.casefold() for element in self)
+    def __contains__(self, key: object) -> bool:
+        if isinstance(key, str):
+            return key.casefold() in (element.casefold() for element in self)
+        return super().__contains__(key)
 
 
 def unique_slugify(
