@@ -80,9 +80,6 @@ export function FollowUpPaymentPlanDetailsHeader({
     paymentPlan.canSendToVision;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
 
   let buttons: ReactElement | null = null;
@@ -159,11 +156,8 @@ export function FollowUpPaymentPlanDetailsHeader({
     case 'ACCEPTED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
-          canSendToVision={canSendToVision}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
-
         />
       );
       break;

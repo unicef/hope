@@ -37,7 +37,4 @@ export function AcceptedPaymentPlanHeaderButtons({
       </>
     </Box>
   );
-      </>
-    </Box>
-  );
 }
