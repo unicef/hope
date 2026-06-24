@@ -15,9 +15,7 @@ pytestmark = pytest.mark.django_db
 
 
 def _set_phone_validity(individual_id: str, *, primary: bool, alternative: bool) -> None:
-    Individual.objects.filter(pk=individual_id).update(
-        phone_no_valid=primary, phone_no_alternative_valid=alternative
-    )
+    Individual.objects.filter(pk=individual_id).update(phone_no_valid=primary, phone_no_alternative_valid=alternative)
 
 
 def _filtered_pks(arg: bool) -> set:
@@ -133,9 +131,9 @@ def test_not_equals_comparison_inverts_the_match() -> None:
     _set_phone_validity(hh_invalid.head_of_household_id, primary=False, alternative=False)
 
     pks = set(
-        Household.objects.filter(
-            get_collector_has_valid_phone_no_query("NOT_EQUALS", [True])
-        ).values_list("pk", flat=True)
+        Household.objects.filter(get_collector_has_valid_phone_no_query("NOT_EQUALS", [True])).values_list(
+            "pk", flat=True
+        )
     )
     assert hh_invalid.pk in pks
     assert hh_valid.pk not in pks
