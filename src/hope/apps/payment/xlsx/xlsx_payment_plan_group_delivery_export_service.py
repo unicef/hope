@@ -1,6 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -158,7 +158,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 self.skipped_reasons.append(reason)
                 continue
             per_fsp_service = XlsxPaymentPlanDeliveryExportService(payment_plan, shared_lookups=shared_lookups)
-            per_fsp_service.prepare_headers(template)
+            per_fsp_service.prepare_headers(cast("FinancialServiceProviderXlsxTemplate", template))
             if not header:
                 header = per_fsp_service.header_list
                 self.allow_export_fsp_auth_code = per_fsp_service.allow_export_fsp_auth_code
