@@ -5,6 +5,7 @@ import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
+  Alert,
   Box,
   FormControlLabel,
   Radio,
@@ -156,6 +157,15 @@ function ConversionToUsd({
               </LoadingButton>
             </Box>
           </Title>
+          {paymentPlan.unoreExchangeRateUnavailable && (
+            <Box mb={3}>
+              <Alert severity="warning">
+                {t(
+                  'The UNORE exchange rate service is currently unavailable. The latest rate could not be retrieved - please try again later or apply a custom exchange rate.',
+                )}
+              </Alert>
+            </Box>
+          )}
           <RadioGroup
             value={selectedOption}
             onChange={(event) =>

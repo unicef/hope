@@ -883,6 +883,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
     closed_by = serializers.SerializerMethodField()
     unore_exchange_rate = serializers.SerializerMethodField()
+    unore_exchange_rate_unavailable = serializers.SerializerMethodField()
     payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
@@ -939,6 +940,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "exchange_rate",
             "custom_exchange_rate",
             "unore_exchange_rate",
+            "unore_exchange_rate_unavailable",
             "eligible_payments_count",
             "funds_commitments",
             "available_funds_commitments",
@@ -959,16 +961,27 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             return None
         return f"{obj.closed_by.first_name} {obj.closed_by.last_name}"
 
+    def _resolve_unore_exchange_rate(self, obj: PaymentPlan) -> tuple[float | None, bool]:
+        """Fetch the UNORE rate once, returning (rate, unavailable)."""
+        if not hasattr(self, "_unore_exchange_rate_cache"):
+            rate: float | None = None
+            unavailable = False
+            if obj.currency:
+                try:
+                    rate = obj.get_unore_exchange_rate()
+                except Exception as e:  # noqa: BLE001
+                    # The UNORE exchange rate is fetched from an external API. If that call fails
+                    # still load the payment plan instead of 500, and flag it for the UI.
+                    logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", obj.pk, e)
+                    unavailable = True
+            self._unore_exchange_rate_cache: tuple[float | None, bool] = (rate, unavailable)
+        return self._unore_exchange_rate_cache
+
     def get_unore_exchange_rate(self, obj: PaymentPlan) -> float | None:
-        if not obj.currency:
-            return None
-        try:
-            return obj.get_unore_exchange_rate()
-        except Exception as e:  # noqa: BLE001
-            # The UNORE exchange rate is fetched from an external API. If that call fails
-            # still load the payment plan instead of 500.
-            logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", obj.pk, e)
-            return None
+        return self._resolve_unore_exchange_rate(obj)[0]
+
+    def get_unore_exchange_rate_unavailable(self, obj: PaymentPlan) -> bool:
+        return self._resolve_unore_exchange_rate(obj)[1]
 
     def _payments_summary(self, payment_plan: PaymentPlan) -> dict[str, int]:
         if not hasattr(self, "_payments_summary_cache"):

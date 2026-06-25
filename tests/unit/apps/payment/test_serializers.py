@@ -422,6 +422,21 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
 
     assert data["id"] == str(payment_plan.id)
     assert data["unore_exchange_rate"] is None
+    assert data["unore_exchange_rate_unavailable"] is True
+
+
+def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_without_currency(
+    payment_plan_detail_context: dict[str, Any],
+) -> None:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    user = payment_plan_detail_context["user"]
+    payment_plan.currency = None
+    payment_plan.save(update_fields=["currency"])
+
+    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
+
+    assert data["unore_exchange_rate"] is None
+    assert data["unore_exchange_rate_unavailable"] is False
 
 
 def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_client(
@@ -437,7 +452,10 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
-    assert data["unore_exchange_rate"] == 0.377
+    expected_rate = payment_plan.get_unore_exchange_rate()
+    assert expected_rate is not None
+    assert data["unore_exchange_rate"] == expected_rate
+    assert data["unore_exchange_rate_unavailable"] is False
 
 
 @pytest.mark.parametrize(
