@@ -227,7 +227,9 @@ def create_follow_up_instruction_delivery_xlsx_async_task(
 
 
 def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
     from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+        EmptyDeliveryExportError,
         XlsxPaymentPlanGroupDeliveryExportService,
     )
     from hope.models import PaymentPlanGroup, User
@@ -268,6 +270,14 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 and payment_plan_group.cycle.program.business_area.enable_email_notification
             ):
                 send_email_notification(service, user)
+        except EmptyDeliveryExportError as exc:
+            # Nothing was exportable (every plan skipped).
+            logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
+            payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+            payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+            job.errors = {**job.errors, "export_skipped_payment_plans": exc.skipped_reasons}
+            job.save(update_fields=["errors"])
+            raise NonRetriableTaskError(str(exc)) from exc
         except Exception:
             logger.exception("Export Payment Plan Group Delivery XLSX Error")
             payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
