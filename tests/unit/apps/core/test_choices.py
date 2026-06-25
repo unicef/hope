@@ -158,12 +158,10 @@ def test_choices_permissions_returns_full_permission_catalog(authenticated_clien
 
 
 @pytest.mark.django_db
-def test_choices_permissions_allows_unauthenticated_access(anonymous_client):
-    # FE type generation (enhance_and_camelize_openapi.js) fetches this endpoint without credentials
+def test_choices_permissions_denies_unauthenticated_access(anonymous_client):
     response = anonymous_client.get(reverse("api:choices-permissions"))
 
-    assert response.status_code == 200
-    assert len(response.data) == len(Permissions)
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
