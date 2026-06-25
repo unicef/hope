@@ -1,6 +1,7 @@
 import pytest
 
 from extras.test_utils.factories import (
+    BeneficiaryGroupFactory,
     DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -8,7 +9,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
 )
 from hope.apps.core.attributes_qet_queries import get_collector_has_valid_phone_no_query
-from hope.apps.household.const import ROLE_ALTERNATE
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.models import DataCollectingType, Household, Individual
 
 pytestmark = pytest.mark.django_db
@@ -70,18 +71,19 @@ def test_checks_collector_not_just_any_member() -> None:
 
 def test_follows_the_collector_role_not_the_head_of_household() -> None:
     # Head has an invalid phone; a distinct ROLE_PRIMARY collector has a valid one -> included.
-    hh = HouseholdFactory()
+    hh = HouseholdFactory(create_role=False)
     _set_phone_validity(hh.head_of_household_id, primary=False, alternative=False)
     collector = IndividualFactory(
         household=hh,
         business_area=hh.business_area,
         program=hh.program,
         registration_data_import=hh.registration_data_import,
-        phone_no_valid=True,
     )
-    hh.individuals_and_roles.all().delete()
-    IndividualRoleInHouseholdFactory(household=hh, individual=collector)
-
+    collector.phone_no_valid = True
+    collector.save()
+    IndividualRoleInHouseholdFactory(household=hh, individual=collector, role=ROLE_PRIMARY)
+    assert collector.phone_no_valid is True
+    assert hh.individuals_and_roles.count() == 1
     assert hh.pk in _filtered_pks(True)
 
 
@@ -94,18 +96,17 @@ def test_includes_when_alternate_collector_has_valid_phone() -> None:
         business_area=hh.business_area,
         program=hh.program,
         registration_data_import=hh.registration_data_import,
-        phone_no_valid=True,
     )
+    alternate.phone_no_valid = True
+    alternate.save()
     IndividualRoleInHouseholdFactory(household=hh, individual=alternate, role=ROLE_ALTERNATE)
-
     assert hh.pk in _filtered_pks(True)
 
 
 def test_works_for_social_worker_people_program() -> None:
-    # People (social-worker) programs use the same household + ROLE_PRIMARY structure;
-    # the query is program-agnostic, so it filters them identically.
+    beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    program = ProgramFactory(data_collecting_type=dct)
+    program = ProgramFactory(data_collecting_type=dct, beneficiary_group=beneficiary_group)
     assert program.is_social_worker_program is True
 
     hh_valid = HouseholdFactory(program=program, business_area=program.business_area)
