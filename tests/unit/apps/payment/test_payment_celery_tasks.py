@@ -1856,6 +1856,36 @@ def test_export_delivery_task_skips_token_generation_when_disabled(
     mock_send_email.assert_not_called()
 
 
+@patch(
+    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service.XlsxPaymentPlanGroupDeliveryExportService"
+)
+def test_export_delivery_task_marks_error_without_retry_when_nothing_exportable(
+    mock_service_cls: Mock,
+    payment_plan_group_with_accepted_plan,
+    user,
+) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import EmptyDeliveryExportError
+
+    group = payment_plan_group_with_accepted_plan
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = False
+    mock_service.save_xlsx_file.side_effect = EmptyDeliveryExportError(["PP-1: no FSP XLSX Template"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": str(user.pk)},
+    )
+
+    with pytest.raises(NonRetriableTaskError):
+        export_payment_plan_group_delivery_xlsx_async_task_action(job)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+    job.refresh_from_db()
+    assert job.errors["export_skipped_payment_plans"] == ["PP-1: no FSP XLSX Template"]
+
+
 def test_import_delivery_group_task_clears_status_on_success(group_with_accepted_plan_and_import_file, user) -> None:
     group = group_with_accepted_plan_and_import_file
 
