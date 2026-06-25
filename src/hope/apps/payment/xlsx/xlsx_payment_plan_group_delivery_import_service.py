@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from io import BytesIO
 import logging
-from typing import IO, TYPE_CHECKING
+from typing import IO, TYPE_CHECKING, cast
 
 from django.db import transaction
 import openpyxl
@@ -230,7 +230,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         with transaction.atomic():
             for payment_plan_id, service in self.per_plan_services.items():
                 payment_plan = service.payment_plan
-                old_payment_plan = copy_model_object(payment_plan)
+                old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
                 service.import_payment_list(user_id)
                 payment_plan.remove_export_files()
                 flow = PaymentPlanFlow(payment_plan)

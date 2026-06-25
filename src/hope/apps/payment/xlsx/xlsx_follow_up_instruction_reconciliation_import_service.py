@@ -4,7 +4,7 @@ import datetime
 from decimal import Decimal
 from io import BytesIO
 import logging
-from typing import IO, TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any, cast
 
 from django.db.models import Prefetch
 from django.utils import timezone
@@ -283,7 +283,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
             calculate_counts(payment_verification_plan)
             payment_verification_plan.save()
         for payment_plan in self.payment_plans_to_update.values():
-            old_payment_plan = copy_model_object(payment_plan)
+            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             payment_plan.update_money_fields()
             if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
                 flow = PaymentPlanFlow(payment_plan)

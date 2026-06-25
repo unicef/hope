@@ -280,9 +280,7 @@ def test_reconciliation_import_creates_activity_log_per_child_plan(
 
     job = SimpleNamespace(config={"follow_up_instruction_id": str(instruction.id), "user_id": str(user.id)})
 
-    with patch(
-        "hope.apps.payment.services.payment_plan_services.PaymentPlanService.recalculate_signatures_in_batch"
-    ):
+    with patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.recalculate_signatures_in_batch"):
         with django_capture_on_commit_callbacks(execute=True):
             import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(job)
 

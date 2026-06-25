@@ -1065,9 +1065,7 @@ class PaymentPlanViewSet(
             flow.background_action_status_steficon_run()
             payment_plan.save()
             user_id = str(request.user.pk)
-            transaction.on_commit(
-                lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule, user_id)
-            )
+            transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule, user_id))
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1155,9 +1153,7 @@ class PaymentPlanViewSet(
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
             user_id = str(request.user.pk)
-            transaction.on_commit(
-                lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan, user_id)
-            )
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan, user_id))
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
@@ -2314,9 +2310,7 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
 
     def perform_create(self, serializer: Any) -> None:
         document = serializer.save()
-        log_payment_plan_supporting_document(
-            document.payment_plan, self.request.user, document.title, created=True
-        )
+        log_payment_plan_supporting_document(document.payment_plan, self.request.user, document.title, created=True)
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:

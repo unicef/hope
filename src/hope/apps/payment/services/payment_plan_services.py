@@ -338,16 +338,16 @@ class PaymentPlanService:
         # validate approval required number and user as well
         self.validate_acceptance_process_approval_count(approval_process)
 
+        approval_type = self.get_approval_type_by_action()
+        approval_comment = self.input_data.get("comment")
         approval_data = {
             "approval_process": approval_process,
             "created_by": self.user,
-            "type": self.get_approval_type_by_action(),
-            "comment": self.input_data.get("comment"),
+            "type": approval_type,
+            "comment": approval_comment,
         }
         Approval.objects.create(**approval_data)
-        log_payment_plan_approval(
-            self.payment_plan, self.user, approval_data["type"], approval_data["comment"]
-        )
+        log_payment_plan_approval(self.payment_plan, self.user, approval_type, approval_comment)
 
         # base on approval required number check if we need update PaymentPlan status after creation new Approval
         self.check_payment_plan_and_update_status(approval_process)

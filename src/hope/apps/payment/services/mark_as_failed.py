@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.db.models import Sum
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -17,7 +17,7 @@ def mark_as_failed(payment_item: Payment, user_id: str | None = None) -> None:
     if payment_item.parent.is_payment_gateway:
         raise DRFValidationError("Payments in payment gateway plans cannot be manually marked as failed")
 
-    old_payment = copy_model_object(payment_item)
+    old_payment = cast("Payment", copy_model_object(payment_item))
     payment_item.mark_as_failed()
     payment_item.save()
     log_payment_change(old_payment, payment_item, user_id)
@@ -34,7 +34,7 @@ def revert_mark_as_failed(
     if payment_item.parent.is_payment_gateway:
         raise DRFValidationError("Payments in payment gateway plans cannot be manually marked as failed")
 
-    old_payment = copy_model_object(payment_item)
+    old_payment = cast("Payment", copy_model_object(payment_item))
     payment_item.revert_mark_as_failed(delivered_quantity, delivery_date)
     payment_item.delivered_quantity_usd = get_quantity_in_usd(
         amount=delivered_quantity,

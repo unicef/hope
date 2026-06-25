@@ -1,7 +1,7 @@
 import datetime
 from decimal import Decimal
 import logging
-from typing import Any
+from typing import Any, cast
 
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
@@ -151,7 +151,7 @@ def create_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJob) 
     user = User.objects.get(pk=job.config["user_id"])
     payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = copy_model_object(payment_plan)
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
 
     try:
         with transaction.atomic():
@@ -350,7 +350,7 @@ def import_payment_plan_payment_list_from_xlsx_async_task_action(job: AsyncRetry
 
     payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = copy_model_object(payment_plan)
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
 
     if not payment_plan.imported_file:
         raise Exception(f"Error import from xlsx, file does not exist for Payment Plan ID {payment_plan.unicef_id}.")
@@ -525,7 +525,7 @@ def import_payment_plan_delivery_from_xlsx_async_task_action(job: AsyncRetryJob)
         id=job.config["payment_plan_id"]
     )
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = copy_model_object(payment_plan)
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
 
     try:
         file_xlsx = payment_plan.reconciliation_import_file.file
@@ -686,7 +686,7 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = copy_model_object(payment_plan)
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
     engine_rule = get_object_or_404(Rule, id=job.config["engine_rule_id"])
     rule: RuleCommit | None = engine_rule.latest
     bulk_size = 1000
@@ -720,7 +720,7 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
         log_pairs_buffer: list = []
         with transaction.atomic():
             for payment in qs.iterator(chunk_size=bulk_size):
-                old_payment = copy_model_object(payment)
+                old_payment = cast("Payment", copy_model_object(payment))
                 result = rule.execute({"household": payment.household, "payment_plan": payment_plan})
 
                 payment.entitlement_quantity = result.value
@@ -795,7 +795,7 @@ def update_exchange_rate_on_release_payments_async_task_action(job: AsyncRetryJo
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = copy_model_object(payment_plan)
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
 
     payment_plan.exchange_rate = payment_plan.get_exchange_rate()
     payment_plan.save(update_fields=["exchange_rate"])
@@ -828,9 +828,7 @@ def update_exchange_rate_on_release_payments_async_task_action(job: AsyncRetryJo
         payment_plan.program_cycle.save()
 
 
-def update_exchange_rate_on_release_payments_async_task(
-    payment_plan: PaymentPlan, user_id: str | None = None
-) -> None:
+def update_exchange_rate_on_release_payments_async_task(payment_plan: PaymentPlan, user_id: str | None = None) -> None:
     payment_plan_id = str(payment_plan.id)
     config = {"payment_plan_id": payment_plan_id, "user_id": user_id}
     AsyncRetryJob.queue_task(
@@ -989,7 +987,7 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
     # for social worker program exclude Individual unicef_id
     is_social_worker_program = payment_plan.program_cycle.program.is_social_worker_program
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = copy_model_object(payment_plan)
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
     pp_payment_items = payment_plan.payment_items.select_related("household")
     error_msg, info_msg = [], []
     filter_key = "household__individuals__unicef_id" if is_social_worker_program else "household__unicef_id"
@@ -1331,7 +1329,7 @@ def payment_plan_apply_steficon_hh_selection_async_task_action(job: AsyncRetryJo
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = copy_model_object(payment_plan)
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
     engine_rule = get_object_or_404(Rule, id=job.config["engine_rule_id"])
     rule: RuleCommit | None = engine_rule.latest
     if not rule:

@@ -475,7 +475,7 @@ class PaymentGatewayService:
 
     @staticmethod
     def _handle_pg_errors(response: AddRecordsResponseData, payments: list[Payment]) -> None:
-        old_payments = [copy_model_object(payment) for payment in payments]
+        old_payments = [cast("Payment", copy_model_object(payment)) for payment in payments]
         for idx, payment in enumerate(payments):
             payment.status = Payment.STATUS_ERROR
             payment.reason_for_unsuccessful_payment = response.errors.get(str(idx), "")
@@ -484,7 +484,7 @@ class PaymentGatewayService:
 
     @staticmethod
     def _handle_pg_success(response: AddRecordsResponseData, payments: list[Payment]) -> None:
-        old_payments = [copy_model_object(payment) for payment in payments]
+        old_payments = [cast("Payment", copy_model_object(payment)) for payment in payments]
         for payment in payments:
             payment.status = Payment.STATUS_SENT_TO_PG
             payment.sent_to_fsp_date = timezone.now()
@@ -638,7 +638,7 @@ class PaymentGatewayService:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return
 
-        old_payment = copy_model_object(payment)
+        old_payment = cast("Payment", copy_model_object(payment))
         payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
@@ -696,7 +696,7 @@ class PaymentGatewayService:
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.exchange_rate
-            old_payment_plan = copy_model_object(payment_plan)
+            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             payment_log_pairs: list = []
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
@@ -731,7 +731,7 @@ class PaymentGatewayService:
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
 
-        old_payment_plan = copy_model_object(payment_plan)
+        old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
         pg_payment_record = self.api.get_record(payment.id)
         if pg_payment_record:
             payment_log_pairs: list = []
@@ -759,7 +759,7 @@ class PaymentGatewayService:
 
     def sync_payment_plan(self, payment_plan: PaymentPlan, user_id: str | None = None) -> None:
         exchange_rate = payment_plan.exchange_rate
-        old_payment_plan = copy_model_object(payment_plan)
+        old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
 
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover

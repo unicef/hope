@@ -25,6 +25,8 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
     from django.db.models import QuerySet
 
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
@@ -54,7 +56,9 @@ def log_payment_plan_change(
     )
 
 
-def _log_payment_plan_event(payment_plan: PaymentPlan, user: "User | None", changes: dict[str, Any]) -> None:
+def _log_payment_plan_event(
+    payment_plan: PaymentPlan, user: "AbstractBaseUser | AnonymousUser | None", changes: dict[str, Any]
+) -> None:
     """Attach a free-form activity-log entry to a PaymentPlan (events the field-diff cannot express)."""
     log = LogEntry.objects.create(
         action=LogEntry.UPDATE,
@@ -71,7 +75,7 @@ def _log_payment_plan_event(payment_plan: PaymentPlan, user: "User | None", chan
 
 def log_payment_plan_approval(
     payment_plan: PaymentPlan,
-    user: "User | None",
+    user: "AbstractBaseUser | AnonymousUser | None",
     approval_type: str,
     comment: str | None,
 ) -> None:
@@ -88,7 +92,7 @@ def log_payment_plan_approval(
 
 def log_payment_plan_supporting_document(
     payment_plan: PaymentPlan,
-    user: "User | None",
+    user: "AbstractBaseUser | AnonymousUser | None",
     title: str,
     *,
     created: bool,
