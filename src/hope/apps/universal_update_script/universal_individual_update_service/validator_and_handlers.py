@@ -110,7 +110,7 @@ def handle_currency_field(
 ) -> Currency | None:
     if value is None or value == "":
         return None
-    return Currency.objects.get(code=value)
+    return Currency.objects.filter(code=value).first()
 
 
 def validate_currency(

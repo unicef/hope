@@ -103,7 +103,11 @@ class Importer:
         self._countries = {c.iso_code3: c.id for c in Country.objects.all()}
 
         # Cache Currency lookups (code -> id mapping)
-        self._currencies = {c.code: c.id for c in Currency.objects.all()}
+        # When duplicate codes exist with different vision_codes, the default (vision_code == code) is preferred
+        self._currencies = {}
+        for c in Currency.objects.all():
+            if c.code not in self._currencies or c.vision_code == c.code:
+                self._currencies[c.code] = c.id
 
         # Dictionary to store household instances by their parser ID (for FK linking)
         self._household_instances = {}

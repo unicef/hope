@@ -653,7 +653,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         elif header == "currency_h_c":
             from hope.models.currency import Currency
 
-            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Currency.objects.get(code=value))
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Currency.objects.filter(code=value).first())
         else:
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True
