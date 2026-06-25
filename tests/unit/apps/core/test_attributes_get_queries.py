@@ -9,8 +9,6 @@ import pytest
 from hope.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
     age_to_birth_date_range_query,
-    country_origin_query,
-    country_query,
     extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
@@ -28,8 +26,6 @@ from hope.apps.core.attributes_qet_queries import (
     get_national_passport_issuer_query,
     get_other_document_number_query,
     get_other_issuer_query,
-    get_receiver_poi_issuer_query,
-    get_receiver_poi_number_query,
     get_role_query,
     get_scope_id_issuer_query,
     get_scope_id_number_query,
@@ -39,7 +35,6 @@ from hope.apps.core.attributes_qet_queries import (
     get_unhcr_id_number_query,
     registration_data_import_query,
 )
-from hope.apps.core.countries import Countries
 from hope.apps.household.const import UNHCR, WFP
 
 TODAY = dt.date.today()
@@ -118,21 +113,6 @@ def test_age_to_birth_date_query_invalid_comparison_method():
 def test_age_to_birth_date_query_incorrect_argument_count():
     with pytest.raises(ValidationError):
         age_to_birth_date_query("EQUALS", [])
-
-
-def test_country_query_equals():
-    q = country_query("EQUALS", ["USA"])
-    assert q == Q(country=Countries.get_country_value("USA"))
-
-
-def test_country_query_not_equals():
-    q = country_query("NOT_EQUALS", ["USA"])
-    assert q == ~Q(country=Countries.get_country_value("USA"))
-
-
-def test_country_query_invalid_comparison_method():
-    with pytest.raises(ValidationError):
-        country_query("INVALID_METHOD", ["USA"])
 
 
 def test_registration_data_import_query():
@@ -307,38 +287,6 @@ def test_get_documents_issuer_query():
     )
     result = get_documents_issuer_query("GENERIC_TYPE", "FRA")
     assert result == expected
-
-
-def test_get_receiver_poi_number_query():
-    expected = Q(documents__type__key="receiver_poi", documents__document_number="12345")
-    result = get_receiver_poi_number_query(None, ["12345"])
-    assert result == expected
-
-
-def test_get_receiver_poi_issuer_query():
-    expected = Q(
-        documents__type__type="receiver_poi",
-        documents__type__country__iso_code3="CAN",
-    )
-    result = get_receiver_poi_issuer_query(None, ["CAN"])
-    assert result == expected
-
-
-def test_country_origin_query_equals():
-    expected = Q(individuals__country_origin="CA")
-    result = country_origin_query("EQUALS", ["CAN"], is_social_worker_query=True)
-    assert result == expected
-
-
-def test_country_origin_query_not_equals():
-    expected = ~Q(individuals__country_origin="CA")
-    result = country_origin_query("NOT_EQUALS", ["CAN"], is_social_worker_query=True)
-    assert result == expected
-
-
-def test_country_origin_query_invalid_comparison():
-    with pytest.raises(ValidationError):
-        country_origin_query("INVALID", ["CAN"], is_social_worker_query=True)
 
 
 def test_get_birth_certificate_issuer_query():
