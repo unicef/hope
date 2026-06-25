@@ -15,7 +15,13 @@ import pyzipper
 
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
-from hope.models import FileTemp, FinancialServiceProviderXlsxTemplate, FspXlsxTemplatePerDeliveryMechanism, PaymentPlan
+from hope.models import (
+    FileTemp,
+    FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
+    Payment,
+    PaymentPlan,
+)
 
 if TYPE_CHECKING:
     from hope.models import PaymentPlanGroup, Program, User
@@ -67,7 +73,9 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 plan_type=PaymentPlan.PlanType.REGULAR,
                 export_tag__isnull=True,
             )
-        self.payment_plans = list(plan_qs.order_by("unicef_id"))
+        self.payment_plans = list(
+            plan_qs.select_related("financial_service_provider", "delivery_mechanism").order_by("unicef_id")
+        )
         self.exported_plan_ids: list = []
         self.skipped_reasons: list[str] = []
         self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = (
@@ -75,19 +83,51 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             if fsp_xlsx_template_id
             else None
         )
+        self._template_map: dict[tuple, FinancialServiceProviderXlsxTemplate] | None = None
+        self._plans_with_blocking_payments: set | None = None
+
+    def _get_template_map(self) -> dict[tuple, FinancialServiceProviderXlsxTemplate]:
+        """Resolve every plan's (fsp, delivery_mechanism) -> xlsx_template in a single query."""
+        if self._template_map is None:
+            pairs = {
+                (pp.financial_service_provider_id, pp.delivery_mechanism_id)
+                for pp in self.payment_plans
+                if pp.financial_service_provider_id and pp.delivery_mechanism_id
+            }
+            mappings = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
+                financial_service_provider_id__in={fsp_id for fsp_id, _ in pairs},
+                delivery_mechanism_id__in={dm_id for _, dm_id in pairs},
+            ).select_related("xlsx_template")
+            self._template_map = {
+                (m.financial_service_provider_id, m.delivery_mechanism_id): m.xlsx_template
+                for m in mappings
+                if (m.financial_service_provider_id, m.delivery_mechanism_id) in pairs
+            }
+        return self._template_map
+
+    def _get_plans_with_blocking_payments(self) -> set:
+        """Plan ids that still have eligible payments not yet sent to the payment gateway.
+
+        Equivalent to PaymentPlan.is_payment_gateway_and_all_sent_to_fsp.
+        """
+        if self._plans_with_blocking_payments is None:
+            self._plans_with_blocking_payments = set(
+                Payment.objects.filter(parent__in=self.payment_plans)
+                .eligible()
+                .filter(status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG))
+                .values_list("parent_id", flat=True)
+                .distinct()
+            )
+        return self._plans_with_blocking_payments
 
     def _resolve_template(self, payment_plan: PaymentPlan) -> FinancialServiceProviderXlsxTemplate | None:
         if self.fsp_xlsx_template is not None:
             return self.fsp_xlsx_template
-        fsp = payment_plan.financial_service_provider
-        delivery_mechanism = payment_plan.delivery_mechanism
-        if not fsp or not delivery_mechanism:
+        if not payment_plan.financial_service_provider_id or not payment_plan.delivery_mechanism_id:
             return None
-        mapping = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-            financial_service_provider=fsp,
-            delivery_mechanism=delivery_mechanism,
-        ).first()
-        return mapping.xlsx_template if mapping else None
+        return self._get_template_map().get(
+            (payment_plan.financial_service_provider_id, payment_plan.delivery_mechanism_id)
+        )
 
     def _skip_reason(
         self, payment_plan: PaymentPlan, template: FinancialServiceProviderXlsxTemplate | None
@@ -98,7 +138,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         if (
             payment_plan.is_payment_gateway
             and "fsp_auth_code" in template.columns
-            and not payment_plan.is_payment_gateway_and_all_sent_to_fsp
+            and payment_plan.id in self._get_plans_with_blocking_payments()
         ):
             return (
                 f"Payment Plan {payment_plan.unicef_id}: template requires fsp_auth_code "
@@ -115,8 +155,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         ]
 
     def generate_token_and_order_numbers(self, program: "Program") -> None:
-        from hope.models import Payment
-
         all_eligible = Payment.objects.filter(parent__in=self.payment_plans).eligible()
         XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
 

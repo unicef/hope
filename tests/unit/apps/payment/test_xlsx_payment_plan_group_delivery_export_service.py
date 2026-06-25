@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 import pytest
 
@@ -96,6 +98,26 @@ def fsp_no_template():
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         vision_vendor_number="987654321",
     )
+
+
+@pytest.fixture
+def payment_gateway_fsp():
+    return FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        payment_gateway_id="pg-1",
+    )
+
+
+@pytest.fixture
+def auth_code_template(payment_gateway_fsp, delivery_mechanism):
+    """Payment-gateway template requiring fsp_auth_code, mapped to the gateway FSP + delivery mechanism."""
+    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_auth_code"])
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=template,
+    )
+    return template
 
 
 @pytest.fixture
@@ -338,6 +360,31 @@ def group_with_two_plans_and_payments(program_cycle, business_area, fsp, deliver
     )
     PaymentHouseholdSnapshotFactory(payment=payment_three, snapshot_data={})
     return group
+
+
+@pytest.fixture
+def make_payment_gateway_group(
+    program_cycle, business_area, payment_gateway_fsp, delivery_mechanism, auth_code_template
+):
+    """Build a group with `plan_count` exportable payment-gateway plans (all payments already sent)."""
+
+    def build_group(plan_count):
+        group = PaymentPlanGroupFactory(cycle=program_cycle)
+        for _ in range(plan_count):
+            plan = PaymentPlanFactory(
+                program_cycle=program_cycle,
+                payment_plan_group=group,
+                business_area=business_area,
+                financial_service_provider=payment_gateway_fsp,
+                delivery_mechanism=delivery_mechanism,
+                status=PaymentPlan.Status.ACCEPTED,
+            )
+            PaymentFactory(
+                parent=plan, financial_service_provider=payment_gateway_fsp, status=Payment.STATUS_DISTRIBUTION_SUCCESS
+            )
+        return group
+
+    return build_group
 
 
 def test_workbook_has_single_sheet_with_group_title(group_with_one_accepted_plan):
@@ -669,27 +716,20 @@ def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_p
     assert plan.export_tag is None
 
 
-def test_plan_with_unprocessed_payments_is_skipped_when_template_requires_auth_code(program_cycle, business_area, user):
-    pg_fsp = FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="pg-1",
-    )
-    delivery_mechanism = DeliveryMechanismFactory()
-    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_auth_code"])
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=pg_fsp, delivery_mechanism=delivery_mechanism, xlsx_template=template
-    )
+def test_plan_with_unprocessed_payments_is_skipped_when_template_requires_auth_code(
+    program_cycle, business_area, user, payment_gateway_fsp, delivery_mechanism, auth_code_template
+):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=pg_fsp,
+        financial_service_provider=payment_gateway_fsp,
         delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
     # payment still PENDING → is_payment_gateway_and_all_sent_to_fsp=False
-    PaymentFactory(parent=plan, financial_service_provider=pg_fsp, status=Payment.STATUS_PENDING)
+    PaymentFactory(parent=plan, financial_service_provider=payment_gateway_fsp, status=Payment.STATUS_PENDING)
 
     with pytest.raises(EmptyDeliveryExportError):
         XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
@@ -699,29 +739,22 @@ def test_plan_with_unprocessed_payments_is_skipped_when_template_requires_auth_c
     assert plan.export_file_delivery is None
 
 
-def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(program_cycle, business_area, user):
-    pg_fsp = FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="pg-2",
-    )
-    delivery_mechanism = DeliveryMechanismFactory()
-    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_auth_code"])
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=pg_fsp, delivery_mechanism=delivery_mechanism, xlsx_template=template
-    )
+def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(
+    program_cycle, business_area, user, payment_gateway_fsp, delivery_mechanism, auth_code_template
+):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=pg_fsp,
+        financial_service_provider=payment_gateway_fsp,
         delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
     # payment in DISTRIBUTION_SUCCESS → not blocking → is_payment_gateway_and_all_sent_to_fsp=True
     PaymentFactory(
         parent=plan,
-        financial_service_provider=pg_fsp,
+        financial_service_provider=payment_gateway_fsp,
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
 
@@ -737,27 +770,20 @@ def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(program_cycle, bus
 
 
 def test_save_xlsx_file_with_auth_code_reexport_with_export_tag_replaces_file_and_keeps_tag(
-    program_cycle, business_area, user
+    program_cycle, business_area, user, payment_gateway_fsp, delivery_mechanism, auth_code_template
 ):
-    pg_fsp = FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="pg-3",
-    )
-    delivery_mechanism = DeliveryMechanismFactory()
-    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "fsp_auth_code"])
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=pg_fsp, delivery_mechanism=delivery_mechanism, xlsx_template=template
-    )
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=pg_fsp,
+        financial_service_provider=payment_gateway_fsp,
         delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
-    PaymentFactory(parent=plan, financial_service_provider=pg_fsp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    PaymentFactory(
+        parent=plan, financial_service_provider=payment_gateway_fsp, status=Payment.STATUS_DISTRIBUTION_SUCCESS
+    )
 
     XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
     plan.refresh_from_db()
@@ -846,3 +872,30 @@ def test_group_export_builds_shared_lookups_once_for_multiple_plans(group_with_t
     XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_and_payments).generate_workbook()
 
     assert build_spy.call_count == 1
+
+
+def test_preview_export_query_count_is_independent_of_plan_count(make_payment_gateway_group):
+    service_two_plans = XlsxPaymentPlanGroupDeliveryExportService(make_payment_gateway_group(2))
+    service_three_plans = XlsxPaymentPlanGroupDeliveryExportService(make_payment_gateway_group(3))
+
+    with CaptureQueriesContext(connection) as queries_two_plans:
+        exported_two_plans = service_two_plans.preview_export()
+    with CaptureQueriesContext(connection) as queries_three_plans:
+        exported_three_plans = service_three_plans.preview_export()
+
+    assert len(exported_two_plans) == 2
+    assert len(exported_three_plans) == 3
+    # one query for the template map + one for the blocking-payments set, regardless of plan count
+    assert len(queries_two_plans.captured_queries) == 2
+    assert len(queries_three_plans.captured_queries) == 2
+
+
+def test_preview_export_runs_single_query_for_non_gateway_plans(group_with_two_plans_and_payments):
+    # XLSX (non-payment-gateway) FSPs short-circuit before the blocking-payments query, leaving only the template map
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_and_payments)
+
+    with CaptureQueriesContext(connection) as queries:
+        exported = service.preview_export()
+
+    assert len(exported) == 2
+    assert len(queries.captured_queries) == 1
