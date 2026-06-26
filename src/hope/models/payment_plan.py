@@ -287,6 +287,8 @@ class PaymentPlan(
         "payment.PaymentPlanGroup",
         on_delete=models.PROTECT,
         related_name="payment_plans",
+        null=True,
+        blank=True,
     )
     payment_plan_purposes = models.ManyToManyField(
         "payment.PaymentPlanPurpose",
@@ -641,6 +643,12 @@ class PaymentPlan(
             ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
             ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
         )
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(is_removed=True) | Q(payment_plan_group__isnull=False),
+                name="payment_plan_group_required_unless_removed",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""

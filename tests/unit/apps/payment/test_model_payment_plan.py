@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.timezone import now
 import pytest
@@ -937,3 +938,24 @@ def test_remove_export_files_removes_delivery_when_finished_with_file() -> None:
         payment_plan.remove_export_files()
 
     assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+
+
+def test_live_payment_plan_without_group_violates_constraint(program_cycle):
+    with pytest.raises(IntegrityError, match="payment_plan_group_required_unless_removed"):
+        with transaction.atomic():
+            PaymentPlanFactory(program_cycle=program_cycle, payment_plan_group=None, is_removed=False)
+
+
+def test_removed_payment_plan_without_group_is_allowed(program_cycle):
+    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, payment_plan_group=None, is_removed=True)
+
+    assert payment_plan.payment_plan_group_id is None
+    assert payment_plan.is_removed is True
+
+
+def test_live_payment_plan_with_group_is_allowed(program_cycle):
+    group = program_cycle.payment_plan_groups.first()
+
+    payment_plan = PaymentPlanFactory(program_cycle=program_cycle, payment_plan_group=group, is_removed=False)
+
+    assert payment_plan.payment_plan_group_id == group.id
