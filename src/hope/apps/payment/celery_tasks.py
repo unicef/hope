@@ -682,7 +682,7 @@ def import_payment_plan_group_delivery_from_xlsx_async_task(
 
 
 def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None:  # noqa: PLR0915
-    from hope.models import Payment, PaymentPlan, Rule, RuleCommit
+    from hope.models import Payment, PaymentPlan, Rule, RuleCommit, User
 
     payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
     set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -716,6 +716,9 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
         pp_currency_exchange_date = payment_plan.currency_exchange_date
 
         steficon_user_id = job.config.get("user_id")
+        # Resolve once: bulk_log_payment_changes runs per batch in the loop below, so passing the
+        # pre-resolved user avoids re-fetching the same user on every flush.
+        steficon_user = User.objects.filter(pk=steficon_user_id).first() if steficon_user_id else None
         updates_buffer = []
         log_pairs_buffer: list = []
         with transaction.atomic():
@@ -739,7 +742,7 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
                         updates_buffer,
                         ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
                     )
-                    bulk_log_payment_changes(log_pairs_buffer, steficon_user_id)
+                    bulk_log_payment_changes(log_pairs_buffer, user=steficon_user)
                     updates_buffer.clear()
                     log_pairs_buffer.clear()
 

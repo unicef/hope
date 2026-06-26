@@ -21,7 +21,6 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     User,
-    log_create,
 )
 
 if TYPE_CHECKING:
@@ -31,6 +30,9 @@ if TYPE_CHECKING:
 
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.currency import Currency
+
+# Sentinel so bulk_log_payment_changes can tell "user not provided" from an explicit user=None.
+_UNSET: Any = object()
 
 
 def log_payment_plan_change(
@@ -44,16 +46,26 @@ def log_payment_plan_change(
     dispatching view's ``log_create()`` snapshot, so the actual changes (status, steficon rule,
     totals, ...) would otherwise go unlogged. ``user_id`` is None for system-initiated runs
     (periodic gateway sync, rebuild).
+
+    The diff is computed once and the entry is inserted directly (instead of via ``log_create``,
+    which re-diffs): this both skips no-op rows when only unmapped fields changed -- matching the
+    admin ``save_model`` guard -- and avoids a second (FK-heavy) diff pass over the PaymentPlan.
     """
+    changes = create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING)
+    if not changes:
+        return
     user = User.objects.filter(pk=user_id).first() if user_id else None
-    log_create(
-        mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-        business_area_field="business_area",
+    log = LogEntry.objects.create(
+        action=LogEntry.UPDATE,
+        content_object=payment_plan,
         user=user,
-        programs=payment_plan.program.pk,
-        old_object=old_payment_plan,
-        new_object=payment_plan,
+        business_area=payment_plan.business_area,
+        object_repr=str(payment_plan),
+        changes=changes,
     )
+    program = payment_plan.program
+    if program is not None:
+        log.programs.add(program.pk)
 
 
 def _log_payment_plan_event(
@@ -128,15 +140,21 @@ def _persist_payment_logs(logs: list[LogEntry], program_ids: list[Any]) -> None:
 
 def bulk_log_payment_changes(
     old_new_pairs: "list[tuple[Payment | None, Payment]]",
-    user_id: str | None,
+    user_id: str | None = None,
+    *,
+    user: Any = _UNSET,
 ) -> None:
     """Activity-log per-payment changes from in-memory old/new objects in one bulk insert.
 
     Use for bulk paths that already hold the mutated Payment objects (entitlement/delivery/status
     updates). Snapshot the old object with copy_model_object() BEFORE mutating, then pass the pairs.
     No-op diffs are skipped so unchanged rows do not create noise.
+
+    Pass a pre-resolved ``user`` to skip the per-call user lookup -- useful when this runs once per
+    batch in a loop (e.g. the steficon engine-rule task) so the same user is not fetched repeatedly.
     """
-    user = User.objects.filter(pk=user_id).first() if user_id else None
+    if user is _UNSET:
+        user = User.objects.filter(pk=user_id).first() if user_id else None
     content_type = ContentType.objects.get_for_model(Payment)
     logs: list[LogEntry] = []
     program_ids: list[Any] = []

@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.contenttypes.models import ContentType
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
@@ -161,3 +162,59 @@ def test_update_payments_and_log_extra_update_not_logged(payments: list[Payment]
     log = LogEntry.objects.filter(object_id=payments[0].pk).first()
     assert "entitlement_quantity" in log.changes
     assert "entitlement_quantity_usd" not in log.changes
+
+
+@pytest.mark.enable_activity_log
+def test_bulk_log_payment_changes_query_count_is_constant(
+    payments: list[Payment], user: User, django_assert_num_queries
+) -> None:
+    pairs = []
+    for payment in payments:
+        old_payment = copy_model_object(payment)
+        payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+        payment.save(update_fields=["status"])
+        pairs.append((old_payment, payment))
+    ContentType.objects.get_for_model(Payment)  # warm content-type cache so the count is deterministic
+
+    # 2 payments -> log bulk insert + program m2m bulk insert; a per-row regression would exceed this
+    with django_assert_num_queries(2):
+        bulk_log_payment_changes(pairs, user=user)
+
+    assert LogEntry.objects.filter(object_id__in=[p.pk for p in payments]).count() == 2
+
+
+@pytest.mark.enable_activity_log
+def test_update_payments_and_log_query_count_is_constant(
+    payments: list[Payment], user: User, django_assert_num_queries
+) -> None:
+    queryset = Payment.objects.filter(pk__in=[p.pk for p in payments])
+    ContentType.objects.get_for_model(Payment)  # warm content-type cache
+
+    # values snapshot + update + user lookup + log insert + program m2m insert, regardless of row count
+    with django_assert_num_queries(5):
+        update_payments_and_log(queryset, {"excluded": True}, str(user.pk))
+
+    assert LogEntry.objects.filter(object_id__in=[p.pk for p in payments]).count() == 2
+
+
+@pytest.mark.enable_activity_log
+def test_update_payments_and_log_logs_fk_valued_change(payments: list[Payment], user: User) -> None:
+    target, source = payments
+    queryset = Payment.objects.filter(pk=target.pk)
+
+    update_payments_and_log(queryset, {"source_payment": source}, str(user.pk))
+
+    target.refresh_from_db()
+    assert target.source_payment_id == source.pk
+    log = LogEntry.objects.get(object_id=target.pk)
+    assert log.changes["source_payment"]["to"] == str(source)
+
+
+@pytest.mark.enable_activity_log
+def test_bulk_log_payment_changes_records_create_when_old_is_none(payments: list[Payment], user: User) -> None:
+    new = payments[0]
+
+    bulk_log_payment_changes([(None, new)], str(user.pk))
+
+    log = LogEntry.objects.get(object_id=new.pk)
+    assert log.action == LogEntry.CREATE
