@@ -32,6 +32,7 @@ from hope.models import (
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
+    User,
 )
 
 logger = logging.getLogger(__name__)
@@ -765,7 +766,10 @@ class PaymentGatewayService:
             return  # pragma: no cover
 
         payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
-        payment_log_pairs: list = []
+        # Resolve the user once and flush logs per instruction: this keeps only one split's
+        # payments (with their household_snapshot) referenced at a time, matching the pre-logging
+        # per-split GC profile instead of retaining the whole plan's payments until the end.
+        user = User.objects.filter(pk=user_id).first() if user_id else None
 
         for instruction in payment_instructions:
             payments = (
@@ -774,6 +778,7 @@ class PaymentGatewayService:
                 .select_related("household_snapshot", "delivery_type", "currency")
             )
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+            instruction_log_pairs: list = []
             for payment in payments:
                 self.update_payment(
                     payment,
@@ -781,10 +786,10 @@ class PaymentGatewayService:
                     instruction,
                     payment_plan,
                     exchange_rate,
-                    payment_log_pairs,
+                    instruction_log_pairs,
                 )
+            bulk_log_payment_changes(instruction_log_pairs, user=user)
 
-        bulk_log_payment_changes(payment_log_pairs, user_id)
         if payment_plan.is_reconciled:
             flow = PaymentPlanFlow(payment_plan)
             flow.status_finished()

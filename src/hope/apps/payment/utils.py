@@ -34,6 +34,11 @@ if TYPE_CHECKING:
 # Sentinel so bulk_log_payment_changes can tell "user not provided" from an explicit user=None.
 _UNSET: Any = object()
 
+# NOTE: the activity-log helpers below deliberately re-implement what
+# hope.models.log_entry.log_create() does (build a LogEntry + attach the program M2M + diff),
+# bypassing it so they can bulk-insert and skip no-op diffs without per-row queries. If log_create's
+# semantics change (action detection, how programs/business_area are resolved), mirror it here too.
+
 
 def log_payment_plan_change(
     payment_plan: PaymentPlan,
@@ -50,6 +55,11 @@ def log_payment_plan_change(
     The diff is computed once and the entry is inserted directly (instead of via ``log_create``,
     which re-diffs): this both skips no-op rows when only unmapped fields changed -- matching the
     admin ``save_model`` guard -- and avoids a second (FK-heavy) diff pass over the PaymentPlan.
+
+    Note: PaymentPlan.ACTIVITY_LOG_MAPPING includes FK fields (financial_service_provider,
+    delivery_mechanism, ...) whose values are dereferenced here for a human-readable label, so the
+    diff issues a few extra SELECTs. This is once per plan (not per payment / not an N+1 over rows);
+    the readable FK labels are worth the cost on these comparatively rare plan-level log writes.
     """
     changes = create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING)
     if not changes:
