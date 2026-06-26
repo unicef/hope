@@ -372,7 +372,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
             if active_jobs:
                 for job in active_jobs:
                     job.terminate()
-                import_payment_plan_group_delivery_from_xlsx_async_task(group)
+                import_payment_plan_group_delivery_from_xlsx_async_task(group, str(request.user.pk))
                 messages.success(request, "Successfully restarted reconciliation import.")
             else:
                 messages.error(request, f"There is no current {task_name} for this payment plan group.")

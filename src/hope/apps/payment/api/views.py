@@ -2308,6 +2308,7 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
             payment_plan=payment_plan,
         )
 
+    @transaction.atomic
     def perform_create(self, serializer: Any) -> None:
         document = serializer.save()
         log_payment_plan_supporting_document(document.payment_plan, self.request.user, document.title, created=True)

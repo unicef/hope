@@ -753,6 +753,7 @@ class PaymentPlanService:
                 should_update_money_stats,
                 vulnerability_filter,
                 self.payment_plan,
+                str(self.user.pk) if self.user else None,
             )
         )
         return self.payment_plan
@@ -1253,6 +1254,7 @@ class PaymentPlanService:
         should_update_money_stats: bool,
         vulnerability_filter: bool,
         payment_plan: PaymentPlan,
+        user_id: str | None = None,
     ) -> None:
         from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection_async_task
 
@@ -1267,7 +1269,7 @@ class PaymentPlanService:
                 # in case of full rebuild and vulnerability filter, need to run steficon after rebuild
                 payment_plan_full_rebuild_async_task(payment_plan)
                 payment_plan_apply_steficon_hh_selection_async_task(
-                    payment_plan, str(payment_plan.steficon_rule_targeting.rule_id)
+                    payment_plan, str(payment_plan.steficon_rule_targeting.rule_id), user_id
                 )
             elif should_update_money_stats:
                 payment_plan_full_rebuild_async_task(payment_plan)

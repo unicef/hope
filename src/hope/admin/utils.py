@@ -362,7 +362,7 @@ class PaymentPlanCeleryTasksMixin:
             task_name = self.import_payment_plan_payment_list_from_xlsx_async_task
             payment_plan = PaymentPlan.objects.get(pk=pk)
             if self._terminate_active_payment_plan_jobs(payment_plan, task_name):
-                import_payment_plan_payment_list_from_xlsx_async_task(payment_plan)
+                import_payment_plan_payment_list_from_xlsx_async_task(payment_plan, str(request.user.pk))
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:

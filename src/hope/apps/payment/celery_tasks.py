@@ -751,7 +751,7 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
                     updates_buffer,
                     ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
                 )
-                bulk_log_payment_changes(log_pairs_buffer, steficon_user_id)
+                bulk_log_payment_changes(log_pairs_buffer, user=steficon_user)
 
             payment_plan.steficon_applied_date = now
             flow = PaymentPlanFlow(payment_plan)
