@@ -218,3 +218,26 @@ def test_bulk_log_payment_changes_records_create_when_old_is_none(payments: list
 
     log = LogEntry.objects.get(object_id=new.pk)
     assert log.action == LogEntry.CREATE
+
+
+@pytest.mark.enable_activity_log
+def test_log_payment_plan_approval_without_comment(payment_plan: PaymentPlan, user: User) -> None:
+    log_payment_plan_approval(payment_plan, user, "APPROVAL", None)
+
+    log = LogEntry.objects.get(object_id=payment_plan.pk)
+    assert log.changes["acceptance_process"]["to"] == "APPROVAL"
+    assert "comment" not in log.changes
+
+
+@pytest.mark.enable_activity_log
+def test_update_payments_and_log_skips_unchanged_payment(payments: list[Payment], user: User) -> None:
+    already_excluded, changing = payments
+    already_excluded.excluded = True
+    already_excluded.save(update_fields=["excluded"])
+    queryset = Payment.objects.filter(pk__in=[p.pk for p in payments])
+
+    update_payments_and_log(queryset, {"excluded": True}, str(user.pk))
+
+    # already True -> field skipped -> no changes -> row produces no log; only the changed one is logged
+    assert not LogEntry.objects.filter(object_id=already_excluded.pk).exists()
+    assert LogEntry.objects.filter(object_id=changing.pk).exists()

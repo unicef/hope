@@ -73,9 +73,8 @@ def log_payment_plan_change(
         object_repr=str(payment_plan),
         changes=changes,
     )
-    program = payment_plan.program
-    if program is not None:
-        log.programs.add(program.pk)
+    # program_cycle is a non-null FK and ProgramCycle.program is non-null, so program is always set.
+    log.programs.add(payment_plan.program.pk)
 
 
 def _log_payment_plan_event(
@@ -90,9 +89,8 @@ def _log_payment_plan_event(
         object_repr=str(payment_plan),
         changes=changes,
     )
-    program = payment_plan.program
-    if program is not None:
-        log.programs.add(program.pk)
+    # program_cycle is a non-null FK and ProgramCycle.program is non-null, so program is always set.
+    log.programs.add(payment_plan.program.pk)
 
 
 def log_payment_plan_approval(

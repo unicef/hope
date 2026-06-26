@@ -631,7 +631,7 @@ class PaymentGatewayService:
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
         exchange_rate: Decimal | float | None,
-        log_pairs: "list[tuple[Payment, Payment]] | None" = None,
+        log_pairs: "list[tuple[Payment, Payment]]",
     ) -> None:
         try:
             matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
@@ -673,8 +673,7 @@ class PaymentGatewayService:
             )
 
         payment.save(update_fields=update_fields)
-        if log_pairs is not None:
-            log_pairs.append((old_payment, payment))
+        log_pairs.append((old_payment, payment))
 
     def sync_records(self) -> None:
         payment_plans = PaymentPlan.objects.prefetch_related(
