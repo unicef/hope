@@ -48,6 +48,14 @@ def increment_individual_list_cache_version(sender: type[Individual], instance: 
     transaction.on_commit(lambda: increment_individual_list_program_key(program_id))
 
 
+@receiver(post_save, sender="household.DocumentType")
+@receiver(post_delete, sender="household.DocumentType")
+def invalidate_doc_types_cache(sender: type[Any], instance: Any, **kwargs: Any) -> None:
+    from django.core.cache import cache
+
+    cache.delete(instance.CACHE_KEY_ALL_DOC_TYPES)
+
+
 def increment_household_list_cache_version_from_bulk(
     sender: type[Household | Individual], instances: list[Any], **kwargs: Any
 ) -> None:
