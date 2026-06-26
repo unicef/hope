@@ -313,7 +313,14 @@ export const sendRequest = async (
 
   onCancel(() => controller.abort());
   let response = await fetch(url, request);
-  const content = await response.json();
+  let content: any;
+  if (response.status !== 204) {
+    try {
+      content = await response.json();
+    } catch {
+      content = undefined;
+    }
+  }
   try {
     if (
       response?.status == 403 &&
@@ -343,7 +350,7 @@ export const sendRequest = async (
     ) {
       const pathWithQuery = window.location.pathname + window.location.search;
       let next = '';
-      if (pathWithQuery) {
+      if (pathWithQuery && pathWithQuery.startsWith('/') && !pathWithQuery.startsWith('//')) {
         next = `?next=${encodeURIComponent(pathWithQuery)}`;
       }
       window.location.href = `/login/${next}`;

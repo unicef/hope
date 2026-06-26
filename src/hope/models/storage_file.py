@@ -4,6 +4,10 @@ from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 
 
+def get_storage_status_choices() -> tuple:
+    return StorageFile.STATUS_CHOICE
+
+
 class StorageFile(models.Model):
     STATUS_NOT_PROCESSED = "Not processed"
     STATUS_PROCESSING = "Processing"
@@ -29,7 +33,7 @@ class StorageFile(models.Model):
     file = models.FileField(upload_to="files")
 
     status = models.CharField(
-        choices=STATUS_CHOICE,
+        choices=get_storage_status_choices,
         default=STATUS_NOT_PROCESSED,
         max_length=25,
     )

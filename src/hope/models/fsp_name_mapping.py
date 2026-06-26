@@ -9,10 +9,14 @@ class FspNameMapping(models.Model):
         HOUSEHOLD = "Household"
         ACCOUNT = "Account"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return FspNameMapping.SourceModel.choices
+
     external_name = models.CharField(max_length=255)
     # this is a python attribute / db field name of source model (possibly mixin with all FSP names mapping attributes):
     hope_name = models.CharField(max_length=255)  # default copy of external name
-    source = models.CharField(max_length=30, choices=SourceModel.choices, default=SourceModel.ACCOUNT)
+    source = models.CharField(max_length=30, choices=SourceModel.get_choices, default=SourceModel.ACCOUNT)
     fsp = models.ForeignKey(
         FinancialServiceProvider,
         on_delete=models.CASCADE,

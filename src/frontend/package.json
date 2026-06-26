@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "4.15.5",
+  "version": "4.16.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,9 +11,9 @@
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest",
     "preview": "vite preview",
-    "download-dev-openapi": "wget --no-check-certificate -O data/openapi.yml ${BACKEND_URL:-http://localhost:8080}/api/rest/",
+    "generate-openapi": "cd ../.. && uv run python manage.py generate_openapi --output-dir src/frontend/data",
     "generate-rest-api-types": "bun run generate-rest-api-types-camelcase",
-    "generate-rest-api-types-camelcase": "bun run download-dev-openapi && node enhance_and_camelize_openapi.js && openapi --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false",
+    "generate-rest-api-types-camelcase": "bun run generate-openapi && node enhance_and_camelize_openapi.js && openapi --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false",
     "prune-unused-exports": "bunx ts-prune src | grep -v '(used in module)' | grep -v '/index.'"
   },
   "engines": {
@@ -88,7 +88,7 @@
     "braces": "3.0.3",
     "camelcase": "^9.0.0",
     "cross-spawn": "^7.0.6",
-    "esbuild": "0.27.3",
+    "esbuild": "0.28.1",
     "eslint": "^10.0.2",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "4.4.4",
@@ -115,7 +115,7 @@
     "vite": "^7.3.1",
     "vite-plugin-csp-guard": "3.0.0",
     "vite-tsconfig-paths": "6.1.1",
-    "vitest": "4.0.18",
+    "vitest": "4.1.0",
     "waait": "^1.0.5"
   },
   "overrides": {

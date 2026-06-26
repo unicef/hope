@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from constance import config
 from elasticsearch import NotFoundError
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +64,14 @@ def rebuild_search_index(models: None = None, options: dict | None = None) -> No
 
     for program in Program.objects.filter(status=Program.ACTIVE):
         rebuild_program_indexes(str(program.id))
+
+
+def _active_or_all_programs(include_non_active: bool = False) -> "QuerySet":
+    from hope.models import Program
+
+    if include_non_active:
+        return Program.objects.all()
+    return Program.objects.filter(status=Program.ACTIVE)
 
 
 def populate_all_indexes() -> None:

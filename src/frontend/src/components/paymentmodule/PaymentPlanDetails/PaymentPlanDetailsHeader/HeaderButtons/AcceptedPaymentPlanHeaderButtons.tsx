@@ -1,319 +1,50 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Select,
-} from '@mui/material';
-import { GetApp } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { LoadingButton } from '../../../../core/LoadingButton';
-import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';
+import { Box } from '@mui/material';
+import { CreateChildPaymentPlan } from '../../../CreateChildPaymentPlan';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
-import { ReactElement, useState } from 'react';
-import { LoadingComponent } from '@components/core/LoadingComponent';
+import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { showApiErrorMessages } from '@utils/utils';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
-import { PERMISSIONS } from 'src/config/permissions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
-  canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
-  canClose: boolean;
+  isInstructionManaged?: boolean;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
-  canSendToPaymentGateway,
   canSplit,
   paymentPlan,
-  canClose,
+  isInstructionManaged = false,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const { showMessage } = useSnackbar();
-  const { businessArea, programId } = useBaseUrl();
-
-  const { mutateAsync: closePaymentPlan, isPending: loadingClose } =
-    useMutation({
-      mutationFn: async () => {
-        return RestService.restBusinessAreasProgramsPaymentPlansCloseRetrieve({
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          id: paymentPlan.id,
-        });
-      },
-      onSuccess: () => {
-        showMessage(t('Payment plan closed successfully'));
-      },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
-      },
-    });
-
-  const { data: templateData, isLoading: loading } = useQuery({
-    queryKey: ['fspXlsxTemplates', businessArea, programId],
-    queryFn: async () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-        },
-      );
-    },
-    enabled: open,
-  });
-
-  const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
-    {
-      mutationFn: () =>
-        RestService.restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: paymentPlan.id,
-          },
-        ),
-      onSuccess: () => {
-        showMessage(t('Password has been sent.'));
-      },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
-      },
-    },
-  );
-
-  const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
-    mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
-      const requestBody: PaymentPlanExportAuthCode = {
-        fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
-      };
-      return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          id: paymentPlan.id,
-          requestBody,
-        },
-      );
-    },
-    onSuccess: () => {
-      showMessage(t('Exporting XLSX started'));
-      queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
-      });
-    },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage);
-    },
-  });
-
-  const {
-    mutateAsync: sendToPaymentGateway,
-    isPending: LoadingSendToPaymentGateway,
-  } = useMutation({
-    mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayRetrieve(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          id: paymentPlan.id,
-        },
-      ),
-    onSuccess: () => {
-      showMessage(t('Sending to Payment Gateway started'));
-    },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage);
-    },
-  });
-
-  const shouldDisableExportXlsx =
-    loadingExport ||
-    !paymentPlan.canExportXlsx ||
-    paymentPlan.backgroundActionStatus ===
-      BackgroundActionStatusEnum.XLSX_EXPORTING;
-
-  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
-
-  if (loading) return <LoadingComponent />;
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleTemplateChange = (event) => {
-    setSelectedTemplate(event.target.value);
-  };
-
-  const handleExportAPI = async () => {
-    try {
-      await mutateExport({
-        fspXlsxTemplateId: selectedTemplate,
-      });
-      handleClose();
-    } catch (e: any) {
-      showApiErrorMessages(e, showMessage);
-    }
-  };
-
-  const handleExport = async () => {
-    try {
-      await mutateExport({
-        fspXlsxTemplateId: '',
-      });
-      handleClose();
-    } catch (e: any) {
-      showMessage(
-        e?.body?.errors || e?.message || 'An error occurred while exporting',
-      );
-    }
-  };
-
   return (
     <Box display="flex" alignItems="center">
       <>
         {paymentPlan.canCreateFollowUp && (
           <Box p={2}>
-            <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
+            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="followup" />
           </Box>
         )}
-        <Box p={2}>
-          <SplitIntoPaymentLists
-            paymentPlan={paymentPlan}
-            canSplit={canSplit}
-          />
-        </Box>
-        {!paymentPlan.hasPaymentListExportFile && (
-          <Box m={2}>
-            <LoadingButton
-              loading={loadingExport}
-              disabled={shouldDisableExportXlsx}
-              color="primary"
-              variant="contained"
-              startIcon={<GetApp />}
-              data-cy="button-export-xlsx"
-              onClick={
-                paymentPlan.isPaymentGateway ? handleClickOpen : handleExport
-              }
-            >
-              {t('Export Xlsx')}
-            </LoadingButton>
+        {paymentPlan.canCreateTopUp && (
+          <Box p={2}>
+            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="topup" />
           </Box>
         )}
-        {canClose && (
-          <Box m={2}>
-            <LoadingButton
-              color="primary"
-              variant="contained"
-              data-cy="button-close"
-              onClick={() => closePaymentPlan()}
-              loading={loadingClose}
-            >
-              {t('Close')}
-            </LoadingButton>
+        {paymentPlan.canCreateTopUpAmendment && (
+          <Box p={2}>
+            <CreateChildPaymentPlan
+              paymentPlan={paymentPlan}
+              variant="amendment"
+            />
           </Box>
         )}
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{t('Select Template')}</DialogTitle>
-          <DialogContent>
-            <Select
-              value={selectedTemplate}
-              onChange={handleTemplateChange}
-              fullWidth
-              variant="outlined"
-              size="small"
-              data-cy="select-template"
-            >
-              {templateData?.results?.map((template) => (
-                <MenuItem key={template.id} value={template.id}>
-                  {template.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              data-cy="cancel-button"
-              onClick={handleClose}
-              color="primary"
-            >
-              {t('Cancel')}
-            </Button>
-            <Button
-              onClick={handleExportAPI}
-              data-cy="export-button"
-              color="primary"
-              disabled={!selectedTemplate}
-            >
-              {t('Export Xlsx')}
-            </Button>
-          </DialogActions>
-        </Dialog>
-        {paymentPlan.hasPaymentListExportFile && (
-          <>
-            <Box m={2}>
-              <Button
-                color="primary"
-                component="a"
-                variant="contained"
-                data-cy="button-download-xlsx"
-                download
-                href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-                disabled={shouldDisableDownloadXlsx}
-                data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
-              >
-                {t('Download XLSX')}
-              </Button>
-            </Box>
-            {paymentPlan.canSendXlsxPassword && (
-              <Box m={2}>
-                <LoadingButton
-                  loading={loadingSend}
-                  disabled={loadingSend}
-                  color="primary"
-                  variant="contained"
-                  data-cy="button-send-xlsx-password"
-                  onClick={() => sendXlsxPassword()}
-                  data-perm={PERMISSIONS.PM_SEND_XLSX_PASSWORD}
-                >
-                  {t('Send Xlsx Password')}
-                </LoadingButton>
-              </Box>
-            )}
-          </>
-        )}
-
-        {canSendToPaymentGateway && (
-          <Box m={2}>
-            <Button
-              type="button"
-              color="primary"
-              variant="contained"
-              onClick={() => sendToPaymentGateway()}
-              data-cy="button-send-to-payment-gateway"
-              disabled={LoadingSendToPaymentGateway}
-              data-perm={PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY}
-            >
-              {t('Send to FSP')}
-            </Button>
+        {!isInstructionManaged && (
+          <Box p={2}>
+            <SplitIntoPaymentLists
+              paymentPlan={paymentPlan}
+              canSplit={canSplit}
+            />
           </Box>
         )}
+        {/* Close moved to the Ready for Closure flow; Send Xlsx Password and Send to FSP moved to the Group / Batch detail pages. */}
       </>
     </Box>
   );

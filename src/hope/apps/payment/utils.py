@@ -12,7 +12,12 @@ from django.shortcuts import get_object_or_404
 
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
-from hope.models import Payment, PaymentPlan, PaymentVerification, PaymentVerificationPlan
+from hope.models import (
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -56,10 +61,12 @@ def to_decimal(received_amount: Decimal | float | int | str | None) -> Decimal |
     if received_amount is None or str(received_amount).strip() == "":
         return None
 
-    if isinstance(received_amount, str):
-        received_amount = float(received_amount.strip())
-
-    return Decimal(f"{round(received_amount, 2):.2f}")
+    try:
+        if isinstance(received_amount, str):
+            received_amount = float(received_amount.strip())
+        return Decimal(f"{round(received_amount, 2):.2f}")
+    except ValueError:
+        return None
 
 
 @no_type_check

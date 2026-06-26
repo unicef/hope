@@ -1,4 +1,5 @@
 from django.conf import settings
+from selenium.webdriver.common.action_chains import ActionChains
 from seleniumbase import BaseCase
 
 
@@ -21,10 +22,12 @@ class HopeTestBrowser(BaseCase):
         pass
 
     def open(self, url: str):
-        self.maximize_window()
+        # maximize_window() is a no-op in headless Chrome, leaving the small
+        # default viewport that breaks layout-sensitive click targets on CI.
+        self.set_window_size(1920, 1080)
         return super().open(f"{self.live_server_url}{url}")
 
-    def login(self, username: str = "superuser", password: str = "testtest2"):
+    def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
         self.open(f"/api/{settings.ADMIN_PANEL_URL}/")
         self.execute_script(
             """
@@ -40,14 +43,15 @@ class HopeTestBrowser(BaseCase):
         self.type("#id_password", password)
         self.click('#login-form input[type="submit"]')
         self.wait_for_ready_state_complete()
-        # Django admin login redirects back to /api/admin/, not the SPA.
-        # Navigate explicitly to the frontend root.
-        self.open("/")
-        self.wait_for_ready_state_complete()
-        # wait_for_ready_state_complete only checks document.readyState; the React
-        # app mounts after that. Wait for the authenticated layout's drawer so
-        # callers can click nav items immediately without racing the first paint.
-        self.wait_for_element_visible('[data-cy="drawer-items"]', timeout=30)
+        if wait_for_drawer:
+            # Django admin login redirects back to /api/admin/, not the SPA.
+            # Navigate explicitly to the frontend root.
+            self.open("/")
+            self.wait_for_ready_state_complete()
+            # wait_for_ready_state_complete only checks document.readyState; the React
+            # app mounts after that. Wait for the authenticated layout's drawer so
+            # callers can click nav items immediately without racing the first paint.
+            self.wait_for_element_visible('[data-cy="drawer-items"]', timeout=30)
 
     def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)
@@ -79,6 +83,57 @@ class HopeTestBrowser(BaseCase):
     def assert_value(self, selector: str, expected: str, timeout: int = 10):
         actual = self.get_value(selector, timeout=timeout)
         assert actual == expected, f"Expected value '{expected}' for {selector}, got '{actual}'"
+
+    def select_chip_option(self, name: str, select_selector: str) -> None:
+        """Pick one option from a MUI multiple-Select chip field and dismiss the listbox.
+
+        MUI multiple-Select keeps the listbox open after each pick. A JavaScript
+        Escape dispatch closes the Popover without requiring a visible backdrop click.
+        """
+        # Click the inner input rather than the wrapper — when chips are already
+        # selected, a click on the wrapper may land on a chip and fail to focus
+        # the Autocomplete input.
+        inner_input = f"{select_selector} input"
+        if self.is_element_present(inner_input):
+            self.click(inner_input)
+        else:
+            self.click(select_selector)
+        self.wait_for_element_visible('ul[role="listbox"]')
+        elements = self.find_elements('ul[role="listbox"] li')
+        for element in elements:
+            if element.text.strip() == name:
+                element.click()
+                break
+        else:
+            raise AssertionError(
+                f"Chip option '{name}' not found in select. Available: {[e.text.strip() for e in elements]}"
+            )
+        self.execute_script(
+            "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', keyCode:27, bubbles:true}))"
+        )
+        self.wait_for_element_absent('ul[role="listbox"]')
+
+    def set_value(self, selector: str, text: str) -> None:
+        """Type text into a React-controlled input or textarea without macOS autocorrect interference.
+
+        Disables spellcheck on the element before typing so the OS cannot silently
+        drop or replace characters mid-input, then restores the original attribute.
+        """
+        elem = self.find_element(selector)
+        original = self.execute_script("return arguments[0].getAttribute('spellcheck')", elem)
+        self.execute_script("arguments[0].setAttribute('spellcheck', 'false')", elem)
+        self.triple_click(selector)
+        self.send_keys(selector, text)
+        if original is None:
+            self.execute_script("arguments[0].removeAttribute('spellcheck')", elem)
+        else:
+            self.execute_script("arguments[0].setAttribute('spellcheck', arguments[1])", elem, original)
+
+    def triple_click(self, selector: str):
+        """Triple-click an element to select all of its text content."""
+        elem = self.find_element(selector)
+        actions = ActionChains(self.driver)
+        actions.move_to_element(elem).click(elem).click(elem).click(elem).perform()
 
     def scroll_main_content(self, scroll_by: int = 600):
         self.execute_script(

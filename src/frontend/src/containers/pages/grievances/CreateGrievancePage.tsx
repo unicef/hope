@@ -57,7 +57,11 @@ import {
 } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import {
+  GRIEVANCES_VIEW_LIST_PERMISSIONS,
+  hasPermissions,
+  PERMISSIONS,
+} from '../../../config/permissions';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -591,7 +595,7 @@ const CreateGrievancePage = (): ReactElement => {
             <PageHeader
               title="New Ticket"
               breadCrumbs={
-                hasPermissions(PERMISSIONS.GRIEVANCES_VIEW_LIST, permissions)
+                hasPermissions(GRIEVANCES_VIEW_LIST_PERMISSIONS, permissions)
                   ? breadCrumbsItems
                   : null
               }
