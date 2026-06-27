@@ -1,4 +1,3 @@
-from base64 import b64decode
 import datetime
 from decimal import ROUND_HALF_UP, Decimal
 import hashlib
@@ -8,20 +7,15 @@ from typing import TYPE_CHECKING, Any, no_type_check
 
 from django.conf import settings
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 
 from hope.apps.core.exchange_rates import ExchangeRates
-from hope.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hope.models import (
     Payment,
-    PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
 )
 
 if TYPE_CHECKING:
-    from django.db.models import QuerySet
-
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.currency import Currency
 
@@ -96,31 +90,6 @@ def calculate_counts(payment_verification_plan: PaymentVerificationPlan) -> None
     )
 
 
-def get_payment_items_for_dashboard(
-    year: int,
-    business_area_slug: str,
-    filters: dict,
-    only_with_delivered_quantity: bool = False,
-) -> "QuerySet":
-    additional_filters = {}
-    if only_with_delivered_quantity:
-        additional_filters["delivered_quantity_usd__gt"] = 0
-    return chart_get_filtered_qs(
-        Payment.objects.filter(excluded=False, conflicted=False),
-        year,
-        business_area_slug_filter={"business_area__slug": business_area_slug},
-        additional_filters={
-            **additional_filters,
-            **chart_create_filter_query(
-                filters,
-                program_id_path="parent__program_cycle__program__id",
-                administrative_area_path="household__admin2",
-            ),
-        },
-        year_filter_path="delivery_date",
-    )
-
-
 def get_quantity_in_usd(
     amount: Decimal | None,
     currency: "Currency | None",
@@ -151,11 +120,6 @@ def normalize_score(value: float | str | Decimal | None) -> Decimal | None:
     if value is None:
         return None
     return Decimal(value).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
-
-
-def get_payment_plan_object(payment_plan_id: str) -> "PaymentPlan":
-    node_name, obj_id = b64decode(payment_plan_id).decode().split(":")
-    return get_object_or_404(PaymentPlan, pk=obj_id)
 
 
 def get_payment_delivered_quantity_status_and_value(
