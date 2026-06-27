@@ -207,13 +207,11 @@ class Migration(migrations.Migration):
             create_default_purpose_and_backfill,
             migrations.RunPython.noop,
         ),
-        migrations.AlterField(
+        migrations.AddConstraint(
             model_name="paymentplan",
-            name="payment_plan_group",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.PROTECT,
-                related_name="payment_plans",
-                to="payment.paymentplangroup",
+            constraint=models.CheckConstraint(
+                condition=models.Q(is_removed=True) | models.Q(payment_plan_group__isnull=False),
+                name="payment_plan_group_required_unless_removed",
             ),
         ),
         # --- source_payment_plan related_name rename ---
