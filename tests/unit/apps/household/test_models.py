@@ -392,7 +392,7 @@ def test_facility_str(business_area: BusinessArea, area_hierarchy: tuple[Area, A
 # --- DocumentType ---
 
 
-def test_get_all_doc_types_choices_is_cached_and_invalidated() -> None:
+def test_get_all_doc_types_choices_is_cached_and_invalidated(django_capture_on_commit_callbacks) -> None:
     from django.core.cache import cache
 
     cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
@@ -407,20 +407,22 @@ def test_get_all_doc_types_choices_is_cached_and_invalidated() -> None:
     DocumentType.objects.bulk_create([DocumentType(key="key_b", label="Label B")])
     assert ("key_b", "Label B") not in DocumentType.get_all_doc_types_choices()
 
-    # Saving a DocumentType invalidates the cache, so the next call is fresh.
-    DocumentTypeFactory(key="key_c", label="Label C")
+    # Saving a DocumentType invalidates the cache on commit, so the next call is fresh.
+    with django_capture_on_commit_callbacks(execute=True):
+        DocumentTypeFactory(key="key_c", label="Label C")
     refreshed = DocumentType.get_all_doc_types_choices()
     assert ("key_b", "Label B") in refreshed
     assert ("key_c", "Label C") in refreshed
 
 
-def test_get_all_doc_types_choices_cache_cleared_on_delete() -> None:
+def test_get_all_doc_types_choices_cache_cleared_on_delete(django_capture_on_commit_callbacks) -> None:
     from django.core.cache import cache
 
     cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
     doc_type = DocumentTypeFactory(key="key_to_delete", label="To Delete")
     assert ("key_to_delete", "To Delete") in DocumentType.get_all_doc_types_choices()
 
-    doc_type.delete()
+    with django_capture_on_commit_callbacks(execute=True):
+        doc_type.delete()
     assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) is None
     assert ("key_to_delete", "To Delete") not in DocumentType.get_all_doc_types_choices()

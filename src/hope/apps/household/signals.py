@@ -53,7 +53,10 @@ def increment_individual_list_cache_version(sender: type[Individual], instance: 
 def invalidate_doc_types_cache(sender: type[Any], instance: Any, **kwargs: Any) -> None:
     from django.core.cache import cache
 
-    cache.delete(instance.CACHE_KEY_ALL_DOC_TYPES)
+    cache_key = instance.CACHE_KEY_ALL_DOC_TYPES
+    # Defer to commit so the cache is cleared only after the new data is visible,
+    # avoiding repopulation with stale (pre-commit) data.
+    transaction.on_commit(lambda: cache.delete(cache_key))
 
 
 def increment_household_list_cache_version_from_bulk(
