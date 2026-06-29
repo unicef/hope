@@ -869,12 +869,12 @@ class PaymentPlanService:
 
     @staticmethod
     def _check_group_fsp_consistency(
-        group: PaymentPlanGroup,
+        group: PaymentPlanGroup | None,
         fsp: FinancialServiceProvider | None,
         exclude_pk: "uuid.UUID | None" = None,
     ) -> None:
         """Raise ValidationError if fsp conflicts with another plan already in this group."""
-        if fsp is None:
+        if group is None or fsp is None:
             return
         qs = (
             PaymentPlan.objects.filter(payment_plan_group=group)

@@ -178,6 +178,29 @@ def group_with_accepted_plan(business_area: Any, cycle: Any) -> Any:
 @pytest.fixture
 def group_with_accepted_plan_and_payment(business_area: Any, cycle: Any) -> Any:
     group = cycle.payment_plan_groups.first()
+    fsp = FinancialServiceProviderFactory()
+    delivery_mechanism = DeliveryMechanismFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    payment = PaymentFactory(parent=plan, financial_service_provider=fsp, delivery_type=delivery_mechanism)
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group
+
+
+@pytest.fixture
+def group_with_accepted_plan_and_payment_no_template(business_area: Any, cycle: Any) -> Any:
+    """Accepted plan with an eligible payment but no resolvable FSP XLSX template - export yields no rows."""
+    group = cycle.payment_plan_groups.first()
     plan = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -1154,6 +1177,29 @@ def test_export_without_eligible_payments_returns_400(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "there are no eligible payments to export." in str(response.json())
+    mocked_task.assert_not_called()
+    group.refresh_from_db()
+    assert group.background_action_status is None
+
+
+def test_export_without_resolvable_template_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment_no_template: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan_and_payment_no_template
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()[0].startswith("Nothing to export:")
     mocked_task.assert_not_called()
     group.refresh_from_db()
     assert group.background_action_status is None

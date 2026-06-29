@@ -134,6 +134,10 @@ from hope.apps.payment.utils import (
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+    EmptyDeliveryExportError,
+    XlsxPaymentPlanGroupDeliveryExportService,
+)
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
     XlsxPaymentPlanGroupDeliveryImportService,
 )
@@ -2612,6 +2616,14 @@ class PaymentPlanGroupViewSet(
                 )
             if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
                 raise ValidationError("Export failed: there are no eligible payments to export.")
+
+            # Reject up-front if every plan would be filtered out (e.g. no FSP XLSX template mapping),
+            # so the user gets the error on click instead of a silently failing background task.
+            exportable_ids = XlsxPaymentPlanGroupDeliveryExportService(
+                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
+            ).preview_export()
+            if not exportable_ids:
+                raise ValidationError(EmptyDeliveryExportError.MESSAGE)
 
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
         payment_plan_group.save(update_fields=["background_action_status"])

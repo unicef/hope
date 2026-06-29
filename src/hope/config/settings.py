@@ -284,12 +284,6 @@ AUTHENTICATION_BACKENDS = [
 NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 
-# helper function to extend all the common lists
-def extend_list_avoid_repeats(list_to_extend: list, extend_with: list) -> None:
-    """Extend the first list with the elements in the second one, making sure its elements are not already there."""
-    list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
-
-
 GIT_VERSION = env("GIT_VERSION")
 HIJACK_PERMISSION_CHECK = "hope.apps.utils.security.can_hijack"
 
