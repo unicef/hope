@@ -12,6 +12,7 @@ from hope.contrib.api.serializers.vision import (
     PaymentPlanCallbackAckSerializer,
     PaymentPlanCallbackRequestSerializer,
 )
+from hope.contrib.vision.choices import VisionLogEntryType
 from hope.models import Grant, PaymentPlan
 
 VISION_RESPONSE_OK = "OK"
@@ -40,7 +41,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         vision_data.setdefault("log", []).append(
             {
                 "timestamp": timezone.now().isoformat(),
-                "type": "push-notification",
+                "type": VisionLogEntryType.PUSH_NOTIFICATION.value,
                 "payload": payload,
                 "response": dict(response_data),
             }

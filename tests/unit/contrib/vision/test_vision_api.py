@@ -5,6 +5,7 @@ import pytest
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
+from hope.contrib.vision.choices import VisionLogEntryType
 
 
 @pytest.fixture(autouse=True)
@@ -196,7 +197,7 @@ def test_vision_api_error_is_raised() -> None:
                 api.send_payment_plan(pp)
             assert "vision" in pp.internal_data
             entry = pp.internal_data["vision"]["log"][0]
-            assert entry["type"] == "api-call"
+            assert entry["type"] == VisionLogEntryType.API_CALL.value
             assert datetime.fromisoformat(entry["timestamp"])
             assert entry["response"]["error"] == "boom"
             pp.save.assert_called_once_with(update_fields=["internal_data"])
@@ -215,7 +216,7 @@ def test_send_payment_plan_logs_4xx_error() -> None:
             assert "vision" in pp.internal_data
             assert len(pp.internal_data["vision"]["log"]) == 1
             entry = pp.internal_data["vision"]["log"][0]
-            assert entry["type"] == "api-call"
+            assert entry["type"] == VisionLogEntryType.API_CALL.value
             assert entry["payload"]["payplanSno"] == "PP001"
             assert "400" in entry["response"]["error"]
             pp.save.assert_called_once_with(update_fields=["internal_data"])
@@ -235,7 +236,7 @@ def test_send_payment_plan_logs_payload_and_response(mock_post, mock_acquire_tok
     assert set(pp.internal_data["vision"]) == {"log", "sent"}
     assert len(pp.internal_data["vision"]["log"]) == 1
     entry = pp.internal_data["vision"]["log"][0]
-    assert entry["type"] == "api-call"
+    assert entry["type"] == VisionLogEntryType.API_CALL.value
     assert datetime.fromisoformat(entry["timestamp"])
     assert entry["payload"]["payplanSno"] == "PP042"
     assert entry["response"]["messageId"] == "msg-42"
@@ -297,7 +298,7 @@ def test_callback_view_success(mock_get, mock_log_entry) -> None:
     }
     assert "vision" in mock_pp.internal_data
     entry = mock_pp.internal_data["vision"]["log"][0]
-    assert entry["type"] == "push-notification"
+    assert entry["type"] == VisionLogEntryType.PUSH_NOTIFICATION.value
     assert datetime.fromisoformat(entry["timestamp"])
     assert entry["payload"]["payplanSno"] == "PP043"
     assert entry["response"]["status"] == "OK"
@@ -385,7 +386,7 @@ def test_callback_view_success_missing_vision_payplan_sno(mock_get, mock_log_ent
     mock_get.assert_called_once_with(unicef_id="PP045")
     mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
     entry = mock_pp.internal_data["vision"]["log"][0]
-    assert entry["type"] == "push-notification"
+    assert entry["type"] == VisionLogEntryType.PUSH_NOTIFICATION.value
     assert entry["payload"]["payplanSno"] == "PP045"
     assert entry["response"]["status"] == "KO"
 
@@ -462,7 +463,7 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
     }
     assert "vision" in mock_pp.internal_data
     entry = mock_pp.internal_data["vision"]["log"][0]
-    assert entry["type"] == "push-notification"
+    assert entry["type"] == VisionLogEntryType.PUSH_NOTIFICATION.value
     assert entry["payload"]["payplanSno"] == "PP043"
     assert entry["response"]["status"] == "OK"
     assert "vision_id" not in mock_pp.internal_data["vision"]

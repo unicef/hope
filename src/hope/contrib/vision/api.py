@@ -6,6 +6,7 @@ import requests
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
+from hope.contrib.vision.choices import VisionLogEntryType
 from hope.models import PaymentPlan
 
 
@@ -79,7 +80,7 @@ class VisionAPI(BaseAPI):
         payload = PaymentPlanPayloadSerializer(payment_plan).data
         entry = {
             "timestamp": timezone.now().isoformat(),
-            "type": "api-call",
+            "type": VisionLogEntryType.API_CALL.value,
             "payload": {k: str(v) for k, v in payload.items()},
             "response": {},
         }
