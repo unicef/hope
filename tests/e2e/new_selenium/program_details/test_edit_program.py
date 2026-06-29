@@ -1,5 +1,4 @@
 import pytest
-from selenium.webdriver.common.keys import Keys
 
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
@@ -35,16 +34,10 @@ def test_edit_programme_updates_details(
         browser.clear('input[name="name"]')
         browser.type('input[name="name"]', "Updated Programme Name")
 
-        start_el = browser.find_element('input[name="startDate"]')
-        start_el.click()
-        start_el.send_keys(Keys.CONTROL, "a")
-        start_el.send_keys("2022-01-01")
+        browser.fill_date('input[name="startDate"]', "2022-01-01")
         browser.click('input[name="name"]')
 
-        end_el = browser.find_element('input[name="endDate"]')
-        end_el.click()
-        end_el.send_keys(Keys.CONTROL, "a")
-        end_el.send_keys("2099-10-01")
+        browser.fill_date('input[name="endDate"]', "2099-10-01")
         browser.click('input[name="name"]')
 
         browser.click('button[data-cy="button-next"]')

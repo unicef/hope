@@ -6,7 +6,6 @@ from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Exists, OuterRef, Q
 
-from hope.apps.core.countries import Countries
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
@@ -265,14 +264,6 @@ def get_unhcr_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = 
     )
 
 
-def get_receiver_poi_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
-    return get_documents_number_query("receiver_poi", args[0], is_social_worker_query=is_social_worker_query)
-
-
-def get_receiver_poi_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
-    return get_documents_issuer_query("receiver_poi", args[0], is_social_worker_query=is_social_worker_query)
-
-
 def get_has_phone_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     has_phone_no = args[0] in [True, "True"]
     lookup_prefix = "individuals__" if is_social_worker_query else ""
@@ -311,35 +302,6 @@ def get_has_tax_id_query(_: Any, args: Any, is_social_worker_query: bool = False
         Q(**{f"{lookup_prefix}documents__type__key__iexact": "TAX_ID"})
         if has_tax_id
         else ~Q(**{f"{lookup_prefix}documents__type__key__iexact": "TAX_ID"})
-    )
-
-
-def country_generic_query(comparison_method: str, args: Any, lookup: Any, is_social_worker_query: bool = False) -> Q:
-    lookup_prefix = "individuals__" if is_social_worker_query else ""
-    query = Q(**{lookup_prefix + lookup: Countries.get_country_value(args[0])})
-    if comparison_method == "EQUALS":
-        return query
-    if comparison_method == "NOT_EQUALS":
-        return ~query
-    logger.warning(f"Country filter query does not support {comparison_method} type")
-    raise ValidationError(f"Country filter query does not support {comparison_method} type")
-
-
-def country_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
-    return country_generic_query(
-        comparison_method,
-        args,
-        "country",
-        is_social_worker_query=is_social_worker_query,
-    )
-
-
-def country_origin_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
-    return country_generic_query(
-        comparison_method,
-        args,
-        "country_origin",
-        is_social_worker_query=is_social_worker_query,
     )
 
 
