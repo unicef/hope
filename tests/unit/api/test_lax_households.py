@@ -37,6 +37,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.currency import Currency
 from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
@@ -662,6 +663,65 @@ def test_household_create_validation_facility_area(
     assert (
         "This field is required when facility_name is provided." in response.json()["results"][0]["facility_admin_area"]
     )
+
+
+def test_create_household_with_currency(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+    currency_usd: Currency,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id, primary_collector.unicef_id],
+        "currency": "USD",
+    }
+
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+    assert household.currency == currency_usd
+    assert household.currency.code == "USD"
+
+
+def test_create_household_without_currency_is_null(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id, primary_collector.unicef_id],
+    }
+
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+    assert household.currency is None
 
 
 def test_household_create_facility(
