@@ -288,6 +288,8 @@ class PaymentPlan(
         "payment.PaymentPlanGroup",
         on_delete=models.PROTECT,
         related_name="payment_plans",
+        null=True,
+        blank=True,
     )
     payment_plan_purposes = models.ManyToManyField(
         "payment.PaymentPlanPurpose",
@@ -644,6 +646,12 @@ class PaymentPlan(
             ("pm_sync_payment_plan_with_pg", "Can sync payment plan with payment gateway"),
             ("pm_send_payment_plan", "Can send payment plan to Vision"),
         )
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(is_removed=True) | Q(payment_plan_group__isnull=False),
+                name="payment_plan_group_required_unless_removed",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -1000,7 +1008,11 @@ class PaymentPlan(
 
     @property
     def is_payment_gateway_and_all_sent_to_fsp(self) -> bool:
-        """Export MTCN file xlsx file with password."""
+        """Export MTCN file xlsx file with password.
+
+        Note: change XlsxPaymentPlanGroupDeliveryExportService._get_plans_with_blocking_payments
+        when changing this function.
+        """
         has_blocking_payments = self.eligible_payments.filter(
             status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG)
         ).exists()

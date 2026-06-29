@@ -57,11 +57,6 @@ def validate_file(file: Any) -> None:
         raise ValidationError(_("File type not supported"))
 
 
-def validate_files_size(files: list[Any]) -> None:
-    if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
-        raise ValidationError("Total size of files can not be larger than 25mb.")
-
-
 def validate_grievance_documents_size(ticket_id: str, new_documents: list[dict], is_updated: bool = False) -> None:
     grievance_documents = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id)
 
