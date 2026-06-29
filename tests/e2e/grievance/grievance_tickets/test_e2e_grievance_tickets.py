@@ -694,8 +694,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Add Member - TEST")
         page_grievance_new_ticket.get_phone_no_alternative().send_keys("999 999 999")
-        page_grievance_new_ticket.get_date_picker_filter().click()
-        page_grievance_new_ticket.get_date_picker_filter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
+        page_grievance_new_ticket.fill_date_picker_filter(FormatTime(1, 5, 1986).numerically_formatted_date)
         page_grievance_new_ticket.get_input_individualdata_blockchainname().send_keys("TEST")
         page_grievance_new_ticket.get_input_individualdata_familyname().send_keys("Teria")
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Krido")
@@ -765,8 +764,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
 
         page_grievance_new_ticket.get_description().send_keys("Add Individual - TEST")
-        page_grievance_new_ticket.get_date_picker_filter().click()
-        page_grievance_new_ticket.get_date_picker_filter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
+        page_grievance_new_ticket.fill_date_picker_filter(FormatTime(1, 5, 1986).numerically_formatted_date)
 
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Krido")
         page_grievance_new_ticket.get_select_individualdata_sex().click()
@@ -1453,8 +1451,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.wait_for_page_ready()
 
         page_grievance_new_ticket.get_description().send_keys("Add Individual with Photo - TEST")
-        page_grievance_new_ticket.get_date_picker_filter().click()
-        page_grievance_new_ticket.get_date_picker_filter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
+        page_grievance_new_ticket.fill_date_picker_filter(FormatTime(1, 5, 1986).numerically_formatted_date)
 
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Test Photo Person")
         page_grievance_new_ticket.get_select_individualdata_sex().click()

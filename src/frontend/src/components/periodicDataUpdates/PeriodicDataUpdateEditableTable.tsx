@@ -215,7 +215,6 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                 slotProps={{
                                   textField: {
                                     fullWidth: true,
-                                    inputProps: { mask: '____-__-__' },
                                   },
                                 }}
                               />

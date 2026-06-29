@@ -517,14 +517,14 @@ class TestSmokePaymentModule:
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
         assert "Currency" in page_new_payment_plan.get_input_currency().text
-        assert (
-            "Dispersion Start Date*"
-            in page_new_payment_plan.wait_for(page_new_payment_plan.input_dispersion_start_date).text
-        )
-        assert (
-            "Dispersion End Date*"
-            in page_new_payment_plan.wait_for(page_new_payment_plan.input_dispersion_end_date).text
-        )
+        # MUI renders the required-field asterisk as a thin space (U+2009) + "*";
+        # strip the thin space so the bare-asterisk assertion still matches.
+        assert "Dispersion Start Date*" in page_new_payment_plan.wait_for(
+            page_new_payment_plan.input_dispersion_start_date
+        ).text.replace("\u2009", "")
+        assert "Dispersion End Date*" in page_new_payment_plan.wait_for(
+            page_new_payment_plan.input_dispersion_end_date
+        ).text.replace("\u2009", "")
 
     def test_smoke_details_payment_plan(
         self,
@@ -602,14 +602,8 @@ class TestSmokePaymentModule:
         page_new_payment_plan.select_listbox_element(payment_plan.name)
         page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.select_listbox_element("Afghan afghani")
-        page_new_payment_plan.get_input_dispersion_start_date().click()
-        page_new_payment_plan.get_input_dispersion_start_date().send_keys(
-            FormatTime(22, 1, 2026).numerically_formatted_date
-        )
-        page_new_payment_plan.get_input_dispersion_end_date().click()
-        page_new_payment_plan.get_input_dispersion_end_date().send_keys(
-            FormatTime(30, 6, 2030).numerically_formatted_date
-        )
+        page_new_payment_plan.fill_input_dispersion_start_date(FormatTime(22, 1, 2026).numerically_formatted_date)
+        page_new_payment_plan.fill_input_dispersion_end_date(FormatTime(30, 6, 2030).numerically_formatted_date)
         page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.get_button_save_payment_plan().click()
         assert "OPEN" in page_payment_module_details.get_status_container().text

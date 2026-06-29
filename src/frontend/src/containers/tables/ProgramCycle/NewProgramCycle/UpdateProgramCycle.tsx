@@ -107,7 +107,7 @@ const UpdateProgramCycle = ({
           title: values.title,
           startDate: values.startDate,
           endDate: values.endDate,
-        } as any, // type assertion to allow camelCase, REST client will transform
+        }, // type assertion to allow camelCase, REST client will transform
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
