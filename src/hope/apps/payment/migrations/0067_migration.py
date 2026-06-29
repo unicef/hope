@@ -1,6 +1,5 @@
 import uuid
 
-from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
@@ -8,14 +7,15 @@ import model_utils.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ("core", "0028_migration"),
         ("payment", "0066_migration"),
         ("program", "0019_migration"),
     ]
 
     operations = [
+        # --- PaymentPlanGroup ---
         migrations.CreateModel(
-            name="FollowUpInstruction",
+            name="PaymentPlanGroup",
             fields=[
                 (
                     "id",
@@ -29,56 +29,38 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                ("name", models.CharField(default="Default Group", max_length=255)),
+                (
+                    "cycle",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payment_plan_groups",
+                        to="program.programcycle",
+                        verbose_name="Programme Cycle",
+                    ),
+                ),
                 (
                     "background_action_status",
                     models.CharField(
                         blank=True,
                         choices=[
-                            ("XLSX_EXPORTING", "Exporting XLSX"),
-                            ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation from XLSX"),
-                            ("XLSX_EXPORT_ERROR", "Error while exporting XLSX"),
-                            ("XLSX_IMPORT_ERROR", "Error while importing XLSX"),
+                            ("XLSX_EXPORTING", "Exporting XLSX file"),
+                            ("XLSX_EXPORT_ERROR", "Export XLSX file Error"),
+                            ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"),
+                            ("XLSX_IMPORT_ERROR", "Import XLSX file Error"),
                         ],
-                        max_length=255,
+                        db_index=True,
+                        default=None,
+                        help_text="Background Action Status for celery export/import task [sys]",
+                        max_length=50,
                         null=True,
                     ),
                 ),
                 (
-                    "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="core.businessarea"),
-                ),
-                (
-                    "created_by",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
-                        related_name="created_follow_up_instructions",
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                (
-                    "export_file",
+                    "delivery_import_file",
                     models.ForeignKey(
                         blank=True,
-                        help_text="Export File",
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="+",
-                        to="core.filetemp",
-                    ),
-                ),
-                (
-                    "program",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
-                        related_name="follow_up_instructions",
-                        to="program.program",
-                    ),
-                ),
-                (
-                    "reconciliation_import_file",
-                    models.ForeignKey(
-                        blank=True,
-                        help_text="Reconciliation Import File",
+                        help_text="Uploaded reconciliation XLSX [sys]",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="+",
@@ -87,112 +69,102 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "Follow Up Instruction",
-                "verbose_name_plural": "Follow Up Instructions",
+                "verbose_name": "Payment Plan Group",
+                "app_label": "payment",
                 "ordering": ["created_at"],
+                "unique_together": {("cycle", "name")},
             },
         ),
         migrations.AddField(
             model_name="paymentplan",
-            name="follow_up_instruction",
+            name="payment_plan_group",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="payment_plans",
-                to="payment.followupinstruction",
+                to="payment.paymentplangroup",
             ),
         ),
         migrations.RunSQL(
+            sql="ALTER TABLE payment_paymentplangroup ADD unicef_id_index SERIAL",
+            reverse_sql="ALTER TABLE payment_paymentplangroup DROP COLUMN unicef_id_index",
+        ),
+        migrations.RunSQL(
             sql="""
-            DO $$
-            DECLARE business_area_record RECORD;
+            CREATE OR REPLACE FUNCTION create_ppg_unicef_id() RETURNS trigger
+                LANGUAGE plpgsql
+                AS $$
             BEGIN
-                FOR business_area_record IN SELECT id FROM core_businessarea LOOP
-                    EXECUTE format(
-                        'CREATE SEQUENCE IF NOT EXISTS follow_up_instruction_business_area_seq_%s',
-                        translate(business_area_record.id::text, '-', '_')
-                    );
-                END LOOP;
-            END;
+                NEW.unicef_id := format('PPG-%s', NEW.unicef_id_index);
+                return NEW;
+            END
             $$;
+
+            CREATE TRIGGER create_ppg_unicef_id BEFORE INSERT ON payment_paymentplangroup FOR EACH ROW EXECUTE PROCEDURE create_ppg_unicef_id();
             """,
             reverse_sql="""
-            DO $$
-            DECLARE business_area_record RECORD;
-            BEGIN
-                FOR business_area_record IN SELECT id FROM core_businessarea LOOP
-                    EXECUTE format(
-                        'DROP SEQUENCE IF EXISTS follow_up_instruction_business_area_seq_%s',
-                        translate(business_area_record.id::text, '-', '_')
-                    );
-                END LOOP;
-            END;
-            $$;
+            DROP TRIGGER IF EXISTS create_ppg_unicef_id ON payment_paymentplangroup;
+            DROP FUNCTION IF EXISTS create_ppg_unicef_id();
             """,
         ),
-        migrations.RunSQL(
-            sql="""
-            CREATE OR REPLACE FUNCTION follow_up_instruction_business_area_seq() RETURNS trigger
-                LANGUAGE plpgsql
-                AS $$
-            begin
-                execute format(
-                    'create sequence if not exists follow_up_instruction_business_area_seq_%s',
-                    translate(NEW.id::text, '-','_')
-                );
-                return NEW;
-            end
-            $$;
-            """,
-            reverse_sql="DROP FUNCTION IF EXISTS follow_up_instruction_business_area_seq();",
+        # --- plan_type (added alongside is_follow_up; backfill + removal happen in 0069/0070) ---
+        migrations.AddField(
+            model_name="paymentplan",
+            name="plan_type",
+            field=models.CharField(
+                choices=[
+                    ("REGULAR", "Regular"),
+                    ("TOP_UP", "Top Up"),
+                    ("FOLLOW_UP", "Follow Up"),
+                    ("TOP_UP_AMENDMENT", "Top Up Amendment"),
+                ],
+                db_index=True,
+                default="REGULAR",
+                help_text="Payment Plan type [sys]",
+                max_length=20,
+            ),
         ),
-        migrations.RunSQL(
-            sql="""
-            DO $$
-            BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM pg_trigger
-                    WHERE tgname = 'follow_up_instruction_business_area_seq'
-                ) THEN
-                    CREATE TRIGGER follow_up_instruction_business_area_seq
-                    AFTER INSERT ON core_businessarea
-                    FOR EACH ROW
-                    EXECUTE PROCEDURE follow_up_instruction_business_area_seq();
-                END IF;
-            END;
-            $$;
-            """,
-            reverse_sql="DROP TRIGGER IF EXISTS follow_up_instruction_business_area_seq ON core_businessarea;",
+        # --- source_payment_plan related_name rename ---
+        migrations.AlterField(
+            model_name="paymentplan",
+            name="source_payment_plan",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Source Payment Plan (applicable for follow-up and top-up Payment Plans)",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="child_plans",
+                to="payment.paymentplan",
+            ),
         ),
-        migrations.RunSQL(
-            sql="""
-            CREATE OR REPLACE FUNCTION follow_up_instruction_fill_unicef_id_per_business_area_seq() RETURNS trigger
-                LANGUAGE plpgsql
-                AS $$
-                DECLARE businessAreaID varchar;
-                DECLARE businessAreaCode varchar;
-            begin
-                SELECT INTO businessAreaID translate(ba.id::text, '-','_') FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
-                SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;
-
-                NEW.unicef_id := format(
-                    'FUI-%s-%s-%s',
-                    trim(businessAreaCode),
-                    to_char(NEW.created_at, 'yy'),
-                    trim(replace(to_char(nextval('follow_up_instruction_business_area_seq_' || businessAreaID), '00000000'), ',', '.'))
-                );
-                RETURN NEW;
-            end
-            $$;
-            """,
-            reverse_sql="DROP FUNCTION IF EXISTS follow_up_instruction_fill_unicef_id_per_business_area_seq();",
+        # --- rename export_file_per_fsp → export_file_delivery ---
+        migrations.RenameField(
+            model_name="paymentplan",
+            old_name="export_file_per_fsp",
+            new_name="export_file_delivery",
         ),
-        migrations.RunSQL(
-            sql="CREATE TRIGGER follow_up_instruction_fill_unicef_id_per_business_area_seq BEFORE INSERT ON payment_followupinstruction FOR EACH ROW EXECUTE PROCEDURE follow_up_instruction_fill_unicef_id_per_business_area_seq();",
-            reverse_sql=(
-                "DROP TRIGGER IF EXISTS follow_up_instruction_fill_unicef_id_per_business_area_seq "
-                "ON payment_followupinstruction;"
+        migrations.AlterField(
+            model_name="paymentplan",
+            name="export_file_delivery",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Export File Delivery",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="core.filetemp",
+            ),
+        ),
+        # --- export_tag ---
+        migrations.AddField(
+            model_name="paymentplan",
+            name="export_tag",
+            field=models.PositiveSmallIntegerField(
+                blank=True,
+                db_index=True,
+                help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
+                null=True,
             ),
         ),
     ]

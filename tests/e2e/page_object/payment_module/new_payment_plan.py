@@ -55,3 +55,11 @@ class NewPaymentPlan(BaseComponents):
 
     def get_input_dispersion_end_date(self) -> WebElement:
         return self.wait_for(self.input_dispersion_end_date).find_elements(By.TAG_NAME, "input")[0]
+
+    # MUI X v9 date fields have no typeable single input; fill via the visible
+    # field wrapper (see BaseComponents.fill_date_picker).
+    def fill_input_dispersion_start_date(self, value: str) -> None:
+        self.fill_date_picker(self.wait_for(self.input_dispersion_start_date), value)
+
+    def fill_input_dispersion_end_date(self, value: str) -> None:
+        self.fill_date_picker(self.wait_for(self.input_dispersion_end_date), value)
