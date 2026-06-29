@@ -36,6 +36,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -182,6 +183,12 @@ class HouseholdSerializer(serializers.ModelSerializer):
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    currency = serializers.SlugRelatedField(
+        slug_field="code",
+        required=False,
+        allow_null=True,
+        queryset=Currency.objects.all(),
+    )
 
     admin1 = serializers.SlugRelatedField(
         slug_field="p_code",
