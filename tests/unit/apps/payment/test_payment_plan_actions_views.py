@@ -33,6 +33,7 @@ from extras.test_utils.factories import (
     RuleCommitFactory,
     UserFactory,
 )
+from extras.test_utils.factories.payment import PaymentVerificationPlanFactory, PaymentVerificationSummaryFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -125,6 +126,8 @@ def payment_plan_actions_context(
         "url_create_follow_up": reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs),
         "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
         "url_pp_close": reverse("api:payments:payment-plans-close", kwargs=url_kwargs),
+        "url_pp_ready_for_closure": reverse("api:payments:payment-plans-ready-for-closure", kwargs=url_kwargs),
+        "url_pp_send_back_to_finished": reverse("api:payments:payment-plans-send-back-to-finished", kwargs=url_kwargs),
         "url_pp_abort": reverse("api:payments:payment-plans-abort", kwargs=url_kwargs),
         "url_pp_reactivate_abort": reverse("api:payments:payment-plans-reactivate-abort", kwargs=url_kwargs),
     }
@@ -1429,9 +1432,90 @@ def test_fsp_xlsx_template_list(
 @pytest.mark.parametrize(
     ("permissions", "expected_status", "pp_status"),
     [
-        ([Permissions.PM_CLOSE_FINISHED], status.HTTP_200_OK, PaymentPlan.Status.FINISHED),
-        ([Permissions.PM_CLOSE_FINISHED], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.ACCEPTED),
+        ([Permissions.PM_MARK_READY_FOR_CLOSURE], status.HTTP_200_OK, PaymentPlan.Status.FINISHED),
+        ([Permissions.PM_MARK_READY_FOR_CLOSURE], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.ACCEPTED),
         ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.FINISHED),
+    ],
+)
+def test_pp_ready_for_closure(
+    payment_plan_actions_context: dict[str, Any],
+    permissions: list,
+    expected_status: int,
+    create_user_role_with_permissions: Any,
+    pp_status: str,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        permissions,
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    pp = payment_plan_actions_context["pp"]
+    pp.status = pp_status
+    pp.save()
+
+    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_pp_ready_for_closure"])
+
+    assert response.status_code == expected_status
+    if expected_status == status.HTTP_200_OK:
+        assert response.json() == {"message": "Payment Plan marked as ready for closure"}
+        pp.refresh_from_db()
+        assert pp.status == PaymentPlan.Status.READY_FOR_CLOSURE
+
+    if expected_status == status.HTTP_400_BAD_REQUEST:
+        assert response.json()[0] == (
+            f"Mark as Ready for Closure is possible only within Status {PaymentPlan.Status.FINISHED}"
+        )
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status", "pp_status"),
+    [
+        (
+            [Permissions.PM_MARK_READY_FOR_CLOSURE],
+            status.HTTP_200_OK,
+            PaymentPlan.Status.READY_FOR_CLOSURE,
+        ),
+        ([Permissions.PM_MARK_READY_FOR_CLOSURE], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.FINISHED),
+        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.READY_FOR_CLOSURE),
+    ],
+)
+def test_pp_send_back_to_finished(
+    payment_plan_actions_context: dict[str, Any],
+    permissions: list,
+    expected_status: int,
+    create_user_role_with_permissions: Any,
+    pp_status: str,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        permissions,
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    pp = payment_plan_actions_context["pp"]
+    pp.status = pp_status
+    pp.save()
+
+    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_pp_send_back_to_finished"])
+
+    assert response.status_code == expected_status
+    if expected_status == status.HTTP_200_OK:
+        assert response.json() == {"message": "Payment Plan sent back to finished"}
+        pp.refresh_from_db()
+        assert pp.status == PaymentPlan.Status.FINISHED
+
+    if expected_status == status.HTTP_400_BAD_REQUEST:
+        assert response.json()[0] == (
+            f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
+        )
+
+
+@pytest.mark.parametrize(
+    ("permissions", "expected_status", "pp_status"),
+    [
+        ([Permissions.PM_CLOSE_FINISHED], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.FINISHED),
+        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.READY_FOR_CLOSURE),
     ],
 )
 def test_pp_close(
@@ -1447,19 +1531,119 @@ def test_pp_close(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    payment_plan_actions_context["pp"].status = pp_status
-    payment_plan_actions_context["pp"].save()
-    payment_plan_actions_context["pp"].refresh_from_db()
+    pp = payment_plan_actions_context["pp"]
+    pp.status = pp_status
+    pp.save()
 
-    assert payment_plan_actions_context["pp"].status == pp_status
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_pp_close"])
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
+    )
 
     assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan closed"}
-
     if expected_status == status.HTTP_400_BAD_REQUEST:
-        assert response.json()[0] == f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}"
+        assert response.json()[0] == (
+            f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
+        )
+
+
+def test_pp_close_success(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CLOSE_FINISHED],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    pp = payment_plan_actions_context["pp"]
+    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
+    pp.save()
+    PaymentVerificationSummaryFactory(payment_plan=pp)
+    PaymentVerificationPlanFactory(payment_plan=pp, responded_count=1)
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"message": "Payment Plan closed"}
+    pp.refresh_from_db()
+    assert pp.status == PaymentPlan.Status.CLOSED
+    assert pp.closed_by == payment_plan_actions_context["user"]
+
+
+def test_pp_close_requires_comment_when_no_verification(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CLOSE_FINISHED],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    pp = payment_plan_actions_context["pp"]
+    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
+    pp.save()
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()[0] == "Closure comment is required when no payment verification was carried out."
+
+
+def test_pp_close_with_comment_when_no_verification(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CLOSE_FINISHED],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    pp = payment_plan_actions_context["pp"]
+    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
+    pp.save()
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_pp_close"],
+        data={"closure_comment": "No verification was done due to operational constraints."},
+        content_type="application/json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    pp.refresh_from_db()
+    assert pp.status == PaymentPlan.Status.CLOSED
+    assert pp.closure_comment == "No verification was done due to operational constraints."
+    assert pp.closed_by == payment_plan_actions_context["user"]
+
+
+def test_pp_close_verification_plan_with_no_responses_requires_comment(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CLOSE_FINISHED],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    pp = payment_plan_actions_context["pp"]
+    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
+    pp.save()
+    PaymentVerificationSummaryFactory(payment_plan=pp)
+    PaymentVerificationPlanFactory(payment_plan=pp, responded_count=0)
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()[0] == "Closure comment is required when no payment verification was carried out."
 
 
 @pytest.mark.parametrize(

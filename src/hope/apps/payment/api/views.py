@@ -67,6 +67,7 @@ from hope.apps.payment.api.serializers import (
     PaymentListSerializer,
     PaymentPlanAbortSerializer,
     PaymentPlanBulkActionSerializer,
+    PaymentPlanCloseSerializer,
     PaymentPlanCreateFollowUpSerializer,
     PaymentPlanCreateUpdateSerializer,
     PaymentPlanDetailSerializer,
@@ -128,6 +129,10 @@ from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVeri
 from hope.apps.payment.utils import calculate_counts, from_received_to_status
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
+)
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
+    EmptyDeliveryExportError,
+    XlsxPaymentPlanGroupDeliveryExportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
     XlsxPaymentPlanGroupDeliveryImportService,
@@ -762,6 +767,7 @@ class PaymentPlanViewSet(
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "abort": PaymentPlanAbortSerializer,
+        "close": PaymentPlanCloseSerializer,
         "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
     permissions_by_action = {
@@ -798,6 +804,8 @@ class PaymentPlanViewSet(
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        "ready_for_closure": [Permissions.PM_MARK_READY_FOR_CLOSURE],
+        "send_back_to_finished": [Permissions.PM_MARK_READY_FOR_CLOSURE],
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
@@ -1483,12 +1491,49 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], url_path="ready-for-closure")
     @transaction.atomic
-    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).close()
+        payment_plan = PaymentPlanService(payment_plan).ready_for_closure()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan marked as ready for closure"})
+
+    @action(detail=True, methods=["get"], url_path="send-back-to-finished")
+    @transaction.atomic
+    def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).send_back_to_finished()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan sent back to finished"})
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        closure_comment = serializer.validated_data.get("closure_comment")
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).close(
+            closure_comment=closure_comment, user_id=str(request.user.pk)
+        )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -2553,6 +2598,14 @@ class PaymentPlanGroupViewSet(
                 )
             if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
                 raise ValidationError("Export failed: there are no eligible payments to export.")
+
+            # Reject up-front if every plan would be filtered out (e.g. no FSP XLSX template mapping),
+            # so the user gets the error on click instead of a silently failing background task.
+            exportable_ids = XlsxPaymentPlanGroupDeliveryExportService(
+                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
+            ).preview_export()
+            if not exportable_ids:
+                raise ValidationError(EmptyDeliveryExportError.MESSAGE)
 
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
         payment_plan_group.save(update_fields=["background_action_status"])

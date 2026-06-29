@@ -856,12 +856,12 @@ class PaymentPlanService:
 
     @staticmethod
     def _check_group_fsp_consistency(
-        group: PaymentPlanGroup,
+        group: PaymentPlanGroup | None,
         fsp: FinancialServiceProvider | None,
         exclude_pk: "uuid.UUID | None" = None,
     ) -> None:
         """Raise ValidationError if fsp conflicts with another plan already in this group."""
-        if fsp is None:
+        if group is None or fsp is None:
             return
         qs = (
             PaymentPlan.objects.filter(payment_plan_group=group)
@@ -1301,13 +1301,42 @@ class PaymentPlanService:
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
 
-    def close(self) -> PaymentPlan:
+    def ready_for_closure(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.FINISHED:
-            raise ValidationError(f"Close Payment Plan is possible only within Status {PaymentPlan.Status.FINISHED}")
+            raise ValidationError(
+                f"Mark as Ready for Closure is possible only within Status {PaymentPlan.Status.FINISHED}"
+            )
         flow = PaymentPlanFlow(self.payment_plan)
-        flow.status_close()
+        flow.status_ready_for_closure()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        return self.payment_plan
+
+    def send_back_to_finished(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
+            raise ValidationError(f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}")
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_finished()
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        return self.payment_plan
+
+    def close(self, closure_comment: str | None = None, user_id: str | None = None) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
+            raise ValidationError(
+                f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
+            )
+        has_verification = self.payment_plan.payment_verification_plans.filter(responded_count__gt=0).exists()
+        if not has_verification and not closure_comment:
+            raise ValidationError("Closure comment is required when no payment verification was carried out.")
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_close()
+        self.payment_plan.closure_comment = closure_comment
+        self.payment_plan.closed_by_id = user_id
+        self.payment_plan.save(update_fields=("status", "status_date", "closure_comment", "closed_by_id", "updated_at"))
+        self.payment_plan.refresh_from_db(
+            fields=["status", "status_date", "closure_comment", "closed_by_id", "updated_at"]
+        )
         return self.payment_plan
 
     def abort(self, abort_comment: str | None) -> PaymentPlan:

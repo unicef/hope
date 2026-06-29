@@ -10,11 +10,9 @@ from uuid import UUID
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
-from jinja2 import Environment
 
 from hope.apps.steficon.config import config
 from hope.apps.steficon.exception import RuleError
-from hope.apps.steficon.templatetags import engine
 
 logger = logging.getLogger(__name__)
 
@@ -138,12 +136,6 @@ class PythonExec(Interpreter):
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
             raise ValidationError(msg)
-
-
-def get_env(**options: Any) -> Environment:
-    env = Environment(autoescape=True, **options)
-    env.filters.update({"adults": engine.adults})
-    return env
 
 
 interpreters: list[type[Interpreter]] = [

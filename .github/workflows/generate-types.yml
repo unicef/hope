@@ -93,28 +93,6 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Start Django backend and wait for readiness
-        run: |
-          nohup uv run python manage.py runserver --classic --noreload 8080 \
-            > runserver.log 2>&1 &
-          echo $! > runserver.pid
-          for i in $(seq 1 60); do
-            if curl -fs http://localhost:8080/api/rest/ > /dev/null; then
-              echo "Backend is up after ${i} attempts."
-              exit 0
-            fi
-            if ! kill -0 "$(cat runserver.pid)" 2>/dev/null; then
-              echo "::error::runserver process exited before becoming ready"
-              cat runserver.log
-              exit 1
-            fi
-            echo "Waiting for backend... (${i}/60)"
-            sleep 2
-          done
-          echo "::error::Backend did not become ready within 120s"
-          cat runserver.log
-          exit 1
-
       - run: bun install --frozen-lockfile
         working-directory: src/frontend
 
