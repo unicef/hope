@@ -68,7 +68,7 @@ class HopeTestBrowser(BaseCase):
     def select_option_by_name(self, option_name: str, selector: str | None = None):
         if selector is None:
             selector = f'li[data-cy="select-option-{option_name}"]'
-        self.wait_for_element_visible(selector)
+        self.wait_for_element_clickable(selector)
         self.click(selector)
         self.wait_for_element_absent(selector)
 
