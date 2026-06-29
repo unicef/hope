@@ -25,11 +25,9 @@ from hope.api.endpoints.rdi.common import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
-from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
-    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_COLLECTED,
     OBSERVED_DISABILITY_CHOICE,
@@ -80,11 +78,26 @@ class IndividualsBulkStaging:
     saved_image_paths: list[str] = field(default_factory=list)
 
 
+class DocumentTypeKeyField(serializers.CharField):
+    """Validate the incoming value against actual ``DocumentType.key`` values (FK target).
+
+    The value is kept as the key string so the bulk flow can resolve keys to ids in a
+    single query. Valid keys are looked up lazily (at validation time, not import time)
+    and cached, so no per-document N+1 is introduced.
+    """
+
+    default_error_messages = {"invalid_choice": '"{input}" is not a valid choice.'}
+
+    def to_internal_value(self, data: Any) -> str:
+        value = super().to_internal_value(data)
+        valid_keys = {key for key, _ in DocumentType.get_all_doc_types_choices()}
+        if value not in valid_keys:
+            self.fail("invalid_choice", input=value)
+        return value
+
+
 class DocumentSerializerLax(serializers.ModelSerializer):
-    type = serializers.ChoiceField(
-        choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value], label) for (value, label) in IDENTIFICATION_TYPE_CHOICE],
-        required=True,
-    )
+    type = DocumentTypeKeyField(required=True)
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
