@@ -1994,16 +1994,14 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "7c2b9a14-9f3d-4b6e-8a21-3d5f0c1e7b93",
-        "type": TYPE_SELECT_ONE,
+        "type": TYPE_BOOL,
         "name": "collector_has_valid_phone_no",
         "lookup": "collector_has_valid_phone_no",
         "get_query": get_collector_has_valid_phone_no_query,
         "label": {"English(EN)": "Collector has a valid phone number"},
         "hint": "Whether the household's collector has a valid (primary or alternative) phone number",
         "required": False,
-        "choices": [
-            {"label": {"English(EN)": "Yes"}, "value": True},
-        ],
+        "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "collector_has_valid_phone_no",
         "scope": [Scope.TARGETING],
