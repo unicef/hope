@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.utils import timezone
 import requests
 
 from hope.apps.core.api.mixins import BaseAPI
@@ -65,9 +66,9 @@ class VisionAPI(BaseAPI):
     def _vision_data(payment_plan: PaymentPlan) -> dict:
         return payment_plan.internal_data.setdefault("vision", {})
 
-    def _append_send_log(self, payment_plan: PaymentPlan, entry: dict) -> dict:
+    def _append_log(self, payment_plan: PaymentPlan, entry: dict) -> dict:
         vision_data = self._vision_data(payment_plan)
-        vision_data.setdefault("send_log", []).append(entry)
+        vision_data.setdefault("log", []).append(entry)
         return vision_data
 
     def send_payment_plan(self, payment_plan: PaymentPlan) -> dict:
@@ -76,18 +77,21 @@ class VisionAPI(BaseAPI):
 
         self._ensure_token()
         payload = PaymentPlanPayloadSerializer(payment_plan).data
-        entry = {"payload": {k: str(v) for k, v in payload.items()}, "response": {}}
+        entry = {
+            "timestamp": timezone.now().isoformat(),
+            "type": "api-call",
+            "payload": {k: str(v) for k, v in payload.items()},
+            "response": {},
+        }
         try:
             response, _ = self._post(self.payment_plan_creation_url, payload)
             entry["response"] = response
         except (BaseAPI.APIError, VisionAPIError) as e:
             entry["response"] = {"error": str(e)}
-            self._append_send_log(payment_plan, entry)
+            self._append_log(payment_plan, entry)
             payment_plan.save(update_fields=["internal_data"])
             raise VisionAPIError(str(e)) from e
-        vision_data = self._append_send_log(payment_plan, entry)
+        vision_data = self._append_log(payment_plan, entry)
         vision_data["sent"] = True
-        if message_id := response.get("messageId"):
-            vision_data["message_id"] = message_id
         payment_plan.save(update_fields=["internal_data"])
         return response

@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -34,10 +35,12 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         )
 
     @staticmethod
-    def _append_callback_log(payment_plan: Any, payload: dict, response_data: dict) -> None:
+    def _append_log(payment_plan: Any, payload: dict, response_data: dict) -> None:
         vision_data = payment_plan.internal_data.setdefault("vision", {})
-        vision_data.setdefault("callback_log", []).append(
+        vision_data.setdefault("log", []).append(
             {
+                "timestamp": timezone.now().isoformat(),
+                "type": "push-notification",
                 "payload": payload,
                 "response": dict(response_data),
             }
@@ -55,12 +58,12 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
 
         if not serializer.validated_vision_payplan_sno:
             response_data = self._build_response(VISION_RESPONSE_KO, serializer)
-            self._append_callback_log(payment_plan, serializer.external_payload, response_data)
+            self._append_log(payment_plan, serializer.external_payload, response_data)
             payment_plan.save(update_fields=["internal_data"])
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
         response_data = self._build_response(VISION_RESPONSE_OK, serializer)
-        self._append_callback_log(payment_plan, serializer.external_payload, response_data)
+        self._append_log(payment_plan, serializer.external_payload, response_data)
         vision_data = payment_plan.internal_data.setdefault("vision", {})
 
         if serializer.validated_data.get("status") == VISION_PAYMENT_PLAN_STATUS_SUCCESS:
