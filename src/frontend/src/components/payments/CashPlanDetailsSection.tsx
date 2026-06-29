@@ -109,7 +109,7 @@ export function CashPlanDetailsSection({
                           display: false,
                         },
                       },
-                    } as any
+                    }
                   }
                   data={{
                     labels: [t('SUCCESSFUL'), t('ERRONEOUS')],

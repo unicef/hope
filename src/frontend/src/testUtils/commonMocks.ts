@@ -1,59 +1,21 @@
 import { vi } from 'vitest';
 import React from 'react';
 
-/**
- * Common mock for @hooks/useBaseUrl hook
- */
-export const mockUseBaseUrl = (
-  businessArea = 'afghanistan',
-  programId = 'test-program',
-  baseUrl = 'afghanistan/test-program',
-) => {
-  vi.mock('@hooks/useBaseUrl', () => ({
-    useBaseUrl: () => ({ businessArea, programId, baseUrl }),
-  }));
-};
+// vi.hoisted() values are initialized before any imports, making them safe for use
+// in vi.mock() factory functions. Note: vi.hoisted() results cannot be directly
+// exported — use a separate re-export below.
+const _useBaseUrlState = vi.hoisted(() => ({
+  businessArea: 'afghanistan',
+  programId: 'test-program',
+  baseUrl: 'afghanistan/test-program',
+}));
 
-/**
- * Common mock for useProgramContext hook
- */
-export const mockUseProgramContext = (
-  groupLabel = 'Household',
-  groupLabelPlural = 'Households',
-) => {
-  vi.mock('src/programContext', () => ({
-    useProgramContext: () => ({
-      selectedProgram: {
-        beneficiaryGroup: {
-          groupLabel,
-          groupLabelPlural,
-        },
-      },
-    }),
-  }));
-};
+const _programContextState = vi.hoisted(() => ({
+  groupLabel: 'Household',
+  groupLabelPlural: 'Households',
+}));
 
-/**
- * Common mock for react-router-dom
- */
-export const mockReactRouterDom = () => {
-  vi.mock('react-router-dom', () => ({
-    useNavigate: () => vi.fn(),
-    useLocation: () => ({
-      pathname: '/test-path',
-      search: '',
-      hash: '',
-      state: null,
-      key: 'test-key',
-    }),
-    Link: ({ children, to, ...props }: any) =>
-      React.createElement('a', { href: to, ...props }, children),
-  }));
-};
-/**
- * Common mock for @utils/utils module
- */
-export const utilsMock = {
+const _utilsMock = vi.hoisted(() => ({
   createApiParams: vi.fn((baseParams, queryParams, options) => ({
     ...baseParams,
     ...queryParams,
@@ -96,100 +58,121 @@ export const utilsMock = {
   decodeIdString: vi.fn((id) => id),
   programCycleStatusToColor: vi.fn(() => 'primary'),
   individualStatusToColor: vi.fn(() => '#000000'),
-};
+}));
 
-/**
- * Helper function to mock the @utils/utils module
- */
-export const mockUtils = () => {
-  vi.mock('@utils/utils', () => utilsMock);
-};
+const _restServiceMethods = vi.hoisted(() => ({
+  restBusinessAreasProgramsHouseholdsList: vi.fn(),
+  restBusinessAreasProgramsHouseholdsCountRetrieve: vi.fn(),
+  restBusinessAreasProgramsIndividualsList: vi.fn(),
+  restBusinessAreasProgramsHouseholdsMembersList: vi.fn(),
+  restBusinessAreasProgramsList: vi.fn(),
+  restBusinessAreasProgramsCountRetrieve: vi.fn(),
+  restBusinessAreasUsersProfileRetrieve: vi.fn(() =>
+    Promise.resolve({
+      id: 'test-user',
+      username: 'mock-user',
+      permissions: ['can_view_programs'],
+    }),
+  ),
+  restBusinessAreasProgramsCyclesList: vi.fn(),
+  restBusinessAreasProgramsCyclesRetrieve: vi.fn(),
+  restBusinessAreasProgramsCyclesCreate: vi.fn(),
+  restBusinessAreasProgramsCyclesUpdate: vi.fn(),
+  restBusinessAreasProgramsCyclesPartialUpdate: vi.fn(),
+  restBusinessAreasProgramsCyclesDestroy: vi.fn(),
+  restBusinessAreasProgramsCyclesFinishCreate: vi.fn(),
+  restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
+  restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
+}));
 
-/**
- * Common mock for RestService
- */
-export const mockRestService = () => {
-  vi.mock('@restgenerated/services/RestService', () => ({
-    RestService: {
-      restBusinessAreasProgramsHouseholdsList: vi.fn(),
-      restBusinessAreasProgramsHouseholdsCountRetrieve: vi.fn(),
-      restBusinessAreasProgramsIndividualsList: vi.fn(),
-      restBusinessAreasProgramsHouseholdsMembersList: vi.fn(),
-      restBusinessAreasProgramsList: vi.fn(),
-      restBusinessAreasProgramsCountRetrieve: vi.fn(),
-      restBusinessAreasUsersProfileRetrieve: vi.fn(() =>
-        Promise.resolve({
-          id: 'test-user',
-          username: 'mock-user',
-          permissions: ['can_view_programs'],
-        }),
-      ),
-      restBusinessAreasProgramsCyclesList: vi.fn(),
-      restBusinessAreasProgramsCyclesRetrieve: vi.fn(),
-      restBusinessAreasProgramsCyclesCreate: vi.fn(),
-      restBusinessAreasProgramsCyclesUpdate: vi.fn(),
-      restBusinessAreasProgramsCyclesPartialUpdate: vi.fn(),
-      restBusinessAreasProgramsCyclesDestroy: vi.fn(),
-      restBusinessAreasProgramsCyclesFinishCreate: vi.fn(),
-      restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
-      restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
-      // Add other commonly used RestService methods as needed
+// Top-level vi.mock() registrations — no hoisting warnings
+vi.mock('@hooks/useBaseUrl', () => ({
+  useBaseUrl: () => ({ ..._useBaseUrlState }),
+}));
+
+vi.mock('src/programContext', () => ({
+  useProgramContext: () => ({
+    selectedProgram: {
+      beneficiaryGroup: { ..._programContextState },
     },
-  }));
+  }),
+}));
+
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => vi.fn(),
+  useLocation: () => ({
+    pathname: '/test-path',
+    search: '',
+    hash: '',
+    state: null,
+    key: 'test-key',
+  }),
+  Link: ({ children, to, ...props }: any) =>
+    React.createElement('a', { href: to, ...props }, children),
+}));
+
+vi.mock('@utils/utils', () => _utilsMock);
+
+vi.mock('@restgenerated/services/RestService', () => ({
+  RestService: _restServiceMethods,
+}));
+
+vi.mock('src/api/programCycleApi', () => ({
+  finishProgramCycle: vi.fn(),
+  reactivateProgramCycle: vi.fn(),
+}));
+
+vi.mock('@hooks/useSnackBar', () => ({
+  useSnackbar: () => ({
+    showMessage: vi.fn(),
+  }),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: vi.fn((key) => key),
+  }),
+}));
+
+// Re-export the hoisted mock object so tests can spy on individual methods
+export const utilsMock = _utilsMock;
+
+export const mockUseBaseUrl = (
+  businessArea = 'afghanistan',
+  programId = 'test-program',
+  baseUrl = 'afghanistan/test-program',
+) => {
+  _useBaseUrlState.businessArea = businessArea;
+  _useBaseUrlState.programId = programId;
+  _useBaseUrlState.baseUrl = baseUrl;
 };
 
-/**
- * Helper function to set up all common mocks at once
- * Usage in test files:
- *
- * import { setupCommonMocks } from 'src/testUtils/commonMocks';
- *
- * // At the top level of your test file
- * setupCommonMocks();
- */
+export const mockUseProgramContext = (
+  groupLabel = 'Household',
+  groupLabelPlural = 'Households',
+) => {
+  _programContextState.groupLabel = groupLabel;
+  _programContextState.groupLabelPlural = groupLabelPlural;
+};
+
+export const mockReactRouterDom = () => {
+  // vi.mock('react-router-dom') is registered at the top level of this module.
+};
+
+export const mockUtils = () => {
+  // vi.mock('@utils/utils') is registered at the top level of this module.
+};
+
+export const mockRestService = () => {
+  // vi.mock('@restgenerated/services/RestService') is registered at the top level of this module.
+};
+
 export const setupCommonMocks = () => {
-  // Mock useBaseUrl
-  vi.mock('@hooks/useBaseUrl', () => ({
-    useBaseUrl: () => ({
-      businessArea: 'afghanistan',
-      programId: 'test-program',
-      baseUrl: 'afghanistan/test-program',
-    }),
-  }));
-
-  // Mock useProgramContext
-  vi.mock('src/programContext', () => ({
-    useProgramContext: () => ({
-      selectedProgram: {
-        beneficiaryGroup: {
-          groupLabel: 'Household',
-          groupLabelPlural: 'Households',
-        },
-      },
-    }),
-  }));
-
-  mockReactRouterDom();
-  mockUtils();
-  mockRestService();
-
-  // Mock program cycle API
-  vi.mock('src/api/programCycleApi', () => ({
-    finishProgramCycle: vi.fn(),
-    reactivateProgramCycle: vi.fn(),
-  }));
-
-  // Mock useSnackbar
-  vi.mock('@hooks/useSnackBar', () => ({
-    useSnackbar: () => ({
-      showMessage: vi.fn(),
-    }),
-  }));
-
-  // Mock useTranslation
-  vi.mock('react-i18next', () => ({
-    useTranslation: () => ({
-      t: vi.fn((key) => key),
-    }),
-  }));
+  // All vi.mock() registrations happen at module import time (top-level above).
+  // This function resets parameterized mocks to their default values.
+  _useBaseUrlState.businessArea = 'afghanistan';
+  _useBaseUrlState.programId = 'test-program';
+  _useBaseUrlState.baseUrl = 'afghanistan/test-program';
+  _programContextState.groupLabel = 'Household';
+  _programContextState.groupLabelPlural = 'Households';
 };
