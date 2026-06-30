@@ -1176,7 +1176,6 @@ class TestGrievanceTickets:
         page_households.get_households_rows()[0].click()
         assert "5" in page_households_details.get_row05().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_add_note(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -1188,7 +1187,7 @@ class TestGrievanceTickets:
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
         page_grievance_tickets.get_ticket_list_row()[0].click()
-        page_grievance_details_page.get_input_newnote().send_keys("Test adding new note.")
+        page_grievance_details_page.get_input_new_note().send_keys("Test adding new note.")
         page_grievance_details_page.get_button_new_note().click()
         user = page_grievance_details_page.get_note_name().text
         assert len(page_grievance_details_page.get_note_rows()) == 1

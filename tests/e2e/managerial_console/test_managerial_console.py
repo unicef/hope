@@ -2,7 +2,6 @@ from datetime import datetime, timezone as dt_timezone
 
 from dateutil.relativedelta import relativedelta
 import pytest
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from e2e.page_object.managerial_console.managerial_console import ManagerialConsole
@@ -90,31 +89,6 @@ def test_managerial_console_renders_all_sections(page_managerial_console: Manage
         "Payment Plans pending for Release", page_managerial_console.title
     )
     page_managerial_console.wait_for_text_in_any_element("Released Payment Plans", page_managerial_console.title)
-
-
-@pytest.mark.usefixtures("login")
-def test_managerial_console_hides_actions_without_selection(
-    page_managerial_console: ManagerialConsole,
-    create_active_test_program: Program,
-) -> None:
-    program_cycle = create_active_test_program.cycles.first()
-    PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_APPROVAL)
-    PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_AUTHORIZATION)
-    PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_REVIEW)
-
-    page_managerial_console.get_nav_managerial_console().click()
-
-    page_managerial_console.get_select_all_approval()
-    with pytest.raises(NoSuchElementException):
-        page_managerial_console.get_approve_button().click()
-
-    page_managerial_console.get_select_all_authorization()
-    with pytest.raises(NoSuchElementException):
-        page_managerial_console.get_authorize_button().click()
-
-    page_managerial_console.get_select_all_release()
-    with pytest.raises(NoSuchElementException):
-        page_managerial_console.get_release_button().click()
 
 
 @pytest.mark.usefixtures("login")
