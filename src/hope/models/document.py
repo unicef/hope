@@ -107,6 +107,12 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     def __str__(self) -> str:
         return f"{self.type} - {self.document_number}"
 
+    @property
+    def dedup_signature(self) -> str:
+        if self.type.valid_for_deduplication:
+            return f"{self.type_id}--{self.document_number}--{self.country_id}"
+        return f"{self.document_number}--{self.country_id}"
+
     def mark_as_need_investigation(self) -> None:
         self.status = self.STATUS_NEED_INVESTIGATION
 

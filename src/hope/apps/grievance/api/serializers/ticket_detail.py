@@ -18,6 +18,9 @@ from hope.apps.grievance.models import (
     TicketPaymentVerificationDetails,
     TicketSystemFlaggingDetails,
 )
+from hope.apps.grievance.services.needs_adjudication_ticket_services import (
+    can_close_as_unique,
+)
 from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualForTicketSerializer,
@@ -202,6 +205,7 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
 
 class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     has_duplicated_document = serializers.SerializerMethodField()
+    can_close_as_unique = serializers.SerializerMethodField()
     golden_records_individual = IndividualForTicketSerializer()
     extra_data = serializers.SerializerMethodField()
     possible_duplicate = IndividualForTicketSerializer()
@@ -215,6 +219,7 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "has_duplicated_document",
+            "can_close_as_unique",
             "is_multiple_duplicates_version",
             "golden_records_individual",
             "possible_duplicate",
@@ -228,6 +233,9 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
 
     def get_has_duplicated_document(self, obj: TicketNeedsAdjudicationDetails) -> bool:
         return obj.has_duplicated_document
+
+    def get_can_close_as_unique(self, obj: TicketNeedsAdjudicationDetails) -> bool:
+        return can_close_as_unique(obj)
 
     def get_extra_data(self, obj: TicketSystemFlaggingDetails) -> dict:
         return TicketNeedsAdjudicationDetailsExtraDataSerializer(
