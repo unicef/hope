@@ -41,8 +41,6 @@ class HOPEPermission(IsAuthenticated):
     def has_permission(self, request: Request, view: Any) -> bool:
         if not bool(request.auth):
             return False
-        if view.permission == "any":
-            return True
         if not view.permission or view.permission.name not in request.auth.grants:
             return False
         # token must be valid for the business area in the URL (skipped when there is none)
