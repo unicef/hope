@@ -257,6 +257,52 @@ def test_webhook_deduplication_with_api_token_missing_grant(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
+def test_webhook_deduplication_with_api_token_not_valid_for_business_area(
+    mock_fetch_dedup_results: Mock, user: User, program: Program
+) -> None:
+    other_business_area = BusinessAreaFactory(slug="ukraine", name="Ukraine")
+    token = APITokenFactory(
+        user=user,
+        grants=[Grant.API_DEDUP_FETCH_FINDINGS.name],
+    )
+    token.valid_for.add(other_business_area)
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    url = reverse(
+        "api:registration-data:registration-data-imports-webhook-deduplication",
+        args=["afghanistan", program.code],
+    )
+
+    response = client.get(url)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    mock_fetch_dedup_results.assert_not_called()
+
+
+@patch("hope.apps.registration_data.api.views.merge_registration_data_import_async_task")
+def test_api_token_forbidden_on_action_without_token_permission(
+    mock_merge_task: Mock, api_token: APIToken, business_area: BusinessArea, program: Program
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+    )
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Token " + api_token.key)
+    url = reverse(
+        "api:registration-data:registration-data-imports-merge",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    response = client.post(url, {}, format="json")
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    mock_merge_task.assert_not_called()
+
+
 def test_merge_rdi_without_permission(
     api_client_no_permissions: APIClient,
     business_area: BusinessArea,
