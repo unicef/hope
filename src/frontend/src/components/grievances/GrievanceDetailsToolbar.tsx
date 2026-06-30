@@ -118,6 +118,28 @@ export const GrievanceDetailsToolbar = ({
     },
   });
 
+  const { mutateAsync: closeAsUniqueAsync, isPending: closingAsUnique } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsCloseAsUniqueCreate({
+          businessAreaSlug: businessArea,
+          id: ticket.id,
+          formData: {},
+        }),
+      onError: (e: any) => {
+        showApiErrorMessages(e, showMessage);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'businessAreasGrievanceTicketsRetrieve',
+            businessArea,
+            ticket.id,
+          ],
+        });
+      },
+    });
+
   const isNew = ticket.status === GRIEVANCE_TICKET_STATES.NEW;
   const isAssigned = ticket.status === GRIEVANCE_TICKET_STATES.ASSIGNED;
   const isInProgress = ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS;
@@ -296,6 +318,7 @@ export const GrievanceDetailsToolbar = ({
   const isDeduplicationCategory =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
   const hasDuplicatedDocument = ticket?.ticketDetails?.hasDuplicatedDocument;
+  const canCloseAsUnique = ticket?.ticketDetails?.canCloseAsUnique;
   const isMultipleDuplicatesVersion =
     ticket?.ticketDetails?.isMultipleDuplicatesVersion;
   const selectedIndividual = ticket?.ticketDetails?.selectedIndividual;
@@ -344,25 +367,39 @@ export const GrievanceDetailsToolbar = ({
     />
   ) : (
     <LoadingButton
-      loading={loading}
+      loading={loading || closingAsUnique}
       color="primary"
       variant="contained"
       onClick={() =>
-        confirm({
-          title: t('Close ticket'),
-          extraContent: isDeduplicationCategory
-            ? closingConfirmationText
-            : getClosingConfirmationExtraText(),
-          content: getClosingConfirmationText(),
-          warningContent: closingWarningText,
-          continueText: t('close ticket'),
-        }).then(async () => {
-          try {
-            await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-          } catch {
-            // Error handling is done in the mutation onError callback
-          }
-        })
+        isDeduplicationCategory && canCloseAsUnique
+          ? confirm({
+              title: t('Close ticket as unique'),
+              content: t(
+                `The ${beneficiaryGroup?.memberLabelPlural} on this ticket no longer share a document number. Do you want to mark them as unique and close the ticket?`,
+              ),
+              continueText: t('mark as unique and close'),
+            }).then(async () => {
+              try {
+                await closeAsUniqueAsync();
+              } catch {
+                // Error handling is done in the mutation onError callback
+              }
+            })
+          : confirm({
+              title: t('Close ticket'),
+              extraContent: isDeduplicationCategory
+                ? closingConfirmationText
+                : getClosingConfirmationExtraText(),
+              content: getClosingConfirmationText(),
+              warningContent: closingWarningText,
+              continueText: t('close ticket'),
+            }).then(async () => {
+              try {
+                await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+              } catch {
+                // Error handling is done in the mutation onError callback
+              }
+            })
       }
       data-cy="button-close-ticket"
       disabled={!isActiveProgram || disableCloseDueToPrimaryNotReassigned}
