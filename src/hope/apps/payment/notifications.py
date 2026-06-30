@@ -9,11 +9,30 @@ from django.utils import timezone
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.notifications.events import PAYMENT_PLAN_ACTION_TO_BITCASTER_EVENT
 from hope.apps.core.notifications.flags import bitcaster_enabled
-from hope.apps.core.notifications.publishers import MailjetTemplateEmailEvent, publish_mailjet_template_email_event
+from hope.apps.core.notifications.publishers import (
+    BaseRenderedEmailNotificationService,
+    MailjetTemplateEmailEvent,
+    publish_mailjet_template_email_event,
+)
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import PaymentPlan, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
+
+
+class WesternUnionReportEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "payment/western_union_report_email.html"
+    text_template = "payment/western_union_report_email.txt"
+
+
+class PaymentPlanReconciliationOverdueEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "payment/pp_reconciliation_overdue_email.html"
+    text_template = "payment/pp_reconciliation_overdue_email.txt"
+
+
+class PaymentPlanDeliveryPasswordEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "payment/xlsx_file_password_email.html"
+    text_template = "payment/xlsx_file_password_email.txt"
 
 
 class PaymentNotification:

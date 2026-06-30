@@ -42,9 +42,20 @@ class RenderedEmailEvent:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
+class BaseRenderedEmailNotificationService:
+    html_template: str
+    text_template: str
+
+    def __init__(self) -> None:
+        if not getattr(self, "html_template", None):
+            raise NotImplementedError("html_template is required")
+        if not getattr(self, "text_template", None):
+            raise NotImplementedError("text_template is required")
+
+
 @dataclass(frozen=True, kw_only=True)
 class RenderedEmailNotification:
-    service: Any
+    service: BaseRenderedEmailNotificationService
     user: Any
     subject: str
     html_body: str

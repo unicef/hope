@@ -15,6 +15,7 @@ from hope.apps.core.notifications.payloads import (
     build_rendered_email_payload,
 )
 from hope.apps.core.notifications.publishers import (
+    BaseRenderedEmailNotificationService,
     MailjetTemplateEmailEvent,
     RenderedEmailEvent,
     RenderedEmailNotification,
@@ -178,9 +179,13 @@ def test_publish_rendered_email_notification_skips_when_flag_disabled(mocker: An
     mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=False)
     mock_publish = mocker.patch("hope.apps.core.notifications.publishers.publish_rendered_email_event")
 
+    class RenderedEmailService(BaseRenderedEmailNotificationService):
+        html_template = "email.html"
+        text_template = "email.txt"
+
     publish_rendered_email_notification(
         RenderedEmailNotification(
-            service=SimpleNamespace(html_template="email.html", text_template="email.txt"),
+            service=RenderedEmailService(),
             user=SimpleNamespace(id=1, email="user@example.org"),
             subject="Rendered subject",
             html_body="<p>Rendered</p>",
@@ -196,7 +201,7 @@ def test_publish_rendered_email_notification_publishes_when_flag_enabled(mocker:
     mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
     mock_publish = mocker.patch("hope.apps.core.notifications.publishers.publish_rendered_email_event")
 
-    class RenderedEmailService:
+    class RenderedEmailService(BaseRenderedEmailNotificationService):
         html_template = "email.html"
         text_template = "email.txt"
 
@@ -223,6 +228,14 @@ def test_publish_rendered_email_notification_publishes_when_flag_enabled(mocker:
         "user_id": "1",
     }
     assert event.idempotency_key.startswith("email.rendered.sent:tests.RenderedEmailService:1:")
+
+
+def test_base_rendered_email_notification_service_requires_templates() -> None:
+    class MissingTextTemplateService(BaseRenderedEmailNotificationService):
+        html_template = "email.html"
+
+    with pytest.raises(NotImplementedError, match="text_template is required"):
+        MissingTextTemplateService()
 
 
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})

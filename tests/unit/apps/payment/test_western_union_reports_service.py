@@ -1830,6 +1830,9 @@ def test_send_notification_emails_sends_to_users_with_permission(
         patch.object(user, "has_perm", return_value=True),
         patch.object(user, "email_user") as email_user_mock,
         patch(
+            "hope.apps.payment.services.western_union_reports_service.publish_rendered_email_notification"
+        ) as publish_mock,
+        patch(
             "hope.apps.payment.services.western_union_reports_service.render_to_string",
             side_effect=["rendered-html", "rendered-text"],
         ) as render_to_string_mock,
@@ -1842,6 +1845,14 @@ def test_send_notification_emails_sends_to_users_with_permission(
         service.send_notification_emails(report)
 
     email_user_mock.assert_called_once()
+    publish_mock.assert_called_once()
+    notification = publish_mock.call_args.args[0]
+    assert notification.user == user
+    assert notification.subject == f"Payment Plan {report.report_file.file.name} Western Union report"
+    assert notification.html_body == "rendered-html"
+    assert notification.text_body == "rendered-text"
+    assert notification.service.html_template == "payment/western_union_report_email.html"
+    assert notification.service.text_template == "payment/western_union_report_email.txt"
     render_to_string_mock.assert_any_call(
         "payment/western_union_report_email.html",
         context={
@@ -1872,9 +1883,13 @@ def test_send_notification_emails_skips_when_no_users_have_permission(
         patch("hope.apps.payment.services.western_union_reports_service.User.objects.all", return_value=[user]),
         patch.object(user, "has_perm", return_value=False),
         patch.object(user, "email_user") as email_user_mock,
+        patch(
+            "hope.apps.payment.services.western_union_reports_service.publish_rendered_email_notification"
+        ) as publish_mock,
         patch("hope.apps.payment.services.western_union_reports_service.render_to_string") as render_to_string_mock,
     ):
         service.send_notification_emails(report)
 
     email_user_mock.assert_not_called()
+    publish_mock.assert_not_called()
     render_to_string_mock.assert_not_called()
