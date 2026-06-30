@@ -81,6 +81,23 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
 
 
 @pytest.mark.usefixtures("login")
+def test_managerial_console_renders_all_sections(page_managerial_console: ManagerialConsole) -> None:
+    page_managerial_console.get_nav_managerial_console().click()
+    assert "Managerial Console" in page_managerial_console.get_page_header_title().text
+
+    page_managerial_console.wait_for_text_in_any_element(
+        "Payment Plans pending for Approval", page_managerial_console.title
+    )
+    page_managerial_console.wait_for_text_in_any_element(
+        "Payment Plans pending for Authorization", page_managerial_console.title
+    )
+    page_managerial_console.wait_for_text_in_any_element(
+        "Payment Plans pending for Release", page_managerial_console.title
+    )
+    page_managerial_console.wait_for_text_in_any_element("Released Payment Plans", page_managerial_console.title)
+
+
+@pytest.mark.usefixtures("login")
 class TestSmokeManagerialConsole:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_managerial_console_smoke_test(
