@@ -220,20 +220,25 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     fsp.delivery_mechanisms.set([dm_cash])
     payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
-        business_area=program.business_area,
-        program_cycle=cycle,
-        currency=Currency.objects.get(code="USD"),
-        dispersion_start_date=timezone.now() + relativedelta(days=10),
-        dispersion_end_date=timezone.now() + relativedelta(days=15),
-        status_date=timezone.now(),
-        status=PaymentPlan.Status.ACCEPTED,
-        created_by=User.objects.first(),
-        total_delivered_quantity=999,
-        total_entitled_quantity=2999,
-        is_follow_up=False,
-        financial_service_provider=fsp,
-        delivery_mechanism=dm_cash,
+        defaults={
+            "business_area": program.business_area,
+            "program_cycle": cycle,
+            "payment_plan_group": cycle.payment_plan_groups.first(),
+            "currency": Currency.objects.get(code="USD"),
+            "dispersion_start_date": timezone.now() + relativedelta(days=10),
+            "dispersion_end_date": timezone.now() + relativedelta(days=15),
+            "status_date": timezone.now(),
+            "status": PaymentPlan.Status.ACCEPTED,
+            "created_by": User.objects.first(),
+            "total_delivered_quantity": 999,
+            "total_entitled_quantity": 2999,
+            "plan_type": PaymentPlan.PlanType.REGULAR,
+            "financial_service_provider": fsp,
+            "delivery_mechanism": dm_cash,
+        },
     )
+    if not payment_plan.payment_plan_purposes.exists():
+        payment_plan.payment_plan_purposes.add(program.payment_plan_purposes.first())
     return payment_plan
 
 
@@ -266,7 +271,7 @@ def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms
 
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.DRAFT,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=timezone.now().date(),
@@ -306,7 +311,7 @@ def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=timezone.now().date(),
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         source_payment_plan=payment_plan,
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
@@ -321,7 +326,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
     payment_plan = PaymentPlanFactory(
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         status=status,
         program_cycle=program.cycles.first(),
         dispersion_start_date=timezone.now().date(),
@@ -487,7 +492,8 @@ class TestSmokePaymentModule:
         assert "Total Undelivered Quantity" in page_payment_module.get_table_label()[7].text
         assert "Dispersion Start Date" in page_payment_module.get_table_label()[8].text
         assert "Dispersion End Date" in page_payment_module.get_table_label()[9].text
-        assert "Follow-up Payment Plans" in page_payment_module.get_table_label()[10].text
+        assert "Export Batch" in page_payment_module.get_table_label()[10].text
+        assert "Linked Payment Plans" in page_payment_module.get_table_label()[11].text
         assert "ACCEPTED" in page_payment_module.get_status_container().text
         assert "Rows per page: 5 1–1 of 1" in page_payment_module.get_table_pagination().text.replace("\n", " ")
 
@@ -511,14 +517,14 @@ class TestSmokePaymentModule:
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
         assert "Currency" in page_new_payment_plan.get_input_currency().text
-        assert (
-            "Dispersion Start Date*"
-            in page_new_payment_plan.wait_for(page_new_payment_plan.input_dispersion_start_date).text
-        )
-        assert (
-            "Dispersion End Date*"
-            in page_new_payment_plan.wait_for(page_new_payment_plan.input_dispersion_end_date).text
-        )
+        # MUI renders the required-field asterisk as a thin space (U+2009) + "*";
+        # strip the thin space so the bare-asterisk assertion still matches.
+        assert "Dispersion Start Date*" in page_new_payment_plan.wait_for(
+            page_new_payment_plan.input_dispersion_start_date
+        ).text.replace("\u2009", "")
+        assert "Dispersion End Date*" in page_new_payment_plan.wait_for(
+            page_new_payment_plan.input_dispersion_end_date
+        ).text.replace("\u2009", "")
 
     def test_smoke_details_payment_plan(
         self,
@@ -596,14 +602,8 @@ class TestSmokePaymentModule:
         page_new_payment_plan.select_listbox_element(payment_plan.name)
         page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.select_listbox_element("Afghan afghani")
-        page_new_payment_plan.get_input_dispersion_start_date().click()
-        page_new_payment_plan.get_input_dispersion_start_date().send_keys(
-            FormatTime(22, 1, 2026).numerically_formatted_date
-        )
-        page_new_payment_plan.get_input_dispersion_end_date().click()
-        page_new_payment_plan.get_input_dispersion_end_date().send_keys(
-            FormatTime(30, 6, 2030).numerically_formatted_date
-        )
+        page_new_payment_plan.fill_input_dispersion_start_date(FormatTime(22, 1, 2026).numerically_formatted_date)
+        page_new_payment_plan.fill_input_dispersion_end_date(FormatTime(30, 6, 2030).numerically_formatted_date)
         page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.get_button_save_payment_plan().click()
         assert "OPEN" in page_payment_module_details.get_status_container().text

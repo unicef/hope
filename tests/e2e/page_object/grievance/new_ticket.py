@@ -113,29 +113,29 @@ class NewTicket(BaseComponents):
     add_documentation = 'button[data-cy="add-documentation"]'
     input_documentation_name = 'input[data-cy="input-documentation[{}].name"]'
     input_file = 'input[type="file"]'
-    input_questionnaire_size = 'span[data-cy="input-questionnaire_size"]'
+    input_questionnaire_size = '[data-cy="input-questionnaire_size"]'
     label_household_size = 'div[data-cy="label-Group Size"]'
-    input_questionnaire_malechildrencount = 'span[data-cy="input-questionnaire_maleChildrenCount"]'
+    input_questionnaire_malechildrencount = '[data-cy="input-questionnaire_maleChildrenCount"]'
     label_number_of_male_children = 'div[data-cy="label-Number of Male Children"]'
-    input_questionnaire_femalechildrencount = 'span[data-cy="input-questionnaire_femaleChildrenCount"]'
+    input_questionnaire_femalechildrencount = '[data-cy="input-questionnaire_femaleChildrenCount"]'
     label_number_of_female_children = 'div[data-cy="label-Number of Female Children"]'
-    input_questionnaire_childrendisabledcount = 'span[data-cy="input-questionnaire_childrenDisabledCount"]'
+    input_questionnaire_childrendisabledcount = '[data-cy="input-questionnaire_childrenDisabledCount"]'
     label_number_of_disabled_children = 'div[data-cy="label-Number of Disabled Children"]'
-    input_questionnaire_headofhousehold = 'span[data-cy="input-questionnaire_headOfHousehold"]'
+    input_questionnaire_headofhousehold = '[data-cy="input-questionnaire_headOfHousehold"]'
     label_head_of_household = 'div[data-cy="label-Head of Group"]'
-    input_questionnaire_countryorigin = 'span[data-cy="input-questionnaire_countryOrigin"]'
+    input_questionnaire_countryorigin = '[data-cy="input-questionnaire_countryOrigin"]'
     label_country_of_origin = 'div[data-cy="label-Country of Origin"]'
-    input_questionnaire_address = 'span[data-cy="input-questionnaire_address"]'
+    input_questionnaire_address = '[data-cy="input-questionnaire_address"]'
     label_address = 'div[data-cy="label-Address"]'
-    input_questionnaire_village = 'span[data-cy="input-questionnaire_village"]'
+    input_questionnaire_village = '[data-cy="input-questionnaire_village"]'
     label_village = 'div[data-cy="label-Village"]'
-    input_questionnaire_admin1 = 'span[data-cy="input-questionnaire_admin1"]'
+    input_questionnaire_admin1 = '[data-cy="input-questionnaire_admin1"]'
     label_administrative_level1 = 'div[data-cy="label-Administrative Level 1"]'
-    input_questionnaire_admin2 = 'span[data-cy="input-questionnaire_admin2"]'
+    input_questionnaire_admin2 = '[data-cy="input-questionnaire_admin2"]'
     label_administrative_level2 = 'div[data-cy="label-Administrative Level 2"]'
-    input_questionnaire_admin3 = 'span[data-cy="input-questionnaire_admin3"]'
+    input_questionnaire_admin3 = '[data-cy="input-questionnaire_admin3"]'
     label_administrative_level3 = 'div[data-cy="label-Administrative Level 3"]'
-    input_questionnaire_admin4 = 'span[data-cy="input-questionnaire_admin4"]'
+    input_questionnaire_admin4 = '[data-cy="input-questionnaire_admin4"]'
     label_administrative_level4 = 'div[data-cy="label-Administrative Level 4"]'
     input_questionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
     label_length_of_time_since_arrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
@@ -406,6 +406,11 @@ class NewTicket(BaseComponents):
     def get_date_picker_filter(self) -> WebElement:
         return self.wait_for(self.date_picker_filter).find_element("tag name", "input")
 
+    # MUI X v9 date fields have no typeable single input; fill via the visible
+    # field wrapper (see BaseComponents.fill_date_picker).
+    def fill_date_picker_filter(self, value: str) -> None:
+        self.fill_date_picker(self.wait_for(self.date_picker_filter), value)
+
     def get_input_individualdata_blockchainname(self) -> WebElement:
         return self.wait_for(self.input_individualdata_blockchainname)
 
@@ -525,6 +530,11 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.input_file)
 
     def get_input_questionnaire_size(self) -> WebElement:
+        # Questionnaire checkboxes only mount once the household detail query
+        # resolves (LoadingComponent renders until then). Wait for the spinner
+        # to clear before scrolling/clicking, otherwise the checkbox span isn't
+        # in the DOM yet and the wait below times out.
+        self.wait_for_disappear('div[data-cy="loading-container"]')
         self.driver.execute_script(
             """
             container = document.querySelector("div[data-cy='main-content']")

@@ -7,7 +7,7 @@ import logging
 
 from constance import config
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.utils.elasticsearch_utils import populate_index
@@ -24,7 +24,7 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
     if not es.indices.exists(index=index_name):
         return
     for concrete in _resolve_to_concrete_indexes(es, index_name):
-        es.indices.delete(index=concrete, ignore=[404, 400])  # type: ignore[call-arg]
+        es.options(ignore_status=[400, 404]).indices.delete(index=concrete)
 
 
 def create_program_indexes(program_id: str, using: str = "default") -> tuple[bool, str]:

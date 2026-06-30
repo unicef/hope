@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Any, Callable
+from unittest.mock import MagicMock, patch
 
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -41,6 +42,22 @@ def business_area(db: Any) -> "BusinessArea":
         slug="afghanistan",
         active=True,
     )
+
+
+def test_elasticsearch_panel_info_action(
+    django_app: "DjangoTestApp",
+    superuser: "User",
+) -> None:
+    url = reverse("admin:console-es")
+    mock_conn = MagicMock()
+    mock_conn.info.return_value.body = {"cluster_name": "test-cluster", "version": {"number": "9.0.1"}}
+    with patch("hope.apps.administration.panels.es.create_connection", return_value=mock_conn):
+        get_response = django_app.get(url, user=superuser)
+        form = next(f for f in get_response.forms.values() if "action" in f.fields)
+        form["action"] = "info"
+        response = form.submit()
+    assert response.status_code == 200
+    mock_conn.info.assert_called_once()
 
 
 @pytest.mark.parametrize(("name", "model_admin"), get_model_admins())

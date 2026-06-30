@@ -61,6 +61,7 @@ class ProgrammeManagement(BaseComponents):
     select_pdu_fields_object_pdu_data_number_of_rounds = 'div[data-cy="select-pduFields.{}.pduData.numberOfRounds"]'
     input_pdu_fields_rounds_names = 'input[data-cy="input-pduFields.{}.pduData.roundsNames.{}"]'
     button_add_time_series_field = 'button[data-cy="button-add-time-series-field"]'
+    input_payment_plan_purposes = '[data-cy="input-payment-plan-purposes"] input'
 
     def get_step_button_details(self) -> WebElement:
         return self.wait_for(self.step_button_details)
@@ -154,8 +155,19 @@ class ProgrammeManagement(BaseComponents):
     def get_input_freq_of_payment_regular(self) -> WebElement:
         return self.wait_for(self.input_freq_of_payment_regular, By.XPATH)
 
+    # MUI X v9 date fields have no typeable single input. Wait for the visible
+    # input-base box (located via the hidden value input's data-cy), then
+    # fill_date_picker drives its editable section list.
+    date_field_box = "//input[@data-cy='date-input-{}']/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]"
+
     def get_input_start_date(self) -> WebElement:
-        return self.wait_for(self.input_start_date)
+        return self.wait_for(self.date_field_box.format("startDate"), By.XPATH)
+
+    def fill_input_start_date(self, value: str) -> None:
+        self.fill_date_picker(self.get_input_start_date(), value)
+
+    def fill_input_end_date(self, value: str) -> None:
+        self.fill_date_picker(self.get_input_end_date(), value)
 
     def choose_input_start_date_via_calendar(self, day: int) -> None:
         self.get(self.label_start_date).find_element(By.TAG_NAME, "button").click()
@@ -165,8 +177,14 @@ class ProgrammeManagement(BaseComponents):
         self.get_elements(self.calendar_days, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar, By.XPATH)
 
+    # The open-picker (calendar) button sits inside the field; the end-date hidden
+    # input is no longer visible in MUI X v9, so reach the button via its data-cy.
+    calendar_icon_end_date = (
+        "//input[@data-cy='date-input-endDate']/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]//button"
+    )
+
     def choose_input_end_date_via_calendar(self, day: int) -> None:
-        self.get_label_end_date().find_element(By.XPATH, "./..").find_element(By.TAG_NAME, "button").click()
+        self.wait_for(self.calendar_icon_end_date, By.XPATH).click()
         self.get_calendar()
         month = self.wait_for(self.calendar_month_year).text
         self.wait_for(self.calendar_change_month).click()
@@ -182,7 +200,7 @@ class ProgrammeManagement(BaseComponents):
         return self.get_elements(self.label_start_date)[0]
 
     def get_input_end_date(self) -> WebElement:
-        return self.wait_for(self.input_end_date)
+        return self.wait_for(self.date_field_box.format("endDate"), By.XPATH)
 
     def get_label_end_date(self) -> WebElement:
         return self.wait_for(self.label_end_date)
@@ -268,6 +286,10 @@ class ProgrammeManagement(BaseComponents):
 
     def get_input_beneficiary_group(self) -> WebElement:
         return self.wait_for(self.input_beneficiary_group)
+
+    def choose_payment_plan_purpose(self, purpose_name: str) -> None:
+        self.wait_for(self.input_payment_plan_purposes).click()
+        self.select_listbox_element(purpose_name)
 
     def get_table_row_by_program_name(self, program_name: str) -> WebElement:
         return self.wait_for(self.table_row.format(program_name))

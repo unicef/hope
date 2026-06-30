@@ -122,7 +122,7 @@ export const ProgramCyclesFilters = ({
           <DatePickerFilter
             onChange={(date) =>
               handleFilterChange(
-                'end_date',
+                'endDate',
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }

@@ -7,6 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
+from e2e.helpers.date_picker import fill_mui_date
 from e2e.helpers.helper import Common
 
 
@@ -258,3 +259,12 @@ class BaseComponents(Common):
         element.click()
         element.send_keys(key, "a")
         element.send_keys(Keys.DELETE)
+
+    def fill_date_picker(self, element: WebElement, value: str) -> None:
+        """Type a yyyy-MM-dd date into a MUI X date picker.
+
+        `element` is any element of the field (the hidden value input page objects
+        already return, or a wrapper). MUI X v9 fields have no single typeable input,
+        so this focuses the editable section list and types the date's digits.
+        """
+        fill_mui_date(self.driver, element, value)

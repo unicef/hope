@@ -3,15 +3,19 @@ from django.db import models
 from hope.models.file_temp import FileTemp
 
 
+def get_status_choices() -> tuple:
+    return WesternUnionInvoice.STATUS_CHOICES
+
+
 class WesternUnionInvoice(models.Model):
     STATUS_PENDING = "PENDING"
     STATUS_COMPLETED = "COMPLETED"
     STATUS_ERROR = "ERROR"
-    STATUS_CHOICES = [
+    STATUS_CHOICES = (
         (STATUS_PENDING, "Pending"),
         (STATUS_COMPLETED, "Completed"),
         (STATUS_ERROR, "Error"),
-    ]
+    )
 
     name = models.CharField(max_length=255, unique=True)
     is_legacy = models.BooleanField(default=False)
@@ -33,7 +37,7 @@ class WesternUnionInvoice(models.Model):
     )
     net_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     charges = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    status = models.CharField(max_length=20, choices=get_status_choices, default=STATUS_PENDING, db_index=True)
     error_msg = models.TextField(null=True, blank=True)
     payments = models.ManyToManyField(
         "Payment",

@@ -1,30 +1,35 @@
 from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 import json
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+import uuid
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import IntegrityError
 from django.utils import timezone
 from django.utils.timezone import now
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
-from extras.test_utils.factories.core import CurrencyFactory, FileTempFactory
+from extras.test_utils.factories.core import CurrencyFactory, FileTempFactory, PaymentPlanPurposeFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
-from hope.models import Approval, Payment, PaymentPlan, ProgramCycle, Rule
+from hope.apps.payment.flows import PaymentPlanFlow
+from hope.models import Approval, FileTemp, Payment, PaymentPlan, ProgramCycle, Rule
 
 pytestmark = pytest.mark.django_db
 
@@ -310,6 +315,10 @@ def test_can_be_locked():
         household=payment_1.household,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
+    shared_purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(shared_purpose)
+    payment_plan.payment_plan_purposes.add(shared_purpose)
+    payment_plan_conflicted.payment_plan_purposes.add(shared_purpose)
     assert payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).count() == 1
     assert payment_plan.can_be_locked is False
 
@@ -505,6 +514,64 @@ def test_has_payments_reconciliation_overdue():
     assert payment_plan.has_payments_reconciliation_overdue is False
 
 
+def test_remove_export_files_removes_entitlement_when_locked():
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+    file_temp = FileTempFactory(
+        object_id=payment_plan.pk,
+        content_type=get_content_type_for_model(payment_plan),
+        created=timezone.now(),
+        file=ContentFile(b"abc", "entitlement.xlsx"),
+    )
+    payment_plan.export_file_entitlement = file_temp
+    payment_plan.save()
+
+    payment_plan.remove_export_files()
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_entitlement is None
+
+
+def test_has_export_file_returns_true_for_accepted_with_delivery_file():
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+    file_temp = FileTempFactory(
+        object_id=payment_plan.pk,
+        content_type=get_content_type_for_model(payment_plan),
+        created=timezone.now(),
+        file=ContentFile(b"abc", "delivery.xlsx"),
+    )
+    payment_plan.export_file_delivery = file_temp
+    payment_plan.save()
+
+    assert payment_plan.has_export_file is True
+
+
+def test_has_export_file_returns_false_on_missing_file_temp():
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+    file_temp = FileTempFactory(
+        object_id=payment_plan.pk,
+        content_type=get_content_type_for_model(payment_plan),
+        created=timezone.now(),
+        file=ContentFile(b"abc", "delivery.xlsx"),
+    )
+    file_temp_id = file_temp.pk
+    FileTemp.objects.filter(pk=file_temp_id).delete()
+    # stale FK id on the instance, row already gone -> descriptor raises FileTemp.DoesNotExist
+    payment_plan.export_file_delivery_id = file_temp_id
+
+    assert payment_plan.has_export_file is False
+
+
+def test_can_send_to_payment_gateway_returns_false_when_instruction_managed():
+    instruction = FollowUpInstructionFactory()
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        follow_up_instruction=instruction,
+    )
+    PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+
+    assert payment_plan.can_send_to_payment_gateway is False
+
+
 def test_manager_annotations_pp_conflicts():
     program = ProgramFactory(cycle=False)
     program_cycle = ProgramCycleFactory(program=program, end_date=now().date() + timedelta(days=30))
@@ -529,6 +596,11 @@ def test_manager_annotations_pp_conflicts():
         program_cycle=program_cycle,
         business_area=pp1.business_area,
     )
+    shared_purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(shared_purpose)
+    for pp in [pp1, pp2, pp3, pp4]:
+        pp.payment_plan_purposes.add(shared_purpose)
+
     p1 = PaymentFactory(parent=pp1)
     p2 = PaymentFactory(parent=pp2, household=p1.household)
     p3 = PaymentFactory(parent=pp3, household=p1.household)
@@ -632,21 +704,25 @@ def test_manager_annotations_conflicts_for_follow_up():
     program_cycle = ProgramCycleFactory(end_date=now().date() + timedelta(days=30))
     pp1 = PaymentPlanFactory(
         program_cycle=program_cycle,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         status=PaymentPlan.Status.FINISHED,
     )
     pp2_follow_up = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         source_payment_plan=pp1,
         program_cycle=program_cycle,
     )
     pp3 = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         source_payment_plan=pp1,
         program_cycle=program_cycle,
     )
+    shared_purpose = PaymentPlanPurposeFactory()
+    program_cycle.program.payment_plan_purposes.add(shared_purpose)
+    pp2_follow_up.payment_plan_purposes.add(shared_purpose)
+    pp3.payment_plan_purposes.add(shared_purpose)
     p1 = PaymentFactory(
         parent=pp1,
         is_follow_up=False,
@@ -686,3 +762,196 @@ def test_manager_annotations_conflicts_for_follow_up():
         "payment_plan_start_date": pp2_follow_up.program_cycle.start_date.isoformat(),
     }
     assert p3_data["payment_plan_soft_conflicted_data"] == [json.dumps(data)]
+
+
+def test_no_conflict_when_plans_have_different_purposes():
+    program = ProgramFactory(status="ACTIVE")
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan_a = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])
+    plan_b = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[education])
+    payment_a = PaymentFactory(parent=plan_a)
+    PaymentFactory(parent=plan_b, household=payment_a.household)
+
+    result = plan_a.eligible_payments_with_conflicts.filter(id=payment_a.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is False
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_conflict_when_plans_share_at_least_one_purpose():
+    program = ProgramFactory(status="ACTIVE")
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan_a = PaymentPlanFactory(
+        program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food, education]
+    )
+    plan_b = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])
+    payment_a = PaymentFactory(parent=plan_a)
+    PaymentFactory(parent=plan_b, household=payment_a.household)
+
+    result = plan_a.eligible_payments_with_conflicts.filter(id=payment_a.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is True
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_beneficiary_allowed_in_single_multi_purpose_plan():
+    program = ProgramFactory(status="ACTIVE")
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan = PaymentPlanFactory(
+        program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food, education]
+    )
+    payment = PaymentFactory(parent=plan)
+
+    result = plan.eligible_payments_with_conflicts.filter(id=payment.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is False
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_beneficiary_allowed_in_two_separate_single_purpose_plans():
+    program = ProgramFactory(status="ACTIVE")
+    food = PaymentPlanPurposeFactory()
+    education = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.set([food, education])
+    cycle = ProgramCycleFactory(program=program)
+    plan_food = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])
+    plan_education = PaymentPlanFactory(
+        program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[education]
+    )
+    payment = PaymentFactory(parent=plan_food)
+    PaymentFactory(parent=plan_education, household=payment.household)
+
+    result = plan_food.eligible_payments_with_conflicts.filter(id=payment.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is False
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_beneficiary_conflict_in_overlapping_plans():
+    program = ProgramFactory(status="ACTIVE")
+    food = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.set([food])
+    cycle = ProgramCycleFactory(program=program)
+    plan_a = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])
+    plan_b = PaymentPlanFactory(program_cycle=cycle, status=PaymentPlan.Status.OPEN, payment_plan_purposes=[food])
+    payment_a = PaymentFactory(parent=plan_a)
+    PaymentFactory(parent=plan_b, household=payment_a.household)
+
+    result = plan_a.eligible_payments_with_conflicts.filter(id=payment_a.id).values()[0]
+
+    assert result["payment_plan_soft_conflicted"] is True
+    assert result["payment_plan_hard_conflicted"] is False
+
+
+def test_payment_plan_flow_xlsx_export_error_from_exporting() -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+    )
+    PaymentPlanFlow(payment_plan).background_action_status_xlsx_export_error()
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR
+
+
+def test_payment_plan_flow_xlsx_import_error_from_importing_reconciliation() -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+    )
+    PaymentPlanFlow(payment_plan).background_action_status_xlsx_import_error()
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+
+
+def test_remove_export_file_delivery_skips_when_no_file_temp_id() -> None:
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+    # no export_file_delivery set → file_temp_id is None
+    payment_plan.remove_export_file_delivery()
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_delivery is None
+
+
+def test_remove_export_file_delivery_skips_deletion_when_another_plan_references_file() -> None:
+    file_temp = FileTempFactory()
+    plan_a = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
+    plan_b = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        export_file_delivery=file_temp,
+        payment_plan_group=plan_a.payment_plan_group,
+        program_cycle=plan_a.program_cycle,
+    )
+
+    plan_a.remove_export_file_delivery()
+
+    assert FileTemp.objects.filter(pk=file_temp.pk).exists()
+    assert plan_a.export_file_delivery is None
+    plan_b.refresh_from_db()
+    assert plan_b.export_file_delivery_id == file_temp.pk
+
+
+def test_remove_export_file_delivery_skips_when_file_temp_missing() -> None:
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+    payment_plan.export_file_delivery_id = uuid.uuid4()
+
+    payment_plan.remove_export_file_delivery()
+
+    assert payment_plan.export_file_delivery is None
+
+
+def test_remove_export_file_delivery_deletes_file_temp_when_last_reference() -> None:
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
+
+    with patch("django.db.models.fields.files.FieldFile.delete"):
+        payment_plan.remove_export_file_delivery()
+
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_delivery is None
+
+
+def test_remove_export_files_removes_delivery_when_accepted_with_file() -> None:
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
+
+    with patch("django.db.models.fields.files.FieldFile.delete"):
+        payment_plan.remove_export_files()
+
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+    payment_plan.refresh_from_db()
+    assert payment_plan.export_file_delivery is None
+
+
+def test_remove_export_files_removes_delivery_when_finished_with_file() -> None:
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, export_file_delivery=file_temp)
+
+    with patch("django.db.models.fields.files.FieldFile.delete"):
+        payment_plan.remove_export_files()
+
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+
+
+@pytest.fixture
+def removed_payment_plan_without_group(program_cycle):
+    return PaymentPlanFactory(program_cycle=program_cycle, payment_plan_group=None, is_removed=True)
+
+
+def test_live_payment_plan_without_group_violates_constraint(payment_plan):
+    payment_plan.payment_plan_group = None
+
+    with pytest.raises(IntegrityError, match="payment_plan_group_required_unless_removed"):
+        payment_plan.save()
+
+
+def test_removed_payment_plan_without_group_is_allowed(removed_payment_plan_without_group):
+    assert removed_payment_plan_without_group.payment_plan_group_id is None
+    assert removed_payment_plan_without_group.is_removed is True

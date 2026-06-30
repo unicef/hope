@@ -7,6 +7,7 @@ export const useHopeDetailsQuery = <TData, TOptions = any>(
   options: any,
 ): UseQueryResult<TData> => {
   const { businessAreaSlug, programCode } = useBaseUrl();
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   return useQuery({
     queryKey: [queryFn.name, { id, programCode, businessAreaSlug }],
     queryFn: () =>
