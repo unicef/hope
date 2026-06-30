@@ -4,7 +4,7 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class ErrorPage(BaseComponents):
-    page_not_found_title = "h1"
+    page_not_found_title = '[data-cy="page-not-found-title"]'
     button_refresh_page = '[data-cy="button-refresh-page"]'
     button_go_to_programme_management = '[data-cy="go-to-programme-management"]'
 

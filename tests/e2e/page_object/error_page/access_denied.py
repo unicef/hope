@@ -4,7 +4,7 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class AccessDenied(BaseComponents):
-    access_denied_title = "h1"
+    access_denied_title = '[data-cy="access-denied-title"]'
     button_refresh_page = '[data-cy="button-refresh-page"]'
     button_go_back = '[data-cy="button-go-back"]'
 
