@@ -20,7 +20,11 @@ class SanctionListIndividualDocumentAdmin(HOPEModelAdminBase):
         ("issuing_country", AutoCompleteFilter),
         "type_of_document",
     )
+    readonly_fields = ("individual",)
     search_fields = ("document_number",)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "issuing_country")

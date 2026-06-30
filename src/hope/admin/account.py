@@ -62,12 +62,14 @@ class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_active", "transfer_type", "account_type")
     search_fields = ("code", "name")
     list_filter = ("is_active", "transfer_type")
+    readonly_fields = ("code",)
 
 
 @admin.register(AccountType)
 class AccountTypeAdmin(HOPEModelAdminBase):
     list_display = ("key", "unique_fields", "payment_gateway_id")
     search_fields = ("key", "payment_gateway_id")
+    readonly_fields = ("key",)
 
 
 @admin.register(DeliveryMechanismConfig)

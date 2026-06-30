@@ -419,7 +419,24 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     cursor_ordering_field = "-created_at"
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
-    readonly_fields = ("collector_type",)
+    readonly_fields = (
+        "collector_type",
+        "currency",
+        "entitlement_quantity",
+        "entitlement_quantity_usd",
+        "delivered_quantity",
+        "delivered_quantity_usd",
+        "delivery_date",
+        "entitlement_date",
+        "sent_to_fsp_date",
+        "vulnerability_score",
+        "status_date",
+        "order_number",
+        "token_number",
+        "conflicted",
+        "excluded",
+        "has_valid_wallet",
+    )
 
     show_full_result_count = False
 

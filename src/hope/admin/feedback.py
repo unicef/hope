@@ -17,4 +17,5 @@ class FeedbackAdmin(HOPEModelAdminBase):
         "individual_lookup",
     )
     list_filter = ("issue_type", ("business_area", AutoCompleteFilter), "consent")
+    readonly_fields = ("unicef_id",)
     search_fields = ("unicef_id",)

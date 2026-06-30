@@ -8,6 +8,7 @@ from hope.models import UploadedXLSXFile
 @admin.register(UploadedXLSXFile)
 class UploadedXLSXFileAdmin(HOPEModelAdminBase):
     list_display = ("id", "file", "associated_email")
+    readonly_fields = ("file",)
     filter_horizontal = ("selected_lists",)
 
     def get_actions(self, request: HttpRequest) -> dict:

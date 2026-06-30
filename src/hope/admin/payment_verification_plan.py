@@ -50,6 +50,17 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "xlsx_file_imported",
     )
     date_hierarchy = "updated_at"
+    readonly_fields = (
+        "activation_date",
+        "completion_date",
+        "responded_count",
+        "received_count",
+        "not_received_count",
+        "received_with_problems_count",
+        "xlsx_file_exporting",
+        "xlsx_file_imported",
+        "error",
+    )
     search_fields = ("payment_plan__name",)
 
     @button(permission="payment.view_paymentverification")
