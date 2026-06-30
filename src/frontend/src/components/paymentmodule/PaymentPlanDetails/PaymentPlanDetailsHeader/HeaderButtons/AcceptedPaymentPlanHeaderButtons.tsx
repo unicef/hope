@@ -44,7 +44,6 @@ export function AcceptedPaymentPlanHeaderButtons({
             />
           </Box>
         )}
-        {/* Close moved to the Ready for Closure flow; Send Xlsx Password and Send to FSP moved to the Group / Batch detail pages. */}
       </>
     </Box>
   );

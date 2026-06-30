@@ -11,6 +11,17 @@ interface Option {
   labelEn: string;
 }
 
+// Defined at module scope so its identity is stable across renders. A component
+// created inline in render forces MUI to remount the popup (and the input) on
+// every keystroke, which drops all typed characters after the first.
+const CriteriaAutocompletePaper = forwardRef<HTMLDivElement>(
+  function CriteriaAutocompletePaper(props, ref) {
+    return (
+      <Paper {...props} ref={ref} data-cy="autocomplete-target-criteria-options" />
+    );
+  },
+);
+
 function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
   const [open, setOpen] = useState(false);
   const [newValue, setNewValue] = useState(null);
@@ -73,19 +84,7 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
         />
       )}
       data-cy="autocomplete-target-criteria"
-      component={forwardRef(
-        function CriteriaAutocompletePaperComponent(props, ref) {
-          return (
-            <Paper
-              {...{
-                ...props,
-                ref,
-              }}
-              data-cy="autocomplete-target-criteria-options"
-            />
-          );
-        },
-      )}
+      slots={{ paper: CriteriaAutocompletePaper }}
     />
   );
 }

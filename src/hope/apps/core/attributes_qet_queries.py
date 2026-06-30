@@ -4,9 +4,8 @@ from typing import Any
 
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 
-from hope.apps.core.countries import Countries
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
@@ -15,6 +14,8 @@ from hope.apps.household.const import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
     UNHCR,
     WFP,
 )
@@ -263,18 +264,27 @@ def get_unhcr_id_issuer_query(_: Any, args: Any, is_social_worker_query: bool = 
     )
 
 
-def get_receiver_poi_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
-    return get_documents_number_query("receiver_poi", args[0], is_social_worker_query=is_social_worker_query)
-
-
-def get_receiver_poi_issuer_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
-    return get_documents_issuer_query("receiver_poi", args[0], is_social_worker_query=is_social_worker_query)
-
-
 def get_has_phone_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
     has_phone_no = args[0] in [True, "True"]
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return ~Q(**{f"{lookup_prefix}phone_no": ""}) if has_phone_no else Q(**{f"{lookup_prefix}phone_no": ""})
+
+
+def get_collector_has_valid_phone_no_query(
+    comparison_method: Any, args: Any, is_social_worker_query: bool = False
+) -> Q:
+    """Households filtered by whether a collector has a valid phone number."""
+    from hope.models import IndividualRoleInHousehold
+
+    wants_valid = args[0] in [True, "True"]
+    if comparison_method == "NOT_EQUALS":  # SELECT_ONE also allows NOT_EQUALS
+        wants_valid = not wants_valid
+    valid_collector = IndividualRoleInHousehold.objects.filter(
+        household=OuterRef("pk"),
+        role__in=[ROLE_PRIMARY, ROLE_ALTERNATE],
+    ).filter(Q(individual__phone_no_valid=True) | Q(individual__phone_no_alternative_valid=True))
+    has_valid_collector_phone = Q(Exists(valid_collector))
+    return has_valid_collector_phone if wants_valid else ~has_valid_collector_phone
 
 
 def get_has_bank_account_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:
@@ -292,35 +302,6 @@ def get_has_tax_id_query(_: Any, args: Any, is_social_worker_query: bool = False
         Q(**{f"{lookup_prefix}documents__type__key__iexact": "TAX_ID"})
         if has_tax_id
         else ~Q(**{f"{lookup_prefix}documents__type__key__iexact": "TAX_ID"})
-    )
-
-
-def country_generic_query(comparison_method: str, args: Any, lookup: Any, is_social_worker_query: bool = False) -> Q:
-    lookup_prefix = "individuals__" if is_social_worker_query else ""
-    query = Q(**{lookup_prefix + lookup: Countries.get_country_value(args[0])})
-    if comparison_method == "EQUALS":
-        return query
-    if comparison_method == "NOT_EQUALS":
-        return ~query
-    logger.warning(f"Country filter query does not support {comparison_method} type")
-    raise ValidationError(f"Country filter query does not support {comparison_method} type")
-
-
-def country_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
-    return country_generic_query(
-        comparison_method,
-        args,
-        "country",
-        is_social_worker_query=is_social_worker_query,
-    )
-
-
-def country_origin_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
-    return country_generic_query(
-        comparison_method,
-        args,
-        "country_origin",
-        is_social_worker_query=is_social_worker_query,
     )
 
 
