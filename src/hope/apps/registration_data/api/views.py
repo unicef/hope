@@ -108,7 +108,7 @@ class RegistrationDataImportViewSet(
     def get_permissions(self) -> list[BasePermission]:
         if self.is_external_request():
             self.permission_classes = [HOPEPermission]
-            self.permission = self.token_permissions_by_action.get(self.action, self.token_permission)
+            self.permission = self.token_permissions_by_action.get(self.action)
             return [permission() for permission in self.permission_classes]
         return super().get_permissions()
 

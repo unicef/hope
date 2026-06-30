@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q
+from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions
@@ -38,9 +39,14 @@ class HOPEAuthentication(TokenAuthentication):
 
 class HOPEPermission(IsAuthenticated):
     def has_permission(self, request: Request, view: Any) -> bool:
-        if bool(request.auth):
-            if view.permission == "any":
-                return True
-            if view.permission:
-                return view.permission.name in request.auth.grants
-        return False
+        if not bool(request.auth):
+            return False
+        if view.permission == "any":
+            return True
+        if not view.permission or view.permission.name not in request.auth.grants:
+            return False
+        # token must be valid for the business area in the URL (skipped when there is none)
+        ba_slug = view.kwargs.get("business_area_slug")
+        if ba_slug and not request.auth.valid_for.filter(slug=ba_slug).exists():
+            raise Http404
+        return True
