@@ -21,6 +21,7 @@ from hope.models import (
     RegistrationDataImport,
     User,
 )
+from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db
 
@@ -203,6 +204,97 @@ def test_push_creates_household_and_individuals(
     assert hh.head_of_household.program_id == program.id
     assert data["households"] == 1
     assert data["individuals"] == 2
+
+
+def test_push_creates_household_with_currency(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    currency_usd: Currency,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {
+            "residence_status": "",
+            "village": "village_currency",
+            "country": "AF",
+            "currency": "USD",
+            "members": [
+                {
+                    "relationship": HEAD,
+                    "full_name": "James Head",
+                    "birth_date": "2000-01-01",
+                    "sex": "MALE",
+                    "role": "",
+                },
+                {
+                    "relationship": NON_BENEFICIARY,
+                    "full_name": "Mary Primary",
+                    "birth_date": "2000-01-01",
+                    "role": ROLE_PRIMARY,
+                    "sex": "FEMALE",
+                },
+            ],
+            "size": 1,
+        }
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    data = response.json()
+    rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
+    assert rdi is not None
+    hh = PendingHousehold.objects.filter(registration_data_import=rdi, village="village_currency").first()
+    assert hh is not None
+    assert hh.currency == currency_usd
+    assert hh.currency.code == "USD"
+
+
+def test_push_creates_household_without_currency_is_null(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {
+            "residence_status": "",
+            "village": "village_no_currency",
+            "country": "AF",
+            "members": [
+                {
+                    "relationship": HEAD,
+                    "full_name": "James Head",
+                    "birth_date": "2000-01-01",
+                    "sex": "MALE",
+                    "role": "",
+                },
+                {
+                    "relationship": NON_BENEFICIARY,
+                    "full_name": "Mary Primary",
+                    "birth_date": "2000-01-01",
+                    "role": ROLE_PRIMARY,
+                    "sex": "FEMALE",
+                },
+            ],
+            "size": 1,
+        }
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    data = response.json()
+    rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
+    assert rdi is not None
+    hh = PendingHousehold.objects.filter(registration_data_import=rdi, village="village_no_currency").first()
+    assert hh is not None
+    assert hh.currency is None
 
 
 @pytest.fixture
