@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, Mock
 
+from django.http import Http404
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -40,7 +41,7 @@ def token(business_area: BusinessArea) -> APIToken:
 def test_permission_granted(token: APIToken, business_area: BusinessArea) -> None:
     permission = HOPEPermission()
     request = Mock(auth=token)
-    view = Mock(selected_business_area=business_area, permission=Grant.API_RDI_UPLOAD)
+    view = Mock(kwargs={"business_area_slug": business_area.slug}, permission=Grant.API_RDI_UPLOAD)
 
     assert permission.has_permission(request, view)
 
@@ -51,6 +52,15 @@ def test_permission_denied_missing_grant(token: APIToken, business_area: Busines
     view = Mock(selected_business_area=business_area, permission=Grant.API_READ_ONLY)
 
     assert not permission.has_permission(request, view)
+
+
+def test_permission_denied_not_valid_for_business_area(token: APIToken) -> None:
+    permission = HOPEPermission()
+    request = Mock(auth=token)
+    view = Mock(kwargs={"business_area_slug": "not-valid-ba"}, permission=Grant.API_RDI_UPLOAD)
+
+    with pytest.raises(Http404):
+        permission.has_permission(request, view)
 
 
 def test_authentication_success(token: APIToken) -> None:
