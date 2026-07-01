@@ -1,6 +1,5 @@
 from typing import Any
 
-from flaky import flaky
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, GrievanceTicketFactory, UserFactory
@@ -15,7 +14,6 @@ from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.models import BusinessArea, User
 
 pytestmark = [
-    pytest.mark.skip("Too flaky, hard to pass, need to fix"),
     pytest.mark.django_db,
 ]
 
@@ -88,7 +86,6 @@ def grievance_context(business_area: BusinessArea, users: dict[str, User]) -> di
     }
 
 
-@flaky(max_runs=3, min_passes=1)
 def test_bulk_update_assignee(grievance_context: dict[str, Any]) -> None:
     user = grievance_context["users"]["user"]
     user_two = grievance_context["users"]["user_two"]
@@ -113,7 +110,6 @@ def test_bulk_update_assignee(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.status == GrievanceTicket.STATUS_ASSIGNED
 
 
-@flaky(max_runs=5, min_passes=1)
 def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:
     business_area = grievance_context["business_area"]
     grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
@@ -134,7 +130,6 @@ def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.priority == PRIORITY_HIGH
 
 
-@flaky(max_runs=5, min_passes=1)
 def test_bulk_update_urgency(grievance_context: dict[str, Any]) -> None:
     business_area = grievance_context["business_area"]
     grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
@@ -155,7 +150,6 @@ def test_bulk_update_urgency(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.urgency == URGENCY_VERY_URGENT
 
 
-@flaky(max_runs=3, min_passes=1)
 def test_bulk_add_note(grievance_context: dict[str, Any]) -> None:
     user = grievance_context["users"]["user"]
     business_area = grievance_context["business_area"]
