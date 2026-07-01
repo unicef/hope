@@ -5,12 +5,7 @@ from unittest.mock import patch
 from django.utils import timezone
 import pytest
 
-from extras.test_utils.factories import (
-    BusinessAreaFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    ProgramFactory,
-)
+from extras.test_utils.factories import BusinessAreaFactory, PaymentFactory, PaymentPlanFactory, ProgramFactory
 from hope.apps.dashboard.services import DashboardCacheBase
 from hope.models import BusinessArea, Payment, PaymentPlan, Program
 
