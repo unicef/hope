@@ -3,6 +3,13 @@ from typing import Any
 
 
 @dataclass(frozen=True, kw_only=True)
+class EmailAttachmentPayload:
+    filename: str
+    content_type: str
+    base64_content: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class MailjetTemplateEmailPayloadData:
     idempotency_key: str
     recipients: list[str]
@@ -23,6 +30,7 @@ class RenderedEmailPayloadData:
     html_template: str
     text_template: str
     context: dict[str, Any]
+    ccs: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -51,7 +59,7 @@ def build_rendered_email_payload(data: RenderedEmailPayloadData) -> dict[str, An
         "channel": "email",
         "provider": "rendered",
         "recipients": data.recipients,
-        "cc": [],
+        "cc": data.ccs,
         "subject": data.subject,
         "html_body": data.html_body,
         "text_body": data.text_body,

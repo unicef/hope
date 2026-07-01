@@ -249,6 +249,31 @@ def test_execute_matches_two_name_row_with_date_cell(
     mailjet_mock.return_value.send_email.assert_called_once_with()
 
 
+def test_execute_publishes_bitcaster_notification_with_attachment_context(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.bitcaster_enabled", return_value=True)
+    mock_publish = mocker.patch(
+        "hope.apps.sanction_list.tasks.check_against_sanction_list.publish_rendered_email_notification"
+    )
+    uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
+
+    CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    notification = mock_publish.call_args.args[0]
+    attachment = notification.context["attachments"][0]
+    assert notification.user.email == "checker@example.com"
+    assert notification.ccs == [settings.SANCTION_LIST_CC_MAIL]
+    assert notification.context["results_count"] == 1
+    assert notification.context["file_name"] == "check.xlsx"
+    assert attachment["filename"] == f"{notification.subject}.xlsx"
+    assert attachment["content_type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    assert attachment["base64_content"] == mailjet_mock.return_value.attach_file.call_args.kwargs["attachment"]
+
+
 def test_execute_matches_single_name_row_by_first_name(
     make_uploaded_file: Any,
     john_doe: SanctionListIndividual,

@@ -39,6 +39,7 @@ class RenderedEmailEvent:
     html_template: str
     text_template: str
     context: dict[str, Any]
+    ccs: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -61,6 +62,7 @@ class RenderedEmailNotification:
     html_body: str
     text_body: str
     context: dict[str, Any]
+    ccs: list[str] = field(default_factory=list)
 
 
 def publish_mailjet_template_email_event(event: MailjetTemplateEmailEvent) -> None:
@@ -93,6 +95,7 @@ def publish_rendered_email_event(event: RenderedEmailEvent) -> None:
             html_template=event.html_template,
             text_template=event.text_template,
             context=event.context,
+            ccs=event.ccs,
             metadata=event.metadata,
         )
     )
@@ -119,6 +122,7 @@ def publish_rendered_email_notification(notification: RenderedEmailNotification)
                 html_template=notification.service.html_template,
                 text_template=notification.service.text_template,
                 context=notification.context,
+                ccs=notification.ccs,
                 metadata={
                     "source": "hope",
                     "service": _get_service_path(notification.service),

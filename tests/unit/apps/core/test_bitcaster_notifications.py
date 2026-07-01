@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from types import SimpleNamespace
 from typing import Any
 
@@ -9,6 +10,7 @@ from hope.apps.core.notifications.bitcaster_client import BitcasterClient, Bitca
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.handlers import handle_bitcaster_event
 from hope.apps.core.notifications.payloads import (
+    EmailAttachmentPayload,
     MailjetTemplateEmailPayloadData,
     RenderedEmailPayloadData,
     build_mailjet_template_email_payload,
@@ -137,6 +139,7 @@ def test_build_rendered_email_payload_limits_bitcaster_delivery_to_recipients() 
             html_template="email.html",
             text_template="email.txt",
             context={"title": "Rendered subject"},
+            ccs=["cc@example.org"],
             metadata={"service": "Service"},
         )
     )
@@ -144,10 +147,25 @@ def test_build_rendered_email_payload_limits_bitcaster_delivery_to_recipients() 
     assert payload["correlation_id"] == "email.rendered.sent:service:1"
     assert payload["provider"] == "rendered"
     assert payload["recipients"] == ["user@example.org"]
+    assert payload["cc"] == ["cc@example.org"]
     assert payload["html_template"] == "email.html"
     assert payload["text_template"] == "email.txt"
     assert payload["context"] == {"title": "Rendered subject"}
     assert payload["options"] == {"limit_to": ["user@example.org"]}
+
+
+def test_email_attachment_payload_serializes_with_asdict() -> None:
+    attachment = EmailAttachmentPayload(
+        filename="results.xlsx",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        base64_content="base64-content",
+    )
+
+    assert asdict(attachment) == {
+        "filename": "results.xlsx",
+        "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "base64_content": "base64-content",
+    }
 
 
 def test_publish_rendered_email_event_sends_payload_to_signal(mocker: Any) -> None:
@@ -164,6 +182,7 @@ def test_publish_rendered_email_event_sends_payload_to_signal(mocker: Any) -> No
             html_template="email.html",
             text_template="email.txt",
             context={"title": "Rendered subject"},
+            ccs=["cc@example.org"],
             metadata={"service": "Service"},
         )
     )
@@ -172,6 +191,7 @@ def test_publish_rendered_email_event_sends_payload_to_signal(mocker: Any) -> No
     mock_signal_send.assert_called_once()
     assert mock_signal_send.call_args.kwargs["event_name"] == "email.rendered.sent"
     assert payload["idempotency_key"] == "email.rendered.sent:service:1"
+    assert payload["cc"] == ["cc@example.org"]
     assert payload["options"] == {"limit_to": ["user@example.org"]}
 
 
