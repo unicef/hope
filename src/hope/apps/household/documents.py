@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db.models import QuerySet
 from django_elasticsearch_dsl import Document, fields
-from elasticsearch_dsl import AttrDict
+from elasticsearch.dsl import AttrDict
 
 from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
@@ -23,7 +23,26 @@ index_settings = {
 }
 
 
-class IndividualDocument(Document):
+class _PreparedFieldsFix:
+    """Mixin that fixes AttrDict._d_ shadowing of _prepared_fields in elasticsearch.dsl 9.x.
+
+    In elasticsearch.dsl 9.x, AttrDict.__setattr__ routes assignments to _d_ when the class
+    already has the attribute (but it lacks fset), making self._prepared_fields = result store in
+    _d_ while reads still return the class-level [] via normal MRO lookup. The property descriptor
+    below forces AttrDict to use super().__setattr__ (which in turn calls our setter), ensuring
+    the value is readable back via the same property getter.
+    """
+
+    @property
+    def _prepared_fields(self) -> list:
+        return self._d_.get("_prepared_fields", [])
+
+    @_prepared_fields.setter
+    def _prepared_fields(self, value: list) -> None:
+        self._d_["_prepared_fields"] = value
+
+
+class IndividualDocument(_PreparedFieldsFix, Document):
     id = fields.KeywordField()  # The boost parameter on field mappings has been removed
     given_name = fields.TextField(
         analyzer=name_synonym_analyzer,
@@ -113,7 +132,7 @@ class IndividualDocument(Document):
         return None
 
 
-class HouseholdDocument(Document):
+class HouseholdDocument(_PreparedFieldsFix, Document):
     head_of_household = fields.ObjectField(
         properties={
             "unicef_id": fields.TextField(),

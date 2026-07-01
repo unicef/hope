@@ -257,7 +257,6 @@ OTHER_APPS = [
     "drf_spectacular_sidecar",
     "flags",
     "admin_cursor_paginator",
-    "markdownify.apps.MarkdownifyConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -283,12 +282,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
-
-
-# helper function to extend all the common lists
-def extend_list_avoid_repeats(list_to_extend: list, extend_with: list) -> None:
-    """Extend the first list with the elements in the second one, making sure its elements are not already there."""
-    list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
 
 
 GIT_VERSION = env("GIT_VERSION")
@@ -486,6 +479,8 @@ CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
 SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF")
 SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS")
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD")
 
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 

@@ -111,6 +111,7 @@ export function LookUpLinkedTicketsTable({
         : 'businessAreasGrievanceTicketsCount',
       businessArea,
       programId,
+      queryVariables,
     ],
     queryFn: () => {
       if (programId) {

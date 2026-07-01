@@ -26,6 +26,7 @@ from hope.models.data_collecting_type import DataCollectingType
 from hope.models.household import Household
 from hope.models.payment import Payment
 from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_purpose import PaymentPlanPurpose
 from hope.models.sanction_list import SanctionList
 from hope.models.utils import (
     AbstractSyncable,
@@ -51,6 +52,26 @@ class ProgramQuerySet(QuerySet):
 
 class ProgramManager(SoftDeletableIsVisibleManager.from_queryset(ProgramQuerySet)):
     pass
+
+
+def get_status_choices() -> tuple:
+    return Program.STATUS_CHOICE
+
+
+def get_frequency_of_payments_choices() -> tuple:
+    return Program.FREQUENCY_OF_PAYMENTS_CHOICE
+
+
+def get_sector_choices() -> tuple:
+    return Program.SECTOR_CHOICE
+
+
+def get_scope_choices() -> tuple:
+    return Program.SCOPE_CHOICE
+
+
+def get_partner_access_choices() -> tuple:
+    return Program.PARTNER_ACCESS_CHOICE
 
 
 class Program(
@@ -160,7 +181,7 @@ class Program(
         db_collation="und-ci-det",
     )
     code = models.CharField(max_length=4, db_index=True, help_text="Program code")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
+    status = models.CharField(max_length=10, choices=get_status_choices, db_index=True, help_text="Program status")
     description = models.CharField(
         blank=True,
         max_length=255,
@@ -169,7 +190,7 @@ class Program(
     )
     start_date = models.DateField(db_index=True, help_text="Program start date")
     end_date = models.DateField(null=True, blank=True, db_index=True, help_text="Program end date")
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True, help_text="Program sector")
+    sector = models.CharField(max_length=50, choices=get_sector_choices, db_index=True, help_text="Program sector")
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=11,
@@ -179,20 +200,20 @@ class Program(
     )
     frequency_of_payments = models.CharField(
         max_length=50,
-        choices=FREQUENCY_OF_PAYMENTS_CHOICE,
+        choices=get_frequency_of_payments_choices,
         help_text="Program frequency of payments",
     )
     scope = models.CharField(
         blank=True,
         null=True,
         max_length=50,
-        choices=SCOPE_CHOICE,
+        choices=get_scope_choices,
         help_text="Program scope",
     )
 
     partner_access = models.CharField(
         max_length=50,
-        choices=PARTNER_ACCESS_CHOICE,
+        choices=get_partner_access_choices,
         default=SELECTED_PARTNERS_ACCESS,
         help_text="Program partner access",
     )
@@ -230,6 +251,13 @@ class Program(
         help_text="Program sanction lists",
     )
 
+    payment_plan_purposes = models.ManyToManyField(
+        "payment.PaymentPlanPurpose",
+        blank=True,
+        related_name="programs",
+        help_text="Payment plan purposes available within program",
+    )
+
     reconciliation_window_in_days = models.PositiveIntegerField(
         default=0, help_text="Payment Plan reconciliation window in days"
     )
@@ -250,6 +278,18 @@ class Program(
             and not self.beneficiary_group.master_detail
         ):
             raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+        if self.pk and not self._state.adding and not self.payment_plan_purposes.exists():
+            raise ValidationError("Program must have at least one Payment Plan Purpose.")
+        if (
+            self.pk
+            and not self._state.adding
+            and self.payment_plan_purposes.exclude(
+                id__in=PaymentPlanPurpose.objects.filter(
+                    Q(limit_to__isnull=True) | Q(limit_to__slug=self.business_area.slug)
+                ).distinct()
+            ).exists()
+        ):
+            raise ValidationError("All Payment Plan Purposes must be available for this program's business area.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()

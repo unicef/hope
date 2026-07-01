@@ -6,13 +6,19 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievancesFilters } from '@components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '@components/grievances/GrievancesTable/GrievancesTable';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import {
+  GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
+  GRIEVANCES_VIEW_LIST_PERMISSIONS,
+  PERMISSIONS,
+  hasPermissions,
+} from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
+  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Tabs, Tab } from '@core/Tabs';
@@ -66,7 +72,7 @@ export const GrievancesTablePage = (): ReactElement => {
     urgency: '',
     preferredLanguage: '',
     program: '',
-    programState: 'all',
+    programState: PROGRAM_STATE_FILTER.ALL,
     areaScope: 'all',
   };
 
@@ -130,21 +136,17 @@ export const GrievancesTablePage = (): ReactElement => {
     return <LoadingComponent />;
 
   // Define the permission criteria for viewing grievances
-  const hasGrievancesViewPermission = permissions.some(
-    (perm) =>
-      perm.includes('GRIEVANCES_VIEW_LIST') ||
-      perm.includes('GRIEVANCES_VIEW_DETAILS'),
+  const grievancesViewPermissions = [
+    ...GRIEVANCES_VIEW_LIST_PERMISSIONS,
+    ...GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
+  ];
+  const hasGrievancesViewPermission = hasPermissions(
+    grievancesViewPermissions,
+    permissions,
   );
 
   if (!hasGrievancesViewPermission)
-    return (
-      <PermissionDenied
-        permission={[
-          PERMISSIONS.GRIEVANCES_VIEW_LIST,
-          PERMISSIONS.GRIEVANCES_VIEW_DETAILS,
-        ]}
-      />
-    );
+    return <PermissionDenied permission={grievancesViewPermissions} />;
   if (!choicesData) return null;
 
   return (

@@ -53,7 +53,7 @@ jobs:
             shared-mime-info
 
       - name: Install Python & UV
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: latest
           enable-cache: true
@@ -67,33 +67,31 @@ jobs:
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
 
-      - name: Run migrations
+      - name: Restore migrated DB cache
+        id: db-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/aurora.sql
+          key: pgdump-v1-${{ hashFiles('src/hope/apps/**/migrations/*.py', 'uv.lock') }}
+
+      - name: Apply cached DB dump
+        if: steps.db-cache.outputs.cache-hit == 'true'
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d aurora -v ON_ERROR_STOP=1 -f /tmp/aurora.sql
+
+      - name: Run migrations (cache miss only)
+        if: steps.db-cache.outputs.cache-hit != 'true'
         run: uv run python manage.py migrate --run-syncdb
+
+      - name: Dump DB for next run (cache miss only)
+        if: steps.db-cache.outputs.cache-hit != 'true'
+        env:
+          PGPASSWORD: postgres
+        run: pg_dump -h localhost -U postgres -d aurora --no-owner --no-privileges > /tmp/aurora.sql
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
-
-      - name: Start Django backend and wait for readiness
-        run: |
-          nohup uv run python manage.py runserver --classic --noreload 8080 \
-            > runserver.log 2>&1 &
-          echo $! > runserver.pid
-          for i in $(seq 1 60); do
-            if curl -fs http://localhost:8080/api/rest/ > /dev/null; then
-              echo "Backend is up after ${i} attempts."
-              exit 0
-            fi
-            if ! kill -0 "$(cat runserver.pid)" 2>/dev/null; then
-              echo "::error::runserver process exited before becoming ready"
-              cat runserver.log
-              exit 1
-            fi
-            echo "Waiting for backend... (${i}/60)"
-            sleep 2
-          done
-          echo "::error::Backend did not become ready within 120s"
-          cat runserver.log
-          exit 1
 
       - run: bun install --frozen-lockfile
         working-directory: src/frontend

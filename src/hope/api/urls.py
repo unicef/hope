@@ -4,12 +4,14 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rest_framework.permissions import AllowAny
 from rest_framework.routers import DefaultRouter
 
 from hope.api import endpoints
 from hope.api.endpoints.base import ConstanceSettingsAPIView
 from hope.api.endpoints.beneficiary_ticket import CreateBeneficiaryTicketView
 from hope.api.endpoints.program.views import ProgramGlobalListView
+from hope.api.endpoints.surprise import SurprisePageConfigView
 from hope.apps.core.api.views import ChoicesViewSet
 from hope.apps.steficon.views import RuleEngineViewSet
 from hope.contrib.aurora.views import (
@@ -25,13 +27,15 @@ router.register(r"choices", ChoicesViewSet, basename="choices")
 
 
 urlpatterns = [
-    re_path("^$", SpectacularAPIView.as_view(), name="schema"),
+    re_path("^$", SpectacularAPIView.as_view(permission_classes=[AllowAny]), name="schema"),
     re_path(
         "^swagger/$",
-        SpectacularSwaggerView.as_view(url_name="api:schema"),
+        SpectacularSwaggerView.as_view(permission_classes=[AllowAny], url_name="api:schema"),
         name="swagger-ui",
     ),
-    re_path("^redoc/$", SpectacularRedocView.as_view(url_name="api:schema"), name="redoc"),
+    re_path(
+        "^redoc/$", SpectacularRedocView.as_view(permission_classes=[AllowAny], url_name="api:schema"), name="redoc"
+    ),
     path("", include("hope.apps.accountability.api.urls", namespace="accountability")),
     path("", include("hope.apps.activity_log.api.urls", namespace="activity-logs")),
     path("", include("hope.apps.core.api.urls", namespace="core")),
@@ -61,6 +65,7 @@ urlpatterns = [
     path("areas/", endpoints.lookups.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.lookups.AreaTypeList().as_view(), name="areatype-list"),
     path("constance/", ConstanceSettingsAPIView().as_view(), name="constance-list"),
+    path("surprise/", SurprisePageConfigView.as_view(), name="surprise-config"),
     path("engine-rules/", RuleEngineViewSet().as_view(), name="engine-rules-list"),
     path(
         "lookups/document/",

@@ -572,10 +572,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def image_validator(self, value: Image, header: str, cell: Cell, *args: Any, **kwargs: Any) -> Any:
         try:
-            if self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
+            if self.required_validator(value, header, *args, **kwargs):
                 return True
-            return self.image_loader.image_in(cell)  # pragma: no cover
-        except Exception as e:  # pragma: no cover
+            return self.image_loader.image_in(cell.coordinate)
+        except Exception as e:
             logger.warning(e)
             raise
 

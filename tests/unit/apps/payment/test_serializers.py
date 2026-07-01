@@ -16,6 +16,8 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
     RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
@@ -48,7 +50,8 @@ def user() -> Any:
 
 @pytest.fixture
 def pending_payment_context(business_area: Any, user: Any) -> dict[str, Any]:
-    payment_plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    program = ProgramFactory(business_area=business_area)
+    payment_plan = PaymentPlanFactory(created_by=user, program_cycle=ProgramCycleFactory(program=program))
     program = payment_plan.program_cycle.program
     admin2 = AreaFactory(name="New admin22")
     hoh = IndividualFactory(household=None, business_area=business_area, program=program)
@@ -74,7 +77,8 @@ def pending_payment_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
-    payment_plan = PaymentPlanFactory(created_by=user, business_area=business_area)
+    program = ProgramFactory(business_area=business_area)
+    payment_plan = PaymentPlanFactory(created_by=user, program_cycle=ProgramCycleFactory(program=program))
     program = payment_plan.program_cycle.program
     admin2 = AreaFactory(name="New admin22")
     hoh = IndividualFactory(household=None, business_area=business_area, program=program)
@@ -106,9 +110,10 @@ def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def payment_plan_list_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
     )
@@ -117,9 +122,10 @@ def payment_plan_list_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
     )
@@ -165,9 +171,10 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
 
 @pytest.fixture
 def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
     )
@@ -187,9 +194,10 @@ def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def volume_by_delivery_context(business_area: Any, user: Any) -> dict[str, Any]:
+    program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        business_area=business_area,
+        program_cycle=ProgramCycleFactory(program=program),
         dispersion_start_date=None,
         dispersion_end_date=None,
         financial_service_provider=None,
@@ -379,6 +387,7 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["can_send_xlsx_password"] is False
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
+    assert data["status_date"] is not None
 
 
 def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
@@ -401,11 +410,18 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan.get_unore_exchange_rate.assert_called_once_with()
 
 
-def test_payment_plan_detail_can_export_xlsx(payment_plan_detail_context: dict[str, Any]) -> None:
+@pytest.mark.parametrize(
+    "pp_status",
+    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
+)
+def test_payment_plan_detail_can_export_xlsx(
+    payment_plan_detail_context: dict[str, Any],
+    pp_status: str,
+) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.status = pp_status
     payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
     payment_plan.save(update_fields=["status", "financial_service_provider"])
 
@@ -449,11 +465,18 @@ def test_payment_plan_detail_can_export_xlsx_for_payment_gateway_statuses(
     assert data["can_export_xlsx"] is expected_result
 
 
-def test_payment_plan_detail_can_download_xlsx(payment_plan_detail_context: dict[str, Any]) -> None:
+@pytest.mark.parametrize(
+    "pp_status",
+    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
+)
+def test_payment_plan_detail_can_download_xlsx(
+    payment_plan_detail_context: dict[str, Any],
+    pp_status: str,
+) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.status = pp_status
     payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
     payment_plan.save(update_fields=["status", "financial_service_provider"])
 
@@ -467,11 +490,18 @@ def test_payment_plan_detail_can_download_xlsx(payment_plan_detail_context: dict
     assert data["can_download_xlsx"] is False
 
 
-def test_payment_plan_detail_can_send_xlsx_password(payment_plan_detail_context: dict[str, Any]) -> None:
+@pytest.mark.parametrize(
+    "pp_status",
+    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
+)
+def test_payment_plan_detail_can_send_xlsx_password(
+    payment_plan_detail_context: dict[str, Any],
+    pp_status: str,
+) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.status = pp_status
     payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
     payment_plan.save(update_fields=["status", "financial_service_provider"])
 

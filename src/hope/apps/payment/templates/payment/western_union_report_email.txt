@@ -1,0 +1,4 @@
+{% extends "core/base_greeting_email.txt" %}
+
+{% block content %}{{ message }}{% if link %}
+Western Union report file: {{ link }}{% endif %}{% endblock content %}

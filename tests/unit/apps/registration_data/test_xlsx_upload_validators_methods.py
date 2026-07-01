@@ -671,6 +671,55 @@ def test_required_validator(program: Any) -> None:
         assert result
 
 
+def test_image_validator(program: Any) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
+        return_value={"test": {"required": True}},
+    ):
+        validator = UploadXLSXInstanceValidator(program)
+        sheet = openpyxl.Workbook().active
+        cell = sheet["A1"]
+        validator.image_loader = mock.Mock()
+        validator.image_loader.image_in.return_value = True
+
+        result = validator.image_validator(value="", header="test", cell=cell)
+
+        assert result is True
+        validator.image_loader.image_in.assert_called_once_with("A1")
+
+
+def test_image_validator_returns_true_for_required_value(program: Any) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
+        return_value={"test": {"required": True}},
+    ):
+        validator = UploadXLSXInstanceValidator(program)
+        cell = openpyxl.Workbook().active["A1"]
+        validator.image_loader = mock.Mock()
+
+        result = validator.image_validator(value="has-value", header="test", cell=cell)
+
+        assert result is True
+        validator.image_loader.image_in.assert_not_called()
+
+
+def test_image_validator_reraises_and_logs_error(program: Any) -> None:
+    with mock.patch(
+        "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
+        return_value={"test": {"required": True}},
+    ):
+        validator = UploadXLSXInstanceValidator(program)
+        cell = openpyxl.Workbook().active["A1"]
+        validator.image_loader = mock.Mock()
+        validator.image_loader.image_in.side_effect = RuntimeError("boom")
+
+        with mock.patch("hope.apps.registration_data.validators.logger.warning") as logger_warning:
+            with pytest.raises(RuntimeError, match="boom"):
+                validator.image_validator(value="", header="test", cell=cell)
+
+        logger_warning.assert_called_once()
+
+
 def test_validate_empty_file(program: Any) -> None:
     empty_file_path = FILES_DIR / "empty_rdi.xlsx"
     wb = openpyxl.load_workbook(

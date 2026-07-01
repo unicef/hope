@@ -1,40 +1,21 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
+import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
+import { PaymentVerificationStatusEnum } from '@restgenerated/models/PaymentVerificationStatusEnum';
+import { PaymentVerificationSummaryStatusEnum } from '@restgenerated/models/PaymentVerificationSummaryStatusEnum';
+import { ProfileStatusEnum } from '@restgenerated/models/ProfileStatusEnum';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { Box, Typography } from '@mui/material';
+import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
-import { ReactElement } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
-export function displayNameWithLatin<T extends Record<string, any>>(
-  obj: T | null | undefined,
-  key: string & keyof T,
-): string | ReactElement | null {
-  if (!obj) return null;
-  const name = obj[key] as string | null | undefined;
-  if (!name) return null;
-  const latinName = obj[`${key}Latin`] as string | null | undefined;
-  if (!latinName) return name;
-  return (
-    <Box
-      component="span"
-      sx={{ display: 'inline-flex', flexDirection: 'column', lineHeight: 1.1 }}
-    >
-      <span>{name}</span>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ fontSize: '0.7rem' }}
-      >
-        {latinName}
-      </Typography>
-    </Box>
-  );
-}
+const NEWLINE_RE = /[\r\n]/g;
 
 // Formats a string or array value to Normal Case using lodash's startCase
 export function formatNormalCaseValue(value: string | string[]): string {
@@ -54,6 +35,7 @@ export function safeStringify(value) {
   return String(value);
 }
 // Status color for periodic data updates online edits
+// TODO: replace with generated enum once backend exposes these as a typed enum
 export function periodicDataUpdatesOnlineEditsStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -153,7 +135,7 @@ export function populationStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'ACTIVE':
+    case ProgramStatusEnum.ACTIVE:
       return theme.hctPalette.green;
     default:
       return theme.hctPalette.gray;
@@ -165,14 +147,14 @@ export function paymentStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'Pending':
-    case 'Sent to Payment Gateway':
-    case 'Sent to FSP':
+    case PaymentStatusEnum.PENDING:
+    case PaymentStatusEnum.SENT_TO_PAYMENT_GATEWAY:
+    case PaymentStatusEnum.SENT_TO_FSP:
       return theme.hctPalette.orange;
-    case 'Distribution Successful':
-    case 'Transaction Successful':
+    case PaymentStatusEnum.DISTRIBUTION_SUCCESSFUL:
+    case PaymentStatusEnum.TRANSACTION_SUCCESSFUL:
       return theme.hctPalette.green;
-    case 'Partially Distributed':
+    case PaymentStatusEnum.PARTIALLY_DISTRIBUTED:
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -181,22 +163,22 @@ export function paymentStatusToColor(
 
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
-    case 'Pending':
+    case PaymentStatusEnum.PENDING:
       return 'PENDING';
-    case 'Distribution Successful':
-    case 'Transaction Successful':
+    case PaymentStatusEnum.DISTRIBUTION_SUCCESSFUL:
+    case PaymentStatusEnum.TRANSACTION_SUCCESSFUL:
       return 'DELIVERED FULLY';
-    case 'Partially Distributed':
+    case PaymentStatusEnum.PARTIALLY_DISTRIBUTED:
       return 'DELIVERED PARTIALLY';
-    case 'Not Distributed':
+    case PaymentStatusEnum.NOT_DISTRIBUTED:
       return 'NOT DELIVERED';
-    case 'Force failed':
+    case PaymentStatusEnum.FORCE_FAILED:
       return 'FORCE FAILED';
-    case 'Manually Cancelled':
+    case PaymentStatusEnum.MANUALLY_CANCELLED:
       return 'MANUALLY CANCELLED';
-    case 'Sent to Payment Gateway':
+    case PaymentStatusEnum.SENT_TO_PAYMENT_GATEWAY:
       return 'SENT TO PAYMENT GATEWAY';
-    case 'Sent to FSP':
+    case PaymentStatusEnum.SENT_TO_FSP:
       return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
@@ -237,11 +219,11 @@ export function paymentVerificationStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'ACTIVE':
+    case PaymentVerificationSummaryStatusEnum.ACTIVE:
       return theme.hctPalette.green;
-    case 'PENDING':
+    case PaymentVerificationSummaryStatusEnum.PENDING:
       return theme.hctPalette.orange;
-    case 'FINISHED':
+    case PaymentVerificationSummaryStatusEnum.FINISHED:
       return theme.hctPalette.gray;
     default:
       return theme.palette.error.main;
@@ -253,13 +235,13 @@ export function verificationRecordsStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'PENDING':
+    case PaymentVerificationStatusEnum.PENDING:
       return theme.hctPalette.gray;
-    case 'RECEIVED':
+    case PaymentVerificationStatusEnum.RECEIVED:
       return theme.hctPalette.green;
-    case 'NOT_RECEIVED':
+    case PaymentVerificationStatusEnum.NOT_RECEIVED:
       return theme.palette.error.main;
-    case 'RECEIVED_WITH_ISSUES':
+    case PaymentVerificationStatusEnum.RECEIVED_WITH_ISSUES:
       return theme.hctPalette.orange;
     default:
       return theme.palette.error.main;
@@ -271,13 +253,11 @@ export function registrationDataImportStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'Merged':
+    case RegistrationDataImportStatusEnum.MERGED:
       return theme.hctPalette.green;
-    case 'In Progress':
-      return theme.hctPalette.orange;
-    case 'Import Error':
-    case 'Merge Error':
-    case 'Deduplication Failed':
+    case RegistrationDataImportStatusEnum.IMPORT_ERROR:
+    case RegistrationDataImportStatusEnum.MERGE_ERROR:
+    case RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED:
       return theme.palette.error.main;
     default:
       return theme.hctPalette.orange;
@@ -289,16 +269,16 @@ export function registrationDataImportDeduplicationEngineStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'PENDING':
+    case DeduplicationEngineStatusEnum.PENDING:
       return theme.hctPalette.gray;
-    case 'UPLOADED':
+    case DeduplicationEngineStatusEnum.UPLOADED:
       return theme.hctPalette.orange;
-    case 'IN_PROGRESS':
+    case DeduplicationEngineStatusEnum.IN_PROGRESS:
       return theme.hctPalette.orange;
-    case 'FINISHED':
+    case DeduplicationEngineStatusEnum.FINISHED:
       return theme.hctPalette.green;
-    case 'UPLOAD_ERROR':
-    case 'ERROR':
+    case DeduplicationEngineStatusEnum.UPLOAD_ERROR:
+    case DeduplicationEngineStatusEnum.ERROR:
       return theme.palette.error.main;
     default:
       return theme.hctPalette.orange;
@@ -329,6 +309,7 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.gray,
     [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.lighterGray,
     [PaymentPlanStatus.ABORTED]: theme.hctPalette.red,
+    [PaymentPlanStatus.READY_FOR_CLOSURE]: theme.hctPalette.teal,
     [PaymentPlanStatus.CLOSED]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
@@ -342,10 +323,10 @@ export function paymentPlanBuildStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    OK: theme.hctPalette.green,
-    FAILED: theme.hctPalette.red,
-    BUILDING: theme.hctPalette.orange,
-    PENDING: theme.hctPalette.gray,
+    [BuildStatusEnum.OK]: theme.hctPalette.green,
+    [BuildStatusEnum.FAILED]: theme.hctPalette.red,
+    [BuildStatusEnum.BUILDING]: theme.hctPalette.orange,
+    [BuildStatusEnum.PENDING]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -357,6 +338,7 @@ export function periodicDataUpdateTemplateStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
+  // TODO: replace with generated enum once backend exposes these as a typed enum
   const colorsMap = {
     NEW: theme.hctPalette.gray,
     EXPORTED: theme.hctPalette.green,
@@ -376,6 +358,7 @@ export function periodicDataUpdatesUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
+  // TODO: replace with generated enum once backend exposes these as a typed enum
   const colorsMap = {
     SUCCESSFUL: theme.hctPalette.green,
     FAILED: theme.hctPalette.red,
@@ -395,21 +378,21 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [BackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
-    [BackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
-    [BackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
+    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
-    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
       theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
+    [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
       theme.palette.error.main,
-    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
-    [BackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
+    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };
   if (status in colorsMap) {
@@ -423,11 +406,11 @@ export function userStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'INVITED':
+    case ProfileStatusEnum.INVITED:
       return theme.hctPalette.gray;
-    case 'ACTIVE':
+    case ProfileStatusEnum.ACTIVE:
       return theme.hctPalette.green;
-    case 'INACTIVE':
+    case ProfileStatusEnum.INACTIVE:
       return theme.palette.error.main;
     default:
       return theme.palette.error.main;
@@ -438,6 +421,7 @@ export function householdStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
+  // TODO: replace with generated enum once backend exposes HouseholdStatus as a typed enum
   switch (status) {
     case 'ACTIVE':
       return theme.hctPalette.green;
@@ -452,6 +436,7 @@ export function individualStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
+  // TODO: replace with generated enum once backend exposes IndividualStatus as a typed enum
   switch (status) {
     case 'ACTIVE':
       return theme.hctPalette.green;
@@ -508,11 +493,11 @@ export function programCycleStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'Draft':
+    case ProgramStatusEnum.DRAFT:
       return theme.hctPalette.gray;
-    case 'Active':
+    case ProgramStatusEnum.ACTIVE:
       return theme.hctPalette.green;
-    case 'Finished':
+    case ProgramStatusEnum.FINISHED:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.gray;
@@ -603,14 +588,16 @@ export function decodeIdString(idString: string): string | null {
   // Check for valid base64 (length multiple of 4, only base64 chars)
   const base64Pattern = /^[A-Za-z0-9+/=]+$/;
   if (idString.length % 4 !== 0 || !base64Pattern.test(idString)) {
-    console.error('decodeIdString: Not a valid base64 string:', idString);
+    const safeId = idString.replace(NEWLINE_RE, '');
+    console.error('decodeIdString: Not a valid base64 string:', safeId);
     return null;
   }
   try {
     const decoded = atob(idString);
     return decoded.split(':')[1];
   } catch (e) {
-    console.error('Failed to decode string:', e, idString);
+    const safeId = idString.replace(NEWLINE_RE, '');
+    console.error('Failed to decode string:', e, safeId);
     return null;
   }
 }

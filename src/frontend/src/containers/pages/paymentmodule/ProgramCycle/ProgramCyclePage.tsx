@@ -14,6 +14,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
 import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 const initialFilter = {
   search: '',
@@ -21,7 +24,7 @@ const initialFilter = {
   totalEntitledQuantityUsdFrom: '',
   totalEntitledQuantityUsdTo: '',
   startDate: '',
-  end_date: '',
+  endDate: '',
 };
 
 export const ProgramCyclePage = (): ReactElement => {
@@ -29,7 +32,7 @@ export const ProgramCyclePage = (): ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, businessArea } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [filter, setFilter] = useState(
@@ -43,6 +46,14 @@ export const ProgramCyclePage = (): ReactElement => {
   useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
     setShouldScroll(false),
   );
+
+  const { data: programChoicesData } = useQuery<ProgramChoices>({
+    queryKey: ['programChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
@@ -76,6 +87,7 @@ export const ProgramCyclePage = (): ReactElement => {
           setAppliedFilter(f);
           setShouldScroll(true);
         }}
+        choicesData={programChoicesData}
       />
       <div ref={tableRef}>
         <TableWrapper>

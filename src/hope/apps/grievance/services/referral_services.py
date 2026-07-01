@@ -45,16 +45,3 @@ def fetch_household_and_individual(
     individual = feedback_ticket_extras.get("individual")
     household = feedback_ticket_extras.get("household")
     return household, individual
-
-
-def update_ticket(
-    grievance_ticket: GrievanceTicket,
-    household: Household | None,
-    individual: Individual | None,
-) -> None:
-    ticket_details = grievance_ticket.referral_ticket_details
-    if individual:
-        ticket_details.individual = individual
-    if household:
-        ticket_details.household = household
-    ticket_details.save()

@@ -10,6 +10,7 @@ from hope.models import (
     DeliveryMechanism,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -24,6 +25,8 @@ class PaymentPlanFilter(FilterSet):
     )
     program = django_filters.CharFilter(method="filter_by_program", help_text="Filter by program code")
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
+    payment_plan_group = django_filters.UUIDFilter(field_name="payment_plan_group__id")
+    export_tag = django_filters.NumberFilter(field_name="export_tag")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     fsp = django_filters.CharFilter(field_name="financial_service_provider__name")
     delivery_mechanism = django_filters.ModelMultipleChoiceFilter(
@@ -50,7 +53,7 @@ class PaymentPlanFilter(FilterSet):
         model = PaymentPlan
         fields = {
             "total_entitled_quantity": ["gte", "lte"],
-            "is_follow_up": ["exact"],
+            "plan_type": ["exact"],
             "updated_at": ["gte", "lte"],
         }
 
@@ -206,6 +209,26 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
         return queryset
 
 
+class PaymentPlanGroupFilter(FilterSet):
+    cycle = django_filters.UUIDFilter(field_name="cycle__id")
+    search = django_filters.CharFilter(method="search_filter")
+    ordering = OrderingFilter(
+        fields=(
+            ("unicef_id", "unicef_id"),
+            ("name", "name"),
+            ("created_at", "created_at"),
+            ("cycle__title", "cycle"),
+        )
+    )
+
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["cycle"]
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+
+
 class PaymentVerificationRecordFilter(FilterSet):
     search = django_filters.CharFilter(method="search_filter")
     verification_status = django_filters.MultipleChoiceFilter(
@@ -273,6 +296,7 @@ class PaymentSearchFilter(FilterSet):
             ("household__unicef_id", "household__unicef_id"),
             ("household__size", "household__size"),
             ("collector__full_name", "collector__full_name"),
+            ("created_at", "created_at"),
         )
     )
 
