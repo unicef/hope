@@ -12,7 +12,6 @@ from django.test import RequestFactory, override_settings
 from django.test.client import MULTIPART_CONTENT
 from django.urls import reverse
 from django_webtest import DjangoTestApp
-from flaky import flaky
 import pytest
 
 from extras.test_utils.factories import AreaFactory, AreaTypeFactory, CountryFactory, UserFactory
@@ -46,7 +45,10 @@ def superuser() -> User:
 
 @pytest.fixture
 def geo_test_data() -> None:
-    AreaTypeFactory.create_batch(2)
+    country = CountryFactory(
+        name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="1234"
+    )
+    AreaTypeFactory.create_batch(2, country=country)
     AreaFactory.create_batch(
         2,
         area_type=AreaType.objects.first(),
@@ -55,7 +57,6 @@ def geo_test_data() -> None:
         3,
         area_type=AreaType.objects.last(),
     )
-    CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="1234")
 
 
 @pytest.fixture
@@ -121,7 +122,6 @@ def test_admin_changelist_view_accessible(
 
 
 @pytest.mark.parametrize("delay_mptt_updates", [True, False])
-@flaky(max_runs=3, min_passes=1)
 @patch("hope.admin.geo.import_areas_from_csv_async_task")
 @override_settings(POWER_QUERY_DB_ALIAS="default")
 def test_upload_triggers_background_task(
