@@ -17,14 +17,12 @@ from extras.test_utils.factories import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
+    IndividualFactory,
     PaymentFactory,
     ProgramFactory,
 )
-from hope.apps.dashboard.services import (
-    GLOBAL_SLUG,
-    DashboardDataCache,
-    DashboardGlobalDataCache,
-)
+from hope.apps.dashboard.services import GLOBAL_SLUG, DashboardDataCache, DashboardGlobalDataCache
+from hope.apps.household.const import DISABLED, NON_BENEFICIARY, NOT_DISABLED
 from hope.models import Payment, PaymentPlan
 
 
@@ -420,8 +418,6 @@ def test_dashboard_reconciliation_verification_consistency(reconciliation_test_d
 @pytest.mark.django_db
 def test_dashboard_pwd_count_from_individuals(afghanistan, area_kabul, fsp_common, delivery_mechanism_common) -> None:
     cache.delete(f"dashboard_data_{afghanistan.slug}")
-    from extras.test_utils.factories import IndividualFactory
-    from hope.apps.household.const import DISABLED, NON_BENEFICIARY, NOT_DISABLED
 
     # Create a program with a non-"full_collection" code
     dct = DataCollectingTypeFactory(code="other_collection")
