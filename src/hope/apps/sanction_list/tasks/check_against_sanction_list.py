@@ -18,13 +18,21 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.payloads import EmailAttachmentPayload
-from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
-from hope.apps.sanction_list.notifications import SanctionListCheckResultsEmailNotificationService
+from hope.apps.core.notifications.publishers import (
+    BaseRenderedEmailNotificationService,
+    RenderedEmailNotification,
+    publish_rendered_email_notification,
+)
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import SanctionListIndividual, UploadedXLSXFile
 
 if TYPE_CHECKING:
     from uuid import UUID
+
+
+class SanctionListCheckResultsEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "sanction_list/check_results.html"
+    text_template = "sanction_list/check_results.txt"
 
 
 class CheckAgainstSanctionListTask:

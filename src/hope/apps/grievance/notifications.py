@@ -95,6 +95,8 @@ class GrievanceNotification:
     def _prepare_emails(self) -> tuple[list[MailjetClient], list[RenderedEmailNotification]]:
         emails = []
         rendered_email_notifications = []
+        if not self.user_recipients:
+            return emails, rendered_email_notifications
         for user in self.user_recipients:
             email, rendered_email_notification = self._prepare_email(user)
             emails.append(email)
@@ -190,7 +192,11 @@ class GrievanceNotification:
         return text_body, html_body, subject
 
     def _prepare_for_approval_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        context = self._prepare_default_context(user_recipient)
+        notification_service = GrievanceSendForApprovalEmailNotificationService()
+        text_body = render_to_string(notification_service.text_template, context=context)
+        html_body = render_to_string(notification_service.html_template, context=context)
+        subject = self._prepare_for_approval_subject()
         return text_body, html_body, subject
 
     def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
