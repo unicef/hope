@@ -158,6 +158,9 @@ class HouseholdDocument(_PreparedFieldsFix, Document):
     program_id = fields.KeywordField(attr="program_id")
     detail_id = fields.TextField()
     program_registration_id = fields.TextField()
+    facility = fields.ObjectField(
+        properties={"name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})}
+    )
 
     def prepare_admin1(self, household: Household) -> str | None:
         if household and household.admin1:
