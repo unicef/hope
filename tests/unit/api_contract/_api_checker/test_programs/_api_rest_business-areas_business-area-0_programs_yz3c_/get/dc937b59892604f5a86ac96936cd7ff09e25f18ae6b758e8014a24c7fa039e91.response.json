@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1269"
+        "Content-Length": "1315"
     },
     "data": {
         "id": "113aaf47-3213-404d-b175-b28e9312237c",
@@ -45,7 +45,7 @@
         "admin_url": "/api/unicorn/program/program/113aaf47-3213-404d-b175-b28e9312237c/change/",
         "description": "",
         "administrative_areas_of_implementation": "",
-        "version": 1735688653315201,
+        "version": 1735688653315200,
         "partners": [
             {
                 "id": 3,
@@ -61,7 +61,8 @@
         "screen_beneficiary": false,
         "reconciliation_window_in_days": 0,
         "send_reconciliation_window_expiry_notifications": false,
-        "identification_key_individual_label": null
+        "identification_key_individual_label": null,
+        "payment_plan_purposes": []
     },
     "content_type": "application/json"
 }
