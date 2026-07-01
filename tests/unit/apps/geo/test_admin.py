@@ -48,15 +48,9 @@ def geo_test_data() -> None:
     country = CountryFactory(
         name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="1234"
     )
-    AreaTypeFactory.create_batch(2, country=country)
-    AreaFactory.create_batch(
-        2,
-        area_type=AreaType.objects.first(),
-    )
-    AreaFactory.create_batch(
-        3,
-        area_type=AreaType.objects.last(),
-    )
+    area_type_1, area_type_2 = AreaTypeFactory.create_batch(2, country=country)
+    AreaFactory.create_batch(2, area_type=area_type_1)
+    AreaFactory.create_batch(3, area_type=area_type_2)
 
 
 @pytest.fixture
