@@ -326,6 +326,7 @@ class PermissionsMixin:
         """
 
     permission_classes: list[type[BasePermission]]
+    permission: "Grant | None" = None
     token_permission = Grant.API_READ_ONLY
 
     def is_external_request(self) -> bool:
