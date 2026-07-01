@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.urls import reverse
 import pytest
@@ -45,6 +46,7 @@ from hope.models import (
     FlexibleAttribute,
     IndividualRoleInHousehold,
     MergeStatusModel,
+    Payment,
     PaymentHouseholdSnapshot,
 )
 
@@ -359,8 +361,10 @@ def test_entitlement_import_updates_only_modified_rows_for_household_program(
     import_service.validate()
     assert import_service.errors == []
 
-    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
-    with django_assert_num_queries(3):
+    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions.
+    # +2 constant queries for per-payment activity logging (bulk log insert, program m2m).
+    ContentType.objects.get_for_model(Payment)  # warm cache so the count is order-independent
+    with django_assert_num_queries(5):
         import_service.import_payment_list()
 
     payment_1.refresh_from_db()
@@ -421,8 +425,10 @@ def test_entitlement_import_updates_only_modified_rows_for_social_worker_program
     import_service.validate()
     assert import_service.errors == []
 
-    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
-    with django_assert_num_queries(3):
+    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions.
+    # +2 constant queries for per-payment activity logging (bulk log insert, program m2m).
+    ContentType.objects.get_for_model(Payment)  # warm cache so the count is order-independent
+    with django_assert_num_queries(5):
         import_service.import_payment_list()
 
     payment_1.refresh_from_db()

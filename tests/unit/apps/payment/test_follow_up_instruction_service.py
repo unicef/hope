@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
-from hope.models import FollowUpInstruction, Payment, PaymentPlan
+from hope.models import FollowUpInstruction, LogEntry, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -180,6 +180,51 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
     assert len(child_plans) == 2
     assert {child.source_payment_plan_id for child in child_plans} == {source_one.id, source_two.id}
     assert all(child.plan_type == PaymentPlan.PlanType.FOLLOW_UP for child in child_plans)
+
+
+@pytest.mark.enable_activity_log
+def test_create_logs_activity_for_each_child_payment_plan(
+    user,
+    program,
+    cycle,
+    second_cycle,
+    business_area,
+    currency,
+    delivery_mechanism,
+    fsp,
+):
+    group_one = PaymentPlanGroupFactory(cycle=cycle)
+    group_two = PaymentPlanGroupFactory(cycle=second_cycle)
+    source_one = _create_source_payment_plan(
+        cycle=cycle,
+        group=group_one,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    _create_source_payment_plan(
+        cycle=second_cycle,
+        group=group_two,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+
+    instruction = FollowUpInstructionService(program).create(
+        user=user,
+        payment_plan_group_ids=[str(group_one.id), str(group_two.id)],
+        dispersion_start_date=source_one.dispersion_start_date + timedelta(days=1),
+        dispersion_end_date=source_one.dispersion_end_date + timedelta(days=1),
+    )
+
+    child_ids = list(instruction.payment_plans.values_list("id", flat=True))
+    create_logs = LogEntry.objects.filter(object_id__in=child_ids, action=LogEntry.CREATE)
+    assert create_logs.count() == 2
+    assert all(log.user == user for log in create_logs)
 
 
 def test_create_excludes_source_plans_with_existing_follow_up_child(

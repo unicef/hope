@@ -279,5 +279,5 @@ def test_restart_importing_reconciliation_xlsx_file_restarts_active_async_job(
 
     assert response.status_code == status.HTTP_302_FOUND
     mocked_terminate.assert_called_once()
-    mocked_restart.assert_called_once_with(payment_plan)
+    mocked_restart.assert_called_once_with(payment_plan, str(admin_user["user"].pk))
     assert list(messages.get_messages(response.wsgi_request))[-1].message == "Successfully executed."

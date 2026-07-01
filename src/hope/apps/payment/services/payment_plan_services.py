@@ -44,7 +44,7 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.payment.utils import get_link
+from hope.apps.payment.utils import get_link, log_payment_plan_approval, update_payments_and_log
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.models import (
@@ -268,8 +268,10 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise ValidationError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).update(
-            conflicted=True
+        update_payments_and_log(
+            self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True),
+            {"conflicted": True},
+            str(self.user.pk) if self.user else None,
         )
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_lock()
@@ -281,7 +283,11 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self) -> PaymentPlan:
-        self.payment_plan.payment_items.all().update(conflicted=False)
+        update_payments_and_log(
+            self.payment_plan.payment_items.all(),
+            {"conflicted": False},
+            str(self.user.pk) if self.user else None,
+        )
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -332,13 +338,16 @@ class PaymentPlanService:
         # validate approval required number and user as well
         self.validate_acceptance_process_approval_count(approval_process)
 
+        approval_type = self.get_approval_type_by_action()
+        approval_comment = self.input_data.get("comment")
         approval_data = {
             "approval_process": approval_process,
             "created_by": self.user,
-            "type": self.get_approval_type_by_action(),
-            "comment": self.input_data.get("comment"),
+            "type": approval_type,
+            "comment": approval_comment,
         }
         Approval.objects.create(**approval_data)
+        log_payment_plan_approval(self.payment_plan, self.user, approval_type, approval_comment)
 
         # base on approval required number check if we need update PaymentPlan status after creation new Approval
         self.check_payment_plan_and_update_status(approval_process)
@@ -417,7 +426,10 @@ class PaymentPlanService:
                 flow.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
                 # AB#272790
-                transaction.on_commit(lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan))
+                release_user_id = str(self.user.pk) if self.user else None
+                transaction.on_commit(
+                    lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
+                )
 
             if approval_type == Approval.REJECT:
                 flow = PaymentPlanFlow(self.payment_plan)
@@ -741,6 +753,7 @@ class PaymentPlanService:
                 should_update_money_stats,
                 vulnerability_filter,
                 self.payment_plan,
+                str(self.user.pk) if self.user else None,
             )
         )
         return self.payment_plan
@@ -1241,6 +1254,7 @@ class PaymentPlanService:
         should_update_money_stats: bool,
         vulnerability_filter: bool,
         payment_plan: PaymentPlan,
+        user_id: str | None = None,
     ) -> None:
         from hope.apps.payment.celery_tasks import payment_plan_apply_steficon_hh_selection_async_task
 
@@ -1255,7 +1269,7 @@ class PaymentPlanService:
                 # in case of full rebuild and vulnerability filter, need to run steficon after rebuild
                 payment_plan_full_rebuild_async_task(payment_plan)
                 payment_plan_apply_steficon_hh_selection_async_task(
-                    payment_plan, str(payment_plan.steficon_rule_targeting.rule_id)
+                    payment_plan, str(payment_plan.steficon_rule_targeting.rule_id), user_id
                 )
             elif should_update_money_stats:
                 payment_plan_full_rebuild_async_task(payment_plan)
