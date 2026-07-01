@@ -20,11 +20,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
 )
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
-from hope.apps.dashboard.services import (
-    GLOBAL_SLUG,
-    DashboardDataCache,
-    DashboardGlobalDataCache,
-)
+from hope.apps.dashboard.services import GLOBAL_SLUG, DashboardDataCache, DashboardGlobalDataCache
 from hope.models import BusinessArea, Payment, PaymentPlan
 
 
