@@ -19,6 +19,7 @@ class ImportDataAdmin(HOPEModelAdminBase):
         "number_of_households",
         "number_of_individuals",
     )
+    readonly_fields = ("business_area_slug",)
     list_filter = (
         "status",
         "data_type",

@@ -43,6 +43,8 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
             )
         )
 
+    readonly_fields = ("created_by",)
+
     def total_selected_columns(self, obj: Any) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
 
@@ -120,6 +122,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         "created_by",
     )
     form = FspXlsxTemplatePerDeliveryMechanismForm
+    readonly_fields = ("created_by",)
 
     def get_queryset(self, request: "HttpRequest") -> "QuerySet":
         return (

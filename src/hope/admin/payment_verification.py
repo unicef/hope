@@ -40,6 +40,7 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         "sent_to_rapid_pro",
     )
     date_hierarchy = "updated_at"
+    readonly_fields = ("status_date", "sent_to_rapid_pro")
     search_fields = ("payment__unicef_id",)
 
     def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover

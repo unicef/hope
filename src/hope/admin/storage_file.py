@@ -21,6 +21,7 @@ class StorageFileAdmin(AutocompleteForeignKeyMixin, ExtraButtonsMixin, admin.Mod
         "created_by",
         "created_at",
     )
+    readonly_fields = ("file_name", "file_size", "created_by", "created_at", "business_area")
     search_fields = ("file_name",)
 
     def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:

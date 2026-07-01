@@ -41,6 +41,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
         ("cleared_by", AutoCompleteFilter),
         "status",
     )
+    readonly_fields = ("program",)
     exclude = ("cleared_date", "cleared_by")
     show_full_result_count = False
 

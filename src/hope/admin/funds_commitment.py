@@ -21,6 +21,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         "posting_date",
         ("business_area", ValueFilter),
     )
+    readonly_fields = ("business_area",)
     search_fields = (
         "rec_serial_number",
         "vendor_id",

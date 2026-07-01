@@ -77,6 +77,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         "erased",
         "deduplication_engine_status",
     )
+    readonly_fields = ("business_area", "program", "imported_by", "import_date")
     date_hierarchy = "updated_at"
     advanced_filter_fields = (
         "status",
