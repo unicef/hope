@@ -41,6 +41,7 @@ def token(user, afghanistan) -> APIToken:
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
+@patch("hope.admin.api_token.publish_rendered_email_notification")
 @patch.object(APITokenAdmin, "message_user", return_value=None)
 @patch.object(APITokenAdmin, "__init__", return_value=None)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
@@ -48,6 +49,7 @@ def token(user, afghanistan) -> APIToken:
 def test_send_api_token(
     mocked_admin_init: MagicMock,
     mocked_message_user: MagicMock,
+    mocked_publish_rendered_email_notification: MagicMock,
     mocked_requests_post: MagicMock,
     token: APIToken,
     user: User,
@@ -82,6 +84,17 @@ def test_send_api_token(
                     f"Business Areas: {', '.join(token.valid_for.values_list('name', flat=True))}\n\n"
                     f"Regards\n\n"
                     f"The HOPE Team\n",
+                    "HTMLPart": f"<p>Dear {user.first_name or user.username},</p>\n\n"
+                    f"<p>please find below API token infos</p>\n\n"
+                    f"<p>\n"
+                    f"    Name: {token}<br>\n"
+                    f"    Key: {token.key}<br>\n"
+                    f"    Grants: {token.grants}<br>\n"
+                    f"    Expires: {token.valid_to}<br>\n"
+                    f"    Business Areas: {', '.join(token.valid_for.values_list('name', flat=True))}\n"
+                    f"</p>\n\n"
+                    f"<p>Regards</p>\n\n"
+                    f"<p>The HOPE Team</p>",
                 }
             ]
         }
@@ -92,3 +105,8 @@ def test_send_api_token(
         data=expected_data,
         timeout=30,
     )
+    notification = mocked_publish_rendered_email_notification.call_args.args[0]
+    assert notification.user == user
+    assert notification.subject == f"HOPE API Token {token} infos"
+    assert notification.context["token_key"] == token.key
+    assert notification.context["show_token_key"] is True

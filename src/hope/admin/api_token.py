@@ -11,11 +11,17 @@ from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.apps.account.fields import ChoiceArrayField
+from hope.apps.core.notifications.publishers import (
+    BaseRenderedEmailNotificationService,
+    RenderedEmailNotification,
+    publish_rendered_email_notification,
+)
 from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
 
@@ -68,6 +74,11 @@ Regards
 
 The HOPE Team
 """  # noqa
+
+
+class APITokenEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "admin/api_token_email.html"
+    text_template = "admin/api_token_email.txt"
 
 
 class APITokenForm(forms.ModelForm):
@@ -130,12 +141,44 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
+    def _get_template_message(self, template: str) -> str:
+        if template == TOKEN_CREATED_EMAIL:
+            return "you have been assigned a new API token."
+        if template == TOKEN_UPDATED_EMAIL:
+            return "your assigned API token {token_name} has been updated."
+        return "please find below API token infos"
+
     def _send_token_email(self, request: HttpRequest, obj: Any, template: str) -> None:
         try:
             user = obj.user
+            context = self._get_email_context(request, obj)
+            notification_context = {
+                "friendly_name": context["friendly_name"],
+                "message": self._get_template_message(template).format(token_name=str(obj)),
+                "token_name": str(obj),
+                "token_key": obj.key,
+                "grants": obj.grants,
+                "expire": context["expire"],
+                "areas": context["areas"],
+                "title": f"HOPE API Token {obj} infos",
+                "show_token_key": template != TOKEN_UPDATED_EMAIL,
+            }
+            text_body = render_to_string(APITokenEmailNotificationService.text_template, context=notification_context)
+            html_body = render_to_string(APITokenEmailNotificationService.html_template, context=notification_context)
             user.email_user(
-                subject=f"HOPE API Token {obj} infos",
-                text_body=template.format(**self._get_email_context(request, obj)),
+                subject=notification_context["title"],
+                html_body=html_body,
+                text_body=text_body,
+            )
+            publish_rendered_email_notification(
+                RenderedEmailNotification(
+                    service=APITokenEmailNotificationService(),
+                    user=user,
+                    subject=notification_context["title"],
+                    html_body=html_body,
+                    text_body=text_body,
+                    context=notification_context,
+                )
             )
             self.message_user(request, f"Email sent to {obj.user.email}", messages.SUCCESS)
         except OSError:
