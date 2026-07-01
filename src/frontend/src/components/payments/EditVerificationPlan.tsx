@@ -42,12 +42,8 @@ import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVer
 import { AreaList } from '@restgenerated/models/AreaList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FullList } from '@restgenerated/models/FullList';
-import { RandomSampling } from '@restgenerated/models/RandomSampling';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
-import { RapidPro } from '@restgenerated/models/RapidPro';
-import { Age } from '@restgenerated/models/Age';
 import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
@@ -137,13 +133,13 @@ export const EditVerificationPlan = ({
         ...baseData,
         fullListArguments: {
           excludedAdminAreas: values.excludedAdminAreasFull || [],
-        } as FullList,
+        },
       };
 
       if (values.verificationChannel === 'RAPIDPRO') {
         result.rapidProArguments = {
           flowId: values.rapidProFlow,
-        } as RapidPro;
+        };
       }
 
       return result;
@@ -161,16 +157,16 @@ export const EditVerificationPlan = ({
             ? ({
                 min: values.filterAgeMin || 0,
                 max: values.filterAgeMax || 999,
-              } as Age)
-            : ({ min: 0, max: 999 } as Age),
+              })
+            : ({ min: 0, max: 999 }),
           sex: values.sexCheckbox ? values.filterSex || '' : '',
-        } as RandomSampling,
+        },
       };
 
       if (values.verificationChannel === 'RAPIDPRO') {
         result.rapidProArguments = {
           flowId: values.rapidProFlow,
-        } as RapidPro;
+        };
       }
 
       return result;

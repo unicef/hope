@@ -73,6 +73,7 @@ export function LinkedGrievancesModal({
       'linkedGrievanceTickets',
       businessArea,
       selectedProgram?.id,
+      selectedProgram?.code,
       household.unicefId,
     ],
     queryFn: () => {

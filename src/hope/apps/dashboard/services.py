@@ -17,12 +17,13 @@ from uuid import UUID
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from django.db.models import Count, DecimalField, F, Q, Value
+from django.db.models import Case, Count, DecimalField, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 import sentry_sdk
 
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
-from hope.models import BusinessArea, DataCollectingType, Household, Payment, PaymentPlan
+from hope.apps.household.const import DISABLED, NON_BENEFICIARY
+from hope.models import BusinessArea, DataCollectingType, Household, Individual, Payment, PaymentPlan
 
 logger = logging.getLogger(__name__)
 
@@ -318,7 +319,30 @@ class DashboardCacheBase(Protocol):
                 .filter(id__in=batch_ids)
                 .select_related("admin1", "admin_area", "business_area", "program", "program__data_collecting_type")
                 .annotate(
-                    pwd_count_calc=get_pwd_count_expression(),
+                    pwd_count_calc=Case(
+                        When(
+                            program__data_collecting_type__code="full_collection",
+                            then=get_pwd_count_expression(),
+                        ),
+                        default=Coalesce(
+                            Subquery(
+                                Individual.objects.using(settings.DASHBOARD_DB)
+                                .filter(
+                                    household_id=OuterRef("id"),
+                                    disability=DISABLED,
+                                    withdrawn=False,
+                                    duplicate=False,
+                                )
+                                .exclude(relationship=NON_BENEFICIARY)
+                                .values("household_id")
+                                .annotate(count=Count("id"))
+                                .values("count"),
+                                output_field=models.IntegerField(),
+                            ),
+                            0,
+                        ),
+                        output_field=models.IntegerField(),
+                    ),
                     admin1_name_hh=Coalesce(F("admin1__name"), Value("Unknown Admin1")),
                     country_name_hh=Coalesce(F("business_area__name"), Value("Unknown Country")),
                 )
@@ -330,6 +354,7 @@ class DashboardCacheBase(Protocol):
                     "admin1_name_hh",
                     "country_name_hh",
                     "program__data_collecting_type__type",
+                    "program__data_collecting_type__code",
                 )
             )
 

@@ -1183,10 +1183,8 @@ class TestCreateTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
         page_targeting_create.get_select_round_option(1).click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().send_keys("2022-01-01")
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().send_keys("2022-03-03")
+        page_targeting_create.fill_input_date_individuals_filters_blocks_value_from("2022-01-01")
+        page_targeting_create.fill_input_date_individuals_filters_blocks_value_to("2022-03-03")
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test Date Attribute: 2022-01-01 - 2022-03-03\nRound 1 (Test Round Date 1)"
