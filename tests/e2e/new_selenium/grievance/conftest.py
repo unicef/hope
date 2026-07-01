@@ -24,12 +24,6 @@ def social_worker_program(business_area: BusinessArea) -> Program:
 
 @pytest.fixture
 def household_update_program(business_area: BusinessArea) -> Program:
-    # A standard (non-social) program whose beneficiary group label is "Household", so the
-    # grievance issue type renders as "Household Data Update" and the admin_area_title field
-    # label renders as "Household resides in which admin area?". ProgramFactory defaults to a
-    # STANDARD DataCollectingType, which keeps the household (not individual) look-up tab active.
-    # STANDARD requires a master_detail beneficiary group (see Program.clean), so the pre-seeded
-    # "People" group (master_detail=False) cannot be reused here.
     beneficiary_group, _ = BeneficiaryGroup.objects.get_or_create(
         name="Household Group",
         defaults={
