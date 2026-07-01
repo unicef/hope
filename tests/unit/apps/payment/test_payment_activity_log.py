@@ -76,7 +76,7 @@ def test_bulk_log_payment_changes_one_insert_path(payments: list[Payment], user:
         payment.save(update_fields=["status", "delivered_quantity"])
         pairs.append((old_payment, payment))
 
-    bulk_log_payment_changes(pairs, str(user.pk))
+    bulk_log_payment_changes(pairs, user)
 
     logs = LogEntry.objects.filter(object_id__in=[p.pk for p in payments])
     assert logs.count() == 2
@@ -89,7 +89,7 @@ def test_bulk_log_payment_changes_skips_noop(payments: list[Payment], user: User
     # no field changed -> no log
     pairs = [(copy_model_object(payment), payment) for payment in payments]
 
-    bulk_log_payment_changes(pairs, str(user.pk))
+    bulk_log_payment_changes(pairs, user)
 
     assert not LogEntry.objects.filter(object_id__in=[p.pk for p in payments]).exists()
 
@@ -214,7 +214,7 @@ def test_update_payments_and_log_logs_fk_valued_change(payments: list[Payment], 
 def test_bulk_log_payment_changes_records_create_when_old_is_none(payments: list[Payment], user: User) -> None:
     new = payments[0]
 
-    bulk_log_payment_changes([(None, new)], str(user.pk))
+    bulk_log_payment_changes([(None, new)], user)
 
     log = LogEntry.objects.get(object_id=new.pk)
     assert log.action == LogEntry.CREATE

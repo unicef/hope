@@ -195,7 +195,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            PaymentGatewayService().sync_payment_plan(payment_plan, str(request.user.pk))
+            PaymentGatewayService(user_id=str(request.user.pk)).sync_payment_plan(payment_plan)
 
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         return confirm_action(
@@ -216,7 +216,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            PaymentGatewayService().add_missing_records_to_payment_instructions(payment_plan)
+            PaymentGatewayService(user_id=str(request.user.pk)).add_missing_records_to_payment_instructions(
+                payment_plan
+            )
 
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         return confirm_action(
@@ -482,7 +484,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment = Payment.objects.get(pk=pk)
-            PaymentGatewayService().sync_record(payment, str(request.user.pk))
+            PaymentGatewayService(user_id=str(request.user.pk)).sync_record(payment)
 
             return redirect(reverse("admin:payment_payment_change", args=[pk]))
         return confirm_action(

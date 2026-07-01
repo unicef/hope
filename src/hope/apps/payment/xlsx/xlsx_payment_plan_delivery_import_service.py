@@ -24,7 +24,7 @@ from hope.apps.payment.utils import (
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import FinancialServiceProviderXlsxTemplate, Payment, PaymentVerification
+from hope.models import FinancialServiceProviderXlsxTemplate, Payment, PaymentVerification, User
 
 if TYPE_CHECKING:
     import io
@@ -294,9 +294,10 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             ),
             batch_size=500,
         )
+        user = User.objects.filter(pk=user_id).first() if user_id else None
         bulk_log_payment_changes(
             [(self.old_payments[payment.pk], payment) for payment in self.payments_to_save],
-            user_id,
+            user,
         )
         self.logger.info("Update total cash in households")
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])

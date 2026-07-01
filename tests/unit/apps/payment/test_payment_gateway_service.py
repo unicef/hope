@@ -633,10 +633,10 @@ def test_sync_payment_plan_logs_payment_changes_with_user(
         ],
     ]
 
-    pg_service = PaymentGatewayService()
+    pg_service = PaymentGatewayService(user_id=str(user.pk))
     pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
 
-    pg_service.sync_payment_plan(payment_plan, str(user.pk))
+    pg_service.sync_payment_plan(payment_plan)
 
     payment_logs = LogEntry.objects.filter(object_id__in=[str(p.id) for p in payments])
     assert payment_logs.count() == 2

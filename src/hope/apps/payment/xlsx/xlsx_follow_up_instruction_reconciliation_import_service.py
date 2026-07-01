@@ -25,7 +25,7 @@ from hope.apps.payment.utils import (
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentVerification
+from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentVerification, User
 
 if TYPE_CHECKING:
     from openpyxl.cell.cell import Cell
@@ -273,9 +273,10 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
             ("delivered_quantity", "delivered_quantity_usd", "status", "delivery_date"),
             batch_size=500,
         )
+        user = User.objects.filter(pk=user_id).first() if user_id else None
         bulk_log_payment_changes(
             [(self.old_payments[payment.pk], payment) for payment in self.payments_to_save],
-            user_id,
+            user,
         )
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))

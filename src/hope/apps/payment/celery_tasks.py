@@ -726,8 +726,6 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
         pp_currency_exchange_date = payment_plan.currency_exchange_date
 
         steficon_user_id = job.config.get("user_id")
-        # Resolve once: bulk_log_payment_changes runs per batch in the loop below, so passing the
-        # pre-resolved user avoids re-fetching the same user on every flush.
         steficon_user = User.objects.filter(pk=steficon_user_id).first() if steficon_user_id else None
         updates_buffer = []
         log_pairs_buffer: list = []
@@ -1228,8 +1226,9 @@ def send_to_payment_gateway_async_task_action(job: AsyncJob) -> None:
     try:
         set_sentry_business_area_tag(payment_plan.business_area.name)
 
-        PaymentGatewayService().create_payment_instructions(payment_plan, user.email)
-        PaymentGatewayService().add_records_to_payment_instructions(payment_plan)
+        pg_service = PaymentGatewayService(user_id=job.config["user_id"])
+        pg_service.create_payment_instructions(payment_plan, user.email)
+        pg_service.add_records_to_payment_instructions(payment_plan)
 
         flow = PaymentPlanFlow(payment_plan)
         flow.background_action_status_none()

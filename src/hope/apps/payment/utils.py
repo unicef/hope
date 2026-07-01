@@ -28,9 +28,6 @@ if TYPE_CHECKING:
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.currency import Currency
 
-# Sentinel so bulk_log_payment_changes can tell "user not provided" from an explicit user=None.
-_UNSET: Any = object()
-
 # NOTE: the activity-log helpers below deliberately re-implement what
 # hope.models.log_entry.log_create() does (build a LogEntry + attach the program M2M + diff),
 # bypassing it so they can bulk-insert and skip no-op diffs without per-row queries. If log_create's
@@ -145,9 +142,7 @@ def _persist_payment_logs(logs: list[LogEntry], program_ids: list[Any]) -> None:
 
 def bulk_log_payment_changes(
     old_new_pairs: "list[tuple[Payment | None, Payment]]",
-    user_id: str | None = None,
-    *,
-    user: Any = _UNSET,
+    user: "User | None" = None,
 ) -> None:
     """Activity-log per-payment changes from in-memory old/new objects in one bulk insert.
 
@@ -155,11 +150,10 @@ def bulk_log_payment_changes(
     updates). Snapshot the old object with copy_model_object() BEFORE mutating, then pass the pairs.
     No-op diffs are skipped so unchanged rows do not create noise.
 
-    Pass a pre-resolved ``user`` to skip the per-call user lookup -- useful when this runs once per
-    batch in a loop (e.g. the steficon engine-rule task) so the same user is not fetched repeatedly.
+    ``user`` is the resolved acting user (None for system-initiated runs). Callers that only hold a
+    user_id resolve it once before calling -- loop callers (gateway/steficon) resolve once and reuse,
+    so the same user is not fetched on every flush.
     """
-    if user is _UNSET:
-        user = User.objects.filter(pk=user_id).first() if user_id else None
     content_type = ContentType.objects.get_for_model(Payment)
     logs: list[LogEntry] = []
     program_ids: list[Any] = []
@@ -184,7 +178,8 @@ def bulk_log_payment_changes(
 
 def log_payment_change(old: "Payment | None", new: Payment, user_id: str | None) -> None:
     """Activity-log a single payment change (manual edits: mark-as-failed, revert, ...)."""
-    bulk_log_payment_changes([(old, new)], user_id)
+    user = User.objects.filter(pk=user_id).first() if user_id else None
+    bulk_log_payment_changes([(old, new)], user)
 
 
 def update_payments_and_log(
