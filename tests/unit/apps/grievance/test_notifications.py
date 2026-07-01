@@ -44,6 +44,12 @@ def test_init_builds_recipients_and_emails_for_assignment_changed(
     assert notification.user_recipients == [assignee]
     assert len(notification.emails) == 1
     assert notification.emails[0].recipients == [assignee.email]
+    assert len(notification.rendered_email_notifications) == 1
+    assert notification.rendered_email_notifications[0].user == assignee
+    assert (
+        notification.rendered_email_notifications[0].service.html_template
+        == "assignment_change_notification_email.html"
+    )
     assert notification.enable_email_notification is True
 
 
@@ -54,6 +60,7 @@ def test_assigned_to_recipient_returns_empty_when_unassigned(business_area: Busi
 
     assert notification.user_recipients == []
     assert notification.emails == []
+    assert notification.rendered_email_notifications == []
 
 
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=True)
@@ -191,6 +198,24 @@ def test_add_note_body_uses_created_by_and_note(assigned_ticket: GrievanceTicket
     assert "Please review the attached documents" in html_body
 
 
+def test_rendered_email_notification_context_uses_action_specific_context(
+    assigned_ticket: GrievanceTicket, assignee: User
+) -> None:
+    author = UserFactory(first_name="Note", last_name="Author")
+    ticket_note = TicketNoteFactory(ticket=assigned_ticket, description="Please review the attached documents")
+
+    notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=author,
+        ticket_note=ticket_note,
+    )
+
+    rendered_notification = notification.rendered_email_notifications[0]
+    assert rendered_notification.context["created_by"] == "Note Author"
+    assert rendered_notification.context["ticket_note_description"] == ticket_note.description
+
+
 def test_send_back_to_in_progress_body_uses_approver(assigned_ticket: GrievanceTicket, assignee: User) -> None:
     approver = UserFactory(first_name="Ap", last_name="Prover")
 
@@ -220,20 +245,28 @@ def test_for_approval_body(assigned_ticket: GrievanceTicket, assignee: User) -> 
 def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTicket) -> None:
     notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
 
-    with patch.object(notification.emails[0], "send_email") as mock_send:
+    with (
+        patch.object(notification.emails[0], "send_email") as mock_send,
+        patch("hope.apps.grievance.notifications.publish_rendered_email_notification") as mock_publish,
+    ):
         notification.send_email_notification()
 
     mock_send.assert_called_once()
+    mock_publish.assert_called_once_with(notification.rendered_email_notifications[0])
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=False)
 def test_send_email_notification_skipped_when_config_off(assigned_ticket: GrievanceTicket) -> None:
     notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
 
-    with patch.object(notification.emails[0], "send_email") as mock_send:
+    with (
+        patch.object(notification.emails[0], "send_email") as mock_send,
+        patch("hope.apps.grievance.notifications.publish_rendered_email_notification") as mock_publish,
+    ):
         notification.send_email_notification()
 
     mock_send.assert_not_called()
+    mock_publish.assert_not_called()
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
@@ -242,10 +275,14 @@ def test_send_email_notification_skipped_when_business_area_disabled(assignee: U
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
 
-    with patch.object(notification.emails[0], "send_email") as mock_send:
+    with (
+        patch.object(notification.emails[0], "send_email") as mock_send,
+        patch("hope.apps.grievance.notifications.publish_rendered_email_notification") as mock_publish,
+    ):
         notification.send_email_notification()
 
     mock_send.assert_not_called()
+    mock_publish.assert_not_called()
 
 
 def test_prepare_notification_for_ticket_creation_assigned_and_category(
@@ -282,7 +319,11 @@ def test_prepare_notification_for_ticket_creation_no_assignee_no_matching_catego
 def test_send_all_notifications_sends_each(assigned_ticket: GrievanceTicket) -> None:
     notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
 
-    with patch.object(notification.emails[0], "send_email") as mock_send:
+    with (
+        patch.object(notification.emails[0], "send_email") as mock_send,
+        patch("hope.apps.grievance.notifications.publish_rendered_email_notification") as mock_publish,
+    ):
         GrievanceNotification.send_all_notifications([notification])
 
     mock_send.assert_called_once()
+    mock_publish.assert_called_once_with(notification.rendered_email_notifications[0])
