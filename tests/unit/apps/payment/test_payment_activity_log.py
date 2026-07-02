@@ -14,7 +14,6 @@ from hope.apps.payment.utils import (
     log_payment_change,
     log_payment_plan_approval,
     log_payment_plan_supporting_document,
-    update_payments_and_log,
 )
 from hope.models import LogEntry, Payment, PaymentPlan, Program, User
 
@@ -132,10 +131,10 @@ def test_log_payment_plan_supporting_document_create_and_delete(payment_plan: Pa
 
 
 @pytest.mark.enable_activity_log
-def test_update_payments_and_log_field_update(payments: list[Payment], user: User, program: Program) -> None:
+def test_update_and_log_field_update(payments: list[Payment], user: User, program: Program) -> None:
     queryset = Payment.objects.filter(pk__in=[p.pk for p in payments])
 
-    updated = update_payments_and_log(queryset, {"excluded": True}, str(user.pk))
+    updated = queryset.update_and_log({"excluded": True}, str(user.pk))
 
     assert updated == 2
     for payment in payments:
@@ -149,11 +148,10 @@ def test_update_payments_and_log_field_update(payments: list[Payment], user: Use
 
 
 @pytest.mark.enable_activity_log
-def test_update_payments_and_log_extra_update_not_logged(payments: list[Payment], user: User) -> None:
+def test_update_and_log_extra_update_not_logged(payments: list[Payment], user: User) -> None:
     queryset = Payment.objects.filter(pk__in=[p.pk for p in payments])
 
-    update_payments_and_log(
-        queryset,
+    queryset.update_and_log(
         {"entitlement_quantity": Decimal("50.00")},
         str(user.pk),
         extra_update={"entitlement_quantity_usd": Decimal("50.00")},
@@ -184,25 +182,23 @@ def test_bulk_log_payment_changes_query_count_is_constant(
 
 
 @pytest.mark.enable_activity_log
-def test_update_payments_and_log_query_count_is_constant(
-    payments: list[Payment], user: User, django_assert_num_queries
-) -> None:
+def test_update_and_log_query_count_is_constant(payments: list[Payment], user: User, django_assert_num_queries) -> None:
     queryset = Payment.objects.filter(pk__in=[p.pk for p in payments])
     ContentType.objects.get_for_model(Payment)  # warm content-type cache
 
     # values snapshot + update + user lookup + log insert + program m2m insert, regardless of row count
     with django_assert_num_queries(5):
-        update_payments_and_log(queryset, {"excluded": True}, str(user.pk))
+        queryset.update_and_log({"excluded": True}, str(user.pk))
 
     assert LogEntry.objects.filter(object_id__in=[p.pk for p in payments]).count() == 2
 
 
 @pytest.mark.enable_activity_log
-def test_update_payments_and_log_logs_fk_valued_change(payments: list[Payment], user: User) -> None:
+def test_update_and_log_logs_fk_valued_change(payments: list[Payment], user: User) -> None:
     target, source = payments
     queryset = Payment.objects.filter(pk=target.pk)
 
-    update_payments_and_log(queryset, {"source_payment": source}, str(user.pk))
+    queryset.update_and_log({"source_payment": source}, str(user.pk))
 
     target.refresh_from_db()
     assert target.source_payment_id == source.pk
@@ -230,13 +226,13 @@ def test_log_payment_plan_approval_without_comment(payment_plan: PaymentPlan, us
 
 
 @pytest.mark.enable_activity_log
-def test_update_payments_and_log_skips_unchanged_payment(payments: list[Payment], user: User) -> None:
+def test_update_and_log_skips_unchanged_payment(payments: list[Payment], user: User) -> None:
     already_excluded, changing = payments
     already_excluded.excluded = True
     already_excluded.save(update_fields=["excluded"])
     queryset = Payment.objects.filter(pk__in=[p.pk for p in payments])
 
-    update_payments_and_log(queryset, {"excluded": True}, str(user.pk))
+    queryset.update_and_log({"excluded": True}, str(user.pk))
 
     # already True -> field skipped -> no changes -> row produces no log; only the changed one is logged
     assert not LogEntry.objects.filter(object_id=already_excluded.pk).exists()

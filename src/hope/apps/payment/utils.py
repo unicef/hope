@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, no_type_check
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Model, Q
+from django.db.models import Q
 
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.exchange_rates import ExchangeRates
@@ -23,7 +23,6 @@ from hope.models import (
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
-    from django.db.models import QuerySet
 
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.currency import Currency
@@ -180,68 +179,6 @@ def log_payment_change(old: "Payment | None", new: Payment, user_id: str | None)
     """Activity-log a single payment change (manual edits: mark-as-failed, revert, ...)."""
     user = User.objects.filter(pk=user_id).first() if user_id else None
     bulk_log_payment_changes([(old, new)], user)
-
-
-def update_payments_and_log(
-    queryset: "QuerySet[Payment]",
-    logged_changes: dict[str, Any],
-    user_id: str | None,
-    extra_update: dict[str, Any] | None = None,
-) -> int:
-    """Apply a bulk ``.update()`` and activity-log only the mapped fields, per payment.
-
-    ``logged_changes`` are fields tracked in ACTIVITY_LOG_MAPPING (recorded in the diff);
-    ``extra_update`` are applied to the rows but not logged (e.g. *_usd, entitlement_date).
-    Old values are captured with a single ``.values()`` query, so cost is constant in query count
-    regardless of how many payments are affected. Returns the number of rows updated.
-    """
-    # Build the column list to snapshot; FK fields are compared by their *_id attname.
-    column_for_field: dict[str, str] = {}
-    new_compare: dict[str, Any] = {}
-    new_repr: dict[str, str | None] = {}
-    for field, value in logged_changes.items():
-        if isinstance(value, Model):
-            column = f"{field}_id"
-            new_compare[field] = value.pk
-            new_repr[field] = str(value)
-        else:
-            column = field
-            new_compare[field] = value
-            new_repr[field] = _value_repr(value)
-        column_for_field[field] = column
-
-    snapshot_columns = ["id", "unicef_id", "business_area_id", "program_id", *column_for_field.values()]
-    rows = list(queryset.values(*snapshot_columns))
-
-    updated = queryset.update(**{**logged_changes, **(extra_update or {})})
-
-    user = User.objects.filter(pk=user_id).first() if user_id else None
-    content_type = ContentType.objects.get_for_model(Payment)
-    logs: list[LogEntry] = []
-    program_ids: list[Any] = []
-    for row in rows:
-        changes: dict[str, Any] = {}
-        for field, column in column_for_field.items():
-            old_value = row[column]
-            if old_value == new_compare[field]:
-                continue
-            changes[field] = {"from": _value_repr(old_value), "to": new_repr[field]}
-        if not changes:
-            continue
-        logs.append(
-            LogEntry(
-                content_type=content_type,
-                object_id=row["id"],
-                action=LogEntry.UPDATE,
-                user=user,
-                business_area_id=row["business_area_id"],
-                object_repr=row["unicef_id"] or str(row["id"]),
-                changes=changes,
-            )
-        )
-        program_ids.append(row["program_id"])
-    _persist_payment_logs(logs, program_ids)
-    return updated
 
 
 def get_number_of_samples(

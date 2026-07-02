@@ -31,7 +31,6 @@ from hope.apps.payment.utils import (
     get_quantity_in_usd,
     log_payment_plan_change,
     normalize_score,
-    update_payments_and_log,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
@@ -419,8 +418,7 @@ def payment_plan_set_entitlement_flat_amount_async_task_action(job: AsyncRetryJo
                 exchange_rate=(Decimal(exchange_rate) if exchange_rate is not None else 1),
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
-            update_payments_and_log(
-                payment_plan.eligible_payments,
+            payment_plan.eligible_payments.update_and_log(
                 {"entitlement_quantity": flat_amount_value},
                 job.config.get("user_id"),
                 extra_update={
@@ -1064,8 +1062,8 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
 
         payments_for_exclude = payment_plan.eligible_payments.filter(**{f"{filter_key}__in": excluding_hh_or_ind_ids})
 
-        update_payments_and_log(payments_for_exclude, {"excluded": True}, job.config.get("user_id"))
-        update_payments_and_log(payments_for_undo_exclude, {"excluded": False}, job.config.get("user_id"))
+        payments_for_exclude.update_and_log({"excluded": True}, job.config.get("user_id"))
+        payments_for_undo_exclude.update_and_log({"excluded": False}, job.config.get("user_id"))
 
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()

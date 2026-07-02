@@ -44,7 +44,7 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hope.apps.payment.utils import get_link, log_payment_plan_approval, update_payments_and_log
+from hope.apps.payment.utils import get_link, log_payment_plan_approval
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.models import (
@@ -268,8 +268,7 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise ValidationError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        update_payments_and_log(
-            self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True),
+        self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).update_and_log(
             {"conflicted": True},
             str(self.user.pk) if self.user else None,
         )
@@ -283,8 +282,7 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self) -> PaymentPlan:
-        update_payments_and_log(
-            self.payment_plan.payment_items.all(),
+        self.payment_plan.payment_items.all().update_and_log(
             {"conflicted": False},
             str(self.user.pk) if self.user else None,
         )
