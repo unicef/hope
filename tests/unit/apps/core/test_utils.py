@@ -51,6 +51,7 @@ from hope.apps.core.utils import (
     send_email_notification_on_commit,
     serialize_flex_attributes,
     sort_by_attr,
+    to_camel_case,
     to_choice_object,
     to_dict,
     to_snake_case,
@@ -402,6 +403,21 @@ def test_build_flex_arg_dict_from_list_if_exists_keeps_only_present_keys():
 )
 def test_to_snake_case(camel, expected):
     assert to_snake_case(camel) == expected
+
+
+@pytest.mark.parametrize(
+    ("snake", "expected"),
+    [
+        ("", ""),
+        ("camel", "camel"),
+        ("camel_case", "camelCase"),
+        ("camel_case_word", "camelCaseWord"),
+        ("alreadyCamel", "alreadyCamel"),
+        ("single", "single"),
+    ],
+)
+def test_to_camel_case(snake, expected):
+    assert to_camel_case(snake) == expected
 
 
 def test_check_concurrency_version_returns_for_none():

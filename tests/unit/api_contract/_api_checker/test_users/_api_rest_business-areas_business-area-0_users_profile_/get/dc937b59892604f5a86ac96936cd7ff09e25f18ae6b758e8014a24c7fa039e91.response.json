@@ -367,6 +367,7 @@
             "PM_PROGRAMME_CYCLE_VIEW_LIST",
             "PM_REACTIVATE_ABORT",
             "PM_SEND_FOR_APPROVAL",
+            "PM_SEND_TO_VISION",
             "PM_SEND_TO_PAYMENT_GATEWAY",
             "PM_SEND_XLSX_PASSWORD",
             "PM_SPLIT",

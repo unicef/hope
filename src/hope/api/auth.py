@@ -33,7 +33,7 @@ class HOPEAuthentication(TokenAuthentication):
         if not token.user.is_active:
             raise exceptions.AuthenticationFailed(_("User inactive or deleted."))
 
-        return (token.user, token)
+        return token.user, token
 
 
 class HOPEPermission(IsAuthenticated):

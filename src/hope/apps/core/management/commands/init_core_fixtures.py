@@ -29,3 +29,9 @@ def initialize_core_fixtures() -> None:
         value="True",
         required=False,
     )
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+        required=False,
+    )

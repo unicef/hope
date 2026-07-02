@@ -333,17 +333,13 @@ class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
 
 
 class PaymentGatewayAPI(BaseAPI):
-    API_KEY_ENV_NAME = "PAYMENT_GATEWAY_API_KEY"
-    API_URL_ENV_NAME = "PAYMENT_GATEWAY_API_URL"
+    API_KEY_SETTING_NAME = "PAYMENT_GATEWAY_API_KEY"
+    API_URL_SETTING_NAME = "PAYMENT_GATEWAY_API_URL"
 
     class PaymentGatewayAPIError(Exception):
         pass
 
-    class PaymentGatewayMissingAPICredentialsError(Exception):
-        pass
-
-    API_EXCEPTION_CLASS = PaymentGatewayAPIError  # type: ignore
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsError  # type: ignore
+    API_EXCEPTION_CLASS = PaymentGatewayAPIError
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"

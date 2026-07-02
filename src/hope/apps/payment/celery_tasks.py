@@ -1130,7 +1130,7 @@ def periodic_sync_payment_gateway_fsp_async_task_action(job: AsyncRetryJob | Non
 
     try:
         PaymentGatewayService().sync_fsps()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
+    except PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS:
         return
 
 
@@ -1150,7 +1150,7 @@ def periodic_sync_payment_gateway_account_types_async_task_action(job: AsyncRetr
 
     try:
         PaymentGatewayService().sync_account_types()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
+    except PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS:
         return
 
 
@@ -1213,7 +1213,7 @@ def periodic_sync_payment_gateway_records_async_task_action(job: AsyncRetryJob |
 
     try:
         PaymentGatewayService().sync_records()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
+    except PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS:
         return
 
 
@@ -1272,7 +1272,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms_async_task_action(job: Asy
 
     try:
         PaymentGatewayService().sync_delivery_mechanisms()
-    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError:
+    except PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS:
         return
 
 

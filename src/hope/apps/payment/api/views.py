@@ -13,6 +13,7 @@ from django.utils import timezone
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from flags.state import flag_enabled
 from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -145,6 +146,7 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
+from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     BusinessArea,
@@ -809,6 +811,7 @@ class PaymentPlanViewSet(
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
+        "send_to_vision": [Permissions.PM_SEND_TO_VISION],
         "custom_exchange_rate": [
             Permissions.PM_CUSTOM_EXCHANGE_RATE,
         ],
@@ -1402,6 +1405,26 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=True, methods=["post"], url_path="send-to-vision")
+    def send_to_vision(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if not bool(flag_enabled("VISION_INTEGRATION_ACTIVE", request=request)):
+            raise PermissionDenied("Send to Vision feature is not enabled")
+
+        payment_plan = self.get_object()
+        if not payment_plan.can_send_to_vision:
+            raise PermissionDenied("Payment plan cannot be sent to Vision")
+
+        try:
+            response = VisionAPI().send_payment_plan(payment_plan)
+            return Response(
+                {"message": f"Payment plan sent to Vision successfully: {response.get('messageId', '')}"},
+                status=status.HTTP_200_OK,
+            )
+        except VisionAPIError as e:
+            raise ValidationError(f"Failed to send to Vision: {e}")
+        except VisionAPIMissingCredentialsError as e:
+            raise ValidationError(f"Vision API not configured: {e}")
 
     @action(detail=True, methods=["post"])
     @transaction.atomic

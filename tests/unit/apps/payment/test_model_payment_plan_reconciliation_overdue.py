@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.utils.timezone import now
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
@@ -17,6 +18,46 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def program_cycle():
     return ProgramCycleFactory()
+
+
+@pytest.fixture
+def enable_vision_flag():
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
+
+
+def test_can_send_to_vision_returns_true_when_accepted(program_cycle, enable_vision_flag) -> None:
+    program = ProgramFactory()
+    cycle = program.cycles.first()
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    assert payment_plan.can_send_to_vision is True
+
+
+def test_can_send_to_vision_returns_false_when_not_accepted(program_cycle) -> None:
+    program = ProgramFactory()
+    cycle = program.cycles.first()
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        status=PaymentPlan.Status.DRAFT,
+    )
+    assert payment_plan.can_send_to_vision is False
+
+
+def test_can_send_to_vision_returns_false_when_flag_disabled(program_cycle) -> None:
+    program = ProgramFactory()
+    cycle = program.cycles.first()
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    assert payment_plan.can_send_to_vision is False
 
 
 def test_has_payments_reconciliation_overdue_raises_type_error_when_dispersion_start_date_is_none(program_cycle):

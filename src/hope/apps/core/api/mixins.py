@@ -1,7 +1,7 @@
 from functools import cached_property
-import os
 from typing import TYPE_CHECKING, Any, Mapping
 
+from django.conf import settings
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
@@ -23,8 +23,10 @@ if TYPE_CHECKING:
 
 
 class BaseAPI:
-    API_KEY_ENV_NAME = ""
-    API_URL_ENV_NAME = ""
+    API_KEY_SETTING_NAME = ""
+    API_URL_SETTING_NAME = ""
+    API_REQUIRED_SETTING_NAMES: tuple[str, ...] = ()
+    API_AUTHENTICATION_REQUIRED = True
 
     class APIError(Exception):
         pass
@@ -32,15 +34,35 @@ class BaseAPI:
     class APIMissingCredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = APIError
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = APIMissingCredentialsError
+    API_EXCEPTION_CLASS: type[Exception] = APIError
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS: type[Exception] = APIMissingCredentialsError
+
+    def get_api_url(self) -> str:
+        return getattr(settings, self.API_URL_SETTING_NAME, "") if self.API_URL_SETTING_NAME else ""
+
+    def get_api_key(self) -> str | None:
+        if self.API_KEY_SETTING_NAME:
+            return getattr(settings, self.API_KEY_SETTING_NAME, None)
+        return None
+
+    def validate_credentials(self) -> None:
+        missing_setting_names = [
+            setting_name
+            for setting_name in self.API_REQUIRED_SETTING_NAMES
+            if not getattr(settings, setting_name, None)
+        ]
+        if missing_setting_names:
+            raise self.API_MISSING_CREDENTIALS_EXCEPTION_CLASS(
+                f"Missing {self.__class__.__name__} settings: {', '.join(missing_setting_names)}"
+            )
 
     def __init__(self) -> None:
-        self.api_key = os.getenv(self.API_KEY_ENV_NAME)
-        self.api_url = os.getenv(self.API_URL_ENV_NAME)
+        self.api_url = self.get_api_url()
+        self.api_key = self.get_api_key()
 
-        if not self.api_key or not self.api_url:
+        if not self.api_url or (self.API_KEY_SETTING_NAME and not self.api_key):
             raise self.API_MISSING_CREDENTIALS_EXCEPTION_CLASS(f"Missing {self.__class__.__name__} Key/URL")
+        self.validate_credentials()
 
         self._client = session()
         retries = Retry(
@@ -50,7 +72,8 @@ class BaseAPI:
             allowed_methods=None,
         )
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
-        self._client.headers.update({"Authorization": f"Token {self.api_key}"})
+        if self.API_AUTHENTICATION_REQUIRED:
+            self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
     def get_url(self, endpoint: str) -> str:
         return f"{self.api_url}{endpoint}"
