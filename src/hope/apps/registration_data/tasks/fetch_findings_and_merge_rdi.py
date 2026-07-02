@@ -24,7 +24,7 @@ class FetchFindingsAndMergeRdi:
         RegistrationDataImport.IMPORT_ERROR,
     ]
 
-    def execute(self, registration_data_import_id: str) -> None:
+    def execute(self, registration_data_import_id: str) -> bool:
         # Lightweight read (no lock) — just enough to know whether biometric dedup is on and
         # to get the country_workspace_id, so findings can be fetched before the transaction.
         rdi = (
@@ -33,12 +33,12 @@ class FetchFindingsAndMergeRdi:
             .first()
         )
         if rdi is None:
-            return
+            return False
         if rdi.country_workspace_id is None:
             logger.warning(
                 f"RDI {registration_data_import_id} does not have country_workspace_id and can't be processed."
             )
-            return
+            return False
 
         # Fetch findings from the Deduplication Engine *before* the transaction: it is a slow
         # external call with no DB side effect, and a failure here must not hold a transaction
@@ -64,7 +64,7 @@ class FetchFindingsAndMergeRdi:
                 )
                 if rdi is None:
                     # Picked up by another worker between the read above and this lock.
-                    return
+                    return False
 
                 if rdi.status in (RegistrationDataImport.IMPORT_ERROR, RegistrationDataImport.MERGE_ERROR):
                     self._reset_rdi_state_for_cw_retry(rdi)
@@ -91,6 +91,7 @@ class FetchFindingsAndMergeRdi:
         except Exception:
             self._remove_es_docs(rdi)
             raise
+        return True
 
     def _reset_rdi_state_for_cw_retry(self, rdi: RegistrationDataImport) -> None:
         rdi.error_message = ""
