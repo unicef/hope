@@ -403,9 +403,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         PendingAccount.objects.bulk_create(accounts)
 
     def _get_wallet_account_type(self) -> Any:
-        delivery_mechanism = DeliveryMechanism.objects.filter(
-            code=self.DIGITAL_WALLET_DELIVERY_MECHANISM_CODE
-        ).first()
+        delivery_mechanism = DeliveryMechanism.objects.filter(code=self.DIGITAL_WALLET_DELIVERY_MECHANISM_CODE).first()
         if not delivery_mechanism or not delivery_mechanism.account_type:
             raise ValidationError(
                 f"Delivery mechanism '{self.DIGITAL_WALLET_DELIVERY_MECHANISM_CODE}' has no account type "
