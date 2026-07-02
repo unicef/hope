@@ -16,7 +16,7 @@ from hope.api.endpoints.base import BusinessAreaIngestCWOnlyMixin, HOPEAPIBusine
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
-from hope.apps.registration_data.celery_tasks import process_country_workspace_rdi_task
+from hope.apps.registration_data.celery_tasks import rdi_dispatcher_task
 from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
 
 if TYPE_CHECKING:
@@ -219,7 +219,9 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
         ).count()
         self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
         self.selected_rdi.save()
-        process_country_workspace_rdi_task(self.selected_rdi)
+        # Don't merge this RDI directly — hand off to the dispatcher, which merges the
+        # oldest RDI still waiting for this program (arrival order), not necessarily this one.
+        rdi_dispatcher_task(self.selected_rdi.program)
 
         return Response(
             [

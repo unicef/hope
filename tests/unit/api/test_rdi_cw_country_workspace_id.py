@@ -136,7 +136,7 @@ def rdi_loading_non_cw(business_area: BusinessArea, program: Program) -> Registr
     )
 
 
-def test_complete_cw_rdi_enqueues_arrival_hook_on_commit(
+def test_complete_cw_rdi_enqueues_dispatcher_on_commit(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
     rdi_loading_cw: RegistrationDataImport,
@@ -144,11 +144,13 @@ def test_complete_cw_rdi_enqueues_arrival_hook_on_commit(
 ) -> None:
     url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading_cw.id)])
 
-    with patch("hope.api.endpoints.rdi.base.process_country_workspace_rdi_task") as mock_enqueue:
+    # Completion moves the RDI to MERGE_SCHEDULED and hands off to the dispatcher, which
+    # merges the oldest waiting RDI for the program — not necessarily this one.
+    with patch("hope.api.endpoints.rdi.base.rdi_dispatcher_task") as mock_dispatch:
         with django_capture_on_commit_callbacks(execute=True):
             response = token_api_client.post(url, {}, format="json")
 
     assert response.status_code == status.HTTP_200_OK, str(response.json())
     rdi_loading_cw.refresh_from_db()
     assert rdi_loading_cw.status == RegistrationDataImport.MERGE_SCHEDULED
-    mock_enqueue.assert_called_once_with(rdi_loading_cw)
+    mock_dispatch.assert_called_once_with(rdi_loading_cw.program)

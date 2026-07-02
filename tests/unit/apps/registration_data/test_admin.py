@@ -228,7 +228,7 @@ def test_rerun_merge_rdi_schedules_async_job(
     mock_merge_registration_data_import_task.assert_called_once_with(rdi)
 
 
-@patch("hope.apps.registration_data.celery_tasks.process_country_workspace_rdi_task")
+@patch("hope.apps.registration_data.celery_tasks.fetch_findings_and_merge_rdi")
 @patch("hope.admin.registration_data.merge_registration_data_import_async_task")
 def test_rerun_cw_rdi_merge_error_routes_to_worker(
     mock_merge: Mock,
@@ -252,7 +252,7 @@ def test_rerun_cw_rdi_merge_error_routes_to_worker(
     mock_merge.assert_not_called()
 
 
-@patch("hope.apps.registration_data.celery_tasks.process_country_workspace_rdi_task")
+@patch("hope.apps.registration_data.celery_tasks.fetch_findings_and_merge_rdi")
 @patch("hope.admin.registration_data.merge_registration_data_import_async_task")
 def test_rerun_cw_rdi_import_error_routes_to_worker(
     mock_merge: Mock,
@@ -276,7 +276,7 @@ def test_rerun_cw_rdi_import_error_routes_to_worker(
     mock_merge.assert_not_called()
 
 
-@patch("hope.apps.registration_data.celery_tasks.process_country_workspace_rdi_task")
+@patch("hope.apps.registration_data.celery_tasks.fetch_findings_and_merge_rdi")
 @patch("hope.admin.registration_data.merge_registration_data_import_async_task")
 def test_rerun_cw_rdi_merge_scheduled_routes_to_worker(
     mock_merge: Mock,

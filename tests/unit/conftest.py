@@ -225,7 +225,7 @@ def create_program_es_index():
 
 
 def _wait_for_es(connection_alias: str) -> None:
-    max_tries = 12
+    max_tries = 2
     sleep_time = 5
 
     for _ in range(max_tries):
