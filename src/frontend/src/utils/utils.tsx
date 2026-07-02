@@ -1,4 +1,5 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Box, Typography } from '@mui/material';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
 import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
@@ -11,6 +12,7 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
+import { ReactElement } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
