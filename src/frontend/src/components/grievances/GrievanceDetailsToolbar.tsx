@@ -22,7 +22,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgramContext } from '../../programContext';
 import { MiśTheme } from '../../theme';
-import { getGrievanceEditPath } from './utils/createGrievanceUtils';
+import {
+  getGrievanceDetailsPath,
+  getGrievanceEditPath,
+} from './utils/createGrievanceUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -275,8 +278,24 @@ export const GrievanceDetailsToolbar = ({
       }
       confirm({
         title: t('Close linked ticket as unique'),
-        content: t(
-          `The individuals on linked ticket ${linkedTicket.unicefId} no longer share a document number. Do you want to mark them as unique and close that ticket too?`,
+        content: (
+          <>
+            {t('The individuals on linked ticket')}{' '}
+            <a
+              href={getGrievanceDetailsPath(
+                linkedTicket.id,
+                linkedTicket.category,
+                baseUrl,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {linkedTicket.unicefId}
+            </a>{' '}
+            {t(
+              'no longer share a document number. Do you want to mark them as unique and close that ticket too?',
+            )}
+          </>
         ),
         continueText: t('mark as unique and close'),
       }).then(async () => {
