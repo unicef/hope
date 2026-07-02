@@ -27,7 +27,6 @@ class Permissions(Enum):
     RDI_RERUN_DEDUPE = auto()
     RDI_MERGE_IMPORT = auto()
     RDI_REFUSE_IMPORT = auto()
-    RDI_WEBHOOK_DEDUPLICATION = auto()
 
     # Generic Import
     GENERIC_IMPORT_DATA = auto()

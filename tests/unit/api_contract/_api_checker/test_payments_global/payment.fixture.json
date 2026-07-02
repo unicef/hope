@@ -2,28 +2,29 @@
     "payment": {
         "master": {
             "model": "payment.payment",
-            "pk": "77c13689-b6a1-4164-b85c-56123649ff7f",
+            "pk": "2cb7b73a-22c3-4939-8e1c-7b89b8a928c0",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "unicef_id": "RCPT-BA0000-25-0.000.001",
-                "signature_hash": "c1e9613b7b457da8710be560e796c35ceb0312a9",
+                "signature_hash": "c803c0b3c9af5ac9631e486ba0adefbc11f10e3c",
                 "internal_data": {},
-                "parent": "1dcee178-f68f-4f17-af6e-f3689e807688",
+                "parent": "a9dc00a2-4848-4184-b2b2-1ba2d2ce24fa",
                 "parent_split": null,
-                "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
-                "program": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
-                "household": "38fd5c3d-828c-4d4f-97fa-fd0a53eca856",
+                "business_area": "5a74044c-3422-4c9d-a971-a1e96c47028f",
+                "program": "3c56b61c-813d-49a5-b2e2-6a6d70510558",
+                "household": "0869b46c-eee9-4f47-b7e9-886b1c1081cf",
                 "head_of_household": null,
                 "delivery_type": null,
                 "financial_service_provider": null,
-                "collector": "dbd8a509-1e52-4e7c-ac0f-29ac8e8ccfef",
+                "collector": "a7bd6a09-70d3-43e4-9a5d-7f075be77aa4",
                 "collector_type": "PRIMARY",
                 "source_payment": null,
+                "is_follow_up": false,
                 "status": "Pending",
                 "status_date": "2025-01-01T00:00:00Z",
-                "currency": 1,
+                "currency": 165,
                 "entitlement_quantity": null,
                 "entitlement_quantity_usd": null,
                 "entitlement_date": null,
@@ -50,17 +51,8 @@
         },
         "deps": [
             {
-                "model": "core.currency",
-                "pk": 1,
-                "fields": {
-                    "code": "PLN",
-                    "name": "Polish Zloty",
-                    "is_crypto": false
-                }
-            },
-            {
                 "model": "payment.paymentplan",
-                "pk": "1dcee178-f68f-4f17-af6e-f3689e807688",
+                "pk": "a9dc00a2-4848-4184-b2b2-1ba2d2ce24fa",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
@@ -68,8 +60,9 @@
                     "version": 1735688653315201,
                     "unicef_id": "PP-BA0000-25-00000001",
                     "internal_data": {},
-                    "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
-                    "program_cycle": "4066a3f8-2941-4541-afbb-cdc206f55583",
+                    "business_area": "5a74044c-3422-4c9d-a971-a1e96c47028f",
+                    "program_cycle": "902d6b4d-fa14-498a-8d55-456a940f2169",
+                    "payment_plan_group": "de151cb0-14b1-4774-a3d8-5e2d0c805f07",
                     "delivery_mechanism": null,
                     "financial_service_provider": null,
                     "imported_file": null,
@@ -79,8 +72,11 @@
                     "reconciliation_import_file": null,
                     "steficon_rule": null,
                     "steficon_rule_targeting": null,
-                    "created_by": "048f0b0c-fd0a-4989-85a5-117b081d27fc",
+                    "created_by": "9b4e76f0-34d1-4350-ab49-57bd446f3679",
+                    "closed_by": null,
+                    "closure_comment": null,
                     "source_payment_plan": null,
+                    "follow_up_instruction": null,
                     "storage_file": null,
                     "name": null,
                     "start_date": null,
@@ -100,6 +96,7 @@
                     "built_at": null,
                     "exchange_rate": null,
                     "custom_exchange_rate": false,
+                    "use_payment_gateway": false,
                     "custom_exchange_rate_set_by": null,
                     "female_children_count": 0,
                     "male_children_count": 0,
@@ -118,29 +115,21 @@
                     "total_undelivered_quantity_usd": null,
                     "steficon_targeting_applied_date": null,
                     "steficon_applied_date": null,
-                    "plan_type": "STANDARD",
+                    "plan_type": "REGULAR",
+                    "export_tag": null,
                     "exclude_household_error": null,
                     "status_date": "2025-01-01T00:00:00Z",
                     "is_cash_assist": false,
                     "flag_exclude_if_active_adjudication_ticket": false,
                     "flag_exclude_if_on_sanction_list": false,
-                    "payment_plan_group": "4ed70e02-b683-4469-bd6d-c4e625d119e0"
-                }
-            },
-            {
-                "model": "payment.paymentplangroup",
-                "pk": "4ed70e02-b683-4469-bd6d-c4e625d119e0",
-                "fields": {
-                    "created_at": "2025-01-01T00:00:00Z",
-                    "updated_at": "2025-01-01T00:00:00Z",
-                    "unicef_id": "PPG-0001",
-                    "cycle": "4066a3f8-2941-4541-afbb-cdc206f55583",
-                    "name": "Default Group"
+                    "payment_plan_purposes": [
+                        "82c82fc3-a2a7-41d1-abc4-28d03069cb1e"
+                    ]
                 }
             },
             {
                 "model": "core.businessarea",
-                "pk": "9e49425f-c129-4bfc-aaaf-55797ef96469",
+                "pk": "5a74044c-3422-4c9d-a971-a1e96c47028f",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -166,6 +155,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -181,14 +171,14 @@
             },
             {
                 "model": "program.programcycle",
-                "pk": "4066a3f8-2941-4541-afbb-cdc206f55583",
+                "pk": "902d6b4d-fa14-498a-8d55-456a940f2169",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "version": 1735688653315200,
                     "unicef_id": "PC-BA0000-25-000001",
                     "title": "Programme Cycle 0",
-                    "program": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
+                    "program": "3c56b61c-813d-49a5-b2e2-6a6d70510558",
                     "status": "ACTIVE",
                     "start_date": "2025-01-01",
                     "end_date": null,
@@ -197,18 +187,18 @@
             },
             {
                 "model": "program.program",
-                "pk": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
+                "pk": "3c56b61c-813d-49a5-b2e2-6a6d70510558",
                 "fields": {
                     "is_removed": false,
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
-                    "version": 1735688653315201,
-                    "data_collecting_type": 444,
-                    "beneficiary_group": "cac47b42-adec-48f8-b949-73ba321953ec",
-                    "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
+                    "version": 1735688653315202,
+                    "data_collecting_type": 3,
+                    "beneficiary_group": "52e469af-ce4b-4f22-ae2d-34fd390efe8f",
+                    "business_area": "5a74044c-3422-4c9d-a971-a1e96c47028f",
                     "name": "Program 0",
-                    "code": "2839",
+                    "code": "nf4q",
                     "status": "ACTIVE",
                     "description": "",
                     "start_date": "2025-01-01",
@@ -230,12 +220,15 @@
                     "reconciliation_window_in_days": 0,
                     "send_reconciliation_window_expiry_notifications": false,
                     "admin_areas": [],
-                    "sanction_lists": []
+                    "sanction_lists": [],
+                    "payment_plan_purposes": [
+                        "82c82fc3-a2a7-41d1-abc4-28d03069cb1e"
+                    ]
                 }
             },
             {
                 "model": "core.datacollectingtype",
-                "pk": 444,
+                "pk": 3,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -250,14 +243,14 @@
                     "recalculate_composition": false,
                     "weight": 0,
                     "compatible_types": [
-                        444
+                        3
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "cac47b42-adec-48f8-b949-73ba321953ec",
+                "pk": "52e469af-ce4b-4f22-ae2d-34fd390efe8f",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -270,8 +263,33 @@
                 }
             },
             {
+                "model": "payment.paymentplanpurpose",
+                "pk": "82c82fc3-a2a7-41d1-abc4-28d03069cb1e",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPP-21",
+                    "name": "Purpose 0",
+                    "description": "",
+                    "limit_to": []
+                }
+            },
+            {
+                "model": "payment.paymentplangroup",
+                "pk": "de151cb0-14b1-4774-a3d8-5e2d0c805f07",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPG-15",
+                    "cycle": "902d6b4d-fa14-498a-8d55-456a940f2169",
+                    "name": "Default Group",
+                    "delivery_import_file": null,
+                    "background_action_status": null
+                }
+            },
+            {
                 "model": "account.user",
-                "pk": "048f0b0c-fd0a-4989-85a5-117b081d27fc",
+                "pk": "9b4e76f0-34d1-4350-ab49-57bd446f3679",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -285,7 +303,7 @@
                     "azure_id": null,
                     "display_name": "user_0",
                     "status": "INVITED",
-                    "partner": 1320,
+                    "partner": 8,
                     "email": "user_0@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -296,7 +314,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 1320,
+                "pk": 8,
                 "fields": {
                     "name": "Partner 0",
                     "parent": null,
@@ -310,7 +328,7 @@
             },
             {
                 "model": "household.household",
-                "pk": "38fd5c3d-828c-4d4f-97fa-fd0a53eca856",
+                "pk": "0869b46c-eee9-4f47-b7e9-886b1c1081cf",
                 "fields": {
                     "rdi_merge_status": "MERGED",
                     "is_removed": false,
@@ -319,11 +337,11 @@
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
                     "version": 1735688653315202,
-                    "unicef_id": "HH-25-0000.0684",
+                    "unicef_id": "HH-25-0000.0008",
                     "internal_data": {},
-                    "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
-                    "program": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
-                    "registration_data_import": "2ae1b402-c5cf-458d-9756-69ed627c2346",
+                    "business_area": "5a74044c-3422-4c9d-a971-a1e96c47028f",
+                    "program": "3c56b61c-813d-49a5-b2e2-6a6d70510558",
+                    "registration_data_import": "82287034-2c43-4671-90cf-eee63b7fb020",
                     "household_collection": null,
                     "storage_obj": null,
                     "copied_from": null,
@@ -333,7 +351,7 @@
                     "admin2": null,
                     "admin3": null,
                     "admin4": null,
-                    "head_of_household": "a7712b4b-d96f-4d69-8b9c-5536abf5fdc6",
+                    "head_of_household": "779cf9e2-30c1-4855-86af-61076dd3e52d",
                     "facility": null,
                     "consent_sign": "",
                     "consent": null,
@@ -410,18 +428,17 @@
             },
             {
                 "model": "registration_data.registrationdataimport",
-                "pk": "2ae1b402-c5cf-458d-9756-69ed627c2346",
+                "pk": "82287034-2c43-4671-90cf-eee63b7fb020",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
                     "version": 1735688653315200,
                     "name": "RDI 0",
                     "status": "MERGED",
-                    "deduplication_engine_status": null,
-                    "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
-                    "program": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
+                    "business_area": "5a74044c-3422-4c9d-a971-a1e96c47028f",
+                    "program": "3c56b61c-813d-49a5-b2e2-6a6d70510558",
                     "import_date": "2025-01-01T00:00:00Z",
-                    "imported_by": "e973ad7d-4cb0-42d9-9e1b-46547cd3f543",
+                    "imported_by": "6cdb2eff-9612-44ac-83f0-a69a8c6dcaed",
                     "data_source": "XLS",
                     "import_data": null,
                     "import_from_ids": null,
@@ -442,12 +459,13 @@
                     "golden_record_possible_duplicates": 0,
                     "golden_record_unique": 0,
                     "dedup_engine_batch_duplicates": 0,
-                    "dedup_engine_golden_record_duplicates": 0
+                    "dedup_engine_golden_record_duplicates": 0,
+                    "country_workspace_id": null
                 }
             },
             {
                 "model": "account.user",
-                "pk": "e973ad7d-4cb0-42d9-9e1b-46547cd3f543",
+                "pk": "6cdb2eff-9612-44ac-83f0-a69a8c6dcaed",
                 "fields": {
                     "password": "",
                     "last_login": null,
@@ -461,7 +479,7 @@
                     "azure_id": null,
                     "display_name": "user_1",
                     "status": "INVITED",
-                    "partner": 1322,
+                    "partner": 10,
                     "email": "user_1@example.com",
                     "custom_fields": {},
                     "job_title": "",
@@ -472,7 +490,7 @@
             },
             {
                 "model": "account.partner",
-                "pk": 1322,
+                "pk": 10,
                 "fields": {
                     "name": "Partner 1",
                     "parent": null,
@@ -486,7 +504,7 @@
             },
             {
                 "model": "household.individual",
-                "pk": "a7712b4b-d96f-4d69-8b9c-5536abf5fdc6",
+                "pk": "779cf9e2-30c1-4855-86af-61076dd3e52d",
                 "fields": {
                     "rdi_merge_status": "MERGED",
                     "is_removed": false,
@@ -495,12 +513,12 @@
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
                     "version": 1735688653315200,
-                    "unicef_id": "IND-25-0000.1305",
+                    "unicef_id": "IND-25-0000.0011",
                     "internal_data": {},
-                    "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
-                    "program": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
-                    "registration_data_import": "2ae1b402-c5cf-458d-9756-69ed627c2346",
-                    "household": "38fd5c3d-828c-4d4f-97fa-fd0a53eca856",
+                    "business_area": "5a74044c-3422-4c9d-a971-a1e96c47028f",
+                    "program": "3c56b61c-813d-49a5-b2e2-6a6d70510558",
+                    "registration_data_import": "82287034-2c43-4671-90cf-eee63b7fb020",
+                    "household": "0869b46c-eee9-4f47-b7e9-886b1c1081cf",
                     "individual_collection": null,
                     "copied_from": null,
                     "individual_id": "",
@@ -561,6 +579,7 @@
                     "sanction_list_confirmed_match": false,
                     "detail_id": null,
                     "originating_id": null,
+                    "country_workspace_id": null,
                     "program_registration_id": null,
                     "age_at_registration": null,
                     "origin_unicef_id": null,
@@ -572,7 +591,7 @@
             },
             {
                 "model": "household.individual",
-                "pk": "dbd8a509-1e52-4e7c-ac0f-29ac8e8ccfef",
+                "pk": "a7bd6a09-70d3-43e4-9a5d-7f075be77aa4",
                 "fields": {
                     "rdi_merge_status": "MERGED",
                     "is_removed": false,
@@ -581,12 +600,12 @@
                     "updated_at": "2025-01-01T00:00:00Z",
                     "last_sync_at": null,
                     "version": 1735688653315200,
-                    "unicef_id": "IND-25-0000.1306",
+                    "unicef_id": "IND-25-0000.0012",
                     "internal_data": {},
-                    "business_area": "9e49425f-c129-4bfc-aaaf-55797ef96469",
-                    "program": "0148b962-6a7c-4aad-b4c0-6ccc2faa8277",
-                    "registration_data_import": "2ae1b402-c5cf-458d-9756-69ed627c2346",
-                    "household": "38fd5c3d-828c-4d4f-97fa-fd0a53eca856",
+                    "business_area": "5a74044c-3422-4c9d-a971-a1e96c47028f",
+                    "program": "3c56b61c-813d-49a5-b2e2-6a6d70510558",
+                    "registration_data_import": "82287034-2c43-4671-90cf-eee63b7fb020",
+                    "household": "0869b46c-eee9-4f47-b7e9-886b1c1081cf",
                     "individual_collection": null,
                     "copied_from": null,
                     "individual_id": "",
@@ -647,6 +666,7 @@
                     "sanction_list_confirmed_match": false,
                     "detail_id": null,
                     "originating_id": null,
+                    "country_workspace_id": null,
                     "program_registration_id": null,
                     "age_at_registration": null,
                     "origin_unicef_id": null,
@@ -654,6 +674,18 @@
                     "migrated_at": null,
                     "identification_key": null,
                     "vector_column": "'1':3 'none':1 'person':2"
+                }
+            },
+            {
+                "model": "core.currency",
+                "pk": 165,
+                "fields": {
+                    "code": "PLN",
+                    "name": "Polish Zloty",
+                    "is_crypto": false,
+                    "vision_code": "PLN",
+                    "active": true,
+                    "number_of_decimals": 2
                 }
             }
         ]

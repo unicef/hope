@@ -7,8 +7,8 @@ import factory
 from factory.django import DjangoModelFactory
 
 from hope.models import (
+    BiometricDedupeSimilarityPair,
     BusinessArea,
-    DeduplicationEngineSimilarityPair,
     ImportData,
     KoboImportData,
     RegistrationDataImport,
@@ -56,9 +56,9 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
 
 
-class DeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
+class BiometricDeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
     class Meta:
-        model = DeduplicationEngineSimilarityPair
+        model = BiometricDedupeSimilarityPair
 
     program = factory.SubFactory(ProgramFactory)
     individual1 = factory.SubFactory(
@@ -70,10 +70,10 @@ class DeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..program"),
     )
     similarity_score = Decimal("55.55")
-    status_code = DeduplicationEngineSimilarityPair.StatusCode.STATUS_200
+    status_code = BiometricDedupeSimilarityPair.StatusCode.STATUS_200
 
     @classmethod
-    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> DeduplicationEngineSimilarityPair:
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> BiometricDedupeSimilarityPair:
         individual1 = kwargs.get("individual1")
         individual2 = kwargs.get("individual2")
         if individual1 and individual2 and individual1.id > individual2.id:
@@ -94,8 +94,8 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
     from hope.apps.household.const import HOST
     from hope.models import (
         BeneficiaryGroup,
+        BiometricDedupeSimilarityPair,
         DataCollectingType,
-        DeduplicationEngineSimilarityPair,
         PaymentPlanPurpose,
     )
 
@@ -145,7 +145,6 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
         program=dedup_program,
         erased=False,
         refuse_reason=None,
-        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
     )
 
     pending_heads: list = []
@@ -188,13 +187,13 @@ def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:
     # Seed one similarity pair so the review screen renders without hitting the engine.
     # CheckConstraint requires individual1 < individual2 on FK id ordering.
     ind1, ind2 = sorted((pending_heads[0], pending_heads[1]), key=lambda i: str(i.id))
-    DeduplicationEngineSimilarityPair.objects.get_or_create(
+    BiometricDedupeSimilarityPair.objects.get_or_create(
         program=dedup_program,
         individual1=ind1,
         individual2=ind2,
         defaults={
             "similarity_score": "95.00",
-            "status_code": DeduplicationEngineSimilarityPair.StatusCode.STATUS_200,
+            "status_code": BiometricDedupeSimilarityPair.StatusCode.STATUS_200,
         },
     )
 
