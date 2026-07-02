@@ -40531,6 +40531,10 @@
                             "nullable": true,
                             "readOnly": true
                         },
+                        "unore_exchange_rate_unavailable": {
+                            "type": "boolean",
+                            "readOnly": true
+                        },
                         "eligible_payments_count": {
                             "type": "integer",
                             "readOnly": true
@@ -40617,6 +40621,7 @@
                         "total_households_count_with_valid_phone_no",
                         "total_withdrawn_households_count",
                         "unore_exchange_rate",
+                        "unore_exchange_rate_unavailable",
                         "unsuccessful_payments_count",
                         "updated_at",
                         "volume_by_delivery_mechanism"

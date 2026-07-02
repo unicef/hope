@@ -409,6 +409,61 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan.get_unore_exchange_rate.assert_called_once_with()
 
 
+def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavailable(
+    payment_plan_detail_context: dict[str, Any],
+    django_assert_num_queries: Any,
+) -> None:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    user = payment_plan_detail_context["user"]
+    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.save(update_fields=["currency"])
+    payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
+
+    with django_assert_num_queries(22):
+        data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
+
+    assert data["id"] == str(payment_plan.id)
+    assert data["unore_exchange_rate"] is None
+    assert data["unore_exchange_rate_unavailable"] is True
+
+
+def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_without_currency(
+    payment_plan_detail_context: dict[str, Any],
+    django_assert_num_queries: Any,
+) -> None:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    user = payment_plan_detail_context["user"]
+    payment_plan.currency = None
+    payment_plan.save(update_fields=["currency"])
+
+    with django_assert_num_queries(22):
+        data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
+
+    assert data["unore_exchange_rate"] is None
+    assert data["unore_exchange_rate_unavailable"] is False
+
+
+def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_client(
+    payment_plan_detail_context: dict[str, Any],
+    django_assert_num_queries: Any,
+) -> None:
+    # USE_DUMMY_EXCHANGE_RATES is True in tests, so this exercises the real
+    # get_unore_exchange_rate path through the dummy exchange rate client (no method mock).
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    user = payment_plan_detail_context["user"]
+    payment_plan.currency = CurrencyFactory(code="BHD", name="Bahraini Dinar")
+    payment_plan.custom_exchange_rate = False
+    payment_plan.save(update_fields=["currency", "custom_exchange_rate"])
+
+    with django_assert_num_queries(22):
+        data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
+
+    expected_rate = payment_plan.get_unore_exchange_rate()
+    assert expected_rate is not None
+    assert data["unore_exchange_rate"] == expected_rate
+    assert data["unore_exchange_rate_unavailable"] is False
+
+
 @pytest.mark.parametrize(
     "pp_status",
     [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
