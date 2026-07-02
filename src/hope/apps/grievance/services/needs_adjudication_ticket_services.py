@@ -125,6 +125,26 @@ def _has_other_open_needs_adjudication_ticket(ticket_details: TicketNeedsAdjudic
     )
 
 
+def find_open_unique_identifiers_ticket_for_individual(
+    individual: Individual,
+) -> TicketNeedsAdjudicationDetails | None:
+    """Find the open Unique Identifiers Similarity ticket (if any) this individual is a party to.
+
+    Used to link a Data Change ticket that just corrected an individual's document to the
+    Needs Adjudication ticket it may resolve, so the operator can be offered a close-as-unique
+    prompt right after closing the Data Change ticket.
+    """
+    return (
+        TicketNeedsAdjudicationDetails.objects.filter(
+            Q(golden_records_individual=individual) | Q(possible_duplicates=individual),
+            ticket__issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        )
+        .exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+        .order_by("created_at")
+        .first()
+    )
+
+
 def can_close_as_unique(ticket_details: TicketNeedsAdjudicationDetails) -> bool:
     """Whether the operator may resolve this ticket by marking everyone distinct and closing.
 

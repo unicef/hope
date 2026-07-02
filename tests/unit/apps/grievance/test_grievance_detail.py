@@ -988,6 +988,7 @@ def test_grievance_detail_individual_data_update(
         "id": str(ticket_details.id),
         "individual_data": ticket_details.individual_data,
         "role_reassign_data": ticket_details.role_reassign_data,
+        "linked_needs_adjudication_ticket_id": None,
     }
 
 

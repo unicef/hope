@@ -1,7 +1,9 @@
 """Tests for closing a Unique Identifiers Similarity needs-adjudication ticket as unique.
 
 Covers Document.dedup_signature, TicketNeedsAdjudicationDetails.documents_no_longer_conflict,
-the can_close_as_unique / mark_unique_and_close services and the close-as-unique API action.
+the can_close_as_unique / mark_unique_and_close / find_open_unique_identifiers_ticket_for_individual
+services, the close-as-unique API action, and the Data Change ticket's link to its Needs
+Adjudication counterpart (IndividualDataUpdateTicketDetailsSerializer.linked_needs_adjudication_ticket_id).
 """
 
 from typing import Any, Callable
@@ -23,6 +25,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PartnerFactory,
     ProgramFactory,
+    TicketIndividualDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
     UserFactory,
 )
@@ -30,6 +33,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     can_close_as_unique,
+    find_open_unique_identifiers_ticket_for_individual,
     mark_unique_and_close,
 )
 from hope.apps.household.const import NEEDS_ADJUDICATION, UNIQUE
@@ -545,3 +549,149 @@ def test_close_as_unique_endpoint_rejects_non_needs_adjudication_ticket(
     response = client.post(url, {}, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# --------------------------------------------------------------------------- #
+# find_open_unique_identifiers_ticket_for_individual
+# --------------------------------------------------------------------------- #
+def test_find_open_unique_identifiers_ticket_for_individual_finds_golden(
+    business_area: Any, program: Any, national_id_type: Any, country: Any
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    ticket_details = _build_ticket(business_area, program, golden, [duplicate])
+
+    assert find_open_unique_identifiers_ticket_for_individual(golden) == ticket_details
+
+
+def test_find_open_unique_identifiers_ticket_for_individual_finds_possible_duplicate(
+    business_area: Any, program: Any, national_id_type: Any, country: Any
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    ticket_details = _build_ticket(business_area, program, golden, [duplicate])
+
+    assert find_open_unique_identifiers_ticket_for_individual(duplicate) == ticket_details
+
+
+def test_find_open_unique_identifiers_ticket_for_individual_none_when_ticket_closed(
+    business_area: Any, program: Any, national_id_type: Any, country: Any
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    _build_ticket(business_area, program, golden, [duplicate], ticket_status=GrievanceTicket.STATUS_CLOSED)
+
+    assert find_open_unique_identifiers_ticket_for_individual(golden) is None
+
+
+def test_find_open_unique_identifiers_ticket_for_individual_none_for_other_issue_type(
+    business_area: Any, program: Any, national_id_type: Any, country: Any
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    _build_ticket(
+        business_area,
+        program,
+        golden,
+        [duplicate],
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+
+    assert find_open_unique_identifiers_ticket_for_individual(golden) is None
+
+
+def test_find_open_unique_identifiers_ticket_for_individual_none_when_no_ticket(
+    business_area: Any, program: Any
+) -> None:
+    unrelated = _build_individual(program, business_area)
+
+    assert find_open_unique_identifiers_ticket_for_individual(unrelated) is None
+
+
+def test_find_open_unique_identifiers_ticket_for_individual_single_query(
+    business_area: Any, program: Any, national_id_type: Any, country: Any, django_assert_num_queries: Callable
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    _build_ticket(business_area, program, golden, [duplicate])
+
+    with django_assert_num_queries(1):
+        find_open_unique_identifiers_ticket_for_individual(golden)
+
+
+# --------------------------------------------------------------------------- #
+# Data Change ticket detail exposes linked_needs_adjudication_ticket_id
+# --------------------------------------------------------------------------- #
+def _data_change_ticket_detail_url(business_area: Any, grievance_ticket: GrievanceTicket) -> str:
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={"business_area_slug": business_area.slug, "pk": str(grievance_ticket.id)},
+    )
+
+
+def test_data_change_ticket_exposes_linked_ticket_id_when_present(
+    api_client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    national_id_type: Any,
+    country: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    na_ticket_details = _build_ticket(business_area, program, golden, [duplicate])
+    data_change_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        business_area=business_area,
+    )
+    data_change_ticket.programs.set([program])
+    data_update_details = TicketIndividualDataUpdateDetailsFactory(ticket=data_change_ticket, individual=golden)
+    create_user_role_with_permissions(
+        user, [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE], business_area, program
+    )
+
+    client = api_client(user)
+    response = client.get(_data_change_ticket_detail_url(business_area, data_update_details.ticket))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["linked_needs_adjudication_ticket_id"] == str(na_ticket_details.ticket_id)
+
+
+def test_data_change_ticket_linked_ticket_id_none_when_absent(
+    api_client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    unrelated = _build_individual(program, business_area)
+    data_change_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        business_area=business_area,
+    )
+    data_change_ticket.programs.set([program])
+    data_update_details = TicketIndividualDataUpdateDetailsFactory(ticket=data_change_ticket, individual=unrelated)
+    create_user_role_with_permissions(
+        user, [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE], business_area, program
+    )
+
+    client = api_client(user)
+    response = client.get(_data_change_ticket_detail_url(business_area, data_update_details.ticket))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["linked_needs_adjudication_ticket_id"] is None

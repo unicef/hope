@@ -20,6 +20,7 @@ from hope.apps.grievance.models import (
 )
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     can_close_as_unique,
+    find_open_unique_identifiers_ticket_for_individual,
 )
 from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
@@ -41,6 +42,7 @@ class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
 
 class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
     individual_data = serializers.SerializerMethodField()
+    linked_needs_adjudication_ticket_id = serializers.SerializerMethodField()
 
     class Meta:
         model = TicketIndividualDataUpdateDetails
@@ -48,6 +50,7 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
             "id",
             "individual_data",
             "role_reassign_data",
+            "linked_needs_adjudication_ticket_id",
         )
 
     def get_individual_data(self, obj: TicketIndividualDataUpdateDetails) -> dict | None:
@@ -62,6 +65,10 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
             if photo_data.get("previous_value"):
                 photo_data["previous_value"] = default_storage.url(photo_data["previous_value"])
         return data
+
+    def get_linked_needs_adjudication_ticket_id(self, obj: TicketIndividualDataUpdateDetails) -> str | None:
+        linked = find_open_unique_identifiers_ticket_for_individual(obj.individual)
+        return str(linked.ticket_id) if linked else None
 
 
 class AddIndividualTicketDetailsSerializer(serializers.ModelSerializer):

@@ -118,28 +118,6 @@ export const GrievanceDetailsToolbar = ({
     },
   });
 
-  const { mutateAsync: closeAsUniqueAsync, isPending: closingAsUnique } =
-    useMutation({
-      mutationFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsCloseAsUniqueCreate({
-          businessAreaSlug: businessArea,
-          id: ticket.id,
-          formData: {},
-        }),
-      onError: (e: any) => {
-        showApiErrorMessages(e, showMessage);
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasGrievanceTicketsRetrieve',
-            businessArea,
-            ticket.id,
-          ],
-        });
-      },
-    });
-
   const isNew = ticket.status === GRIEVANCE_TICKET_STATES.NEW;
   const isAssigned = ticket.status === GRIEVANCE_TICKET_STATES.ASSIGNED;
   const isInProgress = ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS;
@@ -281,6 +259,47 @@ export const GrievanceDetailsToolbar = ({
     await mutateAsync({ status });
   };
 
+  const offerLinkedNeedsAdjudicationClose = async (): Promise<void> => {
+    const linkedId = ticket?.ticketDetails?.linkedNeedsAdjudicationTicketId;
+    if (!linkedId) {
+      return;
+    }
+    try {
+      const linkedTicket =
+        await RestService.restBusinessAreasGrievanceTicketsRetrieve({
+          businessAreaSlug: businessArea,
+          id: linkedId,
+        });
+      if (!linkedTicket?.ticketDetails?.canCloseAsUnique) {
+        return;
+      }
+      confirm({
+        title: t('Close linked ticket as unique'),
+        content: t(
+          `The individuals on linked ticket ${linkedTicket.unicefId} no longer share a document number. Do you want to mark them as unique and close that ticket too?`,
+        ),
+        continueText: t('mark as unique and close'),
+      }).then(async () => {
+        try {
+          await RestService.restBusinessAreasGrievanceTicketsCloseAsUniqueCreate(
+            { businessAreaSlug: businessArea, id: linkedId, formData: {} },
+          );
+          queryClient.invalidateQueries({
+            queryKey: [
+              'businessAreasGrievanceTicketsRetrieve',
+              businessArea,
+              linkedId,
+            ],
+          });
+        } catch (e) {
+          showApiErrorMessages(e, showMessage);
+        }
+      });
+    } catch (e) {
+      showApiErrorMessages(e, showMessage);
+    }
+  };
+
   const getClosingConfirmationText = (): string => {
     const isDeduplicationCategory =
       ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
@@ -317,8 +336,9 @@ export const GrievanceDetailsToolbar = ({
 
   const isDeduplicationCategory =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
+  const isDataChangeCategory =
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE;
   const hasDuplicatedDocument = ticket?.ticketDetails?.hasDuplicatedDocument;
-  const canCloseAsUnique = ticket?.ticketDetails?.canCloseAsUnique;
   const isMultipleDuplicatesVersion =
     ticket?.ticketDetails?.isMultipleDuplicatesVersion;
   const selectedIndividual = ticket?.ticketDetails?.selectedIndividual;
@@ -367,39 +387,28 @@ export const GrievanceDetailsToolbar = ({
     />
   ) : (
     <LoadingButton
-      loading={loading || closingAsUnique}
+      loading={loading}
       color="primary"
       variant="contained"
       onClick={() =>
-        isDeduplicationCategory && canCloseAsUnique
-          ? confirm({
-              title: t('Close ticket as unique'),
-              content: t(
-                `The ${beneficiaryGroup?.memberLabelPlural} on this ticket no longer share a document number. Do you want to mark them as unique and close the ticket?`,
-              ),
-              continueText: t('mark as unique and close'),
-            }).then(async () => {
-              try {
-                await closeAsUniqueAsync();
-              } catch {
-                // Error handling is done in the mutation onError callback
-              }
-            })
-          : confirm({
-              title: t('Close ticket'),
-              extraContent: isDeduplicationCategory
-                ? closingConfirmationText
-                : getClosingConfirmationExtraText(),
-              content: getClosingConfirmationText(),
-              warningContent: closingWarningText,
-              continueText: t('close ticket'),
-            }).then(async () => {
-              try {
-                await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-              } catch {
-                // Error handling is done in the mutation onError callback
-              }
-            })
+        confirm({
+          title: t('Close ticket'),
+          extraContent: isDeduplicationCategory
+            ? closingConfirmationText
+            : getClosingConfirmationExtraText(),
+          content: getClosingConfirmationText(),
+          warningContent: closingWarningText,
+          continueText: t('close ticket'),
+        }).then(async () => {
+          try {
+            await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+            if (isDataChangeCategory) {
+              await offerLinkedNeedsAdjudicationClose();
+            }
+          } catch {
+            // Error handling is done in the mutation onError callback
+          }
+        })
       }
       data-cy="button-close-ticket"
       disabled={!isActiveProgram || disableCloseDueToPrimaryNotReassigned}
