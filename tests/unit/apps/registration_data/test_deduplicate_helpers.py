@@ -159,16 +159,14 @@ def test_build_document_signatures_single_doc():
     dedup = HardDocumentDeduplication()
     individual_id = uuid.uuid4()
 
+    expected_sig = "passport--DOC-001--AFG"
     doc = MagicMock()
     doc.document_number = "DOC-001"
     doc.individual_id = individual_id
-    doc.type.valid_for_deduplication = True
-    doc.type_id = "passport"
-    doc.country_id = "AFG"
+    doc.dedup_signature = expected_sig
 
     documents_numbers, new_sigs, per_individual_dict, duplicated = dedup._build_document_signatures([doc])
 
-    expected_sig = "passport--DOC-001--AFG"
     assert documents_numbers == ["DOC-001"]
     assert new_sigs == [expected_sig]
     assert per_individual_dict[str(individual_id)] == [expected_sig]
@@ -180,23 +178,19 @@ def test_build_document_signatures_duplicates():
     individual_id_1 = uuid.uuid4()
     individual_id_2 = uuid.uuid4()
 
+    expected_sig = "passport--DOC-001--AFG"
     doc1 = MagicMock()
     doc1.document_number = "DOC-001"
     doc1.individual_id = individual_id_1
-    doc1.type.valid_for_deduplication = True
-    doc1.type_id = "passport"
-    doc1.country_id = "AFG"
+    doc1.dedup_signature = expected_sig
 
     doc2 = MagicMock()
     doc2.document_number = "DOC-001"
     doc2.individual_id = individual_id_2
-    doc2.type.valid_for_deduplication = True
-    doc2.type_id = "passport"
-    doc2.country_id = "AFG"
+    doc2.dedup_signature = expected_sig
 
     documents_numbers, new_sigs, per_individual_dict, duplicated = dedup._build_document_signatures([doc1, doc2])
 
-    expected_sig = "passport--DOC-001--AFG"
     assert documents_numbers == ["DOC-001", "DOC-001"]
     assert new_sigs == [expected_sig, expected_sig]
     assert per_individual_dict[str(individual_id_1)] == [expected_sig]

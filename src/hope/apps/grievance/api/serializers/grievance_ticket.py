@@ -693,6 +693,10 @@ class GrievanceStatusChangeSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
 
 
+class GrievanceCloseAsUniqueSerializer(serializers.Serializer):
+    version = serializers.IntegerField(required=False)
+
+
 class GrievanceCreateNoteSerializer(serializers.Serializer):
     description = serializers.CharField()
     version = serializers.IntegerField(required=False)

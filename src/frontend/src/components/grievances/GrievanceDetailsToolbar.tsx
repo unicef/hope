@@ -22,7 +22,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgramContext } from '../../programContext';
 import { MiśTheme } from '../../theme';
-import { getGrievanceEditPath } from './utils/createGrievanceUtils';
+import {
+  getGrievanceDetailsPath,
+  getGrievanceEditPath,
+} from './utils/createGrievanceUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -259,6 +262,63 @@ export const GrievanceDetailsToolbar = ({
     await mutateAsync({ status });
   };
 
+  const offerLinkedNeedsAdjudicationClose = async (): Promise<void> => {
+    const linkedId = ticket?.ticketDetails?.linkedNeedsAdjudicationTicketId;
+    if (!linkedId) {
+      return;
+    }
+    try {
+      const linkedTicket =
+        await RestService.restBusinessAreasGrievanceTicketsRetrieve({
+          businessAreaSlug: businessArea,
+          id: linkedId,
+        });
+      if (!linkedTicket?.ticketDetails?.canCloseAsUnique) {
+        return;
+      }
+      confirm({
+        title: t('Close linked ticket as unique'),
+        content: (
+          <>
+            {t('The individuals on linked ticket')}{' '}
+            <a
+              href={getGrievanceDetailsPath(
+                linkedTicket.id,
+                linkedTicket.category,
+                baseUrl,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {linkedTicket.unicefId}
+            </a>{' '}
+            {t(
+              'no longer share a document number. Do you want to mark them as unique and close that ticket too?',
+            )}
+          </>
+        ),
+        continueText: t('mark as unique and close'),
+      }).then(async () => {
+        try {
+          await RestService.restBusinessAreasGrievanceTicketsCloseAsUniqueCreate(
+            { businessAreaSlug: businessArea, id: linkedId, formData: {} },
+          );
+          queryClient.invalidateQueries({
+            queryKey: [
+              'businessAreasGrievanceTicketsRetrieve',
+              businessArea,
+              linkedId,
+            ],
+          });
+        } catch (e) {
+          showApiErrorMessages(e, showMessage);
+        }
+      });
+    } catch (e) {
+      showApiErrorMessages(e, showMessage);
+    }
+  };
+
   const getClosingConfirmationText = (): string => {
     const isDeduplicationCategory =
       ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
@@ -295,6 +355,8 @@ export const GrievanceDetailsToolbar = ({
 
   const isDeduplicationCategory =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
+  const isDataChangeCategory =
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE;
   const hasDuplicatedDocument = ticket?.ticketDetails?.hasDuplicatedDocument;
   const isMultipleDuplicatesVersion =
     ticket?.ticketDetails?.isMultipleDuplicatesVersion;
@@ -359,6 +421,9 @@ export const GrievanceDetailsToolbar = ({
         }).then(async () => {
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+            if (isDataChangeCategory) {
+              await offerLinkedNeedsAdjudicationClose();
+            }
           } catch {
             // Error handling is done in the mutation onError callback
           }

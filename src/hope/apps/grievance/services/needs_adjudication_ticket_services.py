@@ -2,7 +2,8 @@ import logging
 from typing import TYPE_CHECKING, Any, Sequence, cast
 
 from django.contrib.auth.models import AbstractUser
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
@@ -112,6 +113,78 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
     selected_duplicates = ticket_details.selected_individuals.all()
     traverse_sibling_tickets(grievance_ticket, selected_duplicates)
     close_needs_adjudication_new_ticket(ticket_details, user)
+
+
+def _has_other_open_needs_adjudication_ticket(ticket_details: TicketNeedsAdjudicationDetails) -> bool:
+    individuals = [ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all()]
+    return (
+        TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+        .exclude(id=ticket_details.id)
+        .filter(Q(golden_records_individual__in=individuals) | Q(possible_duplicates__in=individuals))
+        .exists()
+    )
+
+
+def find_open_unique_identifiers_ticket_for_individual(
+    individual: Individual,
+) -> TicketNeedsAdjudicationDetails | None:
+    """Find the open Unique Identifiers Similarity ticket (if any) this individual is a party to.
+
+    Used to link a Data Change ticket that just corrected an individual's document to the
+    Needs Adjudication ticket it may resolve, so the operator can be offered a close-as-unique
+    prompt right after closing the Data Change ticket.
+    """
+    return (
+        TicketNeedsAdjudicationDetails.objects.filter(
+            Q(golden_records_individual=individual) | Q(possible_duplicates=individual),
+            ticket__issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        )
+        .exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+        .order_by("created_at")
+        .first()
+    )
+
+
+def can_close_as_unique(ticket_details: TicketNeedsAdjudicationDetails) -> bool:
+    """Whether the operator may resolve this ticket by marking everyone distinct and closing.
+
+    True only for an open Unique Identifiers Similarity ticket whose document conflict is
+    gone and that has no sibling open Needs Adjudication ticket for the same individuals.
+    """
+    ticket = ticket_details.ticket
+    return (
+        ticket.issue_type == GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY
+        and ticket.status != GrievanceTicket.STATUS_CLOSED
+        and ticket_details.documents_no_longer_conflict()
+        and not _has_other_open_needs_adjudication_ticket(ticket_details)
+    )
+
+
+def mark_unique_and_close(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
+    """Mark every individual on the ticket as distinct (unique) and close it directly.
+
+    Used when a separate Data Change ticket has already corrected the shared identifier,
+    so the ticket's sole premise (the duplicated document) no longer holds. Bypasses the
+    FOR_APPROVAL step by design.
+    """
+    ticket = ticket_details.ticket
+    if ticket.issue_type != GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY:
+        raise ValidationError("Ticket can only be closed as unique for the Unique Identifiers Similarity issue type.")
+    if ticket.status == GrievanceTicket.STATUS_CLOSED:
+        raise ValidationError("Ticket is already closed.")
+    if not ticket_details.documents_no_longer_conflict():
+        raise ValidationError("Individuals still share a duplicated document; cannot close as unique.")
+    if _has_other_open_needs_adjudication_ticket(ticket_details):
+        raise ValidationError("Another open Needs Adjudication ticket exists for these individuals.")
+
+    all_individuals = [ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all()]
+    ticket_details.selected_individuals.clear()
+    ticket_details.selected_distinct.set(all_individuals)
+
+    close_needs_adjudication_new_ticket(ticket_details, user)
+
+    ticket.status = GrievanceTicket.STATUS_CLOSED
+    ticket.save()
 
 
 def _get_min_max_score(golden_records: list[dict]) -> tuple[float, float]:
