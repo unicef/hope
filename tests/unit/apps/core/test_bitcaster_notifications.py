@@ -9,7 +9,7 @@ import pytest
 from hope.apps.core.notifications.bitcaster_client import BitcasterClient, BitcasterClientConfig
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.handlers import handle_bitcaster_event
-from hope.apps.core.notifications.notifier import get_notification_backend, send_notification_event
+from hope.apps.core.notifications.notifier import NotificationBackend, get_notification_backend, send_notification_event
 from hope.apps.core.notifications.payloads import (
     EmailAttachmentPayload,
     MailjetTemplateEmailPayloadData,
@@ -413,6 +413,20 @@ def test_send_bitcaster_event_task_retries_unexpected_exception(mocker: Any) -> 
 
 def test_get_notification_backend_returns_bitcaster_client() -> None:
     assert isinstance(get_notification_backend(), BitcasterClient)
+
+
+def test_notification_backend_protocol_stub_methods_are_covered() -> None:
+    assert NotificationBackend.is_configured.fget(SimpleNamespace()) is None
+    assert (
+        NotificationBackend.trigger_event(
+            SimpleNamespace(),
+            "payment.plan.sent_for_approval",
+            {"correlation_id": "1"},
+            options={"limit_to": ["user@example.org"]},
+            cid="1",
+        )
+        is None
+    )
 
 
 def test_send_notification_event_delegates_to_backend(mocker: Any) -> None:
