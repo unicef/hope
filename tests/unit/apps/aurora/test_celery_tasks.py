@@ -17,6 +17,7 @@ from extras.test_utils.factories import (
     OrganizationFactory,
     ProgramFactory,
     ProjectFactory,
+    RegistrationDataImportFactory,
     RegistrationFactory,
 )
 from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
@@ -686,6 +687,20 @@ def test_create_task_for_processing_records_calls_celery_task_with_nullable_rdi(
     create_task_for_processing_records(service, registration, None, [1, 2, 3])
 
     celery_task.assert_called_once_with(registration, None, [1, 2, 3])
+
+
+def test_create_task_for_processing_records_does_not_bind_self_on_real_service(
+    ukraine_context: dict[str, object],
+) -> None:
+    registration = ukraine_context["registration"]
+    service = registration.rdi_parser
+    rdi = RegistrationDataImportFactory(program=ukraine_context["program"])
+
+    with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue_task") as queue_task:
+        create_task_for_processing_records(service, registration, rdi, [1, 2, 3])
+
+    queue_task.assert_called_once()
+    assert queue_task.call_args.kwargs["config"]["records_ids"] == [1, 2, 3]
 
 
 def test_process_flex_records_task_action_raises_not_implemented_without_service(
