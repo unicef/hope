@@ -233,6 +233,7 @@ def test_execute_matches_two_name_row_with_date_cell(
     django_assert_num_queries: Any,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.bitcaster_enabled", return_value=False)
     uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
 
     with django_assert_num_queries(7):
