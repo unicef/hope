@@ -7,24 +7,28 @@ from django.utils.translation import gettext_lazy as _
 class Currency(models.Model):
     code = models.CharField(
         max_length=5,
-        unique=True,
         db_index=True,
         help_text=_("The currency code following the ISO 4217 standard (e.g. USD, EUR)"),
     )
     name = models.CharField(max_length=255, help_text=_("The full name of the currency"))
     is_crypto = models.BooleanField(default=False, help_text=_("Whether this is a cryptocurrency (e.g. USDC)"))
     vision_code = models.CharField(
-        max_length=5, blank=True, default="", help_text=_("The vision system code for this currency")
+        max_length=5, blank=True, default="", db_index=True, help_text=_("The vision system code for this currency")
     )
     active = models.BooleanField(default=True, help_text=_("Whether this currency is active"))
     number_of_decimals = models.SmallIntegerField(default=2, help_text=_("Number of decimal places for this currency"))
 
     class Meta:
         app_label = "core"
-        ordering = ["code"]
+        ordering = ["code", "vision_code"]
         verbose_name_plural = "currencies"
+        constraints = [
+            models.UniqueConstraint(fields=["code", "vision_code"], name="unique_code_vision_code"),
+        ]
 
     def __str__(self) -> str:
+        if self.vision_code and self.vision_code != self.code:
+            return f"{self.code} ({self.vision_code}) - {self.name}"
         return f"{self.code} - {self.name}"
 
     def save(self, *args: Any, **kwargs: Any) -> None:
