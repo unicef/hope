@@ -1,10 +1,6 @@
 """Reconcile a shadow Elasticsearch cluster with Postgres after the bulk copy.
 
-This is the *delta / catch-up* step of the ES 8 -> 9 migration. The bulk copy
-(snapshot+restore of the ES 8 data into the fresh ES 9 cluster, or a full
-``es_shadow_populate`` run) is a point-in-time snapshot. Records keep changing in
-Postgres while that copy runs, so the shadow cluster drifts. This command brings
-it back in sync.
+Records keep changing in Postgres while the ES Index copy runs, so the shadow cluster drifts. This command brings it back in sync.
 
 Postgres is the source of truth. Both ES documents populate from
 ``Individual.all_merge_status_objects`` / ``Household.objects`` and both models have
