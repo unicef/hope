@@ -651,6 +651,51 @@ def test_send_email_notification_does_not_publish_bitcaster_when_flag_disabled(
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
 )
+def test_send_email_notification_returns_when_email_send_fails(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email", side_effect=RuntimeError("send failed"))
+    mock_publish = mocker.patch("hope.apps.payment.notifications.publish_mailjet_template_email_event")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+    mock_publish.assert_not_called()
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
+def test_send_email_notification_swallows_bitcaster_publish_error(notification_setup: dict, mocker: Any) -> None:
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    mocker.patch("hope.apps.payment.notifications.bitcaster_enabled", return_value=True)
+    mock_publish = mocker.patch(
+        "hope.apps.payment.notifications.publish_mailjet_template_email_event",
+        side_effect=RuntimeError("queue failed"),
+    )
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+    mock_send.assert_called_once()
+    mock_publish.assert_called_once()
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
 def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
     notification_setup: dict, mocker: Any
 ) -> None:

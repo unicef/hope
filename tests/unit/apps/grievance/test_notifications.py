@@ -241,6 +241,26 @@ def test_for_approval_body(assigned_ticket: GrievanceTicket, assignee: User) -> 
     assert html_body
 
 
+def test_universal_category_created_body(assigned_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
+
+    text_body, html_body, subject = notification._prepare_universal_category_created_bodies(assignee)
+
+    assert assigned_ticket.get_category_display() in subject
+    assert text_body
+    assert html_body
+
+
+def test_assignment_changed_body(assigned_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    text_body, html_body, subject = notification._prepare_assignment_changed_bodies(assignee)
+
+    assert str(assigned_ticket.id) in subject
+    assert text_body
+    assert html_body
+
+
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTicket) -> None:
     notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
@@ -253,6 +273,20 @@ def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTi
 
     mock_send.assert_called_once()
     mock_publish.assert_called_once_with(notification.rendered_email_notifications[0])
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_send_email_notification_swallows_send_error(assigned_ticket: GrievanceTicket) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    with (
+        patch.object(notification.emails[0], "send_email", side_effect=RuntimeError("send failed")) as mock_send,
+        patch("hope.apps.grievance.notifications.publish_rendered_email_notification") as mock_publish,
+    ):
+        notification.send_email_notification()
+
+    mock_send.assert_called_once()
+    mock_publish.assert_not_called()
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=False)

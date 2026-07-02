@@ -397,6 +397,58 @@ def test_send_email_notification_does_not_publish_bitcaster_when_flag_disabled(
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
 )
+def test_send_email_notification_returns_when_email_send_fails(
+    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, mocker: Any
+) -> None:
+    mocker.patch(
+        "hope.apps.periodic_data_update.notifications.MailjetClient.send_email",
+        side_effect=RuntimeError("send failed"),
+    )
+    mock_publish = mocker.patch("hope.apps.periodic_data_update.notifications.publish_mailjet_template_email_event")
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_with_authorized_users,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        user_action_user,
+        "1 January 2025",
+    )
+
+    pdu_notification.send_email_notification()
+
+    mock_publish.assert_not_called()
+
+
+@override_config(
+    SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
+)
+def test_send_email_notification_swallows_bitcaster_publish_error(
+    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, mocker: Any
+) -> None:
+    mock_send = mocker.patch("hope.apps.periodic_data_update.notifications.MailjetClient.send_email")
+    mocker.patch("hope.apps.periodic_data_update.notifications.bitcaster_enabled", return_value=True)
+    mock_publish = mocker.patch(
+        "hope.apps.periodic_data_update.notifications.publish_mailjet_template_email_event",
+        side_effect=RuntimeError("queue failed"),
+    )
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_with_authorized_users,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        user_action_user,
+        "1 January 2025",
+    )
+
+    pdu_notification.send_email_notification()
+
+    mock_send.assert_called_once()
+    mock_publish.assert_called_once()
+
+
+@override_config(
+    SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
+)
 def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
     pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, mocker: Any
 ) -> None:

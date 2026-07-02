@@ -9,6 +9,7 @@ import pytest
 from hope.apps.core.notifications.bitcaster_client import BitcasterClient, BitcasterClientConfig
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.handlers import handle_bitcaster_event
+from hope.apps.core.notifications.notifier import get_notification_backend, send_notification_event
 from hope.apps.core.notifications.payloads import (
     EmailAttachmentPayload,
     MailjetTemplateEmailPayloadData,
@@ -103,6 +104,20 @@ def test_bitcaster_client_configures_sdk_request_timeout(mocker: Any) -> None:
         "cid": "event:1",
     }
     assert sdk_client.request_kwargs == {"timeout": 7}
+
+
+def test_bitcaster_client_returns_false_when_unconfigured() -> None:
+    client = BitcasterClient(
+        BitcasterClientConfig(
+            api_url="",
+            api_key="",
+            organization_slug="",
+            project_slug="",
+            application_slug="",
+        )
+    )
+
+    assert client.trigger_event("payment.plan.sent_for_approval", {"correlation_id": "event:1"}) is False
 
 
 def test_publish_mailjet_template_email_event_sends_payload_to_signal(mocker: Any) -> None:
@@ -250,6 +265,29 @@ def test_publish_rendered_email_notification_publishes_when_flag_enabled(mocker:
     assert event.idempotency_key.startswith("email.rendered.sent:tests.RenderedEmailService:1:")
 
 
+def test_publish_rendered_email_notification_swallows_publish_error(mocker: Any) -> None:
+    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
+    mocker.patch(
+        "hope.apps.core.notifications.publishers.publish_rendered_email_event",
+        side_effect=RuntimeError("queue failed"),
+    )
+
+    class RenderedEmailService(BaseRenderedEmailNotificationService):
+        html_template = "email.html"
+        text_template = "email.txt"
+
+    publish_rendered_email_notification(
+        RenderedEmailNotification(
+            service=RenderedEmailService(),
+            user=SimpleNamespace(id=1, email="user@example.org"),
+            subject="Rendered subject",
+            html_body="<p>Rendered</p>",
+            text_body="Rendered",
+            context={"title": "Rendered subject"},
+        )
+    )
+
+
 def test_base_rendered_email_notification_service_requires_templates() -> None:
     class MissingTextTemplateService(BaseRenderedEmailNotificationService):
         html_template = "email.html"
@@ -261,6 +299,15 @@ def test_base_rendered_email_notification_service_requires_templates() -> None:
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
 def test_bitcaster_enabled_reads_django_flags() -> None:
     assert bitcaster_enabled() is True
+
+
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": False}]})
+def test_handle_bitcaster_event_skips_when_flag_disabled(mocker: Any) -> None:
+    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
+
+    handle_bitcaster_event(sender=None, event_name="payment.plan.sent_for_approval", payload={"correlation_id": "1"})
+
+    mock_delay.assert_not_called()
 
 
 @override_settings(
@@ -310,6 +357,28 @@ def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any
     )
 
 
+def test_send_bitcaster_event_task_skips_when_flag_disabled(mocker: Any) -> None:
+    mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=False)
+    mock_backend = mocker.patch("hope.apps.core.notifications.tasks.get_notification_backend")
+
+    send_bitcaster_event_task("payment.plan.sent_for_approval", {"correlation_id": "1"})
+
+    mock_backend.assert_not_called()
+
+
+def test_send_bitcaster_event_task_skips_when_backend_not_configured(mocker: Any) -> None:
+    mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
+    mocker.patch(
+        "hope.apps.core.notifications.tasks.get_notification_backend",
+        return_value=SimpleNamespace(is_configured=False),
+    )
+    mock_send = mocker.patch("hope.apps.core.notifications.tasks.send_notification_event")
+
+    send_bitcaster_event_task("payment.plan.sent_for_approval", {"correlation_id": "1"})
+
+    mock_send.assert_not_called()
+
+
 def test_send_bitcaster_event_task_retries_when_backend_returns_false(mocker: Any) -> None:
     payload = {"correlation_id": "payment.plan.sent_for_approval:1:SEND_FOR_APPROVAL", "options": {}}
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
@@ -324,3 +393,44 @@ def test_send_bitcaster_event_task_retries_when_backend_returns_false(mocker: An
         send_bitcaster_event_task("payment.plan.sent_for_approval", payload)
 
     mock_retry.assert_called_once()
+
+
+def test_send_bitcaster_event_task_retries_unexpected_exception(mocker: Any) -> None:
+    payload = {"correlation_id": "payment.plan.sent_for_approval:1:SEND_FOR_APPROVAL", "options": {}}
+    mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
+    mocker.patch(
+        "hope.apps.core.notifications.tasks.get_notification_backend",
+        return_value=SimpleNamespace(is_configured=True),
+    )
+    mocker.patch("hope.apps.core.notifications.tasks.send_notification_event", side_effect=RuntimeError("boom"))
+    mock_retry = mocker.patch.object(send_bitcaster_event_task, "retry", side_effect=Retry())
+
+    with pytest.raises(Retry):
+        send_bitcaster_event_task("payment.plan.sent_for_approval", payload)
+
+    mock_retry.assert_called_once()
+
+
+def test_get_notification_backend_returns_bitcaster_client() -> None:
+    assert isinstance(get_notification_backend(), BitcasterClient)
+
+
+def test_send_notification_event_delegates_to_backend(mocker: Any) -> None:
+    backend = SimpleNamespace(trigger_event=mocker.Mock(return_value=True))
+    mocker.patch("hope.apps.core.notifications.notifier.get_notification_backend", return_value=backend)
+
+    assert (
+        send_notification_event(
+            "payment.plan.sent_for_approval",
+            {"correlation_id": "1"},
+            options={"limit_to": ["user@example.org"]},
+            cid="1",
+        )
+        is True
+    )
+    backend.trigger_event.assert_called_once_with(
+        "payment.plan.sent_for_approval",
+        {"correlation_id": "1"},
+        options={"limit_to": ["user@example.org"]},
+        cid="1",
+    )
