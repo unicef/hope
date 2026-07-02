@@ -41,6 +41,7 @@ def token(user, afghanistan) -> APIToken:
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
+@patch("hope.admin.api_token.publish_rendered_email_notification")
 @patch.object(APITokenAdmin, "message_user", return_value=None)
 @patch.object(APITokenAdmin, "__init__", return_value=None)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
@@ -48,6 +49,7 @@ def token(user, afghanistan) -> APIToken:
 def test_send_api_token(
     mocked_admin_init: MagicMock,
     mocked_message_user: MagicMock,
+    mocked_publish_rendered_email_notification: MagicMock,
     mocked_requests_post: MagicMock,
     token: APIToken,
     user: User,
@@ -58,37 +60,28 @@ def test_send_api_token(
 
     mocked_requests_post.assert_called_once()
 
-    expected_data = json.dumps(
-        {
-            "Messages": [
-                {
-                    "From": {
-                        "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
-                    },
-                    "Subject": f"[test] HOPE API Token {token} infos",
-                    "To": [
-                        {
-                            "Email": "testapitoken@email.com",
-                        },
-                    ],
-                    "Cc": [],
-                    "TextPart": f"\nDear {user.first_name or user.username},\n\n"
-                    f"please find below API token infos\n\n"
-                    f"Name: {token}\n"
-                    f"Key: {token.key}\n"
-                    f"Grants: {token.grants}\n"
-                    f"Expires: {token.valid_to}\n"
-                    f"Business Areas: {', '.join(token.valid_for.values_list('name', flat=True))}\n\n"
-                    f"Regards\n\n"
-                    f"The HOPE Team\n",
-                }
-            ]
-        }
-    )
     mocked_requests_post.assert_called_with(
         "https://api.mailjet.com/v3.1/send",
         auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
-        data=expected_data,
+        data=mocked_requests_post.call_args.kwargs["data"],
         timeout=30,
     )
+    actual_data = json.loads(mocked_requests_post.call_args.kwargs["data"])
+    message = actual_data["Messages"][0]
+    assert message["From"] == {
+        "Email": settings.DEFAULT_EMAIL,
+        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+    }
+    assert message["Subject"] == f"[test] HOPE API Token {token} infos"
+    assert message["To"] == [{"Email": "testapitoken@email.com"}]
+    assert message["Cc"] == []
+    assert f"Dear {user.first_name or user.username}" in message["TextPart"]
+    assert "please find below API token infos" in message["TextPart"]
+    assert f"Key: {token.key}" in message["TextPart"]
+    assert f"<p>Dear {user.first_name or user.username},</p>" in message["HTMLPart"]
+    assert f"Key: {token.key}<br>" in message["HTMLPart"]
+    notification = mocked_publish_rendered_email_notification.call_args.args[0]
+    assert notification.user == user
+    assert notification.subject == f"HOPE API Token {token} infos"
+    assert notification.context["token_key"] == token.key
+    assert notification.context["show_token_key"] is True

@@ -813,10 +813,21 @@ def test_as_plain_text_returns_str_unchanged():
 
 
 def test_send_file_passwords_with_no_file_temp(user):
-    with patch.object(user, "email_user") as mock_email:
+    with (
+        patch.object(user, "email_user") as mock_email,
+        patch(
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_rendered_email_notification"
+        ) as publish_mock,
+    ):
         XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, None, "Test Title")
 
     mock_email.assert_called_once()
+    publish_mock.assert_called_once()
+    notification = publish_mock.call_args.args[0]
+    assert notification.user == user
+    assert notification.subject == "Test Title file's Passwords"
+    assert notification.service.html_template == "payment/xlsx_file_password_email.html"
+    assert notification.service.text_template == "payment/xlsx_file_password_email.txt"
     call_kwargs = mock_email.call_args[1]
     assert "Test Title" in call_kwargs["subject"]
     assert "ZIP file password: \n" in call_kwargs["text_body"]
@@ -829,7 +840,10 @@ def test_send_file_passwords_with_file_temp_sends_passwords(user):
     file_temp.xlsx_password = "xlsx-pw"
     file_temp.save()
 
-    with patch.object(user, "email_user") as mock_email:
+    with (
+        patch.object(user, "email_user") as mock_email,
+        patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_rendered_email_notification"),
+    ):
         XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, "My Plan")
 
     mock_email.assert_called_once()
@@ -840,7 +854,10 @@ def test_send_file_passwords_with_file_temp_sends_passwords(user):
 
 
 def test_send_delivery_passwords_sends_email_with_plan_title(payment_plan, user):
-    with patch.object(user, "email_user") as mock_email:
+    with (
+        patch.object(user, "email_user") as mock_email,
+        patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_rendered_email_notification"),
+    ):
         XlsxPaymentPlanDeliveryExportService.send_delivery_passwords(user, payment_plan)
 
     mock_email.assert_called_once()
@@ -849,7 +866,10 @@ def test_send_delivery_passwords_sends_email_with_plan_title(payment_plan, user)
 
 def test_send_delivery_passwords_for_file_sends_email_with_label(user):
     file_temp = FileTempFactory()
-    with patch.object(user, "email_user") as mock_email:
+    with (
+        patch.object(user, "email_user") as mock_email,
+        patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_rendered_email_notification"),
+    ):
         XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, file_temp, "Batch Label")
 
     mock_email.assert_called_once()

@@ -33,6 +33,7 @@ from PIL import Image
 import pytz
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -620,10 +621,23 @@ def send_email_notification(
     else:
         context = service.get_email_context(user) if user else service.get_email_context()
     user = user or service.user
+    subject = context["title"]
+    html_body = render_to_string(service.html_template, context=context)
+    text_body = render_to_string(service.text_template, context=context)
     user.email_user(
-        subject=context["title"],
-        html_body=render_to_string(service.html_template, context=context),
-        text_body=render_to_string(service.text_template, context=context),
+        subject=subject,
+        html_body=html_body,
+        text_body=text_body,
+    )
+    publish_rendered_email_notification(
+        RenderedEmailNotification(
+            service=service,
+            user=user,
+            subject=subject,
+            html_body=html_body,
+            text_body=text_body,
+            context=context,
+        )
     )
 
 

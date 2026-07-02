@@ -671,6 +671,7 @@ def test_rows_iterator_skips_header_and_empty_rows():
 
 def test_send_email_notification_with_user_renders_html_and_text(mocker):
     mocker.patch("hope.apps.core.utils.render_to_string", side_effect=["<html>body</html>", "text body"])
+    mocker.patch("hope.apps.core.utils.publish_rendered_email_notification")
     user = MagicMock()
     service = MagicMock(html_template="email.html", text_template="email.txt")
     service.get_email_context.return_value = {"title": "Hello"}
@@ -683,6 +684,7 @@ def test_send_email_notification_with_user_renders_html_and_text(mocker):
 
 def test_send_email_notification_without_user_falls_back_to_service_user(mocker):
     mocker.patch("hope.apps.core.utils.render_to_string", return_value="rendered")
+    mocker.patch("hope.apps.core.utils.publish_rendered_email_notification")
     service = MagicMock(html_template="h", text_template="t")
     service.get_email_context.return_value = {"title": "Hi"}
 
@@ -694,6 +696,7 @@ def test_send_email_notification_without_user_falls_back_to_service_user(mocker)
 
 def test_send_email_notification_with_context_kwargs_passes_them(mocker):
     mocker.patch("hope.apps.core.utils.render_to_string", return_value="rendered")
+    mocker.patch("hope.apps.core.utils.publish_rendered_email_notification")
     user = MagicMock()
     service = MagicMock(html_template="h", text_template="t")
     service.get_email_context.return_value = {"title": "Hi"}
@@ -701,6 +704,53 @@ def test_send_email_notification_with_context_kwargs_passes_them(mocker):
     send_email_notification(service, user=user, context_kwargs={"foo": "bar"})
 
     service.get_email_context.assert_called_once_with(foo="bar")
+
+
+def test_send_email_notification_hands_rendered_email_to_notification_publisher(mocker):
+    mocker.patch("hope.apps.core.utils.render_to_string", side_effect=["<html>body</html>", "text body"])
+    mock_publish = mocker.patch("hope.apps.core.utils.publish_rendered_email_notification")
+    user = MagicMock(id=1, email="user@example.org")
+    service = MagicMock(html_template="email.html", text_template="email.txt")
+    service.get_email_context.return_value = {"title": "Hello"}
+
+    send_email_notification(service, user=user)
+
+    user.email_user.assert_called_once_with(subject="Hello", html_body="<html>body</html>", text_body="text body")
+    notification = mock_publish.call_args.args[0]
+    assert notification.service == service
+    assert notification.user == user
+    assert notification.subject == "Hello"
+    assert notification.html_body == "<html>body</html>"
+    assert notification.text_body == "text body"
+    assert notification.context == {"title": "Hello"}
+
+
+def test_send_email_notification_hands_service_metadata_to_notification_publisher(mocker):
+    mocker.patch("hope.apps.core.utils.render_to_string", side_effect=["<html>body</html>", "text body"])
+    mock_publish = mocker.patch("hope.apps.core.utils.publish_rendered_email_notification")
+    user = MagicMock(id=1, email="user@example.org")
+
+    class RenderedEmailService:
+        html_template = "email.html"
+        text_template = "email.txt"
+
+        def __init__(self):
+            self.get_email_context = MagicMock(return_value={"title": "Hello", "link": "https://example.org/file"})
+
+    RenderedEmailService.__module__ = "tests"
+    service = RenderedEmailService()
+
+    send_email_notification(service, user=user)
+
+    user.email_user.assert_called_once_with(subject="Hello", html_body="<html>body</html>", text_body="text body")
+    mock_publish.assert_called_once()
+    notification = mock_publish.call_args.args[0]
+    assert notification.service == service
+    assert notification.user == user
+    assert notification.subject == "Hello"
+    assert notification.html_body == "<html>body</html>"
+    assert notification.text_body == "text body"
+    assert notification.context == {"title": "Hello", "link": "https://example.org/file"}
 
 
 def test_send_email_notification_on_commit_schedules_callback(mocker):

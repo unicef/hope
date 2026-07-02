@@ -16,6 +16,8 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
+from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
+from hope.apps.payment.notifications import PaymentPlanDeliveryPasswordEmailNotificationService
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.utils.exceptions import log_and_raise
@@ -348,8 +350,9 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
 
     @staticmethod
     def _send_file_passwords(user: "User", file_temp: FileTemp | None, title: str) -> None:
-        text_template = "payment/xlsx_file_password_email.txt"
-        html_template = "payment/xlsx_file_password_email.html"
+        notification_service = PaymentPlanDeliveryPasswordEmailNotificationService()
+        text_template = notification_service.text_template
+        html_template = notification_service.html_template
         zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(file_temp.password if file_temp else None)
         xlsx_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(
             file_temp.xlsx_password if file_temp else None
@@ -369,10 +372,22 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             "title": f"{title} file's Passwords",
             "link": "",
         }
+        html_body = render_to_string(html_template, context=context)
+        text_body = render_to_string(text_template, context=context)
         user.email_user(
             subject=context["title"],
-            html_body=render_to_string(html_template, context=context),
-            text_body=render_to_string(text_template, context=context),
+            html_body=html_body,
+            text_body=text_body,
+        )
+        publish_rendered_email_notification(
+            RenderedEmailNotification(
+                service=notification_service,
+                user=user,
+                subject=context["title"],
+                html_body=html_body,
+                text_body=text_body,
+                context=context,
+            )
         )
 
     @staticmethod

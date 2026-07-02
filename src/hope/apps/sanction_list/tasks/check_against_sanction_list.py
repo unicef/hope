@@ -1,8 +1,10 @@
 import base64
 from contextlib import suppress
+from dataclasses import asdict
 from datetime import date, datetime
 import io
 from itertools import permutations
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
 import dateutil.parser
@@ -14,11 +16,23 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
+from hope.apps.core.notifications.flags import bitcaster_enabled
+from hope.apps.core.notifications.payloads import EmailAttachmentPayload
+from hope.apps.core.notifications.publishers import (
+    BaseRenderedEmailNotificationService,
+    RenderedEmailNotification,
+    publish_rendered_email_notification,
+)
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import SanctionListIndividual, UploadedXLSXFile
 
 if TYPE_CHECKING:
     from uuid import UUID
+
+
+class SanctionListCheckResultsEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "sanction_list/check_results.html"
+    text_template = "sanction_list/check_results.txt"
 
 
 class CheckAgainstSanctionListTask:
@@ -138,6 +152,11 @@ class CheckAgainstSanctionListTask:
         subject = f"Sanction List Check - file: {original_file_name}, date: {today.strftime('%Y-%m-%d %I:%M %p')}"
 
         base64_encoded_content = self._create_results_attachment(results_dict)
+        attachment = EmailAttachmentPayload(
+            filename=f"{subject}.xlsx",
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            base64_content=base64_encoded_content,
+        )
 
         email = MailjetClient(
             subject=subject,
@@ -148,10 +167,29 @@ class CheckAgainstSanctionListTask:
         )
         email.attach_file(
             attachment=base64_encoded_content,
-            filename=f"{subject}.xlsx",
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            filename=attachment.filename,
+            mimetype=attachment.content_type,
         )
         email.send_email()
+
+        if bitcaster_enabled():
+            publish_rendered_email_notification(
+                RenderedEmailNotification(
+                    service=SanctionListCheckResultsEmailNotificationService(),
+                    user=SimpleNamespace(id=uploaded_file.id, email=uploaded_file.associated_email),
+                    subject=subject,
+                    html_body=html_body,
+                    text_body=text_body,
+                    ccs=[settings.SANCTION_LIST_CC_MAIL],
+                    context={
+                        "results_count": len(results_dict),
+                        "file_name": original_file_name,
+                        "today_date": timezone.now().isoformat(),
+                        "title": "Sanction List Check",
+                        "attachments": [asdict(attachment)],
+                    },
+                )
+            )
 
     def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]) -> None:
         for row_number, individual in results_dict.items():

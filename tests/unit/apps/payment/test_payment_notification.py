@@ -622,6 +622,116 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
     assert mock_send.call_count == 1
 
 
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
+def test_send_email_notification_does_not_publish_bitcaster_when_flag_disabled(
+    notification_setup: dict, mocker: Any
+) -> None:
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    mocker.patch("hope.apps.payment.notifications.bitcaster_enabled", return_value=False)
+    mock_publish = mocker.patch("hope.apps.payment.notifications.publish_mailjet_template_email_event")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+    mock_send.assert_called_once()
+    mock_publish.assert_not_called()
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
+def test_send_email_notification_returns_when_email_send_fails(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email", side_effect=RuntimeError("send failed"))
+    mock_publish = mocker.patch("hope.apps.payment.notifications.publish_mailjet_template_email_event")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+    mock_publish.assert_not_called()
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
+def test_send_email_notification_swallows_bitcaster_publish_error(notification_setup: dict, mocker: Any) -> None:
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    mocker.patch("hope.apps.payment.notifications.bitcaster_enabled", return_value=True)
+    mock_publish = mocker.patch(
+        "hope.apps.payment.notifications.publish_mailjet_template_email_event",
+        side_effect=RuntimeError("queue failed"),
+    )
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+    mock_send.assert_called_once()
+    mock_publish.assert_called_once()
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
+def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
+    notification_setup: dict, mocker: Any
+) -> None:
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    mocker.patch("hope.apps.payment.notifications.bitcaster_enabled", return_value=True)
+    mock_publish = mocker.patch("hope.apps.payment.notifications.publish_mailjet_template_email_event")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+    payment_plan = notification_setup["payment_plan"]
+    mock_send.assert_called_once()
+    mock_publish.assert_called_once()
+    event = mock_publish.call_args.args[0]
+    assert event.event_name == "payment.plan.sent_for_approval"
+    assert event.idempotency_key == f"payment.plan.sent_for_approval:{payment_plan.id}:SEND_FOR_APPROVAL"
+    assert event.recipients == payment_notification.email.recipients
+    assert event.subject == payment_notification.email.subject
+    assert event.mailjet_template_id == 123456
+    assert event.variables == payment_notification.email.variables
+    assert event.ccs == payment_notification.email.ccs
+    assert event.metadata == {
+        "business_area": payment_plan.business_area.slug,
+        "program": payment_plan.program.code,
+        "payment_plan_id": str(payment_plan.id),
+        "payment_plan_unicef_id": payment_plan.unicef_id,
+        "action": PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        "source": "hope",
+    }
+
+
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 def test_send_email_notification_subject_test_env(notification_setup: dict, mocker: Any) -> None:

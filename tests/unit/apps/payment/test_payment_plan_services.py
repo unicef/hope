@@ -1778,17 +1778,29 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
 
     with mock.patch.object(User, "email_user") as mock_email_user:
         with mock.patch("hope.apps.payment.services.payment_plan_services.render_to_string") as mock_render_to_string:
-            PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
-            mock_email_user.assert_called_once()
-            assert mock_render_to_string.call_count == 2
-            _args, kwargs = mock_render_to_string.call_args
-            context = kwargs["context"]
-            assert context["message"] == (
-                f"Please be informed that Payment Plan: {pp.unicef_id} has exceeded its"
-                f" reconciliation window of {pp.program.reconciliation_window_in_days} days."
-                " Please take the necessary steps to complete the reconciliation process timely."
-            )
-            assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
+            with mock.patch(
+                "hope.apps.payment.services.payment_plan_services.publish_rendered_email_notification"
+            ) as mock_publish:
+                mock_render_to_string.side_effect = ["rendered-html", "rendered-text"]
+                PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
+                mock_email_user.assert_called_once()
+                mock_publish.assert_called_once()
+                notification = mock_publish.call_args.args[0]
+                assert notification.user == user
+                assert notification.subject == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
+                assert notification.html_body == "rendered-html"
+                assert notification.text_body == "rendered-text"
+                assert notification.service.html_template == "payment/pp_reconciliation_overdue_email.html"
+                assert notification.service.text_template == "payment/pp_reconciliation_overdue_email.txt"
+                assert mock_render_to_string.call_count == 2
+                _args, kwargs = mock_render_to_string.call_args
+                context = kwargs["context"]
+                assert context["message"] == (
+                    f"Please be informed that Payment Plan: {pp.unicef_id} has exceeded its"
+                    f" reconciliation window of {pp.program.reconciliation_window_in_days} days."
+                    " Please take the necessary steps to complete the reconciliation process timely."
+                )
+                assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
 
 
 def test_get_collector() -> None:
@@ -1861,7 +1873,10 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
         user=user_with_perm_in_different_program, role=role, business_area=business_area, program=different_program
     )
 
-    with mock.patch.object(User, "email_user", autospec=True) as mock_email_user:
+    with (
+        mock.patch.object(User, "email_user", autospec=True) as mock_email_user,
+        mock.patch("hope.apps.payment.services.payment_plan_services.publish_rendered_email_notification"),
+    ):
         PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
 
         assert mock_email_user.call_count == 2

@@ -7,10 +7,32 @@ from django.db.models import Q, QuerySet
 from django.utils import timezone
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.notifications.events import PAYMENT_PLAN_ACTION_TO_BITCASTER_EVENT
+from hope.apps.core.notifications.flags import bitcaster_enabled
+from hope.apps.core.notifications.publishers import (
+    BaseRenderedEmailNotificationService,
+    MailjetTemplateEmailEvent,
+    publish_mailjet_template_email_event,
+)
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import PaymentPlan, RoleAssignment, User
 
 logger = logging.getLogger(__name__)
+
+
+class WesternUnionReportEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "payment/western_union_report_email.html"
+    text_template = "payment/western_union_report_email.txt"
+
+
+class PaymentPlanReconciliationOverdueEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "payment/pp_reconciliation_overdue_email.html"
+    text_template = "payment/pp_reconciliation_overdue_email.txt"
+
+
+class PaymentPlanDeliveryPasswordEmailNotificationService(BaseRenderedEmailNotificationService):
+    html_template = "payment/xlsx_file_password_email.html"
+    text_template = "payment/xlsx_file_password_email.txt"
 
 
 class PaymentNotification:
@@ -109,8 +131,35 @@ class PaymentNotification:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
             try:
                 self.email.send_email()
-            except Exception:  # pragma: no cover
+            except Exception:
                 logger.exception("Failed to send payment plan notification")
+                return
+            if bitcaster_enabled():
+                try:
+                    publish_mailjet_template_email_event(
+                        MailjetTemplateEmailEvent(
+                            event_name=PAYMENT_PLAN_ACTION_TO_BITCASTER_EVENT[self.action],
+                            idempotency_key=(
+                                f"{PAYMENT_PLAN_ACTION_TO_BITCASTER_EVENT[self.action]}:"
+                                f"{self.payment_plan.id}:{self.action}"
+                            ),
+                            recipients=self.email.recipients,
+                            subject=self.email.subject,
+                            mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
+                            variables=self.email.variables or {},
+                            ccs=self.email.ccs,
+                            metadata={
+                                "business_area": self.payment_plan.business_area.slug,
+                                "program": self.payment_plan.program.code,
+                                "payment_plan_id": str(self.payment_plan.id),
+                                "payment_plan_unicef_id": self.payment_plan.unicef_id,
+                                "action": self.action,
+                                "source": "hope",
+                            },
+                        )
+                    )
+                except Exception:
+                    logger.exception("Failed to queue payment plan Bitcaster event")
 
     def _prepare_body_variables(self) -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
