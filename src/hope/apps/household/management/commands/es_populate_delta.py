@@ -1,6 +1,7 @@
 """Reconcile a shadow Elasticsearch cluster with Postgres after the bulk copy.
 
-Records keep changing in Postgres while the ES Index copy runs, so the shadow cluster drifts. This command brings it back in sync.
+Records keep changing in Postgres while the ES Index copy runs, so the shadow cluster
+drifts. This command brings it back in sync.
 
 Postgres is the source of truth. Both ES documents populate from
 ``Individual.all_merge_status_objects`` / ``Household.objects`` and both models have
@@ -41,10 +42,16 @@ Dry-run (print which programs would be rebuilt, no writes)::
 
     python manage.py es_populate_delta --using v9 --since 2026-07-01T08:55Z --dry-run
 
+Rebuild a smaller sample first (single program, or a whole business area)::
+
+    python manage.py es_populate_delta --using v9 --reconcile --program my-program-code
+    python manage.py es_populate_delta --using v9 --since 2026-07-01T08:55Z --business-area afghanistan
+
 """
 
 from datetime import datetime
 from typing import Any
+import uuid
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -55,9 +62,15 @@ from hope.apps.household.services.index_management import (
     rebuild_program_indexes,
 )
 
+# Above this many programs, --dry-run prints only a summary instead of every pid.
+DRY_RUN_PRINT_LIMIT = 10000
+
 
 class Command(BaseCommand):
-    help = "Delta/reconcile per-program ES indexes on a shadow cluster against Postgres. Shadow cluster is the one that waits to be plugged into prod and replace the one that is currently used."
+    help = (
+        "Delta/reconcile per-program ES indexes on a shadow cluster against Postgres. "
+        "Shadow cluster is the one that waits to be plugged into prod and replace the one that is currently used."
+    )
 
     def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
@@ -82,6 +95,16 @@ class Command(BaseCommand):
             "--include-non-active",
             action="store_true",
             help="Include closed/finished programs (default: ACTIVE only).",
+        )
+        parser.add_argument(
+            "--program",
+            default=None,
+            help="Limit scope to a single program (UUID or code). Handy to rebuild a small sample first.",
+        )
+        parser.add_argument(
+            "--business-area",
+            default=None,
+            help="Limit scope to a business area (slug). Combine with --program to narrow further.",
         )
         parser.add_argument(
             "--parallel",
@@ -128,8 +151,12 @@ class Command(BaseCommand):
         from hope.models import Program
 
         scope = Program.objects.all() if opts["include_non_active"] else Program.objects.filter(status=Program.ACTIVE)
+        scope = self._apply_scope_filters(scope, opts)
         code_by_id = dict(scope.values_list("id", "code"))
         scope_id_set = set(code_by_id)
+        if (opts["program"] or opts["business_area"]) and not scope_id_set:
+            self.stdout.write(self.style.WARNING("No programs match --program / --business-area (nothing to do)."))
+            return
 
         # 1) Programs changed since `since` (inserts / updates / soft-deletes).
         changed_ids = (self._changed_program_ids(since) & scope_id_set) if since is not None else set()
@@ -149,22 +176,49 @@ class Command(BaseCommand):
             self._print_dry_run(to_rebuild, changed_ids, mismatch_ids, code_by_id)
             return
 
-        failures = self._rebuild_programs(to_rebuild, code_by_id, using, opts)
-        if failures:
-            raise CommandError(f"Done with {failures} failure(s) on cluster '{using}'.")
+        failed = self._rebuild_programs(to_rebuild, code_by_id, using, opts)
+        if failed:
+            self.stdout.write(self.style.ERROR(f"Failed programs ({len(failed)}):"))
+            for code, pid, msg in failed:
+                self.stdout.write(self.style.ERROR(f"  - {code}  id={pid}  {msg}"))
+            raise CommandError(f"Done with {len(failed)} failure(s) on cluster '{using}'.")
         self.stdout.write(self.style.SUCCESS(f"Done. Cluster '{using}' is in sync for the processed programs."))
+
+    @staticmethod
+    def _apply_scope_filters(scope: Any, opts: dict) -> Any:
+        if opts["business_area"]:
+            scope = scope.filter(business_area__slug=opts["business_area"])
+        program = opts["program"]
+        if program:
+            try:
+                uuid.UUID(str(program))
+                scope = scope.filter(id=program)
+            except (ValueError, AttributeError):
+                scope = scope.filter(code=program)
+        return scope
 
     @staticmethod
     def _count_mismatch_ids(scope_id_set: set, using: str) -> set:
         return {pid for pid in scope_id_set if not check_program_indexes(str(pid), using=using)[0]}
 
     def _print_dry_run(self, to_rebuild: set, changed_ids: set, mismatch_ids: set, code_by_id: dict) -> None:
+        both = changed_ids & mismatch_ids
+        self.stdout.write(
+            f"  summary: {len(changed_ids)} changed, {len(mismatch_ids)} count-mismatch, "
+            f"{len(both)} both -> {len(to_rebuild)} unique to rebuild."
+        )
+        if len(to_rebuild) > DRY_RUN_PRINT_LIMIT:
+            self.stdout.write(
+                f"  ({len(to_rebuild)} programs exceed the {DRY_RUN_PRINT_LIMIT} print limit; per-program list "
+                f"suppressed. Narrow with --program / --business-area to inspect details.)"
+            )
+            return
         for pid in sorted(to_rebuild, key=lambda p: code_by_id.get(p, "")):
             reasons = [r for r, group in (("changed", changed_ids), ("count-mismatch", mismatch_ids)) if pid in group]
             self.stdout.write(f"  - {code_by_id.get(pid)}  id={pid}  ({', '.join(reasons)})")
 
-    def _rebuild_programs(self, to_rebuild: set, code_by_id: dict, using: str, opts: dict) -> int:
-        failures = 0
+    def _rebuild_programs(self, to_rebuild: set, code_by_id: dict, using: str, opts: dict) -> list:
+        failed: list = []
         for pid in to_rebuild:
             self.stdout.write(f"==> Rebuilding {code_by_id.get(pid)} on '{using}' ...")
             ok, msg = rebuild_program_indexes(
@@ -177,12 +231,12 @@ class Command(BaseCommand):
             line = self.style.SUCCESS if ok else self.style.ERROR
             self.stdout.write(line(f"    {msg or ('ok' if ok else 'failed')}"))
             if not ok:
-                failures += 1
+                failed.append((code_by_id.get(pid), pid, msg or "failed"))
                 continue
             if opts["verify"]:
                 vok, vmsg = check_program_indexes(str(pid), using=using)
                 self.stdout.write((self.style.SUCCESS if vok else self.style.WARNING)(f"    verify: {vmsg}"))
-        return failures
+        return failed
 
     @staticmethod
     def _parse_since(raw: str) -> datetime:
