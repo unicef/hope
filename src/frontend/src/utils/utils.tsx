@@ -1,4 +1,5 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Box, Typography } from '@mui/material';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
 import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
@@ -11,10 +12,36 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
+import { ReactElement } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
+export function displayNameWithLatin<T extends Record<string, any>>(
+  obj: T | null | undefined,
+  key: string & keyof T,
+): string | ReactElement | null {
+  if (!obj) return null;
+  const name = obj[key] as string | null | undefined;
+  if (!name) return null;
+  const latinName = obj[`${key}Latin`] as string | null | undefined;
+  if (!latinName) return name;
+  return (
+    <Box
+      component="span"
+      sx={{ display: 'inline-flex', flexDirection: 'column', lineHeight: 1.1 }}
+    >
+      <span>{name}</span>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ fontSize: '0.7rem' }}
+      >
+        {latinName}
+      </Typography>
+    </Box>
+  );
+}
 const NEWLINE_RE = /[\r\n]/g;
 
 // Formats a string or array value to Normal Case using lodash's startCase
@@ -378,20 +405,26 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
+      theme.palette.error.main,
     [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
+      theme.palette.error.main,
     [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]:
+      theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };

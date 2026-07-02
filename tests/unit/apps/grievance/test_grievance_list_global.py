@@ -885,7 +885,7 @@ def test_all_edit_people_fields_attributes(
 
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 43
+    assert len(data) == 47
 
     first_field = data[0]
     assert "id" in first_field
@@ -928,7 +928,7 @@ def test_all_add_individuals_fields_attributes(
 
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 30
+    assert len(data) == 34
 
     first_field = data[0]
     assert "id" in first_field

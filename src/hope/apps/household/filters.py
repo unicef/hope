@@ -387,6 +387,7 @@ class IndividualFilter(UpdatedAtFilter):
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"full_name": {"query": search}}},
+                        {"match_phrase_prefix": {"full_name_latin": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
@@ -418,6 +419,7 @@ class IndividualFilter(UpdatedAtFilter):
                     Q(unicef_id__icontains=search)
                     | Q(household__unicef_id__icontains=search)
                     | Q(full_name__icontains=search)
+                    | Q(full_name_latin__icontains=search)
                     | Q(phone_no_normalized__icontains=search)
                     | Q(phone_no_alt_normalized__icontains=search)
                     | Q(detail_id__icontains=search)

@@ -51,6 +51,7 @@ class IndividualDocument(_PreparedFieldsFix, Document):
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
     full_name = fields.TextField(analyzer=phonetic_analyzer)
+    full_name_latin = fields.TextField(analyzer=phonetic_analyzer)
     birth_date = fields.DateField()  # Before es 8, similarity parameter on DateField failed silently
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__", similarity="boolean")
@@ -139,6 +140,10 @@ class HouseholdDocument(_PreparedFieldsFix, Document):
             "given_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "middle_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "family_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "full_name_latin": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "given_name_latin": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "middle_name_latin": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "family_name_latin": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "phone_no_text": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "phone_no_alternative_text": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
             "documents": fields.ObjectField(

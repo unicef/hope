@@ -6,7 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualList } from '@restgenerated/models/IndividualList';
-import { choicesToDict, sexToCapitalize } from '@utils/utils';
+import { choicesToDict, displayNameWithLatin, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,7 +47,7 @@ export function IndividualsListTableRow({
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
-      <AnonTableCell>{individual.fullName}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLatin(individual, 'fullName')}</AnonTableCell>
       <TableCell align="left">
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>

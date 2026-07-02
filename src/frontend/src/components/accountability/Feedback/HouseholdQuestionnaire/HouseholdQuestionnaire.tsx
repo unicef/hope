@@ -11,6 +11,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useQuery } from '@tanstack/react-query';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { displayNameWithLatin } from '@utils/utils';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -89,7 +90,7 @@ function HouseholdQuestionnaire({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold?.id}`}
             >
-              {selectedHouseholdData.headOfHousehold?.fullName}
+              {displayNameWithLatin(selectedHouseholdData.headOfHousehold, 'fullName')}
             </ContentLink>
           ),
           size: 3,
