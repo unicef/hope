@@ -57,7 +57,7 @@ from hope.apps.household.services.index_management import (
 
 
 class Command(BaseCommand):
-    help = "Delta/reconcile per-program ES indexes on a shadow cluster against Postgres."
+    help = "Delta/reconcile per-program ES indexes on a shadow cluster against Postgres. Shadow cluster is the one that waits to be plugged into prod and replace the one that is currently used."
 
     def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
