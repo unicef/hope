@@ -416,8 +416,10 @@ def test_get_notification_backend_returns_bitcaster_client() -> None:
 
 
 def test_notification_backend_protocol_stub_methods_are_covered() -> None:
-    assert NotificationBackend.is_configured.fget(SimpleNamespace()) is None
-    assert (
+    with pytest.raises(NotImplementedError):
+        NotificationBackend.is_configured.fget(SimpleNamespace())
+
+    with pytest.raises(NotImplementedError):
         NotificationBackend.trigger_event(
             SimpleNamespace(),
             "payment.plan.sent_for_approval",
@@ -425,8 +427,6 @@ def test_notification_backend_protocol_stub_methods_are_covered() -> None:
             options={"limit_to": ["user@example.org"]},
             cid="1",
         )
-        is None
-    )
 
 
 def test_send_notification_event_delegates_to_backend(mocker: Any) -> None:

@@ -5,7 +5,8 @@ from hope.apps.core.notifications.bitcaster_client import BitcasterClient
 
 class NotificationBackend(Protocol):
     @property
-    def is_configured(self) -> bool: ...
+    def is_configured(self) -> bool:
+        raise NotImplementedError
 
     def trigger_event(
         self,
@@ -13,7 +14,8 @@ class NotificationBackend(Protocol):
         payload: dict[str, Any],
         options: dict[str, Any] | None = None,
         cid: str | None = None,
-    ) -> bool: ...
+    ) -> bool:
+        raise NotImplementedError
 
 
 def get_notification_backend() -> NotificationBackend:
