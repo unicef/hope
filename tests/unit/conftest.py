@@ -130,6 +130,10 @@ def _patch_sync_apps_for_no_migrations() -> None:
 def pytest_configure(config: Config) -> None:
     # Patch sync_apps before tests run
     _patch_sync_apps_for_no_migrations()
+    # Connect the pre/post-migrate signals here (not via an autouse session fixture) so they
+    # are registered before pytest-django's django_db_setup builds the test DB. pytest 9.1.0
+    # changed fixture-closure ordering, which would otherwise run the connector too late.
+    _register_custom_sql_signal()
 
     pytest.localhost = bool(config.getoption("--localhost"))
     here = Path(__file__).parent
@@ -277,8 +281,7 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
     return apps, all_sqls
 
 
-@pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
+def _register_custom_sql_signal() -> None:
     from django.db import connections
     from django.db.models.signals import post_migrate, pre_migrate
 
