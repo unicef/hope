@@ -205,6 +205,42 @@ def test_consent_read_from_form_when_declined(
     assert household.consent is False
 
 
+def test_consent_defaults_to_true_when_not_in_form(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    submission_timestamp: datetime.datetime,
+) -> None:
+    record = RecordFactory(
+        registration=registration.source_id,
+        timestamp=submission_timestamp,
+        source_id=7,
+        fields={
+            "household": [{}],
+            "individuals": [
+                {
+                    "given_name_i_c": "Ivan",
+                    "family_name_i_c": "Kovalenko",
+                    "birth_date": "1970-07-07",
+                    "gender_i_c": "male",
+                    "relationship_i_c": "head",
+                    "role_i_c": "y",
+                    "tax_id_no_i_c": "5555555555",
+                }
+            ],
+        },
+        files=json.dumps({}).encode(),
+    )
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [record.id])
+
+    household = PendingHousehold.objects.get(registration_data_import=rdi)
+    assert household.consent is True
+
+
 def test_individual_full_name_concatenated_and_birth_date_not_estimated(
     registration: Any,
     user: Any,
@@ -369,18 +405,19 @@ def test_import_errors_when_delivery_mechanism_not_configured(
     assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
 
 
-def test_no_wallet_account_when_no_wallet_data(
+def test_no_wallet_account_when_address_missing(
     registration: Any,
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
+    generic_crypto_fi: FinancialInstitution,
     submission_timestamp: datetime.datetime,
 ) -> None:
     record = RecordFactory(
         registration=registration.source_id,
         timestamp=submission_timestamp,
-        source_id=3,
+        source_id=6,
         fields={
             "household": [{"consent_h_c": True}],
             "individuals": [
@@ -391,7 +428,7 @@ def test_no_wallet_account_when_no_wallet_data(
                     "gender_i_c": "male",
                     "relationship_i_c": "head",
                     "role_i_c": "y",
-                    "tax_id_no_i_c": "5555555555",
+                    "wallet_name_i_c": "Trust",
                 }
             ],
         },
@@ -403,6 +440,7 @@ def test_no_wallet_account_when_no_wallet_data(
     service.process_records(rdi.id, [record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.wallet_name == "Trust"
     assert not PendingAccount.objects.filter(individual=individual).exists()
 
 
