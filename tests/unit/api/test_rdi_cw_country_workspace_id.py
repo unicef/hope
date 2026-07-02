@@ -144,7 +144,7 @@ def test_complete_cw_rdi_enqueues_arrival_hook_on_commit(
 ) -> None:
     url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading_cw.id)])
 
-    with patch("hope.api.endpoints.rdi.base.process_country_workspace_rdi_task") as mock_enqueue:
+    with patch("hope.api.endpoints.rdi.base.fetch_findings_and_merge_rdi") as mock_enqueue:
         with django_capture_on_commit_callbacks(execute=True):
             response = token_api_client.post(url, {}, format="json")
 

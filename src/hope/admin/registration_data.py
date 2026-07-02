@@ -183,9 +183,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             if rdi is None:
                 self.message_user(request, "Registration Data Import not found", messages.ERROR)
                 return None
-            from hope.apps.registration_data.celery_tasks import process_country_workspace_rdi_task
+            from hope.apps.registration_data.celery_tasks import fetch_findings_and_merge_rdi
 
-            process_country_workspace_rdi_task(rdi)
+            fetch_findings_and_merge_rdi(rdi)
             self.message_user(request, "CW RDI reprocessing task has started")
         except OperationalError as e:
             logger.warning(e)
