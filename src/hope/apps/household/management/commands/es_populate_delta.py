@@ -250,17 +250,40 @@ class Command(BaseCommand):
 
     @staticmethod
     def _changed_program_ids(since: datetime) -> set:
-        """Program ids with an Individual or Household changed at/after `since`.
+        """Program ids with any record feeding the ES documents changed at/after `since`.
 
-        Uses the exact managers the ES documents populate from, so detection matches
-        the index population set.
+        The Individual/Household ES documents embed related objects, so a change to one of
+        those must trigger a program rebuild even when the parent Individual/Household
+        ``updated_at`` did not move:
+
+        * Individual (base)      -> ``updated_at``
+        * Household (base)       -> ``updated_at``
+        * Document               -> ``updated_at`` (embedded in individual.documents and
+                                    household.head_of_household.documents)
+        * IndividualIdentity     -> ``modified`` (model_utils TimeStampedModel, not updated_at;
+                                    embedded in individual.identities)
+
+        Related records are mapped back to their program via the owning individual
+        (``individual__program_id``), since Document.program is nullable and Identity has no
+        program FK. Over-detection is harmless -- the rebuild is idempotent.
+
+        Not covered here (rare, cross-program reference data with no per-program key): Area
+        (admin names), DocumentType, Country, Partner. If those change during the window, run
+        a full rebuild (``es_shadow_populate``) instead.
         """
-        from hope.models import Household, Individual
+        from hope.models import Document, Household, Individual, IndividualIdentity
 
-        ind = (
-            Individual.all_merge_status_objects.filter(updated_at__gte=since)
-            .values_list("program_id", flat=True)
-            .distinct()
-        )
-        hh = Household.objects.filter(updated_at__gte=since).values_list("program_id", flat=True).distinct()
-        return {pid for pid in ind if pid is not None} | {pid for pid in hh if pid is not None}
+        sources = [
+            Individual.all_merge_status_objects.filter(updated_at__gte=since).values_list("program_id", flat=True),
+            Household.objects.filter(updated_at__gte=since).values_list("program_id", flat=True),
+            Document.all_merge_status_objects.filter(updated_at__gte=since).values_list(
+                "individual__program_id", flat=True
+            ),
+            IndividualIdentity.all_merge_status_objects.filter(modified__gte=since).values_list(
+                "individual__program_id", flat=True
+            ),
+        ]
+        program_ids: set = set()
+        for qs in sources:
+            program_ids.update(pid for pid in qs.distinct() if pid is not None)
+        return program_ids
