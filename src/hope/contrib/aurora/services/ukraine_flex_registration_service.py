@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any
 import uuid
 
@@ -26,6 +27,9 @@ from hope.apps.household.const import (
 from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
+)
+from hope.contrib.aurora.services.generic_registration_service import (
+    GenericRegistrationService,
 )
 from hope.models import (
     Area,
@@ -361,7 +365,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         household_data = super()._prepare_household_data(household_dict, record, registration_data_import)
         consent = household_dict.get("consent_h_c")
         if consent is not None:
-            household_data["consent"] = consent in ("y", "yes", "1", 1, "true", "True", True)
+            household_data["consent"] = GenericRegistrationService.get_boolean(consent)
         return household_data
 
     def _prepare_individual_data(
@@ -384,25 +388,21 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         individuals = PendingIndividual.objects.filter(
             registration_data_import=registration_data_import,
             detail_id=record.source_id,
-        ).exclude(wallet_address="", wallet_name="")
-        if not individuals:
-            return
-
-        account_type = self._get_wallet_account_type()
-        financial_institution = FinancialInstitution.get_generic_one(account_type.key, is_valid_iban=False)
+        ).exclude(wallet_address="")
         accounts = [
             PendingAccount(
                 individual=individual,
-                account_type=account_type,
-                number=individual.wallet_address or None,
-                financial_institution=financial_institution,
+                account_type=self._wallet_account_type,
+                number=individual.wallet_address,
+                financial_institution=self._wallet_financial_institution,
                 data={"wallet_address": individual.wallet_address, "wallet_name": individual.wallet_name},
             )
             for individual in individuals
         ]
         PendingAccount.objects.bulk_create(accounts)
 
-    def _get_wallet_account_type(self) -> Any:
+    @cached_property
+    def _wallet_account_type(self) -> Any:
         delivery_mechanism = DeliveryMechanism.objects.filter(code=self.DIGITAL_WALLET_DELIVERY_MECHANISM_CODE).first()
         if not delivery_mechanism or not delivery_mechanism.account_type:
             raise ValidationError(
@@ -410,3 +410,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
                 "configured; sync it from the Payment Gateway before importing USDC wallets."
             )
         return delivery_mechanism.account_type
+
+    @cached_property
+    def _wallet_financial_institution(self) -> Any:
+        return FinancialInstitution.get_generic_one(self._wallet_account_type.key, is_valid_iban=False)
