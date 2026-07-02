@@ -51,6 +51,9 @@ class FinancialInstitution(TimeStampedModel):
         if account_type == "card":
             return cls.objects.get(name="Generic Bank")
 
+        if account_type == "crypto":
+            return cls.objects.get(name="Generic Crypto")
+
         logger.error(f"Unknown account type for generic Financial Institution: {account_type}")
         return cls.objects.get(name="Generic Bank")
 
