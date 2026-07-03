@@ -62,10 +62,10 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
-    "@babel/plugin-syntax-jsx": "^7.29.7",
-    "@babel/plugin-transform-class-properties": "^7.29.7",
+    "@babel/plugin-syntax-jsx": "^8.0.1",
+    "@babel/plugin-transform-class-properties": "^8.0.1",
     "@babel/plugin-transform-object-rest-spread": "^8.0.1",
-    "@babel/plugin-transform-typescript": "^7.29.7",
+    "@babel/plugin-transform-typescript": "^8.0.1",
     "@babel/preset-env": "7.29.0",
     "@babel/preset-react": "^7.29.7",
     "@babel/preset-typescript": "^7.29.7",
