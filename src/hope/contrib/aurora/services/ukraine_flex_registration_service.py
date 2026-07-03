@@ -32,6 +32,7 @@ from hope.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
 )
 from hope.models import (
+    AccountType,
     Area,
     Country,
     DeliveryMechanism,
@@ -98,6 +99,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         individuals: list[PendingIndividual] = []
         documents: list[PendingDocument] = []
+        accounts: list[PendingAccount] = []
         record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
@@ -140,10 +142,15 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                     household.head_of_household = individual
                     household.save(update_fields=("head_of_household",))
                 documents.extend(self._prepare_documents(individual_dict, individual))
+                accounts.extend(self._prepare_accounts(individual_dict, individual))
             except ValidationError as e:
                 raise ValidationError({f"individual nr {index + 1}": [str(e)]}) from e
 
         PendingDocument.objects.bulk_create(documents)
+        PendingAccount.objects.bulk_create(accounts)
+
+    def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
+        return []
 
     def _set_default_head_of_household(self, individuals_array: list[dict[str, Any]]) -> None:
         for individual_data in individuals_array:
@@ -326,10 +333,9 @@ class Registration2024(UkraineBaseRegistrationService):
 class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
     """USDC registration for Ukraine — regular (household-based) programme.
 
-    Maps the finalized USDC form to Households + Individuals, storing the crypto wallet
-    both on the Individual (`wallet_address`/`wallet_name`, for display/grievance) and on a
-    ``PendingAccount``. The account type is taken from the ``transfer_to_digital_wallet`` delivery mechanism
-    so it always matches payout, and its financial institution is the generic one for that account type.
+    Maps the finalized USDC form to Households + Individuals. The crypto wallet is stored on a ``PendingAccount``.
+    The account type is taken from the ``transfer_to_digital_wallet`` delivery mechanism so it always matches payout,
+    and its financial institution is the generic one for that account type.
     """
 
     DIGITAL_WALLET_DELIVERY_MECHANISM_CODE = "transfer_to_digital_wallet"
@@ -343,8 +349,6 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         "phone_no": "phone_no_i_c",
         "relationship": "relationship_i_c",
         "role": "role_i_c",
-        "wallet_name": "wallet_name_i_c",
-        "wallet_address": "wallet_address_i_c",
     }
 
     DOCUMENT_MAPPING_KEY_DICT = {
@@ -380,29 +384,23 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             individual_data["flex_fields"] = flex_fields
         return individual_data
 
-    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
-        super().create_household_for_rdi_household(record, registration_data_import)
-        self._create_wallet_accounts(record, registration_data_import)
-
-    def _create_wallet_accounts(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
-        individuals = PendingIndividual.objects.filter(
-            registration_data_import=registration_data_import,
-            detail_id=record.source_id,
-        ).exclude(wallet_address="")
-        accounts = [
+    def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
+        wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()
+        if not wallet_address:
+            return []
+        wallet_name = (individual_dict.get("wallet_name_i_c") or "").strip()
+        return [
             PendingAccount(
                 individual=individual,
-                account_type=self._wallet_account_type,
-                number=individual.wallet_address,
-                financial_institution=self._wallet_financial_institution,
-                data={"wallet_address": individual.wallet_address, "wallet_name": individual.wallet_name},
+                account_type=self._digital_wallet_account_type,
+                number=wallet_address,
+                financial_institution=self._digital_wallet_financial_institution,
+                data={"wallet_address": wallet_address, "wallet_name": wallet_name},
             )
-            for individual in individuals
         ]
-        PendingAccount.objects.bulk_create(accounts)
 
     @cached_property
-    def _wallet_account_type(self) -> Any:
+    def _digital_wallet_account_type(self) -> AccountType:
         delivery_mechanism = DeliveryMechanism.objects.filter(code=self.DIGITAL_WALLET_DELIVERY_MECHANISM_CODE).first()
         if not delivery_mechanism or not delivery_mechanism.account_type:
             raise ValidationError(
@@ -412,5 +410,5 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         return delivery_mechanism.account_type
 
     @cached_property
-    def _wallet_financial_institution(self) -> Any:
-        return FinancialInstitution.get_generic_one(self._wallet_account_type.key, is_valid_iban=False)
+    def _digital_wallet_financial_institution(self) -> FinancialInstitution:
+        return FinancialInstitution.get_generic_one(self._digital_wallet_account_type.key, is_valid_iban=False)

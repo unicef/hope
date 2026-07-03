@@ -260,7 +260,7 @@ def test_individual_full_name_concatenated_and_birth_date_not_estimated(
     assert individual.estimated_birth_date is False
 
 
-def test_individual_wallet_fields_populated(
+def test_wallet_stored_on_account_not_on_individual(
     registration: Any,
     user: Any,
     ukraine_country: Any,
@@ -274,8 +274,10 @@ def test_individual_wallet_fields_populated(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    assert individual.wallet_address == "0xABCDEF0123456789"
-    assert individual.wallet_name == "MetaMask"
+    assert individual.wallet_address == ""
+    assert individual.wallet_name == ""
+    account = PendingAccount.objects.get(individual=individual)
+    assert account.data == {"wallet_address": "0xABCDEF0123456789", "wallet_name": "MetaMask"}
 
 
 def test_wallet_images_stored_as_flex_fields(
@@ -440,7 +442,6 @@ def test_no_wallet_account_when_address_missing(
     service.process_records(rdi.id, [record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    assert individual.wallet_name == "Trust"
     assert not PendingAccount.objects.filter(individual=individual).exists()
 
 
