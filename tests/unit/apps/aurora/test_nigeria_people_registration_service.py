@@ -5,7 +5,6 @@ from io import StringIO
 import json
 
 from django.contrib.admin.sites import AdminSite
-from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 import pytest
 
@@ -750,7 +749,8 @@ def test_registration_admin_export_ignored_records_returns_csv(
     registration.rdi_parser = NigeriaPeopleRegistrationService
 
     request = type("Request", (), {"user": user})()
-    response = RegistrationAdmin(models.Registration, AdminSite()).export_ignored_records(request, registration.pk)
+    model_admin = RegistrationAdmin(models.Registration, AdminSite())
+    response = RegistrationAdmin.__dict__["export_ignored_records"].func(model_admin, request, registration.pk)
     csv_rows = list(csv.DictReader(StringIO(response.content.decode())))
 
     assert response["Content-Type"] == "text/csv"
@@ -780,6 +780,9 @@ def test_registration_admin_export_ignored_records_rejects_non_nigeria_registrat
 ) -> None:
     registration.rdi_parser = None
     request = type("Request", (), {"user": user})()
+    model_admin = RegistrationAdmin(models.Registration, AdminSite())
 
-    with pytest.raises(PermissionDenied):
-        RegistrationAdmin(models.Registration, AdminSite()).export_ignored_records(request, registration.pk)
+    response = RegistrationAdmin.__dict__["export_ignored_records"].func(model_admin, request, registration.pk)
+
+    assert response.status_code == 302
+    assert response.url.endswith(f"/aurora/registration/{registration.pk}/change/")

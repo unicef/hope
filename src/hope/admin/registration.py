@@ -6,9 +6,9 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
-from django.core.exceptions import PermissionDenied
 from django.db.models import JSONField
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 from jsoneditor.forms import JSONEditor
 from smart_admin.decorators import smart_register
 
@@ -47,7 +47,7 @@ class RegistrationAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, ExtraBut
     def export_ignored_records(self, request: HttpRequest, pk: Any) -> HttpResponse:
         registration = models.Registration.objects.get(pk=pk)
         if not self.is_nigeria_registration(registration):
-            raise PermissionDenied("Ignored record export is only available for Nigeria Aurora registrations")
+            return redirect("admin:aurora_registration_change", registration.pk)
 
         records = models.Record.objects.filter(registration=registration.source_id, ignored=True).order_by("id")
 

@@ -82,10 +82,17 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
     @classmethod
     def _get_account_number(cls, individual_data: dict, mapping: dict) -> str:
         individuals_key = mapping["defaults"].get("individuals_key", "individual-details")
-        individuals_data = cls.create_individuals_dicts([individual_data], mapping[individuals_key], mapping)
-        if not individuals_data:
-            return ""
-        return cls._get_account_number_from_account_data(individuals_data[0].get("account_details", {}))
+        for field_name, mapped_field in mapping[individuals_key].items():
+            model, field = mapped_field.split(".")
+            if model != "account_details":
+                continue
+
+            retrieved_value = cls.get(individual_data, field_name)
+            if field == "data" and isinstance(retrieved_value, dict):
+                return str(retrieved_value.get("number") or "")
+            if field == "number":
+                return str(retrieved_value or "")
+        return ""
 
     @staticmethod
     def _get_national_id_field_name(mapping: dict) -> str:
