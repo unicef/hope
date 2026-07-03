@@ -397,6 +397,25 @@ def test_record_has_duplicate_account_number_ignores_other_program_accounts(
     )
 
 
+def test_get_account_number_helpers_cover_empty_and_direct_number_mapping(registration: object) -> None:
+    service = NigeriaPeopleRegistrationService(registration)
+    mapping = service.get_mapping(registration.mapping)
+
+    direct_number_mapping = {
+        "defaults": {"individuals_key": "individual-details"},
+        "individual-details": {
+            "bank_account_number_i_c": "account_details.number",
+        },
+    }
+
+    assert service._get_account_number_from_account_data({"data": {"number": "2087008012"}}) == "2087008012"
+    assert service._get_account_number_from_account_data({"data": "not-a-dict"}) == ""
+    assert service._get_account_number({"bank_account_number_i_c": "2087008013"}, direct_number_mapping) == "2087008013"
+    assert service._get_account_number({"bank_account_number_i_c": None}, direct_number_mapping) == ""
+    assert service._get_account_number_from_record_data({}, mapping) == ""
+    assert service._get_account_number_from_record_data({"individual-details": []}, mapping) == ""
+
+
 def test_import_data_to_datahub(
     nigeria_country: object,
     nigeria_admin_areas: dict,
