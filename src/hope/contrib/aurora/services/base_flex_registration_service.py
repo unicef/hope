@@ -100,9 +100,11 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             Record.objects.filter(id__in=records_ids)
             .exclude(status=Record.STATUS_IMPORTED)
             .exclude(ignored=True)
+            .order_by("id")
             .values_list("id", flat=True)
         )
         imported_records_ids = []
+        ignored_records_ids = []
         records_with_error = []
 
         try:
@@ -111,7 +113,10 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                 try:
                     with atomic():
                         self.create_household_for_rdi_household(record, rdi)
-                    imported_records_ids.append(record_id)
+                    if record.ignored:
+                        ignored_records_ids.append(record_id)
+                    else:
+                        imported_records_ids.append(record_id)
                 except ValidationError as e:
                     records_with_error.append((record, str(e)))
                     continue
@@ -129,6 +134,21 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                             "error_message",
                         )
                     )
+
+            if (
+                ignored_records_ids
+                and not imported_records_ids
+                and not records_with_error
+                and rdi.status == RegistrationDataImport.IMPORTING
+            ):
+                rdi.status = RegistrationDataImport.IMPORT_ERROR
+                rdi.error_message = "All selected Aurora Records were ignored during processing"
+                rdi.save(
+                    update_fields=(
+                        "status",
+                        "error_message",
+                    )
+                )
 
             if imported_records_ids:
                 number_of_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).count()
