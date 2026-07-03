@@ -747,6 +747,7 @@ def test_registration_admin_export_ignored_records_returns_csv(
     record.error_message = NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON
     record.save(update_fields=["registration", "fields", "ignored", "error_message"])
     registration.rdi_parser = NigeriaPeopleRegistrationService
+    registration.save(update_fields=["rdi_parser"])
 
     request = type("Request", (), {"user": user})()
     model_admin = RegistrationAdmin(models.Registration, AdminSite())
