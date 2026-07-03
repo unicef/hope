@@ -58,8 +58,9 @@ def social_program(business_area: BusinessArea, social_purpose: PaymentPlanPurpo
 
 @pytest.fixture
 def social_people(social_program: Program, business_area: BusinessArea) -> dict:
-    # unicef_id is normally assigned by a DB trigger that isn't active in this suite, so set it
-    # explicitly (the exclusion maps an "IND" id to its "HH" household unicef_id).
+    # Assign predictable, parallel HH/IND unicef_ids so the exclusion mapping is deterministic:
+    # the trigger-generated ids are serial-based, but the test feeds these exact ids into the
+    # targeting rule and asserts on them (exclusion maps an "IND" id to its "HH" household id).
     hh1 = HouseholdFactory(unicef_id="HH-99-0001.0001", business_area=business_area, program=social_program)
     hh2 = HouseholdFactory(unicef_id="HH-99-0002.0001", business_area=business_area, program=social_program)
     ind1 = hh1.head_of_household

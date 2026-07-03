@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytest
 
+from extras.test_utils.factories.core import BeneficiaryGroupFactory
 from extras.test_utils.factories.household import HouseholdFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Household, Program
@@ -24,15 +25,13 @@ def social_worker_program(business_area: BusinessArea) -> Program:
 
 @pytest.fixture
 def household_update_program(business_area: BusinessArea) -> Program:
-    beneficiary_group, _ = BeneficiaryGroup.objects.get_or_create(
+    beneficiary_group = BeneficiaryGroupFactory(
         name="Household Group",
-        defaults={
-            "group_label": "Household",
-            "group_label_plural": "Households",
-            "member_label": "Individual",
-            "member_label_plural": "Individuals",
-            "master_detail": True,
-        },
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=True,
     )
     return ProgramFactory(
         name="HH Update Program",
