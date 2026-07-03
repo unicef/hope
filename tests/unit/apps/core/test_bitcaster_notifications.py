@@ -305,7 +305,7 @@ def test_publish_rendered_email_notification_normalizes_context_to_json_safe_val
     event = mock_publish.call_args.args[0]
     assert event.context == {
         "date": "2050-01-02",
-        "expires_at": "2050-01-01T12:30:00",
+        "expires_at": "2050-01-01 12:30:00",
         "uuid": "12345678-1234-5678-1234-567812345678",
         "decimal": "123.45",
         "custom": "unknown-context-value",
