@@ -70,7 +70,7 @@ jobs:
           done
 
       - name: Install Python & UV
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: latest
           enable-cache: true
@@ -191,6 +191,12 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
 
+      - name: Download generated types
+        uses: actions/download-artifact@v4
+        with:
+          name: restgenerated-types
+          path: src/frontend/src/restgenerated/
+
       - name: Install JS dependencies & build
         run: |
           cd src/frontend
@@ -198,7 +204,7 @@ jobs:
           bun run build-for-backend
 
       - name: Install Python & UV
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: latest
           enable-cache: true

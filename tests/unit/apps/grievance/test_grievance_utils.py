@@ -122,6 +122,20 @@ def test_traverse_sibling_tickets_empty_intersection_skips_add(
     assert sibling_details.selected_individuals.count() == initial_selected_count
 
 
+def test_traverse_sibling_tickets_empty_selected_returns_early(
+    grievance_ticket: Any,
+    sibling_ticket: Any,
+) -> None:
+    # Empty queryset → selected_individual_ids = [] → returns immediately, no DB writes.
+    sibling_details = sibling_ticket.needs_adjudication_ticket_details
+    initial_count = sibling_details.selected_individuals.count()
+
+    traverse_sibling_tickets(grievance_ticket, Individual.objects.none())
+
+    sibling_details.refresh_from_db()
+    assert sibling_details.selected_individuals.count() == initial_count
+
+
 def test_traverse_sibling_tickets_non_empty_intersection_adds_individuals(
     grievance_ticket: Any,
     sibling_ticket: Any,

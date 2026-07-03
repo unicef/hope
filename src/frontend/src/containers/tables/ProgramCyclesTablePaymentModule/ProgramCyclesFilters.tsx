@@ -8,6 +8,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import moment from 'moment/moment';
 import { FiltersSection } from '@components/core/FiltersSection';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 interface ProgramCyclesFiltersProps {
   filter;
@@ -15,13 +16,8 @@ interface ProgramCyclesFiltersProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
+  choicesData?: ProgramChoices;
 }
-
-const programCycleStatuses = [
-  { value: 'ACTIVE', name: 'Active' },
-  { value: 'DRAFT', name: 'Draft' },
-  { value: 'FINISHED', name: 'Finished' },
-];
 
 export const ProgramCyclesFilters = ({
   filter,
@@ -29,6 +25,7 @@ export const ProgramCyclesFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
+  choicesData,
 }: ProgramCyclesFiltersProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -75,13 +72,11 @@ export const ProgramCyclesFilters = ({
             value={filter.status}
             fullWidth
           >
-            {programCycleStatuses.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData?.programCycleStatusChoices?.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={3}>
@@ -127,7 +122,7 @@ export const ProgramCyclesFilters = ({
           <DatePickerFilter
             onChange={(date) =>
               handleFilterChange(
-                'end_date',
+                'endDate',
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }

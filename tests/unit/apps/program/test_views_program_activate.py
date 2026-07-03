@@ -9,6 +9,7 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     PartnerFactory,
+    PaymentPlanPurposeFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -35,11 +36,13 @@ def user(partner: Partner) -> User:
 
 @pytest.fixture
 def program(afghanistan: BusinessArea) -> Program:
-    return ProgramFactory(
+    program = ProgramFactory(
         business_area=afghanistan,
         status=Program.DRAFT,
         name="Test Program For Activate",
     )
+    program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+    return program
 
 
 @pytest.fixture

@@ -5,6 +5,7 @@ from hope.config.env import env
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT")
 SENTRY_ENABLE_TRACING = env("SENTRY_ENABLE_TRACING")
+SENTRY_TRACES_SAMPLE_RATE = env("SENTRY_TRACES_SAMPLE_RATE")
 
 if SENTRY_DSN:
     import sentry_sdk
@@ -28,7 +29,7 @@ if SENTRY_DSN:
         ],
         release=get_full_version(),
         enable_tracing=SENTRY_ENABLE_TRACING,
-        traces_sample_rate=1.0,
+        traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
         send_default_pii=True,
         ignore_errors=[
             "ValidationError",

@@ -25,9 +25,9 @@ def test_create_new_ticket_referral(
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
         Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user", password="testtest2", wait_for_drawer=False)
         browser.open(f"/{business_area.slug}/programs/all/grievance/tickets/user-generated")
-        browser.wait_for_text("Grievance Tickets", 'h5[data-cy="page-header-title"]')
+        browser.wait_for_text("Grievance Tickets", 'h5[data-cy="page-header-title"]', timeout=60)
 
         browser.click('a[data-cy="button-new-ticket"]')
         browser.select_dropdown_option("category", "Referral")

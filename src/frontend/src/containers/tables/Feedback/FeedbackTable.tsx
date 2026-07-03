@@ -11,6 +11,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
+import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { PaginatedFeedbackListList } from '@restgenerated/models/PaginatedFeedbackListList';
 import { FeedbackList } from '@restgenerated/models/FeedbackList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -39,7 +40,7 @@ function FeedbackTable({
       createdAtBefore: dateToIsoString(filter.createdAtBefore, 'startOfDay'),
       createdAtAfter: dateToIsoString(filter.createdAtAfter, 'endOfDay'),
       program: isAllPrograms ? filter.program : null,
-      isActiveProgram: filter.programState === 'active' ? true : null,
+      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       businessAreaSlug: businessArea,
       programCode: isAllPrograms ? null : programId,
     }),

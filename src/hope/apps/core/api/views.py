@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from hope.api.caches import cached_response, etag_decorator
+from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
@@ -20,6 +21,7 @@ from hope.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
     CollectorAttributeSerializer,
+    CurrencyChoiceSerializer,
     FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
@@ -140,14 +142,13 @@ class ChoicesViewSet(ViewSet):
     Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
     """
 
-    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @extend_schema(responses={200: CurrencyChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="currencies")
     def currencies(self, request: Request) -> Response:
         from hope.models.currency import Currency
 
-        choices = Currency.objects.values_list("code", "name").order_by("code")
-        resp = ChoiceSerializer(to_choice_object(list(choices)), many=True).data
-        return Response(resp)
+        currencies = Currency.objects.filter(active=True).order_by("code")
+        return Response(CurrencyChoiceSerializer(currencies, many=True).data)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="payment-plan-status")
@@ -159,6 +160,12 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="payment-plan-background-action-status")
     def payment_plan_background_action_status(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentPlan.BackgroundActionStatus.choices), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-plan-type")
+    def payment_plan_type(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentPlan.PlanType.choices), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
@@ -212,4 +219,10 @@ class ChoicesViewSet(ViewSet):
         countries = Country.objects.all().order_by("name")
         country_tuples = tuple((country.iso_code3, country.name) for country in countries)
         resp = ChoiceSerializer(to_choice_object(list(country_tuples)), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="permissions")
+    def permissions(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(Permissions.choices()), many=True).data
         return Response(resp)

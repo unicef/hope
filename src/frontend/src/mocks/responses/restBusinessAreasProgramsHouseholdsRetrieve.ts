@@ -27,8 +27,8 @@ export const restBusinessAreasProgramsHouseholdsRetrieve = {
     imported_by: {
       first_name: 'Root',
       last_name: 'Rootkowski',
-      email: 'root@root.com',
-      username: 'root',
+      email: 'mock-user@example.com',
+      username: 'mock-user',
     },
     data_source: 'FLEX_REGISTRATION',
   },

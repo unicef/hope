@@ -1,5 +1,7 @@
 from django.contrib import admin
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.html import format_html
 
 from hope.admin.utils import AutocompleteForeignKeyMixin
@@ -11,7 +13,20 @@ class WesternUnionPaymentPlanReportInline(AutocompleteForeignKeyMixin, admin.Tab
     extra = 0
     can_delete = False
     show_change_link = True
-    readonly_fields = ["payment_plan", "sent", "report_file"]
+    fields = ["report_admin_link", "payment_plan_admin_link", "sent"]
+    readonly_fields = ["report_admin_link", "payment_plan_admin_link", "sent"]
+
+    def report_admin_link(self, obj: WesternUnionPaymentPlanReport) -> str:
+        url = reverse("admin:payment_westernunionpaymentplanreport_change", args=[obj.pk])
+        return format_html('<a href="{}">Report #{}</a>', url, obj.pk)
+
+    report_admin_link.short_description = "Report"
+
+    def payment_plan_admin_link(self, obj: WesternUnionPaymentPlanReport) -> str:
+        url = reverse("admin:payment_paymentplan_change", args=[obj.payment_plan_id])
+        return format_html('<a href="{}">{}</a>', url, obj.payment_plan)
+
+    payment_plan_admin_link.short_description = "Payment Plan"
 
     def has_add_permission(self, request: HttpRequest, obj: WesternUnionPaymentPlanReport | None = None) -> bool:
         return False
@@ -19,6 +34,8 @@ class WesternUnionPaymentPlanReportInline(AutocompleteForeignKeyMixin, admin.Tab
 
 @admin.register(WesternUnionInvoice)
 class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
+    LEGACY_FILTER_PARAM = "is_legacy__exact"
+
     inlines = [WesternUnionPaymentPlanReportInline]
     list_display = [
         "name",
@@ -28,10 +45,9 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
         "charges",
         "status",
         "matched_data",
-        "payment_plans_list",
     ]
 
-    list_filter = ["status", "date"]
+    list_filter = ["is_legacy", "status", "date"]
     search_fields = [
         "name",
         "advice_name",
@@ -42,6 +58,13 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
 
     readonly_fields = ["download_link", "matched_data", "error_msg"]
 
+    def changelist_view(self, request: HttpRequest, extra_context: dict[str, object] | None = None) -> HttpResponse:
+        if self.LEGACY_FILTER_PARAM not in request.GET:
+            query_params = request.GET.copy()
+            query_params[self.LEGACY_FILTER_PARAM] = "0"
+            return redirect(f"{request.path}?{query_params.urlencode()}")
+        return super().changelist_view(request, extra_context)
+
     def download_link(self, obj: WesternUnionInvoice) -> str:  # pragma: no cover
         if not obj.file:
             return "-"
@@ -49,8 +72,3 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
 
     download_link.short_description = "File"
     download_link.admin_order_field = None
-
-    def payment_plans_list(self, obj: WesternUnionInvoice) -> str:  # pragma: no cover
-        return ", ".join(str(r.payment_plan) for r in obj.reports.all().select_related("payment_plan"))
-
-    payment_plans_list.short_description = "Payment Plans"

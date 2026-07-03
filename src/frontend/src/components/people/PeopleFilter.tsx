@@ -8,7 +8,7 @@ import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { Grid, MenuItem } from '@mui/material';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { generateTableOrderOptionsMember } from '@utils/constants';
+import { generateTableOrderOptionsMember, PROGRAM_STATE_FILTER } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -186,11 +186,11 @@ export function PeopleFilter({
             data-cy="ind-filters-gender"
             fullWidth
           >
-            <MenuItem value="FEMALE">{t('Female')}</MenuItem>
-            <MenuItem value="MALE">{t('Male')}</MenuItem>
-            <MenuItem value="OTHER">{t('Other')}</MenuItem>
-            <MenuItem value="NOT_COLLECTED">{t('Not Collected')}</MenuItem>
-            <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
+            {choicesData?.sexChoices?.map(({ name, value }) => (
+              <MenuItem key={value} value={value}>
+                {name}
+              </MenuItem>
+            )) || null}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 2 }}>
@@ -263,15 +263,11 @@ export function PeopleFilter({
             value={filter.status}
             data-cy="ind-filters-status"
           >
-            <MenuItem key="active" value="ACTIVE">
-              Active
-            </MenuItem>
-            <MenuItem key="duplicate" value="DUPLICATE">
-              Duplicate
-            </MenuItem>
-            <MenuItem key="withdrawn" value="WITHDRAWN">
-              Withdrawn
-            </MenuItem>
+            {choicesData?.statusChoices?.map(({ name, value }) => (
+              <MenuItem key={value} value={value}>
+                {name}
+              </MenuItem>
+            )) || null}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 2 }}>
@@ -307,8 +303,8 @@ export function PeopleFilter({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value="active">{t('Active Programmes')}</MenuItem>
-              <MenuItem value="all">{t('All Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
             </SelectFilter>
           </Grid>
         )}

@@ -40,16 +40,39 @@ services:
       timeout: 10s
       retries: 5
 
+  # Step 2 of the ES 8 → 9 migration: official Elastic image reading the same
+  # data volume that Bitnami ES 8.18 wrote. Two compatibility issues are
+  # handled here, mirroring the prod k8s manifest:
+  #   1. UID: Bitnami runs as 1001, official ES 9 runs as 1000. The init
+  #      container chowns the volume once before ES starts.
+  #   2. Data path: Bitnami stores at /bitnami/elasticsearch/data; we keep
+  #      that path via the path.data env so ES 9 reads existing indexes
+  #      without a move/copy.
+  # The analysis-phonetic plugin (auto-installed by Bitnami via env) is
+  # installed by the official image via the command wrapper at boot.
+  elasticsearch-init:
+    image: busybox:1.36
+    user: "0:0"
+    command: ["sh", "-c", "chown -R 1000:0 /data && chmod -R g+rwX /data && echo 'data_es chowned to 1000:0 for official ES 9'"]
+    volumes:
+      - data_es:/data
+
   elasticsearch:
-    image: bitnamilegacy/elasticsearch:8.14.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
+    depends_on:
+      elasticsearch-init:
+        condition: service_completed_successfully
+    command: >
+      bash -c "
+        bin/elasticsearch-plugin install analysis-phonetic --batch --silent 2>/dev/null || true &&
+        exec /usr/local/bin/docker-entrypoint.sh eswrapper
+      "
     environment:
-#      - node.name=es01
-#      - cluster.name=es-docker-cluster
-#      - cluster.initial_master_nodes=es01
-#      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-#      - xpack.security.enabled=false
-      - ELASTICSEARCH_PLUGINS=analysis-phonetic
+      - "xpack.security.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
+      - "discovery.type=single-node"
+      - "path.data=/bitnami/elasticsearch/data"
     ulimits:
       memlock:
         soft: -1

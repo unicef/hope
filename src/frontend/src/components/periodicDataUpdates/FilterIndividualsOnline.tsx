@@ -2,10 +2,14 @@ import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RestService } from '@restgenerated/services/RestService';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
+import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { FC } from 'react';
 
@@ -21,6 +25,15 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
 
   isOnPaper = true,
 }) => {
+  const { businessArea } = useBaseUrl();
+  const { data: individualChoicesData } = useQuery<IndividualChoices>({
+    queryKey: ['individualChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasIndividualsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
+
   const handleStateFilterChange = (name, value) => {
     setFilter((prevFilter) => ({
       ...prevFilter,
@@ -54,21 +67,11 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
             value={filter.gender}
             data-cy="ind-filters-gender"
           >
-            <MenuItem key="male" value="MALE">
-              {t('Male')}
-            </MenuItem>
-            <MenuItem key="female" value="FEMALE">
-              {t('Female')}
-            </MenuItem>
-            <MenuItem key="other" value="OTHER">
-              {t('Other')}
-            </MenuItem>
-            <MenuItem key="not_collected" value="NOT_COLLECTED">
-              {t('Not Collected')}
-            </MenuItem>
-            <MenuItem key="not_answered" value="NOT_ANSWERED">
-              {t('Not Answered')}
-            </MenuItem>
+            {individualChoicesData?.sexChoices?.map((each) => (
+              <MenuItem key={each.value} value={each.value}>
+                {t(each.name)}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={3}>

@@ -133,7 +133,7 @@ export const grievancePermissions = (
     permissions,
   );
 
-  const canAssign = hasPermissions(PERMISSIONS.GRIEVANCES_ASSIGN, permissions);
+  const canAssign = hasPermissions(PERMISSIONS.GRIEVANCE_ASSIGN, permissions);
 
   return {
     canViewHouseholdDetails,

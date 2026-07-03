@@ -50,18 +50,44 @@ _checker_utils.ResponseEncoder = _HopeEncoder
 def _save_or_update(deserialized_obj, using):
     """Save a deserialized object, falling back to UPDATE on duplicate key.
 
-    Also restores M2M relations (e.g. Group.permissions) which
-    ``save_base()`` does not handle.
+    Handles both pk-based existence and unique-constraint conflicts (e.g.
+    two fixtures that reference ``Partner`` with the same ``name`` but
+    different PKs).  Also restores M2M relations (e.g. Group.permissions)
+    which ``save_base()`` does not handle.
     """
-    Model = deserialized_obj.object.__class__  # noqa: N806
-    pk = deserialized_obj.object.pk
-    if pk is not None and Model.objects.using(using).filter(pk=pk).exists():
-        deserialized_obj.object.save_base(using=using, raw=True, force_update=True)
+    model = deserialized_obj.object.__class__
+    obj = deserialized_obj.object
+    pk = obj.pk
+
+    if pk is not None and model.objects.using(using).filter(pk=pk).exists():
+        obj.save_base(using=using, raw=True, force_update=True)
     else:
-        deserialized_obj.object.save_base(using=using, raw=True)
+        existing = _find_conflicting_object(model, obj, using)
+        if existing is not None:
+            for f in model._meta.local_fields:
+                if not f.primary_key:
+                    setattr(existing, f.attname, getattr(obj, f.attname))
+            existing.save_base(using=using, raw=True, force_update=True)
+            deserialized_obj.object = existing
+        else:
+            obj.save_base(using=using, raw=True)
+
     if deserialized_obj.m2m_data:
         for accessor_name, object_list in deserialized_obj.m2m_data.items():
             getattr(deserialized_obj.object, accessor_name).set(object_list)
+
+
+def _find_conflicting_object(model, obj, using):
+    """Search for an existing row that would conflict on unique constraints."""
+    for field in model._meta.local_fields:
+        if field.unique and not field.primary_key:
+            val = getattr(obj, field.attname)
+            if val is not None:
+                try:
+                    return model.objects.using(using).get(**{field.attname: val})
+                except model.DoesNotExist:
+                    continue
+    return None
 
 
 def _load_fixtures_fixed(file, ignorenonexistent=False, using=DEFAULT_DB_ALIAS):

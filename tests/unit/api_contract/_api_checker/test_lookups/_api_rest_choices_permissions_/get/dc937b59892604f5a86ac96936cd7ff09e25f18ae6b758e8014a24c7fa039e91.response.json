@@ -1,0 +1,724 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "14384"
+    },
+    "data": [
+        {
+            "name": "ACCOUNTABILITY COMMUNICATION MESSAGE VIEW CREATE",
+            "value": "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE"
+        },
+        {
+            "name": "ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS",
+            "value": "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS"
+        },
+        {
+            "name": "ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS AS CREATOR",
+            "value": "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR"
+        },
+        {
+            "name": "ACCOUNTABILITY COMMUNICATION MESSAGE VIEW LIST",
+            "value": "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST"
+        },
+        {
+            "name": "ACCOUNTABILITY SURVEY VIEW CREATE",
+            "value": "ACCOUNTABILITY_SURVEY_VIEW_CREATE"
+        },
+        {
+            "name": "ACCOUNTABILITY SURVEY VIEW DETAILS",
+            "value": "ACCOUNTABILITY_SURVEY_VIEW_DETAILS"
+        },
+        {
+            "name": "ACCOUNTABILITY SURVEY VIEW LIST",
+            "value": "ACCOUNTABILITY_SURVEY_VIEW_LIST"
+        },
+        {
+            "name": "ACTIVITY LOG DOWNLOAD",
+            "value": "ACTIVITY_LOG_DOWNLOAD"
+        },
+        {
+            "name": "ACTIVITY LOG VIEW",
+            "value": "ACTIVITY_LOG_VIEW"
+        },
+        {
+            "name": "ALL VIEW PII DATA ON LISTS",
+            "value": "ALL_VIEW_PII_DATA_ON_LISTS"
+        },
+        {
+            "name": "BENEFICIARY GROUP VIEW LIST",
+            "value": "BENEFICIARY_GROUP_VIEW_LIST"
+        },
+        {
+            "name": "DASHBOARD EXPORT",
+            "value": "DASHBOARD_EXPORT"
+        },
+        {
+            "name": "DASHBOARD VIEW COUNTRY",
+            "value": "DASHBOARD_VIEW_COUNTRY"
+        },
+        {
+            "name": "DOWNLOAD STORAGE FILE",
+            "value": "DOWNLOAD_STORAGE_FILE"
+        },
+        {
+            "name": "GENERIC IMPORT DATA",
+            "value": "GENERIC_IMPORT_DATA"
+        },
+        {
+            "name": "GEO VIEW LIST",
+            "value": "GEO_VIEW_LIST"
+        },
+        {
+            "name": "GRIEVANCE ASSIGN",
+            "value": "GRIEVANCE_ASSIGN"
+        },
+        {
+            "name": "GRIEVANCE DOCUMENTS UPLOAD",
+            "value": "GRIEVANCE_DOCUMENTS_UPLOAD"
+        },
+        {
+            "name": "GRIEVANCES ADD NOTE",
+            "value": "GRIEVANCES_ADD_NOTE"
+        },
+        {
+            "name": "GRIEVANCES ADD NOTE AS CREATOR",
+            "value": "GRIEVANCES_ADD_NOTE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES ADD NOTE AS OWNER",
+            "value": "GRIEVANCES_ADD_NOTE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES APPROVE DATA CHANGE",
+            "value": "GRIEVANCES_APPROVE_DATA_CHANGE"
+        },
+        {
+            "name": "GRIEVANCES APPROVE DATA CHANGE AS CREATOR",
+            "value": "GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES APPROVE DATA CHANGE AS OWNER",
+            "value": "GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES APPROVE FLAG AND DEDUPE",
+            "value": "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE"
+        },
+        {
+            "name": "GRIEVANCES APPROVE FLAG AND DEDUPE AS CREATOR",
+            "value": "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES APPROVE FLAG AND DEDUPE AS OWNER",
+            "value": "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES APPROVE PAYMENT VERIFICATION",
+            "value": "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION"
+        },
+        {
+            "name": "GRIEVANCES APPROVE PAYMENT VERIFICATION AS CREATOR",
+            "value": "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES APPROVE PAYMENT VERIFICATION AS OWNER",
+            "value": "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK",
+            "value": "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK"
+        },
+        {
+            "name": "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS CREATOR",
+            "value": "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS OWNER",
+            "value": "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES CLOSE TICKET FEEDBACK",
+            "value": "GRIEVANCES_CLOSE_TICKET_FEEDBACK"
+        },
+        {
+            "name": "GRIEVANCES CLOSE TICKET FEEDBACK AS CREATOR",
+            "value": "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES CLOSE TICKET FEEDBACK AS OWNER",
+            "value": "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES CREATE",
+            "value": "GRIEVANCES_CREATE"
+        },
+        {
+            "name": "GRIEVANCES CROSS AREA FILTER",
+            "value": "GRIEVANCES_CROSS_AREA_FILTER"
+        },
+        {
+            "name": "GRIEVANCES FEEDBACK MESSAGE VIEW CREATE",
+            "value": "GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE"
+        },
+        {
+            "name": "GRIEVANCES FEEDBACK VIEW CREATE",
+            "value": "GRIEVANCES_FEEDBACK_VIEW_CREATE"
+        },
+        {
+            "name": "GRIEVANCES FEEDBACK VIEW DETAILS",
+            "value": "GRIEVANCES_FEEDBACK_VIEW_DETAILS"
+        },
+        {
+            "name": "GRIEVANCES FEEDBACK VIEW LIST",
+            "value": "GRIEVANCES_FEEDBACK_VIEW_LIST"
+        },
+        {
+            "name": "GRIEVANCES FEEDBACK VIEW UPDATE",
+            "value": "GRIEVANCES_FEEDBACK_VIEW_UPDATE"
+        },
+        {
+            "name": "GRIEVANCES SEND BACK",
+            "value": "GRIEVANCES_SEND_BACK"
+        },
+        {
+            "name": "GRIEVANCES SEND BACK AS CREATOR",
+            "value": "GRIEVANCES_SEND_BACK_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES SEND BACK AS OWNER",
+            "value": "GRIEVANCES_SEND_BACK_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES SEND FOR APPROVAL",
+            "value": "GRIEVANCES_SEND_FOR_APPROVAL"
+        },
+        {
+            "name": "GRIEVANCES SEND FOR APPROVAL AS CREATOR",
+            "value": "GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES SEND FOR APPROVAL AS OWNER",
+            "value": "GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES SET IN PROGRESS",
+            "value": "GRIEVANCES_SET_IN_PROGRESS"
+        },
+        {
+            "name": "GRIEVANCES SET IN PROGRESS AS CREATOR",
+            "value": "GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES SET IN PROGRESS AS OWNER",
+            "value": "GRIEVANCES_SET_IN_PROGRESS_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES SET ON HOLD",
+            "value": "GRIEVANCES_SET_ON_HOLD"
+        },
+        {
+            "name": "GRIEVANCES SET ON HOLD AS CREATOR",
+            "value": "GRIEVANCES_SET_ON_HOLD_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES SET ON HOLD AS OWNER",
+            "value": "GRIEVANCES_SET_ON_HOLD_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES UPDATE",
+            "value": "GRIEVANCES_UPDATE"
+        },
+        {
+            "name": "GRIEVANCES UPDATE AS CREATOR",
+            "value": "GRIEVANCES_UPDATE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES UPDATE AS OWNER",
+            "value": "GRIEVANCES_UPDATE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES UPDATE REQUESTED DATA CHANGE",
+            "value": "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE"
+        },
+        {
+            "name": "GRIEVANCES UPDATE REQUESTED DATA CHANGE AS CREATOR",
+            "value": "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES UPDATE REQUESTED DATA CHANGE AS OWNER",
+            "value": "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES VIEW BIOMETRIC RESULTS",
+            "value": "GRIEVANCES_VIEW_BIOMETRIC_RESULTS"
+        },
+        {
+            "name": "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE",
+            "value": "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE"
+        },
+        {
+            "name": "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS CREATOR",
+            "value": "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS OWNER",
+            "value": "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES VIEW DETAILS SENSITIVE",
+            "value": "GRIEVANCES_VIEW_DETAILS_SENSITIVE"
+        },
+        {
+            "name": "GRIEVANCES VIEW DETAILS SENSITIVE AS CREATOR",
+            "value": "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES VIEW DETAILS SENSITIVE AS OWNER",
+            "value": "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES VIEW HOUSEHOLD DETAILS",
+            "value": "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS"
+        },
+        {
+            "name": "GRIEVANCES VIEW HOUSEHOLD DETAILS AS CREATOR",
+            "value": "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES VIEW HOUSEHOLD DETAILS AS OWNER",
+            "value": "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES VIEW INDIVIDUALS DETAILS",
+            "value": "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS"
+        },
+        {
+            "name": "GRIEVANCES VIEW INDIVIDUALS DETAILS AS CREATOR",
+            "value": "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES VIEW INDIVIDUALS DETAILS AS OWNER",
+            "value": "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE",
+            "value": "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE"
+        },
+        {
+            "name": "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS CREATOR",
+            "value": "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS OWNER",
+            "value": "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER"
+        },
+        {
+            "name": "GRIEVANCES VIEW LIST SENSITIVE",
+            "value": "GRIEVANCES_VIEW_LIST_SENSITIVE"
+        },
+        {
+            "name": "GRIEVANCES VIEW LIST SENSITIVE AS CREATOR",
+            "value": "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR"
+        },
+        {
+            "name": "GRIEVANCES VIEW LIST SENSITIVE AS OWNER",
+            "value": "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER"
+        },
+        {
+            "name": "PAYMENT VERIFICATION ACTIVATE",
+            "value": "PAYMENT_VERIFICATION_ACTIVATE"
+        },
+        {
+            "name": "PAYMENT VERIFICATION CREATE",
+            "value": "PAYMENT_VERIFICATION_CREATE"
+        },
+        {
+            "name": "PAYMENT VERIFICATION DELETE",
+            "value": "PAYMENT_VERIFICATION_DELETE"
+        },
+        {
+            "name": "PAYMENT VERIFICATION DISCARD",
+            "value": "PAYMENT_VERIFICATION_DISCARD"
+        },
+        {
+            "name": "PAYMENT VERIFICATION EXPORT",
+            "value": "PAYMENT_VERIFICATION_EXPORT"
+        },
+        {
+            "name": "PAYMENT VERIFICATION FINISH",
+            "value": "PAYMENT_VERIFICATION_FINISH"
+        },
+        {
+            "name": "PAYMENT VERIFICATION IMPORT",
+            "value": "PAYMENT_VERIFICATION_IMPORT"
+        },
+        {
+            "name": "PAYMENT VERIFICATION INVALID",
+            "value": "PAYMENT_VERIFICATION_INVALID"
+        },
+        {
+            "name": "PAYMENT VERIFICATION MARK AS FAILED",
+            "value": "PAYMENT_VERIFICATION_MARK_AS_FAILED"
+        },
+        {
+            "name": "PAYMENT VERIFICATION UPDATE",
+            "value": "PAYMENT_VERIFICATION_UPDATE"
+        },
+        {
+            "name": "PAYMENT VERIFICATION VERIFY",
+            "value": "PAYMENT_VERIFICATION_VERIFY"
+        },
+        {
+            "name": "PAYMENT VERIFICATION VIEW DETAILS",
+            "value": "PAYMENT_VERIFICATION_VIEW_DETAILS"
+        },
+        {
+            "name": "PAYMENT VERIFICATION VIEW LIST",
+            "value": "PAYMENT_VERIFICATION_VIEW_LIST"
+        },
+        {
+            "name": "PAYMENT VERIFICATION VIEW PAYMENT RECORD DETAILS",
+            "value": "PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS"
+        },
+        {
+            "name": "PAYMENT VIEW LIST MANAGERIAL",
+            "value": "PAYMENT_VIEW_LIST_MANAGERIAL"
+        },
+        {
+            "name": "PAYMENT VIEW LIST MANAGERIAL RELEASED",
+            "value": "PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED"
+        },
+        {
+            "name": "PDU ONLINE APPROVE",
+            "value": "PDU_ONLINE_APPROVE"
+        },
+        {
+            "name": "PDU ONLINE MERGE",
+            "value": "PDU_ONLINE_MERGE"
+        },
+        {
+            "name": "PDU ONLINE SAVE DATA",
+            "value": "PDU_ONLINE_SAVE_DATA"
+        },
+        {
+            "name": "PDU TEMPLATE CREATE",
+            "value": "PDU_TEMPLATE_CREATE"
+        },
+        {
+            "name": "PDU TEMPLATE DOWNLOAD",
+            "value": "PDU_TEMPLATE_DOWNLOAD"
+        },
+        {
+            "name": "PDU UPLOAD",
+            "value": "PDU_UPLOAD"
+        },
+        {
+            "name": "PDU VIEW LIST AND DETAILS",
+            "value": "PDU_VIEW_LIST_AND_DETAILS"
+        },
+        {
+            "name": "PM ABORT",
+            "value": "PM_ABORT"
+        },
+        {
+            "name": "PM ACCEPTANCE PROCESS APPROVE",
+            "value": "PM_ACCEPTANCE_PROCESS_APPROVE"
+        },
+        {
+            "name": "PM ACCEPTANCE PROCESS AUTHORIZE",
+            "value": "PM_ACCEPTANCE_PROCESS_AUTHORIZE"
+        },
+        {
+            "name": "PM ACCEPTANCE PROCESS FINANCIAL REVIEW",
+            "value": "PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW"
+        },
+        {
+            "name": "PM ADMIN FINANCIAL SERVICE PROVIDER UPDATE",
+            "value": "PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE"
+        },
+        {
+            "name": "PM APPLY RULE ENGINE FORMULA WITH ENTITLEMENTS",
+            "value": "PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS"
+        },
+        {
+            "name": "PM ASSIGN FUNDS COMMITMENTS",
+            "value": "PM_ASSIGN_FUNDS_COMMITMENTS"
+        },
+        {
+            "name": "PM CLOSE FINISHED",
+            "value": "PM_CLOSE_FINISHED"
+        },
+        {
+            "name": "PM CREATE",
+            "value": "PM_CREATE"
+        },
+        {
+            "name": "PM CUSTOM EXCHANGE RATE",
+            "value": "PM_CUSTOM_EXCHANGE_RATE"
+        },
+        {
+            "name": "PM DELETE SUPPORTING DOCUMENT",
+            "value": "PM_DELETE_SUPPORTING_DOCUMENT"
+        },
+        {
+            "name": "PM DOWNLOAD FSP AUTH CODE",
+            "value": "PM_DOWNLOAD_FSP_AUTH_CODE"
+        },
+        {
+            "name": "PM DOWNLOAD SUPPORTING DOCUMENT",
+            "value": "PM_DOWNLOAD_SUPPORTING_DOCUMENT"
+        },
+        {
+            "name": "PM DOWNLOAD XLSX FOR FSP",
+            "value": "PM_DOWNLOAD_XLSX_FOR_FSP"
+        },
+        {
+            "name": "PM EXCLUDE BENEFICIARIES FROM FOLLOW UP PP",
+            "value": "PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP"
+        },
+        {
+            "name": "PM EXPORT PDF SUMMARY",
+            "value": "PM_EXPORT_PDF_SUMMARY"
+        },
+        {
+            "name": "PM EXPORT XLSX FOR FSP",
+            "value": "PM_EXPORT_XLSX_FOR_FSP"
+        },
+        {
+            "name": "PM IMPORT XLSX WITH ENTITLEMENTS",
+            "value": "PM_IMPORT_XLSX_WITH_ENTITLEMENTS"
+        },
+        {
+            "name": "PM IMPORT XLSX WITH RECONCILIATION",
+            "value": "PM_IMPORT_XLSX_WITH_RECONCILIATION"
+        },
+        {
+            "name": "PM LOCK AND UNLOCK",
+            "value": "PM_LOCK_AND_UNLOCK"
+        },
+        {
+            "name": "PM LOCK AND UNLOCK FSP",
+            "value": "PM_LOCK_AND_UNLOCK_FSP"
+        },
+        {
+            "name": "PM MARK PAYMENT AS FAILED",
+            "value": "PM_MARK_PAYMENT_AS_FAILED"
+        },
+        {
+            "name": "PM PROGRAMME CYCLE CREATE",
+            "value": "PM_PROGRAMME_CYCLE_CREATE"
+        },
+        {
+            "name": "PM PROGRAMME CYCLE DELETE",
+            "value": "PM_PROGRAMME_CYCLE_DELETE"
+        },
+        {
+            "name": "PM PROGRAMME CYCLE UPDATE",
+            "value": "PM_PROGRAMME_CYCLE_UPDATE"
+        },
+        {
+            "name": "PM PROGRAMME CYCLE VIEW DETAILS",
+            "value": "PM_PROGRAMME_CYCLE_VIEW_DETAILS"
+        },
+        {
+            "name": "PM PROGRAMME CYCLE VIEW LIST",
+            "value": "PM_PROGRAMME_CYCLE_VIEW_LIST"
+        },
+        {
+            "name": "PM REACTIVATE ABORT",
+            "value": "PM_REACTIVATE_ABORT"
+        },
+        {
+            "name": "PM SEND FOR APPROVAL",
+            "value": "PM_SEND_FOR_APPROVAL"
+        },
+        {
+            "name": "PM SEND TO PAYMENT GATEWAY",
+            "value": "PM_SEND_TO_PAYMENT_GATEWAY"
+        },
+        {
+            "name": "PM SEND XLSX PASSWORD",
+            "value": "PM_SEND_XLSX_PASSWORD"
+        },
+        {
+            "name": "PM SPLIT",
+            "value": "PM_SPLIT"
+        },
+        {
+            "name": "PM SYNC PAYMENT PLAN WITH PG",
+            "value": "PM_SYNC_PAYMENT_PLAN_WITH_PG"
+        },
+        {
+            "name": "PM SYNC PAYMENT WITH PG",
+            "value": "PM_SYNC_PAYMENT_WITH_PG"
+        },
+        {
+            "name": "PM UPLOAD SUPPORTING DOCUMENT",
+            "value": "PM_UPLOAD_SUPPORTING_DOCUMENT"
+        },
+        {
+            "name": "PM VIEW DETAILS",
+            "value": "PM_VIEW_DETAILS"
+        },
+        {
+            "name": "PM VIEW FSP AUTH CODE",
+            "value": "PM_VIEW_FSP_AUTH_CODE"
+        },
+        {
+            "name": "PM VIEW LIST",
+            "value": "PM_VIEW_LIST"
+        },
+        {
+            "name": "PM VIEW PAYMENT LIST",
+            "value": "PM_VIEW_PAYMENT_LIST"
+        },
+        {
+            "name": "POPULATION VIEW HOUSEHOLDS DETAILS",
+            "value": "POPULATION_VIEW_HOUSEHOLDS_DETAILS"
+        },
+        {
+            "name": "POPULATION VIEW HOUSEHOLDS LIST",
+            "value": "POPULATION_VIEW_HOUSEHOLDS_LIST"
+        },
+        {
+            "name": "POPULATION VIEW INDIVIDUAL DELIVERY MECHANISMS SECTION",
+            "value": "POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION"
+        },
+        {
+            "name": "POPULATION VIEW INDIVIDUALS DETAILS",
+            "value": "POPULATION_VIEW_INDIVIDUALS_DETAILS"
+        },
+        {
+            "name": "POPULATION VIEW INDIVIDUALS LIST",
+            "value": "POPULATION_VIEW_INDIVIDUALS_LIST"
+        },
+        {
+            "name": "PROGRAMME ACTIVATE",
+            "value": "PROGRAMME_ACTIVATE"
+        },
+        {
+            "name": "PROGRAMME CREATE",
+            "value": "PROGRAMME_CREATE"
+        },
+        {
+            "name": "PROGRAMME DUPLICATE",
+            "value": "PROGRAMME_DUPLICATE"
+        },
+        {
+            "name": "PROGRAMME FINISH",
+            "value": "PROGRAMME_FINISH"
+        },
+        {
+            "name": "PROGRAMME MANAGEMENT VIEW",
+            "value": "PROGRAMME_MANAGEMENT_VIEW"
+        },
+        {
+            "name": "PROGRAMME REMOVE",
+            "value": "PROGRAMME_REMOVE"
+        },
+        {
+            "name": "PROGRAMME UPDATE",
+            "value": "PROGRAMME_UPDATE"
+        },
+        {
+            "name": "PROGRAMME VIEW LIST AND DETAILS",
+            "value": "PROGRAMME_VIEW_LIST_AND_DETAILS"
+        },
+        {
+            "name": "PROGRAMME VIEW PAYMENT RECORD DETAILS",
+            "value": "PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS"
+        },
+        {
+            "name": "RDI IMPORT DATA",
+            "value": "RDI_IMPORT_DATA"
+        },
+        {
+            "name": "RDI MERGE IMPORT",
+            "value": "RDI_MERGE_IMPORT"
+        },
+        {
+            "name": "RDI REFUSE IMPORT",
+            "value": "RDI_REFUSE_IMPORT"
+        },
+        {
+            "name": "RDI RERUN DEDUPE",
+            "value": "RDI_RERUN_DEDUPE"
+        },
+        {
+            "name": "RDI VIEW DETAILS",
+            "value": "RDI_VIEW_DETAILS"
+        },
+        {
+            "name": "RDI VIEW LIST",
+            "value": "RDI_VIEW_LIST"
+        },
+        {
+            "name": "RDI WEBHOOK DEDUPLICATION",
+            "value": "RDI_WEBHOOK_DEDUPLICATION"
+        },
+        {
+            "name": "RECEIVE PARSED WU QCF",
+            "value": "RECEIVE_PARSED_WU_QCF"
+        },
+        {
+            "name": "RECEIVE PP OVERDUE EMAIL",
+            "value": "RECEIVE_PP_OVERDUE_EMAIL"
+        },
+        {
+            "name": "SEARCH BUSINESS AREAS",
+            "value": "SEARCH_BUSINESS_AREAS"
+        },
+        {
+            "name": "TARGETING CREATE",
+            "value": "TARGETING_CREATE"
+        },
+        {
+            "name": "TARGETING DUPLICATE",
+            "value": "TARGETING_DUPLICATE"
+        },
+        {
+            "name": "TARGETING LOCK",
+            "value": "TARGETING_LOCK"
+        },
+        {
+            "name": "TARGETING REMOVE",
+            "value": "TARGETING_REMOVE"
+        },
+        {
+            "name": "TARGETING SEND",
+            "value": "TARGETING_SEND"
+        },
+        {
+            "name": "TARGETING UNLOCK",
+            "value": "TARGETING_UNLOCK"
+        },
+        {
+            "name": "TARGETING UPDATE",
+            "value": "TARGETING_UPDATE"
+        },
+        {
+            "name": "TARGETING VIEW DETAILS",
+            "value": "TARGETING_VIEW_DETAILS"
+        },
+        {
+            "name": "TARGETING VIEW LIST",
+            "value": "TARGETING_VIEW_LIST"
+        },
+        {
+            "name": "UPLOAD STORAGE FILE",
+            "value": "UPLOAD_STORAGE_FILE"
+        },
+        {
+            "name": "USER MANAGEMENT VIEW LIST",
+            "value": "USER_MANAGEMENT_VIEW_LIST"
+        }
+    ],
+    "content_type": "application/json"
+}

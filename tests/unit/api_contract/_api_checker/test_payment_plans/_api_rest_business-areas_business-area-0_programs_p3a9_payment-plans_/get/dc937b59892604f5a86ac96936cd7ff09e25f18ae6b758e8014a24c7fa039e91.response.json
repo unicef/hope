@@ -1,0 +1,56 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "ETag": "3581beeef28b523c4e69eb6cbe4746c8",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "898"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/p3a9/payment-plans/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "13182a64-1484-4cba-a551-51edae97458a",
+                "unicef_id": "PP-BA0000-25-00000001",
+                "name": null,
+                "status": "OPEN",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "currency": null,
+                "excluded_ids": null,
+                "total_entitled_quantity": null,
+                "total_delivered_quantity": null,
+                "total_undelivered_quantity": null,
+                "dispersion_start_date": "2025-01-01",
+                "dispersion_end_date": "2025-01-31",
+                "plan_type": "REGULAR",
+                "export_tag": null,
+                "follow_ups": [],
+                "top_ups": [],
+                "created_by": " ",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "program": {
+                    "id": "242ca25d-29c0-4b50-8e5a-1880fd1dc044",
+                    "code": "p3a9",
+                    "name": "Program 0",
+                    "status": "ACTIVE",
+                    "screen_beneficiary": false
+                },
+                "payment_plan_group": {
+                    "id": "3d712672-2820-4d59-adfa-ab99883848f1",
+                    "unicef_id": "PPG-2",
+                    "name": "Default Group"
+                }
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

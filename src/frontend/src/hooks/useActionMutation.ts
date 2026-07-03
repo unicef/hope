@@ -32,5 +32,5 @@ export const useActionMutation = <TData, TOptions>(
         });
       }
     },
-  }) as UseMutationResult<TData, DefaultError, void>;
+  });
 };

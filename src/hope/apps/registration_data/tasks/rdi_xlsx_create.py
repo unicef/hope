@@ -586,8 +586,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return True
         if not current_field and header not in self.complex_fields[self.sheet_title]:
             return True
+        is_complex_field = header in self.complex_fields[self.sheet_title]
         is_not_image = current_field.get("type") != "IMAGE"
-        is_not_required_and_empty = not current_field.get("required") and cell_value is None and is_not_image
+        is_not_required_and_empty = (
+            not current_field.get("required") and cell_value is None and is_not_image and not is_complex_field
+        )
         if header in excluded:
             return True
         return is_not_required_and_empty

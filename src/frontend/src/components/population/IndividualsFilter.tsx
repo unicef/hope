@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { generateTableOrderOptionsMember } from '@utils/constants';
+import { generateTableOrderOptionsMember, PROGRAM_STATE_FILTER } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -147,11 +147,11 @@ export function IndividualsFilter({
             data-cy="ind-filters-gender"
             fullWidth
           >
-            <MenuItem value="FEMALE">{t('Female')}</MenuItem>
-            <MenuItem value="MALE">{t('Male')}</MenuItem>
-            <MenuItem value="OTHER">{t('Other')}</MenuItem>
-            <MenuItem value="NOT_COLLECTED">{t('Not Collected')}</MenuItem>
-            <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
+            {choicesData?.sexChoices?.map((each) => (
+              <MenuItem key={each.value} value={each.value}>
+                {each.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 2 }}>
@@ -224,15 +224,11 @@ export function IndividualsFilter({
             value={filter.status}
             data-cy="ind-filters-status"
           >
-            <MenuItem key="active" value="ACTIVE">
-              Active
-            </MenuItem>
-            <MenuItem key="duplicate" value="DUPLICATE">
-              Duplicate
-            </MenuItem>
-            <MenuItem key="withdrawn" value="WITHDRAWN">
-              Withdrawn
-            </MenuItem>
+            {choicesData?.statusChoices?.map((each) => (
+              <MenuItem key={each.value} value={each.value}>
+                {each.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 2 }}>
@@ -268,8 +264,8 @@ export function IndividualsFilter({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value="active">{t('Active Programmes')}</MenuItem>
-              <MenuItem value="all">{t('All Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
             </SelectFilter>
           </Grid>
         )}

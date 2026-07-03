@@ -4,6 +4,7 @@ import { AccessDenied } from '@containers/pages/accessDenied/AccessDenied';
 import { LoginPage } from '@containers/pages/core/LoginPage';
 import { MaintenancePage } from '@containers/pages/maintenance/MaintenancePage';
 import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
+import { SurprisePage } from '@containers/pages/surprise/SurprisePage';
 import { AllProgramsRoutesSwitch } from '@containers/routers/AllProgramsRoutesSwitch';
 import { BaseHomeRouter } from '@containers/routers/BaseHomeRouter';
 import { SelectedProgramRoutesSwitch } from '@containers/routers/SelectedProgramRoutesSwitch';
@@ -57,6 +58,7 @@ const Root: FC = () => (
       <Route path="/404/*" element={<PageNotFound />} />
       <Route path="/access-denied/*" element={<AccessDenied />} />
       <Route path="/error/*" element={<SomethingWentWrong />} />
+      <Route path="/surprise" element={<SurprisePage />} />
       <Route
         path="/sentry-check"
         element={

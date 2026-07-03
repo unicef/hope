@@ -1,3 +1,4 @@
+import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
@@ -15,10 +16,12 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentPlansTableProps {
-  programCycle: ProgramCycleList;
+  programCycle?: ProgramCycleList;
   filter;
   canViewDetails: boolean;
   title?: string;
+  paymentPlanGroupId?: string;
+  tag?: string;
 }
 
 export const PaymentPlansTable = ({
@@ -26,6 +29,8 @@ export const PaymentPlansTable = ({
   filter,
   canViewDetails,
   title,
+  paymentPlanGroupId,
+  tag,
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
@@ -40,9 +45,11 @@ export const PaymentPlansTable = ({
       totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
       dispersionStartDate: filter.dispersionStartDate,
       dispersionEndDate: filter.dispersionEndDate,
-      isFollowUp: null,
+      planType: null,
       program: programId,
-      programCycle: programCycle.id,
+      programCycle: programCycle?.id,
+      paymentPlanGroup: paymentPlanGroupId,
+      exportTag: tag,
       isPaymentPlan: true,
     }),
     [
@@ -54,7 +61,9 @@ export const PaymentPlansTable = ({
       filter.dispersionStartDate,
       filter.dispersionEndDate,
       programId,
-      programCycle.id,
+      programCycle?.id,
+      paymentPlanGroupId,
+      tag,
     ],
   );
 
@@ -119,9 +128,11 @@ export const PaymentPlansTable = ({
     replacements,
   );
 
+  const results = dataPaymentPlans?.results ?? [];
+
   return (
     <UniversalRestTable
-      defaultOrderBy="-createdAt"
+      defaultOrderBy="paymentPlanGroup__name,-createdAt"
       title={title}
       headCells={adjustedHeadCells}
       queryVariables={queryVariables}
@@ -132,13 +143,24 @@ export const PaymentPlansTable = ({
       itemsCount={itemsCount}
       page={page}
       setPage={setPage}
-      renderRow={(row: PaymentPlanList) => (
-        <PaymentPlanTableRow
-          key={row.id}
-          paymentPlan={row}
-          canViewDetails={canViewDetails}
-        />
-      )}
+      renderRow={(row: PaymentPlanList) => {
+        const idx = results.indexOf(row);
+        const prev = results[idx - 1];
+        const isNewGroup =
+          idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id;
+        return (
+          <>
+            {isNewGroup && (
+              <GroupHeaderRow name={row.paymentPlanGroup?.name} id={row.paymentPlanGroup?.id} />
+            )}
+            <PaymentPlanTableRow
+              key={row.id}
+              paymentPlan={row}
+              canViewDetails={canViewDetails}
+            />
+          </>
+        );
+      }}
     />
   );
 };

@@ -2,8 +2,6 @@
 
 from typing import Any
 
-from django.db.models import Model
-
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
@@ -316,11 +314,3 @@ def get_account_fields() -> dict[Any, Any]:
         if len(wallet_fields) > 0:
             deliver_mechanism_data_fields[account_type] = tuple(wallet_fields)
     return deliver_mechanism_data_fields
-
-
-def _get_db_fields(model_class: type[Model]) -> list[str]:
-    """Return a list of field names that correspond to the columns stored in the model's database table.
-
-    It excludes related fields.
-    """
-    return [field.name for field in model_class._meta.fields]

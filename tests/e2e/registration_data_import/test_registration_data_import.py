@@ -2,7 +2,7 @@ from datetime import datetime
 from time import sleep
 
 from django.conf import settings
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 import pytest
 
 from e2e.page_object.programme_population.households_details import HouseholdsDetails

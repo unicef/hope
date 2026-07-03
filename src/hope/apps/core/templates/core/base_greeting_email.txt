@@ -1,0 +1,5 @@
+{% load custom_tags %}{% greeting first_name last_name %}
+
+{% block content %}{% endblock %}
+
+This is an automated message. Please do not reply to this email.

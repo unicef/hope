@@ -77,6 +77,10 @@ class SoftDeletablePendingManager(SoftDeletableManager[_M]):
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
+def get_merge_status_choices() -> tuple:
+    return MergeStatusModel.STATUS_CHOICE
+
+
 class MergeStatusModel(models.Model):
     PENDING = "PENDING"
     MERGED = "MERGED"
@@ -85,7 +89,7 @@ class MergeStatusModel(models.Model):
         (MERGED, _("Merged")),
     )
 
-    rdi_merge_status = models.CharField(max_length=10, choices=STATUS_CHOICE, default=PENDING, blank=True)
+    rdi_merge_status = models.CharField(max_length=10, choices=get_merge_status_choices, default=PENDING, blank=True)
 
     class Meta:
         abstract = True
@@ -299,15 +303,17 @@ class SignatureMixin(models.Model):
 
     def update_signature_hash(self) -> None:
         if hasattr(self, "signature_fields") and isinstance(self.signature_fields, list | tuple):
-            sha1 = hashlib.sha1()  # noqa
+            # blake2b with digest_size=20 produces a 40-char hex digest matching the
+            # signature_hash CharField(max_length=40); replaces legacy SHA-1 usage.
+            hasher = hashlib.blake2b(digest_size=20)
             salt = settings.SECRET_KEY
-            sha1.update(salt.encode("utf-8"))
+            hasher.update(salt.encode("utf-8"))
 
             for field_name in self.signature_fields:
                 value = nested_getattr(self, field_name, None)
                 value = self._normalize(field_name, value)
-                sha1.update(str(value).encode("utf-8"))
-            self.signature_hash = sha1.hexdigest()
+                hasher.update(str(value).encode("utf-8"))
+            self.signature_hash = hasher.hexdigest()
         else:
             raise ValueError("Define 'signature_fields' in class for SignatureMixin")
 

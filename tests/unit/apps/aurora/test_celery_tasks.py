@@ -189,7 +189,11 @@ UKRAINE_NEW_FORM_FILES: dict = {
 
 
 class ServiceWithoutCeleryTask:
-    process_flex_records_async_task = None
+    process_flex_records_task = None
+
+
+class ServiceWithoutTaskAttribute:
+    pass
 
 
 @pytest.fixture
@@ -667,12 +671,17 @@ def test_create_task_for_processing_records_not_implemented_error() -> None:
         create_task_for_processing_records(ServiceWithoutCeleryTask, None, None, [1])
 
 
+def test_create_task_for_processing_records_not_implemented_error_without_task_attribute() -> None:
+    with pytest.raises(NotImplementedError):
+        create_task_for_processing_records(ServiceWithoutTaskAttribute, None, None, [1])
+
+
 def test_create_task_for_processing_records_calls_celery_task_with_nullable_rdi(
     ukraine_context: dict[str, object],
 ) -> None:
     registration = ukraine_context["registration"]
     celery_task = Mock()
-    service = Mock(process_flex_records_async_task=celery_task)
+    service = Mock(process_flex_records_task=celery_task)
 
     create_task_for_processing_records(service, registration, None, [1, 2, 3])
 

@@ -1,9 +1,9 @@
 export const restUsersProfileRetrieve = {
   id: '4196c2c5-c2dd-48d2-887f-3a9d39e78916',
-  username: 'root',
-  email: 'root@root.com',
-  first_name: 'Root',
-  last_name: 'Rootkowski',
+  username: 'mock-user',
+  email: 'mock-user@example.com',
+  first_name: 'Mock',
+  last_name: 'User',
   is_superuser: true,
   business_areas: [
     {

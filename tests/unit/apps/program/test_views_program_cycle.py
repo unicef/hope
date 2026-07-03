@@ -25,7 +25,7 @@ from hope.apps.program.api.serializers import (
     ProgramCycleUpdateSerializer,
 )
 from hope.apps.program.api.views import ProgramCycleViewSet
-from hope.models import BusinessArea, Partner, PaymentPlan, Program, ProgramCycle, User
+from hope.models import BusinessArea, Partner, PaymentPlan, PaymentPlanGroup, Program, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -184,6 +184,49 @@ def test_retrieve_program_cycle_with_permission(
 
     response = authenticated_client.get(cycle_1_detail_url)
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_retrieve_program_cycle_admin_url_for_staff_user(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle1: ProgramCycle,
+    cycle_1_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        business_area=afghanistan,
+        program=program,
+    )
+    user.is_staff = True
+    user.save(update_fields=["is_staff"])
+
+    response = authenticated_client.get(cycle_1_detail_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["admin_url"] == cycle1.admin_url
+
+
+def test_retrieve_program_cycle_admin_url_hidden_for_non_staff_user(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle_1_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        business_area=afghanistan,
+        program=program,
+    )
+
+    response = authenticated_client.get(cycle_1_detail_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["admin_url"] is None
 
 
 def test_retrieve_program_cycle_without_permission(
@@ -472,6 +515,44 @@ def test_delete_program_cycle_without_permission(
 
     bad_response = authenticated_client.delete(url)
     assert bad_response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_delete_program_cycle_succeeds_when_only_empty_groups_remain(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    cycle1: ProgramCycle,
+    cycle2: ProgramCycle,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    cycle3 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
+    pp = PaymentPlanFactory(program_cycle=cycle3)
+    group = pp.payment_plan_group
+    pp.delete(soft=False)
+    assert group.payment_plans.count() == 0
+    assert cycle3.payment_plan_groups.filter(id=group.id).exists()
+
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_PROGRAMME_CYCLE_DELETE],
+        business_area=afghanistan,
+        program=program,
+    )
+
+    url = reverse(
+        "api:programs:cycles-detail",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "program_code": program.code,
+            "pk": str(cycle3.id),
+        },
+    )
+
+    response = authenticated_client.delete(url)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not ProgramCycle.objects.filter(id=cycle3.id).exists()
+    assert not PaymentPlanGroup.objects.filter(id=group.id).exists()
 
 
 def test_filter_by_status(
@@ -1188,6 +1269,7 @@ def test_viewset_successful_delete() -> None:
     program = ProgramFactory(status=Program.ACTIVE, cycle=False)
     cycle1 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     cycle2 = ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
+    cycle1.payment_plan_groups.all().delete()
     viewset.perform_destroy(cycle1)
     assert not ProgramCycle.objects.filter(id=cycle1.id).exists()
     assert ProgramCycle.objects.filter(id=cycle2.id).exists()

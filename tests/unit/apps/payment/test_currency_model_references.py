@@ -79,7 +79,7 @@ def test_get_unore_exchange_rate_raises_for_null_currency(
 
 
 def _calculate_expected_hash(payment: Payment) -> str:
-    sha1 = hashlib.sha1()
+    sha1 = hashlib.blake2b(digest_size=20)
     sha1.update(settings.SECRET_KEY.encode("utf-8"))
 
     for field_name in payment.signature_fields:

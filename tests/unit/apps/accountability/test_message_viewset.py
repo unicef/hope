@@ -47,7 +47,7 @@ def user(partner):
 
 @pytest.fixture
 def superuser(partner):
-    return UserFactory(partner=partner, first_name="Super", last_name="User", is_superuser=True)
+    return UserFactory(partner=partner, first_name="Super", last_name="User", is_staff=True, is_superuser=True)
 
 
 @pytest.fixture

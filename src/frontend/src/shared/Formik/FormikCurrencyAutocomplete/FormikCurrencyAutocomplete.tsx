@@ -4,6 +4,14 @@ import get from 'lodash/get';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { CurrencyChoice } from '@restgenerated/models/CurrencyChoice';
+
+const getCurrencyLabel = (option: CurrencyChoice): string => {
+  if (option.visionCode && option.visionCode !== option.value) {
+    return `${option.name} (${option.value} / Vision: ${option.visionCode})`;
+  }
+  return option.name;
+};
 
 export const FormikCurrencyAutocomplete = ({
   field,
@@ -18,7 +26,7 @@ export const FormikCurrencyAutocomplete = ({
     queryFn: () => RestService.restChoicesCurrenciesList(),
   });
 
-  const handleChange = (e, option): void => {
+  const handleChange = (e, option: CurrencyChoice | null): void => {
     if (!option) {
       form.setFieldValue(field.name, null);
     } else {
@@ -32,10 +40,10 @@ export const FormikCurrencyAutocomplete = ({
 
   if (!data) return null;
   return (
-    <Autocomplete
+    <Autocomplete<CurrencyChoice>
       options={data || []}
       defaultValue={field.value}
-      getOptionLabel={(option: any) => option.name}
+      getOptionLabel={getCurrencyLabel}
       onChange={handleChange}
       disabled={disabled}
       fullWidth

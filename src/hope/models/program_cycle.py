@@ -15,6 +15,10 @@ from hope.models.program import Program
 from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
+def get_program_cycle_status_choices() -> tuple:
+    return ProgramCycle.STATUS_CHOICE
+
+
 class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -41,7 +45,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         default="Default Programme Cycle",
     )
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, default=DRAFT)
+    status = models.CharField(max_length=10, choices=get_program_cycle_status_choices, db_index=True, default=DRAFT)
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
     created_by = models.ForeignKey(

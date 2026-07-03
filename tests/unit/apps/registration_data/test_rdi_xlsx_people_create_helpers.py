@@ -213,6 +213,27 @@ def test_process_people_cell_not_required_none_value_non_image_returns_early(peo
             mock_dispatch.assert_not_called()
 
 
+def test_process_people_cell_complex_photo_with_none_value_calls_dispatch(people_task, make_cell):
+    """Complex photo fields must still dispatch even when the cell has no text value."""
+    people_task.complex_fields = {"individuals": {"pp_progress_id_photo_i_c": MagicMock()}}
+    cell = make_cell(None, row=3)
+    header_cell = make_cell("pp_progress_id_photo_i_c")
+    obj = MagicMock()
+
+    with patch.object(type(people_task), "_pdu_column_names", new_callable=PropertyMock, return_value=[]):
+        with patch.object(people_task, "_set_index_id") as mock_set_idx:
+            with patch.object(people_task, "_dispatch_people_field") as mock_dispatch:
+                people_task._process_people_cell(cell, header_cell, obj)
+                mock_set_idx.assert_called_once_with(None, "pp_progress_id_photo_i_c")
+                mock_dispatch.assert_called_once_with(
+                    "pp_progress_id_photo_i_c",
+                    cell,
+                    None,
+                    {},
+                    obj,
+                )
+
+
 def test_process_people_cell_pp_age_returns_early_after_set_index(people_task, make_cell):
     """pp_age header should cause early return after _set_index_id."""
     people_task.COMBINED_FIELDS = {"pp_age": {"type": "INTEGER", "required": True}}

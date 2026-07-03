@@ -10,7 +10,7 @@ import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgram
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { GRIEVANCE_ISSUE_TYPES, PROGRAM_STATE_FILTER } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -81,7 +81,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
     householdSizeMax: '',
     orderBy: 'unicef_id',
     withdrawn: '',
-    programState: 'active',
+    programState: PROGRAM_STATE_FILTER.ACTIVE,
   };
   const initialFilterIND = {
     program: isAllPrograms ? '' : programId,
@@ -95,7 +95,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
     flags: [],
     orderBy: 'unicef_id',
     status: '',
-    programState: 'active',
+    programState: PROGRAM_STATE_FILTER.ACTIVE,
   };
 
   const [filterIND, setFilterIND] = useState(

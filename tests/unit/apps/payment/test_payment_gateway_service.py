@@ -873,7 +873,6 @@ def test_api_add_records_to_payment_instruction(
                     "middle_name": payments[0].collector.middle_name,
                     "first_name": payments[0].collector.given_name,
                     "full_name": payments[0].collector.full_name,
-                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "transfer",
                     "account_type": "bank",
                 },
@@ -942,7 +941,6 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
                     "middle_name": primary_collector.middle_name,
                     "first_name": primary_collector.given_name,
                     "full_name": primary_collector.full_name,
-                    "destination_currency": payments[0].currency.code if payments[0].currency else None,
                     "delivery_mechanism": "mobile_money",
                     "account_type": "mobile",
                     "account": {
@@ -1004,16 +1002,15 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     assert PaymentHouseholdSnapshot.objects.count() == 2
     payments[0].refresh_from_db()
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        " financial_institution_code 456,"
-        f" fsp {payments[0].financial_service_provider},"
-        f" payment {payments[0].id},"
-        f" collector {payments[0].collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
+        "456",
+        payments[0].financial_service_provider,
+        payments[0].id,
+        payments[0].collector,
+    )
     assert post_mock.call_count == 1
 
     payments[0].financial_service_provider = uba_fsp
@@ -1031,7 +1028,6 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
         "middle_name": primary_collector.middle_name,
         "first_name": primary_collector.given_name,
         "full_name": primary_collector.full_name,
-        "destination_currency": payments[0].currency.code if payments[0].currency else None,
         "delivery_mechanism": "transfer_to_account",
         "account_type": "bank",
         "account": {
@@ -1213,6 +1209,8 @@ def test_payment_instruction_payload_includes_business_area_office_and_payment_c
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == "AFG"
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"] == {
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
@@ -1234,6 +1232,8 @@ def test_payment_instruction_payload_sets_country_to_none_when_payment_country_i
 
     data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
 
+    assert data["country"] == ""
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
     assert data["payload"] == {
         "destination_currency": split.payment_plan.currency.code,
         "user": "user@example.com",
@@ -1267,6 +1267,33 @@ def test_payment_instruction_get_payload_sets_destination_country_iso_fields_onl
     assert payload_with_country["country"] == "AFG"
     assert payload_with_country["destination_country_iso_code3"] == "AFG"
     assert payload_with_country["destination_country_iso_code2"] == "AF"
+
+
+def test_payment_instruction_payload_uses_destination_country_iso_code2(
+    payment_plan_splits: list[PaymentPlanSplit],
+) -> None:
+    from hope.models import Country
+
+    split = payment_plan_splits[0]
+    business_area = split.payment_plan.business_area
+    business_area.payment_countries.clear()
+    business_area.payment_countries.add(
+        Country.objects.create(
+            name="Test Country",
+            short_name="Test",
+            iso_code2="AF",
+            iso_code3="AFG",
+            iso_num="9999",
+        )
+    )
+
+    data = PaymentInstructionFromSplitSerializer(split, context={"user_email": "user@example.com"}).data
+
+    assert data["country"] == "AFG"
+    assert data["delivery_mechanism"] == split.payment_plan.delivery_mechanism.code
+    assert data["payload"]["country"] == "AFG"
+    assert data["payload"]["destination_country_iso_code3"] == "AFG"
+    assert data["payload"]["destination_country_iso_code2"] == "AF"
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
@@ -1788,6 +1815,25 @@ def test_map_financial_institution_pk_and_mapping_found(payment_gateway_setup: d
     assert result["number"] == "123"
 
 
+def test_payment_payload_uses_service_provider_code_from_snapshot(payment_gateway_setup: dict) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    payment.delivery_type = payment_gateway_setup["delivery_mechanisms"]["transfer"]
+    payment.save(update_fields=["delivery_type"])
+    snapshot = payment.household_snapshot
+    snapshot.snapshot_data["primary_collector"]["account_data"] = {
+        "number": "123",
+        "financial_institution_pk": "999",
+        "service_provider_code": "SNAPSHOT_CODE",
+    }
+    snapshot.save(update_fields=["snapshot_data"])
+
+    with patch.object(PaymentSerializer, "_map_financial_institution") as map_financial_institution_mock:
+        payload = PaymentSerializer().get_payload(payment)
+
+    map_financial_institution_mock.assert_not_called()
+    assert payload["account"]["service_provider_code"] == "SNAPSHOT_CODE"
+
+
 def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(
     payment_gateway_setup: dict,
 ) -> None:
@@ -1799,16 +1845,15 @@ def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_origi
     )
     account_data = {"financial_institution_pk": str(fi.pk)}
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        f" financial_institution {fi},"
-        f" fsp {payment.financial_service_provider},"
-        f" payment {payment.id},"
-        f" collector {payment.collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution %s, fsp %s, payment %s, collector %s.",
+        fi,
+        payment.financial_service_provider,
+        payment.id,
+        payment.collector,
+    )
     assert result == account_data
 
 
@@ -1855,14 +1900,29 @@ def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_or
     payment = payment_gateway_setup["payments"][0]
     account_data = {"code": "UNKNOWN_CODE"}
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        " financial_institution_code UNKNOWN_CODE,"
-        f" fsp {payment.financial_service_provider},"
-        f" payment {payment.id},"
-        f" collector {payment.collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
+        "UNKNOWN_CODE",
+        payment.financial_service_provider,
+        payment.id,
+        payment.collector,
+    )
     assert result == account_data
+
+
+@pytest.mark.django_db
+def test_change_payment_instruction_status_returns_none_for_non_payment_gateway_plan() -> None:
+    fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    payment_plan = PaymentPlanFactory(financial_service_provider=fsp, use_payment_gateway=False)
+    split = PaymentPlanSplitFactory(payment_plan=payment_plan)
+    pg_service = PaymentGatewayService()
+    pg_service.api.change_payment_instruction_status = Mock()  # type: ignore
+
+    result = pg_service.change_payment_instruction_status(PaymentInstructionStatus.OPEN, split)
+
+    assert result is None
+    pg_service.api.change_payment_instruction_status.assert_not_called()

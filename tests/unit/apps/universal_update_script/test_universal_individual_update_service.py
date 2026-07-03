@@ -243,7 +243,6 @@ def test_update_individual(
     facility_old = individual.household.facility
     size_old = individual.household.size
     returnee_old = individual.household.returnee
-    currency_old = individual.household.currency
     muac_old = individual.flex_fields.get("muac")
     eggs_old = individual.household.flex_fields.get("eggs")
     wallet_number_old = wallet.data.get("number")
@@ -320,7 +319,6 @@ Update successful
     assert document_national_id.document_number == document_number_old
     assert individual.household.size == size_old
     assert individual.household.returnee == returnee_old
-    assert individual.household.currency == currency_old
     assert individual.flex_fields.get("muac") == muac_old
     assert individual.household.flex_fields.get("eggs") == eggs_old
     assert wallet.data.get("number") == wallet_number_old

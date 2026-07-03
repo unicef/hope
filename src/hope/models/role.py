@@ -21,7 +21,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         unique=True,
     )
     permissions = ChoiceArrayField(
-        models.CharField(choices=Permissions.choices(), max_length=255),
+        models.CharField(choices=Permissions.choices, max_length=255),
         null=True,
         blank=True,
     )

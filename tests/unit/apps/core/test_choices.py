@@ -1,7 +1,9 @@
 from django.urls import reverse
 import pytest
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories import CountryFactory, CurrencyFactory, PartnerFactory, UserFactory
+from hope.apps.account.permissions import Permissions
 from hope.apps.core.languages import LANGUAGES, Languages
 
 # === Fixtures ===
@@ -16,6 +18,11 @@ def user():
 @pytest.fixture
 def authenticated_client(api_client, user):
     return api_client(user)
+
+
+@pytest.fixture
+def anonymous_client():
+    return APIClient()
 
 
 @pytest.fixture
@@ -35,6 +42,7 @@ def currencies():
         CurrencyFactory(code="PLN", name="Polish Zloty"),
         CurrencyFactory(code="USD", name="United States Dollar"),
         CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True),
+        CurrencyFactory(code="OLD", name="Inactive Currency", active=False),
     ]
 
 
@@ -125,16 +133,35 @@ def test_choices_countries_returns_available_countries(authenticated_client, cou
 
 
 @pytest.mark.django_db
-def test_choices_currencies_returns_currencies_from_db(authenticated_client, currencies):
+def test_choices_currencies_returns_only_active_currencies_from_db(authenticated_client, currencies):
     response = authenticated_client.get(reverse("api:choices-currencies"))
 
     assert response.status_code == 200
     assert len(response.data) == 3
     assert response.data == [
-        {"name": "Polish Zloty", "value": "PLN"},
-        {"name": "USD Coin", "value": "USDC"},
-        {"name": "United States Dollar", "value": "USD"},
+        {"name": "Polish Zloty", "value": "PLN", "vision_code": "PLN", "active": True},
+        {"name": "United States Dollar", "value": "USD", "vision_code": "USD", "active": True},
+        {"name": "USD Coin", "value": "USDC", "vision_code": "USDC", "active": True},
     ]
+
+
+@pytest.mark.django_db
+def test_choices_permissions_returns_full_permission_catalog(authenticated_client):
+    response = authenticated_client.get(reverse("api:choices-permissions"))
+
+    assert response.status_code == 200
+    expected_data = sorted(
+        [{"name": permission.value.replace("_", " "), "value": permission.value} for permission in Permissions],
+        key=lambda choice: choice["name"],
+    )
+    assert response.data == expected_data
+
+
+@pytest.mark.django_db
+def test_choices_permissions_denies_unauthenticated_access(anonymous_client):
+    response = anonymous_client.get(reverse("api:choices-permissions"))
+
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -145,4 +172,5 @@ def test_choices_currencies_returns_value_name_format(authenticated_client, curr
     for item in response.data:
         assert "value" in item
         assert "name" in item
-        assert len(item) == 2
+        assert "vision_code" in item
+        assert "active" in item

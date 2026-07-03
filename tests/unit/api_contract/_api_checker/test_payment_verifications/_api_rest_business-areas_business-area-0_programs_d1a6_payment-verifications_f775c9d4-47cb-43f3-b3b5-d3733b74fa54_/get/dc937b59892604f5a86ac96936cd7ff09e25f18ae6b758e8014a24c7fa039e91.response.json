@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "559"
+        "Content-Length": "561"
     },
     "data": {
         "id": "f775c9d4-47cb-43f3-b3b5-d3733b74fa54",
@@ -26,7 +26,7 @@
         "payment_verification_summary": null,
         "start_date": null,
         "end_date": null,
-        "is_follow_up": false,
+        "plan_type": "STANDARD",
         "version": 1735688653315201
     },
     "content_type": "application/json"

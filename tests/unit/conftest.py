@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 import pytest
 
 from extras.test_utils.factories import CurrencyFactory
@@ -74,7 +74,10 @@ def all_currencies(db: Any) -> None:
 
     mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
     Currency.objects.bulk_create(
-        [Currency(code=code, name=name, is_crypto=is_crypto) for code, name, is_crypto in mod.CURRENCIES],
+        [
+            Currency(code=code, name=name, is_crypto=is_crypto, active=True, vision_code=code)
+            for code, name, is_crypto in mod.CURRENCIES
+        ],
         ignore_conflicts=True,
     )
 

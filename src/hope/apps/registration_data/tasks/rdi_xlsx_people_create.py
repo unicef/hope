@@ -138,10 +138,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         current_field = self.COMBINED_FIELDS.get(header, {})
         if not current_field and header not in self.complex_fields[self.sheet_title]:
             return
+        is_complex_field = header in self.complex_fields[self.sheet_title]
         is_not_image = current_field.get("type") != "IMAGE"
         cell_value = self._cell_value_strip(cell.value)
 
-        if not current_field.get("required") and cell.value is None and is_not_image:
+        if not current_field.get("required") and cell.value is None and is_not_image and not is_complex_field:
             return
 
         self._set_index_id(cell_value, header)

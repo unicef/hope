@@ -13,17 +13,16 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CurrencyFactory,
+    DataCollectingTypeFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
+    IndividualFactory,
     PaymentFactory,
     ProgramFactory,
 )
-from hope.apps.dashboard.services import (
-    GLOBAL_SLUG,
-    DashboardDataCache,
-    DashboardGlobalDataCache,
-)
+from hope.apps.dashboard.services import GLOBAL_SLUG, DashboardDataCache, DashboardGlobalDataCache
+from hope.apps.household.const import DISABLED, NON_BENEFICIARY, NOT_DISABLED
 from hope.models import Payment, PaymentPlan
 
 
@@ -71,7 +70,8 @@ def area_kabul(db):
 @pytest.fixture
 def populate_dashboard_cache(area_kabul):
     def _populate(ba, household_extra_args=None):
-        program = ProgramFactory(business_area=ba)
+        dct = DataCollectingTypeFactory(code="full_collection")
+        program = ProgramFactory(business_area=ba, data_collecting_type=dct)
         household = HouseholdFactory(
             business_area=ba,
             program=program,
@@ -137,17 +137,21 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
     ("test_name", "payment_updates", "expected_total"),
     [
         (
-            "delivered_quantity_usd prioritized",
+            "delivered_quantity_usd used for successful statuses, entitlement for pending",
             {
                 "delivered_quantity_usd": Decimal("100.0"),
                 "entitlement_quantity_usd": Decimal("50.0"),
             },
-            Decimal("500.0"),
+            Decimal("450.0"),
         ),
         (
-            "entitlement_quantity_usd used when delivered_quantity_usd is null",
-            {"delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
-            Decimal("250.0"),
+            "successful status with null delivered_quantity_usd returns 0",
+            {
+                "status": "Transaction Successful",
+                "delivered_quantity_usd": None,
+                "entitlement_quantity_usd": Decimal("50.0"),
+            },
+            Decimal("0.0"),
         ),
         (
             "both fields null",
@@ -155,7 +159,7 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
             Decimal("0.0"),
         ),
         (
-            "Pending status with null delivered_quantity_usd",
+            "Pending status with null delivered_quantity_usd uses entitlement",
             {
                 "status": "Pending",
                 "delivered_quantity_usd": None,
@@ -165,10 +169,10 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
         ),
     ],
     ids=[
-        "delivered_quantity_usd prioritized",
-        "entitlement_quantity_usd used when delivered_quantity_usd is null",
+        "delivered_quantity_usd used for successful statuses, entitlement for pending",
+        "successful status with null delivered_quantity_usd returns 0",
         "both fields null",
-        "Pending status with null delivered_quantity_usd",
+        "Pending status with null delivered_quantity_usd uses entitlement",
     ],
 )
 @pytest.mark.django_db
@@ -195,7 +199,7 @@ def test_dashboard_global_data_cache_prioritizes_delivered_quantity_usd(
         "delivered_quantity_usd": Decimal("100.0"),
         "entitlement_quantity_usd": Decimal("50.0"),
     }
-    expected_total = Decimal("500.0")
+    expected_total = Decimal("450.0")
 
     dashboard_cache_test_data(payment_updates)
 
@@ -408,3 +412,79 @@ def test_dashboard_reconciliation_verification_consistency(reconciliation_test_d
         "Sum of 'total_payment_plans' should be consistent between country and filtered global dashboards "
         f"(Country: {sum_total_plans_country}, Global: {sum_total_plans_global})"
     )
+
+
+@pytest.mark.django_db
+def test_dashboard_pwd_count_from_individuals(afghanistan, area_kabul, fsp_common, delivery_mechanism_common) -> None:
+    cache.delete(f"dashboard_data_{afghanistan.slug}")
+
+    # Create a program with a non-"full_collection" code
+    dct = DataCollectingTypeFactory(code="other_collection")
+    program = ProgramFactory(business_area=afghanistan, data_collecting_type=dct)
+
+    # Household has 0 for standard disabled count fields
+    household = HouseholdFactory(
+        business_area=afghanistan,
+        program=program,
+        size=5,
+        female_age_group_0_5_disabled_count=0,
+        female_age_group_6_11_disabled_count=0,
+        male_age_group_60_disabled_count=0,
+        admin1=area_kabul,
+    )
+
+    # 1 active individual with disability=DISABLED
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=DISABLED,
+        withdrawn=False,
+        duplicate=False,
+    )
+    # 1 active individual with disability=NOT_DISABLED
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=NOT_DISABLED,
+        withdrawn=False,
+        duplicate=False,
+    )
+    # 1 withdrawn individual with disability=DISABLED
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=DISABLED,
+        withdrawn=True,
+        duplicate=False,
+    )
+    # 1 active individual with disability=DISABLED, but NON_BENEFICIARY relationship (should be excluded)
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        disability=DISABLED,
+        withdrawn=False,
+        duplicate=False,
+        relationship=NON_BENEFICIARY,
+    )
+
+    PaymentFactory(
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        status=Payment.STATUS_SUCCESS,
+        delivery_date=TEST_DATE,
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
+        currency=CurrencyFactory(code="USD"),
+    )
+
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert result is not None
+    assert len(result) == 1
+    # Expected PWD count is 1 (only the first active individual should be counted)
+    assert result[0]["pwd_counts"] == 1

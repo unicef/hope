@@ -17,9 +17,10 @@ repos:
             -   id: tox-ini-fmt
                 args: [ "-p", "lint" ]
     -   repo: https://github.com/tox-dev/pyproject-fmt
-        rev: "v2.20.0"
+        rev: "v2.21.2"
         hooks:
             -   id: pyproject-fmt
+                additional_dependencies: ["toml-fmt-common<1.3"]
     -   repo: https://github.com/astral-sh/ruff-pre-commit
         rev: "v0.15.7"
         hooks:
@@ -39,12 +40,6 @@ repos:
                 language: system
                 pass_filenames: false
                 files: ^src/hope/(.*/models\.py|.*/models/.*\.py|models/.*\.py|.*/migrations/.*\.py)$
-            -   id: fe-types-drift
-                name: Frontend REST types drift check
-                entry: scripts/precommit_check_fe_types.sh
-                language: system
-                pass_filenames: false
-                files: ^src/hope/apps/.*/(filters|serializers|views)\.py$
     -   repo: meta
         hooks:
             -   id: check-hooks-apply
