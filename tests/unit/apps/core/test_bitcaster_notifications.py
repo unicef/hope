@@ -1,6 +1,9 @@
 from dataclasses import asdict
+from datetime import date, datetime
+from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
+from uuid import UUID
 
 from celery.exceptions import Retry
 from django.test import override_settings
@@ -263,6 +266,55 @@ def test_publish_rendered_email_notification_publishes_when_flag_enabled(mocker:
         "user_id": "1",
     }
     assert event.idempotency_key.startswith("email.rendered.sent:tests.RenderedEmailService:1:")
+
+
+def test_publish_rendered_email_notification_normalizes_context_to_json_safe_values(mocker: Any) -> None:
+    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
+    mock_publish = mocker.patch("hope.apps.core.notifications.publishers.publish_rendered_email_event")
+
+    class UnknownContextValue:
+        def __str__(self) -> str:
+            return "unknown-context-value"
+
+    class RenderedEmailService(BaseRenderedEmailNotificationService):
+        html_template = "email.html"
+        text_template = "email.txt"
+
+    publish_rendered_email_notification(
+        RenderedEmailNotification(
+            service=RenderedEmailService(),
+            user=SimpleNamespace(id=1, email="user@example.org"),
+            subject="Rendered subject",
+            html_body="<p>Rendered</p>",
+            text_body="Rendered",
+            context={
+                "date": date(2050, 1, 2),
+                "expires_at": datetime(2050, 1, 1, 12, 30, 0),
+                "uuid": UUID("12345678-1234-5678-1234-567812345678"),
+                "decimal": Decimal("123.45"),
+                "custom": UnknownContextValue(),
+                "nested": {
+                    "date": date(2051, 2, 3),
+                    "values": [Decimal("1.25"), UUID("87654321-4321-8765-4321-876543218765")],
+                    "custom": UnknownContextValue(),
+                },
+            },
+        )
+    )
+
+    event = mock_publish.call_args.args[0]
+    assert event.context == {
+        "date": "2050-01-02",
+        "expires_at": "2050-01-01T12:30:00",
+        "uuid": "12345678-1234-5678-1234-567812345678",
+        "decimal": "123.45",
+        "custom": "unknown-context-value",
+        "nested": {
+            "date": "2051-02-03",
+            "values": ["1.25", "87654321-4321-8765-4321-876543218765"],
+            "custom": "unknown-context-value",
+        },
+    }
 
 
 def test_publish_rendered_email_notification_swallows_publish_error(mocker: Any) -> None:

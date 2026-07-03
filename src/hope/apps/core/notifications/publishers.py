@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
 import hashlib
+import json
 import logging
 from typing import Any
+
+from django.core.serializers.json import DjangoJSONEncoder
 
 from hope.apps.core.notifications.events import RENDERED_EMAIL_SENT
 from hope.apps.core.notifications.flags import bitcaster_enabled
@@ -121,7 +124,7 @@ def publish_rendered_email_notification(notification: RenderedEmailNotification)
                 text_body=notification.text_body,
                 html_template=notification.service.html_template,
                 text_template=notification.service.text_template,
-                context=notification.context,
+                context=_json_safe_context(notification.context),
                 ccs=notification.ccs,
                 metadata={
                     "source": "hope",
@@ -132,6 +135,10 @@ def publish_rendered_email_notification(notification: RenderedEmailNotification)
         )
     except Exception:
         logger.exception("Failed to queue rendered email Bitcaster event")
+
+
+def _json_safe_context(context: dict[str, Any]) -> dict[str, Any]:
+    return json.loads(json.dumps(context, cls=DjangoJSONEncoder, default=str))
 
 
 def _build_rendered_email_idempotency_key(notification: RenderedEmailNotification) -> str:
