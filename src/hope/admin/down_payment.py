@@ -15,4 +15,5 @@ class DownPaymentAdmin(HOPEModelAdminBase):
         "doc_number",
     )
 
+    readonly_fields = ("business_area",)
     list_filter = (("business_area", ValueFilter), "doc_number")
