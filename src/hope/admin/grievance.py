@@ -61,7 +61,7 @@ class GrievanceTicketAdmin(CursorPaginatorAdmin, LinkedObjectsMixin, HOPEModelAd
         ("business_area__name", "business area"),
     )
 
-    readonly_fields = ("unicef_id",)
+    readonly_fields = ("unicef_id", "created_at", "created_by")
     filter_horizontal = ("programs",)
     show_full_result_count = False
 

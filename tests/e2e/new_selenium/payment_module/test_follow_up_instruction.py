@@ -23,10 +23,7 @@ def _select_autocomplete_option(browser: HopeTestBrowser, label: str) -> None:
 
 
 def _fill_date(browser: HopeTestBrowser, name: str, value: str) -> None:
-    """Fill a FormikDateField (MUI sectioned date input, format yyyy-MM-dd)."""
-    el = browser.find_element(f'input[name="{name}"]')
-    el.click()
-    el.send_keys(value)
+    browser.fill_date(f'input[name="{name}"]', value)
 
 
 def _confirm_workflow_button(browser: HopeTestBrowser, button_cy: str) -> None:

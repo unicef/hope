@@ -22,6 +22,7 @@ class KoboImportDataDataAdmin(HOPEModelAdminBase):
         "only_active_submissions",
         "pull_pictures",
     )
+    readonly_fields = ("business_area_slug",)
     list_filter = (
         "status",
         "data_type",

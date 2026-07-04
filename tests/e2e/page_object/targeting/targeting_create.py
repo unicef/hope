@@ -1,6 +1,7 @@
 from time import sleep
 
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -315,6 +316,40 @@ class TargetingCreate(BaseComponents):
                 individuals_filters_blocks_number, individual_block_filters_number
             )
         )
+
+    # MUI X v9 date fields have no typeable single input. Wait for the visible
+    # input-base box (located via the hidden value input's data-cy), then
+    # fill_date_picker drives its editable section list.
+    _date_field_box_xpath = (
+        "//input[@data-cy='date-input-individualsFiltersBlocks[{0}].individualBlockFilters[{1}].value.{2}']"
+        "/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]"
+    )
+
+    def fill_input_date_individuals_filters_blocks_value_from(
+        self,
+        value: str,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
+    ) -> None:
+        element = self.wait_for(
+            self._date_field_box_xpath.format(
+                individuals_filters_blocks_number, individual_block_filters_number, "from"
+            ),
+            By.XPATH,
+        )
+        self.fill_date_picker(element, value)
+
+    def fill_input_date_individuals_filters_blocks_value_to(
+        self,
+        value: str,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
+    ) -> None:
+        element = self.wait_for(
+            self._date_field_box_xpath.format(individuals_filters_blocks_number, individual_block_filters_number, "to"),
+            By.XPATH,
+        )
+        self.fill_date_picker(element, value)
 
     def get_input_individuals_filters_blocks_value(
         self,

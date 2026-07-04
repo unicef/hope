@@ -2,6 +2,8 @@ from django.conf import settings
 from selenium.webdriver.common.action_chains import ActionChains
 from seleniumbase import BaseCase
 
+from e2e.helpers.date_picker import fill_mui_date
+
 
 class HopeTestBrowser(BaseCase):
     """SeleniumBase browser wrapper for HOPE E2E tests.
@@ -66,7 +68,7 @@ class HopeTestBrowser(BaseCase):
     def select_option_by_name(self, option_name: str, selector: str | None = None):
         if selector is None:
             selector = f'li[data-cy="select-option-{option_name}"]'
-        self.wait_for_element_visible(selector)
+        self.wait_for_element_clickable(selector)
         self.click(selector)
         self.wait_for_element_absent(selector)
 
@@ -79,6 +81,16 @@ class HopeTestBrowser(BaseCase):
         """
         self.click(f'[data-cy="select-{field_name}"]')
         self.select_option_by_name(option_name)
+
+    def fill_date(self, selector: str, value: str, timeout: int = 10) -> None:
+        """Type a yyyy-MM-dd date into a MUI X date picker located by `selector`.
+
+        MUI X v9 fields have no single typeable input; `selector` should match the
+        field's hidden value input (e.g. `input[name="startDate"]`), which is not
+        visible, so we locate it by presence and drive the editable section list.
+        """
+        field_element = self.wait_for_element_present(selector, timeout=timeout)
+        fill_mui_date(self.driver, field_element, value)
 
     def assert_value(self, selector: str, expected: str, timeout: int = 10):
         actual = self.get_value(selector, timeout=timeout)
