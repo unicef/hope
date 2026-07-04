@@ -1,6 +1,8 @@
+import datetime
 from typing import Any
 
 from django.test import TestCase
+from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
@@ -57,6 +59,148 @@ def role_context(program: Program) -> dict[str, Any]:
         business_area=program.business_area,
     )
     return {"individual": individual, "household": household, "grievance_ticket": grievance_ticket}
+
+
+@pytest.fixture
+def household_with_previous_values(program: Program) -> Any:
+    return HouseholdFactory(
+        program=program,
+        business_area=program.business_area,
+        create_role=False,
+        start=timezone.make_aware(datetime.datetime(2022, 1, 1)),
+        country=CountryFactory(iso_code3="POL"),
+        admin1=AreaFactory(p_code="AF9999"),
+    )
+
+
+@pytest.fixture
+def data_change_ticket(program: Program) -> Any:
+    return GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=program.business_area,
+    )
+
+
+@pytest.fixture
+def empty_ticket_details(data_change_ticket: Any, household_with_previous_values: Any) -> Any:
+    return TicketHouseholdDataUpdateDetailsFactory(
+        ticket=data_change_ticket,
+        household=household_with_previous_values,
+        household_data={},
+    )
+
+
+def test_save_datetime_field_records_previous_value_as_isoformat(
+    household_with_previous_values: Any, data_change_ticket: Any
+) -> None:
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household_with_previous_values,
+                "household_data": {"start": datetime.date(2023, 1, 5)},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=data_change_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "start": {
+            "value": "2023-01-05",
+            "approve_status": False,
+            "previous_value": household_with_previous_values.start.isoformat(),
+        },
+        "flex_fields": {},
+    }
+
+
+def test_save_admin_area_title_records_previous_p_code(
+    household_with_previous_values: Any, data_change_ticket: Any
+) -> None:
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household_with_previous_values,
+                "household_data": {"admin_area_title": "AF010101"},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=data_change_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "admin_area_title": {"value": "AF010101", "approve_status": False, "previous_value": "AF9999"},
+        "flex_fields": {},
+    }
+
+
+def test_update_datetime_field_records_previous_value_as_isoformat(
+    household_with_previous_values: Any, empty_ticket_details: Any
+) -> None:
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household_with_previous_values,
+            "household_data": {"start": datetime.date(2023, 1, 5)},
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=empty_ticket_details.ticket, extras=update_extras)
+    ticket = service.update()
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "start": {
+            "value": "2023-01-05",
+            "approve_status": False,
+            "previous_value": household_with_previous_values.start.isoformat(),
+        },
+        "flex_fields": {},
+    }
+
+
+def test_update_country_field_records_previous_value_as_iso_code3(
+    household_with_previous_values: Any, empty_ticket_details: Any
+) -> None:
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household_with_previous_values,
+            "household_data": {"country": "AGO"},
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=empty_ticket_details.ticket, extras=update_extras)
+    ticket = service.update()
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "country": {"value": "AGO", "approve_status": False, "previous_value": "POL"},
+        "flex_fields": {},
+    }
+
+
+def test_update_admin_area_title_strips_p_code_from_label(
+    household_with_previous_values: Any, empty_ticket_details: Any
+) -> None:
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household_with_previous_values,
+            "household_data": {"admin_area_title": "Prague - AF0101"},
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=empty_ticket_details.ticket, extras=update_extras)
+    ticket = service.update()
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "admin_area_title": {"value": "AF0101", "approve_status": False, "previous_value": "AF9999"},
+        "flex_fields": {},
+    }
 
 
 def test_close_resolves_country_and_country_origin_from_iso_codes() -> None:
