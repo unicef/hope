@@ -3,6 +3,7 @@ from time import sleep
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions
 
 from e2e.page_object.base_components import BaseComponents
 
@@ -232,6 +233,12 @@ class NewTicket(BaseComponents):
 
     def get_received_consent(self) -> WebElement:
         return self.wait_for(self.received_consent, timeout=100)
+
+    def check_received_consent(self) -> None:
+        consent = self.wait_for(self.received_consent, timeout=100)
+        consent.click()
+        consent_input = consent.find_element(By.CSS_SELECTOR, "input")
+        self._wait().until(expected_conditions.element_to_be_selected(consent_input))
 
     def get_description(self) -> WebElement:
         return self.wait_for(self.description)

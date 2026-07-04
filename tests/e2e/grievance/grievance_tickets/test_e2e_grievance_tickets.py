@@ -561,7 +561,6 @@ class TestSmokeGrievanceTickets:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
-    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -572,6 +571,7 @@ class TestGrievanceTickets:
             pytest.param(
                 {"category": "Sensitive Grievance", "type": "Personal disputes"},
                 id="Sensitive Grievance Personal disputes",
+                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "Other Complaint"},
@@ -583,18 +583,22 @@ class TestGrievanceTickets:
                     "type": "Registration Related Complaint",
                 },
                 id="Grievance Complaint Registration Related Complaint",
+                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "FSP Related Complaint"},
                 id="Grievance Complaint FSP Related Complaint",
+                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
                 {"category": "Data Change", "type": "Withdraw Individual"},
                 id="Data Change Withdraw Individual",
+                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
                 {"category": "Data Change", "type": "Withdraw Household"},
                 id="Data Change Withdraw Household",
+                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
         ],
     )
@@ -626,7 +630,7 @@ class TestGrievanceTickets:
             page_grievance_new_ticket.get_individual_tab().click()
             page_grievance_new_ticket.get_individual_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
         page_grievance_new_ticket.get_button_next().click()
@@ -690,7 +694,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Add Member - TEST")
         page_grievance_new_ticket.get_phone_no_alternative().send_keys("999 999 999")
@@ -761,7 +765,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
 
         page_grievance_new_ticket.get_description().send_keys("Add Individual - TEST")
@@ -807,7 +811,6 @@ class TestGrievanceTickets:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_hh_grievance_tickets_create_new_ticket(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -829,7 +832,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
 
         page_grievance_new_ticket.get_description().send_keys("Add Group - TEST")
@@ -842,7 +845,6 @@ class TestGrievanceTickets:
         assert "Female Age Group 12 17" in page_grievance_details_page.get_rows()[0].text
         assert "- 1" in page_grievance_details_page.get_rows()[0].text
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -876,7 +878,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_individual_tab().click()
         page_grievance_new_ticket.get_individual_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
 
         page_grievance_new_ticket.get_description().send_keys("Add Member Data Update - TEST")
@@ -919,7 +921,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_partner().click()
         page_grievance_new_ticket.select_option_by_name("UNICEF HQ")
@@ -948,7 +950,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("TEST Payment Related Complaint")
         page_grievance_new_ticket.get_look_up_payment_record().click()
@@ -975,7 +977,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("TEST Linked Ticket")
         page_grievance_new_ticket.get_look_up_button().click()
@@ -1009,7 +1011,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
         page_grievance_new_ticket.get_add_documentation().click()
@@ -1083,7 +1085,7 @@ class TestGrievanceTickets:
         assert "-" in page_grievance_new_ticket.get_label_phone_number().text
         page_grievance_new_ticket.get_input_questionnaire_relationship().click()
         assert individual.get_relationship_display() in page_grievance_new_ticket.get_label_relationship_to_hoh().text
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
 
     def test_grievance_tickets_edit_tickets_from_main_grievance_page(
@@ -1153,7 +1155,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
 
         page_grievance_new_ticket.get_description().send_keys("Add Individual - TEST")
@@ -1195,7 +1197,6 @@ class TestGrievanceTickets:
         assert datetime.now().strftime("%-d %b %Y") in page_grievance_details_page.get_note_rows()[0].text
         assert "Test adding new note." in page_grievance_details_page.get_note_rows()[0].text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_activity_log(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -1413,7 +1414,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_individual_tab().click()
         page_grievance_new_ticket.get_individual_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
 
         page_grievance_new_ticket.get_description().send_keys("Individual Data Update with Photo - TEST")
@@ -1447,7 +1448,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.wait_for_page_ready()
 

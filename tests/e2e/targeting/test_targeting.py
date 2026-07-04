@@ -119,12 +119,11 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def create_household_with_individual_with_collectors() -> Household:
+def create_household_with_individual_with_collectors(program: Program) -> Household:
     observed_disability = []
     residence_status: str = HOST
     unicef_id: str = "HH-00-0000.0442"
     size: int = 2
-    program = Program.objects.get(name="Test Programm")
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     hoh = IndividualFactory(
         household=None,
@@ -1449,7 +1448,7 @@ class TestTargeting:
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
         page_targeting_details.get_input_name().send_keys("a1!")
-        page_targeting_details.get_elements(page_targeting_details.buttonTargetPopulationDuplicate)[1].click()
+        page_targeting_details.get_elements(page_targeting_details.button_target_population_duplicate)[1].click()
         page_targeting_details.disappear_input_name()
         assert "a1!" in page_targeting_details.get_title_page().text
         assert "OPEN" in page_targeting_details.get_target_population_status().text
@@ -1665,7 +1664,6 @@ class TestTargeting:
                 By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
-    @pytest.mark.xfail(reason="unstable")
     def test_targeting_info_button(
         self,
         create_programs: None,
@@ -1677,7 +1675,6 @@ class TestTargeting:
         page_targeting.get_tab_field_list()
         page_targeting.get_tab_targeting_diagram().click()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_targeting_filters(
         self,
         create_programs: None,

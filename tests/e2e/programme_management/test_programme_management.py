@@ -560,6 +560,7 @@ class TestComeBackScenarios:
         change_super_user: None,
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
+        payment_plan_purpose: PaymentPlanPurpose,
         test_data: dict,
     ) -> None:
         # Go to Programme Management
@@ -576,7 +577,8 @@ class TestComeBackScenarios:
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("People Menu")
+        page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -616,7 +618,6 @@ class TestComeBackScenarios:
 
 
 @pytest.mark.night
-@pytest.mark.xfail(reason="UNSTABLE")
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @pytest.mark.parametrize(
@@ -632,11 +633,11 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_programme_chose_dates_via_calendar(
         self,
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
+        payment_plan_purpose: PaymentPlanPurpose,
         test_data: dict,
     ) -> None:
         # Go to Programme Management
@@ -649,7 +650,8 @@ class TestManualCalendar:
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("People Menu")
+        page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -693,6 +695,7 @@ class TestManualCalendar:
         self,
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
+        payment_plan_purpose: PaymentPlanPurpose,
         test_data: dict,
     ) -> None:
         # Go to Programme Management
@@ -709,7 +712,8 @@ class TestManualCalendar:
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("People Menu")
+        page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -741,9 +745,7 @@ class TestManualCalendar:
         page_programme_management.get_input_programme_name().send_keys("New name after Edit")
         page_programme_management.clear_input(page_programme_management.get_input_programme_code())
         page_programme_management.get_input_programme_code().send_keys("NEW1")
-        page_programme_management.clear_input(
-            page_programme_management.page_programme_management.get_input_start_date()
-        )
+        page_programme_management.clear_input(page_programme_management.get_input_start_date())
         page_programme_management.get_input_start_date().send_keys(
             str(FormatTime(1, 1, 2022).numerically_formatted_date)
         )
@@ -767,6 +769,7 @@ class TestManualCalendar:
         create_programs: None,
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
+        payment_plan_purpose: PaymentPlanPurpose,
         screenshot_path: str,
     ) -> None:
         partner1 = Partner.objects.create(name="Test Partner 1")
@@ -793,7 +796,8 @@ class TestManualCalendar:
         page_programme_management.choose_option_data_collecting_type("Partial")
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("People Menu")
+        page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -801,9 +805,12 @@ class TestManualCalendar:
         # 3rd step (Partners)
         # only partners with role in business area can be selected
 
-        assert partner1 in Partner.objects.filter(business_areas__slug="afghanistan").all()
-        assert partner2 not in Partner.objects.filter(business_areas__slug="afghanistan").all()
-        assert Partner.objects.get(name="UNHCR") in Partner.objects.filter(business_areas__slug="afghanistan").all()
+        assert partner1 in Partner.objects.filter(allowed_business_areas__slug="afghanistan").all()
+        assert partner2 not in Partner.objects.filter(allowed_business_areas__slug="afghanistan").all()
+        assert (
+            Partner.objects.get(name="UNHCR")
+            in Partner.objects.filter(allowed_business_areas__slug="afghanistan").all()
+        )
 
         partner_access_selected = "Only Selected Partners within the business area"
         page_programme_management.get_access_to_program().click()
@@ -820,6 +827,7 @@ class TestManualCalendar:
         page_programme_management.driver.find_element(By.CSS_SELECTOR, "body").click()
 
         page_programme_management.choose_partner_option("UNHCR")
+        page_programme_management.wait_for_text("UNHCR", page_programme_management.input_partner)
 
         page_programme_management.get_button_save().click()
 
@@ -870,10 +878,12 @@ class TestManualCalendar:
             ),
         ],
     )
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_edit_programme_with_rdi(
         self,
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
+        payment_plan_purpose: PaymentPlanPurpose,
         test_data: dict,
     ) -> None:
         # Go to Programme Management
@@ -889,6 +899,9 @@ class TestManualCalendar:
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
+        page_programme_management.get_input_beneficiary_group().click()
+        page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field().click()
