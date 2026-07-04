@@ -1,6 +1,7 @@
 from typing import Any
 
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import BusinessAreaFactory, GrievanceTicketFactory, UserFactory
 from hope.apps.grievance.constants import (
@@ -84,6 +85,21 @@ def grievance_context(business_area: BusinessArea, users: dict[str, User]) -> di
             grievance_ticket4,
         ],
     }
+
+
+@pytest.fixture
+def closed_ticket(business_area: BusinessArea, users: dict[str, User]) -> GrievanceTicket:
+    user = users["user"]
+    return GrievanceTicketFactory(
+        description="Closed ticket",
+        assigned_to=user,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+        language="PL",
+        status=GrievanceTicket.STATUS_CLOSED,
+        created_by=user,
+        business_area=business_area,
+    )
 
 
 def test_bulk_update_assignee(grievance_context: dict[str, Any]) -> None:
@@ -171,3 +187,45 @@ def test_bulk_add_note(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket1.ticket_notes.count() == 1
     assert grievance_ticket2.ticket_notes.count() == 1
     assert grievance_ticket1.ticket_notes.first().description == "Test note"
+
+
+def test_bulk_update_assignee_with_closed_ticket_raises(
+    closed_ticket: GrievanceTicket, users: dict[str, User], business_area: BusinessArea
+) -> None:
+    user_two = users["user_two"]
+
+    with pytest.raises(ValidationError, match="Some tickets do not exist or are closed"):
+        BulkActionService().bulk_assign([closed_ticket.id], user_two.id, business_area.slug)
+
+
+def test_bulk_update_priority_with_invalid_priority_raises(business_area: BusinessArea) -> None:
+    with pytest.raises(ValidationError, match="Invalid priority"):
+        BulkActionService().bulk_set_priority([], 999, business_area.slug)
+
+
+def test_bulk_update_priority_with_closed_ticket_raises(
+    closed_ticket: GrievanceTicket, business_area: BusinessArea
+) -> None:
+    with pytest.raises(ValidationError, match="Some tickets do not exist or are closed"):
+        BulkActionService().bulk_set_priority([closed_ticket.id], PRIORITY_HIGH, business_area.slug)
+
+
+def test_bulk_update_urgency_with_invalid_urgency_raises(business_area: BusinessArea) -> None:
+    with pytest.raises(ValidationError, match="Invalid priority"):
+        BulkActionService().bulk_set_urgency([], 999, business_area.slug)
+
+
+def test_bulk_update_urgency_with_closed_ticket_raises(
+    closed_ticket: GrievanceTicket, business_area: BusinessArea
+) -> None:
+    with pytest.raises(ValidationError, match="Some tickets do not exist or are closed"):
+        BulkActionService().bulk_set_urgency([closed_ticket.id], URGENCY_VERY_URGENT, business_area.slug)
+
+
+def test_bulk_add_note_with_closed_ticket_raises(
+    closed_ticket: GrievanceTicket, users: dict[str, User], business_area: BusinessArea
+) -> None:
+    user = users["user"]
+
+    with pytest.raises(ValidationError, match="Some tickets do not exist, or are closed"):
+        BulkActionService().bulk_add_note(user, [closed_ticket.id], "Test note", business_area.slug)
