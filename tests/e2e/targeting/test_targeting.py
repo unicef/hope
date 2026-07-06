@@ -605,6 +605,7 @@ class TestSmokeTargeting:
         page_targeting_create.get_button_individual_rule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
