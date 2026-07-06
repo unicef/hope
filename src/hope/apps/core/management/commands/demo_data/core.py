@@ -82,7 +82,7 @@ class DataCollectingTypeFactory(DjangoModelFactory):
     individual_filters_available = True
     household_filters_available = True
 
-    @factory.post_generation  # type: ignore[misc]
+    @factory.post_generation  # type: ignore[untyped-decorator]
     def business_areas(self, create: Any, extracted: list[Any], **kwargs: Any) -> None:
         if not create:
             return
@@ -115,7 +115,7 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     class Meta:
         model = FlexibleAttribute
 
-    @factory.lazy_attribute  # type: ignore[misc]
+    @factory.lazy_attribute  # type: ignore[untyped-decorator]
     def program(self) -> Any:
         from extras.test_utils.old_factories.program import ProgramFactory
 
