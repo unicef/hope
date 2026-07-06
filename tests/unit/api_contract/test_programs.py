@@ -2,7 +2,7 @@ from pathlib import Path
 
 from drf_api_checker.pytest import frozenfixture
 import pytest
-from unit.api_contract._helpers import HopeRecorder
+from unit.api_contract._helpers import ProgramsRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
@@ -23,9 +23,15 @@ def business_area(request, db):
     return BusinessAreaFactory()
 
 
-@frozenfixture()
-def unicef_partner_for_ba(request, db, business_area):
-    """Partner created by BusinessArea post_save signal - must be recreated for frozenfixture."""
+@pytest.fixture
+def unicef_partner_for_ba(db, business_area):
+    """UNICEF subpartner for the business area.
+
+    Kept as a plain (non-frozen) fixture: freezing it stored hard-coded partner
+    PKs that, on replay, could be redirected onto an existing ``UNICEF`` row by
+    the conftest's unique-name conflict handling, leaving the child's
+    ``parent_id`` dangling and poisoning the whole xdist worker at teardown.
+    """
     from hope.models import Partner
 
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
@@ -37,8 +43,8 @@ def unicef_partner_for_ba(request, db, business_area):
     return partner
 
 
-@frozenfixture()
-def partner_role_assignment(request, db, business_area, unicef_partner_for_ba):
+@pytest.fixture
+def partner_role_assignment(db, business_area, unicef_partner_for_ba):
     """RoleAssignment for partner - needed for get_partners query."""
     from hope.apps.core.signals import DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
     from hope.models import Role, RoleAssignment
@@ -77,10 +83,10 @@ def role_assignment(request, db, superuser, business_area, role):
 
 
 def test_list_programs(superuser, business_area, program, role_assignment, partner_role_assignment):
-    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder = ProgramsRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/")
 
 
 def test_retrieve_program(superuser, business_area, program, role_assignment, partner_role_assignment):
-    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder = ProgramsRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/programs/{program.code}/")
