@@ -1,0 +1,32 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "OPTIONS, GET",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "246"
+    },
+    "data": [
+        {
+            "delivery_mechanism": {
+                "id": "819fb1fe-65c5-4182-83cf-e0f763238993",
+                "name": "Delivery Mechanism 0",
+                "code": "DM0000",
+                "is_active": true,
+                "transfer_type": "CASH",
+                "account_type": null
+            },
+            "fsps": [
+                {
+                    "id": "fc235582-e7a3-46f2-b69d-7cd96cced137",
+                    "name": "FSP 0"
+                }
+            ]
+        }
+    ],
+    "content_type": "application/json"
+}

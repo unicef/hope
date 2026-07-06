@@ -82,7 +82,7 @@ class DataCollectingTypeFactory(DjangoModelFactory):
     individual_filters_available = True
     household_filters_available = True
 
-    @factory.post_generation
+    @factory.post_generation  # type: ignore[misc]
     def business_areas(self, create: Any, extracted: list[Any], **kwargs: Any) -> None:
         if not create:
             return
@@ -115,7 +115,7 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     class Meta:
         model = FlexibleAttribute
 
-    @factory.lazy_attribute
+    @factory.lazy_attribute  # type: ignore[misc]
     def program(self) -> Any:
         from extras.test_utils.old_factories.program import ProgramFactory
 
@@ -401,7 +401,7 @@ def generate_data_collecting_types() -> None:
     ]
 
     for data_dict in data_collecting_types:
-        DataCollectingTypeFactory(
+        DataCollectingTypeFactory(  # type: ignore[no-untyped-call]
             label=data_dict["label"],
             code=data_dict["code"],
             business_areas=all_ba_id_list,
@@ -418,7 +418,7 @@ def generate_pdu_data() -> None:
         number_of_rounds=12,
         rounds_names=["test1", "test2", "test3..."],
     )
-    FlexibleAttributeForPDUFactory(
+    FlexibleAttributeForPDUFactory(  # type: ignore[no-untyped-call]
         program=test_program,
         pdu_data=pdu_data,
         label="Test pdu 1",
