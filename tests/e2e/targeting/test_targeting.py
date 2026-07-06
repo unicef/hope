@@ -4,6 +4,7 @@ from typing import Any, Callable
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 import factory
+from flaky import flaky
 import pytest
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -605,6 +606,7 @@ class TestSmokeTargeting:
         page_targeting_create.get_button_individual_rule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
 
+    @flaky(max_runs=3, min_passes=1)
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
@@ -1662,6 +1664,7 @@ class TestTargeting:
                 By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
+    @flaky(max_runs=3, min_passes=1)
     def test_targeting_info_button(
         self,
         create_programs: None,

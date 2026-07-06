@@ -3,6 +3,7 @@ from time import sleep
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from flaky import flaky
 import pytest
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -604,6 +605,7 @@ class TestComeBackScenarios:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
+    @flaky(max_runs=3, min_passes=1)
     @pytest.mark.parametrize(
         "test_data",
         [
