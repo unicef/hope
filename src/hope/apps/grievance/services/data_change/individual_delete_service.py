@@ -9,7 +9,7 @@ from hope.apps.grievance.services.reassign_roles_services import (
 )
 from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
 from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.models import Individual, log_create
+from hope.models import Household, Individual, log_create
 
 
 class IndividualDeleteService(DataChangeService):
@@ -35,6 +35,9 @@ class IndividualDeleteService(DataChangeService):
             return
         details = self.grievance_ticket.ticket_details
         individual_to_remove = details.individual
+        # lock household before individual - same order as recalculate_data, to avoid deadlocks
+        if individual_to_remove.household_id:
+            Household.objects.select_for_update().get(id=individual_to_remove.household_id)
         individual_to_remove = Individual.objects.select_for_update().get(id=individual_to_remove.id)
         old_individual_to_remove = Individual.objects.get(id=individual_to_remove.id)
         household_to_remove = reassign_roles_on_disable_individual_service(

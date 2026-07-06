@@ -308,6 +308,14 @@ class IndividualDataUpdateService(DataChangeService):
                 area = Area.objects.filter(p_code=admin_area_title).first()
                 updated_household.set_admin_areas(area)
 
+    def _lock_household_and_individual(self, individual: Individual) -> tuple[Household | None, Individual]:
+        # lock household before individual - same order as recalculate_data, to avoid deadlocks
+        household = None
+        if individual.household_id:
+            household = Household.objects.select_for_update().get(id=individual.household_id)
+        locked_individual = Individual.objects.select_for_update().get(id=individual.id)
+        return household, locked_individual
+
     def close(self, user: AbstractUser) -> None:
         ticket_details = self.grievance_ticket.individual_data_update_ticket_details
         program_qs = self.grievance_ticket.programs.all()
@@ -315,7 +323,6 @@ class IndividualDataUpdateService(DataChangeService):
             return
         details = self.grievance_ticket.individual_data_update_ticket_details
         individual = details.individual
-        household = individual.household
         individual_data = details.individual_data
         flex_fields_with_additional_data = individual_data.pop("flex_fields", {})
         flex_fields = {
@@ -350,7 +357,7 @@ class IndividualDataUpdateService(DataChangeService):
         if individual.flex_fields is not None:
             merged_flex_fields.update(individual.flex_fields)
         merged_flex_fields.update(flex_fields)
-        new_individual = Individual.objects.select_for_update().get(id=individual.id)
+        household, new_individual = self._lock_household_and_individual(individual)
 
         self._validate_phone_numbers(only_approved_data)
         self._update_household_fields(household, only_approved_data)  # type: ignore[arg-type]

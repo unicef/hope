@@ -208,14 +208,15 @@ class RdiMergeTask:
                     self._update_merge_statuses(households_to_merge_ids, individuals_to_merge_ids)
                     self._populate_index_individuals(obj_hct)
 
-                    individuals = evaluate_qs(
-                        Individual.objects.filter(registration_data_import=obj_hct)
-                        .select_for_update(of=("self",))
-                        .order_by("pk")
-                    )
+                    # lock households before individuals - same order as recalculate_data, to avoid deadlocks
                     households = evaluate_qs(
                         Household.objects.filter(registration_data_import=obj_hct)
                         .select_related("household_collection", "business_area")
+                        .select_for_update(of=("self",))
+                        .order_by("pk")
+                    )
+                    individuals = evaluate_qs(
+                        Individual.objects.filter(registration_data_import=obj_hct)
                         .select_for_update(of=("self",))
                         .order_by("pk")
                     )
