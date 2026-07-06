@@ -18,7 +18,7 @@ from extras.test_utils.factories import (
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.add_individual_service import AddIndividualService
 from hope.apps.grievance.services.data_change.utils import handle_add_identity
-from hope.apps.household.const import SINGLE
+from hope.apps.household.const import HEAD, RELATIONSHIP_UNKNOWN, SINGLE
 from hope.models import Document, Individual, IndividualIdentity, Program
 
 pytestmark = [
@@ -149,6 +149,26 @@ def test_add_individual_with_document_that_exists_in_pending_status(
         pytest.fail("ValidationError should not be raised")
     assert Document.objects.filter(document_number="123456", status=Document.STATUS_VALID).count() == 0
     assert Document.objects.filter(document_number="123456").count() == 2
+
+
+def test_add_individual_as_head_reassigns_existing_relationships_on_close_ticket(
+    add_individual_context: dict[str, Any],
+) -> None:
+    household = add_individual_context["household"]
+    ticket = add_individual_context["ticket"]
+    ticket_details = add_individual_context["ticket_details"]
+    previous_head = household.head_of_household
+    ticket_details.individual_data["relationship"] = HEAD
+    ticket_details.save()
+
+    service = AddIndividualService(ticket, {})
+    service.close(UserFactory())
+
+    household.refresh_from_db()
+    previous_head.refresh_from_db()
+    new_head = Individual.objects.get(household=household, full_name="Test Example")
+    assert household.head_of_household == new_head
+    assert previous_head.relationship == RELATIONSHIP_UNKNOWN
 
 
 def test_handle_add_identity(add_individual_context: dict[str, Any], program: Program) -> None:
