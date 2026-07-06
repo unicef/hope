@@ -170,31 +170,6 @@ export const IndividualBioData = ({
     );
   };
 
-  const renderDigitalWalletInfo = (): ReactNode => {
-    return (
-      <>
-        <Grid size={{ xs: 12 }}>
-          <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Wallet Name')}>
-            {individual?.walletName}
-          </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Blockchain Name')}>
-            {individual?.blockchainName}
-          </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Wallet Address')}>
-            {individual?.walletAddress}
-          </LabelizedField>
-        </Grid>
-      </>
-    );
-  };
-
   return (
     <Overview>
       <Title>
@@ -393,7 +368,6 @@ export const IndividualBioData = ({
           )}
         </Grid>
         {renderBiometricDataSection()}
-        {renderDigitalWalletInfo()}
       </Grid>
     </Overview>
   );
