@@ -211,24 +211,24 @@ def test_documents_no_longer_conflict_false_on_partial_resolution(
     assert ticket_details.documents_no_longer_conflict() is False
 
 
-def test_documents_no_longer_conflict_ignores_selected_duplicates(
+def test_documents_no_longer_conflict_false_for_selected_duplicate_still_sharing(
     business_area: Any, program: Any, national_id_type: Any, country: Any
 ) -> None:
     golden = _build_individual(program, business_area)
-    removed_duplicate = _build_individual(program, business_area)
+    selected_duplicate = _build_individual(program, business_area)
     _add_national_id(golden, national_id_type, country, program, "ID-SHARED")
     _add_national_id(
-        removed_duplicate,
+        selected_duplicate,
         national_id_type,
         country,
         program,
         "ID-SHARED",
         doc_status=Document.STATUS_NEED_INVESTIGATION,
     )
-    ticket_details = _build_ticket(business_area, program, golden, [removed_duplicate])
-    ticket_details.selected_individuals.add(removed_duplicate)
+    ticket_details = _build_ticket(business_area, program, golden, [selected_duplicate])
+    ticket_details.selected_individuals.add(selected_duplicate)
 
-    assert ticket_details.documents_no_longer_conflict() is True
+    assert ticket_details.documents_no_longer_conflict() is False
 
 
 def test_documents_no_longer_conflict_ignores_invalid_documents(
@@ -489,6 +489,60 @@ def test_close_as_unique_endpoint_forbidden_without_permission(
     response = client.post(_close_as_unique_url(business_area, ticket_details), {}, format="json")
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_close_as_unique_endpoint_forbidden_with_creator_scoped_permission_when_not_creator(
+    api_client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    national_id_type: Any,
+    country: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    ticket_details = _build_ticket(business_area, program, golden, [duplicate])
+    create_user_role_with_permissions(
+        user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR], business_area, program
+    )
+
+    client = api_client(user)
+    response = client.post(_close_as_unique_url(business_area, ticket_details), {}, format="json")
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    ticket_details.ticket.refresh_from_db()
+    assert ticket_details.ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
+
+
+def test_close_as_unique_endpoint_success_with_creator_scoped_permission_when_creator(
+    api_client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    national_id_type: Any,
+    country: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    golden = _build_individual(program, business_area)
+    duplicate = _build_individual(program, business_area)
+    _add_national_id(golden, national_id_type, country, program, "ID-1")
+    _add_national_id(duplicate, national_id_type, country, program, "ID-2")
+    ticket_details = _build_ticket(business_area, program, golden, [duplicate])
+    ticket_details.ticket.created_by = user
+    ticket_details.ticket.save()
+    create_user_role_with_permissions(
+        user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR], business_area, program
+    )
+
+    client = api_client(user)
+    response = client.post(_close_as_unique_url(business_area, ticket_details), {}, format="json")
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    ticket_details.ticket.refresh_from_db()
+    assert ticket_details.ticket.status == GrievanceTicket.STATUS_CLOSED
 
 
 def test_close_as_unique_endpoint_forbidden_without_area_access(

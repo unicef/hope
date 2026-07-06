@@ -953,26 +953,23 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         return False
 
     def documents_no_longer_conflict(self) -> bool:
-        """Return True when no two unresolved individuals on the ticket still share a document signature.
+        """Return True when no two individuals on the ticket still share a document signature.
 
         Unlike ``has_duplicated_document`` this uses the real dedup signature
         (``Document.dedup_signature``) and detects conflicts pairwise, so a partial
         resolution (e.g. A and B separated while C still shares the id) is correctly
-        reported as a remaining conflict. Invalidated documents are ignored. Callers
-        should prefetch ``documents__type``.
+        reported as a remaining conflict. All parties are compared, including any
+        ``selected_individuals``: close-as-unique marks *everyone* distinct, so a
+        selected duplicate that still shares a document is a genuine remaining conflict.
+        Invalidated documents are ignored. Callers should prefetch ``documents__type``.
         """
         from hope.models import Document
 
-        selected_duplicates = set(self.selected_individuals.all())
-        unresolved = [
-            individual
-            for individual in [self.golden_records_individual, *self.possible_duplicates.all()]
-            if individual not in selected_duplicates
-        ]
-        if len(unresolved) < 2:
+        parties = [self.golden_records_individual, *self.possible_duplicates.all()]
+        if len(parties) < 2:
             return True
         seen_signatures: set[str] = set()
-        for individual in unresolved:
+        for individual in parties:
             signatures = {
                 document.dedup_signature
                 for document in individual.documents.all()

@@ -575,7 +575,13 @@ class GrievanceTicketGlobalViewSet(
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
-            .prefetch_related("programs", *to_prefetch)
+            .prefetch_related(
+                "programs",
+                *to_prefetch,
+                # feeds TicketNeedsAdjudicationDetails.documents_no_longer_conflict() (can_close_as_unique)
+                "needs_adjudication_ticket_details__golden_records_individual__documents__type",
+                "needs_adjudication_ticket_details__possible_duplicates__documents__type",
+            )
             .annotate(
                 has_social_worker_program_annotated=Exists(
                     Program.objects.filter(
@@ -858,11 +864,25 @@ class GrievanceTicketGlobalViewSet(
         if not isinstance(ticket_details, TicketNeedsAdjudicationDetails):
             raise ValidationError("Ticket is not a Needs Adjudication ticket.")
 
+        check_creator_or_owner_permission(
+            user,
+            [
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+            ],
+            self.business_area,
+            grievance_ticket,
+        )
+
         partner = user.partner
-        all_individuals = [
-            ticket_details.golden_records_individual,
-            *ticket_details.possible_duplicates.select_related("household__admin2", "program").all(),
+        individual_ids = [
+            ticket_details.golden_records_individual_id,
+            *ticket_details.possible_duplicates.values_list("id", flat=True),
         ]
+        all_individuals = Individual.objects.filter(id__in=individual_ids).select_related(
+            "household__admin2", "program"
+        )
         for individual in all_individuals:
             household = individual.household
             if (
