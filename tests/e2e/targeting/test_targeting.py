@@ -1671,7 +1671,7 @@ class TestTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_target_population().click()
         page_targeting.get_tab_field_list()
-        page_targeting.get_tab_targeting_diagram().click()
+        page_targeting.click(page_targeting.tab_targeting_diagram)
 
     def test_targeting_filters(
         self,
