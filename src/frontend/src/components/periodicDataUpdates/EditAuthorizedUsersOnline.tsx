@@ -84,6 +84,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
               color="primary"
               type="submit"
               disabled={isSubmitting}
+              data-cy="button-save-authorized-users"
             >
               {t('Save')}
             </Button>
