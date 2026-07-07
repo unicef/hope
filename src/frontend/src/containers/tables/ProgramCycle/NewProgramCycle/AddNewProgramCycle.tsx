@@ -101,11 +101,7 @@ const AddNewProgramCycle = ({
         scroll="paper"
         aria-labelledby="form-dialog-title"
       >
-        {stepsToRender.map((stepComponent, index) => {
-          if (index === step) {
-            return stepComponent;
-          }
-        })}
+        {stepsToRender[Math.min(step, stepsToRender.length - 1)]}
       </Dialog>
     </>
   );

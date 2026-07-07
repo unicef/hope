@@ -5,9 +5,7 @@ import pytest
 from selenium.common.exceptions import TimeoutException
 
 from e2e.page_object.filters import Filters
-from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
-from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -161,6 +159,7 @@ def payment_verification_creator(
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     payment_plan_id: str = "PP-0060-22-11223344",
 ) -> PaymentVerification:
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first()
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -489,22 +488,51 @@ class TestSmokeFilters:
         assert filters.wait_for_number_of_rows(1)
 
     @pytest.mark.night
-    @pytest.mark.skip("ToDo")
     def test_grievance_tickets_filters_of_households_and_individuals(
         self,
+        create_programs: None,
+        add_grievance_tickets: None,
         page_grievance_tickets: GrievanceTickets,
-        page_grievance_new_ticket: NewTicket,
-        page_grievance_details_page: GrievanceDetailsPage,
         filters: Filters,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
+        filters.select_global_program_filter("Test Programm")
+        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
-        page_grievance_tickets.get_button_new_ticket().click()
+        assert filters.wait_for_number_of_rows(2)
 
-    @pytest.mark.skip("ToDo")
-    def test_payment_verification_details_filters(
+        filters.get_filter_by_locator("filters-search").send_keys("Wrong value")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(0)
+
+        filters.get_button_filters_clear().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filters-search").send_keys("GRV-0000123")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(1)
+
+    def test_payment_verification_list_filters(
         self,
+        create_programs: None,
+        add_payment_verification: None,
         page_grievance_tickets: GrievanceTickets,
         filters: Filters,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
+        filters.select_global_program_filter("Test Programm")
+        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_payment_verification().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filter-search").send_keys("Wrong value")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(0)
+
+        filters.get_button_filters_clear().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filter-search").send_keys("PP-0060-22-11223344")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(1)
