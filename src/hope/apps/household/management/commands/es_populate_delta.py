@@ -159,9 +159,23 @@ class Command(BaseCommand):
             return
 
         # 1) Programs changed since `since` (inserts / updates / soft-deletes).
-        changed_ids = (self._changed_program_ids(since) & scope_id_set) if since is not None else set()
         if since is not None:
+            # Push the scope into the change queries only when narrowed; on a full run the
+            # `IN (<all program ids>)` list would be slower than the post-filter intersection.
+            scoped = scope_id_set if (opts["program"] or opts["business_area"]) else None
+            changed_ids = self._changed_program_ids(since, scoped) & scope_id_set
             self.stdout.write(f"Changed since {since.isoformat()}: {len(changed_ids)} program(s) in scope.")
+            ref_changed = self._reference_data_changed(since)
+            if ref_changed:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Reference data changed since {since.isoformat()} ({', '.join(ref_changed)}); "
+                        f"no per-program key -> flagging all {len(scope_id_set)} in-scope program(s) for rebuild."
+                    )
+                )
+                changed_ids |= scope_id_set
+        else:
+            changed_ids = set()
 
         # 2) Programs whose ES vs DB counts disagree (catches hard-deletes).
         mismatch_ids = self._count_mismatch_ids(scope_id_set, using) if opts["reconcile"] else set()
@@ -249,7 +263,7 @@ class Command(BaseCommand):
         return dt
 
     @staticmethod
-    def _changed_program_ids(since: datetime) -> set:
+    def _changed_program_ids(since: datetime, program_ids: set | None = None) -> set:
         """Program ids with any record feeding the ES documents changed at/after `since`.
 
         The Individual/Household ES documents embed related objects, so a change to one of
@@ -263,27 +277,61 @@ class Command(BaseCommand):
         * IndividualIdentity     -> ``modified`` (model_utils TimeStampedModel, not updated_at;
                                     embedded in individual.identities)
 
+        Uses ``all_objects`` (MERGED + PENDING + is_removed), NOT ``all_merge_status_objects``:
+        a soft-delete bumps ``updated_at`` but sets ``is_removed=True``, so the is_removed-filtering
+        managers would drop the just-removed row and miss it here. ``all_objects`` keeps it visible,
+        so soft-deletes land in ``--since``. Over-detection is harmless -- the rebuild is idempotent.
+
         Related records are mapped back to their program via the owning individual
         (``individual__program_id``), since Document.program is nullable and Identity has no
-        program FK. Over-detection is harmless -- the rebuild is idempotent.
+        program FK.
 
-        Not covered here (rare, cross-program reference data with no per-program key): Area
-        (admin names), DocumentType, Country, Partner. If those change during the window, run
-        a full rebuild (``es_shadow_populate``) instead.
+        When ``program_ids`` is given, the scope is pushed into each query (cheap when the run is
+        narrowed with --program/--business-area, instead of scanning every program's rows).
+
+        Reference data embedded in the documents (DocumentType, Country, Area, BusinessArea) has no
+        per-program key and is handled separately by ``_reference_data_changed``. Two things stay
+        invisible and need a full ``es_shadow_populate`` if they happen during the window: a Partner
+        rename (Partner has no timestamp field) and a hard-delete of an embedded Document/
+        IndividualIdentity (row gone, no updated_at bump, and --reconcile only compares
+        Individual/Household counts).
         """
         from hope.models import Document, Household, Individual, IndividualIdentity
 
+        direct = {"program_id__in": program_ids} if program_ids is not None else {}
+        related = {"individual__program_id__in": program_ids} if program_ids is not None else {}
         sources = [
-            Individual.all_merge_status_objects.filter(updated_at__gte=since).values_list("program_id", flat=True),
-            Household.objects.filter(updated_at__gte=since).values_list("program_id", flat=True),
-            Document.all_merge_status_objects.filter(updated_at__gte=since).values_list(
+            Individual.all_objects.filter(updated_at__gte=since, **direct).values_list("program_id", flat=True),
+            Household.all_objects.filter(updated_at__gte=since, **direct).values_list("program_id", flat=True),
+            Document.all_objects.filter(updated_at__gte=since, **related).values_list(
                 "individual__program_id", flat=True
             ),
-            IndividualIdentity.all_merge_status_objects.filter(modified__gte=since).values_list(
+            IndividualIdentity.all_objects.filter(modified__gte=since, **related).values_list(
                 "individual__program_id", flat=True
             ),
         ]
-        program_ids: set = set()
+        result: set = set()
         for qs in sources:
-            program_ids.update(pid for pid in qs.distinct() if pid is not None)
-        return program_ids
+            result.update(pid for pid in qs.distinct() if pid is not None)
+        return result
+
+    @staticmethod
+    def _reference_data_changed(since: datetime) -> list[str]:
+        """Return names of embedded reference tables (no per-program key) changed at/after `since`.
+
+        A change to any of these can invalidate documents across every program, so it cannot be
+        narrowed down -- the caller flags the whole in-scope set. The check is cheap: an indexed
+        ``updated_at`` existence probe on small tables.
+
+        Partner (identities.partner.name) has no timestamp field and is undetectable here; a Partner
+        rename during the window needs a full ``es_shadow_populate``.
+        """
+        from hope.models import Area, BusinessArea, Country, DocumentType
+
+        checks = {
+            "DocumentType": DocumentType,  # documents.key (type.key)
+            "Country": Country,  # documents.country (iso_code3)
+            "Area": Area,  # admin1 / admin2 (name)
+            "BusinessArea": BusinessArea,  # business_area (slug)
+        }
+        return [name for name, model in checks.items() if model.objects.filter(updated_at__gte=since).exists()]

@@ -93,6 +93,48 @@ def test_changed_program_ids_detects_all_related_sources() -> None:
     assert idy_e.individual.program_id in result  # via IndividualIdentity
 
 
+def test_changed_program_ids_detects_soft_deleted_individual() -> None:
+    # A soft-delete bumps updated_at but flips is_removed=True. The is_removed-filtering
+    # manager would hide it; all_objects keeps it visible so --since catches the deletion.
+    since = timezone.now()
+    future = since + datetime.timedelta(hours=1)
+    ind = IndividualFactory()
+    Individual.all_objects.filter(pk=ind.pk).update(is_removed=True, updated_at=future)
+
+    assert ind.program_id in Command._changed_program_ids(since)
+
+
+def test_changed_program_ids_pushes_scope_into_query() -> None:
+    since = timezone.now()
+    future = since + datetime.timedelta(hours=1)
+    in_scope = IndividualFactory()
+    out_scope = IndividualFactory()
+    Individual.all_objects.filter(pk__in=[in_scope.pk, out_scope.pk]).update(updated_at=future)
+
+    result = Command._changed_program_ids(since, {in_scope.program_id})
+
+    assert result == {in_scope.program_id}
+
+
+def test_reference_data_change_is_detected() -> None:
+    # Reference data embedded in the docs (here BusinessArea.slug) has no per-program key; a change
+    # must be surfaced so the caller can rebuild the whole scope.
+    from hope.models import BusinessArea
+
+    since = timezone.now()
+    future = since + datetime.timedelta(hours=1)
+    ba = BusinessAreaFactory()
+    BusinessArea.objects.filter(pk=ba.pk).update(updated_at=future)
+
+    assert "BusinessArea" in Command._reference_data_changed(since)
+
+
+def test_reference_data_unchanged_returns_empty() -> None:
+    BusinessAreaFactory()
+    since = timezone.now() + datetime.timedelta(hours=1)  # nothing changed after this
+    assert Command._reference_data_changed(since) == []
+
+
 # ── _apply_scope_filters ─────────────────────────────────────────────────────
 
 
