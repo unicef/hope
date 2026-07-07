@@ -4,7 +4,6 @@ from time import sleep
 
 from dateutil.relativedelta import relativedelta
 import pytest
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -572,7 +571,6 @@ class TestProgrammeDetails:
         with pytest.raises(IndexError):
             assert page_programme_details.get_delete_programme_cycle()[2]
 
-    @pytest.mark.skip(reason="Unskip after fix 211823")
     def test_program_details_edit_default_cycle_by_add_new_cancel(
         self,
         standard_program_with_draft_programme_cycle: Program,
@@ -597,16 +595,15 @@ class TestProgrammeDetails:
         page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
-        assert "Draft" in page_programme_details.get_program_cycle_status()[2].text
+        assert "Draft" in page_programme_details.get_program_cycle_status()[1].text
         assert (datetime.now() + relativedelta(days=11)).strftime(
             "%-d %b %Y"
-        ) in page_programme_details.get_program_cycle_start_date()[2].text
+        ) in page_programme_details.get_program_cycle_start_date()[1].text
         assert (datetime.now() + relativedelta(days=21)).strftime(
             "%-d %b %Y"
-        ) in page_programme_details.get_program_cycle_end_date()[2].text
-        assert "Test %$ What?" in page_programme_details.get_program_cycle_title()[2].text
+        ) in page_programme_details.get_program_cycle_end_date()[1].text
+        assert "Test %$ What?" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fixing")
     def test_program_details_add_new_cycle_with_wrong_date(
         self,
         standard_active_program_cycle_draft: Program,
@@ -671,7 +668,6 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "New cycle with wrong date" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fixing")
     def test_program_details_edit_cycle_with_wrong_date(
         self,
         program_with_different_cycles: Program,
@@ -729,7 +725,6 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "New cycle with wrong date" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fix: 212581")
     def test_edit_program_details_with_wrong_date(
         self,
         program_with_different_cycles: Program,
@@ -747,9 +742,10 @@ class TestProgrammeDetails:
         page_programme_management.get_button_add_time_series_field()
         programme_creation_url = page_programme_details.driver.current_url
         page_programme_management.get_button_save().click()
-        # Check Details page
-        with pytest.raises(NoSuchElementException):
-            assert "details" in page_programme_details.wait_for_new_url(programme_creation_url).split("/")
+        # Program dates (Jan-Oct 2022) do not contain the existing cycles, so the backend
+        # rejects the update: the app stays on the edit page and never reaches programme details.
+        current_url = page_programme_details.wait_for_new_url(programme_creation_url)
+        assert "details" not in current_url.split("/")
 
     def test_program_details_program_cycle_total_quantities(
         self,
