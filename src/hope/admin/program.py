@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 import zipfile
 
+from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button, choice
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
@@ -17,6 +18,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -44,6 +46,7 @@ from hope.models import (
     PaymentPlanPurpose,
     Program,
     ProgramCycle,
+    RegistrationDataImport,
 )
 
 
@@ -170,6 +173,17 @@ class ProgramAdminForm(forms.ModelForm):
         )
 
 
+def is_cw_merge_queue_retry_enabled(btn: StandardButton) -> bool:
+    program = btn.original
+    return (
+        program.business_area.is_rdi_ingest_source_country_workspace_only
+        and RegistrationDataImport.objects.filter(
+            program=program,
+            status__in=(RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR),
+        ).exists()
+    )
+
+
 @admin.register(Program)
 class ProgramAdmin(
     SoftDeletableAdminMixin,
@@ -226,6 +240,46 @@ class ProgramAdmin(
         if obj and obj.business_area.is_rdi_ingest_source_all_except_country_workspace:
             readonly_fields += ("biometric_deduplication_enabled",)
         return readonly_fields
+
+    @button(
+        label="Retry CW merge queue",
+        permission="registration_data.rerun_rdi",
+        enabled=is_cw_merge_queue_retry_enabled,
+    )
+    def retry_cw_merge_queue(self, request: HttpRequest, pk: str) -> HttpResponse | None:
+        from hope.apps.registration_data.celery_tasks import rdi_dispatcher_task
+
+        program = self.get_object(request, pk)
+        if program is None:
+            self.message_user(request, "Program not found", messages.ERROR)
+            return None
+        if not program.business_area.is_rdi_ingest_source_country_workspace_only:
+            self.message_user(
+                request,
+                "Retry CW merge queue is only available for Country Workspace business areas.",
+                messages.ERROR,
+            )
+            return None
+        with transaction.atomic():
+            rdi = (
+                RegistrationDataImport.objects.select_for_update(skip_locked=True)
+                .filter(
+                    program=program,
+                    status__in=(RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR),
+                )
+                .order_by("import_date", "id")
+                .first()
+            )
+            if rdi is None:
+                self.message_user(request, "No failed RDI to retry for this programme", messages.WARNING)
+                return None
+            rdi.status = RegistrationDataImport.MERGE_SCHEDULED
+            rdi.error_message = ""
+            rdi.sentry_id = ""
+            rdi.save(update_fields=["status", "error_message", "sentry_id"])
+        transaction.on_commit(lambda: rdi_dispatcher_task(program))
+        self.message_user(request, "CW merge queue retry scheduled")
+        return None
 
     @button(
         permission="payment.add_paymentplan",

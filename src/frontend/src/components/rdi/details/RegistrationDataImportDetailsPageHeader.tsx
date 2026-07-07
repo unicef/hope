@@ -112,7 +112,7 @@ const RegistrationDataImportDetailsPageHeader = ({
   switch (registration?.status) {
     case RegistrationDataImportStatusEnum.IMPORT_ERROR:
     case RegistrationDataImportStatusEnum.MERGE_ERROR:
-      buttons = <div>{isManualIngest && canRefuse && eraseButton}</div>;
+      buttons = <div>{canRefuse && eraseButton}</div>;
       break;
     case RegistrationDataImportStatusEnum.IN_REVIEW:
       buttons = (
@@ -143,7 +143,7 @@ const RegistrationDataImportDetailsPageHeader = ({
     case RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED:
       buttons = (
         <div>
-          {isManualIngest && canRefuse && eraseButton}
+          {canRefuse && eraseButton}
           {isManualIngest && !registration.countryWorkspaceId && canRerunDedupe && (
             <MergeButtonContainer>
               <RerunDedupe registration={registration} />

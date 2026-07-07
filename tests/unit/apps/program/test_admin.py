@@ -1,5 +1,6 @@
 """Tests for program admin functionality."""
 
+from datetime import timedelta
 from io import BytesIO
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -11,8 +12,9 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms.models import model_to_dict
-from django.test import RequestFactory
+from django.test import Client, RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
@@ -22,10 +24,15 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PartnerFactory,
     ProgramFactory,
+    RegistrationDataImportFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from hope.admin.program import ProgramAdmin, bulk_upload_individuals_photos_action
+from hope.admin.program import (
+    ProgramAdmin,
+    bulk_upload_individuals_photos_action,
+    is_cw_merge_queue_retry_enabled,
+)
 from hope.models import (
     AdminAreaLimitedTo,
     Area,
@@ -34,6 +41,7 @@ from hope.models import (
     FileTemp,
     Partner,
     Program,
+    RegistrationDataImport,
     RoleAssignment,
     User,
 )
@@ -365,6 +373,173 @@ def test_reindex_program_button_no_permission(django_app: Any, program: Program)
         response = django_app.get(url, user=user_no_perm, expect_errors=True)
     mock_rebuild.assert_not_called()
     assert response.status_code == 403
+
+
+@pytest.fixture
+def cw_business_area(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        name="CW Only",
+        slug="cw-only",
+        ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY,
+    )
+
+
+@pytest.fixture
+def cw_program(cw_business_area: BusinessArea) -> Program:
+    return ProgramFactory(name="CW Only Program", business_area=cw_business_area)
+
+
+@pytest.fixture
+def admin_client(user: User) -> Client:
+    client = Client()
+    client.force_login(user)
+    return client
+
+
+@pytest.mark.parametrize(
+    ("ingest_source", "status", "expected"),
+    [
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_ERROR, True),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.IMPORT_ERROR, True),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_SCHEDULED, False),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGED, False),
+        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGE_ERROR, False),
+    ],
+)
+def test_is_cw_merge_queue_retry_enabled(ingest_source: str, status: str, expected: bool) -> None:
+    business_area = BusinessAreaFactory(ingest_source=ingest_source)
+    program = ProgramFactory(business_area=business_area)
+    RegistrationDataImportFactory(business_area=business_area, program=program, status=status)
+    button = type("Button", (), {"original": program})()
+
+    assert is_cw_merge_queue_retry_enabled(button) is expected
+
+
+def test_is_cw_merge_queue_retry_disabled_when_no_failed_rdi(cw_program: Program) -> None:
+    button = type("Button", (), {"original": cw_program})()
+
+    assert is_cw_merge_queue_retry_enabled(button) is False
+
+
+@pytest.mark.parametrize(
+    "status",
+    [RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR],
+)
+def test_retry_cw_merge_queue_reschedules_failed_head(
+    admin_client: Client,
+    cw_business_area: BusinessArea,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+    status: str,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=cw_business_area,
+        program=cw_program,
+        status=status,
+        error_message="boom",
+        sentry_id="abc123",
+    )
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == 302
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.MERGE_SCHEDULED
+    assert rdi.error_message == ""
+    assert rdi.sentry_id == ""
+    mock_dispatcher.assert_called_once_with(cw_program)
+
+
+def test_retry_cw_merge_queue_reschedules_oldest_failed(
+    admin_client: Client,
+    cw_business_area: BusinessArea,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    older = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+    newer = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+    # import_date is auto_now_add; force a deterministic arrival order.
+    RegistrationDataImport.objects.filter(pk=older.pk).update(import_date=timezone.now() - timedelta(hours=1))
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task"):
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == 302
+    older.refresh_from_db()
+    newer.refresh_from_db()
+    assert older.status == RegistrationDataImport.MERGE_SCHEDULED
+    assert newer.status == RegistrationDataImport.MERGE_ERROR
+
+
+def test_retry_cw_merge_queue_ignores_other_programme(
+    admin_client: Client,
+    cw_business_area: BusinessArea,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    other_program = ProgramFactory(name="Other CW Program", business_area=cw_business_area)
+    target_rdi = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+    other_rdi = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=other_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == 302
+    target_rdi.refresh_from_db()
+    other_rdi.refresh_from_db()
+    assert target_rdi.status == RegistrationDataImport.MERGE_SCHEDULED
+    assert other_rdi.status == RegistrationDataImport.MERGE_ERROR
+    mock_dispatcher.assert_called_once_with(cw_program)
+
+
+def test_retry_cw_merge_queue_no_failed_rdi_does_nothing(
+    admin_client: Client,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == 302
+    mock_dispatcher.assert_not_called()
+
+
+def test_retry_cw_merge_queue_rejected_for_non_cw_business_area(
+    admin_client: Client,
+    business_area: BusinessArea,
+    program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area, program=program, status=RegistrationDataImport.MERGE_ERROR
+    )
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == 302
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.MERGE_ERROR
+    mock_dispatcher.assert_not_called()
 
 
 def test_biometric_flag_readonly_on_non_cw_business_area() -> None:

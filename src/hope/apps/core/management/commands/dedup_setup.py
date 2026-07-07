@@ -4,6 +4,13 @@ Creates two fresh BusinessAreas (one non-CW, one CW-only), each carrying a
 MERGED golden-record population (B/D/E) on its own program, indexed into
 Elasticsearch (autosync is OFF, so the explicit index is mandatory).
 
+The CW-only BA additionally gets a second, master-detail program (STANDARD DCT +
+master_detail beneficiary group, biometric on, NO golden population) so the CW
+household+individual dedup test has somewhere to import households into — the
+primary program is SOCIAL / non-master_detail on demo data and merges 0
+households. ``dedup_teardown`` removes it automatically (it deletes every program
+under the run's BAs), so no teardown change is needed.
+
 Everything is stamped with a short ``run_id`` in ``BusinessArea.custom_fields``
 so ``dedup_teardown`` can remove exactly what this command created.
 
@@ -39,6 +46,7 @@ from hope.models import (
     Individual,
     IndividualCollection,
     MergeStatusModel,
+    PaymentPlanPurpose,
     Program,
     ProgramCycle,
     RegistrationDataImport,
@@ -121,6 +129,34 @@ class Command(BaseCommand):
                 "population": population,
             }
 
+            # CW-only BA also gets a master-detail (household+individual) program so
+            # the CW household test has a STANDARD DCT + master_detail beneficiary
+            # group to import households into. No golden population — that test is a
+            # clean single all-unique batch. Same BA, biometric kept ON. Its ES index
+            # is rebuilt outside the transaction, mirroring the primary program.
+            if ingest_source == BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY:
+                hh_dct, hh_bg = self._household_reference_data()
+                with transaction.atomic():
+                    hh_program = self._create_program(
+                        ba,
+                        tag,
+                        biometric=True,
+                        dct=hh_dct,
+                        bg=hh_bg,
+                        name=f"dedup-regression-hh-{variant}-{tag}",
+                        code=f"{tag[:2]}h1",  # <=4 chars, distinct from the golden program's {tag[:3]}1
+                    )
+                ok, msg = rebuild_program_indexes(str(hh_program.id))
+                if not ok:
+                    raise CommandError(f"ES index failed for household program of {variant!r}: {msg}")
+                result["variants"][variant]["household_program"] = {
+                    "program_id": str(hh_program.id),
+                    "program_code": hh_program.code,
+                    "program_name": hh_program.name,
+                    "data_collecting_type": hh_dct.code,
+                    "beneficiary_group": hh_bg.name,
+                }
+
         token = self._create_api_token(created_bas)
         result["api_token"] = token.key
 
@@ -152,6 +188,36 @@ class Command(BaseCommand):
                 f"master_detail={needs_master_detail} (required for dct {dct.code!r} type {dct.type})"
             )
         return dct, bg, Country.objects.first()
+
+    def _household_reference_data(self) -> tuple[DataCollectingType, BeneficiaryGroup]:
+        """Return the STANDARD DCT + master_detail BeneficiaryGroup for the CW household program.
+
+        The primary ``_reference_data`` pair is SOCIAL / non-master_detail on demo
+        data (0 households). The CW household+individual test needs the opposite:
+        a STANDARD data-collecting type paired with a master_detail beneficiary
+        group (Program.clean() enforces the pairing). Prefer the canonical
+        ``full_collection`` / ``Household`` rows, fall back to any STANDARD /
+        master_detail row so this holds on envs where the names differ.
+        """
+        dct = (
+            DataCollectingType.objects.filter(code="full_collection").first()
+            or DataCollectingType.objects.filter(type=DataCollectingType.Type.STANDARD, active=True).first()
+        )
+        if not dct:
+            raise CommandError(
+                "Missing reference data on env: no STANDARD DataCollectingType "
+                "(need 'full_collection' or similar for the household program)"
+            )
+        bg = (
+            BeneficiaryGroup.objects.filter(name="Household").first()
+            or BeneficiaryGroup.objects.filter(master_detail=True).first()
+        )
+        if not bg:
+            raise CommandError(
+                "Missing reference data on env: no BeneficiaryGroup with "
+                "master_detail=True (need 'Household' or similar for the household program)"
+            )
+        return dct, bg
 
     # -- builders -----------------------------------------------------------
     def _create_ba(self, variant: str, suffix: str, ingest_source: str, tag: str) -> BusinessArea:
@@ -203,10 +269,22 @@ class Command(BaseCommand):
         token.valid_for.set(business_areas)
         return token
 
-    def _create_program(self, ba: BusinessArea, tag: str, biometric: bool) -> Program:
+    def _create_program(  # noqa: PLR0913
+        self,
+        ba: BusinessArea,
+        tag: str,
+        biometric: bool,
+        *,
+        dct: DataCollectingType | None = None,
+        bg: BeneficiaryGroup | None = None,
+        name: str | None = None,
+        code: str | None = None,
+    ) -> Program:
+        # Defaults build the golden-record program; the household program passes a
+        # STANDARD/master_detail dct+bg and its own name/code.
         program = Program.objects.create(
-            name=f"dedup-regression-{ba.slug}",
-            code=f"{tag[:3]}1",  # max_length=4, unique per BA (fresh BA -> safe)
+            name=name or f"dedup-regression-{ba.slug}",
+            code=code or f"{tag[:3]}1",  # max_length=4, unique per BA (fresh BA -> safe)
             business_area=ba,
             status=Program.ACTIVE,
             start_date=date(2024, 1, 1),
@@ -217,10 +295,14 @@ class Command(BaseCommand):
             scope="UNICEF",
             cash_plus=False,
             population_goal=100,
-            data_collecting_type=self.dct,
-            beneficiary_group=self.bg,
+            data_collecting_type=dct or self.dct,
+            beneficiary_group=bg or self.bg,
             biometric_deduplication_enabled=biometric,  # non-CW off (biographic); CW on
         )
+        # Program.clean() requires >=1 Payment Plan Purpose on update-save (RdiMergeTask ->
+        # adjust_program_size). "Default Purpose" has empty limit_to -> available to any BA.
+        default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
+        program.payment_plan_purposes.add(default_purpose)
         ProgramCycle.objects.create(
             program=program,
             title=f"Cycle {tag}",
