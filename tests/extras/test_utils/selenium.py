@@ -68,7 +68,10 @@ class HopeTestBrowser(BaseCase):
         options = self.find_elements(f"{selector} li")
         for option in options:
             if option.text.strip() == name:
-                option.click()
+                # A coordinate-based click can land on a neighbouring option while
+                # the MUI menu is still playing its entering transform; dispatch the
+                # click on the exact node so the target can't be mid-animation.
+                self.execute_script("arguments[0].click()", option)
                 return
         raise AssertionError(f"Option '{name}' not found in listbox. Available: {[o.text.strip() for o in options]}")
 
