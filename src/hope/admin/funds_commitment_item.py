@@ -18,6 +18,7 @@ class FundsCommitmentItemAdmin(HOPEModelAdminBase):
         ("office", AutoCompleteFilter),
         ("funds_commitment_group", AutoCompleteFilter),
     )
+    readonly_fields = ("business_area",)
     search_fields = (
         "rec_serial_number",
         "funds_commitment_number",
