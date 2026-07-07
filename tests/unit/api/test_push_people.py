@@ -354,6 +354,35 @@ def test_push_single_person_with_admin_areas(token_api_client, push_people_url, 
     assert ind.household.admin4 is None
 
 
+def test_push_single_person_with_currency(
+    token_api_client, push_people_url, program, rdi, afghanistan_country, currency_usd
+) -> None:
+    data = [
+        {
+            "residence_status": "IDP",
+            "village": "village1",
+            "country": "AF",
+            "full_name": "John Doe",
+            "birth_date": "2000-01-01",
+            "sex": "MALE",
+            "type": "",
+            "currency": "USD",
+            "program": str(program.id),
+            "country_workspace_id": "cw-currency-1",
+        }
+    ]
+    response = token_api_client.post(push_people_url, data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    response_json = response.json()
+
+    rdi_obj = RegistrationDataImport.objects.filter(id=response_json["id"]).first()
+    assert rdi_obj is not None
+    ind = PendingIndividual.objects.filter(registration_data_import=rdi_obj).first()
+    assert ind is not None
+    assert ind.household.currency is not None
+    assert ind.household.currency.code == "USD"
+
+
 @pytest.fixture
 def base64_photo() -> tuple[str, str]:
     prefix = "data:image/png;base64,"
