@@ -64,6 +64,8 @@ def test_household_record_has_null_individual_side(tmp_path: Path) -> None:
     assert hh_rec["individual_id"] is None
     assert hh_rec["individual_unicef_id"] is None
     assert hh_rec["household_id"] == hh_rec["object_id"]
+    assert hh_rec["field"] == "residence_status"  # embedded in ES doc -> verifiable, unlike size
+    assert hh_rec["old"] != hh_rec["new"]
 
 
 def test_soft_delete_is_logged(tmp_path: Path) -> None:

@@ -42,6 +42,9 @@ from hope.models import Household, Individual
 class Command(BaseCommand):
     help = "Continuously mutate households/individuals to feed es_populate_delta (dev/test tool)."
 
+    # residence_status is embedded in HouseholdDocument, so its change is verifiable in ES (unlike size).
+    RESIDENCE_STATUSES = ("IDP", "IDP_RETURNEE", "REFUGEE", "OTHERS_OF_CONCERN", "HOST", "NON_HOST", "RETURNEE")
+
     def add_arguments(self, parser: Any) -> None:
         parser.add_argument("--sleep", type=float, default=3.0, help="Seconds between passes.")
         parser.add_argument("--batch", type=int, default=5, help="Records touched per model per pass.")
@@ -130,10 +133,11 @@ class Command(BaseCommand):
     def _touch_households(cls, n: int, fh: IO[str]) -> int:
         hhs = cls._random_window(Household.objects.all(), n)
         for hh in hhs:
-            old = hh.size
-            hh.size = (old or 0) + 1
-            hh.save(update_fields=["size", "updated_at"])  # list updated_at (see _touch_individuals)
-            cls._write(fh, cls._record("update", "Household", None, hh, "size", old, hh.size))  # ind side N/A
+            old = hh.residence_status
+            new = random.choice([s for s in cls.RESIDENCE_STATUSES if s != old])  # noqa: S311  # embedded in ES doc
+            hh.residence_status = new
+            hh.save(update_fields=["residence_status", "updated_at"])  # list updated_at (see _touch_individuals)
+            cls._write(fh, cls._record("update", "Household", None, hh, "residence_status", old, new))  # ind side N/A
         return len(hhs)
 
     @classmethod
