@@ -18,14 +18,26 @@ from hope.admin.async_job import (
     UsedJobNameListFilter,
     is_missing,
 )
+from hope.admin.funds_commitment_item import FundsCommitmentItemAdmin
 from hope.admin.grievance import GrievanceTicketAdmin
 from hope.admin.household import HouseholdAdmin
+from hope.admin.payment_plan import PaymentAdmin
+from hope.admin.western_union_data_admin import WesternUnionDataAdmin
 from hope.apps.core.celery_tasks import (
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS,
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import AsyncJob, Household, PeriodicAsyncJob, Program, User
+from hope.contrib.vision.models import FundsCommitmentItem
+from hope.models import (
+    AsyncJob,
+    Household,
+    Payment,
+    PeriodicAsyncJob,
+    Program,
+    User,
+    WesternUnionData,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -150,6 +162,30 @@ def test_filter_horizontal_excluded_from_autocomplete():
     request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
     fields = model_admin.get_autocomplete_fields(request)
     assert "programs" not in fields
+
+
+def test_file_temp_fk_is_autocomplete():
+    model_admin = WesternUnionDataAdmin(WesternUnionData, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "file" in fields
+
+
+def test_payment_plan_split_fk_is_autocomplete():
+    model_admin = PaymentAdmin(Payment, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "parent_split" in fields
+
+
+def test_funds_commitment_group_fk_is_autocomplete():
+    model_admin = FundsCommitmentItemAdmin(FundsCommitmentItem, admin.site)
+    request = HttpRequest()
+    request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "funds_commitment_group" in fields
 
 
 def test_async_job_recover_button_is_enabled_only_for_missing_jobs(program) -> None:
