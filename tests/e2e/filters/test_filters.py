@@ -1,17 +1,13 @@
 from datetime import datetime
-from typing import Any
 
 from dateutil.relativedelta import relativedelta
 import pytest
 from selenium.common.exceptions import TimeoutException
 
 from e2e.page_object.filters import Filters
-from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
-from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -19,6 +15,7 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
 )
@@ -40,11 +37,6 @@ from hope.models import (
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
-
-
-@pytest.fixture
-def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
@@ -161,6 +153,7 @@ def payment_verification_creator(
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     payment_plan_id: str = "PP-0060-22-11223344",
 ) -> PaymentVerification:
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first()
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -169,7 +162,7 @@ def payment_verification_creator(
         registration_data_import=registration_data_import,
         program=program,
         admin2=Area.objects.order_by("?").first(),
-        business_area=BusinessArea.objects.first(),
+        business_area=business_area,
     )
 
     payment_plan = PaymentPlanFactory(
@@ -179,6 +172,9 @@ def payment_verification_creator(
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
+        # FINISHED plans auto-create a PaymentVerificationSummary via post_generation;
+        # suppress it so the explicit summary below doesn't violate the unique constraint.
+        create_payment_verification_summary=False,
     )
 
     payment_plan.unicef_id = payment_plan_id
@@ -193,7 +189,7 @@ def payment_verification_creator(
         currency=Currency.objects.get(code="PLN"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    pv_summary = payment_plan.payment_verification_summary
+    pv_summary = PaymentVerificationSummaryFactory(payment_plan=payment_plan)
     pv_summary.activation_date = datetime.now() - relativedelta(months=1)
     pv_summary.save()
     payment_verification_plan = PaymentVerificationPlanFactory(
@@ -489,22 +485,51 @@ class TestSmokeFilters:
         assert filters.wait_for_number_of_rows(1)
 
     @pytest.mark.night
-    @pytest.mark.skip("ToDo")
     def test_grievance_tickets_filters_of_households_and_individuals(
         self,
+        create_programs: None,
+        add_grievance_tickets: None,
         page_grievance_tickets: GrievanceTickets,
-        page_grievance_new_ticket: NewTicket,
-        page_grievance_details_page: GrievanceDetailsPage,
         filters: Filters,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
+        filters.select_global_program_filter("Test Programm")
+        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
-        page_grievance_tickets.get_button_new_ticket().click()
+        assert filters.wait_for_number_of_rows(2)
 
-    @pytest.mark.skip("ToDo")
-    def test_payment_verification_details_filters(
+        filters.get_filter_by_locator("filters-search").send_keys("Wrong value")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(0)
+
+        filters.get_button_filters_clear().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filters-search").send_keys("GRV-0000123")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(1)
+
+    def test_payment_verification_list_filters(
         self,
+        create_programs: None,
+        add_payment_verification: None,
         page_grievance_tickets: GrievanceTickets,
         filters: Filters,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
+        filters.select_global_program_filter("Test Programm")
+        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_payment_verification().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filter-search").send_keys("Wrong value")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(0)
+
+        filters.get_button_filters_clear().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filter-search").send_keys("PP-0060-22-11223344")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(1)
