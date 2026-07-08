@@ -1,51 +1,52 @@
-"""Reconcile a shadow Elasticsearch cluster with Postgres after the bulk copy.
+"""Catch up a shadow Elasticsearch cluster with Postgres after the bulk copy, incrementally.
 
-Records keep changing in Postgres while the ES Index copy runs, so the shadow cluster
-drifts. This command brings it back in sync.
+Records keep changing in Postgres while the ES bulk copy runs, so the shadow cluster drifts.
+This command closes that gap **without ever deleting an index**: it loops the in-scope programs
+and, for each one that has a delta since ``--since``, writes only the changed documents into the
+existing per-program index (upsert changed, delete the docs of soft-removed records). A program
+whose index does not exist yet (e.g. created during the window) is the only full-populate case:
+we create the index and populate the whole program.
 
-Postgres is the source of truth. Both ES documents populate from
-``Individual.all_merge_status_objects`` / ``Household.objects`` and both models have
-an indexed ``updated_at`` (``auto_now=True``), so "what changed since T" is a cheap,
-exact query. For every program that changed, we rebuild its per-program index on the
-shadow cluster (delete + create + populate). A full per-program rebuild is idempotent
-and re-runnable, and it mirrors Postgres exactly for that program -- so it inherently
-covers inserts, updates, soft-deletes *and* hard-deletes within the touched programs.
+Postgres is the source of truth. The Individual/Household ES documents embed related objects, so a
+change is any of:
 
-Two modes, usually run in sequence:
+* Individual (base)   -> ``updated_at``
+* Household (base)    -> ``updated_at``
+* Document            -> ``updated_at`` (embedded in individual.documents and
+                         household.head_of_household.documents)
+* IndividualIdentity  -> ``modified`` (model_utils TimeStampedModel; embedded in individual.identities)
 
-``--since``     Delta mode. Rebuild only programs with a record changed at/after the
-                given timestamp. Use the time the bulk copy *started* (T0), minus a
-                small safety buffer. Run this once or twice until it reports ~0
-                programs, i.e. the cluster has caught up.
+A soft-delete bumps ``updated_at`` and sets ``is_removed=True``; such records are removed from ES
+by ``_id`` (the document, never the index).
 
-``--reconcile`` Safety net. For every in-scope program, compare ES doc count vs DB
-                row count and rebuild any mismatch. Catches the one case ``--since``
-                cannot: a pure hard-delete in a program with no other change (a
-                hard-delete does not bump any sibling ``updated_at``). This is the
-                "run again to be sure all data are the same" pass.
+Known gaps, out of scope for this incremental pass (need a separate full ``es_shadow_populate``):
+
+* Reference-data rename (Partner / Area / Country / DocumentType): touches documents across many
+  programs with no per-program key -- only reported here as a warning, not applied.
+* Hard-delete (row physically gone): ``--since`` cannot see it, so its ES document is left orphaned.
+  A future ``--reconcile`` id-diff pass would remove such orphans.
+
+The shadow cluster is selected by pointing the pod's ELASTICSEARCH_HOST env at it; the 'default'
+connection then writes there.
 
 Examples
 --------
-Bulk copy started at 2026-07-01T09:00Z. After it finishes, catch up the delta::
+Catch up all active programs from the bulk-copy start time (minus a small buffer)::
 
-    python manage.py es_populate_delta --using v9 --since 2026-07-01T08:55Z --parallel --threads 8
+    python manage.py es_populate_delta --since 2026-07-01T08:55Z --parallel --threads 8
 
-Run it again right before cutover to shrink the window further::
+Dry-run -- print each program's delta without writing::
 
-    python manage.py es_populate_delta --using v9 --since 2026-07-01T11:30Z
+    python manage.py es_populate_delta --since 2026-07-01T08:55Z --dry-run
 
-Final convergence check across all programs (counts must match)::
+Narrow to a single program or a whole business area::
 
-    python manage.py es_populate_delta --using v9 --reconcile --verify
+    python manage.py es_populate_delta --since 2026-07-01T08:55Z --program my-program-code
+    python manage.py es_populate_delta --since 2026-07-01T08:55Z --business-area afghanistan
 
-Dry-run (print which programs would be rebuilt, no writes)::
+Report count drift (ES vs DB) without touching anything::
 
-    python manage.py es_populate_delta --using v9 --since 2026-07-01T08:55Z --dry-run
-
-Rebuild a smaller sample first (single program, or a whole business area)::
-
-    python manage.py es_populate_delta --using v9 --reconcile --program my-program-code
-    python manage.py es_populate_delta --using v9 --since 2026-07-01T08:55Z --business-area afghanistan
+    python manage.py es_populate_delta --reconcile
 
 """
 
@@ -59,37 +60,39 @@ from django.utils import timezone
 
 from hope.apps.household.services.index_management import (
     check_program_indexes,
-    rebuild_program_indexes,
+    create_program_indexes,
+    populate_program_indexes,
 )
-
-# Above this many programs, --dry-run prints only a summary instead of every pid.
-DRY_RUN_PRINT_LIMIT = 10000
 
 
 class Command(BaseCommand):
     help = (
-        "Delta/reconcile per-program ES indexes on a shadow cluster against Postgres. "
-        "Shadow cluster is the one that waits to be plugged into prod and replace the one that is currently used."
+        "Incrementally catch up per-program ES indexes on a shadow cluster against Postgres: "
+        "upsert only changed documents, never delete an index. "
+        "Shadow cluster is the one that waits to be plugged into prod and replace the current one."
     )
 
     def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
             "--using",
-            default="v9",
-            help="Connection alias from settings.ELASTICSEARCH_DSL (default: 'v9').",
+            default="default",
+            help=(
+                "Connection alias from settings.ELASTICSEARCH_DSL (default: 'default'). "
+                "Point the pod's ELASTICSEARCH_HOST at the shadow cluster and 'default' writes there."
+            ),
         )
         parser.add_argument(
             "--since",
             default=None,
             help=(
-                "ISO-8601 timestamp. Rebuild programs with an Individual/Household changed "
-                "at/after this time. Use the bulk-copy start time minus a small buffer."
+                "ISO-8601 timestamp. Sync programs with an Individual/Household/Document/Identity "
+                "changed at/after this time. Use the bulk-copy start time minus a small buffer."
             ),
         )
         parser.add_argument(
             "--reconcile",
             action="store_true",
-            help="Compare ES vs DB counts for all in-scope programs and rebuild mismatches.",
+            help="Report ES-vs-DB count drift per in-scope program (read-only, no writes).",
         )
         parser.add_argument(
             "--include-non-active",
@@ -99,7 +102,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--program",
             default=None,
-            help="Limit scope to a single program (UUID or code). Handy to rebuild a small sample first.",
+            help="Limit scope to a single program (UUID or code). Handy to sync a small sample first.",
         )
         parser.add_argument(
             "--business-area",
@@ -127,12 +130,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--dry-run",
             action="store_true",
-            help="Only print the programs that would be rebuilt.",
+            help="Print each program's delta (and full-populate/no-delta status) without writing.",
         )
         parser.add_argument(
             "--verify",
             action="store_true",
-            help="After each rebuild, run check_program_indexes() to confirm DB/ES counts match.",
+            help="After each program, run check_program_indexes() to confirm DB/ES counts match.",
         )
 
     def handle(self, *args: Any, **opts: Any) -> None:
@@ -141,62 +144,238 @@ class Command(BaseCommand):
             raise CommandError(
                 f"Connection alias '{using}' is not registered in settings.ELASTICSEARCH_DSL "
                 f"(have: {list(settings.ELASTICSEARCH_DSL)}). "
-                f"Set ELASTICSEARCH_HOST_V9 in env to register the 'v9' shadow cluster."
+                f"Use --using default and point the pod's ELASTICSEARCH_HOST at the shadow cluster."
             )
         if not opts["since"] and not opts["reconcile"]:
             raise CommandError("Provide --since <timestamp> and/or --reconcile.")
 
-        since = self._parse_since(opts["since"]) if opts["since"] else None
+        self._print_server_version(using)
 
         from hope.models import Program
 
         scope = Program.objects.all() if opts["include_non_active"] else Program.objects.filter(status=Program.ACTIVE)
         scope = self._apply_scope_filters(scope, opts)
         code_by_id = dict(scope.values_list("id", "code"))
-        scope_id_set = set(code_by_id)
-        if (opts["program"] or opts["business_area"]) and not scope_id_set:
+        if (opts["program"] or opts["business_area"]) and not code_by_id:
             self.stdout.write(self.style.WARNING("No programs match --program / --business-area (nothing to do)."))
             return
 
-        # 1) Programs changed since `since` (inserts / updates / soft-deletes).
-        if since is not None:
-            # Push the scope into the change queries only when narrowed; on a full run the
-            # `IN (<all program ids>)` list would be slower than the post-filter intersection.
-            scoped = scope_id_set if (opts["program"] or opts["business_area"]) else None
-            changed_ids = self._changed_program_ids(since, scoped) & scope_id_set
-            self.stdout.write(f"Changed since {since.isoformat()}: {len(changed_ids)} program(s) in scope.")
-            ref_changed = self._reference_data_changed(since)
-            if ref_changed:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"Reference data changed since {since.isoformat()} ({', '.join(ref_changed)}); "
-                        f"no per-program key -> flagging all {len(scope_id_set)} in-scope program(s) for rebuild."
-                    )
-                )
-                changed_ids |= scope_id_set
-        else:
-            changed_ids = set()
-
-        # 2) Programs whose ES vs DB counts disagree (catches hard-deletes).
-        mismatch_ids = self._count_mismatch_ids(scope_id_set, using) if opts["reconcile"] else set()
         if opts["reconcile"]:
-            self.stdout.write(f"Reconcile: {len(mismatch_ids)} program(s) need a rebuild (count/exists mismatch).")
+            self._report_reconcile(code_by_id, using)
 
-        to_rebuild = changed_ids | mismatch_ids
-        self.stdout.write(f"Target cluster: '{using}' -> {settings.ELASTICSEARCH_DSL[using]['hosts']}")
-        self.stdout.write(f"Programs to rebuild: {len(to_rebuild)}")
-
-        if opts["dry_run"]:
-            self._print_dry_run(to_rebuild, changed_ids, mismatch_ids, code_by_id)
+        if not opts["since"]:
             return
 
-        failed = self._rebuild_programs(to_rebuild, code_by_id, using, opts)
+        since = self._parse_since(opts["since"])
+        self._warn_reference_data(since)
+        self.stdout.write(f"Target cluster: '{using}' -> {settings.ELASTICSEARCH_DSL[using]['hosts']}")
+        self._sync_programs(code_by_id, since, using, opts)
+
+    def _sync_programs(self, code_by_id: dict, since: datetime, using: str, opts: dict) -> None:
+        # Loop every in-scope program and compute its delta *inside* the program (queries scoped to
+        # program_id=pid) -- deliberately no single cross-program scan over all Individuals/Households/
+        # Documents. A brand-new program (no index yet) lands in the missing-index full-populate branch.
+        total = len(code_by_id)
+        self.stdout.write(f"Scanning {total} in-scope program(s) for a delta since {since.isoformat()} ...")
+
+        failed: list = []
+        synced = 0
+        for n, (pid, code) in enumerate(sorted(code_by_id.items(), key=lambda kv: kv[1] or ""), start=1):
+            try:
+                status, msg = self._process_program(str(pid), since, using, opts)
+            except Exception as exc:  # noqa: BLE001  # one bad program must not abort the whole run
+                status, msg = "failed", str(exc)
+            style = self.style.ERROR if status == "failed" else self.style.SUCCESS
+            self.stdout.write(style(f"[{n}/{total}] {code} id={pid}: {status} -- {msg}"))
+            if status == "failed":
+                failed.append((code, pid, msg))
+                continue
+            if status != "no delta":
+                synced += 1
+            if opts["verify"] and not opts["dry_run"]:
+                vok, vmsg = check_program_indexes(str(pid), using=using)
+                self.stdout.write((self.style.SUCCESS if vok else self.style.WARNING)(f"    verify: {vmsg}"))
+
         if failed:
             self.stdout.write(self.style.ERROR(f"Failed programs ({len(failed)}):"))
             for code, pid, msg in failed:
                 self.stdout.write(self.style.ERROR(f"  - {code}  id={pid}  {msg}"))
             raise CommandError(f"Done with {len(failed)} failure(s) on cluster '{using}'.")
-        self.stdout.write(self.style.SUCCESS(f"Done. Cluster '{using}' is in sync for the processed programs."))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. Cluster '{using}': {synced} of {total} program(s) had work, rest already in sync."
+            )
+        )
+
+    def _process_program(self, pid: str, since: datetime, using: str, opts: dict) -> tuple[str, str]:
+        """Sync one program: full-populate if the index is missing, else upsert/delete only the delta."""
+        from elasticsearch.dsl import connections
+
+        from hope.apps.household.documents import get_household_doc, get_individual_doc
+
+        ind_doc = get_individual_doc(pid)
+        hh_doc = get_household_doc(pid)
+        es = connections.get_connection(using)
+        ind_index = ind_doc._index._name
+        hh_index = hh_doc._index._name
+
+        # New program: no index yet -> create + full populate (this is the ONLY full-populate path).
+        if not es.indices.exists(index=ind_index) or not es.indices.exists(index=hh_index):
+            if opts["dry_run"]:
+                return "would-populate (no index)", f"index {ind_index} / {hh_index}"
+            ok, msg = create_program_indexes(pid, using=using)
+            if ok:
+                ok, msg = populate_program_indexes(
+                    pid,
+                    batch_size=opts["chunk_size"],
+                    parallel=opts["parallel"],
+                    thread_count=opts["threads"],
+                    using=using,
+                )
+            return ("populated (new index)", msg) if ok else ("failed", msg)
+
+        delta = self._program_delta(pid, since)
+        counts = (
+            f"ind +{len(delta['ind_present'])}/-{len(delta['ind_removed'])} "
+            f"hh +{len(delta['hh_present'])}/-{len(delta['hh_removed'])}"
+        )
+        if not any(delta.values()):
+            return "no delta", counts
+        if opts["dry_run"]:
+            return "would-sync delta", counts
+
+        self._apply_delta(pid, delta, ind_doc, hh_doc, opts)
+        return "delta synced", counts
+
+    @staticmethod
+    def _apply_delta(pid: str, delta: dict, ind_doc: type, hh_doc: type, opts: dict) -> None:
+        from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
+        from hope.models import Household, Individual
+
+        chunk = opts["chunk_size"]
+        parallel = opts["parallel"]
+        if delta["ind_present"]:
+            qs = Individual.all_merge_status_objects.filter(id__in=delta["ind_present"]).iterator(chunk_size=chunk)
+            ind_doc().update(qs, action="index", parallel=parallel)
+        if delta["hh_present"]:
+            qs = Household.objects.filter(id__in=delta["hh_present"]).iterator(chunk_size=chunk)
+            hh_doc().update(qs, action="index", parallel=parallel)
+        if delta["ind_removed"]:
+            remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["ind_removed"]], ind_doc)
+        if delta["hh_removed"]:
+            remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["hh_removed"]], hh_doc)
+
+    @staticmethod
+    def _program_delta(pid: str, since: datetime) -> dict:
+        """Ids of this program's records to upsert (present) or delete (soft-removed) in ES.
+
+        Mirrors ``get_instances_from_related`` in documents.py (which side-object change forces which
+        document to re-index):
+
+        * present individuals = changed directly, or owning a changed Document/Identity, or whose
+          household changed (individual doc embeds household.unicef_id / admin1 / admin2)
+        * present households = changed directly, or whose head_of_household changed, or whose
+          head_of_household owns a changed Document (household doc embeds the head's own fields + docs)
+        * removed = soft-deleted (updated_at bumped, is_removed=True); a record both changed and
+          removed goes to removed.
+
+        Per-program scoping keeps the unindexed IndividualIdentity.modified join cheap: it starts from
+        this program's individuals (indexed program_id) and joins identities by FK, not a full scan.
+        """
+        from hope.models import Household, Individual
+
+        ind_present = set(
+            Individual.all_merge_status_objects.filter(program_id=pid)
+            .filter(updated_at__gte=since)
+            .values_list("id", flat=True)
+        )
+        ind_present |= set(
+            Individual.all_merge_status_objects.filter(program_id=pid, documents__updated_at__gte=since)
+            .values_list("id", flat=True)
+            .distinct()
+        )
+        ind_present |= set(
+            Individual.all_merge_status_objects.filter(program_id=pid, identities__modified__gte=since)
+            .values_list("id", flat=True)
+            .distinct()
+        )
+        # Individual doc embeds household.unicef_id / admin1 / admin2 -> a household change
+        # re-indexes its members (mirrors get_instances_from_related: Household -> individuals.all()).
+        ind_present |= set(
+            Individual.all_merge_status_objects.filter(program_id=pid, household__updated_at__gte=since)
+            .values_list("id", flat=True)
+            .distinct()
+        )
+        ind_removed = set(
+            Individual.all_objects.filter(program_id=pid, is_removed=True, updated_at__gte=since).values_list(
+                "id", flat=True
+            )
+        )
+        ind_present -= ind_removed
+
+        hh_present = set(
+            Household.objects.filter(program_id=pid).filter(updated_at__gte=since).values_list("id", flat=True)
+        )
+        hh_present |= set(
+            Household.objects.filter(program_id=pid, head_of_household__documents__updated_at__gte=since)
+            .values_list("id", flat=True)
+            .distinct()
+        )
+        # Household doc embeds head_of_household's own fields (given_name, full_name, phone...) ->
+        # a change to the head individual re-indexes the household. This is what es_mutate_stream bumps.
+        hh_present |= set(
+            Household.objects.filter(program_id=pid, head_of_household__updated_at__gte=since)
+            .values_list("id", flat=True)
+            .distinct()
+        )
+        hh_removed = set(
+            Household.all_objects.filter(program_id=pid, is_removed=True, updated_at__gte=since).values_list(
+                "id", flat=True
+            )
+        )
+        hh_present -= hh_removed
+        return {
+            "ind_present": ind_present,
+            "ind_removed": ind_removed,
+            "hh_present": hh_present,
+            "hh_removed": hh_removed,
+        }
+
+    def _print_server_version(self, using: str) -> None:
+        # Confirm which ES server we are about to write to (host + version) before any work.
+        from elasticsearch.dsl import connections
+
+        host = settings.ELASTICSEARCH_DSL[using]["hosts"]
+        try:
+            info = connections.get_connection(using).info()
+            version = info["version"]["number"]
+            cluster = info.get("cluster_name", "?")
+            self.stdout.write(self.style.SUCCESS(f"ES '{using}' -> {host} | cluster={cluster} version={version}"))
+        except Exception as exc:  # noqa: BLE001  # surface a clear connection error instead of a later traceback
+            raise CommandError(f"Cannot reach ES '{using}' at {host}: {exc}") from exc
+
+    def _report_reconcile(self, code_by_id: dict, using: str) -> None:
+        # Read-only drift report. Rebuilding a mismatch would mean deleting the index -- not allowed
+        # here; orphan cleanup (hard-deletes) is a separate id-diff pass, not built yet.
+        mismatched = []
+        for pid, code in code_by_id.items():
+            ok, msg = check_program_indexes(str(pid), using=using)
+            if not ok:
+                mismatched.append((code, pid, msg))
+        self.stdout.write(f"Reconcile (read-only): {len(mismatched)} of {len(code_by_id)} program(s) drift.")
+        for code, pid, msg in mismatched:
+            self.stdout.write(self.style.WARNING(f"  - {code}  id={pid}  {msg}"))
+
+    def _warn_reference_data(self, since: datetime) -> None:
+        ref_changed = self._reference_data_changed(since)
+        if ref_changed:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Reference data changed since {since.isoformat()} ({', '.join(ref_changed)}); "
+                    f"this spans many programs with no per-program key and is NOT applied by the delta -- "
+                    f"run a full es_shadow_populate for those."
+                )
+            )
 
     @staticmethod
     def _apply_scope_filters(scope: Any, opts: dict) -> Any:
@@ -212,47 +391,6 @@ class Command(BaseCommand):
         return scope
 
     @staticmethod
-    def _count_mismatch_ids(scope_id_set: set, using: str) -> set:
-        return {pid for pid in scope_id_set if not check_program_indexes(str(pid), using=using)[0]}
-
-    def _print_dry_run(self, to_rebuild: set, changed_ids: set, mismatch_ids: set, code_by_id: dict) -> None:
-        both = changed_ids & mismatch_ids
-        self.stdout.write(
-            f"  summary: {len(changed_ids)} changed, {len(mismatch_ids)} count-mismatch, "
-            f"{len(both)} both -> {len(to_rebuild)} unique to rebuild."
-        )
-        if len(to_rebuild) > DRY_RUN_PRINT_LIMIT:
-            self.stdout.write(
-                f"  ({len(to_rebuild)} programs exceed the {DRY_RUN_PRINT_LIMIT} print limit; per-program list "
-                f"suppressed. Narrow with --program / --business-area to inspect details.)"
-            )
-            return
-        for pid in sorted(to_rebuild, key=lambda p: code_by_id.get(p, "")):
-            reasons = [r for r, group in (("changed", changed_ids), ("count-mismatch", mismatch_ids)) if pid in group]
-            self.stdout.write(f"  - {code_by_id.get(pid)}  id={pid}  ({', '.join(reasons)})")
-
-    def _rebuild_programs(self, to_rebuild: set, code_by_id: dict, using: str, opts: dict) -> list:
-        failed: list = []
-        for pid in to_rebuild:
-            self.stdout.write(f"==> Rebuilding {code_by_id.get(pid)} on '{using}' ...")
-            ok, msg = rebuild_program_indexes(
-                str(pid),
-                batch_size=opts["chunk_size"],
-                parallel=opts["parallel"],
-                thread_count=opts["threads"],
-                using=using,
-            )
-            line = self.style.SUCCESS if ok else self.style.ERROR
-            self.stdout.write(line(f"    {msg or ('ok' if ok else 'failed')}"))
-            if not ok:
-                failed.append((code_by_id.get(pid), pid, msg or "failed"))
-                continue
-            if opts["verify"]:
-                vok, vmsg = check_program_indexes(str(pid), using=using)
-                self.stdout.write((self.style.SUCCESS if vok else self.style.WARNING)(f"    verify: {vmsg}"))
-        return failed
-
-    @staticmethod
     def _parse_since(raw: str) -> datetime:
         try:
             dt = datetime.fromisoformat(raw)
@@ -263,68 +401,12 @@ class Command(BaseCommand):
         return dt
 
     @staticmethod
-    def _changed_program_ids(since: datetime, program_ids: set | None = None) -> set:
-        """Program ids with any record feeding the ES documents changed at/after `since`.
-
-        The Individual/Household ES documents embed related objects, so a change to one of
-        those must trigger a program rebuild even when the parent Individual/Household
-        ``updated_at`` did not move:
-
-        * Individual (base)      -> ``updated_at``
-        * Household (base)       -> ``updated_at``
-        * Document               -> ``updated_at`` (embedded in individual.documents and
-                                    household.head_of_household.documents)
-        * IndividualIdentity     -> ``modified`` (model_utils TimeStampedModel, not updated_at;
-                                    embedded in individual.identities)
-
-        Uses ``all_objects`` (MERGED + PENDING + is_removed), NOT ``all_merge_status_objects``:
-        a soft-delete bumps ``updated_at`` but sets ``is_removed=True``, so the is_removed-filtering
-        managers would drop the just-removed row and miss it here. ``all_objects`` keeps it visible,
-        so soft-deletes land in ``--since``. Over-detection is harmless -- the rebuild is idempotent.
-
-        Related records are mapped back to their program via the owning individual
-        (``individual__program_id``), since Document.program is nullable and Identity has no
-        program FK.
-
-        When ``program_ids`` is given, the scope is pushed into each query (cheap when the run is
-        narrowed with --program/--business-area, instead of scanning every program's rows).
-
-        Reference data embedded in the documents (DocumentType, Country, Area, BusinessArea) has no
-        per-program key and is handled separately by ``_reference_data_changed``. Two things stay
-        invisible and need a full ``es_shadow_populate`` if they happen during the window: a Partner
-        rename (Partner has no timestamp field) and a hard-delete of an embedded Document/
-        IndividualIdentity (row gone, no updated_at bump, and --reconcile only compares
-        Individual/Household counts).
-        """
-        from hope.models import Document, Household, Individual, IndividualIdentity
-
-        direct = {"program_id__in": program_ids} if program_ids is not None else {}
-        related = {"individual__program_id__in": program_ids} if program_ids is not None else {}
-        sources = [
-            Individual.all_objects.filter(updated_at__gte=since, **direct).values_list("program_id", flat=True),
-            Household.all_objects.filter(updated_at__gte=since, **direct).values_list("program_id", flat=True),
-            Document.all_objects.filter(updated_at__gte=since, **related).values_list(
-                "individual__program_id", flat=True
-            ),
-            IndividualIdentity.all_objects.filter(modified__gte=since, **related).values_list(
-                "individual__program_id", flat=True
-            ),
-        ]
-        result: set = set()
-        for qs in sources:
-            result.update(pid for pid in qs.distinct() if pid is not None)
-        return result
-
-    @staticmethod
     def _reference_data_changed(since: datetime) -> list[str]:
         """Return names of embedded reference tables (no per-program key) changed at/after `since`.
 
         A change to any of these can invalidate documents across every program, so it cannot be
-        narrowed down -- the caller flags the whole in-scope set. The check is cheap: an indexed
-        ``updated_at`` existence probe on small tables.
-
-        Partner (identities.partner.name) has no timestamp field and is undetectable here; a Partner
-        rename during the window needs a full ``es_shadow_populate``.
+        narrowed to record ids. The check is cheap: an indexed ``updated_at`` existence probe.
+        Partner (identities.partner.name) has no timestamp field and is undetectable here.
         """
         from hope.models import Area, BusinessArea, Country, DocumentType
 

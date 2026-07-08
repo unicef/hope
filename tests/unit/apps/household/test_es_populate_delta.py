@@ -1,13 +1,14 @@
-"""Tests for the es_populate_delta management command.
+"""Tests for the es_populate_delta management command (incremental, never deletes an index).
 
-ES-touching helpers (rebuild_program_indexes / check_program_indexes) are mocked, so these
-tests need no live Elasticsearch cluster: `--using default` is a registered alias and the
-DB-only change-detection logic is exercised directly.
+ES-touching bits (server version probe, per-program doc classes, ES connection, create/populate,
+remove-by-id) are mocked, so these tests need no live Elasticsearch cluster. The DB-only per-program
+delta detection (`_program_delta`) is exercised directly against factories.
 """
 
 import datetime
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+import uuid
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -23,13 +24,25 @@ from extras.test_utils.factories import (
     ProgramFactory,
 )
 from hope.apps.household.management.commands.es_populate_delta import Command
-from hope.models import Household, Individual, IndividualIdentity, Program
+from hope.models import Household, Individual, Program
 
 pytestmark = pytest.mark.django_db
 
 CMD = "es_populate_delta"
-REBUILD = "hope.apps.household.management.commands.es_populate_delta.rebuild_program_indexes"
-CHECK = "hope.apps.household.management.commands.es_populate_delta.check_program_indexes"
+_MOD = "hope.apps.household.management.commands.es_populate_delta"
+CHECK = f"{_MOD}.check_program_indexes"
+CREATE = f"{_MOD}.create_program_indexes"
+POPULATE = f"{_MOD}.populate_program_indexes"
+VERSION = f"{_MOD}.Command._print_server_version"
+PROCESS = f"{_MOD}.Command._process_program"
+DELTA = f"{_MOD}.Command._program_delta"
+APPLY = f"{_MOD}.Command._apply_delta"
+GET_IND_DOC = "hope.apps.household.documents.get_individual_doc"
+GET_HH_DOC = "hope.apps.household.documents.get_household_doc"
+GET_CONN = "elasticsearch.dsl.connections.get_connection"
+REMOVE = "hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids"
+
+OPTS = {"dry_run": False, "chunk_size": 2000, "parallel": False, "threads": 4, "verify": False}
 
 
 # ── _parse_since ─────────────────────────────────────────────────────────────
@@ -51,74 +64,117 @@ def test_parse_since_invalid_raises() -> None:
         Command._parse_since("not-a-timestamp")
 
 
-# ── _changed_program_ids (the core delta detection) ──────────────────────────
+# ── _program_delta (per-program record-level delta) ───────────────────────────
 
 
-def test_changed_program_ids_detects_all_related_sources() -> None:
+def test_program_delta_direct_individual_change_is_present() -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
+    since = timezone.now() - datetime.timedelta(days=1)
+    ind = IndividualFactory(program=prog, business_area=prog.business_area)
+
+    delta = Command._program_delta(str(prog.id), since)
+
+    assert ind.id in delta["ind_present"]
+    assert ind.id not in delta["ind_removed"]
+
+
+def test_program_delta_changed_document_marks_owner_present() -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
     past = since - datetime.timedelta(hours=1)
-    future = since + datetime.timedelta(hours=1)
+    ind = IndividualFactory(program=prog, business_area=prog.business_area)
+    Individual.all_merge_status_objects.filter(pk=ind.pk).update(updated_at=past)  # not via direct
+    DocumentFactory(individual=ind)  # fresh updated_at -> triggers via documents
 
-    # A: Individual changed after `since` -> detected.
-    ind_a = IndividualFactory()
-    Individual.all_merge_status_objects.filter(pk=ind_a.pk).update(updated_at=future)
+    delta = Command._program_delta(str(prog.id), since)
 
-    # B: Individual changed before `since` -> excluded.
-    ind_b = IndividualFactory()
-    Individual.all_merge_status_objects.filter(pk=ind_b.pk).update(updated_at=past)
-
-    # C: Household changed after `since`, its members old -> detected via Household.
-    hh_c = HouseholdFactory()
-    Household.objects.filter(pk=hh_c.pk).update(updated_at=future)
-    Individual.all_merge_status_objects.filter(household=hh_c).update(updated_at=past)
-
-    # D: Document changed after `since`, its individual old -> detected via Document.
-    doc_d = DocumentFactory()
-    Individual.all_merge_status_objects.filter(pk=doc_d.individual_id).update(updated_at=past)
-    from hope.models import Document
-
-    Document.all_merge_status_objects.filter(pk=doc_d.pk).update(updated_at=future)
-
-    # E: IndividualIdentity changed after `since` (model_utils `modified`), individual old.
-    idy_e = IndividualIdentityFactory()
-    Individual.all_merge_status_objects.filter(pk=idy_e.individual_id).update(updated_at=past)
-    IndividualIdentity.all_merge_status_objects.filter(pk=idy_e.pk).update(modified=future)
-
-    result = Command._changed_program_ids(since)
-
-    assert ind_a.program_id in result
-    assert ind_b.program_id not in result
-    assert hh_c.program_id in result
-    assert doc_d.individual.program_id in result  # via Document
-    assert idy_e.individual.program_id in result  # via IndividualIdentity
+    assert ind.id in delta["ind_present"]
 
 
-def test_changed_program_ids_detects_soft_deleted_individual() -> None:
-    # A soft-delete bumps updated_at but flips is_removed=True. The is_removed-filtering
-    # manager would hide it; all_objects keeps it visible so --since catches the deletion.
+def test_program_delta_changed_identity_marks_owner_present() -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
+    since = timezone.now()
+    past = since - datetime.timedelta(hours=1)
+    ind = IndividualFactory(program=prog, business_area=prog.business_area)
+    Individual.all_merge_status_objects.filter(pk=ind.pk).update(updated_at=past)
+    IndividualIdentityFactory(individual=ind)  # fresh `modified` -> triggers via identities
+
+    delta = Command._program_delta(str(prog.id), since)
+
+    assert ind.id in delta["ind_present"]
+
+
+def test_program_delta_soft_deleted_individual_goes_to_removed() -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
     future = since + datetime.timedelta(hours=1)
-    ind = IndividualFactory()
+    ind = IndividualFactory(program=prog, business_area=prog.business_area)
     Individual.all_objects.filter(pk=ind.pk).update(is_removed=True, updated_at=future)
 
-    assert ind.program_id in Command._changed_program_ids(since)
+    delta = Command._program_delta(str(prog.id), since)
+
+    assert ind.id in delta["ind_removed"]
+    assert ind.id not in delta["ind_present"]
 
 
-def test_changed_program_ids_pushes_scope_into_query() -> None:
+def test_program_delta_direct_household_change_is_present() -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
+    since = timezone.now() - datetime.timedelta(days=1)
+    hh = HouseholdFactory(program=prog, business_area=prog.business_area)
+
+    delta = Command._program_delta(str(prog.id), since)
+
+    assert hh.id in delta["hh_present"]
+
+
+def test_program_delta_household_change_marks_members_present() -> None:
+    # Individual doc embeds household.unicef_id / admin1 / admin2 -> a household change must
+    # re-index its members even if the member individual itself did not change.
+    prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
-    future = since + datetime.timedelta(hours=1)
-    in_scope = IndividualFactory()
-    out_scope = IndividualFactory()
-    Individual.all_objects.filter(pk__in=[in_scope.pk, out_scope.pk]).update(updated_at=future)
+    past = since - datetime.timedelta(hours=1)
+    hh = HouseholdFactory(program=prog, business_area=prog.business_area)  # fresh updated_at
+    member = IndividualFactory(program=prog, business_area=prog.business_area, household=hh)
+    Individual.all_merge_status_objects.filter(pk=member.pk).update(updated_at=past)  # not via direct
 
-    result = Command._changed_program_ids(since, {in_scope.program_id})
+    delta = Command._program_delta(str(prog.id), since)
 
-    assert result == {in_scope.program_id}
+    assert member.id in delta["ind_present"]
+
+
+def test_program_delta_head_change_marks_household_present() -> None:
+    # Household doc embeds the head's own name/phone fields -> a change to the head individual
+    # (exactly what es_mutate_stream bumps via given_name) must re-index the household.
+    prog = ProgramFactory(status=Program.ACTIVE)
+    since = timezone.now()
+    past = since - datetime.timedelta(hours=1)
+    head = IndividualFactory(program=prog, business_area=prog.business_area)  # fresh updated_at
+    hh = HouseholdFactory(program=prog, business_area=prog.business_area, head_of_household=head)
+    Household.objects.filter(pk=hh.pk).update(updated_at=past)  # not via direct
+
+    delta = Command._program_delta(str(prog.id), since)
+
+    assert hh.id in delta["hh_present"]
+
+
+def test_program_delta_head_document_marks_household_present() -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
+    since = timezone.now()
+    past = since - datetime.timedelta(hours=1)
+    head = IndividualFactory(program=prog, business_area=prog.business_area)
+    hh = HouseholdFactory(program=prog, business_area=prog.business_area, head_of_household=head)
+    Household.objects.filter(pk=hh.pk).update(updated_at=past)  # not via direct
+    DocumentFactory(individual=head)  # head's doc changed -> household doc embed must refresh
+
+    delta = Command._program_delta(str(prog.id), since)
+
+    assert hh.id in delta["hh_present"]
+
+
+# ── _reference_data_changed ───────────────────────────────────────────────────
 
 
 def test_reference_data_change_is_detected() -> None:
-    # Reference data embedded in the docs (here BusinessArea.slug) has no per-program key; a change
-    # must be surfaced so the caller can rebuild the whole scope.
     from hope.models import BusinessArea
 
     since = timezone.now()
@@ -131,7 +187,7 @@ def test_reference_data_change_is_detected() -> None:
 
 def test_reference_data_unchanged_returns_empty() -> None:
     BusinessAreaFactory()
-    since = timezone.now() + datetime.timedelta(hours=1)  # nothing changed after this
+    since = timezone.now() + datetime.timedelta(hours=1)
     assert Command._reference_data_changed(since) == []
 
 
@@ -150,11 +206,101 @@ def test_apply_scope_filters_by_code_uuid_and_business_area() -> None:
     assert ids(program=p1.code, business_area=None) == {p1.id}
     assert ids(program=str(p2.id), business_area=None) == {p2.id}
     assert ids(program=None, business_area=ba.slug) == {p1.id}
-    # business area + program that isn't in it -> empty
     assert ids(program=str(p2.id), business_area=ba.slug) == set()
 
 
-# ── handle: argument validation ──────────────────────────────────────────────
+# ── _process_program (missing index vs delta vs no-delta) ─────────────────────
+
+
+@patch(POPULATE, return_value=(True, "done"))
+@patch(CREATE, return_value=(True, ""))
+@patch(GET_HH_DOC)
+@patch(GET_IND_DOC)
+@patch(GET_CONN)
+def test_process_program_missing_index_creates_and_populates(
+    mock_conn, mock_ind_doc, mock_hh_doc, mock_create, mock_populate
+) -> None:
+    mock_conn.return_value.indices.exists.return_value = False
+
+    status, _ = Command()._process_program(str(uuid.uuid4()), timezone.now(), "default", OPTS)
+
+    assert status.startswith("populated")
+    mock_create.assert_called_once()
+    mock_populate.assert_called_once()
+
+
+@patch(DELTA, return_value={"ind_present": set(), "ind_removed": set(), "hh_present": set(), "hh_removed": set()})
+@patch(GET_HH_DOC)
+@patch(GET_IND_DOC)
+@patch(GET_CONN)
+def test_process_program_existing_index_no_delta(mock_conn, mock_ind_doc, mock_hh_doc, mock_delta) -> None:
+    mock_conn.return_value.indices.exists.return_value = True
+
+    status, _ = Command()._process_program(str(uuid.uuid4()), timezone.now(), "default", OPTS)
+
+    assert status == "no delta"
+
+
+@patch(APPLY)
+@patch(DELTA, return_value={"ind_present": {1}, "ind_removed": set(), "hh_present": set(), "hh_removed": set()})
+@patch(GET_HH_DOC)
+@patch(GET_IND_DOC)
+@patch(GET_CONN)
+def test_process_program_existing_index_applies_delta(
+    mock_conn, mock_ind_doc, mock_hh_doc, mock_delta, mock_apply
+) -> None:
+    mock_conn.return_value.indices.exists.return_value = True
+
+    status, _ = Command()._process_program(str(uuid.uuid4()), timezone.now(), "default", OPTS)
+
+    assert status == "delta synced"
+    mock_apply.assert_called_once()
+
+
+@patch(APPLY)
+@patch(DELTA, return_value={"ind_present": {1}, "ind_removed": set(), "hh_present": set(), "hh_removed": set()})
+@patch(GET_HH_DOC)
+@patch(GET_IND_DOC)
+@patch(GET_CONN)
+def test_process_program_dry_run_does_not_apply(
+    mock_conn, mock_ind_doc, mock_hh_doc, mock_delta, mock_apply
+) -> None:
+    mock_conn.return_value.indices.exists.return_value = True
+    opts = {**OPTS, "dry_run": True}
+
+    status, _ = Command()._process_program(str(uuid.uuid4()), timezone.now(), "default", opts)
+
+    assert status.startswith("would-sync")
+    mock_apply.assert_not_called()
+
+
+# ── _apply_delta: upsert present, delete removed docs, never delete the index ──
+
+
+@patch(REMOVE)
+def test_apply_delta_upserts_present_and_removes_soft_deleted(mock_remove) -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
+    present = IndividualFactory(program=prog, business_area=prog.business_area)
+    removed_id = uuid.uuid4()
+    ind_doc = MagicMock()
+    hh_doc = MagicMock()
+    delta = {"ind_present": {present.id}, "ind_removed": {removed_id}, "hh_present": set(), "hh_removed": set()}
+
+    Command._apply_delta(str(prog.id), delta, ind_doc, hh_doc, OPTS)
+
+    ind_doc.return_value.update.assert_called_once()
+    assert ind_doc.return_value.update.call_args.kwargs["action"] == "index"
+    mock_remove.assert_called_once_with([str(removed_id)], ind_doc)
+
+
+def test_command_never_imports_index_delete() -> None:
+    # Hard guarantee for "never delete an index": the delete helper is not even in the module.
+    import hope.apps.household.management.commands.es_populate_delta as mod
+
+    assert not hasattr(mod, "delete_program_indexes")
+
+
+# ── handle: argument validation & server version ──────────────────────────────
 
 
 def test_requires_since_or_reconcile() -> None:
@@ -167,40 +313,49 @@ def test_unknown_using_alias_raises() -> None:
         call_command(CMD, "--using", "does-not-exist", "--reconcile")
 
 
-# ── handle: reconcile / since / failures / scope / dry-run ────────────────────
+@patch(GET_CONN)
+def test_print_server_version_prints_host_and_version(mock_conn) -> None:
+    mock_conn.return_value.info.return_value = {"version": {"number": "9.0.1"}, "cluster_name": "shadow"}
+    out = StringIO()
+
+    Command(stdout=out)._print_server_version("default")
+
+    printed = out.getvalue()
+    assert "9.0.1" in printed
+    assert "shadow" in printed
 
 
-@patch(REBUILD, return_value=(True, "ok"))
-@patch(CHECK, return_value=(False, "count mismatch"))
-def test_reconcile_rebuilds_mismatched_programs(mock_check, mock_rebuild) -> None:
+@patch(GET_CONN, side_effect=OSError("no route to host"))
+def test_print_server_version_unreachable_raises(mock_conn) -> None:
+    with pytest.raises(CommandError, match="Cannot reach ES"):
+        Command(stdout=StringIO())._print_server_version("default")
+
+
+# ── handle: --since orchestration / --reconcile / scope ───────────────────────
+
+
+@patch(VERSION)
+@patch(PROCESS, return_value=("delta synced", "ind +1/-0 hh +0/-0"))
+def test_since_processes_every_active_program(mock_process, mock_version) -> None:
+    # No cross-program pre-filter: every in-scope program is handed to _process_program.
     prog = ProgramFactory(status=Program.ACTIVE)
-
-    call_command(CMD, "--using", "default", "--reconcile", stdout=StringIO())
-
-    mock_rebuild.assert_called_once()
-    assert mock_rebuild.call_args.args[0] == str(prog.id)
-
-
-@patch(REBUILD, return_value=(True, "ok"))
-def test_since_rebuilds_changed_program(mock_rebuild) -> None:
-    prog = ProgramFactory(status=Program.ACTIVE)
-    IndividualFactory(program=prog, business_area=prog.business_area)
     since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
 
-    call_command(CMD, "--using", "default", "--since", since, stdout=StringIO())
+    call_command(CMD, "--since", since, stdout=StringIO())
 
-    mock_rebuild.assert_called_once()
-    assert mock_rebuild.call_args.args[0] == str(prog.id)
+    mock_process.assert_called_once()
+    assert mock_process.call_args.args[0] == str(prog.id)
 
 
-@patch(REBUILD, return_value=(False, "boom"))
-@patch(CHECK, return_value=(False, "count mismatch"))
-def test_failed_programs_are_listed_and_command_errors(mock_check, mock_rebuild) -> None:
+@patch(VERSION)
+@patch(PROCESS, return_value=("failed", "boom"))
+def test_since_failure_is_listed_and_command_errors(mock_process, mock_version) -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
+    since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
     out = StringIO()
 
     with pytest.raises(CommandError):
-        call_command(CMD, "--using", "default", "--reconcile", stdout=out)
+        call_command(CMD, "--since", since, stdout=out)
 
     printed = out.getvalue()
     assert "Failed programs" in printed
@@ -208,41 +363,38 @@ def test_failed_programs_are_listed_and_command_errors(mock_check, mock_rebuild)
     assert "boom" in printed
 
 
-@patch(REBUILD)
-def test_scope_filter_no_match_warns_and_skips(mock_rebuild) -> None:
-    ProgramFactory(status=Program.ACTIVE)
+@patch(VERSION)
+@patch(CHECK, return_value=(False, "count mismatch"))
+def test_reconcile_reports_drift_read_only(mock_check, mock_version) -> None:
+    prog = ProgramFactory(status=Program.ACTIVE)
     out = StringIO()
 
-    call_command(CMD, "--using", "default", "--reconcile", "--program", "no-such-code", stdout=out)
+    call_command(CMD, "--reconcile", stdout=out)
+
+    printed = out.getvalue()
+    assert "drift" in printed
+    assert prog.code in printed
+
+
+@patch(VERSION)
+@patch(PROCESS)
+@patch(CHECK, return_value=(True, "ok"))
+def test_reconcile_only_does_not_sync(mock_check, mock_process, mock_version) -> None:
+    ProgramFactory(status=Program.ACTIVE)
+
+    call_command(CMD, "--reconcile", stdout=StringIO())
+
+    mock_process.assert_not_called()
+
+
+@patch(VERSION)
+@patch(PROCESS)
+def test_scope_no_match_warns_and_skips(mock_process, mock_version) -> None:
+    ProgramFactory(status=Program.ACTIVE)
+    since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
+    out = StringIO()
+
+    call_command(CMD, "--since", since, "--program", "no-such-code", stdout=out)
 
     assert "No programs match" in out.getvalue()
-    mock_rebuild.assert_not_called()
-
-
-@patch(REBUILD)
-@patch(CHECK, return_value=(False, "count mismatch"))
-def test_dry_run_lists_programs_without_rebuilding(mock_check, mock_rebuild) -> None:
-    prog = ProgramFactory(status=Program.ACTIVE)
-    out = StringIO()
-
-    call_command(CMD, "--using", "default", "--reconcile", "--dry-run", stdout=out)
-
-    printed = out.getvalue()
-    assert "summary:" in printed
-    assert prog.code in printed
-    mock_rebuild.assert_not_called()
-
-
-@patch("hope.apps.household.management.commands.es_populate_delta.DRY_RUN_PRINT_LIMIT", 0)
-@patch(REBUILD)
-@patch(CHECK, return_value=(False, "count mismatch"))
-def test_dry_run_suppresses_list_above_print_limit(mock_check, mock_rebuild) -> None:
-    prog = ProgramFactory(status=Program.ACTIVE)
-    out = StringIO()
-
-    call_command(CMD, "--using", "default", "--reconcile", "--dry-run", stdout=out)
-
-    printed = out.getvalue()
-    assert "suppressed" in printed
-    assert prog.code not in printed  # per-program list suppressed
-    mock_rebuild.assert_not_called()
+    mock_process.assert_not_called()

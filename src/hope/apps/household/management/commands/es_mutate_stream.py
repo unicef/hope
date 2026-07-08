@@ -30,8 +30,10 @@ import json
 import random
 import time
 from typing import IO, Any
+import uuid
 
 from django.core.management.base import BaseCommand
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from hope.models import Household, Individual
@@ -80,6 +82,16 @@ class Command(BaseCommand):
             fh.close()
 
     @staticmethod
+    def _random_window(qs: QuerySet, n: int) -> list:
+        # order_by("?") is ORDER BY RANDOM() -> full-table sort (deadly on 12M rows).
+        # UUID pk is indexed: seek from a random uuid, wrap around if it lands near the end.
+        pivot = uuid.uuid4()
+        rows = list(qs.filter(pk__gte=pivot).order_by("pk")[:n])
+        if len(rows) < n:
+            rows += list(qs.filter(pk__lt=pivot).order_by("pk")[: n - len(rows)])
+        return rows
+
+    @staticmethod
     def _write(fh: IO[str], record: dict) -> None:
         fh.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
         fh.flush()  # crash-safe: every mutation is on disk before the next one
@@ -104,7 +116,7 @@ class Command(BaseCommand):
 
     @classmethod
     def _touch_individuals(cls, n: int, fh: IO[str]) -> int:
-        inds = list(Individual.all_merge_status_objects.select_related("household").order_by("?")[:n])
+        inds = cls._random_window(Individual.all_merge_status_objects.select_related("household"), n)
         for ind in inds:
             old = ind.given_name
             ind.given_name = f"{(old or 'Name').split('#')[0]}#{random.randint(1000, 9999)}"  # noqa: S311
@@ -114,7 +126,7 @@ class Command(BaseCommand):
 
     @classmethod
     def _touch_households(cls, n: int, fh: IO[str]) -> int:
-        hhs = list(Household.objects.order_by("?")[:n])
+        hhs = cls._random_window(Household.objects.all(), n)
         for hh in hhs:
             old = hh.size
             hh.size = (old or 0) + 1
@@ -124,9 +136,10 @@ class Command(BaseCommand):
 
     @classmethod
     def _soft_delete_one(cls, fh: IO[str]) -> str | None:
-        ind = Individual.all_merge_status_objects.select_related("household").order_by("?").first()
-        if ind is None:  # pragma: no cover
+        rows = cls._random_window(Individual.all_merge_status_objects.select_related("household"), 1)
+        if not rows:  # pragma: no cover
             return None
+        ind = rows[0]
         hh = ind.household
         ind.delete()  # SoftDeletableMergeStatusModel -> soft=True by default
         cls._write(fh, cls._record("soft_delete", "Individual", ind, hh, "is_removed", False, True))
