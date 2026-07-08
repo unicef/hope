@@ -108,7 +108,9 @@ class Command(BaseCommand):
         for ind in inds:
             old = ind.given_name
             ind.given_name = f"{(old or 'Name').split('#')[0]}#{random.randint(1000, 9999)}"  # noqa: S311
-            ind.save(update_fields=["given_name"])  # auto_now bumps updated_at too
+            # updated_at must be listed: Django does NOT auto-add auto_now fields to
+            # update_fields, and es_populate_delta --since keys off updated_at.
+            ind.save(update_fields=["given_name", "updated_at"])
             cls._write(fh, cls._record("update", "Individual", ind, ind.household, "given_name", old, ind.given_name))
         return len(inds)
 
@@ -118,7 +120,7 @@ class Command(BaseCommand):
         for hh in hhs:
             old = hh.size
             hh.size = (old or 0) + 1
-            hh.save(update_fields=["size"])  # auto_now bumps updated_at too
+            hh.save(update_fields=["size", "updated_at"])  # list updated_at (see _touch_individuals)
             cls._write(fh, cls._record("update", "Household", None, hh, "size", old, hh.size))  # ind side N/A
         return len(hhs)
 

@@ -136,7 +136,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **opts: Any) -> None:
+        from hope.apps.household.management.commands._es_shadow import register_shadow_connection
+
         using: str = opts["using"]
+        register_shadow_connection(using)  # wire `v9` from ELASTICSEARCH_HOST_V9 (no-op if unset)
         if using not in settings.ELASTICSEARCH_DSL:
             raise CommandError(
                 f"Connection alias '{using}' is not registered in settings.ELASTICSEARCH_DSL "
