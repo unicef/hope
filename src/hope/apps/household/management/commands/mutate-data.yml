@@ -23,7 +23,7 @@ spec:
                 name: keyvault-secret
           env:
             - name: DEBUG
-              value: "True"        
+              value: "True"
             - name: DJANGO_DEBUG
               value: "True"
       restartPolicy: Never

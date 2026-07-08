@@ -6,10 +6,6 @@ The trick: bulk-copy ES 8 → ES 9 up front, then keep catching ES 9 up to Postg
 **incremental, DB-based delta** while the app still serves from ES 8. When ES 9 is within seconds
 of the DB, flip the backend to ES 9 and run one final delta to close the last gap.
 
-**Why DB-based, not an ES 8 → ES 9 diff:** Postgres is the source of truth, and the
-`HouseholdDocument` does **not** store `updated_at` (only `IndividualDocument` does), so a
-timestamp diff on the ES side is impossible for households. The delta reads changed rows from
-Postgres and upserts only those documents into ES 9 — it never deletes an index.
 
 **Two pods, two ES targets** (from `reindex-delta.yml` / `mutate-data.yml`):
 
@@ -19,9 +15,6 @@ Postgres and upserts only those documents into ES 9 — it never deletes an inde
 - `adhoc-mutate-data` does **not** override it → its `default` is ES 8 (the app cluster). **The
   generator runs here**, so its `post_save` signal writes land in ES 8, not ES 9 — ES 9 is touched
   only by the delta. That isolation is the whole point: it proves the delta, not the signals.
-
-Consequence: the mutation log lives on `adhoc-mutate-data`, but verification queries ES 9 from
-`adhoc-reindex-delta` — so copy the log across before verifying (below).
 
 ## Steps
 
@@ -94,5 +87,3 @@ cluster + ES version up front (confirm ES 9), then per program:
 ```bash
 kubectl exec -it adhoc-reindex-delta -- django-admin es_populate_delta --reconcile
 ```
-
-
