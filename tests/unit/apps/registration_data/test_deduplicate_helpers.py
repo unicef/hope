@@ -667,6 +667,7 @@ def test_deduplication_documents_invalidates_batch_duplicate_of_same_individual(
     doc1.type.valid_for_deduplication = True
     doc1.type_id = "passport"
     doc1.country_id = "AFG"
+    doc1.dedup_signature = signature
 
     doc2 = MagicMock()
     doc2.document_number = "DOC-001"
@@ -674,6 +675,7 @@ def test_deduplication_documents_invalidates_batch_duplicate_of_same_individual(
     doc2.type.valid_for_deduplication = True
     doc2.type_id = "passport"
     doc2.country_id = "AFG"
+    doc2.dedup_signature = signature
 
     per_individual_dict = defaultdict(list)
     per_individual_dict[str(individual_id)] = [signature, signature]
