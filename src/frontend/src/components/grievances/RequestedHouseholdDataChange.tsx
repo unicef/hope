@@ -233,12 +233,6 @@ export function RequestedHouseholdDataChange({
               values.selectedFlexFields.includes(key);
           }
         });
-        // Only add flex_fields to householdApproveData if not empty
-        if (Object.keys(flexFieldsApproveData).length > 0) {
-          householdApproveData.flex_fields = flexFieldsApproveData;
-        } else if ('flex_fields' in householdApproveData) {
-          delete householdApproveData.flex_fields;
-        }
         // Roles: add each as roles__<individual_id>: boolean
         householdApproveData.roles = values.selectedRoles.map(
           (individualId) => ({
@@ -250,8 +244,10 @@ export function RequestedHouseholdDataChange({
         // Build mutation payload
         const mutationPayload: {
           householdApproveData: any;
+          flexFieldsApproveData: { [key: string]: boolean };
         } = {
           householdApproveData,
+          flexFieldsApproveData,
         };
 
         try {
