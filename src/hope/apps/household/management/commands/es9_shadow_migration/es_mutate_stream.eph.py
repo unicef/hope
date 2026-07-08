@@ -1,42 +1,19 @@
-"""Continuously mutate households/individuals to produce a realistic change stream.
+"""eph-1 ONLY test tool — generates a change stream to prove the delta shrinks. Not for prod.
 
-A dev/test companion to ``es_populate_delta``: run it while the delta command catches up a shadow
-cluster and each pass bumps ``updated_at`` on a random sample, so re-running ``--since <start>``
-should report a shrinking number of programs as the delta converges.
-
-Every mutation is appended to a JSONL log (one JSON object per line) with the exact ids and the
-before/after value, so ES output can be asserted against it afterwards::
-
-    {"ts": "...", "action": "update", "model": "Individual", "object_id": "<uuid>",
-     "individual_id": "<uuid>", "household_id": "<uuid|null>",
-     "individual_unicef_id": "IND-...", "household_unicef_id": "HH-...|null",
-     "field": "given_name", "old": "Anna", "new": "Anna#4821"}
-
-For Household mutations the individual side is left null (a household change has no single
-individual). Read the log back with::
-
-    [json.loads(line) for line in open("mutate_log.jsonl")]
-
-Examples
---------
-    python manage.py es_mutate_stream                          # forever, 3s between passes
-    python manage.py es_mutate_stream --sleep 5 --batch 3 --passes 20
-    python manage.py es_mutate_stream --delete-every 0         # no soft-deletes
-    python manage.py es_mutate_stream --log /tmp/run1.jsonl
-
+Each pass picks a random ACTIVE program and touches N rows within it (indexed program_id,
+no full-table sort — the dev's order_by("?") is unusably slow on eph-1's ~12M rows).
+Appends every change to a JSONL log. CLI unchanged from the PR command.
 """
 
 import json
 import random
 import time
 from typing import IO, Any
-import uuid
 
 from django.core.management.base import BaseCommand
-from django.db.models import QuerySet
 from django.utils import timezone
 
-from hope.models import Household, Individual
+from hope.models import Household, Individual, Program
 
 
 class Command(BaseCommand):
@@ -52,11 +29,10 @@ class Command(BaseCommand):
         parser.add_argument("--log", default="mutate_log.jsonl", help="JSONL log path (appended, never clobbered).")
 
     def handle(self, *args: Any, **opts: Any) -> None:
-        ind_total = Individual.all_merge_status_objects.count()
-        hh_total = Household.objects.count()
-        self.stdout.write(f"start: individuals={ind_total} households={hh_total} -> log={opts['log']} (Ctrl+C stops)")
-        if ind_total == 0 and hh_total == 0:
-            self.stdout.write(self.style.WARNING("nothing to mutate (empty DB) -- seed some data first."))
+        n_progs = Program.objects.filter(status=Program.ACTIVE).count()
+        self.stdout.write(f"start: {n_progs} active programs -> log={opts['log']} (Ctrl+C stops)")
+        if n_progs == 0:
+            self.stdout.write(self.style.WARNING("no active programs to mutate -- seed some data first."))
             return
 
         fh = open(opts["log"], "a", encoding="utf-8")  # noqa: SIM115  # kept open across the loop
@@ -65,14 +41,15 @@ class Command(BaseCommand):
             while opts["passes"] == 0 or i < opts["passes"]:
                 i += 1
                 try:
-                    ni = self._touch_individuals(opts["batch"], fh)
-                    nh = self._touch_households(opts["batch"], fh)
+                    pid = self._random_active_program_id()
+                    ni = self._touch_individuals(pid, opts["batch"], fh)
+                    nh = self._touch_households(pid, opts["batch"], fh)
                     extra = ""
                     if opts["delete_every"] and i % opts["delete_every"] == 0:
-                        uid = self._soft_delete_one(fh)
+                        uid = self._soft_delete_one(pid, fh)
                         extra = f", soft-deleted {uid}" if uid else ""
                     stamp = timezone.now().isoformat(timespec="seconds")
-                    self.stdout.write(f"[{stamp}] pass {i}: touched {ni} ind / {nh} hh{extra}")
+                    self.stdout.write(f"[{stamp}] pass {i} prog={pid}: touched {ni} ind / {nh} hh{extra}")
                 except Exception as e:  # noqa: BLE001  # pragma: no cover  # keep loop alive on transient error
                     self.stdout.write(self.style.ERROR(f"pass {i}: error, continuing -- {e}"))
                 time.sleep(opts["sleep"])
@@ -82,14 +59,9 @@ class Command(BaseCommand):
             fh.close()
 
     @staticmethod
-    def _random_window(qs: QuerySet, n: int) -> list:
-        # order_by("?") is ORDER BY RANDOM() -> full-table sort (deadly on 12M rows).
-        # UUID pk is indexed: seek from a random uuid, wrap around if it lands near the end.
-        pivot = uuid.uuid4()
-        rows = list(qs.filter(pk__gte=pivot).order_by("pk")[:n])
-        if len(rows) < n:
-            rows += list(qs.filter(pk__lt=pivot).order_by("pk")[: n - len(rows)])
-        return rows
+    def _random_active_program_id() -> str:
+        # Program table is small (hundreds of rows), so order_by("?") here is cheap.
+        return str(Program.objects.filter(status=Program.ACTIVE).order_by("?").values_list("id", flat=True).first())
 
     @staticmethod
     def _write(fh: IO[str], record: dict) -> None:
@@ -112,23 +84,29 @@ class Command(BaseCommand):
             "field": field,
             "old": old,
             "new": new,
+            "program_id": str(ind.program_id if ind else (hh.program_id if hh else None)),
         }
 
     @classmethod
-    def _touch_individuals(cls, n: int, fh: IO[str]) -> int:
-        inds = cls._random_window(Individual.all_merge_status_objects.select_related("household"), n)
+    def _touch_individuals(cls, program_id: str, n: int, fh: IO[str]) -> int:
+        # program_id is indexed. NO order_by: an ORDER BY id would ignore that index and
+        # walk the PK filtering by program_id (IO-bound over 12M rows). Unordered LIMIT n
+        # uses the program_id index directly -> a handful of rows, milliseconds.
+        inds = list(
+            Individual.all_merge_status_objects.select_related("household").filter(program_id=program_id)[:n]
+        )
         for ind in inds:
             old = ind.given_name
             ind.given_name = f"{(old or 'Name').split('#')[0]}#{random.randint(1000, 9999)}"  # noqa: S311
-            # updated_at must be listed: Django does NOT auto-add auto_now fields to
-            # update_fields, and es_populate_delta --since keys off updated_at.
+            # must list updated_at: Django does NOT auto-add auto_now fields to update_fields,
+            # and the delta keys entirely off updated_at.
             ind.save(update_fields=["given_name", "updated_at"])
             cls._write(fh, cls._record("update", "Individual", ind, ind.household, "given_name", old, ind.given_name))
         return len(inds)
 
     @classmethod
-    def _touch_households(cls, n: int, fh: IO[str]) -> int:
-        hhs = cls._random_window(Household.objects.all(), n)
+    def _touch_households(cls, program_id: str, n: int, fh: IO[str]) -> int:
+        hhs = list(Household.objects.filter(program_id=program_id)[:n])
         for hh in hhs:
             old = hh.size
             hh.size = (old or 0) + 1
@@ -137,11 +115,13 @@ class Command(BaseCommand):
         return len(hhs)
 
     @classmethod
-    def _soft_delete_one(cls, fh: IO[str]) -> str | None:
-        rows = cls._random_window(Individual.all_merge_status_objects.select_related("household"), 1)
-        if not rows:  # pragma: no cover
+    def _soft_delete_one(cls, program_id: str, fh: IO[str]) -> str | None:
+        ind = next(
+            iter(Individual.all_merge_status_objects.select_related("household").filter(program_id=program_id)[:1]),
+            None,
+        )
+        if ind is None:  # pragma: no cover
             return None
-        ind = rows[0]
         hh = ind.household
         ind.delete()  # SoftDeletableMergeStatusModel -> soft=True by default
         cls._write(fh, cls._record("soft_delete", "Individual", ind, hh, "is_removed", False, True))
