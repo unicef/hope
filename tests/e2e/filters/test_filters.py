@@ -8,7 +8,6 @@ from e2e.page_object.filters import Filters
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -38,11 +37,6 @@ from hope.models import (
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
-
-
-@pytest.fixture
-def business_area() -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
@@ -178,6 +172,9 @@ def payment_verification_creator(
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
+        # FINISHED plans auto-create a PaymentVerificationSummary via post_generation;
+        # suppress it so the explicit summary below doesn't violate the unique constraint.
+        create_payment_verification_summary=False,
     )
 
     payment_plan.unicef_id = payment_plan_id

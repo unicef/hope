@@ -4,6 +4,7 @@ from time import sleep
 
 from dateutil.relativedelta import relativedelta
 import pytest
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -583,7 +584,17 @@ class TestProgrammeDetails:
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.fill_data_picker_filter(datetime.now().strftime("%Y-%m-%d"))
         page_programme_details.get_button_next().click()
-        page_programme_details.get_button_cancel().click()
+        # Saving the default cycle's end date re-renders the dialog (the step list shrinks
+        # from 2 to 1 and swaps UpdateProgramCycle -> CreateProgramCycle), so the cancel
+        # button can go stale mid-transition; retry the click until it lands.
+        for _ in range(30):
+            try:
+                page_programme_details.get_button_cancel().click()
+                break
+            except StaleElementReferenceException:
+                sleep(0.1)
+        else:
+            page_programme_details.get_button_cancel().click()
 
         assert "Draft" in page_programme_details.get_program_cycle_status()[0].text
         assert datetime.now().strftime("%-d %b %Y") in page_programme_details.get_program_cycle_end_date()[0].text
@@ -595,6 +606,10 @@ class TestProgrammeDetails:
         page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
+        for _ in range(50):
+            if len(page_programme_details.get_program_cycle_status()) == 2:
+                break
+            sleep(0.1)
         assert "Draft" in page_programme_details.get_program_cycle_status()[1].text
         assert (datetime.now() + relativedelta(days=11)).strftime(
             "%-d %b %Y"
@@ -639,15 +654,11 @@ class TestProgrammeDetails:
         page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
-        for _ in range(50):
-            if "Start date must be after the latest cycle." in page_programme_details.get_start_date_cycle_div().text:
-                break
-            sleep(0.1)
-        assert (
-            "Start Date*\nStart date must be after the latest cycle end date."
-            # strip MUI's thin space (U+2009) preceding the required-field asterisk
-            in page_programme_details.get_start_date_cycle_div().text.replace("\u2009", "")
-        )
+        # Unlike the two checks above (frontend Yup validation shown inline in the field),
+        # "Start date must be after the latest cycle end date." is a backend validation
+        # surfaced as a snackbar alert.
+        page_programme_details.check_alert("Start date must be after the latest cycle end date.")
+
         page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
@@ -680,17 +691,14 @@ class TestProgrammeDetails:
         page_programme_details.get_input_title().send_keys("New cycle with wrong date")
         page_programme_details.fill_start_date_cycle((datetime.now() - relativedelta(days=40)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_save().click()
+        # The v9 date field renders the entered value between the label and the error,
+        # so assert only on the stable error message, not the exact field text.
+        error_message = "Start Date cannot be before Programme Start Date"
         for _ in range(50):
-            if (
-                "Start Date*\nStart Date cannot be before Programme Start Date"
-                in page_programme_details.get_start_date_cycle_div().text.replace("\u2009", "")
-            ):
+            if error_message in page_programme_details.get_start_date_cycle_div().text:
                 break
             sleep(0.1)
-        assert (
-            "Start Date*\nStart Date cannot be before Programme Start Date"
-            in page_programme_details.get_start_date_cycle_div().text.replace("\u2009", "")
-        )
+        assert error_message in page_programme_details.get_start_date_cycle_div().text
 
         page_programme_details.fill_start_date_cycle((datetime.now() - relativedelta(days=24)).strftime("%Y-%m-%d"))
         page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d"))
@@ -736,14 +744,18 @@ class TestProgrammeDetails:
         page_programme_details.get_button_edit_program().click()
         page_programme_details.get_select_edit_program_details().click()
         page_programme_management.get_input_programme_name()
-        page_programme_management.fill_input_start_date(FormatTime(1, 1, 2022).numerically_formatted_date)
-        page_programme_management.fill_input_end_date(FormatTime(1, 10, 2022).numerically_formatted_date)
+        # Start before the earliest cycle, and an end date that is in the future (so it clears
+        # the frontend "End Date cannot be in the past" validation and Next stays enabled) but
+        # BEFORE the latest cycle's end date (now + 20 days). The backend then rejects the update
+        # because the new programme dates no longer contain the existing cycles.
+        page_programme_management.fill_input_start_date((datetime.now() - relativedelta(months=2)).strftime("%Y-%m-%d"))
+        page_programme_management.fill_input_end_date((datetime.now() + relativedelta(days=5)).strftime("%Y-%m-%d"))
         page_programme_management.get_button_next().click()
         page_programme_management.get_button_add_time_series_field()
         programme_creation_url = page_programme_details.driver.current_url
         page_programme_management.get_button_save().click()
-        # Program dates (Jan-Oct 2022) do not contain the existing cycles, so the backend
-        # rejects the update: the app stays on the edit page and never reaches programme details.
+        # The backend rejects the update, so the app stays on the edit page and never reaches
+        # programme details.
         current_url = page_programme_details.wait_for_new_url(programme_creation_url)
         assert "details" not in current_url.split("/")
 
