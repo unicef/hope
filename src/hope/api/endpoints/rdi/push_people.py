@@ -42,6 +42,7 @@ from hope.models import (
     PendingIndividual,
     RegistrationDataImport,
 )
+from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -79,6 +80,12 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE, required=False, allow_blank=True)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    currency = serializers.SlugRelatedField(
+        slug_field="code",
+        required=False,
+        allow_null=True,
+        queryset=Currency.objects.all(),
+    )
 
     phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     phone_no_alternative = serializers.CharField(allow_null=True, allow_blank=True, required=False)

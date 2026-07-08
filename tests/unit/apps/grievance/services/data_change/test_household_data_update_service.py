@@ -480,6 +480,66 @@ def test_update_currency_change_records_previous_value_as_code(all_currencies: N
     }
 
 
+def test_close_applies_approved_flex_field_to_household() -> None:
+    household = HouseholdFactory(create_role=False, flex_fields={"existing_flex": "keep"})
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "flex_fields": {
+                "test_h_f": {"value": "new value", "approve_status": True, "previous_value": None},
+            },
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.flex_fields == {"existing_flex": "keep", "test_h_f": "new value"}
+
+
+def test_close_applies_flex_field_approved_with_string_status() -> None:
+    household = HouseholdFactory(create_role=False, flex_fields={})
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "flex_fields": {
+                "test_h_f": {"value": "new value", "approve_status": "true", "previous_value": None},
+            },
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.flex_fields == {"test_h_f": "new value"}
+
+
+def test_close_skips_unapproved_flex_field() -> None:
+    household = HouseholdFactory(create_role=False, flex_fields={})
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "flex_fields": {
+                "test_h_f": {"value": "new value", "approve_status": False, "previous_value": None},
+            },
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.flex_fields == {}
+
+
 def test_close_resolves_currency_from_code(all_currencies) -> None:
     household = HouseholdFactory(create_role=False, currency=None)
     ticket_details = TicketHouseholdDataUpdateDetailsFactory(

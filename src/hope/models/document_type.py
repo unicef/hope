@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db import models
 
 from hope.models.utils import TimeStampedUUIDModel
@@ -24,8 +25,12 @@ class DocumentType(TimeStampedUUIDModel):
 
     @classmethod
     def get_all_doc_types_choices(cls) -> list[tuple[str, str]]:
-        """Return list of Document Types choices."""
-        return [(obj.key, obj.label) for obj in cls.objects.all()]
+        """Return list of Document Types choices (key, label), cached."""
+        choices = cache.get(cls.CACHE_KEY_ALL_DOC_TYPES)
+        if choices is None:
+            choices = [(obj.key, obj.label) for obj in cls.objects.all()]
+            cache.set(cls.CACHE_KEY_ALL_DOC_TYPES, choices, cls.CACHE_TTL_SECONDS)
+        return choices
 
     @classmethod
     def get_all_doc_types(cls) -> list[str]:
