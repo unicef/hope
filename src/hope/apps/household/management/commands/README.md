@@ -23,7 +23,7 @@ of the DB, flip the backend to ES 9 and run one final delta to close the last ga
 | 1 | Initial state | Valeriya | rehearsal only | ES 8 populated from the DB (ES is empty after a dump restore), backend/Celery point at ES 8, empty ES 9 ready. On the real cutover ES 8 is already populated — no dump-restore step there. |
 | 2 | Bulk copy ES 8 → ES 9 | Valeriya | both | `copy-job.yaml` runs `es_migrate.py`. Note its **start time `T0`** — the first `--since` for the delta. |
 | 3 | Generate a change stream | Jan | rehearsal only | On `adhoc-mutate-data`, run `es_mutate_stream`. Realistic logged stream to prove the delta shrinks each pass. On the real cutover, live traffic is the stream — skip. |
-| 4 | Delta catch-up loop | Jan | both | On `adhoc-reindex-delta` (`default` = ES 9), run `es_populate_delta --since <T>` in a loop, **each pass from the previous pass's start** (overlapping windows). Repeat until a pass reports ~0 work. Shrinks the step 7 gap to seconds. |
+| 4 | Delta catch-up  | Jan | both | On `adhoc-reindex-delta` (`default` = ES 9), run `es_populate_delta --since <T>` |
 | 5 | Scale Celery to 0 | Valeriya | both | Blocks dedup, no code change. Web still writes to ES via HOPE's `post_save` signals — harmless: before switch → ES 8, after → ES 9. Search slightly stale for minutes, acceptable. |
 | 6 | Switch backend/Celery to ES 9 | Valeriya | both | Flip the app's ES connection to ES 9. |
 | 7 | Final delta | Jan | both | Immediately re-run `es_populate_delta --since <start of the last pass from step 4>`. Catches everything written to ES 8 in the gap between the last delta and the switch. |
