@@ -59,17 +59,25 @@ logger = logging.getLogger(__name__)
 
 class RdiMergeTask:
     def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list]:
+        collision_detector = obj_hct.program.collision_detector
+
         household_ids_to_exclude = []
+        collided_ids = set()
         for ids in chunks(household_ids, 1000):
-            households_chunks = PendingHousehold.objects.filter(id__in=ids)
-            for household in households_chunks:
-                collided_id = obj_hct.program.collision_detector.detect_collision(household)
-                if not collided_id:
-                    continue
-                household_ids_to_exclude.append(household.id)
-                obj_hct.program.collision_detector.update_household(household)
-                updated_household = Household.objects.get(id=collided_id)
-                updated_household.extra_rdis.add(obj_hct)
+            for household in PendingHousehold.objects.filter(id__in=ids):
+                if collided_id := collision_detector.detect_collision(household):
+                    household_ids_to_exclude.append(household.id)
+                    collided_ids.add(collided_id)
+
+        # acquire all collision-target locks up front in one pk-ordered statement, to avoid
+        # deadlocks; the writes below can then run in any order
+        evaluate_qs(Household.objects.filter(id__in=collided_ids).select_for_update().only("pk").order_by("pk"))
+        for ids in chunks(household_ids_to_exclude, 1000):
+            for household in PendingHousehold.objects.filter(id__in=ids):
+                collision_detector.update_household(household)
+
+        obj_hct.extra_hh_rdis.add(*collided_ids)
+
         households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
         return households_to_merge_ids, household_ids_to_exclude
 
@@ -162,7 +170,7 @@ class RdiMergeTask:
 
     def execute(self, registration_data_import_id: str) -> None:
         try:
-            obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
+            obj_hct = RegistrationDataImport.objects.select_related("program").get(id=registration_data_import_id)
             households = PendingHousehold.objects.filter(registration_data_import=obj_hct)
 
             individuals = PendingIndividual.objects.filter(registration_data_import=obj_hct).order_by(
