@@ -22,6 +22,19 @@ URGENCY_CHOICES = (
     (URGENCY_NOT_URGENT, _("Not urgent")),
 )
 
+# Submission channel a manually-created grievance came in through. System-generated tickets
+# have no channel and stay null.
+SOURCE_CALL_CENTER = 1
+SOURCE_REDRESSAL_DESK = 2
+SOURCE_COMMUNITY_OUTREACH = 3
+SOURCE_SUGGESTION_BOX = 4
+SOURCE_CHOICES = (
+    (SOURCE_CALL_CENTER, _("Call Center")),
+    (SOURCE_REDRESSAL_DESK, _("Grievances Redressal Desk at Distribution Site")),
+    (SOURCE_COMMUNITY_OUTREACH, _("Community Outreach")),
+    (SOURCE_SUGGESTION_BOX, _("Suggestion Boxes")),
+)
+
 
 # Callable choices wrappers: passed to model fields as ``choices=get_*_choices`` so that
 # changing the underlying tuple does not generate a (no-op) migration.
@@ -31,3 +44,7 @@ def get_priority_choices() -> tuple:
 
 def get_urgency_choices() -> tuple:
     return URGENCY_CHOICES
+
+
+def get_source_choices() -> tuple:
+    return SOURCE_CHOICES

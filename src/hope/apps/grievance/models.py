@@ -20,6 +20,7 @@ from hope.apps.grievance.constants import (
     PRIORITY_NOT_SET,
     URGENCY_NOT_SET,
     get_priority_choices,
+    get_source_choices,
     get_urgency_choices,
 )
 from hope.models import Individual, Payment, User
@@ -359,6 +360,13 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=get_urgency_choices, default=URGENCY_NOT_SET)
     category = models.IntegerField(verbose_name=_("Category"), choices=get_grievance_category_choices)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
+    source = models.IntegerField(
+        verbose_name=_("Source"),
+        choices=get_source_choices,
+        null=True,
+        blank=True,
+        help_text=_("Submission channel; empty for system-generated tickets."),
+    )
     description = models.TextField(
         verbose_name=_("Description"),
         blank=True,
