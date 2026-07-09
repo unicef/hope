@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: adhoc-mutate-data
+spec:
+      containers:
+        - name: backend1
+          command: ["/bin/sh"]
+          args: ["-c", "sleep infinity"]
+          # args: ["-c", "django-admin runserver 0.0.0.0:8080"]
+          # args: ["-c", "django-admin shell -c 'from hct_mis_a"]
+          image: unicef/hope-support-images:core-7b7d83765c6b8a8b264ea6a1d273fdcb4538fd90
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: hope-core-backend
+            - configMapRef:
+                name: hope-core-backend
+            - secretRef:
+                name: keyvault-secret
+          env:
+            - name: DEBUG
+              value: "True"
+            - name: DJANGO_DEBUG
+              value: "True"
+      restartPolicy: Never
