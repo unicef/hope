@@ -368,6 +368,7 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
     partner: values.partner ? parseInt(values.partner, 10) : undefined,
     program: values.program,
     comments: values.comments,
+    source: values.source,
     linkedFeedbackId: values.linkedFeedbackId,
     documentation: values.documentation || [],
   };

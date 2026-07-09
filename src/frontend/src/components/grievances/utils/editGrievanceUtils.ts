@@ -14,6 +14,7 @@ import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 interface EditValuesTypes {
   priority?: number | string;
   urgency?: number | string;
+  source?: number | null;
   description?: string;
   assignedTo?: string;
   issueType?: string | number;
@@ -161,6 +162,7 @@ export function prepareInitialValues(
   let initialValues: EditValuesTypes = {
     priority: ticket.priority === 0 ? 'Not set' : ticket.priority,
     urgency: ticket.urgency === 0 ? 'Not set' : ticket.urgency,
+    source: ticket.source ?? null,
     partner: ticket.partner?.id,
     comments: ticket.comments || '',
     program: ticket.programs[0]?.id || '',
@@ -450,6 +452,7 @@ export function prepareRestUpdateVariables(_businessArea, values, ticket) {
         : values.urgency,
     partner: values.partner,
     comments: values.comments,
+    source: values.source,
     program: ticket.programs?.[0]?.id || values?.program,
     paymentRecord: values.selectedPaymentRecords
       ? (values.selectedPaymentRecords[0] as PaymentDetail)?.id

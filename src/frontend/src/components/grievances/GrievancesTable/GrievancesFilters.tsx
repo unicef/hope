@@ -335,6 +335,21 @@ export const GrievancesFilters = ({
         </Grid>
         <Grid size={{ xs: 2 }}>
           <SelectFilter
+            onChange={(e) => handleFilterChange('source', e.target.value)}
+            label={t('Source')}
+            value={filter.source}
+            data-cy="filters-source"
+            fullWidth
+          >
+            {choicesData.grievanceTicketSourceChoices?.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
+        </Grid>
+        <Grid size={{ xs: 2 }}>
+          <SelectFilter
             onChange={(e) =>
               handleFilterChange('grievanceStatus', e.target.value)
             }

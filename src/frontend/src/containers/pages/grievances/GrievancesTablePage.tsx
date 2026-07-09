@@ -70,6 +70,7 @@ export const GrievancesTablePage = (): ReactElement => {
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
+    source: '',
     preferredLanguage: '',
     program: '',
     programState: PROGRAM_STATE_FILTER.ALL,

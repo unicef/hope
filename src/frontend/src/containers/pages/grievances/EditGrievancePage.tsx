@@ -586,6 +586,16 @@ const EditGrievancePage = (): ReactElement => {
                         </Grid>
                         <Grid size={{ xs: 3 }}>
                           <Field
+                            name="source"
+                            fullWidth
+                            variant="outlined"
+                            label={t('Source')}
+                            choices={choicesData.grievanceTicketSourceChoices}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 3 }}>
+                          <Field
                             name="program"
                             label={t('Programme Name')}
                             fullWidth

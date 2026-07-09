@@ -58,6 +58,10 @@ function GrievancesDetails({
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
+  const sourceChoices: {
+    [id: number]: string;
+  } = choicesToDict(choicesData.grievanceTicketSourceChoices || []);
+
   const showIssueType = isShowIssueType(ticket.category);
   const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 
@@ -199,6 +203,11 @@ function GrievancesDetails({
               {
                 label: t('Assigned to'),
                 value: renderUserName(ticket.assignedTo),
+                size: 3,
+              },
+              {
+                label: t('Source'),
+                value: <span>{sourceChoices[ticket.source] || '-'}</span>,
                 size: 3,
               },
               {
