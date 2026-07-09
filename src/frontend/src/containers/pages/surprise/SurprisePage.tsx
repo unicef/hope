@@ -46,6 +46,8 @@ const SubHeading = styled(Typography)`
 
 const Photo = styled.img`
   width: 100vw;
+  max-height: 70vh;
+  object-fit: contain;
   display: block;
 `;
 
