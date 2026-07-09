@@ -92,7 +92,7 @@ function Description({
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
   const priorityChoicesData = choicesData?.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
-  const sourceChoicesData = choicesData?.grievanceTicketSourceChoices;
+  const submissionChannelChoicesData = choicesData?.grievanceTicketSubmissionChannelChoices;
   const canAddDocumentation = hasPermissions(
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
     permissions,
@@ -276,11 +276,11 @@ function Description({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <Field
-              name="source"
+              name="submissionChannel"
               fullWidth
               variant="outlined"
-              label={t('Source')}
-              choices={sourceChoicesData}
+              label={t('Submission Channel')}
+              choices={submissionChannelChoicesData}
               component={FormikSelectField}
             />
           </Grid>

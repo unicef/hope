@@ -10,7 +10,7 @@ from extras.test_utils.factories import BusinessAreaFactory, PartnerFactory, Use
 from extras.test_utils.factories.household import DocumentTypeFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
-from hope.apps.grievance.constants import PRIORITY_CHOICES, SOURCE_CHOICES, URGENCY_CHOICES
+from hope.apps.grievance.constants import PRIORITY_CHOICES, SUBMISSION_CHANNEL_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import BusinessArea, DocumentType, Partner, User
 
@@ -90,7 +90,7 @@ def test_get_choices(
         "grievance_ticket_system_category_choices": to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES),
         "grievance_ticket_priority_choices": to_choice_object(PRIORITY_CHOICES),
         "grievance_ticket_urgency_choices": to_choice_object(URGENCY_CHOICES),
-        "grievance_ticket_source_choices": to_choice_object(SOURCE_CHOICES),
+        "grievance_ticket_submission_channel_choices": to_choice_object(SUBMISSION_CHANNEL_CHOICES),
         "grievance_ticket_issue_type_choices": [
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()

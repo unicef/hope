@@ -58,9 +58,9 @@ function GrievancesDetails({
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const sourceChoices: {
+  const submissionChannelChoices: {
     [id: number]: string;
-  } = choicesToDict(choicesData.grievanceTicketSourceChoices || []);
+  } = choicesToDict(choicesData.grievanceTicketSubmissionChannelChoices || []);
 
   const showIssueType = isShowIssueType(ticket.category);
   const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
@@ -206,8 +206,8 @@ function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Source'),
-                value: <span>{sourceChoices[ticket.source] || '-'}</span>,
+                label: t('Submission Channel'),
+                value: <span>{submissionChannelChoices[ticket.submissionChannel] || '-'}</span>,
                 size: 3,
               },
               {

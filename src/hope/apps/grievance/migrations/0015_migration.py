@@ -11,13 +11,13 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="grievanceticket",
-            name="source",
+            name="submission_channel",
             field=models.IntegerField(
                 blank=True,
-                choices=hope.apps.grievance.constants.get_source_choices,
+                choices=hope.apps.grievance.constants.get_submission_channel_choices,
                 help_text="Submission channel; empty for system-generated tickets.",
                 null=True,
-                verbose_name="Source",
+                verbose_name="Submission Channel",
             ),
         ),
     ]

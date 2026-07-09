@@ -39,8 +39,8 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.constants import (
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
-    SOURCE_CALL_CENTER,
-    SOURCE_SUGGESTION_BOX,
+    SUBMISSION_CHANNEL_CALL_CENTER,
+    SUBMISSION_CHANNEL_SUGGESTION_BOX,
     URGENCY_NOT_URGENT,
 )
 from hope.apps.grievance.models import (
@@ -459,7 +459,7 @@ def referral_ticket_call_center(afghanistan: BusinessArea, program: Program, use
         ticket__status=GrievanceTicket.STATUS_NEW,
         ticket__language="",
         ticket__created_by=user,
-        ticket__source=SOURCE_CALL_CENTER,
+        ticket__submission_channel=SUBMISSION_CHANNEL_CALL_CENTER,
     )
     referral_details.ticket.programs.set([program])
     return referral_details.ticket
@@ -1591,7 +1591,7 @@ def test_update_grievance_ticket_individual_data_clear_photo(
     assert ticket_details.individual_data["photo"]["value"] == ""
 
 
-def test_update_grievance_ticket_changes_source(
+def test_update_grievance_ticket_changes_submission_channel(
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1603,15 +1603,19 @@ def test_update_grievance_ticket_changes_source(
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
 
     client = api_client(user)
-    response = client.patch(referral_ticket_call_center_detail_url, {"source": SOURCE_SUGGESTION_BOX}, format="json")
+    response = client.patch(
+        referral_ticket_call_center_detail_url,
+        {"submission_channel": SUBMISSION_CHANNEL_SUGGESTION_BOX},
+        format="json",
+    )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["source"] == SOURCE_SUGGESTION_BOX
+    assert response.json()["submission_channel"] == SUBMISSION_CHANNEL_SUGGESTION_BOX
     referral_ticket_call_center.refresh_from_db()
-    assert referral_ticket_call_center.source == SOURCE_SUGGESTION_BOX
+    assert referral_ticket_call_center.submission_channel == SUBMISSION_CHANNEL_SUGGESTION_BOX
 
 
-def test_update_grievance_ticket_clears_source(
+def test_update_grievance_ticket_clears_submission_channel(
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1623,9 +1627,9 @@ def test_update_grievance_ticket_clears_source(
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
 
     client = api_client(user)
-    response = client.patch(referral_ticket_call_center_detail_url, {"source": None}, format="json")
+    response = client.patch(referral_ticket_call_center_detail_url, {"submission_channel": None}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["source"] is None
+    assert response.json()["submission_channel"] is None
     referral_ticket_call_center.refresh_from_db()
-    assert referral_ticket_call_center.source is None
+    assert referral_ticket_call_center.submission_channel is None

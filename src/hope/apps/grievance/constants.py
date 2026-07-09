@@ -24,15 +24,15 @@ URGENCY_CHOICES = (
 
 # Submission channel a manually-created grievance came in through. System-generated tickets
 # have no channel and stay null.
-SOURCE_CALL_CENTER = 1
-SOURCE_REDRESSAL_DESK = 2
-SOURCE_COMMUNITY_OUTREACH = 3
-SOURCE_SUGGESTION_BOX = 4
-SOURCE_CHOICES = (
-    (SOURCE_CALL_CENTER, _("Call Center")),
-    (SOURCE_REDRESSAL_DESK, _("Grievances Redressal Desk at Distribution Site")),
-    (SOURCE_COMMUNITY_OUTREACH, _("Community Outreach")),
-    (SOURCE_SUGGESTION_BOX, _("Suggestion Boxes")),
+SUBMISSION_CHANNEL_CALL_CENTER = 1
+SUBMISSION_CHANNEL_REDRESSAL_DESK = 2
+SUBMISSION_CHANNEL_COMMUNITY_OUTREACH = 3
+SUBMISSION_CHANNEL_SUGGESTION_BOX = 4
+SUBMISSION_CHANNEL_CHOICES = (
+    (SUBMISSION_CHANNEL_CALL_CENTER, _("Call Center")),
+    (SUBMISSION_CHANNEL_REDRESSAL_DESK, _("Grievances Redressal Desk at Distribution Site")),
+    (SUBMISSION_CHANNEL_COMMUNITY_OUTREACH, _("Community Outreach")),
+    (SUBMISSION_CHANNEL_SUGGESTION_BOX, _("Suggestion Boxes")),
 )
 
 
@@ -46,5 +46,5 @@ def get_urgency_choices() -> tuple:
     return URGENCY_CHOICES
 
 
-def get_source_choices() -> tuple:
-    return SOURCE_CHOICES
+def get_submission_channel_choices() -> tuple:
+    return SUBMISSION_CHANNEL_CHOICES

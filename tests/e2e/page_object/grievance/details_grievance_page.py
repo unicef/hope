@@ -21,7 +21,7 @@ class GrievanceDetailsPage(BaseComponents):
     ticket_status = 'div[data-cy="label-Status"]'
     ticket_priority = 'div[data-cy="label-Priority"]'
     ticket_urgency = 'div[data-cy="label-Urgency"]'
-    ticket_source = 'div[data-cy="label-Source"]'
+    ticket_submission_channel = 'div[data-cy="label-Submission Channel"]'
     ticket_assigment = 'div[data-cy="label-Assigned to"]'
     ticket_category = 'div[data-cy="label-Category"]'
     label_issue_type = 'div[data-cy="label-Issue Type"]'
@@ -273,8 +273,8 @@ class GrievanceDetailsPage(BaseComponents):
     def get_ticket_urgency(self) -> WebElement:
         return self.wait_for(self.ticket_urgency)
 
-    def get_ticket_source(self) -> WebElement:
-        return self.wait_for(self.ticket_source)
+    def get_ticket_submission_channel(self) -> WebElement:
+        return self.wait_for(self.ticket_submission_channel)
 
     def get_ticket_assigment(self) -> WebElement:
         return self.wait_for(self.ticket_assigment)

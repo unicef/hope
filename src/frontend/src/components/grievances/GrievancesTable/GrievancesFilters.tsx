@@ -335,13 +335,13 @@ export const GrievancesFilters = ({
         </Grid>
         <Grid size={{ xs: 2 }}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('source', e.target.value)}
-            label={t('Source')}
-            value={filter.source}
-            data-cy="filters-source"
+            onChange={(e) => handleFilterChange('submissionChannel', e.target.value)}
+            label={t('Submission Channel')}
+            value={filter.submissionChannel}
+            data-cy="filters-submission-channel"
             fullWidth
           >
-            {choicesData.grievanceTicketSourceChoices?.map((item) => (
+            {choicesData.grievanceTicketSubmissionChannelChoices?.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
