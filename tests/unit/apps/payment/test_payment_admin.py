@@ -53,7 +53,8 @@ def test_payment_post_sync_with_payment_gateway(mock_perm, mock_sync, admin_clie
     url = reverse("admin:payment_payment_sync_with_payment_gateway", args=[payment.pk])
     response = admin_client.post(url)
 
-    mock_sync.assert_called_once_with(payment)
+    mock_sync.assert_called_once()
+    assert mock_sync.call_args[0][0] == payment
     assert response.status_code == 302
     assert reverse("admin:payment_payment_change", args=[payment.pk]) in response["Location"]
 
