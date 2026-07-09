@@ -5,6 +5,7 @@ import pytest
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     HouseholdFactory,
+    IndividualFactory,
     IndividualRoleInHouseholdFactory,
     ProgramFactory,
     TicketDeleteIndividualDetailsFactory,
@@ -58,6 +59,31 @@ def test_close_delete_individual_locks_household_and_withdraws(delete_context: d
     delete_context["household"].refresh_from_db()
     assert delete_context["individual"].withdrawn is True
     assert delete_context["household"].withdrawn is True
+
+
+def test_close_delete_individual_without_household(delete_context: dict[str, Any]) -> None:
+    individual_without_household = IndividualFactory(
+        business_area=delete_context["business_area"],
+        program=delete_context["program"],
+    )
+    ticket_details = TicketDeleteIndividualDetailsFactory(
+        ticket__business_area=delete_context["business_area"],
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        individual=individual_without_household,
+        approve_status=True,
+        role_reassign_data={},
+    )
+    ticket = ticket_details.ticket
+    ticket.programs.set([delete_context["program"]])
+    service = IndividualDeleteService(ticket, {})
+
+    service.close(delete_context["user"])
+
+    individual_without_household.refresh_from_db()
+    assert individual_without_household.household_id is None
+    assert individual_without_household.withdrawn is True
 
 
 def test_close_delete_individual_not_approved_is_noop(delete_context: dict[str, Any]) -> None:
