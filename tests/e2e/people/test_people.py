@@ -198,9 +198,6 @@ class TestSmokePeople:
         assert page_people_details.get_label_alternative_phone_number().text
         assert page_people_details.get_label_date_of_last_screening_against_sanctions_list().text
         assert page_people_details.get_label_linked_grievances().text
-        assert page_people_details.get_label_wallet_name().text
-        assert page_people_details.get_label_blockchain_name().text
-        assert page_people_details.get_label_wallet_address().text
         assert "Rows per page: 5 0–0 of 0" in page_people_details.get_table_pagination().text.replace("\n", " ")
         assert page_people_details.get_label_source().text
         assert page_people_details.get_label_import_name().text

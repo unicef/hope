@@ -75,7 +75,6 @@ class NewTicket(BaseComponents):
     select_program = 'div[data-cy="select-program"]'
     input_individual_data_phone_no_alternative = 'input[data-cy="input-individualDataPhoneNoAlternative"]'
     date_picker_filter = 'div[data-cy="date-picker-filter"]'
-    input_individualdata_blockchainname = 'input[data-cy="input-individualData.blockchainName"]'
     select_individualdata_selfcaredisability = 'div[data-cy="select-individualData.selfcareDisability"]'
     select_individualdata_observeddisability = 'div[data-cy="select-individualData.observedDisability"]'
     select_individualdata_workstatus = 'div[data-cy="select-individualData.workStatus"]'
@@ -98,8 +97,6 @@ class NewTicket(BaseComponents):
     select_individualdata_preferredlanguage = 'div[data-cy="select-individualData.preferredLanguage"]'
     select_individualdata_relationship = 'div[data-cy="select-individualData.relationship"]'
     select_individualdata_role = 'div[data-cy="select-individualData.role"]'
-    input_individualdata_walletaddress = 'input[data-cy="input-individualData.walletAddress"]'
-    input_individualdata_walletname = 'input[data-cy="input-individualData.walletName"]'
     input_individualdata_whoanswersaltphone = 'input[data-cy="input-individualData.whoAnswersAltPhone"]'
     input_individualdata_whoanswersphone = 'input[data-cy="input-individualData.whoAnswersPhone"]'
     select_householddataupdatefields_fieldname = 'div[data-cy="select-householdDataUpdateFields[{}].fieldName"]'
@@ -426,9 +423,6 @@ class NewTicket(BaseComponents):
     def fill_date_picker_filter(self, value: str) -> None:
         self.fill_date_picker(self.wait_for(self.date_picker_filter), value)
 
-    def get_input_individualdata_blockchainname(self) -> WebElement:
-        return self.wait_for(self.input_individualdata_blockchainname)
-
     def get_select_individualdata_selfcaredisability(self) -> WebElement:
         return self.wait_for(self.select_individualdata_selfcaredisability)
 
@@ -494,12 +488,6 @@ class NewTicket(BaseComponents):
 
     def get_select_individualdata_role(self) -> WebElement:
         return self.wait_for(self.select_individualdata_role)
-
-    def get_input_individualdata_walletaddress(self) -> WebElement:
-        return self.wait_for(self.input_individualdata_walletaddress)
-
-    def get_input_individualdata_walletname(self) -> WebElement:
-        return self.wait_for(self.input_individualdata_walletname)
 
     def get_input_individualdata_whoanswersaltphone(self) -> WebElement:
         return self.wait_for(self.input_individualdata_whoanswersaltphone)

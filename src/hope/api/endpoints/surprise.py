@@ -1,5 +1,5 @@
 from constance import config
-from django.conf import settings
+from django.core.files.storage import default_storage
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -12,7 +12,7 @@ class SurprisePageConfigView(APIView):
 
     def get(self, request: Request) -> Response:
         image_path = config.SURPRISE_PAGE_IMAGE
-        image_url = settings.MEDIA_URL + image_path if image_path else None
+        image_url = default_storage.url(image_path) if image_path else None
         return Response(
             {
                 "image": image_url,
