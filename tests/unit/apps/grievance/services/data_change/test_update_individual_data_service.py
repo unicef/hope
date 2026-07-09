@@ -640,6 +640,31 @@ def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
     assert update_context["individual"].phone_no_alternative == "+485544334455"
 
 
+def test_close_individual_update_without_household(update_context: dict[str, Any]) -> None:
+    individual_without_household = IndividualFactory(
+        business_area=update_context["business_area"],
+        program=update_context["program"],
+        phone_no="+485656565665",
+    )
+    ticket_details = TicketIndividualDataUpdateDetailsFactory(
+        individual=individual_without_household,
+        ticket__business_area=update_context["business_area"],
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        individual_data={
+            "phone_no": {"approve_status": True, "previous_value": "+485656565665", "value": "+485544332211"},
+        },
+    )
+
+    ticket = ticket_details.ticket
+    service = IndividualDataUpdateService(ticket, ticket.individual_data_update_ticket_details)
+    service.close(update_context["user"])
+
+    individual_without_household.refresh_from_db()
+    assert individual_without_household.household_id is None
+    assert individual_without_household.phone_no == "+485544332211"
+
+
 def test_close_individual_update_invalidates_both_caches(update_context: dict[str, Any]) -> None:
     update_context["ticket"].individual_data_update_ticket_details.individual_data = {
         "phone_no": {"approve_status": True, "previous_value": "+48111", "value": "+48222"},
