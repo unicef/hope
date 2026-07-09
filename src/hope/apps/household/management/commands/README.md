@@ -18,20 +18,20 @@ of the DB, flip the backend to ES 9 and run one final delta to close the last ga
 
 ## Steps
 
-| # | Step | Owner | Env | What |
-|---|------|-------|-----|------|
+| # | Step | Owner | Env | What                                                                                                                                                                                       |
+|---|------|-------|-----|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1 | Initial state | Valeriya | rehearsal only | ES 8 populated from the DB (ES is empty after a dump restore), backend/Celery point at ES 8, empty ES 9 ready. On the real cutover ES 8 is already populated — no dump-restore step there. |
-| 2 | Bulk copy ES 8 → ES 9 | Valeriya | both | `copy-job.yaml` runs `es_migrate.py`. Note its **start time `T0`** — the first `--since` for the delta. |
-| 3 | Generate a change stream | Jan | rehearsal only | On `adhoc-mutate-data`, run `es_mutate_stream`. Realistic logged stream to prove the delta shrinks each pass. On the real cutover, live traffic is the stream — skip. |
-| 4 | Delta catch-up | Jan | both | On `adhoc-reindex-delta` (`default` = ES 9), run `es_populate_delta --since <T>`. |
-| 5 | Pause deployment | Jan | both | Freeze auto-deploy so nothing ships into the cutover window. |
-| 6 | Merge [#6174](https://github.com/unicef/hope/pull/6174) | Jan | both | ES 9 client code (master backport) onto the target so backend/Celery can talk to ES 9. |
-| 7 | Scale Celery to 0 | Valeriya | both | Blocks dedup, no code change. Web still writes to ES via HOPE's `post_save` signals — harmless: before switch → ES 8, after → ES 9. Search slightly stale for minutes, acceptable. |
-| 8 | Delta catch-up | Jan | both | On `adhoc-reindex-delta` (`default` = ES 9), run `es_populate_delta --since <start of last pass from step 4>`. |
-| 9 | Resume deployment | Jan | both | Unfreeze auto-deploy. |
-| 10 | Switch backend/Celery to ES 9 | Valeriya | both | Flip the app's ES connection to ES 9. |
-| 11 | Final delta | Jan | both | Immediately re-run `es_populate_delta --since <start of the last pass from step 4>`. Catches everything written to ES 8 in the gap between the last delta and the switch. |
-| 12 | Scale Celery back up | Valeriya | both | Restore workers. |
+| 2 | Bulk copy ES 8 → ES 9 | Valeriya | both | `copy-job.yaml` runs `es_migrate.py`. Note its **start time `T0`** — the first `--since` for the delta.                                                                                    |
+| 3 | Generate a change stream | Jan | rehearsal only | On `adhoc-mutate-data`, run `es_mutate_stream`. Realistic logged stream to prove the delta shrinks each pass. On the real cutover, live traffic is the stream — skip.                      |
+| 4 | Delta catch-up | Jan | both | On `adhoc-reindex-delta` (`default` = ES 9), run `es_populate_delta --since <T>`.                                                                                                          |
+| 5 | Pause deployment | Jan | both | Freeze auto-deploy so nothing ships into the cutover window.                                                                                                                               |
+| 6 | Merge [#6174](https://github.com/unicef/hope/pull/6174) | Jan | both | ES 9 client code (master backport) onto the target so backend/Celery can talk to ES 9. Wait for CI to pass                                                                                 |
+| 7 | Scale Celery to 0 | Valeriya | both | Blocks dedup, no code change. Web still writes to ES via HOPE's `post_save` signals — harmless: before switch → ES 8, after → ES 9. Search slightly stale for minutes, acceptable.         |
+| 8 | Delta catch-up | Jan | both | On `adhoc-reindex-delta` (`default` = ES 9), run `es_populate_delta --since <start of last pass from step 4>`.                                                                             |
+| 9 | Resume deployment | Jan | both | Unfreeze auto-deploy.                                                                                                                                                                      |
+| 10 | Switch backend/Celery to ES 9 | Valeriya | both | Flip the app's ES connection to ES 9.                                                                                                                                                      |
+| 11 | Final delta | Jan | both | Immediately re-run `es_populate_delta --since <start of the last pass from step 4>`. Catches everything written to ES 8 in the gap between the last delta and the switch.                  |
+| 12 | Scale Celery back up | Valeriya | both | Restore workers.                                                                                                                                                                           |
 
 ## Tooling (this directory)
 
