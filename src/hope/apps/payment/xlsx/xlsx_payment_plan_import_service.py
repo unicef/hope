@@ -7,19 +7,18 @@ from django.utils import timezone
 import openpyxl
 from openpyxl.cell import Cell
 
-from hope.apps.payment.utils import get_quantity_in_usd, to_decimal
+from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.payment.utils import bulk_log_payment_changes, get_quantity_in_usd, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
     XlsxPaymentPlanBaseService,
 )
-from hope.models import FileTemp, Payment, PaymentPlan
+from hope.models import FileTemp, Payment, PaymentPlan, User
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
-
-    from hope.models import User
 
 Row = tuple[Cell]
 
@@ -61,15 +60,26 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_rows()
             self._validate_imported_file()
 
-    def import_payment_list(self) -> None:
+    def import_payment_list(self, user_id: str | None = None) -> None:
         self._raise_if_required_columns_are_missing()
         payments_to_save = []
+        log_pairs: list = []
+        old_by_id = {payment.id: payment for payment in self.payments_dict.values()}
 
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
             if payment := self._import_row(row):
                 payments_to_save.append(payment)
+                old_payment = old_by_id.get(payment.id)
+                if old_payment is not None:
+                    # _import_row returns a bare Payment(id, entitlement_*) with every other field at its
+                    # model default, so diffing it against old_payment would log spurious changes for
+                    # status/delivered_quantity/etc. Log against a faithful copy of the current row with only
+                    # entitlement_quantity overlaid, so the diff is exactly the field the import changes.
+                    new_for_log = copy_model_object(old_payment)
+                    new_for_log.entitlement_quantity = payment.entitlement_quantity
+                    log_pairs.append((old_payment, new_for_log))
 
             if len(payments_to_save) == self.BATCH_SIZE:
                 self._save_payments(payments_to_save)
@@ -77,6 +87,9 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
 
         if payments_to_save:
             self._save_payments(payments_to_save)
+
+        user = User.objects.filter(pk=user_id).first() if user_id else None
+        bulk_log_payment_changes(log_pairs, user)
 
     def _save_payments(self, payments_to_save: list[Payment]) -> None:
         Payment.objects.bulk_update(
