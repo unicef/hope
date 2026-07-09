@@ -185,6 +185,8 @@ def test_clear_cache_for_household_details_deletes_household_pattern(household_u
 
 
 def test_update_grievance_documents_replaces_file_and_metadata(grievance_document: Any) -> None:
+    assert grievance_document.file_size == 9
+    assert "old" in grievance_document.file.name
     new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
 
     update_grievance_documents([{"id": grievance_document.id, "name": "updated name", "file": new_file}])

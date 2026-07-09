@@ -780,12 +780,10 @@ class TestManualCalendar:
         # 3rd step (Partners)
         # only partners with role in business area can be selected
 
-        assert partner1 in Partner.objects.filter(allowed_business_areas__slug="afghanistan").all()
-        assert partner2 not in Partner.objects.filter(allowed_business_areas__slug="afghanistan").all()
-        assert (
-            Partner.objects.get(name="UNHCR")
-            in Partner.objects.filter(allowed_business_areas__slug="afghanistan").all()
-        )
+        afghanistan_partners = Partner.objects.filter(allowed_business_areas__slug="afghanistan").all()
+        assert partner1 in afghanistan_partners
+        assert partner2 not in afghanistan_partners
+        assert Partner.objects.get(name="UNHCR") in afghanistan_partners
 
         partner_access_selected = "Only Selected Partners within the business area"
         page_programme_management.get_access_to_program().click()

@@ -12,6 +12,12 @@ from hope.models import User
 
 pytestmark = pytest.mark.django_db()
 
+_CLEAR_COOKIES_JS = """
+window.indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(db.name)));
+window.localStorage.clear();
+window.sessionStorage.clear();
+"""
+
 
 @pytest.fixture
 def restricted_user() -> User:
@@ -31,13 +37,7 @@ def restricted_user() -> User:
 @pytest.fixture
 def login_as_restricted(browser: Chrome, restricted_user: User) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/{settings.ADMIN_PANEL_URL}/")
-    browser.execute_script(
-        """
-    window.indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(db.name)));
-    window.localStorage.clear();
-    window.sessionStorage.clear();
-    """
-    )
+    browser.execute_script(_CLEAR_COOKIES_JS)
     login_button = '#login-form input[type="submit"]'
     WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, login_button)))
     browser.find_element(By.ID, "id_username").send_keys("restricted")

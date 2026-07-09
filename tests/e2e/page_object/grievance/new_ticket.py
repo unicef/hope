@@ -235,13 +235,12 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.received_consent, timeout=100)
 
     def check_received_consent(self) -> None:
-
         for _ in range(3):
             consent = self.wait_for(self.received_consent, timeout=30)
             consent_input = consent.find_element(By.CSS_SELECTOR, "input")
             if consent_input.is_selected():
                 return
-            consent.click()
+            self.click(self.received_consent)
             try:
                 self._wait(5).until(expected_conditions.element_to_be_selected(consent_input))
                 return
