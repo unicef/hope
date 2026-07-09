@@ -106,7 +106,7 @@
     "msw": "2.14.6",
     "openapi-typescript-codegen": "^0.30.0",
     "path": "^0.12.7",
-    "prettier": "3.8.4",
+    "prettier": "3.9.4",
     "react-test-renderer": "19.2.7",
     "tough-cookie": "^6.0.1",
     "ts-node": "^10.9.2",
