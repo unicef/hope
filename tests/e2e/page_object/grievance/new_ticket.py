@@ -56,6 +56,7 @@ class NewTicket(BaseComponents):
     checkbox = 'tr[role="checkbox"]'
     select_urgency = 'div[data-cy="select-urgency"]'
     select_priority = 'div[data-cy="select-priority"]'
+    select_source = 'div[data-cy="select-source"]'
     input_language = 'textarea[data-cy="input-language"]'
     input_area = 'input[data-cy="input-area"]'
     admin_area_autocomplete = 'div[data-cy="admin-area-autocomplete"]'
@@ -343,6 +344,9 @@ class NewTicket(BaseComponents):
 
     def get_select_priority(self) -> WebElement:
         return self.wait_for(self.select_priority)
+
+    def get_select_source(self) -> WebElement:
+        return self.wait_for(self.select_source)
 
     def get_input_language(self) -> WebElement:
         return self.wait_for(self.input_language)
