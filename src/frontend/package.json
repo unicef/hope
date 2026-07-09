@@ -12,8 +12,10 @@
     "test": "vitest",
     "preview": "vite preview",
     "generate-openapi": "cd ../.. && uv run python manage.py generate_openapi --output-dir src/frontend/data",
+    "generate-openapi-docker": "docker exec development_tools-backend-1 python manage.py generate_openapi --output-dir src/frontend/data",
     "generate-rest-api-types": "bun run generate-rest-api-types-camelcase",
     "generate-rest-api-types-camelcase": "bun run generate-openapi && node enhance_and_camelize_openapi.js && openapi --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false",
+    "generate-rest-api-types-camelcase-docker": "bun run generate-openapi-docker && node enhance_and_camelize_openapi.js && openapi --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false",
     "prune-unused-exports": "bunx ts-prune src | grep -v '(used in module)' | grep -v '/index.'"
   },
   "engines": {
