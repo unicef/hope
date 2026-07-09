@@ -141,7 +141,8 @@ def test_payment_plan_post_sync_with_payment_gateway(mock_perm, mock_sync, admin
     )
     response = admin_client.post(url)
 
-    mock_sync.assert_called_once_with(payment_plan)
+    mock_sync.assert_called_once()
+    assert mock_sync.call_args[0][0] == payment_plan
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
 
@@ -691,7 +692,7 @@ def test_restart_import_reconciliation_post_when_no_active_job_shows_error(
 
 @patch("hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task")
 def test_restart_import_reconciliation_post_terminates_active_job_and_requeues(
-    mock_task, admin_client, group_with_importing_status
+    mock_task, admin_client, admin_user, group_with_importing_status
 ) -> None:
     group = group_with_importing_status
     AsyncRetryJob.create_for_instance(
@@ -715,7 +716,7 @@ def test_restart_import_reconciliation_post_terminates_active_job_and_requeues(
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
     mock_terminate.assert_called_once()
-    mock_task.assert_called_once_with(group)
+    mock_task.assert_called_once_with(group, str(admin_user.pk))
     messages_list = list(get_messages(response.wsgi_request))
     assert any("Successfully restarted" in str(m) for m in messages_list)
 

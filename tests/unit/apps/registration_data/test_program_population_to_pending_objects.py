@@ -110,9 +110,6 @@ INDIVIDUAL_FIELDS = (
     "preferred_language",
     "age_at_registration",
     "payment_delivery_phone_no",
-    "wallet_name",
-    "blockchain_name",
-    "wallet_address",
     "unicef_id",
 )
 

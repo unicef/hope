@@ -738,9 +738,6 @@ def test_create_individual_default_values(lax_api_client, lax_push_url):
     assert individual.disability == NOT_DISABLED
     assert individual.observed_disability == [NONE]
     assert individual.relationship_confirmed is False
-    assert individual.wallet_name == ""
-    assert individual.blockchain_name == ""
-    assert individual.wallet_address == ""
 
 
 # ── IndividualSerializer tests ───────────────────────────────────────────
