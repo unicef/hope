@@ -644,6 +644,33 @@ class TestGrievanceTickets:
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
         assert "Call Center" in page_grievance_details_page.get_ticket_source().text
 
+    def test_grievance_tickets_edit_ticket_source(
+        self,
+        page_grievance_tickets: GrievanceTickets,
+        page_grievance_new_ticket: NewTicket,
+        page_grievance_details_page: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+    ) -> None:
+        page_grievance_tickets.get_nav_grievance().click()
+        page_grievance_tickets.get_button_new_ticket().click()
+        page_grievance_new_ticket.get_select_category().click()
+        page_grievance_new_ticket.select_option_by_name("Referral")
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.get_button_next().click()
+        page_grievance_new_ticket.get_description().send_keys("Edit source test")
+        page_grievance_new_ticket.get_select_source().click()
+        page_grievance_new_ticket.select_listbox_element("Call Center")
+        page_grievance_new_ticket.get_button_next().click()
+        assert "Call Center" in page_grievance_details_page.get_ticket_source().text
+        page_grievance_details_page.get_button_edit().click()
+        page_grievance_new_ticket.get_select_source().click()
+        page_grievance_new_ticket.select_listbox_element("Community Outreach")
+        page_grievance_details_page.get_button_submit().click()
+        assert "Community Outreach" in page_grievance_details_page.get_ticket_source().text
+
     def test_grievance_tickets_create_new_tickets_social_program(
         self,
         page_grievance_tickets: GrievanceTickets,

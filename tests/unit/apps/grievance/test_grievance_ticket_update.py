@@ -22,6 +22,7 @@ from extras.test_utils.factories import (
     TicketIndividualDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
     TicketPaymentVerificationDetailsFactory,
+    TicketReferralDetailsFactory,
     UserFactory,
 )
 from extras.test_utils.factories.account import AdminAreaLimitedToFactory
@@ -38,6 +39,8 @@ from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.constants import (
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
+    SOURCE_CALL_CENTER,
+    SOURCE_SUGGESTION_BOX,
     URGENCY_NOT_URGENT,
 )
 from hope.apps.grievance.models import (
@@ -446,6 +449,29 @@ def complaint_ticket_create_note_url(afghanistan: BusinessArea, complaint_ticket
             "business_area_slug": afghanistan.slug,
             "pk": str(complaint_ticket.pk),
         },
+    )
+
+
+@pytest.fixture
+def referral_ticket_call_center(afghanistan: BusinessArea, program: Program, user: User) -> GrievanceTicket:
+    referral_details = TicketReferralDetailsFactory(
+        ticket__business_area=afghanistan,
+        ticket__status=GrievanceTicket.STATUS_NEW,
+        ticket__language="",
+        ticket__created_by=user,
+        ticket__source=SOURCE_CALL_CENTER,
+    )
+    referral_details.ticket.programs.set([program])
+    return referral_details.ticket
+
+
+@pytest.fixture
+def referral_ticket_call_center_detail_url(
+    afghanistan: BusinessArea, referral_ticket_call_center: GrievanceTicket
+) -> str:
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={"business_area_slug": afghanistan.slug, "pk": str(referral_ticket_call_center.pk)},
     )
 
 
@@ -1563,3 +1589,43 @@ def test_update_grievance_ticket_individual_data_clear_photo(
     ticket_details = individual_data_change_ticket.individual_data_update_ticket_details
     assert "photo" in ticket_details.individual_data
     assert ticket_details.individual_data["photo"]["value"] == ""
+
+
+def test_update_grievance_ticket_changes_source(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    referral_ticket_call_center: GrievanceTicket,
+    referral_ticket_call_center_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(referral_ticket_call_center_detail_url, {"source": SOURCE_SUGGESTION_BOX}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["source"] == SOURCE_SUGGESTION_BOX
+    referral_ticket_call_center.refresh_from_db()
+    assert referral_ticket_call_center.source == SOURCE_SUGGESTION_BOX
+
+
+def test_update_grievance_ticket_clears_source(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    referral_ticket_call_center: GrievanceTicket,
+    referral_ticket_call_center_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(referral_ticket_call_center_detail_url, {"source": None}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["source"] is None
+    referral_ticket_call_center.refresh_from_db()
+    assert referral_ticket_call_center.source is None
