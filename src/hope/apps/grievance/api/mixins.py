@@ -472,6 +472,10 @@ class GrievanceMutationMixin:
         if urgency != ticket.urgency:
             ticket.urgency = urgency
 
+        source = input_data.pop("source", ticket.source)
+        if source != ticket.source:
+            ticket.source = source
+
         if partner := input_data.pop("partner", None):
             ticket.partner = partner
         if program := input_data.pop("program", None):
