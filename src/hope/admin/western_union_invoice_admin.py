@@ -56,7 +56,7 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
         "reports__payment_plan__name",
     ]
 
-    readonly_fields = ["download_link", "matched_data", "error_msg"]
+    readonly_fields = ["matched_data", "error_msg"]
 
     def changelist_view(self, request: HttpRequest, extra_context: dict[str, object] | None = None) -> HttpResponse:
         if self.LEGACY_FILTER_PARAM not in request.GET:
@@ -64,11 +64,3 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
             query_params[self.LEGACY_FILTER_PARAM] = "0"
             return redirect(f"{request.path}?{query_params.urlencode()}")
         return super().changelist_view(request, extra_context)
-
-    def download_link(self, obj: WesternUnionInvoice) -> str:  # pragma: no cover
-        if not obj.file:
-            return "-"
-        return format_html('<a href="{}" target="_blank">Download</a>', obj.file.file.url)
-
-    download_link.short_description = "File"
-    download_link.admin_order_field = None
