@@ -1360,7 +1360,7 @@ def test_rebuild_payment_plan_population_full_rebuild_with_steficon_targeting_qu
     )
 
     mock_full_rebuild.assert_called_once_with(pp)
-    mock_apply_steficon.assert_called_once_with(pp, str(pp.steficon_rule_targeting.rule_id))
+    mock_apply_steficon.assert_called_once_with(pp, str(pp.steficon_rule_targeting.rule_id), None)
 
 
 def test_lock_fsp_validation(
