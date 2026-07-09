@@ -234,7 +234,13 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
-            return qs.filter(programs__status=Program.ACTIVE)
+            # Tickets without a program are business-area wide and stay visible.
+            # Matching on pk keeps the programs m2m join out of qs, which would
+            # otherwise duplicate rows and inflate the count endpoints.
+            active_or_no_program = GrievanceTicket.objects.filter(
+                Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True)
+            ).values("pk")
+            return qs.filter(pk__in=active_or_no_program)
         if value is False:
             return qs.filter(programs__status=Program.FINISHED)
         return qs

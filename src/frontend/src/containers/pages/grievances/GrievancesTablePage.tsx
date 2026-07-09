@@ -18,7 +18,6 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Tabs, Tab } from '@core/Tabs';
@@ -72,7 +71,6 @@ export const GrievancesTablePage = (): ReactElement => {
     urgency: '',
     preferredLanguage: '',
     program: '',
-    programState: PROGRAM_STATE_FILTER.ALL,
     areaScope: 'all',
   };
 

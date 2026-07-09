@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
+from hope.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -299,3 +300,56 @@ def test_program_dashboard_filters_by_program(
     tickets_by_type = data["tickets_by_type"]
     assert tickets_by_type["user_generated_count"] == 3
     assert tickets_by_type["system_generated_count"] == 0
+
+
+def test_global_dashboard_excludes_finished_program_tickets(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    """Finishing a program hides its tickets from the all-programmes dashboard.
+
+    Users are warned about this when they finish a program. The tickets are not deleted:
+    the program's own dashboard must keep reporting them.
+    """
+    business_area = dashboard_context["business_area"]
+    user = dashboard_context["user"]
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        whole_business_area_access=True,
+    )
+
+    baseline = authenticated_client.get(dashboard_context["global_url"]).json()
+    baseline_count = baseline["tickets_by_type"]["user_generated_count"]
+
+    finished_program = ProgramFactory(
+        name="Finished Program",
+        business_area=business_area,
+        status=Program.FINISHED,
+    )
+    finished_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        issue_type=None,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+        business_area=business_area,
+        consent=True,
+        language="Polish, English",
+        description="Ticket of a finished programme",
+    )
+    finished_ticket.programs.add(finished_program)
+
+    global_response = authenticated_client.get(dashboard_context["global_url"])
+    assert global_response.status_code == status.HTTP_200_OK
+    assert global_response.json()["tickets_by_type"]["user_generated_count"] == baseline_count
+
+    finished_program_url = reverse(
+        "api:grievance:grievance-tickets-dashboard",
+        kwargs={"business_area_slug": business_area.slug, "program_code": finished_program.code},
+    )
+    program_response = authenticated_client.get(finished_program_url)
+    assert program_response.status_code == status.HTTP_200_OK
+    assert program_response.json()["tickets_by_type"]["user_generated_count"] == 1

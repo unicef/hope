@@ -195,9 +195,15 @@ class GrievanceDashboardMixin:
         base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=self.business_area_slug)
 
         if program:
-            base_queryset = base_queryset.filter(programs__in=[program])
+            return base_queryset.filter(programs__in=[program])
 
-        return base_queryset
+        # Global dashboard: finished programs drop out, business-area wide tickets stay.
+        # Matching on pk avoids the programs m2m join, which would double-count any
+        # ticket belonging to more than one active program in the aggregates below.
+        active_or_no_program = GrievanceTicket.objects.filter(
+            Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True)
+        ).values("pk")
+        return base_queryset.filter(pk__in=active_or_no_program)
 
     def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, Any]:
         """Generate dashboard data from base queryset."""
@@ -558,7 +564,9 @@ class GrievanceTicketGlobalViewSet(
     parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_count_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(self.grievance_permissions_query)
+        # distinct() to match get_queryset(): the programs m2m join in BusinessAreaVisibilityMixin
+        # yields one row per program, so a ticket shared by two programs would be counted twice.
+        return super().get_queryset().filter(self.grievance_permissions_query).distinct()
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []

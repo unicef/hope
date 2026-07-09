@@ -1306,6 +1306,77 @@ def test_filter_by_program_status(
     assert len(response.data["results"]) == expected_count
 
 
+def test_filter_by_program_status_keeps_tickets_without_a_program(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    list_global_url: str,
+    tickets: dict,
+) -> None:
+    """Business-area wide tickets have no program, so no program can ever deactivate them.
+
+    The global list deliberately surfaces them (BusinessAreaVisibilityMixin), and defaulting
+    the list to active programs must not make them disappear from every view in the product.
+    """
+    program_less = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+    assert program_less.programs.count() == 0
+
+    client = api_client(user)
+    response = client.get(list_global_url, {"is_active_program": True})
+
+    assert response.status_code == status.HTTP_200_OK
+    returned_ids = [ticket["id"] for ticket in response.data["results"]]
+    assert str(program_less.id) in returned_ids
+
+
+def test_filter_by_program_status_does_not_duplicate_multi_program_tickets(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program_afghanistan1: Program,
+    list_global_url: str,
+) -> None:
+    """`programs` is many-to-many, so filtering on programs__status joins one row per program.
+
+    A ticket shared by two active programs must still be one row, and the count endpoint that
+    drives the table's pagination must agree with it.
+    """
+    second_active_program = ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="another active program",
+    )
+    ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+    ticket.programs.add(program_afghanistan1, second_active_program)
+
+    client = api_client(user)
+    response = client.get(list_global_url, {"is_active_program": True})
+    assert response.status_code == status.HTTP_200_OK
+    assert [t["id"] for t in response.data["results"]] == [str(ticket.id)]
+
+    count_url = reverse(
+        "api:grievance:grievance-tickets-global-count",
+        kwargs={"business_area_slug": afghanistan.slug},
+    )
+    count_response = client.get(count_url, {"is_active_program": True})
+    assert count_response.status_code == status.HTTP_200_OK
+    assert count_response.data["count"] == 1
+
+
 @pytest.mark.parametrize(
     (
         "has_cross_area_filter_permission",

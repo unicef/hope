@@ -21,12 +21,15 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+// Finished programmes are excluded from the all-programmes grievance list,
+// so offering them here would only ever yield an empty table.
+const ACTIVE_PROGRAM_STATUS: Array<'ACTIVE'> = ['ACTIVE'];
 
 interface GrievancesFiltersProps {
   filter;
@@ -146,6 +149,7 @@ export const GrievancesFilters = ({
               filter={filter}
               name="program"
               value={filter.program}
+              status={ACTIVE_PROGRAM_STATUS}
               setFilter={setFilter}
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
@@ -352,23 +356,6 @@ export const GrievancesFilters = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        {isAllPrograms && (
-          <Grid size={{ xs: 2 }}>
-            <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('programState', e.target.value)
-              }
-              label={t('Programme State')}
-              value={filter.programState}
-              fullWidth
-              disableClearable
-              data-cy="filters-program-state"
-            >
-              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
-              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
-            </SelectFilter>
-          </Grid>
-        )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
           <Grid size={{ xs: 2 }}>
             <SelectFilter

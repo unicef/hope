@@ -23,6 +23,7 @@ export function ProgramAutocompleteRestFilter({
   appliedFilter,
   setAppliedFilter,
   setFilter,
+  status,
   dataCy = 'program-autocomplete',
 }: {
   disabled?: boolean;
@@ -33,6 +34,8 @@ export function ProgramAutocompleteRestFilter({
   appliedFilter: any;
   setAppliedFilter: (filter: any) => void;
   setFilter: (filter: any) => void;
+  /** Restricts the offered programmes. Read once on mount, so pass a stable reference. */
+  status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>;
   dataCy?: string;
 }): ReactElement {
   const { businessArea } = useBaseUrl();
@@ -47,6 +50,7 @@ export function ProgramAutocompleteRestFilter({
     limit: 20,
     businessAreaSlug: businessArea,
     search: debouncedInputText || undefined,
+    status,
   });
 
   const {

@@ -409,7 +409,7 @@
   "Programme finished.": "Programme finished.",
   "Programme finish action failed.": "Programme finish action failed.",
   "Finish Programme": "Finish Programme",
-  "Are you sure you want to finish this Programme?": "Are you sure you want to finish this Programme?",
+  "Are you sure you want to finish this Programme? All active tickets that are not yet closed, and any tickets with a Household ID or Individual ID related to this Programme, will be filtered out of every grievance list, report and dashboard. They will remain visible within this Programme.": "Are you sure you want to finish this Programme? All active tickets that are not yet closed, and any tickets with a Household ID or Individual ID related to this Programme, will be filtered out of every grievance list, report and dashboard. They will remain visible within this Programme.",
   "Programme reactivated.": "Programme reactivated.",
   "Programme reactivate action failed.": "Programme reactivate action failed.",
   "Reactivate": "Reactivate",
