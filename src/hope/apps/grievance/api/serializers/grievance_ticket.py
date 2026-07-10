@@ -694,9 +694,9 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
     extras = UpdateGrievanceTicketExtrasSerializer(required=False)
     priority = serializers.IntegerField()
     urgency = serializers.IntegerField()
-    submission_channel = serializers.ChoiceField(
-        choices=SUBMISSION_CHANNEL_MANUAL_CHOICES, required=False, allow_null=True
-    )
+    # All choices (incl. HOPE) accepted on update: the FE echoes a system ticket's existing
+    # HOPE value back. Users still can't *pick* HOPE — the edit dropdown uses manual choices.
+    submission_channel = serializers.ChoiceField(choices=SUBMISSION_CHANNEL_CHOICES, required=False, allow_null=True)
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
     program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
     comments = serializers.CharField(required=False, allow_null=True, allow_blank=True)

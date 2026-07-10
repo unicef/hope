@@ -537,7 +537,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        if self.submission_channel is None and self.category in self.SYSTEM_CATEGORY_CODES:
+        # System-generated tickets always use the HOPE channel; users cannot set it to anything else.
+        if self.category in self.SYSTEM_CATEGORY_CODES:
             self.submission_channel = SUBMISSION_CHANNEL_HOPE
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:

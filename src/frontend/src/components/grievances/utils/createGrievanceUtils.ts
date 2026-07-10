@@ -28,6 +28,14 @@ export function isShowIssueType(category: any): boolean {
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   );
 }
+export function isSystemGeneratedCategory(category: any): boolean {
+  const cat = category?.toString();
+  return (
+    cat === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION ||
+    cat === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
+    cat === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
+  );
+}
 export const getIssueTypeToDisplay = (issueType: number): string =>
   (issueType &&
     GRIEVANCE_ISSUE_TYPES_NAMES[issueType]

@@ -472,9 +472,7 @@ class GrievanceMutationMixin:
         if urgency != ticket.urgency:
             ticket.urgency = urgency
 
-        submission_channel = input_data.pop("submission_channel", ticket.submission_channel)
-        if submission_channel != ticket.submission_channel:
-            ticket.submission_channel = submission_channel
+        ticket.submission_channel = input_data.pop("submission_channel", ticket.submission_channel)
 
         if partner := input_data.pop("partner", None):
             ticket.partner = partner
