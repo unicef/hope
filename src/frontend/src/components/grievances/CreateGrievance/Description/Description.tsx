@@ -92,7 +92,7 @@ function Description({
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
   const priorityChoicesData = choicesData?.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
-  const submissionChannelChoicesData = choicesData?.grievanceTicketSubmissionChannelChoices;
+  const submissionChannelChoicesData = choicesData?.grievanceTicketManualSubmissionChannelChoices;
   const canAddDocumentation = hasPermissions(
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
     permissions,

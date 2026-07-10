@@ -2,6 +2,17 @@ from django.db import migrations, models
 
 import hope.apps.grievance.constants
 
+# System-generated categories (Needs Adjudication, Payment Verification, System Flagging).
+SYSTEM_CATEGORY_CODES = [8, 1, 9]
+SUBMISSION_CHANNEL_HOPE = 5
+
+
+def set_hope_channel_for_system_tickets(apps, schema_editor):
+    GrievanceTicket = apps.get_model("grievance", "GrievanceTicket")
+    GrievanceTicket.objects.filter(category__in=SYSTEM_CATEGORY_CODES, submission_channel__isnull=True).update(
+        submission_channel=SUBMISSION_CHANNEL_HOPE
+    )
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -20,4 +31,5 @@ class Migration(migrations.Migration):
                 verbose_name="Submission Channel",
             ),
         ),
+        migrations.RunPython(set_hope_channel_for_system_tickets, migrations.RunPython.noop),
     ]

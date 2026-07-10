@@ -7,8 +7,10 @@ import pytest
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     GrievanceTicketFactory,
+    TicketSystemFlaggingDetailsFactory,
     UserFactory,
 )
+from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket
 
 pytestmark = pytest.mark.django_db
@@ -85,3 +87,22 @@ def test_get_issue_type_returns_label_when_issue_type_is_set(business_area: Any,
     result = ticket.get_issue_type()
     assert result != ""
     assert "Individual" in str(result)
+
+
+def test_system_generated_ticket_gets_hope_submission_channel(business_area: Any) -> None:
+    details = TicketSystemFlaggingDetailsFactory(ticket__business_area=business_area)
+
+    details.ticket.refresh_from_db()
+    assert details.ticket.submission_channel == SUBMISSION_CHANNEL_HOPE
+
+
+def test_manual_ticket_without_channel_keeps_null_submission_channel(business_area: Any, user: Any) -> None:
+    ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        issue_type=None,
+        business_area=business_area,
+        created_by=user,
+    )
+
+    ticket.refresh_from_db()
+    assert ticket.submission_channel is None

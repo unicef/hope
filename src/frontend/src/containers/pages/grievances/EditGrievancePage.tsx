@@ -590,7 +590,7 @@ const EditGrievancePage = (): ReactElement => {
                             fullWidth
                             variant="outlined"
                             label={t('Submission Channel')}
-                            choices={choicesData.grievanceTicketSubmissionChannelChoices}
+                            choices={choicesData.grievanceTicketManualSubmissionChannelChoices}
                             component={FormikSelectField}
                           />
                         </Grid>

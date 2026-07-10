@@ -18,6 +18,7 @@ from model_utils.models import UUIDModel
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.grievance.constants import (
     PRIORITY_NOT_SET,
+    SUBMISSION_CHANNEL_HOPE,
     URGENCY_NOT_SET,
     get_priority_choices,
     get_submission_channel_choices,
@@ -246,6 +247,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
+    SYSTEM_CATEGORY_CODES = frozenset(code for code, _label in SYSTEM_CATEGORIES)
     CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
     CREATE_CATEGORY_CHOICES = (
@@ -535,6 +537,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.submission_channel is None and self.category in self.SYSTEM_CATEGORY_CODES:
+            self.submission_channel = SUBMISSION_CHANNEL_HOPE
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
