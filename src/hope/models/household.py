@@ -155,6 +155,7 @@ class Household(
             "unhcr_id",
             "detail_id",
             "program_registration_id",
+            "facility",
         ],
         {
             "currency.code": "currency",
