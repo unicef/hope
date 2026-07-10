@@ -8,6 +8,7 @@ import surpriseFallback from '../../../images/surprise-fallback.jpg';
 const Container = styled.div`
   width: 100vw;
   height: 100vh;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   display: flex;
@@ -16,13 +17,8 @@ const Container = styled.div`
 
 const Card = styled.div`
   text-align: center;
-  width: 533px;
-  border-radius: 4px;
-  background-color: #00adef;
-  box-shadow:
-    0 0 2px 0 rgba(0, 0, 0, 0.12),
-    0 2px 2px 0 rgba(0, 0, 0, 0.24);
-  padding: 40px 50px 50px;
+  width: 100%;
+  padding: 40px 0;
 `;
 
 const Heading = styled(Typography)`
@@ -32,6 +28,7 @@ const Heading = styled(Typography)`
     font-weight: 700;
     margin-top: 24px;
     letter-spacing: 0.5px;
+    padding: 0 16px;
   }
 `;
 
@@ -43,12 +40,14 @@ const SubHeading = styled(Typography)`
     margin-top: 8px;
     margin-bottom: 24px;
     opacity: 0.9;
+    padding: 0 16px;
   }
 `;
 
 const Photo = styled.img`
-  width: 100%;
-  border-radius: 4px;
+  width: 100vw;
+  max-height: 70vh;
+  object-fit: contain;
   display: block;
 `;
 
