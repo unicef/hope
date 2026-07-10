@@ -26,10 +26,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-// Finished programmes are excluded from the all-programmes grievance list,
-// so offering them here would only ever yield an empty table.
-const ACTIVE_PROGRAM_STATUS: Array<'ACTIVE'> = ['ACTIVE'];
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 interface GrievancesFiltersProps {
   filter;
@@ -149,7 +146,7 @@ export const GrievancesFilters = ({
               filter={filter}
               name="program"
               value={filter.program}
-              status={ACTIVE_PROGRAM_STATUS}
+              status={[ProgramStatusEnum.ACTIVE]}
               setFilter={setFilter}
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}

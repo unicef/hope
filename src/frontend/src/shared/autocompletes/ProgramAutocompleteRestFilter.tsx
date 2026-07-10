@@ -13,6 +13,7 @@ import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgram
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { BaseAutocompleteFilterRest } from '@shared/autocompletes/BaseAutocompleteFilterRest';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 export function ProgramAutocompleteRestFilter({
   disabled,
@@ -34,8 +35,7 @@ export function ProgramAutocompleteRestFilter({
   appliedFilter: any;
   setAppliedFilter: (filter: any) => void;
   setFilter: (filter: any) => void;
-  /** Restricts the offered programmes. Read once on mount, so pass a stable reference. */
-  status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>;
+  status?: Array<ProgramStatusEnum>;
   dataCy?: string;
 }): ReactElement {
   const { businessArea } = useBaseUrl();
