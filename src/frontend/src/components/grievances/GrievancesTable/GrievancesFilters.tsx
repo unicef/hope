@@ -333,21 +333,27 @@ export const GrievancesFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('submissionChannel', e.target.value)}
-            label={t('Submission Channel')}
-            value={filter.submissionChannel}
-            data-cy="filters-submission-channel"
-            fullWidth
-          >
-            {choicesData.grievanceTicketSubmissionChannelChoices?.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated && (
+          <Grid size={{ xs: 3 }}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('submissionChannel', e.target.value)
+              }
+              label={t('Submission Channel')}
+              value={filter.submissionChannel}
+              data-cy="filters-submission-channel"
+              fullWidth
+            >
+              {choicesData.grievanceTicketManualSubmissionChannelChoices?.map(
+                (item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) =>
