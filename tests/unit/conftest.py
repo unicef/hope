@@ -38,6 +38,17 @@ def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) 
         Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def execute_migration_sql(django_db_setup: Any, django_db_blocker: Any) -> None:
+    """Execute RunSQL from migrations (triggers, functions, extensions).
+
+    With ``--no-migrations`` Django only creates tables from models; RunSQL
+    operations are skipped.  We execute them directly once per test session.
+    """
+    with django_db_blocker.unblock():
+        _execute_migration_sql()
+
+
 @pytest.fixture(autouse=True)
 def create_role_with_all_permissions(db: Any) -> None:
     from hope.models import Role
@@ -256,7 +267,7 @@ def _delete_program_es_indexes() -> None:
             es.indices.delete(index=index, ignore=[404, 400])
 
 
-def _collect_migration_sql_statements() -> tuple[set[str], list]:
+def _collect_migration_sql_statements() -> list[str]:
     from django.db.migrations.loader import MigrationLoader
     from django.db.migrations.operations.special import RunSQL
 
@@ -269,23 +280,57 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
     if orig is not None:
         settings.MIGRATION_MODULES = orig
 
-    apps = set()
-    all_sqls = []
-    for (app_label, _), migration in all_migrations.items():
-        apps.add(app_label)
+    all_sqls: list[str] = []
+    for migration in all_migrations.values():
         for operation in migration.operations:
             if isinstance(operation, RunSQL):
                 sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
                 all_sqls.extend(sql_statements)
 
-    return apps, all_sqls
+    return all_sqls
+
+
+def _execute_migration_sql() -> None:
+    """Execute RunSQL from migrations to create triggers, functions, and extensions.
+
+    With ``--no-migrations`` Django only creates tables from models; RunSQL
+    operations (PostgreSQL triggers, serial columns, etc.) are skipped.  We
+    collect them all and execute them once against the test database.
+    """
+    from django.db import connection
+    from django.db.utils import ProgrammingError
+
+    premigrations_sql = ""
+    if settings.TESTS_ROOT:
+        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
+        with open(filename, "r") as file:
+            premigrations_sql = file.read()
+
+    all_sqls = _collect_migration_sql_statements()
+
+    with connection.cursor() as cursor:
+        if premigrations_sql:
+            cursor.execute(premigrations_sql)
+        for stmt in all_sqls:
+            try:
+                cursor.execute(stmt)
+            except ProgrammingError as e:
+                # Ignore "already exists" errors when using existing test DB
+                if "already exists" in str(e):
+                    continue
+                raise
 
 
 def _register_custom_sql_signal() -> None:
+    """Connect pre/post-migrate signals as a fallback for migrations-based test setups.
+
+    For ``--no-migrations`` the direct ``_execute_migration_sql()`` fixture
+    handles SQL execution instead.
+    """
     from django.db import connections
     from django.db.models.signals import post_migrate, pre_migrate
 
-    apps, all_sqls = _collect_migration_sql_statements()
+    apps_list, all_sqls = _collect_migration_sql_statements_with_apps()
 
     def pre_migration_custom_sql(
         sender: Any,
@@ -314,10 +359,10 @@ def _register_custom_sql_signal() -> None:
         from django.db.utils import ProgrammingError
 
         app_label = app_config.label
-        if app_label not in apps:
+        if app_label not in apps_list:
             return
-        apps.remove(app_label)
-        if apps:
+        apps_list.remove(app_label)
+        if apps_list:
             return
         conn = connections[using]
         for stmt in all_sqls:
@@ -339,6 +384,32 @@ def _register_custom_sql_signal() -> None:
         dispatch_uid="tests.post_migration_custom_sql",
         weak=False,
     )
+
+
+def _collect_migration_sql_statements_with_apps() -> tuple[set[str], list[str]]:
+    """Collect migration SQL along with their app labels (for signal-based execution)."""
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.migrations.operations.special import RunSQL
+
+    orig = getattr(settings, "MIGRATION_MODULES", None)
+    settings.MIGRATION_MODULES = {}
+
+    loader = MigrationLoader(None, load=False)
+    loader.load_disk()
+    all_migrations = loader.disk_migrations
+    if orig is not None:
+        settings.MIGRATION_MODULES = orig
+
+    apps = set()
+    all_sqls: list[str] = []
+    for (app_label, _), migration in all_migrations.items():
+        apps.add(app_label)
+        for operation in migration.operations:
+            if isinstance(operation, RunSQL):
+                sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
+                all_sqls.extend(sql_statements)
+
+    return apps, all_sqls
 
 
 @pytest.fixture(autouse=True)
