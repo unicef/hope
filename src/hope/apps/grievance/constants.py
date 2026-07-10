@@ -50,7 +50,3 @@ def get_urgency_choices() -> tuple:
 
 def get_submission_channel_choices() -> tuple:
     return SUBMISSION_CHANNEL_CHOICES
-
-
-def get_submission_channel_manual_choices() -> tuple:
-    return SUBMISSION_CHANNEL_MANUAL_CHOICES
