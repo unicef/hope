@@ -333,7 +333,7 @@ export const GrievancesFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 2 }}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('submissionChannel', e.target.value)}
             label={t('Submission Channel')}
