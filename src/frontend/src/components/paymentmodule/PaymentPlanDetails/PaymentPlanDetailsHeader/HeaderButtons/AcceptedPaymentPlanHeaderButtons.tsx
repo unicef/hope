@@ -18,6 +18,16 @@ export function AcceptedPaymentPlanHeaderButtons({
   return (
     <Box display="flex" alignItems="center">
       <>
+        {paymentPlan.canCreateFollowUp && (
+          <Box p={2}>
+            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="followup" />
+          </Box>
+        )}
+        {paymentPlan.canCreateTopUp && (
+          <Box p={2}>
+            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="topup" />
+          </Box>
+        )}
         {paymentPlan.canCreateTopUpAmendment && (
           <Box p={2}>
             <CreateChildPaymentPlan
