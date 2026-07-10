@@ -10,12 +10,15 @@ from django.utils import timezone
 from django.utils.timezone import now
 from rest_framework import serializers
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.utils import (
+    bulk_log_payment_changes,
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
+    log_payment_plan_change,
     to_decimal,
 )
 from hope.models import (
@@ -29,6 +32,7 @@ from hope.models import (
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
+    User,
 )
 
 logger = logging.getLogger(__name__)
@@ -438,8 +442,12 @@ class PaymentGatewayService:
         Payment.STATUS_SENT_TO_FSP,
     ]
 
-    def __init__(self) -> None:
+    def __init__(self, user_id: str | None = None) -> None:
         self.api = PaymentGatewayAPI()
+        # Resolve the acting user once; every activity-log write on this service reuses it. user_id is
+        # None for system-initiated runs (periodic sync), so self.user stays None and logs are unattributed.
+        self.user_id = user_id
+        self.user = User.objects.filter(pk=user_id).first() if user_id else None
 
     def create_payment_instructions(self, payment_plan: PaymentPlan, user_email: str) -> None:
         if payment_plan.is_payment_gateway:
@@ -470,19 +478,21 @@ class PaymentGatewayService:
             return response_status
         return None
 
-    @staticmethod
-    def _handle_pg_errors(response: AddRecordsResponseData, payments: list[Payment]) -> None:
+    def _handle_pg_errors(self, response: AddRecordsResponseData, payments: list[Payment]) -> None:
+        old_payments = [cast("Payment", copy_model_object(payment)) for payment in payments]
         for idx, payment in enumerate(payments):
             payment.status = Payment.STATUS_ERROR
             payment.reason_for_unsuccessful_payment = response.errors.get(str(idx), "")
         Payment.objects.bulk_update(payments, ["status", "reason_for_unsuccessful_payment"])
+        bulk_log_payment_changes(list(zip(old_payments, payments, strict=True)), self.user)
 
-    @staticmethod
-    def _handle_pg_success(response: AddRecordsResponseData, payments: list[Payment]) -> None:
+    def _handle_pg_success(self, response: AddRecordsResponseData, payments: list[Payment]) -> None:
+        old_payments = [cast("Payment", copy_model_object(payment)) for payment in payments]
         for payment in payments:
             payment.status = Payment.STATUS_SENT_TO_PG
             payment.sent_to_fsp_date = timezone.now()
         Payment.objects.bulk_update(payments, ["status", "sent_to_fsp_date"])
+        bulk_log_payment_changes(list(zip(old_payments, payments, strict=True)), self.user)
 
     def _add_records_to_container(self, payments: QuerySet[Payment], container: PaymentPlanSplit) -> None:
         add_records_error = None
@@ -617,12 +627,13 @@ class PaymentGatewayService:
             )
 
     @staticmethod
-    def update_payment(
+    def update_payment(  # noqa: PLR0913
         payment: Payment,
         pg_payment_records: list[PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
         exchange_rate: Decimal | float | None,
+        log_pairs: "list[tuple[Payment, Payment]]",
     ) -> None:
         try:
             matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
@@ -630,6 +641,7 @@ class PaymentGatewayService:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return
 
+        old_payment = cast("Payment", copy_model_object(payment))
         payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
@@ -663,6 +675,7 @@ class PaymentGatewayService:
             )
 
         payment.save(update_fields=update_fields)
+        log_pairs.append((old_payment, payment))
 
     def sync_records(self) -> None:
         payment_plans = PaymentPlan.objects.prefetch_related(
@@ -685,6 +698,8 @@ class PaymentGatewayService:
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.exchange_rate
+            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+            payment_log_pairs: list = []
 
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
@@ -700,13 +715,16 @@ class PaymentGatewayService:
                                 instruction,
                                 payment_plan,
                                 exchange_rate,
+                                payment_log_pairs,
                             )
 
+                bulk_log_payment_changes(payment_log_pairs, self.user)
                 payment_plan.update_money_fields()
                 if payment_plan.is_reconciled:
                     flow = PaymentPlanFlow(payment_plan)
                     flow.status_finished()
                     payment_plan.save()
+                    log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
@@ -715,20 +733,25 @@ class PaymentGatewayService:
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
 
+        old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
         pg_payment_record = self.api.get_record(payment.id)
         if pg_payment_record:
+            payment_log_pairs: list = []
             self.update_payment(
                 payment,
                 [pg_payment_record],
                 payment.parent_split,  # type: ignore[arg-type]
                 payment_plan,
                 payment_plan.exchange_rate,
+                payment_log_pairs,
             )
+            bulk_log_payment_changes(payment_log_pairs, self.user)
 
             if payment_plan.is_reconciled:
                 flow = PaymentPlanFlow(payment_plan)
                 flow.status_finished()
                 payment_plan.save()
+                log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
                 for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
                     self.change_payment_instruction_status(
                         PaymentInstructionStatus.FINALIZED,
@@ -738,12 +761,14 @@ class PaymentGatewayService:
 
     def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
         exchange_rate = payment_plan.exchange_rate
+        old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
 
         if not payment_plan.is_payment_gateway:
             return  # pragma: no cover
 
         payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
-
+        # Flush logs per instruction so only one split's payments (with their household_snapshot) are
+        # referenced at a time, matching the pre-logging per-split GC profile.
         for instruction in payment_instructions:
             payments = (
                 instruction.split_payment_items.eligible()
@@ -751,6 +776,7 @@ class PaymentGatewayService:
                 .select_related("household_snapshot", "delivery_type", "currency")
             )
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+            instruction_log_pairs: list = []
             for payment in payments:
                 self.update_payment(
                     payment,
@@ -758,12 +784,15 @@ class PaymentGatewayService:
                     instruction,
                     payment_plan,
                     exchange_rate,
+                    instruction_log_pairs,
                 )
+            bulk_log_payment_changes(instruction_log_pairs, self.user)
 
         if payment_plan.is_reconciled:
             flow = PaymentPlanFlow(payment_plan)
             flow.status_finished()
             payment_plan.save()
+            log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(
                     PaymentInstructionStatus.FINALIZED,
