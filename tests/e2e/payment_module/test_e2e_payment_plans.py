@@ -849,3 +849,7 @@ class TestPaymentPlans:
         page_payment_module_details.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
         page_payment_module_details.get_title_input().find_element(By.TAG_NAME, "input").send_keys("title input")
         page_payment_module_details.get_button_import_submit().click()
+        # Wait for the uploaded document to render. Without this the test ends while
+        # the upload request is still in flight, and teardown's flush (TRUNCATE)
+        # deadlocks against that request's row locks.
+        assert page_payment_module_details.get_supporting_document_item()
