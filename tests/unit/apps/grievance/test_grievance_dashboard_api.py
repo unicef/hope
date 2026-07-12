@@ -157,6 +157,26 @@ def authenticated_client(api_client: Callable, dashboard_context: dict[str, Any]
     return api_client(dashboard_context["user"])
 
 
+@pytest.fixture
+def finished_program(dashboard_context: dict[str, Any]) -> Any:
+    return ProgramFactory(
+        name="Finished Program",
+        business_area=dashboard_context["business_area"],
+        status=Program.FINISHED,
+    )
+
+
+@pytest.fixture
+def finished_program_ticket(dashboard_context: dict[str, Any], finished_program: Any) -> Any:
+    ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        issue_type=None,
+        business_area=dashboard_context["business_area"],
+    )
+    ticket.programs.add(finished_program)
+    return ticket
+
+
 def test_global_dashboard_api_endpoint_with_permission(
     authenticated_client: Any,
     dashboard_context: dict[str, Any],
@@ -305,50 +325,27 @@ def test_program_dashboard_filters_by_program(
 def test_global_dashboard_excludes_finished_program_tickets(
     authenticated_client: Any,
     dashboard_context: dict[str, Any],
+    finished_program: Any,
+    finished_program_ticket: Any,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    """Finishing a program hides its tickets from the all-programmes dashboard.
-
-    Users are warned about this when they finish a program. The tickets are not deleted:
-    the program's own dashboard must keep reporting them.
-    """
-    business_area = dashboard_context["business_area"]
-    user = dashboard_context["user"]
     create_user_role_with_permissions(
-        user,
+        dashboard_context["user"],
         [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
-        business_area,
+        dashboard_context["business_area"],
         whole_business_area_access=True,
     )
 
-    baseline = authenticated_client.get(dashboard_context["global_url"]).json()
-    baseline_count = baseline["tickets_by_type"]["user_generated_count"]
-
-    finished_program = ProgramFactory(
-        name="Finished Program",
-        business_area=business_area,
-        status=Program.FINISHED,
-    )
-    finished_ticket = GrievanceTicketFactory(
-        category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-        issue_type=None,
-        status=GrievanceTicket.STATUS_NEW,
-        created_by=user,
-        assigned_to=user,
-        business_area=business_area,
-        consent=True,
-        language="Polish, English",
-        description="Ticket of a finished programme",
-    )
-    finished_ticket.programs.add(finished_program)
-
     global_response = authenticated_client.get(dashboard_context["global_url"])
     assert global_response.status_code == status.HTTP_200_OK
-    assert global_response.json()["tickets_by_type"]["user_generated_count"] == baseline_count
+    assert global_response.json()["tickets_by_type"]["user_generated_count"] == 4
 
     finished_program_url = reverse(
         "api:grievance:grievance-tickets-dashboard",
-        kwargs={"business_area_slug": business_area.slug, "program_code": finished_program.code},
+        kwargs={
+            "business_area_slug": dashboard_context["business_area"].slug,
+            "program_code": finished_program.code,
+        },
     )
     program_response = authenticated_client.get(finished_program_url)
     assert program_response.status_code == status.HTTP_200_OK
