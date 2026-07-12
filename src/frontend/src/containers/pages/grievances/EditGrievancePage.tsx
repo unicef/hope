@@ -591,7 +591,11 @@ const EditGrievancePage = (): ReactElement => {
                             fullWidth
                             variant="outlined"
                             label={t('Submission Channel')}
-                            choices={choicesData.grievanceTicketManualSubmissionChannelChoices}
+                            choices={
+                              isSystemGeneratedCategory(ticket.category)
+                                ? choicesData.grievanceTicketSubmissionChannelChoices
+                                : choicesData.grievanceTicketManualSubmissionChannelChoices
+                            }
                             component={FormikSelectField}
                             disabled={isSystemGeneratedCategory(ticket.category)}
                           />
