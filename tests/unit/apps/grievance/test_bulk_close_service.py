@@ -379,7 +379,7 @@ def test_bulk_close_rejects_non_existent_ticket(business_area: BusinessArea, use
 def test_bulk_close_with_empty_list_closes_nothing(business_area: BusinessArea, user: User) -> None:
     result = BulkActionService().bulk_close(user, [], business_area.slug)
 
-    assert result.count() == 0
+    assert len(result) == 0
 
 
 def test_bulk_close_scopes_to_business_area(

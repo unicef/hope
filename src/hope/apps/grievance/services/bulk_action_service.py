@@ -100,7 +100,7 @@ class BulkActionService:
         created_by: User,
         tickets_ids: Sequence[str],
         business_area_slug: str,
-    ) -> QuerySet[GrievanceTicket]:
+    ) -> list[GrievanceTicket]:
         """Close the selected tickets only if every one of them is closable, otherwise close none."""
         tickets = list(
             GrievanceTicket.objects.filter(
@@ -109,6 +109,7 @@ class BulkActionService:
                 business_area__slug=business_area_slug,
                 id__in=tickets_ids,
             )
+            .select_for_update(of=("self",))
             .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
             .prefetch_related("programs")
         )
@@ -146,7 +147,7 @@ class BulkActionService:
             )
         # version cache is bumped by the post_save signal on save()
         self._clear_cache(business_area_slug)
-        return GrievanceTicket.objects.filter(id__in=tickets_ids)
+        return tickets
 
     @transaction.atomic
     def bulk_add_note(

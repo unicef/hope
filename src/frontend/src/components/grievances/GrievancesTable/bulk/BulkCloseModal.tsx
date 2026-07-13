@@ -14,7 +14,7 @@ import { BulkBaseModal } from './BulkBaseModal';
 
 interface BulkCloseModalProps {
   selectedTickets: GrievanceTicketList[];
-  setSelected;
+  setSelected: (tickets: GrievanceTicketList[]) => void;
 }
 
 export function BulkCloseModal({
