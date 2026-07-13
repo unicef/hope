@@ -538,7 +538,11 @@ class GrievanceTicketGlobalViewSet(
         "bulk_update_priority": [Permissions.GRIEVANCES_UPDATE],
         "bulk_update_urgency": [Permissions.GRIEVANCES_UPDATE],
         "bulk_add_note": [Permissions.GRIEVANCES_UPDATE],
-        "bulk_close": [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+        "bulk_close": [
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ],
         "all_edit_household_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "all_edit_people_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "all_add_individuals_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],

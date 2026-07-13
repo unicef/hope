@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, Callable
 from uuid import uuid4
 
 import pytest
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
 )
 from extras.test_utils.factories.grievance import TicketComplaintDetailsFactory
 from hope.api.caches import get_or_create_cache_key
+from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.bulk_action_service import (
@@ -29,8 +30,70 @@ def business_area() -> BusinessArea:
 
 
 @pytest.fixture
-def user() -> User:
-    return UserFactory(first_name="user")
+def user(business_area: BusinessArea, create_user_role_with_permissions: Callable) -> User:
+    user = UserFactory(first_name="user")
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+        business_area,
+        whole_business_area_access=True,
+    )
+    return user
+
+
+@pytest.fixture
+def creator_user(business_area: BusinessArea, create_user_role_with_permissions: Callable) -> User:
+    creator = UserFactory(first_name="creator")
+    create_user_role_with_permissions(
+        creator,
+        [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR],
+        business_area,
+        whole_business_area_access=True,
+    )
+    return creator
+
+
+@pytest.fixture
+def owner_user(business_area: BusinessArea, create_user_role_with_permissions: Callable) -> User:
+    owner = UserFactory(first_name="owner")
+    create_user_role_with_permissions(
+        owner,
+        [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER],
+        business_area,
+        whole_business_area_access=True,
+    )
+    return owner
+
+
+@pytest.fixture
+def user_without_close_permission(business_area: BusinessArea, create_user_role_with_permissions: Callable) -> User:
+    other = UserFactory(first_name="no-close")
+    create_user_role_with_permissions(
+        other,
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        whole_business_area_access=True,
+    )
+    return other
+
+
+@pytest.fixture
+def complaint_created_by_creator_user(business_area: BusinessArea, creator_user: User) -> GrievanceTicket:
+    return TicketComplaintDetailsFactory(
+        ticket__business_area=business_area,
+        ticket__created_by=creator_user,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    ).ticket
+
+
+@pytest.fixture
+def complaint_owned_by_owner_user(business_area: BusinessArea, owner_user: User, user: User) -> GrievanceTicket:
+    return TicketComplaintDetailsFactory(
+        ticket__business_area=business_area,
+        ticket__created_by=user,
+        ticket__assigned_to=owner_user,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    ).ticket
 
 
 @pytest.fixture
@@ -120,6 +183,60 @@ def test_bulk_close_closes_complaint_ticket_in_for_approval(
     assert complaint_for_approval.status == GrievanceTicket.STATUS_CLOSED
 
 
+def test_bulk_close_allowed_as_creator(
+    business_area: BusinessArea, creator_user: User, complaint_created_by_creator_user: GrievanceTicket
+) -> None:
+    BulkActionService().bulk_close(creator_user, [complaint_created_by_creator_user.id], business_area.slug)
+
+    complaint_created_by_creator_user.refresh_from_db()
+
+    assert complaint_created_by_creator_user.status == GrievanceTicket.STATUS_CLOSED
+
+
+def test_bulk_close_allowed_as_owner(
+    business_area: BusinessArea, owner_user: User, complaint_owned_by_owner_user: GrievanceTicket
+) -> None:
+    BulkActionService().bulk_close(owner_user, [complaint_owned_by_owner_user.id], business_area.slug)
+
+    complaint_owned_by_owner_user.refresh_from_db()
+
+    assert complaint_owned_by_owner_user.status == GrievanceTicket.STATUS_CLOSED
+
+
+def test_bulk_close_forbidden_without_close_permission(
+    business_area: BusinessArea,
+    user_without_close_permission: User,
+    complaint_for_approval: GrievanceTicket,
+) -> None:
+    with pytest.raises(PermissionDenied):
+        BulkActionService().bulk_close(user_without_close_permission, [complaint_for_approval.id], business_area.slug)
+
+    complaint_for_approval.refresh_from_db()
+
+    assert complaint_for_approval.status == GrievanceTicket.STATUS_FOR_APPROVAL
+
+
+def test_bulk_close_as_creator_closes_nothing_when_not_creator_of_one(
+    business_area: BusinessArea,
+    creator_user: User,
+    complaint_created_by_creator_user: GrievanceTicket,
+    another_complaint_for_approval: GrievanceTicket,
+) -> None:
+    # creator_user created only complaint_created_by_creator_user; another_complaint_for_approval was created by `user`
+    with pytest.raises(PermissionDenied):
+        BulkActionService().bulk_close(
+            creator_user,
+            [complaint_created_by_creator_user.id, another_complaint_for_approval.id],
+            business_area.slug,
+        )
+
+    complaint_created_by_creator_user.refresh_from_db()
+    another_complaint_for_approval.refresh_from_db()
+
+    assert complaint_created_by_creator_user.status == GrievanceTicket.STATUS_FOR_APPROVAL
+    assert another_complaint_for_approval.status == GrievanceTicket.STATUS_FOR_APPROVAL
+
+
 def test_bulk_close_rejects_non_complaint_ticket(
     business_area: BusinessArea, user: User, needs_adjudication_for_approval: GrievanceTicket
 ) -> None:
@@ -206,6 +323,7 @@ def test_bulk_close_bumps_grievance_version_cache(
     assert get_or_create_cache_key(version_key, 1) == version_before + 1
 
 
+@pytest.mark.enable_activity_log
 def test_bulk_close_writes_activity_log(
     business_area: BusinessArea, user: User, complaint_for_approval: GrievanceTicket
 ) -> None:
@@ -242,7 +360,10 @@ def test_bulk_close_query_count_scales_per_ticket(
     another_complaint_for_approval: GrievanceTicket,
     django_assert_max_num_queries: Any,
 ) -> None:
-    with django_assert_max_num_queries(16):
+    # the per-ticket permission check adds a constant cost (the permission set is cached per
+    # user/business-area/program scope, and both tickets share the same scope), so it does not
+    # scale per ticket.
+    with django_assert_max_num_queries(22):
         BulkActionService().bulk_close(
             user,
             [complaint_for_approval.id, another_complaint_for_approval.id],

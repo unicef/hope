@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.account.permissions import Permissions, check_creator_or_owner_permission
 from hope.apps.core.utils import clear_cache_for_key
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
@@ -117,6 +118,19 @@ class BulkActionService:
             raise ValidationError(
                 "Some selected tickets cannot be closed. "
                 "Only Grievance Complaint tickets in status For Approval can be closed."
+            )
+
+        # every selected ticket must be closable by this user (general, or as creator/owner)
+        for ticket in tickets:
+            check_creator_or_owner_permission(
+                created_by,
+                [
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+                ],
+                ticket.business_area,
+                ticket,
             )
 
         for ticket in tickets:
