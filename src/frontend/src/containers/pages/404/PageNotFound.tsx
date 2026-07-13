@@ -68,7 +68,7 @@ export const PageNotFound: FC = () => {
         />
       </SquareLogo>
       <TextContainer>
-        <Title>Oops! Page Not Found</Title>
+        <Title data-cy="page-not-found-title">Oops! Page Not Found</Title>
         <Paragraph>
           Looks like you&apos;ve ventured off the map. Don&apos;t worry, we can
           help you get back on track. Please try again or explore our other

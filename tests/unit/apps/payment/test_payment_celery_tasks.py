@@ -5,6 +5,7 @@ from typing import Any
 from unittest.mock import Mock, PropertyMock, patch
 
 from celery.exceptions import Retry
+from constance.test import override_config
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -64,6 +65,7 @@ from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_records_async_task,
     periodic_sync_payment_gateway_records_async_task_action,
     periodic_sync_payment_plan_invoices_western_union_ftp_async_task,
+    periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
     remove_old_cash_plan_payment_verification_xlsx_async_task,
@@ -81,6 +83,7 @@ from hope.apps.payment.celery_tasks import (
     update_exchange_rate_on_release_payments_async_task,
     update_exchange_rate_on_release_payments_async_task_action,
 )
+from hope.apps.payment.services import western_union_reports_service
 from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
     AsyncJob,
@@ -2054,3 +2057,26 @@ def test_send_payment_notification_emails_action_sends_email() -> None:
         send_payment_notification_emails_async_task_action(job)
 
     mock_notification.return_value.send_email_notification.assert_called_once()
+
+
+def test_wu_ftp_sync_uses_default_31_day_lookback_window() -> None:
+    with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
+        lower_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+        periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
+        upper_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+
+    mock_service_cls.return_value.process_files_since.assert_called_once()
+    called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
+    assert lower_bound <= called_since <= upper_bound
+
+
+@override_config(WU_FTP_SYNC_LOOKBACK_DAYS=7)
+def test_wu_ftp_sync_respects_configured_lookback_window() -> None:
+    with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
+        lower_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+        periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
+        upper_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+
+    mock_service_cls.return_value.process_files_since.assert_called_once()
+    called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
+    assert lower_bound <= called_since <= upper_bound

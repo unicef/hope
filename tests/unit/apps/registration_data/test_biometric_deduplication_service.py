@@ -92,6 +92,23 @@ def test_get_deduplication_set_results(
     mock_get_duplicates.assert_called_once_with(program.unicef_id, ["1", "2"])
 
 
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
+def test_get_deduplication_set_results_fetches_in_batches_of_at_most_50(
+    mock_get_duplicates: mock.Mock, biometric_deduplication_context: dict[str, object]
+) -> None:
+    mock_get_duplicates.return_value = []
+    program = biometric_deduplication_context["program"]
+    service = BiometricDeduplicationService()
+    individual_ids = list(map(str, range(120)))
+
+    service.get_deduplication_set_results(program, individual_ids)
+
+    assert mock_get_duplicates.call_count == 3
+    assert len(mock_get_duplicates.call_args_list[0].args[1]) == 50
+    assert len(mock_get_duplicates.call_args_list[1].args[1]) == 50
+    assert len(mock_get_duplicates.call_args_list[2].args[1]) == 20
+
+
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set")
 def test_get_deduplication_set(
     mock_get_deduplication_set: mock.Mock, biometric_deduplication_context: dict[str, object]
