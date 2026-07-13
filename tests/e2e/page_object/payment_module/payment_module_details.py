@@ -69,6 +69,7 @@ class PaymentModuleDetails(BaseComponents):
     delete_button = 'button[data-cy="button-delete-pp"]'
     upload_file_button = 'button[data-cy="upload-file-button"]'
     title_input = 'div[data-cy="title-input"]'
+    expand_supporting_documents_button = 'button[data-cy="expand-button"]'
 
     def get_button_lock_plan(self) -> WebElement:
         return self.wait_for(self.button_lock_plan)
@@ -278,6 +279,9 @@ class PaymentModuleDetails(BaseComponents):
 
     def get_supporting_documents_empty(self) -> WebElement:
         return self.wait_for(self.supporting_documents_empty)
+
+    def get_expand_supporting_documents_button(self) -> WebElement:
+        return self.wait_for(self.expand_supporting_documents_button)
 
     def get_supporting_document_item(self) -> WebElement:
         return self.wait_for(self.supporting_document_item)
