@@ -89,7 +89,7 @@ export function AccessDenied() {
         />
       </SquareLogo>
       <TextContainer>
-        <Title>Access Denied</Title>
+        <Title data-cy="access-denied-title">Access Denied</Title>
         {detail && <Paragraph>{detail}</Paragraph>}
         {permissionsArray.length === 0 ? (
           <Paragraph>
