@@ -25,6 +25,7 @@ class Config(AppConfig):
             Registration2024,
             UkraineBaseRegistrationService,
             UkraineRegistrationService,
+            UkraineUSDCRegistrationService,
         )
         import hope.contrib.aurora.signals  # noqa: F401
 
@@ -35,4 +36,5 @@ class Config(AppConfig):
         registry.register(UkraineRegistrationService)
         registry.register(CzechRepublicFlexRegistration)
         registry.register(Registration2024)
+        registry.register(UkraineUSDCRegistrationService)
         registry.register(NigeriaPeopleRegistrationService)

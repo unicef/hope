@@ -21,10 +21,14 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
+from extras.test_utils.factories.grievance import (
+    TicketComplaintDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+)
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.exceptions import SearchError
 from hope.apps.household.const import HOST, REFUGEE, ROLE_PRIMARY
-from hope.apps.household.filters import HouseholdFilter
+from hope.apps.household.filters import HouseholdFilter, HouseholdOfficeSearchFilter, MergedHouseholdFilter
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Household, Program
 from hope.models.utils import MergeStatusModel
@@ -64,6 +68,33 @@ def household_filter_context(
         "user": user,
         "api_client": client,
     }
+
+
+@pytest.fixture
+def merged_rdi_household() -> dict[str, Any]:
+    household = HouseholdFactory(create_role=False)
+    return {"rdi": household.registration_data_import, "household": household}
+
+
+@pytest.fixture
+def household_update_ticket(merged_rdi_household: dict[str, Any]) -> Any:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=merged_rdi_household["household"],
+        household_data={},
+    )
+    ticket = ticket_details.ticket
+    ticket.unicef_id = "GRV-8001"
+    ticket.save(update_fields=["unicef_id"])
+    return ticket
+
+
+@pytest.fixture
+def empty_complaint_ticket() -> Any:
+    ticket_details = TicketComplaintDetailsFactory(household=None, individual=None, payment=None)
+    ticket = ticket_details.ticket
+    ticket.unicef_id = "GRV-8002"
+    ticket.save(update_fields=["unicef_id"])
+    return ticket
 
 
 def test_filter_by_rdi_id(household_filter_context: dict[str, Any]) -> None:
@@ -1133,3 +1164,39 @@ def test_filter_detail_id_filters_queryset(household_filter_search_context: dict
     result_qs = household_filter._filter_detail_id(Household.objects.all(), "123")
 
     assert list(result_qs.values_list("id", flat=True)) == [household1.id]
+
+
+def test_phone_no_valid_filter_with_none_returns_queryset_unchanged(db: Any) -> None:
+    queryset = Household.objects.all()
+    household_filter = HouseholdFilter(data={}, queryset=queryset, request=None)
+
+    assert household_filter.phone_no_valid_filter(queryset, "phone_no_valid", None) is queryset
+
+
+def test_merged_household_filter_rdi_id_filters_by_rdi(merged_rdi_household: dict[str, Any]) -> None:
+    queryset = Household.all_objects.all()
+    household_filter = MergedHouseholdFilter(data={}, queryset=queryset)
+
+    result = household_filter.filter_rdi_id(queryset, None, str(merged_rdi_household["rdi"].id))
+
+    assert list(result) == [merged_rdi_household["household"]]
+
+
+def test_office_search_filter_by_grievance_returns_ticket_household(
+    household_update_ticket: Any, merged_rdi_household: dict[str, Any]
+) -> None:
+    queryset = Household.objects.all()
+    household_filter = HouseholdOfficeSearchFilter(data={}, queryset=queryset, request=None)
+
+    result = household_filter.filter_by_grievance_for_office_search(queryset, "GRV-8001")
+
+    assert list(result) == [merged_rdi_household["household"]]
+
+
+def test_office_search_filter_by_grievance_without_household_returns_none(empty_complaint_ticket: Any) -> None:
+    queryset = Household.objects.all()
+    household_filter = HouseholdOfficeSearchFilter(data={}, queryset=queryset, request=None)
+
+    result = household_filter.filter_by_grievance_for_office_search(queryset, "GRV-8002")
+
+    assert list(result) == []
