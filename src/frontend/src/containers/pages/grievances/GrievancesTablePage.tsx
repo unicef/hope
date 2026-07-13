@@ -70,6 +70,7 @@ export const GrievancesTablePage = (): ReactElement => {
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
+    submissionChannel: '',
     preferredLanguage: '',
     program: '',
     programState: PROGRAM_STATE_FILTER.ALL,
@@ -112,12 +113,14 @@ export const GrievancesTablePage = (): ReactElement => {
           grievanceType: GrievanceTypes[newValue],
           category: '',
           program: '',
+          submissionChannel: '',
         });
         setAppliedFilter({
           ...appliedFilter,
           grievanceType: GrievanceTypes[newValue],
           category: '',
           program: '',
+          submissionChannel: '',
         });
         navigate(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}

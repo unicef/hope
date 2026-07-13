@@ -5,6 +5,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
+from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx_async_task
@@ -155,6 +156,7 @@ class VerificationPlanStatusChangeServices:
         for verification in verifications:
             grievance_ticket = GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                submission_channel=SUBMISSION_CHANNEL_HOPE,
                 business_area=business_area,
                 household_unicef_id=verification.payment.household.unicef_id,
                 admin2_id=verification.payment.household.admin2_id,

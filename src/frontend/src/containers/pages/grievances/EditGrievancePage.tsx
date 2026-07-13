@@ -17,6 +17,7 @@ import { LookUpPaymentRecord } from '@components/grievances/LookUps/LookUpPaymen
 import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import {
   getGrievanceDetailsPath,
+  isSystemGeneratedCategory,
   selectedIssueType,
 } from '@components/grievances/utils/createGrievanceUtils';
 import {
@@ -582,6 +583,21 @@ const EditGrievancePage = (): ReactElement => {
                             label={t('Urgency')}
                             choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 3 }}>
+                          <Field
+                            name="submissionChannel"
+                            fullWidth
+                            variant="outlined"
+                            label={t('Submission Channel')}
+                            choices={
+                              isSystemGeneratedCategory(ticket.category)
+                                ? choicesData.grievanceTicketSubmissionChannelChoices
+                                : choicesData.grievanceTicketManualSubmissionChannelChoices
+                            }
+                            component={FormikSelectField}
+                            disabled={isSystemGeneratedCategory(ticket.category)}
                           />
                         </Grid>
                         <Grid size={{ xs: 3 }}>

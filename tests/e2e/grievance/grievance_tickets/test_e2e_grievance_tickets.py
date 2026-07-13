@@ -629,6 +629,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
+        page_grievance_new_ticket.get_select_submission_channel().click()
+        page_grievance_new_ticket.select_listbox_element("Call Center")
+        assert "Call Center" in page_grievance_new_ticket.get_select_submission_channel().text
         page_grievance_new_ticket.get_button_next().click()
         assert "Happy path test 1234!" in page_grievance_details_page.get_ticket_description().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
@@ -639,6 +642,7 @@ class TestGrievanceTickets:
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
+        assert "Call Center" in page_grievance_details_page.get_ticket_submission_channel().text
 
     def test_grievance_tickets_create_new_tickets_social_program(
         self,

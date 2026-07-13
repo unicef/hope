@@ -58,6 +58,10 @@ function GrievancesDetails({
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
+  const submissionChannelChoices: {
+    [id: number]: string;
+  } = choicesToDict(choicesData.grievanceTicketSubmissionChannelChoices || []);
+
   const showIssueType = isShowIssueType(ticket.category);
   const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 
@@ -199,6 +203,11 @@ function GrievancesDetails({
               {
                 label: t('Assigned to'),
                 value: renderUserName(ticket.assignedTo),
+                size: 3,
+              },
+              {
+                label: t('Submission Channel'),
+                value: <span>{submissionChannelChoices[ticket.submissionChannel] || '-'}</span>,
                 size: 3,
               },
               {

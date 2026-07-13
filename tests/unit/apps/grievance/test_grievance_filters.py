@@ -45,6 +45,8 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_MEDIUM,
+    SUBMISSION_CHANNEL_CALL_CENTER,
+    SUBMISSION_CHANNEL_SUGGESTION_BOX,
     URGENCY_URGENT,
     URGENCY_VERY_URGENT,
 )
@@ -635,6 +637,25 @@ def list_global_url(afghanistan: BusinessArea) -> str:
         "api:grievance:grievance-tickets-global-list",
         kwargs={"business_area_slug": afghanistan.slug},
     )
+
+
+@pytest.fixture
+def submission_channel_tickets(afghanistan: BusinessArea, program_afghanistan1: Program) -> dict:
+    call_center_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+        submission_channel=SUBMISSION_CHANNEL_CALL_CENTER,
+    )
+    call_center_ticket.programs.set([program_afghanistan1])
+    suggestion_box_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+        submission_channel=SUBMISSION_CHANNEL_SUGGESTION_BOX,
+    )
+    suggestion_box_ticket.programs.set([program_afghanistan1])
+    return {"call_center": call_center_ticket, "suggestion_box": suggestion_box_ticket}
 
 
 def _test_filter(
@@ -1304,6 +1325,21 @@ def test_filter_by_program_status(
     response = client.get(list_global_url, {"is_active_program": filter_value})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == expected_count
+
+
+def test_filter_by_submission_channel(
+    api_client: Any,
+    user: User,
+    submission_channel_tickets: dict,
+    list_global_url: str,
+) -> None:
+    client = api_client(user)
+    response = client.get(list_global_url, {"submission_channel": SUBMISSION_CHANNEL_CALL_CENTER})
+
+    assert response.status_code == status.HTTP_200_OK
+    returned_ids = {row["id"] for row in response.data["results"]}
+    assert str(submission_channel_tickets["call_center"].id) in returned_ids
+    assert str(submission_channel_tickets["suggestion_box"].id) not in returned_ids
 
 
 @pytest.mark.parametrize(

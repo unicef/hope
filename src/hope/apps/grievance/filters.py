@@ -15,7 +15,7 @@ from django_filters import (
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
-from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
+from hope.apps.grievance.constants import PRIORITY_CHOICES, SUBMISSION_CHANNEL_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
 from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Individual, Program
@@ -99,6 +99,7 @@ class GrievanceTicketFilter(FilterSet):
     preferred_language = CharFilter(method="preferred_language_filter")
     priority = ChoiceFilter(field_name="priority", choices=PRIORITY_CHOICES)
     urgency = ChoiceFilter(field_name="urgency", choices=URGENCY_CHOICES)
+    submission_channel = ChoiceFilter(field_name="submission_channel", choices=SUBMISSION_CHANNEL_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
     program = CharFilter(method="filter_by_program")

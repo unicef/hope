@@ -18,8 +18,10 @@ from model_utils.models import UUIDModel
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.grievance.constants import (
     PRIORITY_NOT_SET,
+    SUBMISSION_CHANNEL_HOPE,
     URGENCY_NOT_SET,
     get_priority_choices,
+    get_submission_channel_choices,
     get_urgency_choices,
 )
 from hope.models import Individual, Payment, User
@@ -245,6 +247,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
+    SYSTEM_CATEGORY_CODES = frozenset(code for code, _label in SYSTEM_CATEGORIES)
     CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
     CREATE_CATEGORY_CHOICES = (
@@ -359,6 +362,13 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=get_urgency_choices, default=URGENCY_NOT_SET)
     category = models.IntegerField(verbose_name=_("Category"), choices=get_grievance_category_choices)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
+    submission_channel = models.IntegerField(
+        verbose_name=_("Submission Channel"),
+        choices=get_submission_channel_choices,
+        null=True,
+        blank=True,
+        help_text=_("Submission channel; empty for system-generated tickets."),
+    )
     description = models.TextField(
         verbose_name=_("Description"),
         blank=True,
@@ -527,6 +537,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        # System-generated tickets always use the HOPE channel; users cannot set it to anything else.
+        if self.category in self.SYSTEM_CATEGORY_CODES:
+            self.submission_channel = SUBMISSION_CHANNEL_HOPE
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
