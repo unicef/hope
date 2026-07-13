@@ -32,7 +32,8 @@ from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
-from hope.models import RegistrationDataImport
+from hope.models import BusinessArea, RegistrationDataImport
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 
 
 class StatusFilter(ChoicesFieldComboFilter):
@@ -100,6 +101,11 @@ class BaseRDIForm(forms.Form):
 
     def clean(self) -> None:
         super().clean()
+        registration = self.cleaned_data.get("registration")
+        if registration:
+            business_area = BusinessArea.objects.get(slug=registration.project.organization.slug)
+            if business_area.is_rdi_ingest_source_country_workspace_only:
+                raise forms.ValidationError(ALL_EXCEPT_CW_INGEST_REJECT_MSG)
         filters, excludes = self.cleaned_data["filters"]
         if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
             filters["status__isnull"] = True
@@ -132,6 +138,12 @@ class AmendRDIForm(BaseRDIForm):
     )
 
     field_order = ["rdi", "registration", "filters"]
+
+    def clean(self) -> None:
+        super().clean()
+        rdi = self.cleaned_data.get("rdi")
+        if rdi and rdi.business_area.is_rdi_ingest_source_country_workspace_only:
+            raise forms.ValidationError(ALL_EXCEPT_CW_INGEST_REJECT_MSG)
 
 
 @admin.register(Record)

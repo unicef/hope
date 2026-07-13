@@ -13,7 +13,7 @@ from extras.test_utils.factories import (
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets_for_biometrics,
 )
-from hope.models import DeduplicationEngineSimilarityPair
+from hope.models import BiometricDedupeSimilarityPair
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -39,12 +39,12 @@ def rdi(program: Any, business_area: Any) -> Any:
 @pytest.fixture
 def pair_both_individuals_none(program: Any) -> Any:
     """A similarity pair where both individual1 and individual2 are None."""
-    return DeduplicationEngineSimilarityPair.objects.create(
+    return BiometricDedupeSimilarityPair.objects.create(
         program=program,
         individual1=None,
         individual2=None,
         similarity_score=Decimal("0.00"),
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_500,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_500,
     )
 
 
@@ -53,7 +53,7 @@ def test_create_needs_adjudication_tickets_for_biometrics_raises_when_both_indiv
     rdi: Any,
 ) -> None:
     """When both individual1 and individual2 are None, an AttributeError is raised."""
-    pairs_qs = DeduplicationEngineSimilarityPair.objects.filter(id=pair_both_individuals_none.id)
+    pairs_qs = BiometricDedupeSimilarityPair.objects.filter(id=pair_both_individuals_none.id)
 
     with pytest.raises(AttributeError):
         create_needs_adjudication_tickets_for_biometrics(pairs_qs, rdi)

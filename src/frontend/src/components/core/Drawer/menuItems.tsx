@@ -65,6 +65,7 @@ export const menuItems: MenuItem[] = [
     permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
     scopes: [SCOPE_PROGRAM],
     dataPerm: PERMISSIONS.RDI_VIEW_LIST,
+    flag: 'isManualIngest',
   },
   {
     name: 'Programme Population',

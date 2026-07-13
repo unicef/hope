@@ -1,13 +1,23 @@
 from typing import Any
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField
+from django.utils.translation import gettext_lazy as _
 from natural_keys import NaturalKeyModel
 
 from hope.apps.core.utils import unique_slugify
 from hope.models.utils import (
     TimeStampedUUIDModel,
+)
+
+CW_ONLY_INGEST_REJECT_MSG: str = (
+    "This endpoint is available only for business areas that manage RDIs only through Country Workspace."
+)
+ALL_EXCEPT_CW_INGEST_REJECT_MSG: str = (
+    "This endpoint is available only for business areas that manage RDIs only through "
+    "non Country Workspace paths (e.g. KOBO, XLSX)"
 )
 
 
@@ -25,6 +35,10 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         <REGION_NAME>MENAR</REGION_NAME>
     </BusinessArea>
     """
+
+    class IngestSource(models.TextChoices):
+        COUNTRY_WORKSPACE_ONLY = "COUNTRY_WORKSPACE_ONLY", _("Country Workspace only")
+        ALL_EXCEPT_COUNTRY_WORKSPACE = "ALL_EXCEPT_COUNTRY_WORKSPACE", _("All except Country Workspace")
 
     code = models.CharField(max_length=10, unique=True)
     slug = models.CharField(
@@ -70,6 +84,11 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     rapid_pro_survey_token = models.CharField(max_length=40, null=True, blank=True)
 
     postpone_deduplication = models.BooleanField(default=False)
+    ingest_source = models.CharField(
+        choices=IngestSource,
+        default=IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE,
+        max_length=64,
+    )
     deduplication_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
@@ -107,8 +126,21 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     custom_fields = JSONField(default=dict, blank=True)
 
+    def clean(self) -> None:
+        super().clean()
+        new_ingest_source = self.ingest_source
+        old_ingest_source = BusinessArea.objects.filter(pk=self.pk).values_list("ingest_source", flat=True).first()
+        if (
+            new_ingest_source == BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE
+            and old_ingest_source == BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+        ):
+            raise ValidationError(
+                {"ingest_source": _("Cannot go back to legacy ingest sources when CW source was chosen.")}
+            )
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
+        self.full_clean()
         if self.parent:
             self.parent.is_split = True
             self.parent.save()
@@ -138,6 +170,14 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     def natural_key(self) -> tuple[str]:
         return (self.code,)
+
+    @property
+    def is_rdi_ingest_source_country_workspace_only(self) -> bool:
+        return self.ingest_source == self.IngestSource.COUNTRY_WORKSPACE_ONLY
+
+    @property
+    def is_rdi_ingest_source_all_except_country_workspace(self) -> bool:
+        return self.ingest_source == self.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE
 
     @property
     def can_import_ocha_response_plans(self) -> bool:

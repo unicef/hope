@@ -296,7 +296,7 @@ def dedup_engine_stub(monkeypatch: pytest.MonkeyPatch) -> Any:
 
     base = re.escape(stub_url)
     sets = rf"{base}deduplication_sets/[^/]+"
-    set_groups = rf"{base}deduplication_set_groups/[^/]+"
+    set_groups = rf"{base}deduplication_sets/[^/]+"
 
     with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
         rsps.add(responses.POST, re.compile(rf"{base}deduplication_sets/$"), json={}, status=200)
@@ -307,10 +307,8 @@ def dedup_engine_stub(monkeypatch: pytest.MonkeyPatch) -> Any:
         rsps.add(responses.DELETE, re.compile(rf"{sets}/images_bulk/clear/$"), json={}, status=200)
         rsps.add(responses.GET, re.compile(rf"{sets}/duplicates/$"), json={"results": [], "next": None}, status=200)
         rsps.add(responses.POST, re.compile(rf"{sets}/ignored/filenames/$"), json={}, status=200)
-        rsps.add(responses.POST, re.compile(rf"{sets}/approve_or_reject/$"), json={}, status=200)
         # Ticket 306312: new set_groups resource family.
         rsps.add(responses.GET, re.compile(rf"{set_groups}/findings/$"), json={"findings": []}, status=200)
-        rsps.add(responses.POST, re.compile(rf"{set_groups}/approve/$"), json={}, status=200)
         yield rsps
 
 

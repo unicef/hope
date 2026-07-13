@@ -1,0 +1,53 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "e4bbcc0e4a826c14f5b19b7b126dd033",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1130"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/xrb8/individuals/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "4c811223-f8a1-4842-9ce2-be1cd617e391",
+                "unicef_id": "IND-25-0000.0007",
+                "full_name": "Person 0",
+                "household": null,
+                "status": "ACTIVE",
+                "relationship": "",
+                "age": 35,
+                "sex": "MALE",
+                "relationship_display": "",
+                "birth_date": "1990-01-01",
+                "deduplication_batch_status": "UNIQUE_IN_BATCH",
+                "deduplication_batch_status_display": "Unique in batch",
+                "biometric_deduplication_batch_status": "NOT_PROCESSED",
+                "biometric_deduplication_batch_status_display": "Not Processed",
+                "deduplication_batch_results": [],
+                "biometric_deduplication_batch_results": [],
+                "deduplication_golden_record_status": "UNIQUE",
+                "deduplication_golden_record_status_display": "Unique",
+                "biometric_deduplication_golden_record_status": "NOT_PROCESSED",
+                "biometric_deduplication_golden_record_status_display": "Not Processed",
+                "deduplication_golden_record_results": [],
+                "biometric_deduplication_golden_record_results": [],
+                "program": {
+                    "id": "f9b6efce-e97f-46e0-9c4f-28d4e0044489",
+                    "name": "Program 0",
+                    "code": "xrb8"
+                },
+                "last_registration_date": "2025-01-01",
+                "role": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
