@@ -39,7 +39,7 @@ export function BulkCloseModal({
     mutationFn: (params: BulkCloseGrievanceTickets) =>
       RestService.restBusinessAreasGrievanceTicketsBulkCloseCreate({
         businessAreaSlug,
-        requestBody: params,
+        formData: params,
       }),
     onSuccess: () => {
       if (isAllPrograms) {
