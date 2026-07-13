@@ -16,6 +16,7 @@ from django.test import Client, RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 import pytest
+from rest_framework import status
 
 from extras.test_utils.factories import (
     AreaFactory,
@@ -341,7 +342,7 @@ def test_check_index_button(django_app: Any, program: Program) -> None:
     with patch("hope.admin.program.check_program_indexes", return_value=(True, "ok")) as mock_check:
         response = django_app.get(url, user=user_with_perm, expect_errors=True)
     mock_check.assert_called_once_with(str(program.id))
-    assert response.status_code == 302
+    assert response.status_code == status.HTTP_302_FOUND
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
 
 
@@ -351,7 +352,7 @@ def test_check_index_button_no_permission(django_app: Any, program: Program) -> 
     with patch("hope.admin.program.check_program_indexes") as mock_check:
         response = django_app.get(url, user=user_no_perm, expect_errors=True)
     mock_check.assert_not_called()
-    assert response.status_code == 403
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_reindex_program_button(django_app: Any, program: Program) -> None:
@@ -362,7 +363,7 @@ def test_reindex_program_button(django_app: Any, program: Program) -> None:
     with patch("hope.admin.program.rebuild_program_indexes", return_value=(True, "ok")) as mock_rebuild:
         response = django_app.get(url, user=user_with_perm, expect_errors=True)
     mock_rebuild.assert_called_once_with(str(program.id))
-    assert response.status_code == 302
+    assert response.status_code == status.HTTP_302_FOUND
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
 
 
@@ -372,7 +373,7 @@ def test_reindex_program_button_no_permission(django_app: Any, program: Program)
     with patch("hope.admin.program.rebuild_program_indexes") as mock_rebuild:
         response = django_app.get(url, user=user_no_perm, expect_errors=True)
     mock_rebuild.assert_not_called()
-    assert response.status_code == 403
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.fixture
@@ -473,7 +474,7 @@ def test_retry_cw_merge_queue_reschedules_oldest_failed(
         with django_capture_on_commit_callbacks(execute=True):
             response = admin_client.get(url)
 
-    assert response.status_code == 302
+    assert response.status_code == status.HTTP_302_FOUND
     older.refresh_from_db()
     newer.refresh_from_db()
     assert older.status == RegistrationDataImport.MERGE_SCHEDULED
@@ -499,7 +500,7 @@ def test_retry_cw_merge_queue_ignores_other_programme(
         with django_capture_on_commit_callbacks(execute=True):
             response = admin_client.get(url)
 
-    assert response.status_code == 302
+    assert response.status_code == status.HTTP_302_FOUND
     target_rdi.refresh_from_db()
     other_rdi.refresh_from_db()
     assert target_rdi.status == RegistrationDataImport.MERGE_SCHEDULED
@@ -517,7 +518,7 @@ def test_retry_cw_merge_queue_no_failed_rdi_does_nothing(
         with django_capture_on_commit_callbacks(execute=True):
             response = admin_client.get(url)
 
-    assert response.status_code == 302
+    assert response.status_code == status.HTTP_302_FOUND
     mock_dispatcher.assert_not_called()
 
 

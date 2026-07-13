@@ -824,6 +824,34 @@ def test_fetch_findings_and_merge_rdi_returns_true_when_lock_not_acquired(
     mock_execute.assert_not_called()
 
 
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
+@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+def test_fetch_findings_and_merge_rdi_bails_when_status_changes_between_read_and_lock(
+    mock_get_findings: mock.Mock,
+    mock_rdi_merge: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+) -> None:
+    # Concurrency re-check: the pre-lock read passes the status filter, then a competing
+    # worker advances the RDI out of a processable status before this one takes the row
+    # lock. Findings are fetched between those two reads, so flipping the DB status inside
+    # get_rdi_findings's side_effect reproduces the race deterministically — the locked
+    # re-read filters on the processable statuses, misses, and execute() returns False
+    # before transitioning to MERGING or scheduling the merge.
+    def steal_rdi_then_return_findings(_country_workspace_id: str) -> list[dict]:
+        RegistrationDataImport.objects.filter(pk=cw_rdi.pk).update(status=RegistrationDataImport.MERGED)
+        return [_finding(first_pk="1001", second_pk="1002")]
+
+    mock_get_findings.side_effect = steal_rdi_then_return_findings
+
+    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
+
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.MERGED
+    mock_rdi_merge.return_value.execute.assert_not_called()
+    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+
+
 # ---------------------------------------------------------------------------
 # Problem 0 — Part 2: transaction rework.
 #
