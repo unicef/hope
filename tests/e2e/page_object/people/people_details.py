@@ -56,9 +56,6 @@ class PeopleDetails(BaseComponents):
         'div[data-cy="label-Date of last screening against sanctions list"]'
     )
     label_linked_grievances = 'div[data-cy="label-Linked Grievances"]'
-    label_wallet_name = 'div[data-cy="label-Wallet Name"]'
-    label_blockchain_name = 'div[data-cy="label-Blockchain Name"]'
-    label_wallet_address = 'div[data-cy="label-Wallet Address"]'
     label_cash_received = 'div[data-cy="label-Cash received"]'
     label_total_cash_received = 'div[data-cy="label-Total Cash Received"]'
     table_title = 'h6[data-cy="table-title"]'
@@ -213,15 +210,6 @@ class PeopleDetails(BaseComponents):
 
     def get_label_linked_grievances(self) -> WebElement:
         return self.wait_for(self.label_linked_grievances)
-
-    def get_label_wallet_name(self) -> WebElement:
-        return self.wait_for(self.label_wallet_name)
-
-    def get_label_blockchain_name(self) -> WebElement:
-        return self.wait_for(self.label_blockchain_name)
-
-    def get_label_wallet_address(self) -> WebElement:
-        return self.wait_for(self.label_wallet_address)
 
     def get_label_cash_received(self) -> WebElement:
         return self.wait_for(self.label_cash_received)

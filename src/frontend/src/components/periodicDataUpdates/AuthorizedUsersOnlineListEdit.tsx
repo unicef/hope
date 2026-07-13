@@ -256,11 +256,12 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
               </TableHead>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow key={user.id} data-cy={`authorized-user-row-${user.id}`}>
                     <TableCell>
                       <Checkbox
                         checked={selected.includes(user.id)}
                         onChange={() => handleSelect(user.id)}
+                        data-cy={`checkbox-authorized-user-${user.id}`}
                       />
                     </TableCell>
                     <TableCell>{user.name}</TableCell>

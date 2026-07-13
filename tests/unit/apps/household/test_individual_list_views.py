@@ -904,9 +904,6 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
     assert data["phone_no"] == ind1.phone_no
     assert data["phone_no_alternative"] == ind1.phone_no_alternative
     assert data["sanction_list_last_check"] == ind1.sanction_list_last_check
-    assert data["wallet_name"] == ind1.wallet_name
-    assert data["blockchain_name"] == ind1.blockchain_name
-    assert data["wallet_address"] == ind1.wallet_address
     assert data["status"] == ind1.status
     assert data["flex_fields"] == {
         "wellbeing_index_i_f": 24,

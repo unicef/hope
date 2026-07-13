@@ -629,6 +629,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_received_consent().click()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Happy path test 1234!")
+        page_grievance_new_ticket.get_select_submission_channel().click()
+        page_grievance_new_ticket.select_listbox_element("Call Center")
+        assert "Call Center" in page_grievance_new_ticket.get_select_submission_channel().text
         page_grievance_new_ticket.get_button_next().click()
         assert "Happy path test 1234!" in page_grievance_details_page.get_ticket_description().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
@@ -639,6 +642,7 @@ class TestGrievanceTickets:
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
+        assert "Call Center" in page_grievance_details_page.get_ticket_submission_channel().text
 
     def test_grievance_tickets_create_new_tickets_social_program(
         self,
@@ -695,7 +699,6 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_description().send_keys("Add Member - TEST")
         page_grievance_new_ticket.get_phone_no_alternative().send_keys("999 999 999")
         page_grievance_new_ticket.fill_date_picker_filter(FormatTime(1, 5, 1986).numerically_formatted_date)
-        page_grievance_new_ticket.get_input_individualdata_blockchainname().send_keys("TEST")
         page_grievance_new_ticket.get_input_individualdata_familyname().send_keys("Teria")
         page_grievance_new_ticket.get_input_individualdata_fullname().send_keys("Krido")
         page_grievance_new_ticket.get_estimated_birth_date().click()
@@ -727,8 +730,6 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.select_listbox_element("English")
         page_grievance_new_ticket.get_select_individualdata_relationship().click()
         page_grievance_new_ticket.select_listbox_element("Wife / Husband")
-        page_grievance_new_ticket.get_input_individualdata_walletaddress().send_keys("Wordoki")
-        page_grievance_new_ticket.get_input_individualdata_walletname().send_keys("123")
         page_grievance_new_ticket.get_input_individualdata_whoanswersaltphone().send_keys("000 000 000")
         page_grievance_new_ticket.get_input_individualdata_whoanswersphone().send_keys("111 11 11")
 
