@@ -20,6 +20,7 @@ from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
+from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     AsyncJob,
@@ -59,6 +60,10 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
 
     def has_delete_permission(self: Any, request: Any, obj: Any = None) -> bool:
         return False
+
+
+def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.can_send_to_vision
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
@@ -186,9 +191,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -207,9 +210,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_missing_records_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -247,6 +248,32 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+    @button(
+        visible=lambda btn: can_send_to_vision(btn.original),
+        permission="payment.pm_send_payment_plan",
+    )
+    def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            try:
+                response = VisionAPI().send_payment_plan(payment_plan)
+                self.message_user(
+                    request,
+                    f"Payment plan sent to Vision successfully: {response.get('messageId', '')}",
+                    level="success",
+                )
+            except VisionAPIError as e:
+                self.message_user(request, f"Failed to send to Vision: {e}", level="warning")
+            except VisionAPIMissingCredentialsError as e:
+                self.message_user(request, f"Vision API not configured: {e}", level="error")
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.send_to_vision,
+            message="Do you confirm to send this payment plan to Vision?",
+        )
 
 
 @admin.register(PaymentPlanGroup)
@@ -394,13 +421,6 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
     readonly_fields = ("snapshot_data", "household_id")
 
 
-def has_payment_pg_sync_permission(request: Any, payment: Payment) -> bool:
-    return request.user.has_perm(
-        Permissions.PM_SYNC_PAYMENT_WITH_PG.value,
-        payment.parent.program,
-    )
-
-
 @admin.register(Payment)
 class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id",)
@@ -494,7 +514,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
-        permission=lambda request, payment, *args, **kwargs: has_payment_pg_sync_permission(request, payment),
+        permission="payment.pm_sync_payment_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":

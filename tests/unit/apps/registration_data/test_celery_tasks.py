@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
 from django.db import Error
+from django.test.utils import override_settings
 from openpyxl.utils.exceptions import InvalidFileException
 import pytest
 
@@ -880,12 +881,9 @@ def test_pull_kobo_submissions_execute(
     assert str(resp_2["kobo_import_data_id"]) == str(kobo_import_data_without_pics.id)
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
@@ -904,12 +902,9 @@ def test_deduplication_engine_process_task(
     mock_upload_and_process.assert_called_once_with(program)
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
@@ -928,12 +923,9 @@ def test_fetch_biometric_deduplication_results_and_process(
     mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, None)
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
