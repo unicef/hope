@@ -16,7 +16,6 @@ import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
-  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -91,7 +90,7 @@ export const GrievancesTable = ({
       submissionChannel: filter.submissionChannel,
       preferredLanguage: filter.preferredLanguage,
       programCode: isAllPrograms ? filter.program : programCode,
-      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
+      isActiveProgram: isAllPrograms ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
     [
@@ -120,7 +119,6 @@ export const GrievancesTable = ({
       filter.submissionChannel,
       filter.preferredLanguage,
       filter.program,
-      filter.programState,
       filter.areaScope,
       isAllPrograms,
       programCode,

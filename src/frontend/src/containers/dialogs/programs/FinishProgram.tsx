@@ -81,7 +81,9 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            {t('Are you sure you want to finish this Programme?')}
+            {t(
+              'Are you sure you want to finish this Programme? All active tickets that are not yet closed, and any tickets with a Household ID or Individual ID related to this Programme, will be filtered out of every grievance list, report and dashboard. They will remain visible within this Programme.',
+            )}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>

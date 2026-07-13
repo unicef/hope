@@ -640,6 +640,31 @@ def list_global_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
+def ticket_without_program(afghanistan: BusinessArea) -> GrievanceTicket:
+    return GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+
+
+@pytest.fixture
+def multi_active_program_ticket(afghanistan: BusinessArea, program_afghanistan1: Program) -> GrievanceTicket:
+    second_active_program = ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="another active program",
+    )
+    ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+    ticket.programs.add(program_afghanistan1, second_active_program)
+    return ticket
+
+
+@pytest.fixture
 def submission_channel_tickets(afghanistan: BusinessArea, program_afghanistan1: Program) -> dict:
     call_center_ticket = GrievanceTicketFactory(
         business_area=afghanistan,
@@ -1325,6 +1350,42 @@ def test_filter_by_program_status(
     response = client.get(list_global_url, {"is_active_program": filter_value})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == expected_count
+
+
+def test_filter_by_program_status_keeps_tickets_without_a_program(
+    api_client: Any,
+    user: User,
+    program_afghanistan1: Program,
+    ticket_without_program: GrievanceTicket,
+    list_global_url: str,
+) -> None:
+    client = api_client(user)
+    response = client.get(list_global_url, {"is_active_program": True})
+
+    assert response.status_code == status.HTTP_200_OK
+    returned_ids = [ticket["id"] for ticket in response.data["results"]]
+    assert str(ticket_without_program.id) in returned_ids
+
+
+def test_filter_by_program_status_does_not_duplicate_multi_program_tickets(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    multi_active_program_ticket: GrievanceTicket,
+    list_global_url: str,
+) -> None:
+    client = api_client(user)
+    response = client.get(list_global_url, {"is_active_program": True})
+    assert response.status_code == status.HTTP_200_OK
+    assert [t["id"] for t in response.data["results"]] == [str(multi_active_program_ticket.id)]
+
+    count_url = reverse(
+        "api:grievance:grievance-tickets-global-count",
+        kwargs={"business_area_slug": afghanistan.slug},
+    )
+    count_response = client.get(count_url, {"is_active_program": True})
+    assert count_response.status_code == status.HTTP_200_OK
+    assert count_response.data["count"] == 1
 
 
 def test_filter_by_submission_channel(

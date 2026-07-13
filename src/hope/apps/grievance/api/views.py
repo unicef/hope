@@ -195,9 +195,12 @@ class GrievanceDashboardMixin:
         base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=self.business_area_slug)
 
         if program:
-            base_queryset = base_queryset.filter(programs__in=[program])
+            return base_queryset.filter(programs__in=[program])
 
-        return base_queryset
+        active_or_no_program = base_queryset.filter(
+            Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True)
+        ).values("pk")
+        return base_queryset.filter(pk__in=active_or_no_program)
 
     def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, Any]:
         """Generate dashboard data from base queryset."""
@@ -558,7 +561,7 @@ class GrievanceTicketGlobalViewSet(
     parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_count_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(self.grievance_permissions_query)
+        return super().get_queryset().filter(self.grievance_permissions_query).distinct()
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []

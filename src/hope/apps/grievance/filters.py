@@ -235,7 +235,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
-            return qs.filter(programs__status=Program.ACTIVE)
+            return qs.filter(Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True))
         if value is False:
             return qs.filter(programs__status=Program.FINISHED)
         return qs
