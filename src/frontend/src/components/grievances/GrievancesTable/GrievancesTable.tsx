@@ -33,6 +33,7 @@ import {
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
+import { BulkCloseModal } from './bulk/BulkCloseModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -418,6 +419,10 @@ export const GrievancesTable = ({
             setSelected={setSelectedTickets}
           />
           <BulkAddNoteModal
+            selectedTickets={selectedTickets}
+            setSelected={setSelectedTickets}
+          />
+          <BulkCloseModal
             selectedTickets={selectedTickets}
             setSelected={setSelectedTickets}
           />
