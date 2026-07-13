@@ -197,7 +197,7 @@ class GrievanceDashboardMixin:
         if program:
             return base_queryset.filter(programs__in=[program])
 
-        active_or_no_program = GrievanceTicket.objects.filter(
+        active_or_no_program = base_queryset.filter(
             Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True)
         ).values("pk")
         return base_queryset.filter(pk__in=active_or_no_program)
