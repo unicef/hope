@@ -119,7 +119,6 @@ class BulkActionService:
                 "Only Grievance Complaint tickets in status For Approval can be closed."
             )
 
-        # version cache is bumped by the post_save signal on save()
         for ticket in tickets:
             old_ticket = copy.copy(ticket)
             TicketStatusChangerService(ticket, created_by).change_status(GrievanceTicket.STATUS_CLOSED)
@@ -131,6 +130,7 @@ class BulkActionService:
                 old_object=old_ticket,
                 new_object=ticket,
             )
+        # version cache is bumped by the post_save signal on save()
         self._clear_cache(business_area_slug)
         return GrievanceTicket.objects.filter(id__in=tickets_ids)
 
