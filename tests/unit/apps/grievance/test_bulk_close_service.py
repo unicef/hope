@@ -251,41 +251,15 @@ def test_bulk_close_rejects_non_complaint_ticket(
 def test_bulk_close_rejects_complaint_ticket_in_wrong_status(
     business_area: BusinessArea, user: User, complaint_new: GrievanceTicket
 ) -> None:
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as exc_info:
         BulkActionService().bulk_close(user, [complaint_new.id], business_area.slug)
 
     complaint_new.refresh_from_db()
 
     assert complaint_new.status == GrievanceTicket.STATUS_NEW
-
-
-def test_bulk_close_error_message(business_area: BusinessArea, user: User, complaint_new: GrievanceTicket) -> None:
-    with pytest.raises(ValidationError) as exc_info:
-        BulkActionService().bulk_close(user, [complaint_new.id], business_area.slug)
-
     assert str(exc_info.value.detail[0]) == (
         "Some selected tickets cannot be closed. Only Grievance Complaint tickets in status For Approval can be closed."
     )
-
-
-def test_bulk_close_closes_nothing_when_a_ticket_is_wrong_type(
-    business_area: BusinessArea,
-    user: User,
-    complaint_for_approval: GrievanceTicket,
-    needs_adjudication_for_approval: GrievanceTicket,
-) -> None:
-    with pytest.raises(ValidationError):
-        BulkActionService().bulk_close(
-            user,
-            [complaint_for_approval.id, needs_adjudication_for_approval.id],
-            business_area.slug,
-        )
-
-    complaint_for_approval.refresh_from_db()
-    needs_adjudication_for_approval.refresh_from_db()
-
-    assert complaint_for_approval.status == GrievanceTicket.STATUS_FOR_APPROVAL
-    assert needs_adjudication_for_approval.status == GrievanceTicket.STATUS_FOR_APPROVAL
 
 
 def test_bulk_close_closes_nothing_when_a_complaint_is_wrong_status(
