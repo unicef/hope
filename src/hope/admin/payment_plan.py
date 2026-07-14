@@ -18,7 +18,7 @@ from django.utils.html import format_html
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
-from hope.apps.payment.forms import BatchReexportForm, TemplateSelectForm
+from hope.apps.payment.forms import BatchReexportForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root

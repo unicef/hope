@@ -28,8 +28,8 @@ from hope.admin.payment_plan import (
     can_send_to_vision,
     can_sync_with_payment_gateway,
 )
-from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import (
     AsyncJob,
     AsyncJobModel,
@@ -37,7 +37,7 @@ from hope.models import (
     FinancialServiceProvider,
     PaymentPlan,
     PaymentPlanGroup,
-    RoleAssignment
+    RoleAssignment,
 )
 
 pytestmark = pytest.mark.django_db
