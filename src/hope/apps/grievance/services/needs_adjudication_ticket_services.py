@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Sequence, cast
+from typing import TYPE_CHECKING, Any, Sequence
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q, QuerySet
@@ -314,8 +314,8 @@ def create_needs_adjudication_tickets(
 
         if possible_duplicates and not (possible_duplicate in possible_duplicates and len(possible_duplicates) == 1):
             ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=cast("Individual", possible_duplicate),
-                possible_duplicate=cast("Individual", possible_duplicate),  # for backward compatibility
+                main_individual=possible_duplicate,
+                possible_duplicate=possible_duplicate,  # for backward compatibility
                 business_area=business_area,
                 registration_data_import=registration_data_import,
                 possible_duplicates=possible_duplicates,
@@ -360,7 +360,7 @@ def create_needs_adjudication_tickets_for_biometrics(
             if pair.individual1:
                 original_individual = pair.individual1
             else:
-                original_individual = pair.individual2  # pragma: no cover
+                original_individual = pair.individual2  # type: ignore[assignment]  # pragma: no cover
         # if both individuals are from the same rdi mark second as duplicate
         # if one of individuals is in already merged population mark it as original
         elif pair.individual1.registration_data_import in [
