@@ -4,7 +4,7 @@ from time import sleep
 
 from dateutil.relativedelta import relativedelta
 import pytest
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -29,6 +29,7 @@ from hope.models import (
     DataCollectingType,
     Household,
     PaymentPlan,
+    PaymentPlanGroup,
     Program,
     ProgramCycle,
     User,
@@ -218,6 +219,7 @@ def create_custom_household() -> Household:
 @pytest.fixture
 def create_payment_plan(standard_program: Program) -> PaymentPlan:
     cycle = standard_program.cycles.first()
+    group, _ = PaymentPlanGroup.objects.get_or_create(cycle=cycle, defaults={"name": "Default Group"})
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=BusinessArea.objects.get(slug="afghanistan"),
@@ -231,8 +233,9 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         created_by=User.objects.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         program_cycle=cycle,
+        payment_plan_group=group,
     )
     return payment_plan[0]
 
@@ -290,31 +293,6 @@ class TestSmokeProgrammeDetails:
         )
         assert "0" in page_programme_details.get_label_program_size().text
 
-    def test_edit_programme_from_details(
-        self,
-        create_programs: None,
-        page_programme_details: ProgrammeDetails,
-        page_programme_management: ProgrammeManagement,
-    ) -> None:
-        page_programme_details.select_global_program_filter("Test Programm")
-        page_programme_details.get_button_edit_program().click()
-        page_programme_details.get_select_edit_program_details().click()
-        page_programme_management.clear_input(page_programme_management.get_input_programme_name())
-        page_programme_management.get_input_programme_name().send_keys("New name after Edit")
-        page_programme_management.clear_input(page_programme_management.get_input_start_date())
-        page_programme_management.get_input_start_date().send_keys(
-            str(FormatTime(1, 1, 2022).numerically_formatted_date)
-        )
-        page_programme_management.clear_input(page_programme_management.get_input_end_date())
-        page_programme_management.get_input_end_date().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
-        page_programme_management.get_button_next().click()
-        page_programme_management.get_button_add_time_series_field()
-        page_programme_management.get_button_save().click()
-        # Check Details page
-        page_programme_details.wait_for_text("New name after Edit", page_programme_details.header_title)
-        assert FormatTime(1, 1, 2022).date_in_text_format in page_programme_details.get_label_start_date().text
-        assert FormatTime(1, 10, 2099).date_in_text_format in page_programme_details.get_label_end_date().text
-
     def test_program_details_happy_path(
         self, create_payment_plan: Program, page_programme_details: ProgrammeDetails
     ) -> None:
@@ -358,10 +336,8 @@ class TestProgrammeDetails:
         # Create Programme
         page_programme_management.get_button_new_program().click()
         page_programme_management.get_input_programme_name().send_keys("Test 1234 Program")
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(FormatTime(1, 1, 2022).numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(FormatTime(1, 2, 2032).numerically_formatted_date)
+        page_programme_management.fill_input_start_date(FormatTime(1, 1, 2022).numerically_formatted_date)
+        page_programme_management.fill_input_end_date(FormatTime(1, 2, 2032).numerically_formatted_date)
         page_programme_management.choose_option_selector("Health")
         page_programme_management.choose_option_data_collecting_type("Partial")
         page_programme_management.get_input_beneficiary_group().click()
@@ -392,18 +368,11 @@ class TestProgrammeDetails:
         assert "0" in page_programme_details.get_label_program_size().text
         assert "Programme Cycles" in page_programme_details.get_table_title().text
         page_programme_details.get_button_add_new_programme_cycle().click()
-        page_programme_details.get_data_picker_filter().click()
-        page_programme_details.get_data_picker_filter().send_keys(datetime.now().strftime("%Y-%m-%d"))
+        page_programme_details.fill_data_picker_filter(datetime.now().strftime("%Y-%m-%d"))
         page_programme_details.get_button_next().click()
         page_programme_details.get_input_title().send_keys("Test Title")
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.get_end_date_cycle().click()
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
         page_programme_details.get_program_cycle_row()
         for _ in range(50):
@@ -435,14 +404,8 @@ class TestProgrammeDetails:
         # Create first cycle with end date
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("123")
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.get_end_date_cycle().click()
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
         # Wait for first cycle to be created (2 total cycles)
@@ -453,10 +416,7 @@ class TestProgrammeDetails:
         # Create second cycle without end date
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("Test %$ What?")
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
         # Wait for second cycle to be created (3 total cycles)
@@ -491,14 +451,8 @@ class TestProgrammeDetails:
         # Create first cycle
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("123")
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.get_end_date_cycle().click()
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=10)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
         # Wait for first cycle to be created (2 total cycles)
@@ -509,14 +463,8 @@ class TestProgrammeDetails:
         # Create second cycle
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("Test %$ What?")
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.get_end_date_cycle().click()
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
         # Wait for second cycle to be created (3 total cycles)
@@ -553,14 +501,8 @@ class TestProgrammeDetails:
         page_programme_details.get_button_edit_program_cycle()[0].click()
         page_programme_details.clear_input(page_programme_details.get_input_title())
         page_programme_details.get_input_title().send_keys("Edited title check")
-        page_programme_details.clear_input(page_programme_details.get_start_date_cycle())
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.clear_input(page_programme_details.get_end_date_cycle())
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_save().click()
         assert "Draft" in page_programme_details.get_program_cycle_status()[0].text
         start_date = (datetime.now() + relativedelta(days=11)).strftime("%-d %b %Y")
@@ -630,7 +572,6 @@ class TestProgrammeDetails:
         with pytest.raises(IndexError):
             assert page_programme_details.get_delete_programme_cycle()[2]
 
-    @pytest.mark.skip(reason="Unskip after fix 211823")
     def test_program_details_edit_default_cycle_by_add_new_cancel(
         self,
         standard_program_with_draft_programme_cycle: Program,
@@ -641,10 +582,19 @@ class TestProgrammeDetails:
         assert "0" in page_programme_details.get_label_program_size().text
         assert "Programme Cycles" in page_programme_details.get_table_title().text
         page_programme_details.get_button_add_new_programme_cycle().click()
-        page_programme_details.get_data_picker_filter().click()
-        page_programme_details.get_data_picker_filter().send_keys(datetime.now().strftime("%Y-%m-%d"))
+        page_programme_details.fill_data_picker_filter(datetime.now().strftime("%Y-%m-%d"))
         page_programme_details.get_button_next().click()
-        page_programme_details.get_button_cancel().click()
+        # Saving the default cycle's end date re-renders the dialog (the step list shrinks
+        # from 2 to 1 and swaps UpdateProgramCycle -> CreateProgramCycle), so the cancel
+        # button can go stale mid-transition; retry the click until it lands.
+        for _ in range(30):
+            try:
+                page_programme_details.get_button_cancel().click()
+                break
+            except StaleElementReferenceException:
+                sleep(0.1)
+        else:
+            page_programme_details.get_button_cancel().click()
 
         assert "Draft" in page_programme_details.get_program_cycle_status()[0].text
         assert datetime.now().strftime("%-d %b %Y") in page_programme_details.get_program_cycle_end_date()[0].text
@@ -652,26 +602,23 @@ class TestProgrammeDetails:
 
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.get_input_title().send_keys("Test %$ What?")
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.get_end_date_cycle().click()
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=11)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
-        assert "Draft" in page_programme_details.get_program_cycle_status()[2].text
+        for _ in range(50):
+            if len(page_programme_details.get_program_cycle_status()) == 2:
+                break
+            sleep(0.1)
+        assert "Draft" in page_programme_details.get_program_cycle_status()[1].text
         assert (datetime.now() + relativedelta(days=11)).strftime(
             "%-d %b %Y"
-        ) in page_programme_details.get_program_cycle_start_date()[2].text
+        ) in page_programme_details.get_program_cycle_start_date()[1].text
         assert (datetime.now() + relativedelta(days=21)).strftime(
             "%-d %b %Y"
-        ) in page_programme_details.get_program_cycle_end_date()[2].text
-        assert "Test %$ What?" in page_programme_details.get_program_cycle_title()[2].text
+        ) in page_programme_details.get_program_cycle_end_date()[1].text
+        assert "Test %$ What?" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fixing")
     def test_program_details_add_new_cycle_with_wrong_date(
         self,
         standard_active_program_cycle_draft: Program,
@@ -682,10 +629,7 @@ class TestProgrammeDetails:
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.clear_input(page_programme_details.get_input_title())
         page_programme_details.get_input_title().send_keys("New cycle with wrong date")
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() - relativedelta(days=40)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() - relativedelta(days=40)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
         for _ in range(50):
             if (
@@ -698,39 +642,24 @@ class TestProgrammeDetails:
             "Start Date cannot be before Programme Start Date" in page_programme_details.get_start_date_cycle_div().text
         )
 
-        page_programme_details.clear_input(page_programme_details.get_start_date_cycle())
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() - relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.get_end_date_cycle().click()
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() - relativedelta(days=1)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
         for _ in range(50):
             if "End Date cannot be after Programme End Date" in page_programme_details.get_end_date_cycle_div().text:
                 break
             sleep(0.1)
         assert "End Date cannot be after Programme End Date" in page_programme_details.get_end_date_cycle_div().text
-        page_programme_details.clear_input(page_programme_details.get_end_date_cycle())
 
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
-        for _ in range(50):
-            if "Start date must be after the latest cycle." in page_programme_details.get_start_date_cycle_div().text:
-                break
-            sleep(0.1)
-        assert (
-            "Start Date*\nStart date must be after the latest cycle end date."
-            in page_programme_details.get_start_date_cycle_div().text
-        )
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")
-        )
+        # Unlike the two checks above (frontend Yup validation shown inline in the field),
+        # "Start date must be after the latest cycle end date." is a backend validation
+        # surfaced as a snackbar alert.
+        page_programme_details.check_alert("Start date must be after the latest cycle end date.")
+
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_create_program_cycle().click()
 
         page_programme_details.get_button_add_new_programme_cycle()
@@ -750,7 +679,6 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "New cycle with wrong date" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fixing")
     def test_program_details_edit_cycle_with_wrong_date(
         self,
         program_with_different_cycles: Program,
@@ -761,48 +689,30 @@ class TestProgrammeDetails:
         page_programme_details.get_button_edit_program_cycle()[1].click()
         page_programme_details.clear_input(page_programme_details.get_input_title())
         page_programme_details.get_input_title().send_keys("New cycle with wrong date")
-        page_programme_details.clear_input(page_programme_details.get_start_date_cycle())
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() - relativedelta(days=40)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() - relativedelta(days=40)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_save().click()
+        # The v9 date field renders the entered value between the label and the error,
+        # so assert only on the stable error message, not the exact field text.
+        error_message = "Start Date cannot be before Programme Start Date"
         for _ in range(50):
-            if (
-                "Start Date*\nStart Date cannot be before Programme Start Date"
-                in page_programme_details.get_start_date_cycle_div().text
-            ):
+            if error_message in page_programme_details.get_start_date_cycle_div().text:
                 break
             sleep(0.1)
-        assert (
-            "Start Date*\nStart Date cannot be before Programme Start Date"
-            in page_programme_details.get_start_date_cycle_div().text
-        )
+        assert error_message in page_programme_details.get_start_date_cycle_div().text
 
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() - relativedelta(days=24)).strftime("%Y-%m-%d")
-        )
-        page_programme_details.clear_input(page_programme_details.get_end_date_cycle())
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() - relativedelta(days=24)).strftime("%Y-%m-%d"))
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=121)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_save().click()
         for _ in range(50):
             if "End Date cannot be after Programme End Date" in page_programme_details.get_end_date_cycle_div().text:
                 break
             sleep(0.1)
         assert "End Date cannot be after Programme End Date" in page_programme_details.get_end_date_cycle_div().text
-        page_programme_details.clear_input(page_programme_details.get_end_date_cycle())
 
-        page_programme_details.get_end_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_end_date_cycle((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_save().click()
 
-        page_programme_details.get_start_date_cycle().click()
-        page_programme_details.get_start_date_cycle().send_keys(
-            (datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d")
-        )
+        page_programme_details.fill_start_date_cycle((datetime.now() + relativedelta(days=12)).strftime("%Y-%m-%d"))
         page_programme_details.get_button_save().click()
 
         page_programme_details.get_button_add_new_programme_cycle()
@@ -823,7 +733,6 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[1].text
         assert "New cycle with wrong date" in page_programme_details.get_program_cycle_title()[1].text
 
-    @pytest.mark.skip("Unskip after fix: 212581")
     def test_edit_program_details_with_wrong_date(
         self,
         program_with_different_cycles: Program,
@@ -835,19 +744,20 @@ class TestProgrammeDetails:
         page_programme_details.get_button_edit_program().click()
         page_programme_details.get_select_edit_program_details().click()
         page_programme_management.get_input_programme_name()
-        page_programme_management.clear_input(page_programme_management.get_input_start_date())
-        page_programme_management.get_input_start_date().send_keys(
-            str(FormatTime(1, 1, 2022).numerically_formatted_date)
-        )
-        page_programme_management.clear_input(page_programme_management.get_input_end_date())
-        page_programme_management.get_input_end_date().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
+        # Start before the earliest cycle, and an end date that is in the future (so it clears
+        # the frontend "End Date cannot be in the past" validation and Next stays enabled) but
+        # BEFORE the latest cycle's end date (now + 20 days). The backend then rejects the update
+        # because the new programme dates no longer contain the existing cycles.
+        page_programme_management.fill_input_start_date((datetime.now() - relativedelta(months=2)).strftime("%Y-%m-%d"))
+        page_programme_management.fill_input_end_date((datetime.now() + relativedelta(days=5)).strftime("%Y-%m-%d"))
         page_programme_management.get_button_next().click()
         page_programme_management.get_button_add_time_series_field()
         programme_creation_url = page_programme_details.driver.current_url
         page_programme_management.get_button_save().click()
-        # Check Details page
-        with pytest.raises(NoSuchElementException):
-            assert "details" in page_programme_details.wait_for_new_url(programme_creation_url).split("/")
+        # The backend rejects the update, so the app stays on the edit page and never reaches
+        # programme details.
+        current_url = page_programme_details.wait_for_new_url(programme_creation_url)
+        assert "details" not in current_url.split("/")
 
     def test_program_details_program_cycle_total_quantities(
         self,

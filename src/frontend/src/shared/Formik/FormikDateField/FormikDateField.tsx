@@ -1,4 +1,4 @@
-import { InputAdornment, Tooltip, TextField } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import moment from 'moment';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import styled from 'styled-components';
@@ -14,7 +14,11 @@ const FullWidthFormControl = styled(FormControl)`
 export const FormikDateField = ({
   field,
   form,
+  // decoratorStart/decoratorEnd are accepted for call-site API compatibility but no longer
+  // rendered; destructured here only to keep them out of the spread onto DesktopDatePicker.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   decoratorStart,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   decoratorEnd,
   tooltip = null,
   required = false,
@@ -37,7 +41,7 @@ export const FormikDateField = ({
       <DesktopDatePicker
         {...field}
         {...otherProps}
-        label={required ? `${otherProps.label}*` : otherProps.label}
+        label={otherProps.label}
         format="yyyy-MM-dd"
         name={field.name}
         slotProps={{
@@ -45,8 +49,11 @@ export const FormikDateField = ({
             size: 'small',
             error: isInvalid,
             helperText: isInvalid && get(form.errors, field.name),
-            inputProps: {
-              'data-cy': `date-input-${field.name}`,
+            required,
+            slotProps: {
+              htmlInput: {
+                'data-cy': `date-input-${field.name}`,
+              },
             },
           },
         }}
@@ -54,33 +61,6 @@ export const FormikDateField = ({
           '& .MuiSvgIcon-root': {
             outline: 'none',
           },
-        }}
-        slots={{
-          TextField: (props) => (
-            <TextField
-              {...props}
-              variant="outlined"
-              size="small"
-              fullWidth
-              error={isInvalid}
-              helperText={isInvalid && get(form.errors, field.name)}
-              InputProps={{
-                startAdornment: decoratorStart && (
-                  <InputAdornment position="start">
-                    {decoratorStart}
-                  </InputAdornment>
-                ),
-                endAdornment: decoratorEnd && (
-                  <InputAdornment position="end">{decoratorEnd}</InputAdornment>
-                ),
-              }}
-              required={required}
-              inputProps={{
-                ...props.inputProps,
-                'data-cy': `date-input-${field.name}`,
-              }}
-            />
-          ),
         }}
         value={formattedValue || null}
         onBlur={() => {

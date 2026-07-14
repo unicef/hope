@@ -286,8 +286,8 @@ class IndividualListSerializer(serializers.ModelSerializer):
 
     def get_role(self, obj: dict) -> str | None:
         roles = getattr(obj, "prefetched_roles", None)
-        if roles:
-            role = roles[0]
+        if roles is not None:
+            role = roles[0] if roles else None
         else:
             role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
 
@@ -380,9 +380,6 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "phone_no_alternative",
             "phone_no_alternative_valid",
             "sanction_list_last_check",
-            "wallet_name",
-            "blockchain_name",
-            "wallet_address",
             "status",
             "deduplication_golden_record_status",
             "flex_fields",

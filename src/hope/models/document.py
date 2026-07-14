@@ -24,6 +24,10 @@ class DocumentValidator(TimeStampedUUIDModel):
         ordering = ("id",)
 
 
+def get_document_status_choices() -> tuple:
+    return Document.STATUS_CHOICES
+
+
 class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
@@ -41,7 +45,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     document_number = models.CharField(max_length=255, blank=True, db_index=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, blank=True)
+    status = models.CharField(max_length=20, choices=get_document_status_choices, default=STATUS_PENDING, blank=True)
     photo = models.ImageField(blank=True)
     cleared = models.BooleanField(default=False, help_text="Cleared used to confirm FOSTER_CHILD relationship")
     cleared_date = models.DateTimeField(default=timezone.now, blank=True)
@@ -102,6 +106,12 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
     def __str__(self) -> str:
         return f"{self.type} - {self.document_number}"
+
+    @property
+    def dedup_signature(self) -> str:
+        if self.type.valid_for_deduplication:
+            return f"{self.type_id}--{self.document_number}--{self.country_id}"
+        return f"{self.document_number}--{self.country_id}"
 
     def mark_as_need_investigation(self) -> None:
         self.status = self.STATUS_NEED_INVESTIGATION

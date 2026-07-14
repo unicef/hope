@@ -29,7 +29,7 @@ export function VerificationPlanDetailsChart({
                 display: false,
               },
             },
-          } as any
+          }
         }
         data={{
           labels: [

@@ -763,7 +763,13 @@ class HardDocumentDeduplication:
             program_q = Q(individual__program=program_id)
             documents_to_dedup = evaluate_qs(
                 new_documents.filter(Q(status=Document.STATUS_PENDING) & Q(type__is_identity_document=True) & program_q)
-                .select_related("individual", "type")
+                .select_related(
+                    "individual",
+                    "individual__business_area",
+                    "individual__household__admin2",
+                    "type",
+                    "country",
+                )
                 .select_for_update(of=("self",))  # no need to lock individuals
                 .order_by("document_number", "created_at")
             )
@@ -1021,9 +1027,7 @@ class HardDocumentDeduplication:
         return program_ids
 
     def _generate_signature(self, document: Document) -> str:
-        if document.type.valid_for_deduplication:
-            return f"{document.type_id}--{document.document_number}--{document.country_id}"
-        return f"{document.document_number}--{document.country_id}"
+        return document.dedup_signature
 
     def _prepare_grievance_ticket_documents_deduplication(
         self,

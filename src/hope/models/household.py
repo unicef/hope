@@ -21,14 +21,14 @@ from sorl.thumbnail import ImageField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.household.const import (
     BLANK,
-    DATA_SHARING_CHOICES,
-    ORG_ENUMERATOR_CHOICES,
-    REGISTRATION_METHOD_CHOICES,
-    RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     STATUS_ACTIVE,
     STATUS_INACTIVE,
+    get_data_sharing_choices,
+    get_org_enumerator_choices,
+    get_registration_method_choices,
+    get_residence_status_choices,
 )
 from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import (
@@ -87,6 +87,10 @@ class Household(
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
         SINGLE = "SINGLE", "Single"
+
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return Household.CollectType.choices
 
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -278,14 +282,14 @@ class Household(
     )
     consent = models.BooleanField(null=True, blank=True, help_text="Household consent")
     consent_sharing = MultiSelectField(
-        choices=DATA_SHARING_CHOICES,
+        choices=get_data_sharing_choices,
         default=BLANK,
         blank=True,
         help_text="Household consent sharing",
     )
     residence_status = models.CharField(
         max_length=254,
-        choices=RESIDENCE_STATUS_CHOICE,
+        choices=get_residence_status_choices,
         blank=True,
         help_text="Household residence status",
     )
@@ -445,7 +449,7 @@ class Household(
     # System fields
     registration_method = models.CharField(
         max_length=250,
-        choices=REGISTRATION_METHOD_CHOICES,
+        choices=get_registration_method_choices,
         default=BLANK,
         blank=True,
         help_text="Household registration method [sys]",
@@ -465,7 +469,7 @@ class Household(
     is_migration_handled = models.BooleanField(default=False, help_text="Household migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Household migrated at [sys]")
     collect_type = models.CharField(
-        choices=CollectType.choices,
+        choices=CollectType.get_choices,
         default=CollectType.STANDARD.value,
         max_length=8,
         blank=True,
@@ -514,7 +518,7 @@ class Household(
     )
     org_enumerator = models.CharField(
         max_length=250,
-        choices=ORG_ENUMERATOR_CHOICES,
+        choices=get_org_enumerator_choices,
         default=BLANK,
         blank=True,
         help_text="Household org enumerator [sys]",

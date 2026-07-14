@@ -1,7 +1,8 @@
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import patch
 
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import AnonymousUser, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
@@ -9,6 +10,7 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    HouseholdFactory,
     PartnerFactory,
     ProgramFactory,
     RoleAssignmentFactory,
@@ -176,6 +178,11 @@ def role_test_user():
 @pytest.fixture
 def role_test_partner():
     return RoleFactory(name="Test Role Partner", permissions=["PROGRAMME_FINISH"])
+
+
+@pytest.fixture
+def household(business_area, program):
+    return HouseholdFactory(business_area=business_area, program=program, create_role=False)
 
 
 def test_get_all_permissions_caches_result(
@@ -553,3 +560,41 @@ def test_no_permissions_for_program_without_any_role_assignment(
     permissions = backend.get_all_permissions(user, program_other)
 
     assert set() == permissions
+
+
+def test_get_user_returns_none_for_missing_user(backend, db):
+    result = backend.get_user(999_999)
+    assert result is None
+
+
+def test_get_all_permissions_for_object_with_program_attribute(
+    backend, user, business_area, program, household, role_assignment_user, role_programme_create
+):
+    role_assignment_user.role = role_programme_create
+    role_assignment_user.program = program
+    role_assignment_user.save()
+
+    permissions = backend.get_all_permissions(user, household)
+
+    assert "PROGRAMME_CREATE" in permissions
+
+
+def test_get_all_permissions_for_object_with_business_area_attribute(
+    backend, user, business_area, role_assignment_user, role_programme_create
+):
+    role_assignment_user.role = role_programme_create
+    role_assignment_user.save()
+
+    permissions = backend.get_all_permissions(user, SimpleNamespace(business_area=business_area))
+
+    assert "PROGRAMME_CREATE" in permissions
+
+
+def test_get_all_permissions_for_unsupported_object_returns_empty_set(backend, user):
+    permissions = backend.get_all_permissions(user, SimpleNamespace())
+
+    assert permissions == set()
+
+
+def test_has_perm_returns_false_for_anonymous_user(backend):
+    assert backend.has_perm(AnonymousUser(), "core.test_permission") is False

@@ -7,6 +7,7 @@ from constance.test import override_config
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.test.utils import override_settings
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
@@ -502,12 +503,9 @@ def test_close_needs_adjudication_ticket_service_when_just_duplicates(
     )
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate")
 def test_close_needs_adjudication_ticket_service_for_biometrics(
@@ -563,12 +561,9 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
     )
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @patch("hope.apps.grievance.services.needs_adjudication_ticket_services.logger")
 @patch("hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService")

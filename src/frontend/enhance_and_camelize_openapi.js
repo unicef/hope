@@ -2,54 +2,12 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
 const NEWLINE_RE = /[\r\n]/g;
+const CHOICES_FILE = 'data/choices.json';
 
 const EXCLUDED_CHOICE_ENDPOINTS = [
   'payment-record-delivery-type',
 ];
-
-// Function to automatically discover all choice endpoints from the OpenAPI spec
-async function discoverChoiceEndpoints() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/rest/`);
-    const openApiText = await response.text();
-    const openApiSpec = yaml.load(openApiText);
-
-    const choiceEndpoints = new Set();
-
-    // Find all endpoints that match the pattern /api/rest/choices/{choice-type}/
-    for (const [path, pathObj] of Object.entries(openApiSpec.paths || {})) {
-      if (path.startsWith('/api/rest/choices/') && path.endsWith('/')) {
-        const choiceType = path
-          .replace('/api/rest/choices/', '')
-          .replace('/', '');
-        if (choiceType) {
-          choiceEndpoints.add(choiceType);
-        }
-      }
-    }
-
-    console.log('Discovered choice endpoints:', Array.from(choiceEndpoints));
-    return Array.from(choiceEndpoints);
-  } catch (error) {
-    console.warn(
-      'Failed to discover choice endpoints, using fallback list:',
-      error.message,
-    );
-    // Fallback to known endpoints
-    return [
-      'payment-plan-status',
-      'payment-plan-background-action-status',
-      'payment-record-delivery-type',
-      'grievance-ticket-category',
-      'grievance-ticket-status',
-      'grievance-ticket-priority',
-      'grievance-ticket-urgency',
-      'grievance-ticket-issue-type',
-    ];
-  }
-}
 
 // Function to generate enum name from endpoint
 function generateEnumName(endpoint) {
@@ -204,68 +162,51 @@ function findFieldMappings(openApiSchema, enumName, endpoint) {
   return [...new Set(fields)]; // Remove duplicates
 }
 
-async function fetchChoices() {
+function loadChoices() {
   const choices = {};
-  const endpoints = await discoverChoiceEndpoints();
 
-  for (const endpoint of endpoints) {
+  if (!fs.existsSync(CHOICES_FILE)) {
+    throw new Error(
+      `Choices file ${CHOICES_FILE} not found. Run \`uv run python manage.py generate_openapi\` first.`,
+    );
+  }
+
+  const choicesByEndpoint = JSON.parse(fs.readFileSync(CHOICES_FILE, 'utf8'));
+
+  for (const [endpoint, data] of Object.entries(choicesByEndpoint)) {
     if (EXCLUDED_CHOICE_ENDPOINTS.includes(endpoint)) {
       console.log(`Skipping enum generation for ${endpoint}`);
       continue;
     }
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/rest/choices/${endpoint}/`,
-      );
 
-      if (!response.ok) {
-        console.warn(`Choice endpoint ${endpoint} returned ${response.status}`);
-        continue;
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.warn(`Choice endpoint ${endpoint} returned non-JSON response`);
-        continue;
-      }
-
-      const data = await response.json();
-
-      // Validate that it's an array of choice objects
-      if (!Array.isArray(data) || data.length === 0) {
-        console.warn(
-          `Choice endpoint ${endpoint} returned invalid data structure`,
-        );
-        continue;
-      }
-
-      // Validate choice structure
-      const firstChoice = data[0];
-      if (!firstChoice.value || !firstChoice.name) {
-        console.warn(
-          `Choice endpoint ${endpoint} returned invalid choice structure`,
-        );
-        continue;
-      }
-
-      const enumName = generateEnumName(endpoint);
-      const enumValues = data.map((choice) => choice.value);
-
-      choices[enumName] = {
-        endpoint,
-        values: enumValues,
-        descriptions: data.reduce((acc, choice) => {
-          acc[choice.value] = choice.name;
-          return acc;
-        }, {}),
-      };
-
-      console.log(
-        `✓ Successfully fetched ${data.length} choices for ${String(endpoint).replace(NEWLINE_RE, '')} -> ${String(enumName).replace(NEWLINE_RE, '')}`,
-      );
-    } catch (error) {
-      console.warn(`Failed to fetch choices for ${String(endpoint).replace(NEWLINE_RE, '')}:`, error.message);
+    // Validate that it's an array of choice objects
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn(`Choice endpoint ${endpoint} has invalid data structure`);
+      continue;
     }
+
+    // Validate choice structure
+    const firstChoice = data[0];
+    if (!firstChoice.value || !firstChoice.name) {
+      console.warn(`Choice endpoint ${endpoint} has invalid choice structure`);
+      continue;
+    }
+
+    const enumName = generateEnumName(endpoint);
+    const enumValues = data.map((choice) => choice.value);
+
+    choices[enumName] = {
+      endpoint,
+      values: enumValues,
+      descriptions: data.reduce((acc, choice) => {
+        acc[choice.value] = choice.name;
+        return acc;
+      }, {}),
+    };
+
+    console.log(
+      `✓ Loaded ${data.length} choices for ${String(endpoint).replace(NEWLINE_RE, '')} -> ${String(enumName).replace(NEWLINE_RE, '')}`,
+    );
   }
 
   return choices;
@@ -341,9 +282,9 @@ function camelizeProperties(properties) {
 
 async function main() {
   try {
-    console.log('Fetching choice data from API...');
-    const choices = await fetchChoices();
-    console.log('Fetched choices:', Object.keys(choices));
+    console.log('Loading choice data from file...');
+    const choices = loadChoices();
+    console.log('Loaded choices:', Object.keys(choices));
 
     console.log('Reading OpenAPI specification...');
     const fileContent = fs.readFileSync('data/openapi.yml', 'utf8');

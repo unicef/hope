@@ -8,6 +8,7 @@ from hope.apps.targeting.choices import FlexFieldClassification
 from hope.models import (
     FlexibleAttribute,
     PaymentPlan,
+    PaymentPlanGroup,
     Program,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
@@ -16,9 +17,16 @@ from hope.models import (
 )
 
 
+class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name"]
+
+
 class TargetPopulationListSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(method_name="get_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
 
     class Meta:
         model = PaymentPlan
@@ -31,6 +39,7 @@ class TargetPopulationListSerializer(serializers.ModelSerializer):
             "total_households_count",
             "total_individuals_count",
             "updated_at",
+            "payment_plan_group",
         )
 
     @staticmethod

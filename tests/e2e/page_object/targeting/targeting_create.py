@@ -1,6 +1,7 @@
 from time import sleep
 
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -26,9 +27,9 @@ class TargetingCreate(BaseComponents):
     button_target_population_create = 'button[data-cy="button-target-population-create"]'
     input_div_name = 'div[data-cy="input-name"]'
     input_included_household_ids = 'div[data-cy="input-included-household-ids"]'
-    input_householdids = '[data-cy="input-householdIds"]'
+    input_householdids = 'div[data-cy="input-included-household-ids"] textarea:not([aria-hidden="true"])'
     input_included_individual_ids = 'div[data-cy="input-included-individual-ids"]'
-    input_individualids = 'input[data-cy="input-individualIds"]'
+    input_individualids = 'div[data-cy="input-included-individual-ids"] textarea:not([aria-hidden="true"])'
     input_flag_exclude_if_on_sanction_list = 'span[data-cy="input-flagExcludeIfOnSanctionList"]'
     input_flag_exclude_if_active_adjudication_ticket = 'span[data-cy="input-flagExcludeIfActiveAdjudicationTicket"]'
     icon_selected = '[data-testid="CheckBoxIcon"]'
@@ -86,6 +87,8 @@ class TargetingCreate(BaseComponents):
     total_number_of_households_count = 'div[data-cy="total-number-of-households-count"]'
     total_number_of_people_count = 'div[data-cy="label-Total Number of People"]'
     select_program_cycle_autocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
+    select_payment_plan_group_autocomplete = 'div[data-cy="filters-payment-plan-group-autocomplete"]'
+    input_payment_plan_purposes = '[data-cy="input-payment-plan-purposes"] input'
     programme_cycle_input = 'div[data-cy="Programme Cycle-input"]'
     select_refugee = 'li[data-cy="select-option-REFUGEE"]'
     field_chooser = 'data-cy="field-chooser-householdsFiltersBlocks[{}]"'
@@ -314,6 +317,40 @@ class TargetingCreate(BaseComponents):
             )
         )
 
+    # MUI X v9 date fields have no typeable single input. Wait for the visible
+    # input-base box (located via the hidden value input's data-cy), then
+    # fill_date_picker drives its editable section list.
+    _date_field_box_xpath = (
+        "//input[@data-cy='date-input-individualsFiltersBlocks[{0}].individualBlockFilters[{1}].value.{2}']"
+        "/ancestor::*[contains(@class, 'MuiPickersInputBase-root')][1]"
+    )
+
+    def fill_input_date_individuals_filters_blocks_value_from(
+        self,
+        value: str,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
+    ) -> None:
+        element = self.wait_for(
+            self._date_field_box_xpath.format(
+                individuals_filters_blocks_number, individual_block_filters_number, "from"
+            ),
+            By.XPATH,
+        )
+        self.fill_date_picker(element, value)
+
+    def fill_input_date_individuals_filters_blocks_value_to(
+        self,
+        value: str,
+        individuals_filters_blocks_number: int = 0,
+        individual_block_filters_number: int = 0,
+    ) -> None:
+        element = self.wait_for(
+            self._date_field_box_xpath.format(individuals_filters_blocks_number, individual_block_filters_number, "to"),
+            By.XPATH,
+        )
+        self.fill_date_picker(element, value)
+
     def get_input_individuals_filters_blocks_value(
         self,
         individuals_filters_blocks_number: int = 0,
@@ -344,6 +381,12 @@ class TargetingCreate(BaseComponents):
 
     def get_filters_program_cycle_autocomplete(self) -> WebElement:
         return self.wait_for(self.select_program_cycle_autocomplete)
+
+    def get_filters_payment_plan_group_autocomplete(self) -> WebElement:
+        return self.wait_for(self.select_payment_plan_group_autocomplete)
+
+    def get_input_payment_plan_purposes(self) -> WebElement:
+        return self.wait_for(self.input_payment_plan_purposes)
 
     def get_programme_cycle_input(self) -> WebElement:
         return self.wait_for(self.programme_cycle_input)

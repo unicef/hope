@@ -20,6 +20,10 @@ def generic_financial_institutions():
             name="IBAN Provider Bank",
             type=FinancialInstitution.FinancialInstitutionType.BANK,
         ),
+        FinancialInstitution.objects.create(
+            name="Generic Crypto",
+            type=FinancialInstitution.FinancialInstitutionType.OTHER,
+        ),
     ]
 
 
@@ -30,6 +34,7 @@ def test_get_generic_one(generic_financial_institutions):
         ("xxx", True, "Generic Bank"),
         ("bank", True, "IBAN Provider Bank"),
         ("bank", False, "Generic Bank"),
+        ("crypto", False, "Generic Crypto"),
     ]
     for account_type, is_valid_iban, expected_fi_name in cases:
         assert FinancialInstitution.get_generic_one(account_type, is_valid_iban).name == expected_fi_name

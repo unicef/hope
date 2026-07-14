@@ -18,8 +18,8 @@ from extras.test_utils.factories import (
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.add_individual_service import AddIndividualService
 from hope.apps.grievance.services.data_change.utils import handle_add_identity
-from hope.apps.household.const import SINGLE
-from hope.models import Document, Individual, IndividualIdentity, Program
+from hope.apps.household.const import HEAD, RELATIONSHIP_UNKNOWN, SINGLE
+from hope.models import Document, Individual, IndividualIdentity, Program, User
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -53,6 +53,63 @@ def add_individual_context(program: Program) -> dict[str, Any]:
     ticket = ticket_details.ticket
     ticket.save()
     return {"household": household, "ticket": ticket, "ticket_details": ticket_details}
+
+
+@pytest.fixture
+def user() -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def unapproved_add_individual_context(program: Program) -> dict[str, Any]:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketAddIndividualDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        individual_data={
+            "given_name": "Test",
+            "full_name": "Test Example",
+            "family_name": "Example",
+            "sex": "MALE",
+            "birth_date": date(year=1980, month=2, day=1).isoformat(),
+            "marital_status": SINGLE,
+            "documents": [],
+        },
+        approve_status=False,
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return {"household": household, "ticket": ticket, "ticket_details": ticket_details}
+
+
+@pytest.fixture
+def head_add_individual_context(program: Program) -> dict[str, Any]:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketAddIndividualDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        individual_data={
+            "given_name": "Head",
+            "full_name": "Head Example",
+            "family_name": "Example",
+            "sex": "MALE",
+            "birth_date": date(year=1980, month=2, day=1).isoformat(),
+            "marital_status": SINGLE,
+            "relationship": HEAD,
+            "documents": [],
+        },
+        approve_status=True,
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return {
+        "household": household,
+        "ticket": ticket,
+        "ticket_details": ticket_details,
+        "previous_head": household.head_of_household,
+    }
 
 
 def test_increase_household_size_on_close_ticket(add_individual_context: dict[str, Any]) -> None:
@@ -166,3 +223,32 @@ def test_handle_add_identity(add_individual_context: dict[str, Any], program: Pr
     assert identity_obj.partner.name == "UNICEF"
     assert identity_obj.number == "A123456A"
     assert identity_obj.country == poland
+
+
+def test_close_without_approval_creates_no_individual(
+    unapproved_add_individual_context: dict[str, Any], user: User
+) -> None:
+    ticket = unapproved_add_individual_context["ticket"]
+    individuals_before = Individual.objects.count()
+
+    service = AddIndividualService(ticket, {})
+    service.close(user)
+
+    assert Individual.objects.count() == individuals_before
+
+
+def test_close_with_head_relationship_replaces_head_of_household(
+    head_add_individual_context: dict[str, Any], user: User
+) -> None:
+    household = head_add_individual_context["household"]
+    previous_head = head_add_individual_context["previous_head"]
+    ticket = head_add_individual_context["ticket"]
+
+    service = AddIndividualService(ticket, {})
+    service.close(user)
+
+    household.refresh_from_db()
+    new_head = Individual.objects.get(full_name="Head Example")
+    assert household.head_of_household == new_head
+    previous_head.refresh_from_db()
+    assert previous_head.relationship == RELATIONSHIP_UNKNOWN

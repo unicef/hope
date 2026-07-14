@@ -304,7 +304,7 @@ def test_form_existing_program_same_biometric_deduplication_value_does_not_call_
 def test_form_new_program_biometric_enabled_calls_service(
     business_area: BusinessArea,
 ) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True)
+    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True, status=Program.DRAFT)
     code = program.generate_code()
     data = _program_form_data(
         program,
@@ -327,7 +327,7 @@ def test_form_new_program_biometric_enabled_calls_service(
 def test_form_new_program_biometric_disabled_does_not_call_service(
     business_area: BusinessArea,
 ) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
+    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False, status=Program.DRAFT)
     code = program.generate_code()
     data = _program_form_data(
         program,
@@ -367,7 +367,7 @@ def test_form_missing_credentials_blocks_save_and_shows_error(
     data = _program_form_data(program, biometric_deduplication_enabled=True)
     form = ProgramAdminForm(data=data, instance=program)
 
-    error = DeduplicationEngineAPI.DeduplicationEngineMissingAPICredentialsError("Missing credentials")
+    error = DeduplicationEngineAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS("Missing credentials")
     with patch("hope.admin.program.BiometricDeduplicationService", side_effect=error):
         assert not form.is_valid()
 

@@ -1,6 +1,5 @@
 from decimal import Decimal
 import json
-import os
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
@@ -44,6 +43,7 @@ from hope.models import (
     FinancialInstitutionMapping,
     FinancialServiceProvider,
     FspNameMapping,
+    LogEntry,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
@@ -69,12 +69,9 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def mock_payment_gateway_env_vars() -> None:
-    with mock.patch.dict(
-        os.environ,
-        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST/"},
-    ):
-        yield
+def mock_payment_gateway_env_vars(settings) -> None:
+    settings.PAYMENT_GATEWAY_API_KEY = "TEST"
+    settings.PAYMENT_GATEWAY_API_URL = "TEST/"
 
 
 def normalize(data: Any) -> dict:
@@ -565,6 +562,83 @@ def test_sync_payment_plan(
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
+
+
+@pytest.mark.enable_activity_log
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+    return_value="FINALIZED",
+)
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+    return_value=100.00,
+)
+def test_sync_payment_plan_logs_payment_changes_with_user(
+    get_quantity_in_usd_mock: Any,
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    change_payment_instruction_status_mock: Any,
+    payment_gateway_setup: dict,
+) -> None:
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payments = payment_gateway_setup["payments"]
+    payment_plan = payment_gateway_setup["payment_plan"]
+    user = UserFactory()
+
+    split_1.sent_to_payment_gateway = True
+    split_2.sent_to_payment_gateway = True
+    split_1.save()
+    split_2.save()
+
+    payments[0].status = Payment.STATUS_PENDING
+    payments[1].status = Payment.STATUS_PENDING
+    payments[0].save()
+    payments[1].save()
+
+    get_records_for_payment_instruction_mock.side_effect = [
+        [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(payments[0].id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
+                auth_code="1",
+                payout_amount=float(payments[0].entitlement_quantity),
+                fsp_code="1",
+            )
+        ],
+        [
+            PaymentRecordData(
+                id=2,
+                remote_id=str(payments[1].id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="2",
+                parent="2",
+                status="ERROR",
+                auth_code="2",
+                payout_amount=0.0,
+                fsp_code="2",
+                message="Error",
+            ),
+        ],
+    ]
+
+    pg_service = PaymentGatewayService(user_id=str(user.pk))
+    pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+
+    pg_service.sync_payment_plan(payment_plan)
+
+    payment_logs = LogEntry.objects.filter(object_id__in=[str(p.id) for p in payments])
+    assert payment_logs.count() == 2
+    assert all(log.action == LogEntry.UPDATE for log in payment_logs)
+    assert all(log.user == user for log in payment_logs)
+    assert all("status" in log.changes for log in payment_logs)
 
 
 @mock.patch(
@@ -1918,3 +1992,19 @@ def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_or
         payment.collector,
     )
     assert result == account_data
+
+
+@pytest.mark.django_db
+def test_change_payment_instruction_status_returns_none_for_non_payment_gateway_plan() -> None:
+    fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    payment_plan = PaymentPlanFactory(financial_service_provider=fsp, use_payment_gateway=False)
+    split = PaymentPlanSplitFactory(payment_plan=payment_plan)
+    pg_service = PaymentGatewayService()
+    pg_service.api.change_payment_instruction_status = Mock()  # type: ignore
+
+    result = pg_service.change_payment_instruction_status(PaymentInstructionStatus.OPEN, split)
+
+    assert result is None
+    pg_service.api.change_payment_instruction_status.assert_not_called()

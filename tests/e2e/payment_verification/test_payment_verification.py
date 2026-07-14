@@ -596,7 +596,6 @@ class TestSmokePaymentVerification:
         assert page_payment_record.wait_for_status_container("RECEIVED", timeout=60)
         assert page_payment_record.get_status_container().text == "RECEIVED"
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_partially_successful(
         self,
         clear_downloaded_files: None,

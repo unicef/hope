@@ -75,20 +75,21 @@ const CreateProgramCycle = ({
       .min(2, t('Too short'))
       .max(150, t('Too long')),
     startDate: Yup.date()
+      .nullable()
       .required(t('Start Date is required'))
       .min(
         new Date(program.startDate),
         t('Start Date cannot be before Programme Start Date'),
       ),
-    endDate: endDate,
+    endDate: endDate.nullable(),
   });
 
   const initialValues: {
-    [key: string]: string | boolean | number;
+    [key: string]: string | boolean | number | null;
   } = {
     title: '',
-    startDate: undefined,
-    endDate: undefined,
+    startDate: null,
+    endDate: null,
   };
 
   const { mutateAsync, isPending, error } = useMutation<

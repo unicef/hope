@@ -1,19 +1,24 @@
 """Tests for grievance utils — traverse_sibling_tickets intersection guard."""
 
 from typing import Any
+from unittest.mock import patch
+from uuid import uuid4
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    GrievanceDocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.utils import traverse_sibling_tickets
+from hope.apps.grievance.utils import clear_cache, traverse_sibling_tickets, update_grievance_documents
 from hope.models import Individual
 
 pytestmark = [
@@ -88,6 +93,26 @@ def sibling_ticket(business_area: Any, rdi: Any, individual_golden: Any, individ
     return ticket
 
 
+@pytest.fixture
+def household_update_details(business_area: Any, household_golden: Any) -> Any:
+    ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=business_area,
+    )
+    return TicketHouseholdDataUpdateDetailsFactory(ticket=ticket, household=household_golden, household_data={})
+
+
+@pytest.fixture
+def grievance_document(business_area: Any) -> Any:
+    ticket = GrievanceTicketFactory(business_area=business_area)
+    return GrievanceDocumentFactory(
+        grievance_ticket=ticket,
+        file=SimpleUploadedFile("old.jpg", b"old-bytes", content_type="image/jpeg"),
+        file_size=9,
+    )
+
+
 def test_traverse_sibling_tickets_no_rdi_returns_early(
     grievance_ticket: Any,
     individual_golden: Any,
@@ -122,6 +147,20 @@ def test_traverse_sibling_tickets_empty_intersection_skips_add(
     assert sibling_details.selected_individuals.count() == initial_selected_count
 
 
+def test_traverse_sibling_tickets_empty_selected_returns_early(
+    grievance_ticket: Any,
+    sibling_ticket: Any,
+) -> None:
+    # Empty queryset → selected_individual_ids = [] → returns immediately, no DB writes.
+    sibling_details = sibling_ticket.needs_adjudication_ticket_details
+    initial_count = sibling_details.selected_individuals.count()
+
+    traverse_sibling_tickets(grievance_ticket, Individual.objects.none())
+
+    sibling_details.refresh_from_db()
+    assert sibling_details.selected_individuals.count() == initial_count
+
+
 def test_traverse_sibling_tickets_non_empty_intersection_adds_individuals(
     grievance_ticket: Any,
     sibling_ticket: Any,
@@ -136,3 +175,33 @@ def test_traverse_sibling_tickets_non_empty_intersection_adds_individuals(
     traverse_sibling_tickets(grievance_ticket, selected)
 
     assert sibling_details.selected_individuals.filter(id=individual_dup.id).exists()
+
+
+def test_clear_cache_for_household_details_deletes_household_pattern(household_update_details: Any) -> None:
+    with patch("hope.apps.grievance.utils.cache") as mock_cache:
+        clear_cache(household_update_details, "afghanistan")
+
+    mock_cache.delete_pattern.assert_called_once_with("count_afghanistan_HouseholdNodeConnection_*")
+
+
+def test_update_grievance_documents_replaces_file_and_metadata(grievance_document: Any) -> None:
+    assert grievance_document.file_size == 9
+    assert "old" in grievance_document.file.name
+    new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
+
+    update_grievance_documents([{"id": grievance_document.id, "name": "updated name", "file": new_file}])
+
+    grievance_document.refresh_from_db()
+    assert grievance_document.name == "updated name"
+    assert grievance_document.file_size == 10
+    assert grievance_document.content_type == "image/jpeg"
+    assert "new" in grievance_document.file.name
+
+
+def test_update_grievance_documents_skips_missing_document(grievance_document: Any) -> None:
+    new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
+
+    update_grievance_documents([{"id": uuid4(), "name": "updated name", "file": new_file}])
+
+    grievance_document.refresh_from_db()
+    assert grievance_document.name != "updated name"

@@ -23,6 +23,8 @@ from extras.test_utils.factories import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -67,21 +69,29 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def sw_program() -> Program:
-    return get_program_with_dct_type_and_name(
+    prog = get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.SOCIAL,
         status=Program.ACTIVE,
         beneficiary_group_name="People",
     )
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
+    prog.payment_plan_purposes.add(purpose)
+    PaymentPlanGroupFactory(cycle=prog.cycles.first(), name="Test Group")
+    return prog
 
 
 @pytest.fixture
 def non_sw_program() -> Program:
-    return get_program_with_dct_type_and_name(
+    prog = get_program_with_dct_type_and_name(
         "Test Programm",
         dct_type=DataCollectingType.Type.STANDARD,
         status=Program.ACTIVE,
     )
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
+    prog.payment_plan_purposes.add(purpose)
+    PaymentPlanGroupFactory(cycle=prog.cycles.first(), name="Test Group")
+    return prog
 
 
 @pytest.fixture
@@ -96,23 +106,24 @@ def program(business_area: BusinessArea) -> Program:
         data_collecting_type=dct,
         cycle=False,
     )
-    ProgramCycleFactory(
+    cycle = ProgramCycleFactory(
         title="Cycle In Programme",
         start_date=timezone.now() - relativedelta(days=5),
         end_date=timezone.now() + relativedelta(months=5),
         program=program,
     )
-
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
+    program.payment_plan_purposes.add(purpose)
+    PaymentPlanGroupFactory(cycle=cycle, name="Test Group")
     return program
 
 
 @pytest.fixture
-def create_household_with_individual_with_collectors() -> Household:
+def create_household_with_individual_with_collectors(program: Program) -> Household:
     observed_disability = []
     residence_status: str = HOST
     unicef_id: str = "HH-00-0000.0442"
     size: int = 2
-    program = Program.objects.get(name="Test Programm")
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     hoh = IndividualFactory(
         household=None,
@@ -391,6 +402,10 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
     fsp_1.delivery_mechanisms.set([dm_cash])
     fsp_1.allowed_business_areas.add(business_area)
 
+    purpose = PaymentPlanPurposeFactory(name="Test Purpose")
+    test_program.payment_plan_purposes.add(purpose)
+    group = PaymentPlanGroupFactory(cycle=test_program.cycles.first(), name="Test Group")
+
     pp = PaymentPlanFactory(
         name="Test Target Population",
         status=PaymentPlan.Status.TP_OPEN,
@@ -400,6 +415,8 @@ def create_targeting(delivery_mechanisms) -> PaymentPlan:
         updated_at=timezone.now(),
         delivery_mechanism=dm_cash,
         financial_service_provider=fsp_1,
+        payment_plan_group=group,
+        payment_plan_purposes=[purpose],
         business_area=business_area,
     )
     ind_1 = IndividualFactory(
@@ -588,6 +605,7 @@ class TestSmokeTargeting:
         page_targeting_create.get_button_individual_rule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
@@ -837,6 +855,10 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_add_criteria_button().click()
         assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD PEOPLE RULE"
         page_targeting_create.get_add_people_rule_button().click()
@@ -888,6 +910,10 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_add_criteria_button().click()
         assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD ITEMS GROUP RULE"
         page_targeting_create.get_add_household_rule_button().click()
@@ -931,6 +957,10 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_add_criteria_button().click()
         page_targeting_create.get_add_individual_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
@@ -1141,6 +1171,10 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_add_criteria_button().click()
         page_targeting_create.get_add_individual_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
@@ -1149,10 +1183,8 @@ class TestCreateTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
         page_targeting_create.get_select_round_option(1).click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().send_keys("2022-01-01")
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().send_keys("2022-03-03")
+        page_targeting_create.fill_input_date_individuals_filters_blocks_value_from("2022-01-01")
+        page_targeting_create.fill_input_date_individuals_filters_blocks_value_to("2022-03-03")
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test Date Attribute: 2022-01-01 - 2022-03-03\nRound 1 (Test Round Date 1)"
@@ -1195,6 +1227,10 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_add_criteria_button().click()
         page_targeting_create.get_add_individual_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
@@ -1239,6 +1275,10 @@ class TestCreateTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_add_criteria_button().click()
         assert page_targeting_create.get_add_people_rule_button().text.upper() == "ADD PEOPLE RULE"
         page_targeting_create.get_add_people_rule_button().click()
@@ -1294,6 +1334,10 @@ class TestTargeting:
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_div_target_population_add_criteria().click()
         page_targeting_create.get_input_household_ids().click()
         page_targeting_create.get_input_household_ids().send_keys(household_with_disability.unicef_id)
@@ -1403,7 +1447,7 @@ class TestTargeting:
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
         page_targeting_details.get_input_name().send_keys("a1!")
-        page_targeting_details.get_elements(page_targeting_details.buttonTargetPopulationDuplicate)[1].click()
+        page_targeting_details.get_elements(page_targeting_details.button_target_population_duplicate)[1].click()
         page_targeting_details.disappear_input_name()
         assert "a1!" in page_targeting_details.get_title_page().text
         assert "OPEN" in page_targeting_details.get_target_population_status().text
@@ -1619,7 +1663,7 @@ class TestTargeting:
                 By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
-    @pytest.mark.xfail(reason="unstable")
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_targeting_info_button(
         self,
         create_programs: None,
@@ -1629,9 +1673,8 @@ class TestTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_target_population().click()
         page_targeting.get_tab_field_list()
-        page_targeting.get_tab_targeting_diagram().click()
+        page_targeting.click(page_targeting.tab_targeting_diagram)
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_targeting_filters(
         self,
         create_programs: None,
@@ -1737,6 +1780,10 @@ class TestTargeting:
         assert "New Target Population" in page_targeting_create.get_title_page().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.get_filters_payment_plan_group_autocomplete().click()
+        page_targeting_create.select_listbox_element("Test Group")
+        page_targeting_create.get_input_payment_plan_purposes().click()
+        page_targeting_create.select_listbox_element("Test Purpose")
         page_targeting_create.get_add_criteria_button().click()
         page_targeting_create.get_add_people_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()

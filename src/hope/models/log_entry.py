@@ -18,6 +18,10 @@ if TYPE_CHECKING:
     from hope.models.program import Program
 
 
+def get_log_entry_action_choices() -> tuple:
+    return LogEntry.LOG_ENTRY_ACTION_CHOICES
+
+
 class LogEntry(models.Model):
     CREATE = "CREATE"
     UPDATE = "UPDATE"
@@ -41,7 +45,7 @@ class LogEntry(models.Model):
     object_id = models.UUIDField(null=True, blank=True, db_index=True)
     content_object = GenericForeignKey("content_type", "object_id")
     action = models.CharField(
-        choices=LOG_ENTRY_ACTION_CHOICES,
+        choices=get_log_entry_action_choices,
         max_length=100,
         verbose_name=_("action"),
         db_index=True,

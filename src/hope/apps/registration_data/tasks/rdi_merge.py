@@ -1,6 +1,6 @@
 import contextlib
 import logging
-from typing import Any, Iterable
+from typing import Any
 
 from constance import config
 from django.core.cache import cache
@@ -42,6 +42,7 @@ from hope.models import (
     HouseholdCollection,
     Individual,
     IndividualCollection,
+    IndividualIdentity,
     KoboImportedSubmission,
     PendingAccount,
     PendingDocument,
@@ -132,7 +133,7 @@ class RdiMergeTask:
         golden_record_duplicates = Individual.objects.filter(
             registration_data_import=obj_hct,
             deduplication_golden_record_status=DUPLICATE,
-        )
+        ).select_related("household__admin2", "program")
         logger.info(f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates")
         create_needs_adjudication_tickets(
             golden_record_duplicates,
@@ -146,7 +147,7 @@ class RdiMergeTask:
         needs_adjudication = Individual.objects.filter(
             registration_data_import=obj_hct,
             deduplication_golden_record_status=NEEDS_ADJUDICATION,
-        )
+        ).select_related("household__admin2", "program")
         logger.info(f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication")
         create_needs_adjudication_tickets(
             needs_adjudication,
@@ -208,10 +209,15 @@ class RdiMergeTask:
                     self._populate_index_individuals(obj_hct)
 
                     individuals = evaluate_qs(
-                        Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                        Individual.objects.filter(registration_data_import=obj_hct)
+                        .select_for_update(of=("self",))
+                        .order_by("pk")
                     )
                     households = evaluate_qs(
-                        Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                        Household.objects.filter(registration_data_import=obj_hct)
+                        .select_related("household_collection", "business_area")
+                        .select_for_update(of=("self",))
+                        .order_by("pk")
                     )
 
                     if not obj_hct.business_area.postpone_deduplication and len(individuals):
@@ -279,7 +285,11 @@ class RdiMergeTask:
                 Prefetch(
                     "documents",
                     queryset=Document.objects.select_related("type", "country"),
-                )
+                ),
+                Prefetch(
+                    "identities",
+                    queryset=IndividualIdentity.objects.select_related("partner"),
+                ),
             )
         )
 
@@ -322,13 +332,19 @@ class RdiMergeTask:
         # and new representation will be added to it
         # if this is the 2nd representation -
         # the collection is created now for the new representation and the existing one
-        for household in households:
-            # find other household with the same unicef_id and group them in the same collection
-            household_from_collection = (
-                Household.objects.filter(unicef_id=household.unicef_id, business_area=rdi.business_area)
-                .exclude(registration_data_import=rdi)
-                .first()
+        new_unicef_ids = [h.unicef_id for h in households]
+        existing_households_by_unicef_id: dict[str, Household] = {
+            h.unicef_id: h
+            for h in Household.objects.filter(
+                unicef_id__in=new_unicef_ids,
+                business_area=rdi.business_area,
             )
+            .exclude(registration_data_import=rdi)
+            .select_related("household_collection")
+        }
+
+        for household in households:
+            household_from_collection = existing_households_by_unicef_id.get(household.unicef_id)
             if household_from_collection:
                 if collection := household_from_collection.household_collection:
                     household.household_collection = collection
@@ -342,18 +358,23 @@ class RdiMergeTask:
 
         Household.all_objects.bulk_update(households_to_update, ["household_collection"])
 
-    def _update_individual_collections(self, individuals: Iterable, rdi: RegistrationDataImport) -> None:
+    def _update_individual_collections(self, individuals: QuerySet[Individual], rdi: RegistrationDataImport) -> None:
         individuals_to_update = []
-        for individual in individuals:
-            # find other individual with the same unicef_id and group them in the same collection
-            individual_from_collection = (
-                Individual.objects.filter(
-                    unicef_id=individual.unicef_id,
-                    business_area=rdi.business_area,
-                )
-                .exclude(registration_data_import=rdi)
-                .first()
+        individuals_list = list(individuals)
+        new_unicef_ids = [ind.unicef_id for ind in individuals_list]
+        existing_individuals_by_unicef_id: dict[str, Individual] = {
+            ind.unicef_id: ind
+            for ind in Individual.objects.filter(
+                unicef_id__in=new_unicef_ids,
+                business_area=rdi.business_area,
             )
+            .exclude(registration_data_import=rdi)
+            .select_related("individual_collection")
+        }
+
+        for individual in individuals_list:
+            # find other individual with the same unicef_id and group them in the same collection
+            individual_from_collection = existing_individuals_by_unicef_id.get(individual.unicef_id)
             if individual_from_collection:
                 if collection := individual_from_collection.individual_collection:
                     individual.individual_collection = collection

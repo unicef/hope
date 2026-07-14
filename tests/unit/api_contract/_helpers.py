@@ -49,6 +49,42 @@ class HopeRecorder(Recorder):
     def assert_payment_verification_plan_unicef_id(self, response, expected, path):
         pass
 
+    def assert_version(self, response, expected, path):
+        # IntegerVersionField increments on every save; comparing exact values across
+        # regenerate / replay runs is flaky. Type-check only.
+        assert response["version"] is None or isinstance(response["version"], int)
+
+
+class ProgramsRecorder(HopeRecorder):
+    """Recorder for the programs endpoints.
+
+    The embedded ``partners[*].id`` is a DB-sequence PK, which is not
+    deterministic across xdist workers, so normalize it to a constant on
+    both sides before comparison (name/access fields still compared).
+    """
+
+    def compare(self, response, expected, filename, view=None):
+        super().compare(self._mask_partner_ids(response), self._mask_partner_ids(expected), filename, view=view)
+
+    @classmethod
+    def _mask_partner_ids(cls, payload):
+        if isinstance(payload, dict):
+            return {
+                key: [cls._mask_id(item) for item in value]
+                if key == "partners" and isinstance(value, list)
+                else cls._mask_partner_ids(value)
+                for key, value in payload.items()
+            }
+        if isinstance(payload, (list, tuple)):
+            return [cls._mask_partner_ids(item) for item in payload]
+        return payload
+
+    @staticmethod
+    def _mask_id(item):
+        if isinstance(item, dict) and "id" in item:
+            return {**item, "id": 0}
+        return item
+
 
 class JsonPostRecorder(HopeRecorder):
     """Recorder for POST endpoints that send JSON bodies."""

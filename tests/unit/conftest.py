@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 import pytest
 
 from extras.test_utils.factories import CurrencyFactory
@@ -158,11 +158,6 @@ def pytest_unconfigure(config: Config) -> None:
     import sys  # noqa
 
     del sys._called_from_pytest
-
-
-disabled_locally_test = pytest.mark.skip(
-    reason="Elasticsearch error - to investigate",
-)
 
 
 @pytest.fixture

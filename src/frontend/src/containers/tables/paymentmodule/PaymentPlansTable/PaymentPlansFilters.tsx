@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -80,6 +80,11 @@ export function PaymentPlansFilters({
     [...(statusChoicesData || [])]?.filter((el) =>
       allowedStatusChoices.includes(el.value as any),
     ) || [];
+
+  const { data: planTypeChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentPlanTypeList'],
+    queryFn: () => RestService.restChoicesPaymentPlanTypeList(),
+  });
 
   return (
     <FiltersSection
@@ -178,26 +183,21 @@ export function PaymentPlansFilters({
             minDateMessage={<span />}
           />
         </Grid>
-        <Grid size={12}>
-          <Box ml={2}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(filter.isFollowUp)}
-                  value={filter.isFollowUp}
-                  color="primary"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleFilterChange('isFollowUp', true);
-                    } else {
-                      handleFilterChange('isFollowUp', false);
-                    }
-                  }}
-                />
-              }
-              label={t('Show only Follow-up plans')}
-            />
-          </Box>
+        <Grid size={3}>
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('planType', e.target.value || null)
+            }
+            label={t('Plan Type')}
+            value={filter.planType ?? ''}
+            fullWidth
+          >
+            {(planTypeChoicesData || []).map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
       </Grid>
     </FiltersSection>

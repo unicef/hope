@@ -249,6 +249,10 @@ class TargetingCriteriaFilterBase:
         ("IS_NULL", _("Is null")),
     )
 
+    @staticmethod
+    def get_comparison_choices() -> "Choices":
+        return TargetingCriteriaFilterBase.COMPARISON_CHOICES
+
     @property
     def field_name_combined(self) -> str:
         return f"{self.field_name}__{self.round_number}" if self.round_number else self.field_name

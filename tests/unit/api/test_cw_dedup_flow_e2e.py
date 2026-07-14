@@ -1,6 +1,4 @@
-import os
 from typing import Any
-from unittest import mock
 from unittest.mock import patch
 import uuid
 
@@ -32,15 +30,9 @@ pytestmark = [
 
 
 @pytest.fixture
-def mock_deduplication_engine_env_vars() -> Any:
-    with mock.patch.dict(
-        os.environ,
-        {
-            "DEDUPLICATION_ENGINE_API_KEY": "TEST",
-            "DEDUPLICATION_ENGINE_API_URL": "TEST/",
-        },
-    ):
-        yield
+def mock_deduplication_engine_env_vars(settings) -> None:
+    settings.DEDUPLICATION_ENGINE_API_KEY = "TEST"
+    settings.DEDUPLICATION_ENGINE_API_URL = "TEST/"
 
 
 @pytest.fixture
@@ -238,7 +230,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=168,
+        expected_queries=170,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
@@ -353,7 +345,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=165,
+        expected_queries=167,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)

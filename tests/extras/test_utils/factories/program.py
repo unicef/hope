@@ -2,13 +2,14 @@
 
 from datetime import date, timedelta
 from decimal import Decimal
+from typing import Any
 
 import factory
 from factory.django import DjangoModelFactory
 
 from hope.models import Program, ProgramCycle
 
-from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory
+from .core import BeneficiaryGroupFactory, BusinessAreaFactory, DataCollectingTypeFactory, PaymentPlanPurposeFactory
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -30,7 +31,16 @@ class ProgramFactory(DjangoModelFactory):
     biometric_deduplication_enabled = False
 
     @factory.post_generation
-    def cycle(self, create, extracted, **kwargs):
+    def payment_plan_purposes(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+        if not create:
+            return
+        if extracted is not None:
+            self.payment_plan_purposes.set(extracted)
+        else:
+            self.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+
+    @factory.post_generation
+    def cycle(self, create: bool, extracted: Any, **kwargs: Any) -> None:
         if not create or extracted is False:
             return
         ProgramCycleFactory(program=self, **kwargs)

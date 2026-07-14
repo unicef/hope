@@ -20,7 +20,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     comparison_method = models.CharField(
         max_length=20,
-        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
+        choices=TargetingCriteriaFilterBase.get_comparison_choices,
     )
     individuals_filters_block = models.ForeignKey(
         "TargetingIndividualRuleFilterBlock",
@@ -29,7 +29,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     )
     flex_field_classification = models.CharField(
         max_length=20,
-        choices=FlexFieldClassification.choices,
+        choices=FlexFieldClassification.get_choices,
         default=FlexFieldClassification.NOT_FLEX_FIELD,
     )
     field_name = models.CharField(max_length=50)

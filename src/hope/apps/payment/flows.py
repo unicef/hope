@@ -3,6 +3,7 @@ from __future__ import annotations
 from django.utils import timezone
 from viewflow import fsm
 
+from hope.models.follow_up_instruction import FollowUpInstruction
 from hope.models.payment_plan import PaymentPlan
 
 
@@ -431,6 +432,7 @@ class PaymentPlanFlow:
         source=[
             PaymentPlan.Status.ACCEPTED,
             PaymentPlan.Status.FINISHED,
+            PaymentPlan.Status.READY_FOR_CLOSURE,
         ],
         target=PaymentPlan.Status.FINISHED,
     )
@@ -439,6 +441,13 @@ class PaymentPlanFlow:
 
     @status.transition(
         source=PaymentPlan.Status.FINISHED,
+        target=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+    def status_ready_for_closure(self) -> None:
+        self.payment_plan.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlan.Status.READY_FOR_CLOSURE,
         target=PaymentPlan.Status.CLOSED,
     )
     def status_close(self) -> None:
@@ -485,3 +494,56 @@ class PaymentPlanFlow:
     def status_reactivate_abort(self) -> None:
         self.payment_plan.status_date = timezone.now()
         self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
+
+
+class FollowUpInstructionFlow:
+    background_action_status = fsm.State(FollowUpInstruction.BackgroundActionStatus)
+
+    def __init__(self, instruction: "FollowUpInstruction"):
+        self.instruction = instruction
+
+    @background_action_status.setter()
+    def _set_background_action_status(self, value: str | None) -> None:
+        self.instruction.background_action_status = value
+
+    @background_action_status.getter()
+    def _get_background_action_status(self) -> str | None:
+        return self.instruction.background_action_status
+
+    @background_action_status.transition(
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+    )
+    def background_action_status_xlsx_exporting(self) -> None:
+        pass
+
+    @background_action_status.transition(
+        source=[
+            PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+            PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        ],
+        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+    )
+    def background_action_status_xlsx_export_error(self) -> None:
+        pass
+
+    @background_action_status.transition(
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+    )
+    def background_action_status_xlsx_importing_reconciliation(self) -> None:
+        pass
+
+    @background_action_status.transition(
+        source=[
+            PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        ],
+        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+    )
+    def background_action_status_xlsx_import_error(self) -> None:
+        pass
+
+    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus), target=None)
+    def background_action_status_none(self) -> None:
+        self.instruction.background_action_status = None

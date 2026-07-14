@@ -125,6 +125,7 @@ def registration_xlsx_import_async_task(
     import_data_id: str,
     business_area_id: str,
     program_id: str,
+    requeue: bool = False,
 ) -> None:
     registration_data_import_id = str(registration_data_import.id)
     config = {
@@ -133,7 +134,8 @@ def registration_xlsx_import_async_task(
         "business_area_id": business_area_id,
         "program_id": program_id,
     }
-    AsyncRetryJob.queue_task(
+    enqueue = AsyncRetryJob.requeue if requeue else AsyncRetryJob.queue_task
+    enqueue(
         instance=registration_data_import,
         job_name=registration_xlsx_import_async_task.__name__,
         program=registration_data_import.program,
@@ -204,26 +206,44 @@ def registration_program_population_import_async_task(
     )
 
 
-def registration_kobo_import_async_task_action(job: AsyncRetryJob) -> None:
+def registration_kobo_import_async_task_action(job: AsyncRetryJob) -> bool:
     try:
         from hope.apps.registration_data.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
-        from hope.models import BusinessArea
 
         registration_data_import_id = job.config["registration_data_import_id"]
         import_data_id = job.config["import_data_id"]
         business_area_id = job.config["business_area_id"]
         program_id = job.config["program_id"]
 
-        set_sentry_business_area_tag(BusinessArea.objects.get(pk=business_area_id).name)
-        RdiKoboCreateTask(
-            registration_data_import_id=registration_data_import_id,
-            business_area_id=business_area_id,
-        ).execute(
-            import_data_id=import_data_id,
-            program_id=program_id,
-        )
+        with locked_cache(key=f"registration_kobo_import_async_task-{registration_data_import_id}") as locked:
+            if not locked:
+                raise AlreadyRunningError(
+                    f"Task with key registration_kobo_import_async_task"
+                    f" {registration_data_import_id} is already running"
+                )
+            rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
+            if rdi.status not in (
+                RegistrationDataImport.IMPORT_SCHEDULED,
+                RegistrationDataImport.IMPORT_ERROR,
+            ):
+                raise WrongStatusError(
+                    f"Rdi is in status {rdi.status}, expected "
+                    f"{RegistrationDataImport.IMPORT_SCHEDULED} or {RegistrationDataImport.IMPORT_ERROR} to import"
+                )
+
+            RdiKoboCreateTask(
+                registration_data_import_id=registration_data_import_id,
+                business_area_id=business_area_id,
+            ).execute(
+                import_data_id=import_data_id,
+                program_id=program_id,
+            )
+            return True
+    except (WrongStatusError, AlreadyRunningError) as exc:
+        logger.info(str(exc))
+        return True
     except Exception as exc:  # noqa
         logger.warning(exc)
         handle_rdi_exception(job.config["registration_data_import_id"], exc)
@@ -235,6 +255,7 @@ def registration_kobo_import_async_task(
     import_data_id: str,
     business_area_id: str,
     program_id: str,
+    requeue: bool = False,
 ) -> None:
     registration_data_import_id = str(registration_data_import.id)
     config = {
@@ -243,7 +264,8 @@ def registration_kobo_import_async_task(
         "business_area_id": business_area_id,
         "program_id": program_id,
     }
-    AsyncRetryJob.queue_task(
+    enqueue = AsyncRetryJob.requeue if requeue else AsyncRetryJob.queue_task
+    enqueue(
         instance=registration_data_import,
         job_name=registration_kobo_import_async_task.__name__,
         program=registration_data_import.program,

@@ -48,7 +48,7 @@ DEFAULTS = {
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_ID": (str, ""),
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
-    "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
+    "ELASTICSEARCH_HOST": (str, "http://hope-es-hope-search:9200"),
     "ELASTICSEARCH_INDEX_PREFIX": (str, ""),
     "ELASTICSEARCH_SYNONYMS_FILE": (str, "/app/data/synonyms.txt"),
     "RAPID_PRO_URL": (str, "https://rapidpro.io"),
@@ -180,6 +180,11 @@ DEFAULTS = {
     "FTP_WESTERN_UNION_PORT": (int, 22),
     "FTP_WESTERN_UNION_USERNAME": (str, ""),
     "FTP_WESTERN_UNION_PASSWORD": (str, ""),
+    "VISION_API_URL": (str, ""),
+    "VISION_CLIENT_ID": (str, ""),
+    "VISION_CLIENT_SECRET": (str, ""),
+    "VISION_TOKEN_GRANT_TYPE": (str, "client_credentials"),
+    "VISION_DEFAULT_TIMEOUT": (int, 60),
 }
 
 env = SmartEnv(**DEFAULTS)

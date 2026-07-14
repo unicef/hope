@@ -106,7 +106,10 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys.get_nav_accountability().click()
         page_accountability_surveys.get_nav_surveys().click()
         page_accountability_surveys.get_rows()[0].click()
-        page_accountability_surveys.wait_for_page_ready()
+        page_accountability_surveys_details.wait_for_header_text(
+            page_accountability_surveys_details.page_header_title,
+            add_accountability_surveys_message.unicef_id,
+        )
         assert (
             add_accountability_surveys_message.unicef_id
             in page_accountability_surveys_details.get_page_header_title().text

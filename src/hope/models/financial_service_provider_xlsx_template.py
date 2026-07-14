@@ -52,6 +52,10 @@ class FlexFieldArrayField(ArrayField):
         )
 
 
+def get_columns_choices() -> tuple:
+    return FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES
+
+
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
@@ -107,7 +111,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
         max_length=1000,
-        choices=COLUMNS_CHOICES,
+        choices=get_columns_choices,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
         help_text=_("Select the columns to include in the report"),
@@ -313,7 +317,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             elif isinstance(obj, dict):
                 result = obj.get(nested_field, "")
             else:
-                result = getattr(obj, nested_field, None) or ""
+                value = getattr(obj, nested_field, None)
+                result = "" if value is None else value
         else:
             result = "wrong_column_name"
 
