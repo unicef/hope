@@ -99,7 +99,7 @@ class PaymentInstructionInline(admin.TabularInline):
         request = getattr(self, "_request", None)
         if not obj.payment_plan.is_payment_gateway or not obj.sent_to_payment_gateway or request is None:
             return "-"
-        if not has_payment_instruction_download_permission(request, obj.payment_plan):
+        if not has_payment_instruction_download_permission(request):
             return "-"
         url = PaymentGatewayAPI().get_download_payment_instruction_url(str(obj.id))
         return format_html('<a href="{}" target="_blank">Download</a>', url)
@@ -134,9 +134,9 @@ def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan)
     )
 
 
-def has_payment_instruction_download_permission(request: Any, payment_plan: PaymentPlan) -> bool:
+def has_payment_instruction_download_permission(request: Any) -> bool:
     permission = "payment.download_payment_instruction"
-    return request.user.has_perm(permission) or request.user.has_perm(permission, payment_plan.business_area)
+    return request.user.has_perm(permission)
 
 
 @admin.register(PaymentPlan)
