@@ -1027,9 +1027,7 @@ class HardDocumentDeduplication:
         return program_ids
 
     def _generate_signature(self, document: Document) -> str:
-        if document.type.valid_for_deduplication:
-            return f"{document.type_id}--{document.document_number}--{document.country_id}"
-        return f"{document.document_number}--{document.country_id}"
+        return document.dedup_signature
 
     def _prepare_grievance_ticket_documents_deduplication(
         self,

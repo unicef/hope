@@ -5,12 +5,16 @@ from tempfile import NamedTemporaryFile
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
+import zipfile
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.urls import reverse
+import openpyxl
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory, FileTempFactory, FlexibleAttributeFactory
@@ -45,6 +49,7 @@ from hope.models import (
     FlexibleAttribute,
     IndividualRoleInHousehold,
     MergeStatusModel,
+    Payment,
     PaymentHouseholdSnapshot,
 )
 
@@ -359,8 +364,10 @@ def test_entitlement_import_updates_only_modified_rows_for_household_program(
     import_service.validate()
     assert import_service.errors == []
 
-    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
-    with django_assert_num_queries(3):
+    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions.
+    # +2 constant queries for per-payment activity logging (bulk log insert, program m2m).
+    ContentType.objects.get_for_model(Payment)  # warm cache so the count is order-independent
+    with django_assert_num_queries(5):
         import_service.import_payment_list()
 
     payment_1.refresh_from_db()
@@ -421,8 +428,10 @@ def test_entitlement_import_updates_only_modified_rows_for_social_worker_program
     import_service.validate()
     assert import_service.errors == []
 
-    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions
-    with django_assert_num_queries(3):
+    # bulk_update of entitlements + signature_hash refresh path; pinned to catch N+1 regressions.
+    # +2 constant queries for per-payment activity logging (bulk log insert, program m2m).
+    ContentType.objects.get_for_model(Payment)  # warm cache so the count is order-independent
+    with django_assert_num_queries(5):
         import_service.import_payment_list()
 
     payment_1.refresh_from_db()
@@ -854,3 +863,59 @@ def test_send_delivery_passwords_for_file_sends_email_with_label(user):
 
     mock_email.assert_called_once()
     assert "Batch Label" in mock_email.call_args[1]["subject"]
+
+
+def test_open_workbook_sets_title(payment_plan):
+    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+
+    wb, ws = export_service.open_workbook("Test Title")
+
+    assert ws.title == "Test Title"
+    assert wb.active is ws
+
+
+def test_get_template_uses_explicit_template_id(payment_plan, fsp, delivery_mechanisms):
+    template = FinancialServiceProviderXlsxTemplateFactory()
+    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan, fsp_xlsx_template_id=str(template.id))
+
+    result = export_service.get_template(fsp, delivery_mechanisms["cash"])
+
+    assert result == template
+    assert export_service.fsp_xlsx_template == template
+
+
+def test_get_template_raises_when_no_template_assigned(payment_plan, fsp, delivery_mechanisms):
+    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+
+    with pytest.raises(ValidationError, match="There isn't any FSP XLSX Template assigned"):
+        export_service.get_template(fsp, delivery_mechanisms["atm_card"])
+
+
+def test_prepare_headers_raises_for_unknown_template_columns(payment_plan):
+    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+    fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "unknown_column"])
+
+    with pytest.raises(ValidationError, match="we can't export columns"):
+        export_service.prepare_headers(fsp_xlsx_template)
+
+
+def test_get_flex_field_returns_empty_when_no_snapshot(payment_plan, payments, flex_decimal_attribute):
+    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+    payment = payments[0]
+
+    result = export_service._get_flex_field_by_name(flex_decimal_attribute.name, payment)
+
+    assert result == ""
+
+
+def test_save_workbook_without_password_writes_plain_xlsx():
+    wb = openpyxl.Workbook()
+    buffer = BytesIO()
+
+    with zipfile.ZipFile(buffer, "w") as zip_file:
+        XlsxPaymentPlanDeliveryExportService.save_workbook(zip_file, wb, "test.xlsx")
+
+    buffer.seek(0)
+    with zipfile.ZipFile(buffer) as zip_archive:
+        assert zip_archive.namelist() == ["test.xlsx"]
+        assert zip_archive.read("test.xlsx")[:2] == b"PK"  # plain (unencrypted) xlsx is a zip container

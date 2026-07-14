@@ -1,5 +1,4 @@
 from decimal import Decimal
-import os
 from unittest import mock
 from unittest.mock import patch
 import uuid
@@ -34,15 +33,9 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def mock_deduplication_engine_env_vars() -> None:
-    with mock.patch.dict(
-        os.environ,
-        {
-            "DEDUPLICATION_ENGINE_API_KEY": "TEST",
-            "DEDUPLICATION_ENGINE_API_URL": "TEST",
-        },
-    ):
-        yield
+def mock_deduplication_engine_env_vars(settings) -> None:
+    settings.DEDUPLICATION_ENGINE_API_KEY = "TEST"
+    settings.DEDUPLICATION_ENGINE_API_URL = "TEST"
 
 
 @pytest.fixture
@@ -97,6 +90,23 @@ def test_get_deduplication_set_results(
     service = BiometricDeduplicationService()
     service.get_deduplication_set_results(program, ["1", "2"])
     mock_get_duplicates.assert_called_once_with(program.unicef_id, ["1", "2"])
+
+
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
+def test_get_deduplication_set_results_fetches_in_batches_of_at_most_50(
+    mock_get_duplicates: mock.Mock, biometric_deduplication_context: dict[str, object]
+) -> None:
+    mock_get_duplicates.return_value = []
+    program = biometric_deduplication_context["program"]
+    service = BiometricDeduplicationService()
+    individual_ids = list(map(str, range(120)))
+
+    service.get_deduplication_set_results(program, individual_ids)
+
+    assert mock_get_duplicates.call_count == 3
+    assert len(mock_get_duplicates.call_args_list[0].args[1]) == 50
+    assert len(mock_get_duplicates.call_args_list[1].args[1]) == 50
+    assert len(mock_get_duplicates.call_args_list[2].args[1]) == 20
 
 
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set")

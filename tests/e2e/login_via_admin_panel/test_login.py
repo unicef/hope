@@ -28,7 +28,7 @@ class TestAdminPanel:
         page_admin_panel.get_login().send_keys("superuser")
         page_admin_panel.get_password().send_keys("testtest2")
         page_admin_panel.get_login_button().click()
-        assert "Permissions" in page_admin_panel.get_permission_text().text
+        assert page_admin_panel.wait_for_text("Permissions", page_admin_panel.permission_text, By.ID)
 
     def test_login_normal_user(self, browser: Chrome, page_admin_panel: AdminPanel) -> None:
         create_normal_user()
@@ -36,7 +36,9 @@ class TestAdminPanel:
         page_admin_panel.get_login().send_keys("normal_user")
         page_admin_panel.get_password().send_keys("normal_password")
         page_admin_panel.get_login_button().click()
-        assert "You don't have permission to view or edit anything." in page_admin_panel.get_permission_text().text
+        assert page_admin_panel.wait_for_text(
+            "You don't have permission to view or edit anything.", page_admin_panel.permission_text, By.ID
+        )
 
     def test_login_with_valid_username_and_invalid_password(
         self, browser: Chrome, page_admin_panel: AdminPanel
