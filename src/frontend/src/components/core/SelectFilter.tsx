@@ -27,9 +27,12 @@ const SelectWrapper = styled.div`
   max-width: 100%;
 `;
 
-const StyledSelect = styled(Select)`
+const StyledSelect = styled(Select)<{ $borderRadius?: string }>`
   && .MuiOutlinedInput-input {
     padding-right: 10px !important;
+  }
+  .MuiOutlinedInput-root {
+    border-radius: ${(props) => props.$borderRadius};
   }
   flex: 1;
   max-width: 100%;
@@ -53,6 +56,7 @@ export const SelectFilter = ({
   fullWidth = true,
   disableClearable = false,
   dataCy = 'select-filter',
+  borderRadius = '4px',
   ...otherProps
 }): ReactElement => {
   const checkValue = (value): boolean => {
@@ -79,6 +83,7 @@ export const SelectFilter = ({
             onChange={onChange}
             variant="outlined"
             label={label}
+            $borderRadius={borderRadius}
             MenuProps={{
               anchorOrigin: {
                 vertical: 'bottom',

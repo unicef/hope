@@ -36,15 +36,16 @@ export function SearchTextField({
       $borderRadius={borderRadius}
       variant="outlined"
       placeholder={placeholder}
-      inputProps={{ maxLength: 200 }}
-      // https://github.com/mui-org/material-ui/issues/12805
-       
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            {(icon as React.JSX.Element) || <SearchIcon />}
-          </InputAdornment>
-        ),
+      slotProps={{
+        // https://github.com/mui-org/material-ui/issues/12805
+        htmlInput: { maxLength: 200 },
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              {(icon as React.JSX.Element) || <SearchIcon />}
+            </InputAdornment>
+          ),
+        },
       }}
     />
   );
