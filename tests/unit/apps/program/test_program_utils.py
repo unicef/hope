@@ -74,7 +74,6 @@ def household_original_already_enrolled(program1: Program) -> Household:
     return HouseholdFactory(
         program=program1,
         head_of_household=IndividualFactory(household=None, program=program1),
-        unicef_id="HH-26-0000.0100",
     )
 
 
@@ -97,12 +96,12 @@ def household_already_enrolled(
 
 @pytest.fixture
 def individual_hoh(program1: Program) -> Individual:
-    return IndividualFactory(household=None, program=program1, unicef_id="IND-26-0000.0100")
+    return IndividualFactory(household=None, program=program1)
 
 
 @pytest.fixture
 def individual1(program1: Program) -> Individual:
-    ind = IndividualFactory(household=None, program=program1, unicef_id="IND-26-0000.0101")
+    ind = IndividualFactory(household=None, program=program1)
     DocumentFactory(individual=ind)
     IndividualIdentityFactory(individual=ind)
     return ind
@@ -110,7 +109,7 @@ def individual1(program1: Program) -> Individual:
 
 @pytest.fixture
 def individual_2_original(program1: Program) -> Individual:
-    return IndividualFactory(household=None, program=program1, unicef_id="IND-26-0000.0102")
+    return IndividualFactory(household=None, program=program1)
 
 
 @pytest.fixture
@@ -134,7 +133,6 @@ def household(
     household = HouseholdFactory(
         program=program1,
         head_of_household=individual_hoh,
-        unicef_id="HH-26-0000.0101",
     )
     household.refresh_from_db()
     household.individuals.set([individual1, individual_2_original])
