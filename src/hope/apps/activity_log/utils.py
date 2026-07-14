@@ -4,10 +4,6 @@ from typing import Any
 from hope.apps.core.utils import nested_getattr
 
 
-def field_list_to_dict(field_list: list) -> dict:
-    return {field: field for field in field_list}
-
-
 def create_mapping_dict(simple_mapping: list, complex_mapping: dict | None = None) -> dict:
     concatenated_dict = {}
     concatenated_dict.update({field: field for field in simple_mapping})

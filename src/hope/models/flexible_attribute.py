@@ -19,6 +19,14 @@ def label_contains_english_en_validator(data: dict) -> None:
         raise ValidationError('The "English(EN)" key is required in the label.')
 
 
+def get_type_choice_choices() -> tuple:
+    return FlexibleAttribute.TYPE_CHOICE
+
+
+def get_associated_with_choices() -> tuple:
+    return FlexibleAttribute.ASSOCIATED_WITH_CHOICES
+
+
 class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     STRING = "STRING"
     IMAGE = "IMAGE"
@@ -56,8 +64,8 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         null=True,
         blank=True,
     )
-    type = models.CharField(max_length=16, choices=TYPE_CHOICE)
-    associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
+    type = models.CharField(max_length=16, choices=get_type_choice_choices)
+    associated_with = models.SmallIntegerField(choices=get_associated_with_choices)
     program = models.ForeignKey(
         "program.Program",
         on_delete=models.CASCADE,
@@ -161,6 +169,10 @@ class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUU
         return f"list name: {self.list_name}, name: {self.name}"
 
 
+def get_periodic_type_choices() -> tuple:
+    return PeriodicFieldData.TYPE_CHOICES
+
+
 class PeriodicFieldData(models.Model):
     """Additional data for PDU."""
 
@@ -176,7 +188,7 @@ class PeriodicFieldData(models.Model):
         (BOOL, _("Boolean (true/false)")),
     )
 
-    subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
+    subtype = models.CharField(max_length=16, choices=get_periodic_type_choices)
     rounds_names = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     number_of_rounds = models.IntegerField()
 

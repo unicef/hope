@@ -17,12 +17,13 @@ from model_utils.models import UUIDModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.grievance.constants import (
-    PRIORITY_CHOICES,
     PRIORITY_NOT_SET,
-    URGENCY_CHOICES,
     URGENCY_NOT_SET,
+    get_priority_choices,
+    get_urgency_choices,
 )
-from hope.models import Individual, Payment, PaymentVerification, User
+from hope.models import Individual, Payment, User
+from hope.models.payment_verification import get_status_choices as get_payment_verification_status_choices
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -79,6 +80,14 @@ class GrievanceTicketManager(models.Manager):
             (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
         )
+
+
+def get_grievance_status_choices() -> tuple:
+    return GrievanceTicket.STATUS_CHOICES
+
+
+def get_grievance_category_choices() -> tuple:
+    return GrievanceTicket.CATEGORY_CHOICES
 
 
 class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, UnicefIdentifiedModel):
@@ -346,16 +355,16 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         symmetrical=True,
     )
     household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
-    priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_NOT_SET)
-    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_SET)
-    category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
+    priority = models.IntegerField(verbose_name=_("Priority"), choices=get_priority_choices, default=PRIORITY_NOT_SET)
+    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=get_urgency_choices, default=URGENCY_NOT_SET)
+    category = models.IntegerField(verbose_name=_("Category"), choices=get_grievance_category_choices)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
         verbose_name=_("Description"),
         blank=True,
         help_text=_("The content of the customers query."),
     )
-    status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
+    status = models.IntegerField(verbose_name=_("Status"), choices=get_grievance_status_choices, default=STATUS_NEW)
     area = models.CharField(max_length=250, blank=True)
     admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     language = models.TextField(blank=True)
@@ -985,7 +994,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     payment_verifications = models.ManyToManyField("payment.PaymentVerification", related_name="ticket_details")
     payment_verification_status = models.CharField(
         max_length=50,
-        choices=PaymentVerification.STATUS_CHOICES,
+        choices=get_payment_verification_status_choices,
     )
     payment_verification = models.ForeignKey(
         "payment.PaymentVerification",
@@ -996,7 +1005,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     )
     new_status = models.CharField(
         max_length=50,
-        choices=PaymentVerification.STATUS_CHOICES,
+        choices=get_payment_verification_status_choices,
         default=None,
         null=True,
         blank=True,

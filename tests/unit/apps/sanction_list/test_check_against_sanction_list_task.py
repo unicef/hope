@@ -12,17 +12,38 @@ from django.template.loader import render_to_string
 from django.test import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 import pytest
 
-from extras.test_utils.factories import SanctionListIndividualFactory
+from extras.test_utils.factories import (
+    SanctionListFactory,
+    SanctionListIndividualDateOfBirthFactory,
+    SanctionListIndividualFactory,
+)
 from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )
-from hope.models import SanctionListIndividualDateOfBirth, UploadedXLSXFile
+from hope.models import SanctionList, SanctionListIndividual, SanctionListIndividualDateOfBirth, UploadedXLSXFile
 
 pytestmark = pytest.mark.django_db
+
+
+def _build_xlsx(rows: list[tuple]) -> bytes:
+    wb = Workbook()
+    ws = wb.active
+    ws.append(("FIRST NAME", "SECOND NAME", "THIRD NAME", "FOURTH NAME", "DATE OF BIRTH"))
+    for row in rows:
+        ws.append(row)
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    return buffer.getvalue()
+
+
+def _attachment_rows(mailjet_mock: Any) -> list[tuple]:
+    attachment_b64 = mailjet_mock.return_value.attach_file.call_args.kwargs["attachment"]
+    attachment_wb = load_workbook(io.BytesIO(base64.b64decode(attachment_b64)))
+    return list(attachment_wb.active.iter_rows(values_only=True))
 
 
 @pytest.fixture
@@ -31,6 +52,36 @@ def uploaded_file():
         file=SimpleUploadedFile("test.xlsx", b"test"),
         associated_email="test_email@email.com",
     )
+
+
+@pytest.fixture
+def sanction_list() -> SanctionList:
+    return SanctionListFactory()
+
+
+@pytest.fixture
+def john_doe(sanction_list: SanctionList) -> SanctionListIndividual:
+    individual = SanctionListIndividualFactory(
+        sanction_list=sanction_list,
+        first_name="John",
+        second_name="Doe",
+        full_name="John Doe",
+    )
+    SanctionListIndividualDateOfBirthFactory(individual=individual, date=datetime.date(1980, 1, 1))
+    return individual
+
+
+@pytest.fixture
+def make_uploaded_file(sanction_list: SanctionList) -> Any:
+    def _make(rows: list[tuple]) -> UploadedXLSXFile:
+        uploaded = UploadedXLSXFile.objects.create(
+            file=SimpleUploadedFile("check.xlsx", _build_xlsx(rows)),
+            associated_email="checker@example.com",
+        )
+        uploaded.selected_lists.add(sanction_list)
+        return uploaded
+
+    return _make
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
@@ -173,3 +224,109 @@ def test_join_names_and_birthday_db():
 
     assert rows[0][4] == "1980-02-01, 1981-01-01"
     assert rows[0][5] == 2
+
+
+def test_execute_matches_two_name_row_with_date_cell(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+    django_assert_num_queries: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
+
+    with django_assert_num_queries(7):
+        CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    rows = _attachment_rows(mailjet_mock)
+    assert len(rows) == 2
+    assert rows[1][0] == "John"
+    assert rows[1][1] == "Doe"
+    assert rows[1][4] == "1980-01-01"
+    assert rows[1][5] == 2
+    assert mailjet_mock.call_args.kwargs["recipients"] == ["checker@example.com"]
+    assert mailjet_mock.call_args.kwargs["ccs"] == [settings.SANCTION_LIST_CC_MAIL]
+    mailjet_mock.return_value.send_email.assert_called_once_with()
+
+
+def test_execute_matches_single_name_row_by_first_name(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    uploaded = make_uploaded_file([("john", None, None, None, None)])
+
+    CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    rows = _attachment_rows(mailjet_mock)
+    assert len(rows) == 2
+    assert rows[1][0] == "John"
+    assert rows[1][5] == 2
+
+
+def test_execute_parses_date_of_birth_given_as_string(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    uploaded = make_uploaded_file([("john", "doe", None, None, "1980-01-01")])
+
+    CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    rows = _attachment_rows(mailjet_mock)
+    assert len(rows) == 2
+    assert rows[1][0] == "John"
+    assert rows[1][5] == 2
+
+
+def test_execute_ignores_unparseable_date_of_birth(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    uploaded = make_uploaded_file([("john", "doe", None, None, "not-a-date")])
+
+    CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    rows = _attachment_rows(mailjet_mock)
+    assert len(rows) == 2
+    assert rows[1][0] == "John"
+
+
+def test_execute_skips_empty_rows_and_rows_without_names(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    uploaded = make_uploaded_file(
+        [
+            (None, None, None, None, None),
+            (None, None, None, None, "1985-05-05"),
+        ]
+    )
+
+    CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    rows = _attachment_rows(mailjet_mock)
+    assert rows == [
+        ("FIRST NAME", "SECOND NAME", "THIRD NAME", "FOURTH NAME", "DATE OF BIRTH", "ORIGINAL FILE ROW NUMBER")
+    ]
+    mailjet_mock.return_value.send_email.assert_called_once_with()
+
+
+def test_execute_does_not_match_unrelated_names(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    uploaded = make_uploaded_file([("jane", "smith", None, None, None)])
+
+    CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    rows = _attachment_rows(mailjet_mock)
+    assert len(rows) == 1

@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
 )
 from hope.apps.payment.validators import payment_token_and_order_number_validator
-from hope.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import XlsxPaymentPlanExportPerFspService
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.models import Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -90,7 +90,7 @@ def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> 
 def test_generate_token_and_order_numbers_for_payments(
     payment_plan: PaymentPlan, program: Any, payments: list[Payment]
 ) -> None:
-    service = XlsxPaymentPlanExportPerFspService(payment_plan, None)
+    service = XlsxPaymentPlanDeliveryExportService(payment_plan, None)
     service.generate_token_and_order_numbers(payment_plan.eligible_payments.all(), program)
     payment = payment_plan.eligible_payments.first()
     assert len(str(payment.order_number)) == 9

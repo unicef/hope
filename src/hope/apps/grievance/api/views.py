@@ -8,6 +8,7 @@ from django.db.models import (
     CharField,
     Count,
     DateField,
+    DateTimeField,
     Exists,
     F,
     IntegerField,
@@ -349,7 +350,7 @@ class GrievanceTicketViewSet(
                         status=GrievanceTicket.STATUS_CLOSED,
                         then=F("updated_at") - F("created_at"),
                     ),
-                    default=timezone.now() - F("created_at"),
+                    default=Value(timezone.now(), output_field=DateTimeField()) - F("created_at"),
                     output_field=DateField(),
                 ),
                 existing_tickets_count=Coalesce(
@@ -582,7 +583,7 @@ class GrievanceTicketGlobalViewSet(
                         status=GrievanceTicket.STATUS_CLOSED,
                         then=F("updated_at") - F("created_at"),
                     ),
-                    default=timezone.now() - F("created_at"),
+                    default=Value(timezone.now(), output_field=DateTimeField()) - F("created_at"),
                     output_field=DateField(),
                 ),
             )

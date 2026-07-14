@@ -6,7 +6,6 @@ import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import (
-    delete_all_indexes,
     populate_all_indexes,
     rebuild_search_index,
     remove_elasticsearch_documents_by_matching_ids,
@@ -87,34 +86,6 @@ def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMoc
     populate_all_indexes()
 
     mock_populate_program.assert_not_called()
-
-
-@pytest.mark.django_db
-@patch("hope.apps.household.services.index_management.delete_program_indexes")
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_delete_all_indexes_calls_per_program_and_global(mock_delete_program: MagicMock) -> None:
-    ba: BusinessArea = BusinessAreaFactory()
-    with override_config(IS_ELASTICSEARCH_ENABLED=False):
-        program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-        program_2: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
-        ProgramFactory(business_area=ba, status=Program.DRAFT)
-
-    delete_all_indexes()
-
-    mock_delete_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
-    assert mock_delete_program.call_count == 2
-
-
-@pytest.mark.django_db
-@patch("hope.apps.household.services.index_management.delete_program_indexes")
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_delete_all_indexes_no_active_programs(mock_delete_program: MagicMock) -> None:
-    ba: BusinessArea = BusinessAreaFactory()
-    ProgramFactory(business_area=ba, status=Program.DRAFT)
-
-    delete_all_indexes()
-
-    mock_delete_program.assert_not_called()
 
 
 @pytest.mark.django_db

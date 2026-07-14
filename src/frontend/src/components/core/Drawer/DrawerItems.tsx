@@ -113,7 +113,8 @@ export const DrawerItems = ({
 
     // When GlobalProgramFilter applied
     if (!isAllPrograms) {
-      updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
+      const safeProgramId = programId.replace(/[^a-zA-Z0-9\-_=+]/g, '');
+      updatedMenuItems[programDetailsIndex].href = `/details/${encodeURIComponent(safeProgramId)}`;
     }
     updatedMenuItems = updatedMenuItems.filter((item) => {
       let isVisible = isAllPrograms

@@ -145,7 +145,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   const isFinished =
     paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
-  const { isFollowUp } = paymentPlan;
+  const isFollowUp = paymentPlan.planType === 'FOLLOW_UP';
 
   const toolbar = (
     <PageHeader

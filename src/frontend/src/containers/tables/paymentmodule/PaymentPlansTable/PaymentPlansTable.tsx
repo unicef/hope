@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { Fragment, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
@@ -14,6 +14,7 @@ import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPay
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
 
 interface PaymentPlansTableProps {
   filter;
@@ -39,7 +40,7 @@ function PaymentPlansTable({
       totalEntitledQuantityUsdTo: filter.totalEntitledQuantityUsdTo || null,
       dispersionStartDate: filter.dispersionStartDate || null,
       dispersionEndDate: filter.dispersionEndDate || null,
-      isFollowUp: filter.isFollowUp ? true : null,
+      planType: filter.planType,
       isPaymentPlan: true,
     }),
     [
@@ -51,7 +52,7 @@ function PaymentPlansTable({
       filter.totalEntitledQuantityUsdTo,
       filter.dispersionStartDate,
       filter.dispersionEndDate,
-      filter.isFollowUp,
+      filter.planType,
     ],
   );
 
@@ -112,9 +113,23 @@ function PaymentPlansTable({
     ? headCellsPeople
     : adjustHeadCells(headCells, beneficiaryGroup, replacements);
 
+  // Ids of the first row in each consecutive group, so the group header renders
+  // exactly once per group boundary (computed once instead of per-row indexOf).
+  const groupStartRowIds = useMemo(() => {
+    const ids = new Set<string>();
+    const rows = paymentPlansData?.results ?? [];
+    rows.forEach((row, idx) => {
+      const prev = rows[idx - 1];
+      if (idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id) {
+        ids.add(row.id);
+      }
+    });
+    return ids;
+  }, [paymentPlansData]);
+
   return (
     <UniversalRestTable
-      defaultOrderBy="-createdAt"
+      defaultOrderBy="paymentPlanGroup__name,-createdAt"
       title={t('Payment Plans')}
       headCells={adjustedHeadCells as any}
       data={paymentPlansData}
@@ -126,11 +141,15 @@ function PaymentPlansTable({
       page={page}
       setPage={setPage}
       renderRow={(row: PaymentPlanList) => (
-        <PaymentPlanTableRow
-          key={row.id}
-          plan={row}
-          canViewDetails={canViewDetails}
-        />
+        <Fragment key={row.id}>
+          {groupStartRowIds.has(row.id) && (
+            <GroupHeaderRow
+              name={row.paymentPlanGroup?.name}
+              id={row.paymentPlanGroup?.id}
+            />
+          )}
+          <PaymentPlanTableRow plan={row} canViewDetails={canViewDetails} />
+        </Fragment>
       )}
     />
   );

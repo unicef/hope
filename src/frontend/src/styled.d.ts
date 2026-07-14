@@ -19,6 +19,7 @@ declare module 'styled-components' {
       darkBrown: string;
       navyBlue: string;
       lightBlue: string;
+      teal: string;
     };
     hctTypography: {
       fontFamily: string;

@@ -57,7 +57,7 @@ export function TargetPopulationTableRow({
           />
         </TableCell>
       )}
-      <TableCell align="left">
+      <TableCell align="left" sx={{ paddingLeft: 4 }}>
         {canViewDetails ? (
           <BlackLink to={targetPopulationDetailsPath}>
             {targetPopulation.name}

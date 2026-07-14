@@ -18,7 +18,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
 
     comparison_method = models.CharField(
         max_length=20,
-        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
+        choices=TargetingCriteriaFilterBase.get_comparison_choices,
     )
     targeting_criteria_rule = models.ForeignKey(
         "TargetingCriteriaRule",
@@ -27,7 +27,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     )
     flex_field_classification = models.CharField(
         max_length=20,
-        choices=FlexFieldClassification.choices,
+        choices=FlexFieldClassification.get_choices,
         default=FlexFieldClassification.NOT_FLEX_FIELD,
     )
     field_name = models.CharField(max_length=50)

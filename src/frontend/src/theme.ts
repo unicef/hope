@@ -48,6 +48,7 @@ export const theme = Object.assign({}, muiTheme, {
     darkBrown: '#715247',
     navyBlue: '#003C8F',
     lightBlue: '#00ADEF',
+    teal: '#00897B',
   },
   hctTypography: {
     fontFamily: FONT,

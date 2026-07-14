@@ -1,0 +1,36 @@
+name: Dependabot — regenerate bun.lock
+on:
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - "src/frontend/package.json"
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-lockfile:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Regenerate bun.lock
+        run: bun install
+        working-directory: src/frontend
+
+      - name: Commit updated lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/frontend/bun.lock
+          git diff --cached --quiet || git commit -m "chore: regenerate bun.lock after dependency update"
+          git push

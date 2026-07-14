@@ -4,6 +4,14 @@ from django.utils.translation import gettext_lazy as _
 from hope.models.utils import TimeStampedUUIDModel
 
 
+def get_data_type_choices() -> tuple:
+    return ImportData.DATA_TYPE_CHOICES
+
+
+def get_status_choices() -> tuple:
+    return ImportData.STATUS_CHOICES
+
+
 class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
@@ -26,9 +34,9 @@ class ImportData(TimeStampedUUIDModel):
         (STATUS_ERROR, _("Error")),
         (STATUS_VALIDATION_ERROR, _("Validation Error")),
     )
-    status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=get_status_choices)
     business_area_slug = models.CharField(max_length=200, blank=True)
-    data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
+    data_type = models.CharField(max_length=4, choices=get_data_type_choices, default=XLSX)
     file = models.FileField(null=True, blank=True)
     number_of_households = models.PositiveIntegerField(null=True, blank=True)
     number_of_individuals = models.PositiveIntegerField(null=True, blank=True)

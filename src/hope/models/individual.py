@@ -20,29 +20,29 @@ from hope.apps.core.utils import FlexFieldsEncoder
 from hope.apps.household.const import (
     BLANK,
     CANNOT_DO,
-    DEDUPLICATION_BATCH_STATUS_CHOICE,
-    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
-    DISABILITY_CHOICES,
     DISABLED,
     DUPLICATE,
     LOT_DIFFICULTY,
-    MARITAL_STATUS_CHOICE,
     NONE,
     NOT_DISABLED,
     NOT_PROCESSED,
     NOT_PROVIDED,
-    OBSERVED_DISABILITY_CHOICE,
-    RELATIONSHIP_CHOICE,
     ROLE_PRIMARY,
-    SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
     STATUS_ACTIVE,
     STATUS_DUPLICATE,
     STATUS_INACTIVE,
     STATUS_WITHDRAWN,
     UNIQUE,
     UNIQUE_IN_BATCH,
-    WORK_STATUS_CHOICE,
+    get_deduplication_batch_status_choices,
+    get_deduplication_golden_record_status_choices,
+    get_disability_choices,
+    get_marital_status_choices,
+    get_observed_disability_choices,
+    get_relationship_choices,
+    get_severity_of_disability_choices,
+    get_sex_choices,
+    get_work_status_choices,
 )
 from hope.apps.household.field_validators import validate_originating_id
 from hope.apps.household.mixins import IndividualDeliveryDataMixin
@@ -202,7 +202,7 @@ class Individual(
     )
     sex = models.CharField(
         max_length=255,
-        choices=SEX_CHOICE,
+        choices=get_sex_choices,
         db_index=True,
         help_text="Beneficiary gender",
     )
@@ -210,7 +210,7 @@ class Individual(
     estimated_birth_date = models.BooleanField(default=False, help_text="Estimated birth date flag")
     marital_status = models.CharField(
         max_length=255,
-        choices=MARITAL_STATUS_CHOICE,
+        choices=get_marital_status_choices,
         default=BLANK,
         blank=True,
         db_index=True,
@@ -224,13 +224,13 @@ class Individual(
     relationship = models.CharField(
         max_length=255,
         blank=True,
-        choices=RELATIONSHIP_CHOICE,
+        choices=get_relationship_choices,
         help_text="""This represents the MEMBER relationship. can be blank
             as well if household is null!""",
     )
     work_status = models.CharField(
         max_length=20,
-        choices=WORK_STATUS_CHOICE,
+        choices=get_work_status_choices,
         blank=True,
         default=NOT_PROVIDED,
         help_text="Work status",
@@ -240,12 +240,12 @@ class Individual(
     child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
     disability = models.CharField(
         max_length=20,
-        choices=DISABILITY_CHOICES,
+        choices=get_disability_choices,
         default=NOT_DISABLED,
         help_text="Disability status",
     )
     observed_disability = MultiSelectField(
-        choices=OBSERVED_DISABILITY_CHOICE,
+        choices=get_observed_disability_choices,
         default=NONE,
         help_text="Observed disability status",
     )
@@ -254,37 +254,37 @@ class Individual(
     )
     seeing_disability = models.CharField(
         max_length=50,
-        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        choices=get_severity_of_disability_choices,
         blank=True,
         help_text="Seeing disability",
     )
     hearing_disability = models.CharField(
         max_length=50,
-        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        choices=get_severity_of_disability_choices,
         blank=True,
         help_text="Hearing disability",
     )
     physical_disability = models.CharField(
         max_length=50,
-        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        choices=get_severity_of_disability_choices,
         blank=True,
         help_text="Physical disability",
     )
     memory_disability = models.CharField(
         max_length=50,
-        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        choices=get_severity_of_disability_choices,
         blank=True,
         help_text="Memory disability",
     )
     selfcare_disability = models.CharField(
         max_length=50,
-        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        choices=get_severity_of_disability_choices,
         blank=True,
         help_text="Selfcare disability",
     )
     comms_disability = models.CharField(
         max_length=50,
-        choices=SEVERITY_OF_DISABILITY_CHOICES,
+        choices=get_severity_of_disability_choices,
         blank=True,
         help_text="Comms disability",
     )
@@ -295,7 +295,7 @@ class Individual(
     )
     preferred_language = models.CharField(
         max_length=6,
-        choices=Languages.get_tuple(),
+        choices=Languages.get_tuple,
         null=True,
         blank=True,
         help_text="Preferred language",
@@ -343,14 +343,14 @@ class Individual(
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
-        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        choices=get_deduplication_golden_record_status_choices,
         db_index=True,
         help_text="Deduplication golden record status [sys]",
     )
     deduplication_batch_status = models.CharField(
         max_length=50,
         default=UNIQUE_IN_BATCH,
-        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        choices=get_deduplication_batch_status_choices,
         db_index=True,
         help_text="Deduplication batch status [sys]",
     )
@@ -361,14 +361,14 @@ class Individual(
     biometric_deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=NOT_PROCESSED,
-        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        choices=get_deduplication_golden_record_status_choices,
         db_index=True,
         help_text="Deduplication golden record status [sys]",
     )
     biometric_deduplication_batch_status = models.CharField(
         max_length=50,
         default=NOT_PROCESSED,
-        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        choices=get_deduplication_batch_status_choices,
         db_index=True,
         help_text="Deduplication batch status [sys]",
     )

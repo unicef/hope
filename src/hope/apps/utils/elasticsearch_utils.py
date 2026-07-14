@@ -76,15 +76,3 @@ def populate_all_indexes() -> None:
 
     for program in Program.objects.filter(status=Program.ACTIVE):
         populate_program_indexes(str(program.id))
-
-
-def delete_all_indexes() -> None:
-    """Delete Elasticsearch indexes - for all active programs."""
-    from hope.apps.household.services.index_management import delete_program_indexes
-    from hope.models import Program
-
-    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
-        return
-
-    for program in Program.objects.filter(status=Program.ACTIVE):
-        delete_program_indexes(str(program.id))

@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@mui/material';
 import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -245,9 +245,9 @@ function Entitlement({
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-      BackgroundActionStatusEnum.XLSX_EXPORTING ||
+      PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORTING ||
     paymentPlan?.backgroundActionStatus ===
-      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+      PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_RUN ||
     !isActiveProgram;
 
   return (
@@ -325,7 +325,7 @@ function Entitlement({
                   !steficonRuleValue ||
                   paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                   paymentPlan.backgroundActionStatus ===
-                    BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                    PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                   !isActiveProgram
                 }
                 data-cy="button-apply-steficon"
@@ -391,7 +391,7 @@ function Entitlement({
                     !flatAmount ||
                     paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
-                      BackgroundActionStatusEnum.RULE_ENGINE_RUN ||
+                      PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
                   data-cy="button-apply-flat-amount"
