@@ -413,9 +413,13 @@ export const getGrievanceEditPath = (
   ticketId: string,
   category: number,
   baseUrl: string,
+  issueType?: number,
 ): string => {
   if (!ticketId || !category) {
     return null;
+  }
+  if (issueType?.toString() === GRIEVANCE_ISSUE_TYPES.PICTURE_ERROR) {
+    return `/${baseUrl}/grievance/edit-ticket/picture-error/${ticketId}`;
   }
   return `/${baseUrl}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
     category,
