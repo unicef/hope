@@ -8,7 +8,6 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-from flaky import flaky
 import freezegun
 import openpyxl
 import pytest
@@ -132,7 +131,6 @@ def url_upload(business_area: BusinessArea, program1: Program) -> str:
 
 
 @freezegun.freeze_time("2022-01-01")
-@flaky(max_runs=3, min_passes=1)
 @pytest.mark.parametrize(
     ("permissions", "partner_permissions", "access_to_program", "expected_status"),
     [

@@ -1,8 +1,9 @@
 from time import sleep
 
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions
 
 from e2e.page_object.base_components import BaseComponents
 
@@ -134,17 +135,17 @@ class NewTicket(BaseComponents):
     label_administrative_level3 = 'div[data-cy="label-Administrative Level 3"]'
     input_questionnaire_admin4 = '[data-cy="input-questionnaire_admin4"]'
     label_administrative_level4 = 'div[data-cy="label-Administrative Level 4"]'
-    input_questionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
+    input_questionnaire_months_displaced_h_f = '[data-cy="input-questionnaire_months_displaced_h_f"]'
     label_length_of_time_since_arrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
-    input_questionnaire_fullname = 'span[data-cy="input-questionnaire_fullName"]'
+    input_questionnaire_fullname = '[data-cy="input-questionnaire_fullName"]'
     label_individual_full_name = 'div[data-cy="label-Member full name"]'
-    input_questionnaire_birthdate = 'span[data-cy="input-questionnaire_birthDate"]'
+    input_questionnaire_birthdate = '[data-cy="input-questionnaire_birthDate"]'
     label_birth_date = 'div[data-cy="label-Birth Date"]'
-    input_questionnaire_sex = 'span[data-cy="input-questionnaire_sex"]'
+    input_questionnaire_sex = '[data-cy="input-questionnaire_sex"]'
     label_gender = 'div[data-cy="label-Gender"]'
-    input_questionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'
+    input_questionnaire_phoneno = '[data-cy="input-questionnaire_phoneNo"]'
     label_phone_number = 'div[data-cy="label-Phone Number"]'
-    input_questionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
+    input_questionnaire_relationship = '[data-cy="input-questionnaire_relationship"]'
     label_relationship_to_hoh = 'div[data-cy="label-Relationship to Head of Group"]'
 
     # Texts
@@ -229,6 +230,20 @@ class NewTicket(BaseComponents):
 
     def get_received_consent(self) -> WebElement:
         return self.wait_for(self.received_consent, timeout=100)
+
+    def check_received_consent(self) -> None:
+        for _ in range(3):
+            consent = self.wait_for(self.received_consent, timeout=30)
+            consent_input = consent.find_element(By.CSS_SELECTOR, "input")
+            if consent_input.is_selected():
+                return
+            self.click(self.received_consent)
+            try:
+                self._wait(5).until(expected_conditions.element_to_be_selected(consent_input))
+                return
+            except TimeoutException:
+                continue
+        raise AssertionError("Received consent checkbox could not be selected")
 
     def get_description(self) -> WebElement:
         return self.wait_for(self.description)
