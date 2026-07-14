@@ -54,7 +54,6 @@ export function BaseAutocompleteRest({
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [open, setOpen] = useState(false);
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data, isLoading } = useQuery({
     queryKey: [label, businessArea, programId, queryParams],
     queryFn: () => fetchFunction(businessArea, programId, { ...queryParams }),

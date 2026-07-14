@@ -75,9 +75,6 @@ export function FollowUpPaymentPlanDetailsHeader({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-  const canSendToVision =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_VISION, permissions) &&
-    paymentPlan.canSendToVision;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);

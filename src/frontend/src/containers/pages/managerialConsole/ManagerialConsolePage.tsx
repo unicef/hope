@@ -70,7 +70,6 @@ export const ManagerialConsolePage: FC = () => {
     data: inApprovalData,
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansInApproval', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
@@ -80,7 +79,6 @@ export const ManagerialConsolePage: FC = () => {
     data: inAuthorizationData,
     isLoading: inAuthorizationLoading,
     refetch: refetchInAuthorization,
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansInAuthorization', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
@@ -90,7 +88,6 @@ export const ManagerialConsolePage: FC = () => {
     data: inReviewData,
     isLoading: inReviewLoading,
     refetch: refetchInReview,
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansInReview', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_REVIEW'),
@@ -100,7 +97,6 @@ export const ManagerialConsolePage: FC = () => {
     data: releasedData,
     isLoading: releasedLoading,
     refetch: refetchReleased,
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansReleased', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('ACCEPTED'),

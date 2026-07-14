@@ -94,10 +94,6 @@ export const PaymentPlanDetailsHeader = ({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-  const canSendToVision =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_VISION, permissions) &&
-    paymentPlan.canSendToVision;
-
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canMarkReadyForClosure = hasPermissions(
     PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
