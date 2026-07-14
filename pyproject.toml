@@ -36,10 +36,10 @@ dependencies = [
   "django-concurrency>=2.4,<3",
   "django-constance[redis]>=4.3.2,<5",
   "django-cors-headers>=3.13,<5",
-  "django-countries>=7.3.2,<9",
+  "django-countries>=7.3.2,<10",
   "django-csp>=3.7,<5",
-  "django-debug-toolbar>=6,<6.1",            # break triggers
-  "django-elasticsearch-dsl>=9,<10",
+  "django-debug-toolbar>=6,<7",
+  "django-elasticsearch-dsl>=8,<10",
   "django-environ>=0.10,<1",
   "django-extensions>=3.1.5,<5",
   "django-fernet-encrypted-fields>=0.3,<1",
@@ -142,7 +142,7 @@ dev = [
   "parameterized>=0.8.1",
   "parso>=0.8.3",
   "pre-commit>=3.1.1",
-  "pytest>=7.4.4,<9.1",                # todo upgrade
+  "pytest>=7.4.4,<10",
   "pytest-cov>=4.1",
   "pytest-django>=4.5.2",
   "pytest-echo>=1.7.1",
@@ -161,7 +161,7 @@ dev = [
   "snapshottest>=1.0.0a0",
   "tox>=4.25",
   "types-freezegun>=1.1.10",
-  "types-paramiko>=4,<5",
+  "types-paramiko>=4,<6",
   "types-python-dateutil>=2.8.19.2",
   "types-pytz>=2022.4",
   "types-redis>=4.3.21.2",
@@ -208,9 +208,6 @@ package-dir = { "" = "src" }
 packages.find.where = [ "src" ]
 
 [tool.uv]
-override-dependencies = [
-  "pytest-html==4.0.2",
-]
 package = true
 
 [tool.django-stubs]
