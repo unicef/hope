@@ -531,6 +531,7 @@ def test_import_data_skips_duplicate_national_id_in_same_rdi(
 
     duplicate_record.refresh_from_db()
     assert duplicate_record.ignored is True
+    assert duplicate_record.status == duplicate_record.STATUS_ERROR
     assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
     assert (
@@ -583,6 +584,7 @@ def test_import_data_skips_duplicate_account_number_in_same_batch(
     rdi.refresh_from_db()
     assert record.status == record.STATUS_IMPORTED
     assert duplicate_record.ignored is True
+    assert duplicate_record.status == duplicate_record.STATUS_ERROR
     assert duplicate_record.error_message == NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON
     assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
@@ -680,6 +682,7 @@ def test_import_data_skips_record_if_account_number_already_imported(
     record.refresh_from_db()
     rdi.refresh_from_db()
     assert record.ignored is True
+    assert record.status == record.STATUS_ERROR
     assert record.error_message == NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON
     assert rdi.status == RegistrationDataImport.IMPORT_ERROR
     assert rdi.error_message == "All selected Aurora Records were ignored during processing"
@@ -720,6 +723,7 @@ def test_import_data_skips_record_if_national_id_already_imported(
 
     record.refresh_from_db()
     assert record.ignored is True
+    assert record.status == record.STATUS_ERROR
     assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 0
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
     assert (
@@ -763,8 +767,9 @@ def test_registration_admin_export_ignored_records_returns_csv(
     record.registration = registration.source_id
     record.fields = make_record_fields(record_fields)
     record.ignored = True
+    record.status = record.STATUS_ERROR
     record.error_message = NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON
-    record.save(update_fields=["registration", "fields", "ignored", "error_message"])
+    record.save(update_fields=["registration", "fields", "ignored", "status", "error_message"])
     registration.rdi_parser = NigeriaPeopleRegistrationService
     registration.save(update_fields=["rdi_parser"])
 

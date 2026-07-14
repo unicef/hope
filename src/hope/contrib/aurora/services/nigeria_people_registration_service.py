@@ -147,8 +147,9 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
     @staticmethod
     def _ignore_record(record: Any, reason: str) -> None:
         record.ignored = True
+        record.status = record.STATUS_ERROR
         record.error_message = reason
-        record.save(update_fields=["ignored", "error_message"])
+        record.save(update_fields=["ignored", "status", "error_message"])
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         mapping = self.get_mapping(self.registration.mapping)
