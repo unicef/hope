@@ -72,7 +72,7 @@ def test_full_lax_import_merge_collision_flow(
         ind_url,
         [
             {
-                "individual_id": "EXT-IND-001",
+                "country_workspace_id": "EXT-IND-001",
                 "full_name": "Alice Smith",
                 "given_name": "Alice",
                 "family_name": "Smith",
@@ -82,7 +82,7 @@ def test_full_lax_import_merge_collision_flow(
                 "identification_key": "IND-KEY-001",
             },
             {
-                "individual_id": "EXT-IND-002",
+                "country_workspace_id": "EXT-IND-002",
                 "full_name": "Bob Johnson",
                 "given_name": "Bob",
                 "family_name": "Johnson",
@@ -147,7 +147,7 @@ def test_full_lax_import_merge_collision_flow(
         ind_url,
         [
             {
-                "individual_id": "EXT-IND-003",
+                "country_workspace_id": "EXT-IND-003",
                 "full_name": "Charlie Brown",
                 "given_name": "Charlie",
                 "family_name": "Brown",
@@ -157,7 +157,7 @@ def test_full_lax_import_merge_collision_flow(
                 "identification_key": "IND-KEY-003",
             },
             {
-                "individual_id": "EXT-IND-004",
+                "country_workspace_id": "EXT-IND-004",
                 "full_name": "Diana Prince",
                 "given_name": "Diana",
                 "family_name": "Prince",

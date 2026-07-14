@@ -1,0 +1,53 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "9ff5ab1117e65f793bc08f217eb8f64e",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1128"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/btso/individuals/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "3a3aead5-8f90-4ad9-a297-24ca876e302b",
+                "unicef_id": "IND-25-0000.0007",
+                "full_name": "Person 0",
+                "household": null,
+                "status": "ACTIVE",
+                "relationship": "",
+                "age": 35,
+                "sex": "MALE",
+                "relationship_display": "",
+                "birth_date": "1990-01-01",
+                "deduplication_batch_status": "UNIQUE_IN_BATCH",
+                "deduplication_batch_status_display": "Unique in RDI",
+                "biometric_deduplication_batch_status": "NOT_PROCESSED",
+                "biometric_deduplication_batch_status_display": "Not Processed",
+                "deduplication_batch_results": [],
+                "biometric_deduplication_batch_results": [],
+                "deduplication_golden_record_status": "UNIQUE",
+                "deduplication_golden_record_status_display": "Unique",
+                "biometric_deduplication_golden_record_status": "NOT_PROCESSED",
+                "biometric_deduplication_golden_record_status_display": "Not Processed",
+                "deduplication_golden_record_results": [],
+                "biometric_deduplication_golden_record_results": [],
+                "program": {
+                    "id": "18f357ba-1192-47ae-89a9-cdfebe0e590b",
+                    "name": "Program 0",
+                    "code": "btso"
+                },
+                "last_registration_date": "2025-01-01",
+                "role": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,5 +1,6 @@
 """Tests for program admin functionality."""
 
+from datetime import timedelta
 from io import BytesIO
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -11,9 +12,11 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms.models import model_to_dict
-from django.test import RequestFactory
+from django.test import Client, RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 import pytest
+from rest_framework import status
 
 from extras.test_utils.factories import (
     AreaFactory,
@@ -22,11 +25,15 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PartnerFactory,
     ProgramFactory,
+    RegistrationDataImportFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
-from hope.admin.program import ProgramAdmin, ProgramAdminForm, bulk_upload_individuals_photos_action
-from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
+from hope.admin.program import (
+    ProgramAdmin,
+    bulk_upload_individuals_photos_action,
+    is_cw_merge_queue_retry_enabled,
+)
 from hope.models import (
     AdminAreaLimitedTo,
     Area,
@@ -35,6 +42,7 @@ from hope.models import (
     FileTemp,
     Partner,
     Program,
+    RegistrationDataImport,
     RoleAssignment,
     User,
 )
@@ -250,130 +258,6 @@ def test_area_limits_post_request_delete(
     assert not AdminAreaLimitedTo.objects.filter(partner=partner_with_role, program=program).exists()
 
 
-def test_form_existing_program_enable_biometric_deduplication_calls_service(
-    business_area: BusinessArea,
-) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
-    data = _program_form_data(program, biometric_deduplication_enabled=True)
-    form = ProgramAdminForm(data=data, instance=program)
-
-    with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-        # If obj.pk exists and biometric_deduplication_enabled changes False -> True,
-        # admin should create the deduplication set and mark RDIs as pending.
-        assert form.is_valid()
-        service = service_cls.return_value
-        service.create_deduplication_set.assert_called_once_with(program)
-        service.mark_rdis_as_pending.assert_called_once_with(program)
-        service.delete_deduplication_set.assert_not_called()
-
-
-def test_form_existing_program_disable_biometric_deduplication_calls_service(
-    business_area: BusinessArea,
-) -> None:
-    """
-    If obj.pk exists and biometric_deduplication_enabled changes True -> False,
-    admin should delete the deduplication set.
-    """
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True)
-    data = _program_form_data(program, biometric_deduplication_enabled=False)
-    form = ProgramAdminForm(data=data, instance=program)
-
-    with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-        assert form.is_valid()
-        # If obj.pk exists and biometric_deduplication_enabled changes True -> False,
-        # admin should delete the deduplication set.
-        service = service_cls.return_value
-        service.delete_deduplication_set.assert_called_once_with(program)
-        service.create_deduplication_set.assert_not_called()
-        service.mark_rdis_as_pending.assert_not_called()
-
-
-def test_form_existing_program_same_biometric_deduplication_value_does_not_call_service(
-    business_area: BusinessArea,
-) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
-    data = _program_form_data(program)
-    form = ProgramAdminForm(data=data, instance=program)
-
-    with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-        assert form.is_valid()
-
-    service_cls.assert_not_called()
-
-
-def test_form_new_program_biometric_enabled_calls_service(
-    business_area: BusinessArea,
-) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True, status=Program.DRAFT)
-    code = program.generate_code()
-    data = _program_form_data(
-        program,
-        name=f"{program.name}-new",
-        code=code,
-    )
-    form = ProgramAdminForm(data=data)
-
-    with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-        assert form.is_valid()
-
-    # When creating a new program with biometric deduplication enabled, admin should create the deduplication set.
-
-    service = service_cls.return_value
-    service.create_deduplication_set.assert_called_once()
-    service.mark_rdis_as_pending.assert_called_once()
-    service.delete_deduplication_set.assert_not_called()
-
-
-def test_form_new_program_biometric_disabled_does_not_call_service(
-    business_area: BusinessArea,
-) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False, status=Program.DRAFT)
-    code = program.generate_code()
-    data = _program_form_data(
-        program,
-        name=f"{program.name}-new",
-        code=code,
-        biometric_deduplication_enabled=False,
-    )
-    form = ProgramAdminForm(data=data)
-
-    with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-        assert form.is_valid()
-
-    service_cls.assert_not_called()
-
-
-def test_form_api_exception_blocks_save_and_shows_error(
-    business_area: BusinessArea,
-) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
-    data = _program_form_data(program, biometric_deduplication_enabled=True)
-    form = ProgramAdminForm(data=data, instance=program)
-
-    with patch("hope.admin.program.BiometricDeduplicationService") as service_cls:
-        service = service_cls.return_value
-        service.create_deduplication_set.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIError("API failure")
-        assert not form.is_valid()
-
-    assert "BiometricDeduplicationService Error" in form.errors["__all__"][0]
-    program.refresh_from_db()
-    assert program.biometric_deduplication_enabled is False
-
-
-def test_form_missing_credentials_blocks_save_and_shows_error(
-    business_area: BusinessArea,
-) -> None:
-    program = ProgramFactory(business_area=business_area, biometric_deduplication_enabled=False)
-    data = _program_form_data(program, biometric_deduplication_enabled=True)
-    form = ProgramAdminForm(data=data, instance=program)
-
-    error = DeduplicationEngineAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS("Missing credentials")
-    with patch("hope.admin.program.BiometricDeduplicationService", side_effect=error):
-        assert not form.is_valid()
-
-    assert "BiometricDeduplicationService Error" in form.errors["__all__"][0]
-
-
 def test_bulk_upload_individuals_photos_schedules_job(
     business_area: BusinessArea,
 ) -> None:
@@ -458,7 +342,7 @@ def test_check_index_button(django_app: Any, program: Program) -> None:
     with patch("hope.admin.program.check_program_indexes", return_value=(True, "ok")) as mock_check:
         response = django_app.get(url, user=user_with_perm, expect_errors=True)
     mock_check.assert_called_once_with(str(program.id))
-    assert response.status_code == 302
+    assert response.status_code == status.HTTP_302_FOUND
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
 
 
@@ -468,7 +352,7 @@ def test_check_index_button_no_permission(django_app: Any, program: Program) -> 
     with patch("hope.admin.program.check_program_indexes") as mock_check:
         response = django_app.get(url, user=user_no_perm, expect_errors=True)
     mock_check.assert_not_called()
-    assert response.status_code == 403
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_reindex_program_button(django_app: Any, program: Program) -> None:
@@ -479,7 +363,7 @@ def test_reindex_program_button(django_app: Any, program: Program) -> None:
     with patch("hope.admin.program.rebuild_program_indexes", return_value=(True, "ok")) as mock_rebuild:
         response = django_app.get(url, user=user_with_perm, expect_errors=True)
     mock_rebuild.assert_called_once_with(str(program.id))
-    assert response.status_code == 302
+    assert response.status_code == status.HTTP_302_FOUND
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
 
 
@@ -489,4 +373,199 @@ def test_reindex_program_button_no_permission(django_app: Any, program: Program)
     with patch("hope.admin.program.rebuild_program_indexes") as mock_rebuild:
         response = django_app.get(url, user=user_no_perm, expect_errors=True)
     mock_rebuild.assert_not_called()
-    assert response.status_code == 403
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.fixture
+def cw_business_area(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        name="CW Only",
+        slug="cw-only",
+        ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY,
+    )
+
+
+@pytest.fixture
+def cw_program(cw_business_area: BusinessArea) -> Program:
+    return ProgramFactory(name="CW Only Program", business_area=cw_business_area)
+
+
+@pytest.fixture
+def admin_client(user: User) -> Client:
+    client = Client()
+    client.force_login(user)
+    return client
+
+
+@pytest.mark.parametrize(
+    ("ingest_source", "status", "expected"),
+    [
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_ERROR, True),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.IMPORT_ERROR, True),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_SCHEDULED, False),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGED, False),
+        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGE_ERROR, False),
+    ],
+)
+def test_is_cw_merge_queue_retry_enabled(ingest_source: str, status: str, expected: bool) -> None:
+    business_area = BusinessAreaFactory(ingest_source=ingest_source)
+    program = ProgramFactory(business_area=business_area)
+    RegistrationDataImportFactory(business_area=business_area, program=program, status=status)
+    button = type("Button", (), {"original": program})()
+
+    assert is_cw_merge_queue_retry_enabled(button) is expected
+
+
+def test_is_cw_merge_queue_retry_disabled_when_no_failed_rdi(cw_program: Program) -> None:
+    button = type("Button", (), {"original": cw_program})()
+
+    assert is_cw_merge_queue_retry_enabled(button) is False
+
+
+@pytest.mark.parametrize(
+    "status",
+    [RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR],
+)
+def test_retry_cw_merge_queue_reschedules_failed_head(
+    admin_client: Client,
+    cw_business_area: BusinessArea,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+    status: str,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=cw_business_area,
+        program=cw_program,
+        status=status,
+        error_message="boom",
+        sentry_id="abc123",
+    )
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == 302
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.MERGE_SCHEDULED
+    assert rdi.error_message == ""
+    assert rdi.sentry_id == ""
+    mock_dispatcher.assert_called_once_with(cw_program)
+
+
+def test_retry_cw_merge_queue_reschedules_oldest_failed(
+    admin_client: Client,
+    cw_business_area: BusinessArea,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    older = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+    newer = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+    # import_date is auto_now_add; force a deterministic arrival order.
+    RegistrationDataImport.objects.filter(pk=older.pk).update(import_date=timezone.now() - timedelta(hours=1))
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task"):
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == status.HTTP_302_FOUND
+    older.refresh_from_db()
+    newer.refresh_from_db()
+    assert older.status == RegistrationDataImport.MERGE_SCHEDULED
+    assert newer.status == RegistrationDataImport.MERGE_ERROR
+
+
+def test_retry_cw_merge_queue_ignores_other_programme(
+    admin_client: Client,
+    cw_business_area: BusinessArea,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    other_program = ProgramFactory(name="Other CW Program", business_area=cw_business_area)
+    target_rdi = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+    other_rdi = RegistrationDataImportFactory(
+        business_area=cw_business_area, program=other_program, status=RegistrationDataImport.MERGE_ERROR
+    )
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == status.HTTP_302_FOUND
+    target_rdi.refresh_from_db()
+    other_rdi.refresh_from_db()
+    assert target_rdi.status == RegistrationDataImport.MERGE_SCHEDULED
+    assert other_rdi.status == RegistrationDataImport.MERGE_ERROR
+    mock_dispatcher.assert_called_once_with(cw_program)
+
+
+def test_retry_cw_merge_queue_no_failed_rdi_does_nothing(
+    admin_client: Client,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == status.HTTP_302_FOUND
+    mock_dispatcher.assert_not_called()
+
+
+def test_retry_cw_merge_queue_rejected_for_non_cw_business_area(
+    admin_client: Client,
+    business_area: BusinessArea,
+    program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area, program=program, status=RegistrationDataImport.MERGE_ERROR
+    )
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == 302
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.MERGE_ERROR
+    mock_dispatcher.assert_not_called()
+
+
+def test_biometric_flag_readonly_on_non_cw_business_area() -> None:
+    ba = BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE)
+    program = ProgramFactory(business_area=ba)
+    request = RequestFactory().get("/admin/program/program/")
+    request.user = UserFactory(is_staff=True, is_superuser=True)
+    admin_instance = ProgramAdmin(Program, AdminSite())
+
+    assert "biometric_deduplication_enabled" in admin_instance.get_readonly_fields(request, program)
+
+
+def test_biometric_flag_editable_on_cw_business_area() -> None:
+    ba = BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY)
+    program = ProgramFactory(business_area=ba)
+    request = RequestFactory().get("/admin/program/program/")
+    request.user = UserFactory(is_staff=True, is_superuser=True)
+    admin_instance = ProgramAdmin(Program, AdminSite())
+
+    assert "biometric_deduplication_enabled" not in admin_instance.get_readonly_fields(request, program)
+
+
+def test_biometric_flag_editable_on_add_view_without_object() -> None:
+    request = RequestFactory().get("/admin/program/program/add/")
+    request.user = UserFactory(is_staff=True, is_superuser=True)
+    admin_instance = ProgramAdmin(Program, AdminSite())
+
+    assert "biometric_deduplication_enabled" not in admin_instance.get_readonly_fields(request, None)

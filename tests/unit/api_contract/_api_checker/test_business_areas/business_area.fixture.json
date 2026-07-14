@@ -2,7 +2,7 @@
     "business_area": {
         "master": {
             "model": "core.businessarea",
-            "pk": "c7210972-7cea-4929-9055-14b5eb27d11e",
+            "pk": "3d8240e0-98f4-4fac-98e6-bc88cb6e18a2",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
@@ -25,6 +25,7 @@
                 "rapid_pro_messages_token": null,
                 "rapid_pro_survey_token": null,
                 "postpone_deduplication": false,
+                "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                 "deduplication_duplicate_score": 6.0,
                 "deduplication_possible_duplicate_score": 6.0,
                 "deduplication_batch_duplicates_percentage": 50,
@@ -35,7 +36,7 @@
                 "biometric_deduplication_threshold": 0.0,
                 "custom_fields": {},
                 "countries": [
-                    "68d47416-e1ec-4c13-b452-a9f5153c3fc0"
+                    "07c1d789-b09b-4075-802b-8b0dbd25faae"
                 ],
                 "payment_countries": []
             }
@@ -43,7 +44,7 @@
         "deps": [
             {
                 "model": "geo.country",
-                "pk": "68d47416-e1ec-4c13-b452-a9f5153c3fc0",
+                "pk": "07c1d789-b09b-4075-802b-8b0dbd25faae",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -53,6 +54,7 @@
                     "iso_code2": "TL",
                     "iso_code3": "TLN",
                     "iso_num": "9999",
+                    "currency": null,
                     "parent": null,
                     "valid_from": "2025-01-01T00:00:00Z",
                     "valid_until": null,

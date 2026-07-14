@@ -1,0 +1,43 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "60983fdcb918da23c31c3ec79cdfe5ca",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "702"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/3j5w/households/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "b33d59aa-9a52-4e5d-bca0-af8e5f85fdeb",
+                "unicef_id": "HH-25-0000.0001",
+                "head_of_household": "Person 0",
+                "admin1": null,
+                "admin2": null,
+                "status": "ACTIVE",
+                "size": null,
+                "residence_status": "None",
+                "total_cash_received": null,
+                "total_cash_received_usd": null,
+                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01T00:00:00Z",
+                "currency": null,
+                "has_duplicates": false,
+                "sanction_list_possible_match": false,
+                "sanction_list_confirmed_match": false,
+                "program_id": "69d0b162-0b46-48c8-840a-3161d03e5af4",
+                "program_name": "Program 0",
+                "program_code": "3j5w"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
