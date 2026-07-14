@@ -71,7 +71,7 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInApproval', businessAreaSlug],
+    queryKey: ['paymentPlansInApproval', businessAreaSlug, fetchPaymentPlans],
     queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
   });
 
@@ -80,7 +80,7 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inAuthorizationLoading,
     refetch: refetchInAuthorization,
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInAuthorization', businessAreaSlug],
+    queryKey: ['paymentPlansInAuthorization', businessAreaSlug, fetchPaymentPlans],
     queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
   });
 
@@ -89,7 +89,7 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inReviewLoading,
     refetch: refetchInReview,
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInReview', businessAreaSlug],
+    queryKey: ['paymentPlansInReview', businessAreaSlug, fetchPaymentPlans],
     queryFn: () => fetchPaymentPlans('IN_REVIEW'),
   });
 
@@ -98,7 +98,7 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: releasedLoading,
     refetch: refetchReleased,
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansReleased', businessAreaSlug],
+    queryKey: ['paymentPlansReleased', businessAreaSlug, fetchPaymentPlans],
     queryFn: () => fetchPaymentPlans('ACCEPTED'),
   });
 

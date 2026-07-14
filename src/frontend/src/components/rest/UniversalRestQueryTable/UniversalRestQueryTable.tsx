@@ -38,7 +38,7 @@ export const UniversalRestQueryTable = <T, K>(
   const { queryVariables } = props;
   const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
   const { data, isLoading, error } = useQuery({
-    queryKey: [query.name, cleanedQueryVariables, programCode, businessArea],
+    queryKey: [query.name, query, cleanedQueryVariables, programCode, businessArea],
     queryFn: () =>
       query({
         businessAreaSlug: businessArea,

@@ -8,7 +8,7 @@ export const useHopeDetailsQuery = <TData, TOptions = any>(
 ): UseQueryResult<TData> => {
   const { businessAreaSlug, programCode } = useBaseUrl();
   return useQuery({
-    queryKey: [queryFn.name, { id, programCode, businessAreaSlug }],
+    queryKey: [queryFn.name, queryFn, { id, programCode, businessAreaSlug }],
     queryFn: () =>
       queryFn({
         id,

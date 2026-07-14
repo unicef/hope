@@ -55,7 +55,7 @@ export function BaseAutocompleteRest({
   const debouncedInputText = useDebounce(inputValue, 800);
   const [open, setOpen] = useState(false);
   const { data, isLoading } = useQuery({
-    queryKey: [label, businessArea, programId, queryParams],
+    queryKey: [label, businessArea, programId, queryParams, fetchFunction],
     queryFn: () => fetchFunction(businessArea, programId, { ...queryParams }),
   });
   useEffect(
