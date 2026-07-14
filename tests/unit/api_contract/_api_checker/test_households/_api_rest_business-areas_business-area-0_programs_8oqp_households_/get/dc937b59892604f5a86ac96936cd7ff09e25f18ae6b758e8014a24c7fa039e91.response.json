@@ -1,0 +1,43 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "15ebd16d7c9dc6bacd8ba30ccae593fa",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "702"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/8oqp/households/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "3bc072c1-678f-47bf-88a0-7c156e40d5a9",
+                "unicef_id": "HH-25-0000.0001",
+                "head_of_household": "Person 0",
+                "admin1": null,
+                "admin2": null,
+                "status": "ACTIVE",
+                "size": null,
+                "residence_status": "None",
+                "total_cash_received": null,
+                "total_cash_received_usd": null,
+                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01T00:00:00Z",
+                "currency": null,
+                "has_duplicates": false,
+                "sanction_list_possible_match": false,
+                "sanction_list_confirmed_match": false,
+                "program_id": "b49b1bdf-edb6-4527-83f1-91d23bf1bcee",
+                "program_name": "Program 0",
+                "program_code": "8oqp"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

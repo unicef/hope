@@ -7,8 +7,8 @@ import pytest
 from rest_framework import status
 
 from extras.test_utils.factories import (
+    BiometricDeduplicationEngineSimilarityPairFactory,
     BusinessAreaFactory,
-    DeduplicationEngineSimilarityPairFactory,
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
@@ -21,8 +21,8 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets_for_biometrics,
 )
 from hope.models import (
+    BiometricDedupeSimilarityPair,
     BusinessArea,
-    DeduplicationEngineSimilarityPair,
     Individual,
     Program,
     RegistrationDataImport,
@@ -207,26 +207,26 @@ def biometric_context(
     ind3, ind4 = sorted([ind1, other_individual], key=lambda item: item.id)
     ind5 = other_individual2
 
-    dedup_engine_similarity_pair = DeduplicationEngineSimilarityPairFactory(
+    dedup_engine_similarity_pair = BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=ind1,
         individual2=ind2,
         similarity_score=55.55,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_200,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_200,
     )
-    dedup_engine_similarity_pair_2 = DeduplicationEngineSimilarityPairFactory(
+    dedup_engine_similarity_pair_2 = BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=ind3,
         individual2=ind4,
         similarity_score=75.25,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_200,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_200,
     )
-    dedup_engine_similarity_pair_3 = DeduplicationEngineSimilarityPairFactory(
+    dedup_engine_similarity_pair_3 = BiometricDeduplicationEngineSimilarityPairFactory(
         program=program2,
         individual1=ind5,
         individual2=None,
         similarity_score=0.0,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_429,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_429,
     )
 
     return {
@@ -318,15 +318,14 @@ def test_create_na_tickets_biometrics(biometric_context: dict[str, Any]) -> None
 
     assert GrievanceTicket.objects.count() == 0
     assert TicketNeedsAdjudicationDetails.objects.count() == 0
-    assert rdi.deduplication_engine_status is None
 
-    create_needs_adjudication_tickets_for_biometrics(DeduplicationEngineSimilarityPair.objects.none(), rdi)
+    create_needs_adjudication_tickets_for_biometrics(BiometricDedupeSimilarityPair.objects.none(), rdi)
     assert GrievanceTicket.objects.count() == 0
     assert TicketNeedsAdjudicationDetails.objects.count() == 0
 
-    assert DeduplicationEngineSimilarityPair.objects.count() == 3
+    assert BiometricDedupeSimilarityPair.objects.count() == 3
     create_needs_adjudication_tickets_for_biometrics(
-        DeduplicationEngineSimilarityPair.objects.filter(pk=pair_1.pk),
+        BiometricDedupeSimilarityPair.objects.filter(pk=pair_1.pk),
         rdi,
     )
 
@@ -341,14 +340,14 @@ def test_create_na_tickets_biometrics(biometric_context: dict[str, Any]) -> None
     assert na_ticket.extra_data["dedup_engine_similarity_pair"] == pair_1.serialize_for_ticket()
 
     create_needs_adjudication_tickets_for_biometrics(
-        DeduplicationEngineSimilarityPair.objects.filter(pk=pair_2.pk),
+        BiometricDedupeSimilarityPair.objects.filter(pk=pair_2.pk),
         rdi,
     )
     assert GrievanceTicket.objects.count() == 2
     assert TicketNeedsAdjudicationDetails.objects.count() == 2
 
     create_needs_adjudication_tickets_for_biometrics(
-        DeduplicationEngineSimilarityPair.objects.filter(pk=pair_2.pk),
+        BiometricDedupeSimilarityPair.objects.filter(pk=pair_2.pk),
         rdi,
     )
     assert GrievanceTicket.objects.count() == 2
@@ -364,7 +363,7 @@ def test_create_na_tickets_biometrics_for_1_ind(biometric_context: dict[str, Any
     assert TicketNeedsAdjudicationDetails.objects.count() == 0
 
     create_needs_adjudication_tickets_for_biometrics(
-        DeduplicationEngineSimilarityPair.objects.filter(pk=pair_3.pk),
+        BiometricDedupeSimilarityPair.objects.filter(pk=pair_3.pk),
         rdi,
     )
 
@@ -405,7 +404,7 @@ def test_ticket_biometric_query_response(
     assert TicketNeedsAdjudicationDetails.objects.count() == 0
 
     create_needs_adjudication_tickets_for_biometrics(
-        DeduplicationEngineSimilarityPair.objects.filter(pk=pair_1.pk),
+        BiometricDedupeSimilarityPair.objects.filter(pk=pair_1.pk),
         rdi,
     )
     assert GrievanceTicket.objects.count() == 1

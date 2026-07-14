@@ -16,12 +16,7 @@ from hope.apps.registration_data.tasks.rdi_program_population_create import (
     RdiProgramPopulationCreateTask,
 )
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import (
-    AsyncRetryJob,
-    Document,
-    Program,
-    RegistrationDataImport,
-)
+from hope.models import AsyncRetryJob, Document, Program, RegistrationDataImport
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -29,7 +24,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
+def handle_rdi_exception(rdi_id: str, e: BaseException, new_status: str = RegistrationDataImport.IMPORT_ERROR) -> None:
     try:
         from sentry_sdk import capture_exception
 
@@ -38,7 +33,7 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
         err = "N/A"  # pragma: no cover
         logger.exception(exc)  # pragma: no cover
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
-    rdi.status = RegistrationDataImport.IMPORT_ERROR
+    rdi.status = new_status
     rdi.sentry_id = err
     rdi.error_message = str(e)
     rdi.save(update_fields=["status", "sentry_id", "error_message"])
@@ -490,90 +485,65 @@ def deduplicate_documents_for_rdi(rdi_id: str) -> bool:
     return True
 
 
-def deduplication_engine_process_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.registration_data.services.biometric_deduplication import (
-        BiometricDeduplicationService,
-    )
-
-    program = Program.objects.get(id=job.config["program_id"])
-    set_sentry_business_area_tag(program.business_area.name)
-    BiometricDeduplicationService().upload_and_process_deduplication_set(program)
-
-
-def deduplication_engine_process_async_task(program_id: str) -> None:
-    config = {"program_id": program_id}
-    AsyncRetryJob.queue_task(
-        job_name=deduplication_engine_process_async_task.__name__,
-        program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.deduplication_engine_process_async_task_action",
-        config=config,
-        group_key="registration_data",
-        description=f"Process biometric deduplication for program {program_id}",
-    )
-
-
-def fetch_biometric_deduplication_results_and_process_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.apps.registration_data.services.biometric_deduplication import (
-        BiometricDeduplicationService,
-    )
-
-    program = Program.objects.get(id=job.config["program_id"])
-    rdi_id = job.config.get("rdi_id")
-    rdi = RegistrationDataImport.objects.get(id=rdi_id) if rdi_id else None
-    set_sentry_business_area_tag(program.business_area.name)
-
-    service = BiometricDeduplicationService()
-    service.fetch_biometric_deduplication_results_and_process(program, rdi)
-
-
-def fetch_biometric_deduplication_results_and_process_async_task(
-    program_id: str,
-    rdi_id: str | None = None,
-) -> None:
-    config = {
-        "program_id": program_id,
-        "rdi_id": rdi_id,
-    }
-    AsyncRetryJob.queue_task(
-        job_name=fetch_biometric_deduplication_results_and_process_async_task.__name__,
-        program_id=program_id,
-        action="hope.apps.registration_data.celery_tasks.fetch_biometric_deduplication_results_and_process_async_task_action",
-        config=config,
-        group_key="registration_data",
-        description=f"Fetch biometric deduplication results for program {program_id}",
-    )
-
-
-def classify_findings_and_schedule_merge_async_task_action(job: AsyncRetryJob) -> bool:
-    from hope.apps.registration_data.tasks.cw_arrival_hook import CwArrivalHookTask
+def fetch_findings_and_merge_rdi_action(job: AsyncRetryJob) -> bool:
+    from hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi import FetchFindingsAndMergeRdi
 
     registration_data_import_id = job.config["registration_data_import_id"]
-    logger.info(f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge action received")
+    program_id = job.config["program_id"]
+    merged = False
     try:
-        with locked_cache(
-            key=f"classify_findings_and_schedule_merge_async_task-{registration_data_import_id}"
-        ) as locked:
+        with locked_cache(key=f"fetch_findings_and_merge_rdi-program-{program_id}") as locked:
             if not locked:
                 logger.info(
-                    f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge skipped (lock held)"
+                    f"RDI:{registration_data_import_id} fetch_findings_and_merge_rdi skipped (program lock held)"
                 )
                 return True
-            CwArrivalHookTask().execute(registration_data_import_id)
-        logger.info(f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge action completed")
-        return True
+            merged = FetchFindingsAndMergeRdi().execute(registration_data_import_id)
     except Exception as exc:  # noqa
-        handle_rdi_exception(registration_data_import_id, exc)
+        handle_rdi_exception(registration_data_import_id, exc, new_status=RegistrationDataImport.MERGE_ERROR)
         raise
+    if merged:
+        rdi_dispatcher_task(Program.objects.get(id=program_id))
+    return True
 
 
-def classify_findings_and_schedule_merge_async_task(registration_data_import: RegistrationDataImport) -> None:
+def fetch_findings_and_merge_rdi(registration_data_import: RegistrationDataImport) -> None:
     registration_data_import_id = str(registration_data_import.id)
     AsyncRetryJob.queue_task(
         instance=registration_data_import,
-        job_name=classify_findings_and_schedule_merge_async_task.__name__,
+        job_name=fetch_findings_and_merge_rdi.__name__,
         program=registration_data_import.program,
-        action="hope.apps.registration_data.celery_tasks.classify_findings_and_schedule_merge_async_task_action",
-        config={"registration_data_import_id": registration_data_import_id},
-        group_key=f"classify_findings_and_schedule_merge_async_task:{registration_data_import_id}",
-        description=f"Classify CW findings and schedule merge for {registration_data_import_id}",
+        action="hope.apps.registration_data.celery_tasks.fetch_findings_and_merge_rdi_action",
+        config={
+            "registration_data_import_id": registration_data_import_id,
+            "program_id": str(registration_data_import.program_id),
+        },
+        group_key="registration_data",
+        description=f"Classify Country Workspace findings and schedule merge for {registration_data_import_id}",
+    )
+
+
+def rdi_dispatcher_task_action(job: AsyncRetryJob) -> bool:
+    from hope.apps.registration_data.tasks.rdi_merge_dispatcher import RdiMergeDispatcher
+
+    RdiMergeDispatcher().execute(job.config["program_id"])
+    return True
+
+
+def rdi_dispatcher_task(program: Program) -> None:
+    """Advance a program's CW merge queue: process the oldest RDI still waiting to merge.
+
+    Triggered on CW RDI completion (CompleteRDIView) and by admin retry. Lock-free — the
+    dispatcher only decides who is next; the per-program lock lives in the merge job.
+    """
+    if program is None:
+        return
+    AsyncRetryJob.queue_task(
+        instance=program,
+        job_name=rdi_dispatcher_task.__name__,
+        program=program,
+        action="hope.apps.registration_data.celery_tasks.rdi_dispatcher_task_action",
+        config={"program_id": str(program.id)},
+        group_key="registration_data",
+        description=f"Advance Country Workspace merge queue for program {program.id}",
     )

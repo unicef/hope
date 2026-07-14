@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 import zipfile
 
+from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button, choice
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
@@ -17,6 +18,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -32,8 +34,6 @@ from hope.admin.utils import (
 )
 from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.household.services.index_management import check_program_indexes, rebuild_program_indexes
-from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task
 from hope.models import (
     AdminAreaLimitedTo,
@@ -46,6 +46,7 @@ from hope.models import (
     PaymentPlanPurpose,
     Program,
     ProgramCycle,
+    RegistrationDataImport,
 )
 
 
@@ -171,38 +172,16 @@ class ProgramAdminForm(forms.ModelForm):
             "send_reconciliation_window_expiry_notifications",
         )
 
-    def _handle_biometric_deduplication_set(self, action: str) -> None:
-        try:
-            service = BiometricDeduplicationService()
-            if action == "create":
-                service.create_deduplication_set(self.instance)
-                if self.instance.pk:
-                    service.mark_rdis_as_pending(self.instance)
-            elif action == "delete":
-                service.delete_deduplication_set(self.instance)
-        except (
-            DeduplicationEngineAPI.API_EXCEPTION_CLASS,
-            DeduplicationEngineAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS,
-        ) as exc:
-            raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
 
-    def clean(self) -> dict[str, Any] | None:
-        cleaned_data = super().clean()
-        if self.errors:
-            return cleaned_data
-
-        if "biometric_deduplication_enabled" in self.changed_data:
-            enable = cleaned_data.get("biometric_deduplication_enabled")
-            if self.instance.pk:
-                original_enabled = self.instance.biometric_deduplication_enabled
-                if enable is True and original_enabled is False:
-                    self._handle_biometric_deduplication_set("create")
-                elif enable is False and original_enabled is True:
-                    self._handle_biometric_deduplication_set("delete")
-            elif enable is True:
-                self._handle_biometric_deduplication_set("create")
-
-        return cleaned_data
+def is_cw_merge_queue_retry_enabled(btn: StandardButton) -> bool:
+    program = btn.original
+    return (
+        program.business_area.is_rdi_ingest_source_country_workspace_only
+        and RegistrationDataImport.objects.filter(
+            program=program,
+            status__in=(RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR),
+        ).exists()
+    )
 
 
 @admin.register(Program)
@@ -255,6 +234,52 @@ class ProgramAdmin(
             "QuerySet[Program]",
             super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
         )
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Program | None = None) -> tuple[str, ...]:
+        readonly_fields = tuple(super().get_readonly_fields(request, obj))
+        if obj and obj.business_area.is_rdi_ingest_source_all_except_country_workspace:
+            readonly_fields += ("biometric_deduplication_enabled",)
+        return readonly_fields
+
+    @button(
+        label="Retry CW merge queue",
+        permission="registration_data.rerun_rdi",
+        enabled=is_cw_merge_queue_retry_enabled,
+    )
+    def retry_cw_merge_queue(self, request: HttpRequest, pk: str) -> HttpResponse | None:
+        from hope.apps.registration_data.celery_tasks import rdi_dispatcher_task
+
+        program = self.get_object(request, pk)
+        if program is None:
+            self.message_user(request, "Program not found", messages.ERROR)
+            return None
+        if not program.business_area.is_rdi_ingest_source_country_workspace_only:
+            self.message_user(
+                request,
+                "Retry CW merge queue is only available for Country Workspace business areas.",
+                messages.ERROR,
+            )
+            return None
+        with transaction.atomic():
+            rdi = (
+                RegistrationDataImport.objects.select_for_update(skip_locked=True)
+                .filter(
+                    program=program,
+                    status__in=(RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR),
+                )
+                .order_by("import_date", "id")
+                .first()
+            )
+            if rdi is None:
+                self.message_user(request, "No failed RDI to retry for this programme", messages.WARNING)
+                return None
+            rdi.status = RegistrationDataImport.MERGE_SCHEDULED
+            rdi.error_message = ""
+            rdi.sentry_id = ""
+            rdi.save(update_fields=["status", "error_message", "sentry_id"])
+        transaction.on_commit(lambda: rdi_dispatcher_task(program))
+        self.message_user(request, "CW merge queue retry scheduled")
+        return None
 
     @button(
         permission="payment.add_paymentplan",
