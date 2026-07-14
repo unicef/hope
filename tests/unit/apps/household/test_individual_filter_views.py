@@ -441,7 +441,7 @@ def _test_search(
         ({"search": "John Root"}, {"full_name": "Jack Root"}, {"full_name": "John Root"}, {}, {}),
         ({"search": "+48010101010"}, {"phone_no": "+48 609 456 008"}, {"phone_no": "+48 010 101 010"}, {}, {}),
         ({"search": "HOPE-123"}, {"detail_id": "HOPE-321"}, {"detail_id": "HOPE-123"}, {}, {}),
-        ({"search": "456"}, {"program_registration_id": "123"}, {"program_registration_id": "456"}, {}, {}),
+        ({"search": "REG-456"}, {"program_registration_id": "REG-123"}, {"program_registration_id": "REG-456"}, {}, {}),
     ],
 )
 def test_search(
@@ -479,7 +479,7 @@ def test_search(
         ({"search": "John Root"}, {"full_name": "Jack Root"}, {"full_name": "John Root"}, {}, {}),
         ({"search": "+48010101010"}, {"phone_no": "+48 609 456 008"}, {"phone_no": "+48 010 101 010"}, {}, {}),
         ({"search": "HOPE-987"}, {"detail_id": "HOPE-654"}, {"detail_id": "HOPE-987"}, {}, {}),
-        ({"search": "786"}, {"program_registration_id": "456"}, {"program_registration_id": "786"}, {}, {}),
+        ({"search": "REG-786"}, {"program_registration_id": "REG-456"}, {"program_registration_id": "REG-786"}, {}, {}),
     ],
 )
 def test_search_db(
@@ -518,7 +518,7 @@ def test_search_db(
         ({"search": "John Root"}, {"full_name": "Jack Root"}, {"full_name": "John Root"}, {}, {}),
         ({"search": "+48010101010"}, {"phone_no": "+48 609 456 008"}, {"phone_no": "+48 010 101 010"}, {}, {}),
         ({"search": "HOPE-987"}, {"detail_id": "HOPE-654"}, {"detail_id": "HOPE-987"}, {}, {}),
-        ({"search": "786"}, {"program_registration_id": "456"}, {"program_registration_id": "786"}, {}, {}),
+        ({"search": "REG-786"}, {"program_registration_id": "REG-456"}, {"program_registration_id": "REG-786"}, {}, {}),
     ],
 )
 def test_search_db_no_program_filter(

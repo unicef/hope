@@ -32,6 +32,10 @@ class PDUXlsxTemplate(TimeStampedModel, AdminUrlMixin):
         FAILED = "FAILED", "Failed"
         CANCELED = "CANCELED", "Canceled"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PDUXlsxTemplate.Status.choices
+
     name = models.CharField(
         max_length=255,
         validators=[
@@ -56,7 +60,7 @@ class PDUXlsxTemplate(TimeStampedModel, AdminUrlMixin):
     )
     status = models.CharField(
         max_length=20,
-        choices=Status.choices,
+        choices=Status.get_choices,
         default=Status.TO_EXPORT,
     )
     created_by = models.ForeignKey(

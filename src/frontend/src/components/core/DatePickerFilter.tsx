@@ -1,6 +1,6 @@
 import { Box, FormControl } from '@mui/material';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { FieldLabel } from './FieldLabel';
 import { ReactElement } from 'react';
 
@@ -23,13 +23,9 @@ export const DatePickerFilter = ({
       <FormControl data-cy={calculatedDataCy} size="small">
         <DesktopDatePicker
           slotProps={{ textField: { size: 'small' } }}
-          onChange={(date) => {
-            if (date) {
-              // Format as 'yyyy-MM-dd' (date only)
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, '0');
-              const day = String(date.getDate()).padStart(2, '0');
-              onChange(`${year}-${month}-${day}`);
+          onChange={(value) => {
+            if (value instanceof Date && !isNaN(value.getTime())) {
+              onChange(format(value, 'yyyy-MM-dd'));
             } else {
               onChange(null);
             }

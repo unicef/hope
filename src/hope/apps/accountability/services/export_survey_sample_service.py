@@ -47,7 +47,7 @@ class ExportSurveySampleService:
 
         msg = "Survey sample xlsx file was generated and below You have the link to download this file."
         return {
-            "first_name": self.user.first_name,
+            "first_name": self.user.first_name or getattr(self.user, "username", ""),
             "last_name": self.user.last_name,
             "email": self.user.email,
             "message": msg,

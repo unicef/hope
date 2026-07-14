@@ -5,7 +5,8 @@ import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Chip, Grid, Typography } from '@mui/material';
+import { PaymentPlanPurpose } from '@restgenerated/models/PaymentPlanPurpose';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
@@ -116,10 +117,7 @@ export const ProgramDetails = ({
             />
           </Grid>
           <Grid size={4}>
-            <LabelizedField
-              label={t('Programme Code')}
-              value={program.code}
-            />
+            <LabelizedField label={t('Programme Code')} value={program.code} />
           </Grid>
           <Grid size={4}>
             <LabelizedField
@@ -189,6 +187,23 @@ export const ProgramDetails = ({
               }
             />
           </Grid>
+          {program.paymentPlanPurposes?.length > 0 && (
+            <Grid size={12}>
+              <LabelizedField label={t('Payment Plan Purposes')}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {program.paymentPlanPurposes.map(
+                    (purpose: PaymentPlanPurpose) => (
+                      <Chip
+                        key={purpose.id}
+                        label={purpose.name}
+                        size="small"
+                      />
+                    ),
+                  )}
+                </Box>
+              </LabelizedField>
+            </Grid>
+          )}
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>

@@ -1,6 +1,6 @@
 from django.db import models
 
-from hope.apps.household.const import ROLE_CHOICE
+from hope.apps.household.const import get_role_choices
 from hope.models.utils import AbstractSyncable, PendingManager, SoftDeletableMergeStatusModel, TimeStampedUUIDModel
 
 
@@ -18,7 +18,7 @@ class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDMo
     role = models.CharField(
         max_length=255,
         blank=True,
-        choices=ROLE_CHOICE,
+        choices=get_role_choices,
     )
     copied_from = models.ForeignKey(
         "self",

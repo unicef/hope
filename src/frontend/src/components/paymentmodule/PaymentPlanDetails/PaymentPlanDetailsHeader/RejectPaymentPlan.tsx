@@ -150,7 +150,7 @@ export function RejectPaymentPlan({
                   onClick={submitForm}
                   dataCy="button-submit"
                   disabled={!isActiveProgram}
-                  data-perm={PERMISSIONS.PM_ACCEPTANCE_PROCESS_REJECT}
+                  data-perm={`${PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE}, ${PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE}, ${PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW}`}
                 >
                   {t('Reject')}
                 </LoadingButton>

@@ -36,8 +36,12 @@ USER_STATUS_CHOICES = (
 )
 
 
+def get_user_status_choices() -> tuple:
+    return USER_STATUS_CHOICES
+
+
 class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
-    status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
+    status = models.CharField(choices=get_user_status_choices, max_length=10, default=INVITED)
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT)
     email = models.EmailField(_("email address"), unique=True)
     custom_fields = JSONField(default=dict, blank=True)

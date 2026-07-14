@@ -93,15 +93,14 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       ),
   });
 
-  type FormValues = Yup.InferType<typeof validationSchema>;
-  const initialValues: FormValues = {
+  const initialValues = {
     paymentPlanId: '',
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
   };
 
-  const handleSubmit = async (values: FormValues): Promise<void> => {
+  const handleSubmit = async (values: typeof initialValues): Promise<void> => {
     try {
       const dispersionStartDate = values.dispersionStartDate
         ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')

@@ -41,6 +41,10 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
         FAILED_MERGE = "FAILED_MERGE", "Failed merge"
         CANCELED_MERGE = "CANCELED_MERGE", "Canceled merge"
 
+        @staticmethod
+        def get_choices() -> list[tuple[str, str]]:
+            return PDUOnlineEdit.Status.choices
+
     name = models.CharField(
         max_length=255,
         validators=[
@@ -65,7 +69,7 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
     )
     status = models.CharField(
         max_length=20,
-        choices=Status.choices,
+        choices=Status.get_choices,
         default=Status.PENDING_CREATE,
     )
     created_by = models.ForeignKey(

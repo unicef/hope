@@ -1,13 +1,13 @@
 from decimal import Decimal
 from unittest.mock import MagicMock
 
-from hope.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    XlsxPaymentPlanDeliveryImportService,
 )
 
 
-def _build_service(payments_dict: dict) -> XlsxPaymentPlanImportPerFspService:
-    svc = XlsxPaymentPlanImportPerFspService.__new__(XlsxPaymentPlanImportPerFspService)
+def _build_service(payments_dict: dict) -> XlsxPaymentPlanDeliveryImportService:
+    svc = XlsxPaymentPlanDeliveryImportService.__new__(XlsxPaymentPlanDeliveryImportService)
     svc.errors = []
     svc.sheetname = "TestSheet"
     svc.xlsx_headers = ["payment_id", "delivered_quantity"]

@@ -1,0 +1,6 @@
+{% comment %}
+Reusable email call-to-action button. Pass `link` (a bare URL) and an optional
+`label` (defaults to "Download File"). Inline styles are mandatory — email clients
+such as Outlook strip the <head>, so the styling cannot live in a stylesheet.
+{% endcomment %}
+<p><a class="button" href="{{ link }}" style="background-color: #033F91; color: #ffffff; font-size: 16px; text-decoration: none; padding: 12px 24px; border-radius: 4px; display: inline-block;">{{ label|default:"Download File" }}</a></p>

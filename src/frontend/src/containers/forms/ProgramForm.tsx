@@ -7,6 +7,7 @@ import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { PaymentPlanPurposesAutocomplete } from '@shared/autocompletes/rest/PaymentPlanPurposesAutocomplete';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -20,11 +21,13 @@ interface ProgramFormPropTypes {
   values;
   programHasRdi?: boolean;
   errors;
+  lockedPurposeIds?: string[];
 }
 
 const ProgramForm = ({
   values,
   programHasRdi,
+  lockedPurposeIds,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -287,6 +290,15 @@ const ProgramForm = ({
             variant="outlined"
             component={FormikTextField}
             data-cy="input-description"
+          />
+        </Grid>
+        <Grid size={12}>
+          <Field
+            name="paymentPlanPurposes"
+            required
+            component={PaymentPlanPurposesAutocomplete}
+            lockedValues={lockedPurposeIds ?? []}
+            disabled={(values.paymentPlanPurposes?.length ?? 0) >= 10}
           />
         </Grid>
         <Grid size={6}>

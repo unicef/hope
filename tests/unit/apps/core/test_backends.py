@@ -553,3 +553,8 @@ def test_no_permissions_for_program_without_any_role_assignment(
     permissions = backend.get_all_permissions(user, program_other)
 
     assert set() == permissions
+
+
+def test_get_user_returns_none_for_missing_user(backend, db):
+    result = backend.get_user(999_999)
+    assert result is None

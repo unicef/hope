@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
     FileTempFactory,
+    FollowUpInstructionFactory,
     PartnerFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
@@ -289,6 +290,41 @@ def test_bulk_action(
     assert managerial_context["payment_plan2"].status == PaymentPlan.Status.IN_AUTHORIZATION
 
 
+def test_bulk_action_raises_for_instruction_managed(
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    create_partner_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+    create_partner_role_with_permissions(
+        managerial_context["partner"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+    instruction = FollowUpInstructionFactory(
+        program=managerial_context["program1"],
+        business_area=managerial_context["business_area"],
+        created_by=managerial_context["user"],
+    )
+    pp = managerial_context["payment_plan1"]
+    pp.follow_up_instruction = instruction
+    pp.save(update_fields=["follow_up_instruction"])
+
+    response = managerial_context["client"].post(
+        managerial_context["bulk_url"],
+        data={"ids": [str(pp.id)], "action": PaymentPlan.Action.APPROVE.value},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "This Payment Plan is managed by a Follow Up Instruction." in str(response.data)
+
+
 def test_bulk_action_no_approve_permissions(
     managerial_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -343,8 +379,8 @@ def test_get_action_permission(action_name: str, result: str | None) -> None:
 def _attach_files(payment_plan: PaymentPlan, user: Any) -> None:
     payment_plan.imported_file = FileTempFactory(created_by=user)
     payment_plan.export_file_entitlement = FileTempFactory(created_by=user)
-    payment_plan.export_file_per_fsp = FileTempFactory(created_by=user)
-    payment_plan.save(update_fields=["imported_file", "export_file_entitlement", "export_file_per_fsp"])
+    payment_plan.export_file_delivery = FileTempFactory(created_by=user)
+    payment_plan.save(update_fields=["imported_file", "export_file_entitlement", "export_file_delivery"])
 
 
 def test_bulk_action_copies_payment_plan_files_when_present(

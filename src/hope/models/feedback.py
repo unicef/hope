@@ -6,6 +6,10 @@ from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
+def get_issue_type_choices() -> tuple:
+    return Feedback.ISSUE_TYPE_CHOICES
+
+
 class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -27,7 +31,7 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         (NEGATIVE_FEEDBACK, _("Negative feedback")),
     )
 
-    issue_type = models.CharField(verbose_name=_("Issue type"), choices=ISSUE_TYPE_CHOICES, max_length=20)
+    issue_type = models.CharField(verbose_name=_("Issue type"), choices=get_issue_type_choices, max_length=20)
     household_lookup = models.ForeignKey(
         "household.Household",
         related_name="feedbacks",

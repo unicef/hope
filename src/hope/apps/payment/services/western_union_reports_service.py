@@ -544,7 +544,11 @@ class WesternUnionReportsService:
                     try:
                         return self.decode_rows(zip_info.filename, extracted_file.read())
                     except self.QCFReportsServiceError:
-                        logger.warning("Skipping unsupported archive member %s in %s", zip_info.filename, filename)
+                        logger.warning(
+                            "Skipping unsupported archive member %s in %s",
+                            zip_info.filename,
+                            filename,
+                        )
 
         raise self.QCFReportsServiceError(f"Could not parse any supported archive member in {filename}")
 
@@ -763,12 +767,12 @@ class WesternUnionReportsService:
 
         for user in users:
             context = {
-                "first_name": getattr(user, "first_name", ""),
+                "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Payment Plan: {payment_plan_link}",
                 "title": f"Payment Plan {report.report_file.file.name} Western Union report",
-                "link": f"Western Union report file: {download_link}",
+                "link": download_link,
             }
             user.email_user(
                 subject=context["title"],

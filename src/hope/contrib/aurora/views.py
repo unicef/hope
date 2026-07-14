@@ -63,7 +63,7 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
             filters = {"pk": self.kwargs["pk"]}
         else:
             raise Http404
-        base = Registration.objects.select_related("flex_form", "validator", "project", "project__organization")
+        base = Registration.objects.select_related("project", "project__organization")
         try:
             reg = base.get(**filters)
             set_tag("registration.organization", reg.project.organization.name)

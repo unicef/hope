@@ -88,7 +88,9 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             ),
         )
         payments_ids = [payment.id for payment in payments_to_save]
-        payments = Payment.objects.filter(id__in=payments_ids).select_related("household_snapshot")
+        payments = Payment.objects.filter(id__in=payments_ids).select_related(
+            "household_snapshot", "delivery_type", "currency"
+        )
         for payment in payments:
             payment.update_signature_hash()
         Payment.objects.bulk_update(payments, fields=("signature_hash",))

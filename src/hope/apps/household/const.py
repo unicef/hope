@@ -445,3 +445,61 @@ INDIVIDUAL_FLAGS_CHOICES = (
 )
 
 RDI_SOURCES = ("KOB", "AUR", "XLS", "API")
+
+
+# Callable choices wrappers: passed to model fields as ``choices=get_*_choices`` so that
+# changing the underlying tuple does not generate a (no-op) migration.
+def get_residence_status_choices() -> tuple:
+    return RESIDENCE_STATUS_CHOICE
+
+
+def get_sex_choices() -> tuple:
+    return SEX_CHOICE
+
+
+def get_marital_status_choices() -> tuple:
+    return MARITAL_STATUS_CHOICE
+
+
+def get_observed_disability_choices() -> tuple:
+    return OBSERVED_DISABILITY_CHOICE
+
+
+def get_relationship_choices() -> tuple:
+    return RELATIONSHIP_CHOICE
+
+
+def get_work_status_choices() -> tuple:
+    return WORK_STATUS_CHOICE
+
+
+def get_role_choices() -> tuple:
+    return ROLE_CHOICE
+
+
+def get_deduplication_golden_record_status_choices() -> tuple:
+    return DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE
+
+
+def get_deduplication_batch_status_choices() -> tuple:
+    return DEDUPLICATION_BATCH_STATUS_CHOICE
+
+
+def get_severity_of_disability_choices() -> tuple:
+    return SEVERITY_OF_DISABILITY_CHOICES
+
+
+def get_org_enumerator_choices() -> tuple:
+    return ORG_ENUMERATOR_CHOICES
+
+
+def get_data_sharing_choices() -> tuple:
+    return DATA_SHARING_CHOICES
+
+
+def get_registration_method_choices() -> tuple:
+    return REGISTRATION_METHOD_CHOICES
+
+
+def get_disability_choices() -> tuple:
+    return DISABILITY_CHOICES

@@ -8,7 +8,7 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { BackgroundActionStatusEnum } from '@restgenerated/models/BackgroundActionStatusEnum';
+import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -24,6 +24,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
@@ -45,10 +46,10 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     refetchInterval: (query) => {
       const data = query.state.data;
       const errorStatuses = [
-        BackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-        BackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-        BackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-        BackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+        PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
@@ -80,6 +81,11 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
 
+  const shouldDisplayVerificationSummary =
+    status === PaymentPlanStatusEnum.FINISHED ||
+    status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
+    status === PaymentPlanStatusEnum.CLOSED;
+
   const shouldDisplayFundsCommitment =
     status === PaymentPlanStatusEnum.IN_REVIEW ||
     status === PaymentPlanStatusEnum.ACCEPTED ||
@@ -94,6 +100,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       {status !== PaymentPlanStatusEnum.PREPARING && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayVerificationSummary && (
+            <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
+          )}
           {shouldDisplayFundsCommitment && (
             <FundsCommitmentSection paymentPlan={paymentPlan} />
           )}

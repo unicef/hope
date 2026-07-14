@@ -1002,16 +1002,15 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     assert PaymentHouseholdSnapshot.objects.count() == 2
     payments[0].refresh_from_db()
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        " financial_institution_code 456,"
-        f" fsp {payments[0].financial_service_provider},"
-        f" payment {payments[0].id},"
-        f" collector {payments[0].collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         PaymentGatewayAPI().add_records_to_payment_instruction([payments[0]], "123")
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
+        "456",
+        payments[0].financial_service_provider,
+        payments[0].id,
+        payments[0].collector,
+    )
     assert post_mock.call_count == 1
 
     payments[0].financial_service_provider = uba_fsp
@@ -1846,16 +1845,15 @@ def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_origi
     )
     account_data = {"financial_institution_pk": str(fi.pk)}
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        f" financial_institution {fi},"
-        f" fsp {payment.financial_service_provider},"
-        f" payment {payment.id},"
-        f" collector {payment.collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution %s, fsp %s, payment %s, collector %s.",
+        fi,
+        payment.financial_service_provider,
+        payment.id,
+        payment.collector,
+    )
     assert result == account_data
 
 
@@ -1902,14 +1900,29 @@ def test_map_financial_institution_with_code_mapping_missing_logs_and_returns_or
     payment = payment_gateway_setup["payments"][0]
     account_data = {"code": "UNKNOWN_CODE"}
 
-    expected_error = (
-        "No Financial Institution Mapping found for"
-        " financial_institution_code UNKNOWN_CODE,"
-        f" fsp {payment.financial_service_provider},"
-        f" payment {payment.id},"
-        f" collector {payment.collector}."
-    )
     with patch("hope.apps.payment.services.payment_gateway.logger.error") as logger_error_mock:
         result = PaymentSerializer()._map_financial_institution(payment, account_data)
-    logger_error_mock.assert_called_once_with(expected_error)
+    logger_error_mock.assert_called_once_with(
+        "No Financial Institution Mapping found for financial_institution_code %s, fsp %s, payment %s, collector %s.",
+        "UNKNOWN_CODE",
+        payment.financial_service_provider,
+        payment.id,
+        payment.collector,
+    )
     assert result == account_data
+
+
+@pytest.mark.django_db
+def test_change_payment_instruction_status_returns_none_for_non_payment_gateway_plan() -> None:
+    fsp = FinancialServiceProviderFactory(
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    payment_plan = PaymentPlanFactory(financial_service_provider=fsp, use_payment_gateway=False)
+    split = PaymentPlanSplitFactory(payment_plan=payment_plan)
+    pg_service = PaymentGatewayService()
+    pg_service.api.change_payment_instruction_status = Mock()  # type: ignore
+
+    result = pg_service.change_payment_instruction_status(PaymentInstructionStatus.OPEN, split)
+
+    assert result is None
+    pg_service.api.change_payment_instruction_status.assert_not_called()

@@ -396,7 +396,7 @@ def test_individual_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 4
-        assert len(captured.captured_queries) == 20
+        assert len(captured.captured_queries) == 18
 
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
@@ -419,7 +419,7 @@ def test_individual_list_caching(
         etag_third = response.headers["etag"]
         assert json.loads(cache.get(etag_third)[0].decode("utf8")) == response.json()
         assert etag_third not in [etag, etag_second]
-        assert len(captured.captured_queries) == 15
+        assert len(captured.captured_queries) == 13
 
     set_admin_area_limits_in_program(ctx["partner"], ctx["program"], [ctx["area1"]])
     with CaptureQueriesContext(connection) as captured:
@@ -428,7 +428,7 @@ def test_individual_list_caching(
         etag_changed_areas = response.headers["etag"]
         assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
         assert etag_changed_areas not in [etag, etag_second, etag_third]
-        assert len(captured.captured_queries) == 15
+        assert len(captured.captured_queries) == 13
 
     hh_version_before_delete = get_household_list_program_key(ctx["program"].id)
     ind_version_before_delete = get_individual_list_program_key(ctx["program"].id)
@@ -442,7 +442,7 @@ def test_individual_list_caching(
         etag_fourth = response.headers["etag"]
         assert len(response.json()["results"]) == 3
         assert etag_fourth not in [etag, etag_second, etag_third, etag_changed_areas]
-        assert len(captured.captured_queries) == 14
+        assert len(captured.captured_queries) == 13
 
     with CaptureQueriesContext(connection) as captured:
         response = ctx["client"].get(ctx["list_url"])
@@ -1066,6 +1066,55 @@ def test_individual_detail_admin_url(detail_context: dict) -> None:
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["admin_url"] == ctx["individual1"].admin_url
+
+
+def test_individual_list_role_field(list_context: dict, create_user_role_with_permissions: Callable) -> None:
+    # Covers IndividualListSerializer.get_role branches:
+    # - prefetched_roles non-empty → returns role display string from the prefetch  (head of household)
+    # - prefetched_roles empty []  → falls back to a DB query that finds no role → None  (plain member)
+    ctx = list_context
+    create_user_role_with_permissions(
+        user=ctx["user"],
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+        business_area=ctx["afghanistan"],
+        program=ctx["program"],
+    )
+
+    response = ctx["client"].get(ctx["list_url"])
+    assert response.status_code == status.HTTP_200_OK
+    results_by_id = {r["id"]: r for r in response.json()["results"]}
+
+    # head_of_household has a PRIMARY role → serializer finds it in prefetched_roles
+    head = ctx["individual1_1"]
+    assert results_by_id[str(head.id)]["role"] == "Primary collector"
+
+    # plain member has no IndividualRoleInHousehold → prefetched_roles is [] → DB fallback finds nothing → None
+    member = ctx["individual1_2"]
+    assert results_by_id[str(member.id)]["role"] is None
+
+
+def test_individual_list_role_field_no_prefetch(
+    list_context: dict,
+) -> None:
+    # Covers IndividualListSerializer.get_role else-branch (roles is None):
+    # when prefetched_roles is absent the serializer falls back to a DB query.
+    from hope.apps.household.api.serializers.individual import IndividualListSerializer
+
+    ctx = list_context
+    head = ctx["individual1_1"]
+
+    # Ensure the individual has no prefetched_roles attribute (simulates a direct
+    # serializer call without the view's Prefetch annotation).
+    assert not hasattr(head, "prefetched_roles")
+
+    serializer = IndividualListSerializer(head, context={"request": None})
+    assert serializer.data["role"] == "Primary collector"
+
+    member = ctx["individual1_2"]
+    assert not hasattr(member, "prefetched_roles")
+
+    serializer = IndividualListSerializer(member, context={"request": None})
+    assert serializer.data["role"] is None
 
 
 def test_get_individual_photos(detail_context: dict, create_user_role_with_permissions: Callable) -> None:

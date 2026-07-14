@@ -3,9 +3,11 @@ from decimal import Decimal
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
+import uuid
 
 from aniso8601 import parse_date
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.contenttypes.models import ContentType
+from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
 from django.test import override_settings
 from django.utils import timezone
@@ -24,23 +26,29 @@ from extras.test_utils.factories import (
     CountryFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
+    FileTempFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     HouseholdFactory,
     IndividualFactory,
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
     TargetingCriteriaRuleFactory,
+    TargetingIndividualBlockRuleFilterFactory,
+    TargetingIndividualRuleFilterBlockFactory,
     UserFactory,
 )
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_async_task,
+    prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -58,6 +66,7 @@ from hope.models import (
     ProgramCycle,
     Role,
     RoleAssignment,
+    TargetingIndividualBlockRuleFilter,
     User,
 )
 
@@ -289,7 +298,11 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     program.status = Program.ACTIVE
     program.save()
 
+    purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(purpose)
     create_input_data["name"] = "TEST"
+    create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=program_cycle).id
+    create_input_data["payment_plan_purposes"] = [purpose]
     pp = PaymentPlanService.create(
         input_data=create_input_data,
         user=user,
@@ -345,6 +358,7 @@ def test_create(
         end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
     program_cycle = program.cycles.first()
+    payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle)
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
     hh2 = HouseholdFactory(program=program, business_area=business_area)
@@ -365,10 +379,13 @@ def test_create(
         registration_data_import=hh1.registration_data_import,
     )
 
+    purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
         "name": "paymentPlanName",
         "program_cycle_id": program_cycle.id,
+        "payment_plan_group_id": payment_plan_group.id,
         "flag_exclude_if_active_adjudication_ticket": False,
         "flag_exclude_if_on_sanction_list": False,
         "rules": [
@@ -381,10 +398,11 @@ def test_create(
         ],
         "fsp_id": fsp.id,
         "delivery_mechanism_code": dm_transfer_to_account.code,
+        "payment_plan_purposes": [purpose],
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(16):
+        with django_assert_num_queries(25):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -406,6 +424,46 @@ def test_create(
     assert pp.total_households_count == 2
     assert pp.total_individuals_count == 6
     assert pp.payment_items.count() == 2
+
+
+def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: User, business_area: Any) -> None:
+    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    program_cycle = ProgramCycleFactory(program=program)
+    other_cycle = ProgramCycleFactory(program=program)
+    group_from_other_cycle = PaymentPlanGroupFactory(cycle=other_cycle)
+
+    input_data = {
+        "business_area_slug": business_area.slug,
+        "name": "Test TP",
+        "program_cycle_id": program_cycle.id,
+        "payment_plan_group_id": group_from_other_cycle.id,
+        "flag_exclude_if_active_adjudication_ticket": False,
+        "flag_exclude_if_on_sanction_list": False,
+        "rules": [],
+    }
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService.create(input_data=input_data, user=user, business_area_slug=business_area.slug)
+    assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
+
+
+def test_create_raises_when_payment_plan_group_does_not_exist(user: User, business_area: Any) -> None:
+    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    program_cycle = ProgramCycleFactory(program=program)
+
+    input_data = {
+        "business_area_slug": business_area.slug,
+        "name": "Test TP",
+        "program_cycle_id": program_cycle.id,
+        "payment_plan_group_id": uuid.uuid4(),
+        "flag_exclude_if_active_adjudication_ticket": False,
+        "flag_exclude_if_on_sanction_list": False,
+        "rules": [],
+    }
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService.create(input_data=input_data, user=user, business_area_slug=business_area.slug)
+    assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
 
 
 @freeze_time("2020-10-10")
@@ -450,6 +508,7 @@ def test_create_follow_up_pp(
         name="Test Payment Plan",
     )
     program = pp.program_cycle.program
+    purpose = pp.payment_plan_purposes.first()
     payments = []
     for _ in range(5):
         hh = HouseholdFactory(program=program, business_area=business_area)
@@ -486,7 +545,7 @@ def test_create_follow_up_pp(
     p_force_failed = payments[2]
     p_manually_cancelled = payments[3]
 
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(10):
         follow_up_pp = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     follow_up_pp.refresh_from_db()
@@ -503,11 +562,13 @@ def test_create_follow_up_pp(
     assert follow_up_pp.total_households_count == 0
     assert follow_up_pp.total_individuals_count == 0
     assert follow_up_pp.payment_items.count() == 0
+    assert follow_up_pp.payment_plan_group == pp.payment_plan_group
+    assert list(follow_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
-    assert pp.follow_ups.count() == 1
+    assert pp.child_plans.count() == 1
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_follow_up_payment_plan_async_task(follow_up_pp)
+        prepare_child_payment_plan_async_task(follow_up_pp)
     follow_up_pp.refresh_from_db()
 
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -535,14 +596,14 @@ def test_create_follow_up_pp(
     follow_up_payment.excluded = True
     follow_up_payment.save()
 
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(10):
         follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
-    assert pp.follow_ups.count() == 2
+    assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(62):
+    with django_assert_num_queries(77):
         with django_capture_on_commit_callbacks(execute=True):
-            prepare_follow_up_payment_plan_async_task(follow_up_pp_2)
+            prepare_child_payment_plan_async_task(follow_up_pp_2)
 
     assert follow_up_pp_2.payment_items.count() == 1
     assert {follow_up_payment.source_payment.id} == set(
@@ -556,7 +617,7 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.FINISHED,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
     dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
@@ -567,13 +628,120 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
     assert error.value.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
 
 
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment"),
+    ],
+)
+def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    expected_child_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with mock.patch.object(PaymentPlanService, method_name, return_value=expected_child_plan) as service_method:
+        result = PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=plan_type,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert result == expected_child_plan
+    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date)
+
+
+def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+    )
+    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan(
+            plan_type=PaymentPlan.PlanType.REGULAR,
+            user=user,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
+        )
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
+
+
+@pytest.mark.parametrize(
+    ("plan_type", "method_name"),
+    [
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments"),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments"),
+    ],
+)
+def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    plan_type: str,
+    method_name: str,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=plan_type,
+    )
+
+    with mock.patch.object(PaymentPlanService, method_name) as service_method:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    service_method.assert_called_once_with()
+
+
+def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).create_child_plan_payments()
+
+    assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
+
+
 def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.OPEN,
-        is_follow_up=True,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
@@ -723,6 +891,7 @@ def test_send_to_payment_gateway(
     business_area: Any,
     cycle: ProgramCycle,
     dm_transfer_to_account: Any,
+    django_capture_on_commit_callbacks: Any,
 ) -> None:
     pg_fsp = FinancialServiceProviderFactory(
         name="Western Union",
@@ -758,45 +927,12 @@ def test_send_to_payment_gateway(
     with mock.patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task") as mock_task:
         pps = PaymentPlanService(pp)
         pps.user = mock.MagicMock(pk="123")
-        pps.send_to_payment_gateway()
+        with django_capture_on_commit_callbacks(execute=True):
+            pps.send_to_payment_gateway()
         mock_task.assert_called_once_with(pp, str(pps.user.pk))
 
-
-@mock.patch(
-    "hope.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx_async_task"
-)
-def test_import_xlsx_per_fsp(
-    mock_task: Any,
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    pp = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        created_by=user,
-        business_area=business_area,
-        program_cycle=cycle,
-        background_action_status=None,
-    )
-
-    mock_file = SimpleUploadedFile(
-        "test.xlsx",
-        b"test file content",
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-    service = PaymentPlanService(pp)
-
-    with django_capture_on_commit_callbacks(execute=True):
-        result = service.import_xlsx_per_fsp(user, mock_file)
-
-    assert mock_task.call_count == 1
-
-    pp.refresh_from_db()
-    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
-    assert pp.reconciliation_import_file is not None
-    assert result == pp
+    pp.refresh_from_db(fields=["background_action_status"])
+    assert pp.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
 
 
 @freeze_time("2020-10-10")
@@ -814,6 +950,8 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
         end_date=timezone.datetime(2021, 12, 10, tzinfo=UTC).date(),
         status=ProgramCycle.ACTIVE,
     )
+    purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
         "dispersion_start_date": parse_date("2020-11-11"),
@@ -842,6 +980,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
                 ],
             }
         ],
+        "payment_plan_purposes": [purpose],
     }
 
     cycle.status = ProgramCycle.FINISHED
@@ -857,6 +996,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
     cycle.status = ProgramCycle.DRAFT
     cycle.end_date = None
     cycle.save()
+    input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=cycle).id
     PaymentPlanService.create(
         input_data=input_data,
         user=user,
@@ -882,6 +1022,7 @@ def test_full_rebuild(
         end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
     program_cycle = program.cycles.first()
+    payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle)
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
     hh2 = HouseholdFactory(program=program, business_area=business_area)
@@ -893,10 +1034,13 @@ def test_full_rebuild(
         registration_data_import=hh1.registration_data_import,
     )
 
+    purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
         "name": "paymentPlanName",
         "program_cycle_id": program_cycle.id,
+        "payment_plan_group_id": payment_plan_group.id,
         "flag_exclude_if_active_adjudication_ticket": False,
         "flag_exclude_if_on_sanction_list": False,
         "rules": [
@@ -907,9 +1051,10 @@ def test_full_rebuild(
                 "individuals_filters_blocks": [],
             }
         ],
+        "payment_plan_purposes": [purpose],
     }
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(12):
+        with django_assert_num_queries(18):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -974,7 +1119,6 @@ def test_validate_action_not_implemented(payment_plan_base: PaymentPlan, user: U
         "REVIEW",
         "REJECT",
         "SEND_TO_PAYMENT_GATEWAY",
-        "SEND_XLSX_PASSWORD",
     ]
     assert error.value.detail[0] == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
 
@@ -1123,10 +1267,9 @@ def test_update_pp_validation_errors(user: User, business_area: Any, cycle: Prog
         PaymentPlanService(payment_plan).update({"name": "test_data"})
     assert error.value.detail[0] == f"Name 'test_data' and program '{cycle.program.name}' already exists."
 
-    cycle.status = ProgramCycle.FINISHED
-    cycle.save()
+    finished_cycle = ProgramCycleFactory(program=cycle.program, status=ProgramCycle.FINISHED)
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"program_cycle_id": str(cycle.id)})
+        PaymentPlanService(payment_plan).update({"program_cycle_id": str(finished_cycle.id)})
     assert error.value.detail[0] == "Not possible to assign Finished Program Cycle"
 
 
@@ -1281,11 +1424,47 @@ def test_unlock_fsp(user: User, business_area: Any, cycle: ProgramCycle) -> None
 
 def test_update_pp_program_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program, title="New Cycle ABC")
+    new_group = PaymentPlanGroupFactory(cycle=new_cycle)
 
-    PaymentPlanService(payment_plan_base).update({"program_cycle_id": new_cycle.id})
+    PaymentPlanService(payment_plan_base).update(
+        {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
+    )
 
     payment_plan_base.refresh_from_db()
     assert payment_plan_base.program_cycle.title == "New Cycle ABC"
+    assert payment_plan_base.payment_plan_group == new_group
+
+
+def test_edit_cycle_requires_group_from_new_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
+    new_cycle = ProgramCycleFactory(program=program)
+    new_group = PaymentPlanGroupFactory(cycle=new_cycle)
+
+    PaymentPlanService(payment_plan_base).update(
+        {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
+    )
+
+    payment_plan_base.refresh_from_db()
+    assert payment_plan_base.program_cycle == new_cycle
+    assert payment_plan_base.payment_plan_group == new_group
+
+
+def test_edit_cycle_rejects_group_from_old_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
+    old_group = payment_plan_base.payment_plan_group
+    new_cycle = ProgramCycleFactory(program=program)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan_base).update(
+            {"program_cycle_id": new_cycle.id, "payment_plan_group_id": old_group.id}
+        )
+    assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
+
+
+def test_edit_cycle_rejects_missing_group(payment_plan_base: PaymentPlan, program: Program) -> None:
+    new_cycle = ProgramCycleFactory(program=program)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan_base).update({"program_cycle_id": new_cycle.id})
+    assert error.value.detail[0] == "Payment Plan Group is required when changing Programme Cycle."
 
 
 def test_update_pp_vulnerability_score(payment_plan_base: PaymentPlan) -> None:
@@ -1583,11 +1762,13 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
         business_area=business_area,
     )
 
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program)
     pp = PaymentPlanFactory(
         dispersion_start_date=now() - timedelta(days=10),
         dispersion_end_date=now(),
         status=PaymentPlan.Status.ACCEPTED,
-        business_area=business_area,
+        program_cycle=cycle,
     )
     pp.refresh_from_db()
     program = pp.program
@@ -1648,11 +1829,13 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
         name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
     )
 
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program)
     pp = PaymentPlanFactory(
         dispersion_start_date=now() - timedelta(days=10),
         dispersion_end_date=now(),
         status=PaymentPlan.Status.ACCEPTED,
-        business_area=business_area,
+        program_cycle=cycle,
     )
     pp.refresh_from_db()
     program = pp.program
@@ -1791,3 +1974,97 @@ def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_p
             payments_count=payments_count,
         )
     assert len(result) == 1
+
+
+def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: ProgramCycle) -> None:
+    pp = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    service = PaymentPlanService(payment_plan=pp)
+    service._set_program_cycle({"program_cycle_id": str(cycle.pk)})
+    pp.refresh_from_db()
+    assert pp.program_cycle == cycle
+
+
+def test_execute_update_status_action_raises_when_instruction_managed(
+    payment_plan_base: PaymentPlan,
+    user: User,
+) -> None:
+    instruction = FollowUpInstructionFactory(
+        business_area=payment_plan_base.business_area,
+        program=payment_plan_base.program,
+        created_by=user,
+    )
+    payment_plan_base.follow_up_instruction = instruction
+    payment_plan_base.save(update_fields=["follow_up_instruction"])
+
+    with pytest.raises(ValidationError, match="This Payment Plan is managed by a Follow Up Instruction."):
+        PaymentPlanService(payment_plan_base).execute_update_status_action(input_data={"action": "LOCK"}, user=user)
+
+
+def test_copy_target_criteria_copies_individual_block_filters(
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    source_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
+    target_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
+    rule = TargetingCriteriaRuleFactory(payment_plan=source_pp)
+    ind_block = TargetingIndividualRuleFilterBlockFactory(targeting_criteria_rule=rule)
+    TargetingIndividualBlockRuleFilterFactory(individuals_filters_block=ind_block)
+
+    PaymentPlanService.copy_target_criteria(source_pp, target_pp)
+
+    target_rule = target_pp.rules.get()
+    target_block = target_rule.individuals_filters_blocks.get()
+    assert TargetingIndividualBlockRuleFilter.objects.filter(individuals_filters_block=target_block).count() == 1
+
+
+def test_set_group_for_open_pp_returns_early_when_cycle_is_changing(
+    user: User,
+    business_area: Any,
+    program: Program,
+) -> None:
+    cycle_a = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+    cycle_b = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+    pp = PaymentPlanFactory(
+        created_by=user,
+        business_area=business_area,
+        program_cycle=cycle_a,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    group_in_b = PaymentPlanGroupFactory(cycle=cycle_b)
+    service = PaymentPlanService(pp)
+
+    service._set_group_for_open_pp({"payment_plan_group_id": str(group_in_b.id), "program_cycle_id": cycle_b.id})
+
+    assert pp.payment_plan_group != group_in_b
+
+
+def test_split_removes_existing_export_file_delivery(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> None:
+    pp = PaymentPlanFactory(
+        created_by=user,
+        business_area=business_area,
+        program_cycle=cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    household = HouseholdFactory(business_area=business_area, program=cycle.program)
+    PaymentFactory(parent=pp, household=household, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    file_temp = FileTempFactory(
+        object_id=pp.pk,
+        content_type=ContentType.objects.get_for_model(pp),
+        created_by=user,
+        file=ContentFile(b"data", "delivery.xlsx"),
+    )
+    pp.export_file_delivery = file_temp
+    pp.save(update_fields=["export_file_delivery"])
+
+    PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+
+    pp.refresh_from_db()
+    assert pp.export_file_delivery is None
