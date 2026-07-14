@@ -964,7 +964,7 @@ def test_payment_instruction_inline_download_link_returns_dash_for_non_pg_plan(
     assert inline.download_link(payment_instruction) == "-"
 
 
-def test_payment_instruction_inline_download_link_returns_anchor_with_scoped_permission(
+def test_payment_instruction_inline_download_link_returns_dash_with_only_scoped_permission(
     staff_user, payment_gateway_fsp
 ) -> None:
     payment_plan = PaymentPlanFactory(
@@ -992,6 +992,4 @@ def test_payment_instruction_inline_download_link_returns_anchor_with_scoped_per
     inline._request = RequestFactory().get("/")
     inline._request.user = staff_user
 
-    html = str(inline.download_link(payment_instruction))
-
-    assert PaymentGatewayAPI().get_download_payment_instruction_url(str(payment_instruction.id)) in html
+    assert inline.download_link(payment_instruction) == "-"
