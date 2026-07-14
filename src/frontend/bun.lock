@@ -98,7 +98,7 @@
         "ts-prune": "^0.10.3",
         "typescript": "5.9.3",
         "vite": "^7.3.5",
-        "vite-plugin-csp-guard": "3.0.0",
+        "vite-plugin-csp-guard": "4.0.1",
         "vite-tsconfig-paths": "6.1.1",
         "vitest": "4.1.9",
         "waait": "^1.0.5",
@@ -906,7 +906,7 @@
 
     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
 
-    "csp-toolkit": ["csp-toolkit@1.4.0", "", {}, "sha512-ezMVB6+2RnsnN5ncHsLX8njyPMv7I0M6ZLDP4pgmRVS4JjCgiWyeY2vs0zVfFTbdCo0CQI47PFICiQOZ5tDiww=="],
+    "csp-toolkit": ["csp-toolkit@1.5.0", "", {}, "sha512-rg87BNXAOzSySl5LrgaWpsqR8MCimQQtu3b59Ag8bWmkOBWvSIpNBbQkIeZ/E2i61Ulf5fOYh/S1Xc2Mdt/XWw=="],
 
     "css-color-keywords": ["css-color-keywords@1.0.0", "", {}, "sha512-FyyrDHZKEjXDpNJYvVsV960FiqQyXc/LlYmsxl2BcdMb2WPx0OGRVgTg55rPSyLSNMqP52R9r8geSp7apN3Ofg=="],
 
@@ -1716,7 +1716,7 @@
 
     "vite": ["vite@7.3.6", "", { "dependencies": { "esbuild": "^0.27.0 || ^0.28.0", "fdir": "^6.5.0", "picomatch": "^4.0.3", "postcss": "^8.5.6", "rollup": "^4.43.0", "tinyglobby": "^0.2.15" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^20.19.0 || >=22.12.0", "jiti": ">=1.21.0", "less": "^4.0.0", "lightningcss": "^1.21.0", "sass": "^1.70.0", "sass-embedded": "^1.70.0", "stylus": ">=0.54.8", "sugarss": "^5.0.0", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "jiti", "less", "lightningcss", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg=="],
 
-    "vite-plugin-csp-guard": ["vite-plugin-csp-guard@3.0.0", "", { "dependencies": { "cheerio": "^1.1.2", "csp-toolkit": "1.4.0" }, "peerDependencies": { "vite": "^7.0.0" } }, "sha512-1c4s/pzn6S22JOa75sFHIa9BwzwpUMwQO2cP1BOU4N+6d33E1EQ067mbPV5pa8UGut9hrfUZZsj4FTN2e8ZGbQ=="],
+    "vite-plugin-csp-guard": ["vite-plugin-csp-guard@4.0.1", "", { "dependencies": { "cheerio": "^1.1.2", "csp-toolkit": "^1.5.0" }, "peerDependencies": { "vite": "^8.0.0" } }, "sha512-0x9NIexSXPDURVWG0iKDb31DDM2QBjgHcX/QVQGZVY+wORges+L2P3/RRfoZq1D1F8FXOnxBQrhWUnA/yAqLlQ=="],
 
     "vite-tsconfig-paths": ["vite-tsconfig-paths@6.1.1", "", { "dependencies": { "debug": "^4.1.1", "globrex": "^0.1.2", "tsconfck": "^3.0.3" }, "peerDependencies": { "vite": "*" } }, "sha512-2cihq7zliibCCZ8P9cKJrQBkfgdvcFkOOc3Y02o3GWUDLgqjWsZudaoiuOwO/gzTzy17cS5F7ZPo4bsnS4DGkg=="],
 
