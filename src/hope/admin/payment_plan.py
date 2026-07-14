@@ -16,9 +16,11 @@ from django.urls import reverse
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
+from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
+from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     AsyncJob,
@@ -27,6 +29,7 @@ from hope.models import (
     PaymentPlan,
     PaymentPlanGroup,
     PaymentPlanSupportingDocument,
+    log_create,
 )
 
 if TYPE_CHECKING:
@@ -57,6 +60,10 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
 
     def has_delete_permission(self: Any, request: Any, obj: Any = None) -> bool:
         return False
+
+
+def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.can_send_to_vision
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
@@ -118,6 +125,21 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         request._payment_plan_obj = obj
         return super().get_form(request, obj, change, **kwargs)
 
+    def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:
+        old_payment_plan = copy_model_object(PaymentPlan.objects.get(pk=obj.pk)) if change and obj.pk else None
+        super().save_model(request, obj, form, change)
+        # skip a no-op log when an edit touched only fields outside ACTIVITY_LOG_MAPPING
+        if old_payment_plan is not None and not create_diff(old_payment_plan, obj, PaymentPlan.ACTIVITY_LOG_MAPPING):
+            return
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=obj.program.pk,
+            old_object=old_payment_plan,
+            new_object=obj,
+        )
+
     def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "payment_plan_purposes":
             obj = getattr(request, "_payment_plan_obj", None)
@@ -169,16 +191,14 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            PaymentGatewayService().sync_payment_plan(payment_plan)
+            PaymentGatewayService(user_id=str(request.user.pk)).sync_payment_plan(payment_plan)
 
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         return confirm_action(
@@ -190,16 +210,16 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_missing_records_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            PaymentGatewayService().add_missing_records_to_payment_instructions(payment_plan)
+            PaymentGatewayService(user_id=str(request.user.pk)).add_missing_records_to_payment_instructions(
+                payment_plan
+            )
 
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         return confirm_action(
@@ -228,6 +248,32 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+    @button(
+        visible=lambda btn: can_send_to_vision(btn.original),
+        permission="payment.pm_send_payment_plan",
+    )
+    def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            try:
+                response = VisionAPI().send_payment_plan(payment_plan)
+                self.message_user(
+                    request,
+                    f"Payment plan sent to Vision successfully: {response.get('messageId', '')}",
+                    level="success",
+                )
+            except VisionAPIError as e:
+                self.message_user(request, f"Failed to send to Vision: {e}", level="warning")
+            except VisionAPIMissingCredentialsError as e:
+                self.message_user(request, f"Vision API not configured: {e}", level="error")
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.send_to_vision,
+            message="Do you confirm to send this payment plan to Vision?",
+        )
 
 
 @admin.register(PaymentPlanGroup)
@@ -355,7 +401,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
             if active_jobs:
                 for job in active_jobs:
                     job.terminate()
-                import_payment_plan_group_delivery_from_xlsx_async_task(group)
+                import_payment_plan_group_delivery_from_xlsx_async_task(group, str(request.user.pk))
                 messages.success(request, "Successfully restarted reconciliation import.")
             else:
                 messages.error(request, f"There is no current {task_name} for this payment plan group.")
@@ -373,13 +419,6 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot
     readonly_fields = ("snapshot_data", "household_id")
-
-
-def has_payment_pg_sync_permission(request: Any, payment: Payment) -> bool:
-    return request.user.has_perm(
-        Permissions.PM_SYNC_PAYMENT_WITH_PG.value,
-        payment.parent.program,
-    )
 
 
 @admin.register(Payment)
@@ -419,7 +458,24 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     cursor_ordering_field = "-created_at"
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
-    readonly_fields = ("collector_type",)
+    readonly_fields = (
+        "collector_type",
+        "currency",
+        "entitlement_quantity",
+        "entitlement_quantity_usd",
+        "delivered_quantity",
+        "delivered_quantity_usd",
+        "delivery_date",
+        "entitlement_date",
+        "sent_to_fsp_date",
+        "vulnerability_score",
+        "status_date",
+        "order_number",
+        "token_number",
+        "conflicted",
+        "excluded",
+        "has_valid_wallet",
+    )
 
     show_full_result_count = False
 
@@ -458,14 +514,14 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
-        permission=lambda request, payment, *args, **kwargs: has_payment_pg_sync_permission(request, payment),
+        permission="payment.pm_sync_payment_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
             from hope.apps.payment.services.payment_gateway import PaymentGatewayService
 
             payment = Payment.objects.get(pk=pk)
-            PaymentGatewayService().sync_record(payment)
+            PaymentGatewayService(user_id=str(request.user.pk)).sync_record(payment)
 
             return redirect(reverse("admin:payment_payment_change", args=[pk]))
         return confirm_action(

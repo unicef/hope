@@ -1,6 +1,4 @@
-import os
 from typing import Any
-from unittest import mock
 from unittest.mock import patch
 import uuid
 
@@ -32,15 +30,9 @@ pytestmark = [
 
 
 @pytest.fixture
-def mock_deduplication_engine_env_vars() -> Any:
-    with mock.patch.dict(
-        os.environ,
-        {
-            "DEDUPLICATION_ENGINE_API_KEY": "TEST",
-            "DEDUPLICATION_ENGINE_API_URL": "TEST/",
-        },
-    ):
-        yield
+def mock_deduplication_engine_env_vars(settings) -> None:
+    settings.DEDUPLICATION_ENGINE_API_KEY = "TEST"
+    settings.DEDUPLICATION_ENGINE_API_URL = "TEST/"
 
 
 @pytest.fixture
