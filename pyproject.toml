@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [ "setuptools", "wheel" ]
+requires = [ "setuptools" ]
 
 [project]
 name = "hope"
@@ -204,8 +204,8 @@ docs = [
 ]
 
 [tool.setuptools]
-package-dir = { "" = "src" }
 packages.find.where = [ "src" ]
+package-dir = { "" = "src" }
 
 [tool.uv]
 package = true

@@ -376,8 +376,6 @@ class RdiMergeTask:
 
         for individual in individuals_list:
             # find other individual with the same unicef_id and group them in the same collection
-            if not individual.unicef_id:
-                continue
             individual_from_collection = existing_individuals_by_unicef_id.get(individual.unicef_id)
             if individual_from_collection:
                 if collection := individual_from_collection.individual_collection:
