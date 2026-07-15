@@ -658,6 +658,7 @@ class PaymentPlan(
             ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
             ("pm_sync_payment_plan_with_pg", "Can sync payment plan with payment gateway"),
             ("pm_send_payment_plan", "Can send payment plan to Vision"),
+            ("download_payment_instruction", "Can download payment instruction from payment gateway"),
         )
         constraints = [
             models.CheckConstraint(
