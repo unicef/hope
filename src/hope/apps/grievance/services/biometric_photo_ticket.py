@@ -21,6 +21,7 @@ def create_biometrics_photo_data_change_tickets(
     individuals_with_error: dict[str, Individual] = {}
     for pair in deduplication_pairs:
         present = [individual for individual in (pair.individual1, pair.individual2) if individual]
+        # Defensive: the engine only ever names one individual on a photo error.
         if len(present) != 1:
             continue
         individual = present[0]
