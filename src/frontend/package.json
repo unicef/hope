@@ -53,9 +53,9 @@
     "react-dropzone": "15.0.0",
     "react-i18next": "16.5.4",
     "react-idle-timer": "^5.7.3",
-    "react-router-dom": "7.18.0",
+    "react-router-dom": "7.18.1",
     "react-use": "^17.6.1",
-    "react-zoom-pan-pinch": "^3.7.0",
+    "react-zoom-pan-pinch": "^4.0.3",
     "string.prototype.replaceall": "^1.0.11",
     "styled-components": "6.4.2",
     "use-deep-compare-effect": "^1.8.1",
@@ -84,8 +84,8 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@types/react-router-dom": "^5.3.3",
-    "@typescript-eslint/eslint-plugin": "8.61.1",
-    "@typescript-eslint/parser": "8.61.1",
+    "@typescript-eslint/eslint-plugin": "8.64.0",
+    "@typescript-eslint/parser": "8.64.0",
     "@vitejs/plugin-react": "5.1.4",
     "braces": "3.0.3",
     "camelcase": "^9.0.0",
@@ -115,7 +115,7 @@
     "ts-prune": "^0.10.3",
     "typescript": "5.9.3",
     "vite": "^7.3.5",
-    "vite-plugin-csp-guard": "3.0.0",
+    "vite-plugin-csp-guard": "4.0.1",
     "vite-tsconfig-paths": "6.1.1",
     "vitest": "4.1.9",
     "waait": "^1.0.5"
@@ -124,6 +124,6 @@
     "@typescript-eslint/utils": "8.61.1",
     "minimatch": ">=9.0.5",
     "rollup": ">=4.59.0",
-    "undici": ">=7.18.2"
+    "undici": "^7.25.0"
   }
 }
