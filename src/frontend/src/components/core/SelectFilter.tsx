@@ -31,7 +31,7 @@ const StyledSelect = styled(Select)<{ $borderRadius?: string }>`
   && .MuiOutlinedInput-input {
     padding-right: 10px !important;
   }
-  .MuiOutlinedInput-root {
+  && {
     border-radius: ${(props) => props.$borderRadius};
   }
   flex: 1;
