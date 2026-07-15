@@ -446,6 +446,7 @@ export const GrievanceDetailsToolbar = ({
     ticket.id,
     ticket.category,
     baseUrl,
+    ticket.issueType,
   );
 
   return (

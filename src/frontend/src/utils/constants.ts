@@ -108,6 +108,8 @@ export const GRIEVANCE_ISSUE_TYPES = {
   BIOGRAPHICAL_DATA_SIMILARITY: '24',
   BIOMETRICS_SIMILARITY: '25',
   UPDATE_DELEGATE: '26',
+  // TODO(picture_error): confirm id vs backend enum (backend issue types currently max at 26)
+  PICTURE_ERROR: '27',
 };
 
 export const GRIEVANCE_ISSUE_TYPES_NAMES = {
@@ -137,6 +139,8 @@ export const GRIEVANCE_ISSUE_TYPES_NAMES = {
   24: 'BIOGRAPHICAL_DATA_SIMILARITY',
   25: 'BIOMETRICS_SIMILARITY',
   26: 'UPDATE_DELEGATE',
+  // TODO(picture_error): confirm id vs backend enum
+  27: 'PICTURE_ERROR',
 };
 
 export const getGrievanceCategoryDescriptions = (beneficiaryGroup) => ({
