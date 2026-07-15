@@ -807,3 +807,9 @@ class BulkGrievanceTicketsAddNoteSerializer(serializers.Serializer):
         child=serializers.UUIDField(),
     )
     note = serializers.CharField()
+
+
+class BulkCloseGrievanceTicketsSerializer(serializers.Serializer):
+    grievance_ticket_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+    )

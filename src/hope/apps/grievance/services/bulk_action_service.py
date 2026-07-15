@@ -1,3 +1,4 @@
+import copy
 from typing import Sequence
 
 from django.db import transaction
@@ -6,11 +7,35 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.account.permissions import Permissions, check_creator_or_owner_permission
 from hope.apps.core.utils import clear_cache_for_key
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.services.ticket_status_changer_service import TicketStatusChangerService
 from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
-from hope.models import User
+from hope.models import User, log_create
+
+# prevent N+1 queries with Grievance Ticket queries in log_create
+_ACTIVITY_LOG_SELECT_RELATED = (
+    "business_area",
+    "assigned_to",
+    "created_by",
+    "admin2",
+    "complaint_ticket_details__household",
+    "complaint_ticket_details__individual",
+    "complaint_ticket_details__payment",
+    "sensitive_ticket_details",
+    "positive_feedback_ticket_details",
+    "negative_feedback_ticket_details",
+    "referral_ticket_details",
+    "household_data_update_ticket_details",
+    "individual_data_update_ticket_details",
+    "add_individual_ticket_details",
+    "delete_individual_ticket_details",
+    "system_flagging_ticket_details",
+    "needs_adjudication_ticket_details",
+    "payment_verification_ticket_details",
+)
 
 
 class BulkActionService:
@@ -68,6 +93,61 @@ class BulkActionService:
         increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
         self._clear_cache(business_area_slug)
         return queryset
+
+    @transaction.atomic
+    def bulk_close(
+        self,
+        created_by: User,
+        tickets_ids: Sequence[str],
+        business_area_slug: str,
+    ) -> list[GrievanceTicket]:
+        """Close the selected tickets only if every one of them is closable, otherwise close none."""
+        tickets = list(
+            GrievanceTicket.objects.filter(
+                ~Q(status=GrievanceTicket.STATUS_CLOSED),
+                category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+                business_area__slug=business_area_slug,
+                id__in=tickets_ids,
+            )
+            .select_for_update(of=("self",))
+            .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
+            .prefetch_related("programs")
+        )
+        if len(tickets) != len(tickets_ids) or any(
+            not ticket.can_change_status(GrievanceTicket.STATUS_CLOSED) for ticket in tickets
+        ):
+            raise ValidationError(
+                "Some selected tickets cannot be closed. "
+                "Only Grievance Complaint tickets in status For Approval can be closed."
+            )
+
+        # every selected ticket must be closable by this user (general, or as creator/owner)
+        for ticket in tickets:
+            check_creator_or_owner_permission(
+                created_by,
+                [
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+                ],
+                ticket.business_area,
+                ticket,
+            )
+
+        for ticket in tickets:
+            old_ticket = copy.copy(ticket)
+            TicketStatusChangerService(ticket, created_by).change_status(GrievanceTicket.STATUS_CLOSED)
+            log_create(
+                GrievanceTicket.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                created_by,
+                ticket.programs.all(),
+                old_object=old_ticket,
+                new_object=ticket,
+            )
+        # version cache is bumped by the post_save signal on save()
+        self._clear_cache(business_area_slug)
+        return tickets
 
     @transaction.atomic
     def bulk_add_note(

@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
   hasCreatorOrOwnerPermissions,
+  hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
 import {
@@ -32,6 +33,7 @@ import {
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
+import { BulkCloseModal } from './bulk/BulkCloseModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -317,6 +319,15 @@ export const GrievancesTable = ({
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
   const currentUserId = currentUserData.id;
 
+  const canBulkClose = hasPermissions(
+    [
+      PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+      PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+    ],
+    permissions,
+  );
+
   const getCanViewDetailsOfTicket = (ticket: GrievanceTicketList): boolean => {
     const isTicketCreator = currentUserId === ticket.createdBy?.id;
     const isTicketOwner = currentUserId === ticket.assignedTo?.id;
@@ -421,6 +432,12 @@ export const GrievancesTable = ({
             selectedTickets={selectedTickets}
             setSelected={setSelectedTickets}
           />
+          {canBulkClose && (
+            <BulkCloseModal
+              selectedTickets={selectedTickets}
+              setSelected={setSelectedTickets}
+            />
+          )}
         </Box>
         <UniversalRestTable
           isOnPaper={false}

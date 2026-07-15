@@ -920,5 +920,7 @@
   "Delegate": "Delegate",
   "Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector": "Household/Individual IDs listed here will be paid to the Alternative Collector instead of the Primary Collector",
   "Facility Name": "Facility Name",
-  "Reconciliation Information: Extra Info": "Reconciliation Information: Extra Info"
+  "Reconciliation Information: Extra Info": "Reconciliation Information: Extra Info",
+  "{{count}} of the selected ticket(s) cannot be closed. Only Grievance Complaint tickets in status For Approval can be closed — deselect the others to continue.": "{{count}} of the selected ticket(s) cannot be closed. Only Grievance Complaint tickets in status For Approval can be closed — deselect the others to continue.",
+  "Ticket cannot be closed, primary collector role has to be reassigned": "Ticket cannot be closed, primary collector role has to be reassigned"
 }
