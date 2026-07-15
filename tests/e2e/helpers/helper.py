@@ -213,9 +213,7 @@ class Common:
         for item in items:
             sleep(delay_between_checks)
             if name in item.text:
-                self._wait().until(
-                    expected_conditions.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]"))
-                )
+                self._wait().until(expected_conditions.element_to_be_clickable(item))
                 item.click()
                 self.wait_for_disappear('ul[role="listbox"]')
                 break
