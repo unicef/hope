@@ -1,3 +1,5 @@
+from typing import Any
+
 from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
@@ -40,7 +42,7 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         "sent_to_rapid_pro",
     )
     date_hierarchy = "updated_at"
-    readonly_fields = ("status_date", "sent_to_rapid_pro")
+    readonly_fields = ("payment", "payment_verification_plan", "status_date", "received_amount", "sent_to_rapid_pro")
     search_fields = ("payment__unicef_id",)
 
     def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
@@ -65,3 +67,6 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
                 "payment_verification_plan__payment_plan__business_area",
             )
         )
+
+    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
