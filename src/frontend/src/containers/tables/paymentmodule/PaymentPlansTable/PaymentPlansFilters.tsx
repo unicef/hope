@@ -3,7 +3,6 @@ import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -81,6 +80,11 @@ export function PaymentPlansFilters({
     [...(statusChoicesData || [])]?.filter((el) =>
       allowedStatusChoices.includes(el.value as any),
     ) || [];
+
+  const { data: planTypeChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentPlanTypeList'],
+    queryFn: () => RestService.restChoicesPaymentPlanTypeList(),
+  });
 
   return (
     <FiltersSection
@@ -188,8 +192,11 @@ export function PaymentPlansFilters({
             value={filter.planType ?? ''}
             fullWidth
           >
-            <MenuItem value={PlanTypeEnum.FOLLOW_UP}>{t('Follow Up')}</MenuItem>
-            <MenuItem value={PlanTypeEnum.TOP_UP}>{t('Top Up')}</MenuItem>
+            {(planTypeChoicesData || []).map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
       </Grid>

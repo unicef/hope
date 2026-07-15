@@ -5,6 +5,7 @@ from typing import Any
 from unittest.mock import Mock, PropertyMock, patch
 
 from celery.exceptions import Retry
+from constance.test import override_config
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -57,11 +58,14 @@ from hope.apps.payment.celery_tasks import (
     periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
     periodic_sync_payment_gateway_account_types_async_task,
     periodic_sync_payment_gateway_account_types_async_task_action,
+    periodic_sync_payment_gateway_delivery_mechanisms_async_task,
+    periodic_sync_payment_gateway_delivery_mechanisms_async_task_action,
     periodic_sync_payment_gateway_fsp_async_task,
     periodic_sync_payment_gateway_fsp_async_task_action,
     periodic_sync_payment_gateway_records_async_task,
     periodic_sync_payment_gateway_records_async_task_action,
     periodic_sync_payment_plan_invoices_western_union_ftp_async_task,
+    periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
     remove_old_cash_plan_payment_verification_xlsx_async_task,
@@ -79,6 +83,7 @@ from hope.apps.payment.celery_tasks import (
     update_exchange_rate_on_release_payments_async_task,
     update_exchange_rate_on_release_payments_async_task_action,
 )
+from hope.apps.payment.services import western_union_reports_service
 from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
     AsyncJob,
@@ -1613,7 +1618,7 @@ def test_periodic_sync_payment_gateway_fsp_action_runs_service(mock_service_cls:
 def test_periodic_sync_payment_gateway_fsp_action_returns_on_missing_credentials(mock_sync_fsps: Mock) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
-    mock_sync_fsps.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+    mock_sync_fsps.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
 
     assert periodic_sync_payment_gateway_fsp_async_task_action() is None
 
@@ -1645,7 +1650,7 @@ def test_periodic_sync_payment_gateway_account_types_action_returns_on_missing_c
 ) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
-    mock_sync_account_types.side_effect = PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsError()
+    mock_sync_account_types.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
 
     assert periodic_sync_payment_gateway_account_types_async_task_action() is None
 
@@ -1673,6 +1678,17 @@ def test_periodic_sync_payment_gateway_records_action_runs_service(mock_service_
     mock_service_cls.return_value.sync_records.assert_called_once()
 
 
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_records")
+def test_periodic_sync_payment_gateway_records_action_returns_on_missing_credentials(
+    mock_sync_records: Mock,
+) -> None:
+    from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    mock_sync_records.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
+
+    assert periodic_sync_payment_gateway_records_async_task_action() is None
+
+
 def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
         with django_capture_on_commit_callbacks(execute=True):
@@ -1684,6 +1700,43 @@ def test_periodic_sync_payment_gateway_records_queues_retry_job(django_capture_o
     assert job.config == {}
     assert job.group_key == "payment"
     assert job.description == "Periodic sync payment gateway records"
+    mock_queue.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
+def test_periodic_sync_payment_gateway_delivery_mechanisms_action_runs_service(mock_service_cls: Mock) -> None:
+    periodic_sync_payment_gateway_delivery_mechanisms_async_task_action()
+
+    mock_service_cls.return_value.sync_delivery_mechanisms.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
+def test_periodic_sync_payment_gateway_delivery_mechanisms_action_returns_on_missing_credentials(
+    mock_sync_delivery_mechanisms: Mock,
+) -> None:
+    from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    mock_sync_delivery_mechanisms.side_effect = PaymentGatewayAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS()
+
+    assert periodic_sync_payment_gateway_delivery_mechanisms_async_task_action() is None
+
+
+def test_periodic_sync_payment_gateway_delivery_mechanisms_queues_retry_job(
+    django_capture_on_commit_callbacks,
+) -> None:
+    with patch("hope.apps.payment.celery_tasks.PeriodicAsyncRetryJob.queue", autospec=True) as mock_queue:
+        with django_capture_on_commit_callbacks(execute=True):
+            periodic_sync_payment_gateway_delivery_mechanisms_async_task()
+
+    job = PeriodicAsyncRetryJob.objects.latest("pk")
+    assert job.type == AsyncJobModel.JobType.JOB_TASK
+    assert (
+        job.action
+        == "hope.apps.payment.celery_tasks.periodic_sync_payment_gateway_delivery_mechanisms_async_task_action"
+    )
+    assert job.config == {}
+    assert job.group_key == "payment"
+    assert job.description == "Periodic sync payment gateway delivery mechanisms"
     mock_queue.assert_called_once()
 
 
@@ -1856,6 +1909,36 @@ def test_export_delivery_task_skips_token_generation_when_disabled(
     mock_send_email.assert_not_called()
 
 
+@patch(
+    "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service.XlsxPaymentPlanGroupDeliveryExportService"
+)
+def test_export_delivery_task_marks_error_without_retry_when_nothing_exportable(
+    mock_service_cls: Mock,
+    payment_plan_group_with_accepted_plan,
+    user,
+) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import EmptyDeliveryExportError
+
+    group = payment_plan_group_with_accepted_plan
+    mock_service = mock_service_cls.return_value
+    mock_service.payment_generate_token_and_order_numbers = False
+    mock_service.save_xlsx_file.side_effect = EmptyDeliveryExportError(["PP-1: no FSP XLSX Template"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk), "user_id": str(user.pk)},
+    )
+
+    with pytest.raises(NonRetriableTaskError):
+        export_payment_plan_group_delivery_xlsx_async_task_action(job)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+    job.refresh_from_db()
+    assert job.errors["export_skipped_payment_plans"] == ["PP-1: no FSP XLSX Template"]
+
+
 def test_import_delivery_group_task_clears_status_on_success(group_with_accepted_plan_and_import_file, user) -> None:
     group = group_with_accepted_plan_and_import_file
 
@@ -1974,3 +2057,26 @@ def test_send_payment_notification_emails_action_sends_email() -> None:
         send_payment_notification_emails_async_task_action(job)
 
     mock_notification.return_value.send_email_notification.assert_called_once()
+
+
+def test_wu_ftp_sync_uses_default_31_day_lookback_window() -> None:
+    with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
+        lower_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+        periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
+        upper_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+
+    mock_service_cls.return_value.process_files_since.assert_called_once()
+    called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
+    assert lower_bound <= called_since <= upper_bound
+
+
+@override_config(WU_FTP_SYNC_LOOKBACK_DAYS=7)
+def test_wu_ftp_sync_respects_configured_lookback_window() -> None:
+    with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
+        lower_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+        periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
+        upper_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+
+    mock_service_cls.return_value.process_files_since.assert_called_once()
+    called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
+    assert lower_bound <= called_since <= upper_bound

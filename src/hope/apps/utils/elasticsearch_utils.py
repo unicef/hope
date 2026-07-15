@@ -66,14 +66,6 @@ def rebuild_search_index(models: None = None, options: dict | None = None) -> No
         rebuild_program_indexes(str(program.id))
 
 
-def _active_or_all_programs(include_non_active: bool = False) -> "QuerySet":
-    from hope.models import Program
-
-    if include_non_active:
-        return Program.objects.all()
-    return Program.objects.filter(status=Program.ACTIVE)
-
-
 def populate_all_indexes() -> None:
     """Populate Elasticsearch indexes - for all active programs."""
     from hope.apps.household.services.index_management import populate_program_indexes
@@ -84,15 +76,3 @@ def populate_all_indexes() -> None:
 
     for program in Program.objects.filter(status=Program.ACTIVE):
         populate_program_indexes(str(program.id))
-
-
-def delete_all_indexes() -> None:
-    """Delete Elasticsearch indexes - for all active programs."""
-    from hope.apps.household.services.index_management import delete_program_indexes
-    from hope.models import Program
-
-    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
-        return
-
-    for program in Program.objects.filter(status=Program.ACTIVE):
-        delete_program_indexes(str(program.id))

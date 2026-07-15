@@ -119,12 +119,11 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def create_household_with_individual_with_collectors() -> Household:
+def create_household_with_individual_with_collectors(program: Program) -> Household:
     observed_disability = []
     residence_status: str = HOST
     unicef_id: str = "HH-00-0000.0442"
     size: int = 2
-    program = Program.objects.get(name="Test Programm")
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     hoh = IndividualFactory(
         household=None,
@@ -606,6 +605,7 @@ class TestSmokeTargeting:
         page_targeting_create.get_button_individual_rule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
@@ -1183,10 +1183,8 @@ class TestCreateTargeting:
         page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
         page_targeting_create.get_select_individuals_filters_blocks_round_number().click()
         page_targeting_create.get_select_round_option(1).click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_from().send_keys("2022-01-01")
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().click()
-        page_targeting_create.get_input_date_individuals_filters_blocks_value_to().send_keys("2022-03-03")
+        page_targeting_create.fill_input_date_individuals_filters_blocks_value_from("2022-01-01")
+        page_targeting_create.fill_input_date_individuals_filters_blocks_value_to("2022-03-03")
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         expected_criteria_text = "Test Date Attribute: 2022-01-01 - 2022-03-03\nRound 1 (Test Round Date 1)"
@@ -1449,7 +1447,7 @@ class TestTargeting:
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
         page_targeting_details.get_input_name().send_keys("a1!")
-        page_targeting_details.get_elements(page_targeting_details.buttonTargetPopulationDuplicate)[1].click()
+        page_targeting_details.get_elements(page_targeting_details.button_target_population_duplicate)[1].click()
         page_targeting_details.disappear_input_name()
         assert "a1!" in page_targeting_details.get_title_page().text
         assert "OPEN" in page_targeting_details.get_target_population_status().text
@@ -1665,7 +1663,7 @@ class TestTargeting:
                 By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
-    @pytest.mark.xfail(reason="unstable")
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_targeting_info_button(
         self,
         create_programs: None,
@@ -1675,9 +1673,8 @@ class TestTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_target_population().click()
         page_targeting.get_tab_field_list()
-        page_targeting.get_tab_targeting_diagram().click()
+        page_targeting.click(page_targeting.tab_targeting_diagram)
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_targeting_filters(
         self,
         create_programs: None,

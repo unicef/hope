@@ -1,14 +1,6 @@
 from unittest.mock import MagicMock, patch
 
-from hope.middlewares.sentry import SentryScopeMiddleware, is_country_name
-
-
-def test_is_country_name_returns_true_for_known_country() -> None:
-    assert is_country_name("Ukraine") is True
-
-
-def test_is_country_name_returns_false_for_unknown_country() -> None:
-    assert is_country_name("Test123") is False
+from hope.middlewares.sentry import SentryScopeMiddleware
 
 
 @patch("hope.middlewares.sentry.sentry_sdk")

@@ -1,6 +1,6 @@
 import logging
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -15,12 +15,28 @@ import pyzipper
 
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
-from hope.models import FileTemp, FinancialServiceProviderXlsxTemplate, FspXlsxTemplatePerDeliveryMechanism, PaymentPlan
+from hope.models import (
+    FileTemp,
+    FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
+    Payment,
+    PaymentPlan,
+)
 
 if TYPE_CHECKING:
     from hope.models import PaymentPlanGroup, Program, User
 
 logger = logging.getLogger(__name__)
+
+
+class EmptyDeliveryExportError(Exception):
+    """Raised when an export batch would produce no rows because every payment plan was skipped."""
+
+    MESSAGE = "Nothing to export: no payment plan is currently exportable."
+
+    def __init__(self, skipped_reasons: list[str]) -> None:
+        self.skipped_reasons = skipped_reasons
+        super().__init__(self.MESSAGE)
 
 
 class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
@@ -57,30 +73,88 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 plan_type=PaymentPlan.PlanType.REGULAR,
                 export_tag__isnull=True,
             )
-        self.payment_plans = list(plan_qs.order_by("unicef_id"))
+        self.payment_plans = list(
+            plan_qs.select_related("financial_service_provider", "delivery_mechanism").order_by("unicef_id")
+        )
         self.exported_plan_ids: list = []
+        self.skipped_reasons: list[str] = []
         self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = (
             get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=fsp_xlsx_template_id)
             if fsp_xlsx_template_id
             else None
         )
+        self._template_map: dict[tuple, FinancialServiceProviderXlsxTemplate] | None = None
+        self._plans_with_blocking_payments: set | None = None
+
+    def _get_template_map(self) -> dict[tuple, FinancialServiceProviderXlsxTemplate]:
+        """Resolve every plan's (fsp, delivery_mechanism) -> xlsx_template in a single query."""
+        if self._template_map is None:
+            pairs = {
+                (pp.financial_service_provider_id, pp.delivery_mechanism_id)
+                for pp in self.payment_plans
+                if pp.financial_service_provider_id and pp.delivery_mechanism_id
+            }
+            mappings = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
+                financial_service_provider_id__in={fsp_id for fsp_id, _ in pairs},
+                delivery_mechanism_id__in={dm_id for _, dm_id in pairs},
+            ).select_related("xlsx_template")
+            self._template_map = {
+                (m.financial_service_provider_id, m.delivery_mechanism_id): m.xlsx_template
+                for m in mappings
+                if (m.financial_service_provider_id, m.delivery_mechanism_id) in pairs
+            }
+        return self._template_map
+
+    def _get_plans_with_blocking_payments(self) -> set:
+        """Plan ids that still have eligible payments not yet sent to the payment gateway.
+
+        Equivalent to PaymentPlan.is_payment_gateway_and_all_sent_to_fsp.
+        """
+        if self._plans_with_blocking_payments is None:
+            self._plans_with_blocking_payments = set(
+                Payment.objects.filter(parent__in=self.payment_plans)
+                .eligible()
+                .filter(status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG))
+                .values_list("parent_id", flat=True)
+                .distinct()
+            )
+        return self._plans_with_blocking_payments
 
     def _resolve_template(self, payment_plan: PaymentPlan) -> FinancialServiceProviderXlsxTemplate | None:
         if self.fsp_xlsx_template is not None:
             return self.fsp_xlsx_template
-        fsp = payment_plan.financial_service_provider
-        delivery_mechanism = payment_plan.delivery_mechanism
-        if not fsp or not delivery_mechanism:
+        if not payment_plan.financial_service_provider_id or not payment_plan.delivery_mechanism_id:
             return None
-        mapping = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-            financial_service_provider=fsp,
-            delivery_mechanism=delivery_mechanism,
-        ).first()
-        return mapping.xlsx_template if mapping else None
+        return self._get_template_map().get(
+            (payment_plan.financial_service_provider_id, payment_plan.delivery_mechanism_id)
+        )
+
+    def _skip_reason(
+        self, payment_plan: PaymentPlan, template: FinancialServiceProviderXlsxTemplate | None
+    ) -> str | None:
+        """Return why `payment_plan` would be left out of the export, or None if it would be included."""
+        if template is None:
+            return f"Payment Plan {payment_plan.unicef_id}: no FSP XLSX Template for its FSP and delivery mechanism."
+        if (
+            payment_plan.is_payment_gateway
+            and "fsp_auth_code" in template.columns
+            and payment_plan.id in self._get_plans_with_blocking_payments()
+        ):
+            return (
+                f"Payment Plan {payment_plan.unicef_id}: template requires fsp_auth_code "
+                f"but not all payments have been sent to the payment gateway yet."
+            )
+        return None
+
+    def preview_export(self) -> list:
+        """Return the ids of plans that would be exported (empty if every plan would be skipped)."""
+        return [
+            payment_plan.id
+            for payment_plan in self.payment_plans
+            if self._skip_reason(payment_plan, self._resolve_template(payment_plan)) is None
+        ]
 
     def generate_token_and_order_numbers(self, program: "Program") -> None:
-        from hope.models import Payment
-
         all_eligible = Payment.objects.filter(parent__in=self.payment_plans).eligible()
         XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
 
@@ -110,29 +184,19 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         header: list[str] = []
         prepared_services: list[XlsxPaymentPlanDeliveryExportService] = []
         self.exported_plan_ids = []
+        self.skipped_reasons = []
 
         shared_lookups = XlsxPaymentPlanDeliveryExportService.build_shared_lookups()
 
         for payment_plan in self.payment_plans:
             template = self._resolve_template(payment_plan)
-            if template is None:
-                logger.warning(
-                    f"Skipping Payment Plan {payment_plan.unicef_id}: no FSP XLSX Template for its FSP "
-                    f"and delivery mechanism."
-                )
-                continue
-            if (
-                payment_plan.is_payment_gateway
-                and "fsp_auth_code" in template.columns
-                and not payment_plan.is_payment_gateway_and_all_sent_to_fsp
-            ):
-                logger.warning(
-                    f"Skipping Payment Plan {payment_plan.unicef_id}: template requires fsp_auth_code "
-                    f"but not all payments have been sent to the payment gateway yet."
-                )
+            reason = self._skip_reason(payment_plan, template)
+            if reason:
+                logger.warning(f"Skipping {reason}")
+                self.skipped_reasons.append(reason)
                 continue
             per_fsp_service = XlsxPaymentPlanDeliveryExportService(payment_plan, shared_lookups=shared_lookups)
-            per_fsp_service.prepare_headers(template)
+            per_fsp_service.prepare_headers(cast("FinancialServiceProviderXlsxTemplate", template))
             if not header:
                 header = per_fsp_service.header_list
                 self.allow_export_fsp_auth_code = per_fsp_service.allow_export_fsp_auth_code
@@ -155,7 +219,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         group = self.payment_plan_group
         self.generate_workbook()
         if not self.exported_plan_ids:
-            return
+            raise EmptyDeliveryExportError(self.skipped_reasons)
         if self.export_tag is not None:
             tag = self.export_tag
         else:

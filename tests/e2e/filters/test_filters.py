@@ -5,12 +5,9 @@ import pytest
 from selenium.common.exceptions import TimeoutException
 
 from e2e.page_object.filters import Filters
-from e2e.page_object.grievance.details_grievance_page import GrievanceDetailsPage
 from e2e.page_object.grievance.grievance_tickets import GrievanceTickets
-from e2e.page_object.grievance.new_ticket import NewTicket
 from e2e.page_object.programme_details.programme_details import ProgrammeDetails
 from extras.test_utils.factories import (
-    BusinessAreaFactory,
     DataCollectingTypeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -40,11 +37,6 @@ from hope.models import (
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
-
-
-@pytest.fixture
-def business_area() -> object:
-    return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
@@ -161,6 +153,7 @@ def payment_verification_creator(
     channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     payment_plan_id: str = "PP-0060-22-11223344",
 ) -> PaymentVerification:
+    business_area = BusinessArea.objects.filter(slug="afghanistan").first()
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -179,6 +172,9 @@ def payment_verification_creator(
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
+        # FINISHED plans auto-create a PaymentVerificationSummary via post_generation;
+        # suppress it so the explicit summary below doesn't violate the unique constraint.
+        create_payment_verification_summary=False,
     )
 
     payment_plan.unicef_id = payment_plan_id
@@ -295,122 +291,122 @@ class TestSmokeFilters:
             "Registration Data Import": [
                 filters.filter_search,
                 filters.imported_by_input,
-                filters.selectFilter,
-                filters.filterStatus,
-                filters.filterSizeMin,
-                filters.filterSizeMax,
-                filters.filterImportDateRangeMin,
-                filters.filterImportDateRangeMax,
+                filters.select_filter,
+                filters.filter_status,
+                filters.filter_size_min,
+                filters.filter_size_max,
+                filters.filter_import_date_range_min,
+                filters.filter_import_date_range_max,
             ],
             "Main Menu": [
-                filters.selectFilter,
-                filters.filtersDocumentType,
-                filters.filtersDocumentNumber,
-                filters.selectFilter,
-                filters.hhFiltersResidenceStatus,
-                filters.hhFiltersAdmin2,
-                filters.hhFiltersHouseholdSizeFrom,
-                filters.hhFiltersHouseholdSizeTo,
-                filters.selectFilter,
-                filters.hhFiltersOrderBy,
-                filters.selectFilter,
-                filters.hhFiltersStatus,
+                filters.select_filter,
+                filters.filters_document_type,
+                filters.filters_document_number,
+                filters.select_filter,
+                filters.hh_filters_residence_status,
+                filters.hh_filters_admin2,
+                filters.hh_filters_household_size_from,
+                filters.hh_filters_household_size_to,
+                filters.select_filter,
+                filters.hh_filters_order_by,
+                filters.select_filter,
+                filters.hh_filters_status,
             ],
             "Items": [
-                filters.indFiltersSearch,
-                filters.selectFilter,
-                filters.filtersDocumentType,
-                filters.filtersDocumentNumber,
-                filters.selectFilter,
-                filters.indFiltersGender,
-                filters.indFiltersAgeFrom,
-                filters.indFiltersAgeTo,
-                filters.selectFilter,
-                filters.indFiltersFlags,
-                filters.selectFilter,
-                filters.indFiltersOrderBy,
-                filters.selectFilter,
-                filters.indFiltersStatus,
-                filters.indFiltersRegDateFrom,
-                filters.indFiltersRegDateTo,
+                filters.ind_filters_search,
+                filters.select_filter,
+                filters.filters_document_type,
+                filters.filters_document_number,
+                filters.select_filter,
+                filters.ind_filters_gender,
+                filters.ind_filters_age_from,
+                filters.ind_filters_age_to,
+                filters.select_filter,
+                filters.ind_filters_flags,
+                filters.select_filter,
+                filters.ind_filters_order_by,
+                filters.select_filter,
+                filters.ind_filters_status,
+                filters.ind_filters_reg_date_from,
+                filters.ind_filters_reg_date_to,
             ],
             "Targeting": [
-                filters.filtersSearch,
-                filters.selectFilter,
-                filters.filtersStatus,
-                filters.filtersTotalHouseholdsCountMin,
-                filters.filtersTotalHouseholdsCountMax,
-                filters.datePickerFilterFrom,
-                filters.datePickerFilterTo,
+                filters.filters_search,
+                filters.select_filter,
+                filters.filters_status,
+                filters.filters_total_households_count_min,
+                filters.filters_total_households_count_max,
+                filters.date_picker_filter_from,
+                filters.date_picker_filter_to,
             ],
             "Payment Plans": [
-                filters.selectFilter,
-                filters.filtersTotalEntitledQuantityFrom,
-                filters.filtersTotalEntitledQuantityTo,
-                filters.datePickerFilterFrom,
-                filters.datePickerFilterTo,
+                filters.select_filter,
+                filters.filters_total_entitled_quantity_from,
+                filters.filters_total_entitled_quantity_to,
+                filters.date_picker_filter_from,
+                filters.date_picker_filter_to,
             ],
             "Payment Verification": [
-                filters.filterSearch,
-                filters.selectFilter,
-                filters.filterStatus,
-                filters.filterFsp,
-                filters.selectFilter,
-                filters.filterModality,
-                filters.filterStartDate,
-                filters.filterEndDate,
+                filters.filter_search,
+                filters.select_filter,
+                filters.filter_status,
+                filters.filter_fsp,
+                filters.select_filter,
+                filters.filter_modality,
+                filters.filter_start_date,
+                filters.filter_end_date,
             ],
             "Grievance": [
-                filters.filtersSearch,
-                filters.selectFilter,
-                filters.filtersDocumentType,
-                filters.filtersDocumentNumber,
-                filters.selectFilter,
-                filters.filtersStatus,
-                filters.filtersFsp,
-                filters.filtersCreationDateFrom,
-                filters.filtersCreationDateTo,
-                filters.selectFilter,
-                filters.filtersCategory,
-                filters.filtersAdminLevel,
-                filters.filtersAssignee,
-                filters.assignedToInput,
-                filters.filtersCreatedByAutocomplete,
-                filters.filtersRegistrationDataImport,
-                filters.filtersPreferredLanguage,
-                filters.filtersPriority,
-                filters.filtersUrgency,
-                filters.filtersActiveTickets,
+                filters.filters_search,
+                filters.select_filter,
+                filters.filters_document_type,
+                filters.filters_document_number,
+                filters.select_filter,
+                filters.filters_status,
+                filters.filters_fsp,
+                filters.filters_creation_date_from,
+                filters.filters_creation_date_to,
+                filters.select_filter,
+                filters.filters_category,
+                filters.filters_admin_level,
+                filters.filters_assignee,
+                filters.assigned_to_input,
+                filters.filters_created_by_autocomplete,
+                filters.filters_registration_data_import,
+                filters.filters_preferred_language,
+                filters.filters_priority,
+                filters.filters_urgency,
+                filters.filters_active_tickets,
             ],
             "Feedback": [
-                filters.filtersSearch,
-                filters.selectFilter,
-                filters.filtersIssueType,
-                filters.filtersCreatedByAutocomplete,
-                filters.filtersCreationDateFrom,
-                filters.filtersCreationDateTo,
+                filters.filters_search,
+                filters.select_filter,
+                filters.filters_issue_type,
+                filters.filters_created_by_autocomplete,
+                filters.filters_creation_date_from,
+                filters.filters_creation_date_to,
             ],
             "Accountability": [
-                filters.filtersTargetPopulationAutocomplete,
-                filters.targetPopulationInput,
-                filters.createdByInput,
-                filters.filtersCreationDateFrom,
-                filters.filtersCreationDateTo,
+                filters.filters_target_population_autocomplete,
+                filters.target_population_input,
+                filters.created_by_input,
+                filters.filters_creation_date_from,
+                filters.filters_creation_date_to,
             ],
             "Surveys": [
-                filters.filtersSearch,
-                filters.filtersTargetPopulationAutocomplete,
-                filters.targetPopulationInput,
-                filters.createdByInput,
-                filters.filtersCreationDateFrom,
-                filters.filtersCreationDateTo,
+                filters.filters_search,
+                filters.filters_target_population_autocomplete,
+                filters.target_population_input,
+                filters.created_by_input,
+                filters.filters_creation_date_from,
+                filters.filters_creation_date_to,
             ],
             "Programme Users": [],
             "Programme Log": [
-                filters.filtersSearch,
-                filters.selectFilter,
-                filters.filtersResidenceStatus,
-                filters.userInput,
+                filters.filters_search,
+                filters.select_filter,
+                filters.filters_residence_status,
+                filters.user_input,
             ],
         }
 
@@ -489,22 +485,51 @@ class TestSmokeFilters:
         assert filters.wait_for_number_of_rows(1)
 
     @pytest.mark.night
-    @pytest.mark.skip("ToDo")
     def test_grievance_tickets_filters_of_households_and_individuals(
         self,
+        create_programs: None,
+        add_grievance_tickets: None,
         page_grievance_tickets: GrievanceTickets,
-        page_grievance_new_ticket: NewTicket,
-        page_grievance_details_page: GrievanceDetailsPage,
         filters: Filters,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
+        filters.select_global_program_filter("Test Programm")
+        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
-        page_grievance_tickets.get_button_new_ticket().click()
+        assert filters.wait_for_number_of_rows(2)
 
-    @pytest.mark.skip("ToDo")
-    def test_payment_verification_details_filters(
+        filters.get_filter_by_locator("filters-search").send_keys("Wrong value")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(0)
+
+        filters.get_button_filters_clear().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filters-search").send_keys("GRV-0000123")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(1)
+
+    def test_payment_verification_list_filters(
         self,
+        create_programs: None,
+        add_payment_verification: None,
         page_grievance_tickets: GrievanceTickets,
         filters: Filters,
+        page_programme_details: ProgrammeDetails,
     ) -> None:
+        filters.select_global_program_filter("Test Programm")
+        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_payment_verification().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filter-search").send_keys("Wrong value")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(0)
+
+        filters.get_button_filters_clear().click()
+        assert filters.wait_for_number_of_rows(2)
+
+        filters.get_filter_by_locator("filter-search").send_keys("PP-0060-22-11223344")
+        filters.get_button_filters_apply().click()
+        assert filters.wait_for_number_of_rows(1)

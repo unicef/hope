@@ -10,6 +10,7 @@ from hope.models import PaymentPlanPurpose
 @admin.register(PaymentPlanPurpose)
 class PaymentPlanPurposeAdmin(HOPEModelAdminBase):
     list_display = ("unicef_id", "name", "description")
+    readonly_fields = ("unicef_id",)
     search_fields = ("name",)
     filter_horizontal = ("limit_to",)
 

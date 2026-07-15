@@ -3,16 +3,7 @@ import sys
 from typing import Any, Callable
 
 from django.http import HttpRequest
-import pycountry
 import sentry_sdk
-
-
-def is_country_name(country_name: str) -> bool:
-    try:
-        pycountry.countries.lookup(country_name)
-        return True
-    except LookupError:
-        return False
 
 
 class SentryScopeMiddleware:

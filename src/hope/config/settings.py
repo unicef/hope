@@ -284,12 +284,6 @@ AUTHENTICATION_BACKENDS = [
 NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
 
 
-# helper function to extend all the common lists
-def extend_list_avoid_repeats(list_to_extend: list, extend_with: list) -> None:
-    """Extend the first list with the elements in the second one, making sure its elements are not already there."""
-    list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
-
-
 GIT_VERSION = env("GIT_VERSION")
 HIJACK_PERMISSION_CHECK = "hope.apps.utils.security.can_hijack"
 
@@ -451,6 +445,7 @@ FLAGS = {
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
+    "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
 }
 
 MARKDOWNIFY = {
@@ -511,6 +506,7 @@ from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
 from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
+from hope.config.fragments.vision import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

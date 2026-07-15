@@ -2,6 +2,8 @@ from django.conf import settings
 from selenium.webdriver.common.action_chains import ActionChains
 from seleniumbase import BaseCase
 
+from e2e.helpers.date_picker import fill_mui_date
+
 
 class HopeTestBrowser(BaseCase):
     """SeleniumBase browser wrapper for HOPE E2E tests.
@@ -55,18 +57,35 @@ class HopeTestBrowser(BaseCase):
 
     def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)
-        elements = self.find_elements(f"{selector} li")
-        for element in elements:
-            if element.text.strip() == name:
-                element.click()
-                self.wait_for_element_absent(selector)
+        # A click can be dropped during the MUI open transition; if the listbox
+        # stays open after the pick, click the option once more.
+        self._click_listbox_option(name, selector)
+        if not self._listbox_closed(selector):
+            self._click_listbox_option(name, selector)
+        self.wait_for_element_absent(selector)
+
+    def _click_listbox_option(self, name: str, selector: str) -> None:
+        options = self.find_elements(f"{selector} li")
+        for option in options:
+            if option.text.strip() == name:
+                # A coordinate-based click can land on a neighbouring option while
+                # the MUI menu is still playing its entering transform; dispatch the
+                # click on the exact node so the target can't be mid-animation.
+                self.execute_script("arguments[0].click()", option)
                 return
-        raise AssertionError(f"Option '{name}' not found in listbox. Available: {[e.text.strip() for e in elements]}")
+        raise AssertionError(f"Option '{name}' not found in listbox. Available: {[o.text.strip() for o in options]}")
+
+    def _listbox_closed(self, selector: str, timeout: int = 5) -> bool:
+        try:
+            self.wait_for_element_absent(selector, timeout=timeout)
+            return True
+        except Exception:  # noqa: BLE001
+            return False
 
     def select_option_by_name(self, option_name: str, selector: str | None = None):
         if selector is None:
             selector = f'li[data-cy="select-option-{option_name}"]'
-        self.wait_for_element_visible(selector)
+        self.wait_for_element_clickable(selector)
         self.click(selector)
         self.wait_for_element_absent(selector)
 
@@ -79,6 +98,16 @@ class HopeTestBrowser(BaseCase):
         """
         self.click(f'[data-cy="select-{field_name}"]')
         self.select_option_by_name(option_name)
+
+    def fill_date(self, selector: str, value: str, timeout: int = 10) -> None:
+        """Type a yyyy-MM-dd date into a MUI X date picker located by `selector`.
+
+        MUI X v9 fields have no single typeable input; `selector` should match the
+        field's hidden value input (e.g. `input[name="startDate"]`), which is not
+        visible, so we locate it by presence and drive the editable section list.
+        """
+        field_element = self.wait_for_element_present(selector, timeout=timeout)
+        fill_mui_date(self.driver, field_element, value)
 
     def assert_value(self, selector: str, expected: str, timeout: int = 10):
         actual = self.get_value(selector, timeout=timeout)

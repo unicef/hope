@@ -7,8 +7,6 @@ from django import template
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
 
-from hope.models import Household
-
 register = template.Library()
 
 
@@ -128,11 +126,6 @@ def get_attr(d: Any, v: Any) -> Any:
 @register.simple_tag
 def define(val: Any = None) -> Any:
     return val
-
-
-@register.filter
-def adults(hh: Household) -> int:
-    return hh.members.filter(age__gte=18, age__lte=65, work__in=["fulltime", "seasonal", "parttime"]).count()
 
 
 @register.filter

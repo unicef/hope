@@ -175,6 +175,30 @@ class Common:
     ) -> bool:
         return self._wait(timeout).until(expected_conditions.element_to_be_clickable((element_type, locator)))
 
+    def click(
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+        attempts: int = 3,
+    ) -> WebElement:
+        """Wait for the element to be clickable and click it, re-locating on each attempt.
+
+        Re-locating makes the click resilient to the element going stale between the
+        lookup and the click.
+        """
+        for attempt in range(attempts):
+            try:
+                element = self._wait(timeout).until(
+                    expected_conditions.element_to_be_clickable((element_type, locator))
+                )
+                element.click()
+                return element
+            except StaleElementReferenceException:
+                if attempt == attempts - 1:
+                    raise
+        raise StaleElementReferenceException(f"Element {locator} stayed stale after {attempts} attempts")
+
     def select_listbox_element(
         self,
         name: str,

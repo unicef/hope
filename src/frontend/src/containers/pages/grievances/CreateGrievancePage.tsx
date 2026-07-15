@@ -327,7 +327,7 @@ const CreateGrievancePage = (): ReactElement => {
     mutationFn: (requestData: CreateGrievanceTicket) => {
       return RestService.restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug: businessArea,
-        formData: requestData as any,
+        formData: requestData,
       });
     },
   });

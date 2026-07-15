@@ -73,7 +73,12 @@ export function FormikAsyncAutocomplete({
   return (
     <Autocomplete
       renderInput={(params) => (
-        <TextField {...params} label={label} variant="outlined" />
+        <TextField
+          {...params}
+          label={label}
+          variant="outlined"
+          inputProps={{ ...params.inputProps, 'data-cy': `input-${field.name}` }}
+        />
       )}
       filterOptions={(option) => option}
       autoComplete

@@ -24,7 +24,7 @@ const initialFilter = {
   totalEntitledQuantityUsdFrom: '',
   totalEntitledQuantityUsdTo: '',
   startDate: '',
-  end_date: '',
+  endDate: '',
 };
 
 export const ProgramCyclePage = (): ReactElement => {

@@ -19,10 +19,7 @@ pytestmark = pytest.mark.django_db()
 
 
 def _fill_date(browser: HopeTestBrowser, name: str, value: str) -> None:
-    """Fill a FormikDateField (MUI sectioned date input, format yyyy-MM-dd)."""
-    el = browser.find_element(f'input[name="{name}"]')
-    el.click()
-    el.send_keys(value)
+    browser.fill_date(f'input[name="{name}"]', value)
 
 
 def _create_source_plan(program: Program, *, payment_status: str) -> PaymentPlan:
@@ -136,9 +133,10 @@ def test_create_top_up_payment_plan(
     # A distinct Top-Up child plan is created and the UI navigates to its detail page.
     new_pp = PaymentPlan.objects.get(source_payment_plan=source, plan_type=PaymentPlan.PlanType.TOP_UP)
     assert new_pp.id != source.id
-    # Header shows the Top-Up plan-type label (backend label) for the new plan;
-    # waiting on it guarantees the navigation + render to the child plan completed.
-    login.wait_for_text("Top Up", '[data-cy="page-header-title"]')
+    # Waiting on the new plan's unicef_id in the header guarantees the navigation +
+    # render to the child plan completed. It comes from the primary plan query, so
+    # unlike the plan-type label (a separate async choices request) it can't race.
+    login.wait_for_text(new_pp.unicef_id, '[data-cy="pp-unicef-id"]')
     assert str(new_pp.id) in login.get_current_url()
 
 
