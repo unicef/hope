@@ -112,8 +112,8 @@ const PictureErrorEditPage = (): ReactElement => {
     },
   ];
 
-  // TODO(picture_error): confirm source field for the current picture vs backend contract
-  const currentPictureSrc = (ticket.ticketDetails as any)?.photo;
+  const photoDetail = ticket.ticketDetails?.individualData?.photo;
+  const currentPictureSrc = photoDetail?.value ?? photoDetail?.previousValue;
 
   return (
     <Formik
@@ -121,9 +121,16 @@ const PictureErrorEditPage = (): ReactElement => {
       onSubmit={async (values) => {
         try {
           const formData = {
-            ticketId: ticket.id,
-            // TODO(picture_error): confirm upload field/extras vs backend contract
-            new_photo: values.photo,
+            priority: ticket.priority ?? 0,
+            urgency: ticket.urgency ?? 0,
+            assignedTo: ticket.assignedTo?.id ?? null,
+            language: ticket.language ?? '',
+            program: ticket.programs?.[0]?.id,
+            extras: {
+              individualDataUpdateIssueTypeExtras: {
+                individualData: { photo: values.photo },
+              },
+            },
           };
           await updateGrievanceTicket({ id: ticket.id, formData });
           showMessage(t('Grievance Ticket edited.'));
