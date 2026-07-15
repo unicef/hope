@@ -37,8 +37,9 @@ export const UniversalRestQueryTable = <T, K>(
   const { businessArea, programCode } = useBaseUrl();
   const { queryVariables } = props;
   const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data, isLoading, error } = useQuery({
-    queryKey: [query.name, query, cleanedQueryVariables, programCode, businessArea],
+    queryKey: [query.name, cleanedQueryVariables, programCode, businessArea],
     queryFn: () =>
       query({
         businessAreaSlug: businessArea,
