@@ -55,7 +55,7 @@
     "react-idle-timer": "^5.7.3",
     "react-router-dom": "7.18.0",
     "react-use": "^17.6.1",
-    "react-zoom-pan-pinch": "^3.7.0",
+    "react-zoom-pan-pinch": "^4.0.3",
     "string.prototype.replaceall": "^1.0.11",
     "styled-components": "6.4.2",
     "use-deep-compare-effect": "^1.8.1",
