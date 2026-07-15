@@ -48,6 +48,7 @@ from hope.apps.household.api.caches import (
 )
 from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.apps.household.services.locking import lock_household_then_individual
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 from hope.models.currency import Currency
@@ -308,14 +309,6 @@ class IndividualDataUpdateService(DataChangeService):
                 area = Area.objects.filter(p_code=admin_area_title).first()
                 updated_household.set_admin_areas(area)
 
-    def _lock_household_and_individual(self, individual: Individual) -> tuple[Household | None, Individual]:
-        # lock household before individual - same order as recalculate_data, to avoid deadlocks
-        household = None
-        if individual.household_id:
-            household = Household.objects.select_for_update().get(id=individual.household_id)
-        locked_individual = Individual.objects.select_for_update().get(id=individual.id)
-        return household, locked_individual
-
     def close(self, user: AbstractUser) -> None:
         ticket_details = self.grievance_ticket.individual_data_update_ticket_details
         program_qs = self.grievance_ticket.programs.all()
@@ -357,7 +350,7 @@ class IndividualDataUpdateService(DataChangeService):
         if individual.flex_fields is not None:
             merged_flex_fields.update(individual.flex_fields)
         merged_flex_fields.update(flex_fields)
-        household, new_individual = self._lock_household_and_individual(individual)
+        household, new_individual = lock_household_then_individual(individual)
 
         self._validate_phone_numbers(only_approved_data)
         self._update_household_fields(household, only_approved_data)  # type: ignore[arg-type]
