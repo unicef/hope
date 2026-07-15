@@ -75,15 +75,25 @@ describe('PictureErrorEditPage', () => {
     render(<PictureErrorEditPage />, { wrapper: TestProviders });
 
     // Wait for the ticket + profile queries to resolve and the form to render.
-    const fileInput = (await screen.findByDisplayValue(
-      '',
+    const fileInput = (await screen.findByTestId(
+      'file-input',
     )) as HTMLInputElement;
     expect(fileInput.type).toBe('file');
+
+    // Save is gated until a replacement photo is selected.
+    expect(
+      (screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
 
     const file = new File(['photo-bytes'], 'photo.png', { type: 'image/png' });
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    const saveButton = screen.getByRole('button', {
+      name: 'Save',
+    }) as HTMLButtonElement;
+    await waitFor(() => expect(saveButton.disabled).toBe(false));
+    fireEvent.click(saveButton);
 
     await waitFor(() => {
       expect(

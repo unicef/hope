@@ -6,12 +6,12 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { Title } from '@components/core/Title';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { GrievanceDocumentPhotoModalEditable } from '@components/grievances/GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
+import { PictureErrorEditField } from '@components/grievances/GrievancesPhotoModals/PictureErrorEditField';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -140,7 +140,7 @@ const PictureErrorEditPage = (): ReactElement => {
         }
       }}
     >
-      {({ submitForm, setFieldValue }) => (
+      {({ submitForm, values }) => (
         <>
           <PageHeader
             title={`${t('Edit Ticket')} #${ticket.unicefId}`}
@@ -154,6 +154,7 @@ const PictureErrorEditPage = (): ReactElement => {
               </Box>
               <LoadingButton
                 loading={loading}
+                disabled={!values.photo}
                 color="primary"
                 variant="contained"
                 onClick={submitForm}
@@ -168,15 +169,10 @@ const PictureErrorEditPage = (): ReactElement => {
               <Title>
                 <Typography variant="h6">{t('Picture')}</Typography>
               </Title>
-              <Grid container>
-                <Grid size={{ xs: 4 }}>
-                  <GrievanceDocumentPhotoModalEditable
-                    photoSrc={currentPictureSrc}
-                    setFieldValue={setFieldValue}
-                    fieldName="photo"
-                  />
-                </Grid>
-              </Grid>
+              <PictureErrorEditField
+                currentPhotoSrc={currentPictureSrc}
+                fieldName="photo"
+              />
             </ContainerColumnWithBorder>
           </Box>
         </>
