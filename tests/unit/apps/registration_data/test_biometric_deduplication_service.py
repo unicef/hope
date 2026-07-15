@@ -674,11 +674,13 @@ def test_get_duplicates_for_rdi_against_batch(biometric_deduplication_context: d
     ]
 
 
+@patch("hope.apps.grievance.services.biometric_photo_ticket.create_biometrics_photo_data_change_tickets")
 @patch(
     "hope.apps.grievance.services.needs_adjudication_ticket_services.create_needs_adjudication_tickets_for_biometrics"
 )
 def test_create_grievance_tickets_for_duplicates(
     create_needs_adjudication_tickets_for_biometrics_mock: mock.Mock,
+    create_biometrics_photo_data_change_tickets_mock: mock.Mock,
     biometric_deduplication_context: dict[str, object],
 ) -> None:
     program = biometric_deduplication_context["program"]
@@ -692,10 +694,11 @@ def test_create_grievance_tickets_for_duplicates(
 
     service = BiometricDeduplicationService()
     service.get_duplicates_for_rdi_against_population = mock.MagicMock()
-    service.get_duplicates_for_rdi_against_population.return_value = []
+    service.get_duplicates_for_rdi_against_population.return_value = DeduplicationEngineSimilarityPair.objects.none()
 
     service.create_grievance_tickets_for_duplicates(rdi1)
-    create_needs_adjudication_tickets_for_biometrics_mock.assert_called_once_with([], rdi1)
+    create_needs_adjudication_tickets_for_biometrics_mock.assert_called_once_with(mock.ANY, rdi1)
+    create_biometrics_photo_data_change_tickets_mock.assert_called_once_with(mock.ANY, rdi1)
 
 
 def test_fetch_biometric_deduplication_results_and_process_success(
@@ -1150,10 +1153,13 @@ def test_update_rdis_deduplication_statistics(biometric_deduplication_context: d
 
     rdi1.refresh_from_db()
     assert rdi1.dedup_engine_batch_duplicates == 5
-    assert rdi1.dedup_engine_golden_record_duplicates == 1
+    # A score-0 photo-error (412) pair is not a valid comparison, so exclude_not_valid=True
+    # (the statistics default) filters it out and it does not count as a golden-record duplicate.
+    assert rdi1.dedup_engine_golden_record_duplicates == 0
     ind1.refresh_from_db()
     assert ind1.biometric_deduplication_golden_record_results == []
-    assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
+    # With the score-0 photo-error pair excluded, the individual has no golden-record duplicate.
+    assert ind1.biometric_deduplication_golden_record_status == UNIQUE
     assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 
 
