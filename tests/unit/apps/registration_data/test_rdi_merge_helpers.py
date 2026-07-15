@@ -252,3 +252,30 @@ def test_process_collisions_no_collision_detected(
     assert pending_household.id not in household_ids_to_exclude
     assert pending_household.id in households_to_merge_ids
     mock_collision_detector.update_household.assert_not_called()
+
+
+# --- _update_household_collections ---
+
+
+def test_update_household_collections_skips_household_without_unicef_id(
+    rdi: RegistrationDataImport,
+) -> None:
+    """Households with no unicef_id are skipped (guard clause)."""
+    household_no_id = PendingHouseholdFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=rdi.business_area,
+        unicef_id="",
+    )
+    household_with_id = PendingHouseholdFactory(
+        registration_data_import=rdi,
+        program=rdi.program,
+        business_area=rdi.business_area,
+        unicef_id="HH-TEST-001",
+    )
+    task = RdiMergeTask()
+    households = PendingHousehold.objects.filter(id__in=[household_no_id.id, household_with_id.id])
+    task._update_household_collections(households, rdi)
+
+    household_no_id.refresh_from_db()
+    assert household_no_id.household_collection is None
