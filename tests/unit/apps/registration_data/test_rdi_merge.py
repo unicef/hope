@@ -3,6 +3,7 @@ from unittest import mock
 from unittest.mock import patch
 
 from django.forms import model_to_dict
+from django.test.utils import override_settings
 from freezegun import freeze_time
 import pytest
 
@@ -90,9 +91,6 @@ def pending_head_individual(rdi: object, business_area: object, program: object)
         business_area=business_area,
         program=program,
         email="fake_email_1@com",
-        wallet_name="Wallet Name 1",
-        blockchain_name="Blockchain Name 1",
-        wallet_address="Wallet Address 1",
         unicef_id="IND-9",
         household=None,
     )
@@ -286,9 +284,6 @@ def test_merge_rdi_and_recalculation(
     assert Individual.objects.filter(full_name="Baz Bush").first().email == "fake_email_5@com"
     assert Individual.objects.filter(full_name="Benjamin Butler").first().email == "fake_email_1@com"
     assert Individual.objects.filter(full_name="Bob Jackson").first().email == ""
-    assert Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name == "Wallet Name 1"
-    assert Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name == "Blockchain Name 1"
-    assert Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address == "Wallet Address 1"
 
     household_data = model_to_dict(
         household,  # type: ignore[arg-type]
@@ -548,12 +543,9 @@ def test_merging_external_collector(
         RdiMergeTask().execute(rdi.pk)
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @mock.patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_ack_to_biometric_deduplication_engine"
@@ -599,12 +591,9 @@ def test_merge_biometric_deduplication_non_cw_path(
     }
 
 
-@patch.dict(
-    "os.environ",
-    {
-        "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
-        "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
-    },
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @mock.patch(
     "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.report_ack_to_biometric_deduplication_engine"

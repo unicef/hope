@@ -28,6 +28,7 @@ from hope.apps.household.const import (
     BLANK,
     DISABLED,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE,
     NONE,
     NOT_COLLECTED,
     NOT_DISABLED,
@@ -54,6 +55,11 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def document_type() -> Any:
     return DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE])
+
+
+@pytest.fixture
+def disability_certificate_document_type() -> Any:
+    return DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE])
 
 
 @pytest.fixture
@@ -514,6 +520,38 @@ def test_create_individual_with_document_image(
     assert document.photo.name.endswith(".png")
 
 
+def test_create_individual_with_non_default_document_type_is_accepted(
+    lax_api_client, lax_push_url, disability_certificate_document_type, afghanistan_country
+):
+    individual_data = {
+        "individual_id": "IND001",
+        "full_name": "John Doe",
+        "given_name": "John",
+        "family_name": "Doe",
+        "birth_date": "1990-01-01",
+        "sex": "MALE",
+        "observed_disability": ["NONE"],
+        "marital_status": "SINGLE",
+        "documents": [
+            {
+                "type": "disability_certificate",
+                "country": "AF",
+                "document_number": "DOC123456",
+            }
+        ],
+    }
+
+    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+
+    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
+    document = PendingDocument.objects.get(individual=individual)
+    assert document.type.key == "disability_certificate"
+
+
 def test_retry_with_same_originating_id_does_not_raise_integrity_error(
     lax_api_client, lax_push_url, document_type, afghanistan_country, bank_account_type, generic_bank
 ):
@@ -738,9 +776,6 @@ def test_create_individual_default_values(lax_api_client, lax_push_url):
     assert individual.disability == NOT_DISABLED
     assert individual.observed_disability == [NONE]
     assert individual.relationship_confirmed is False
-    assert individual.wallet_name == ""
-    assert individual.blockchain_name == ""
-    assert individual.wallet_address == ""
 
 
 # ── IndividualSerializer tests ───────────────────────────────────────────

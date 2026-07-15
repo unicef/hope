@@ -159,7 +159,13 @@ class RecordAdmin(HOPEModelAdminBase):
     )
     change_form_template = "registration_data/admin/record/change_form.html"
 
-    actions: list[Any] = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
+    actions: list[Any] = [
+        mass_update,
+        "extract",
+        "async_extract",
+        "create_rdi",
+        "count_queryset",
+    ]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []

@@ -20,6 +20,7 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
 from psycopg2._range import NumericRange
 
@@ -81,12 +82,18 @@ class PaymentPlan(
             "background_action_status",
             "imported_file_date",
             "imported_file",
-            "export_file",
+            "export_file_entitlement",
+            "export_file_delivery",
+            "export_pdf_file_summary",
             "steficon_rule",
             "steficon_applied_date",
             "steficon_rule_targeting",
             "steficon_targeting_applied_date",
             "exclusion_reason",
+            "financial_service_provider",
+            "delivery_mechanism",
+            "source_payment_plan",
+            "currency_exchange_date",
             "male_children_count",
             "female_children_count",
             "male_adults_count",
@@ -101,6 +108,13 @@ class PaymentPlan(
             "reconciliation_import_file",
             "flat_amount_value",
             "use_payment_gateway",
+            "exchange_rate",
+            "total_entitled_quantity",
+            "total_entitled_quantity_usd",
+            "total_delivered_quantity",
+            "total_delivered_quantity_usd",
+            "total_undelivered_quantity",
+            "total_undelivered_quantity_usd",
         ],
         {
             "steficon_rule": "additional_formula",
@@ -642,6 +656,9 @@ class PaymentPlan(
             ("restart_exporting_template_for_entitlement", "Can restart Exporting Template for Entitlements"),
             ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
             ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
+            ("pm_sync_payment_plan_with_pg", "Can sync payment plan with payment gateway"),
+            ("pm_send_payment_plan", "Can send payment plan to Vision"),
+            ("download_payment_instruction", "Can download payment instruction from payment gateway"),
         )
         constraints = [
             models.CheckConstraint(
@@ -1204,6 +1221,19 @@ class PaymentPlan(
             sent_to_payment_gateway=False,
         ).exists()
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+
+    @property
+    def can_send_to_vision(self) -> bool:
+        return (
+            self.status == PaymentPlan.Status.ACCEPTED
+            and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
+            and not self.sent_to_vision
+        )
+
+    @property
+    def sent_to_vision(self) -> bool:
+        vision_data = (self.internal_data or {}).get("vision", {})
+        return isinstance(vision_data, dict) and bool(vision_data.get("sent"))
 
     @property
     def has_payments_reconciliation_overdue(self) -> bool:

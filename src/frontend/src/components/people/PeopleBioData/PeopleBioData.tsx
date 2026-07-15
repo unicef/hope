@@ -95,31 +95,6 @@ export const PeopleBioData = ({
     </Grid>
   ));
 
-  const renderDigitalWalletInfo = (): ReactNode => {
-    return (
-      <>
-        <Grid size={{ xs: 12 }}>
-          <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Wallet Name')}>
-            {individual?.walletName}
-          </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Blockchain Name')}>
-            {individual?.blockchainName}
-          </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Wallet Address')}>
-            {individual?.walletAddress}
-          </LabelizedField>
-        </Grid>
-      </>
-    );
-  };
-
   const renderDelegate = (): ReactNode | null => {
     const alternateRole = (household?.rolesInHousehold as any[])?.find(
       (r) => r.role === 'ALTERNATE',
@@ -448,7 +423,6 @@ export const PeopleBioData = ({
           )}
         </Grid>
         {renderBiometricDataSection()}
-        {renderDigitalWalletInfo()}
         {renderDelegate()}
       </Grid>
     </Overview>
