@@ -1,11 +1,15 @@
 import copy
+import csv
 import datetime
+from io import StringIO
 import json
 
+from django.contrib.admin.sites import AdminSite
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
+    AccountFactory,
     AccountTypeFactory,
     AreaFactory,
     AreaTypeFactory,
@@ -26,7 +30,9 @@ from extras.test_utils.factories import (
     RegistrationFactory,
     UserFactory,
 )
+from hope.admin.registration import RegistrationAdmin
 from hope.apps.household.const import HEAD, MALE
+from hope.contrib.aurora import models
 from hope.contrib.aurora.services.nigeria_people_registration_service import NigeriaPeopleRegistrationService
 from hope.models import (
     Document,
@@ -35,6 +41,7 @@ from hope.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    RegistrationDataImport,
 )
 
 pytestmark = pytest.mark.django_db
@@ -155,6 +162,54 @@ def record_fields() -> dict:
     }
 
 
+def make_record_fields(
+    record_fields: dict,
+    *,
+    account_number: str = "2087008012",
+    national_id: str = "01234567891",
+    given_name: str = "Giulio",
+    email: str = "gfranco@unicef.org",
+    birth_date: str = "1988-04-08",
+) -> dict:
+    fields = copy.deepcopy(record_fields)
+    individual = fields["individual-details"][0]
+    individual["account_details"]["number"] = account_number
+    individual["national_id_no"] = national_id
+    individual["national_id_no_i_c"] = national_id
+    individual["given_name_i_c"] = given_name
+    individual["email_i_c"] = email
+    individual["birth_date_i_c"] = birth_date
+    return fields
+
+
+def make_record(
+    record: object,
+    record_fields: dict,
+    record_files: dict,
+    *,
+    source_id: int,
+    account_number: str,
+    national_id: str,
+    given_name: str,
+    email: str,
+    birth_date: str = "1988-04-08",
+) -> object:
+    return RecordFactory(
+        registration=record.registration,
+        timestamp=record.timestamp,
+        source_id=source_id,
+        files=json.dumps(record_files).encode(),
+        fields=make_record_fields(
+            record_fields,
+            account_number=account_number,
+            national_id=national_id,
+            given_name=given_name,
+            email=email,
+            birth_date=birth_date,
+        ),
+    )
+
+
 @pytest.fixture
 def record(record_fields: dict, record_files: dict) -> object:
     return RecordFactory(
@@ -273,6 +328,92 @@ def test_record_has_duplicate_national_id(
     assert service._record_has_duplicate_national_id({"national_id_no_i_c": "MERGED-EXISTS"}, rdi, mapping) is True
 
 
+def test_record_has_duplicate_account_number_matches_exact_string_only(
+    registration: object,
+    user: object,
+    program: object,
+    account_type: object,
+) -> None:
+    assert account_type
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    mapping = service.get_mapping(registration.mapping)
+
+    assert service._record_has_duplicate_account_number({}, rdi, mapping) is False
+    assert (
+        service._record_has_duplicate_account_number(
+            {"account_details": {"number": "2087008012"}},
+            rdi,
+            mapping,
+        )
+        is False
+    )
+
+    pending_individual = PendingIndividualFactory(
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=rdi,
+    )
+    AccountFactory(individual=pending_individual, number="2087008012")
+
+    assert (
+        service._record_has_duplicate_account_number(
+            {"account_details": {"number": "2087008012"}},
+            rdi,
+            mapping,
+        )
+        is True
+    )
+    assert (
+        service._record_has_duplicate_account_number(
+            {"account_details": {"number": "208 7008012"}},
+            rdi,
+            mapping,
+        )
+        is False
+    )
+
+
+def test_record_has_duplicate_account_number_ignores_other_program_accounts(
+    registration: object,
+    user: object,
+    account_type: object,
+) -> None:
+    assert account_type
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    mapping = service.get_mapping(registration.mapping)
+    AccountFactory(number="2087008012")
+
+    assert (
+        service._record_has_duplicate_account_number(
+            {"account_details": {"number": "2087008012"}},
+            rdi,
+            mapping,
+        )
+        is False
+    )
+
+
+def test_get_account_number_helpers_cover_empty_and_direct_number_mapping(registration: object) -> None:
+    service = NigeriaPeopleRegistrationService(registration)
+    mapping = service.get_mapping(registration.mapping)
+
+    direct_number_mapping = {
+        "defaults": {"individuals_key": "individual-details"},
+        "individual-details": {
+            "bank_account_number_i_c": "account_details.number",
+        },
+    }
+
+    assert service._get_account_number({"bank_account_number_i_c": "2087008013"}, direct_number_mapping) == "2087008013"
+    assert service._get_account_number({"bank_account_number_i_c": None}, direct_number_mapping) == ""
+    assert service._get_account_number_from_record_data({}, mapping) == ""
+    assert service._get_account_number_from_record_data({"individual-details": []}, mapping) == ""
+
+
 def test_import_data_to_datahub(
     nigeria_country: object,
     nigeria_admin_areas: dict,
@@ -388,6 +529,7 @@ def test_import_data_skips_duplicate_national_id_in_same_rdi(
 
     duplicate_record.refresh_from_db()
     assert duplicate_record.ignored is True
+    assert duplicate_record.status == duplicate_record.STATUS_ERROR
     assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
     assert (
@@ -398,6 +540,153 @@ def test_import_data_skips_duplicate_national_id_in_same_rdi(
         ).count()
         == 1
     )
+
+
+def test_import_data_skips_duplicate_account_number_in_same_batch(
+    nigeria_country: object,
+    nigeria_admin_areas: dict,
+    document_type: object,
+    account_type: object,
+    financial_institution_mapping: object,
+    registration: object,
+    user: object,
+    record: object,
+    financial_institutions: dict,
+    record_fields: dict,
+    record_files: dict,
+) -> None:
+    assert nigeria_country
+    assert nigeria_admin_areas
+    assert document_type
+    assert account_type
+    assert financial_institution_mapping
+    assert financial_institutions
+
+    duplicate_record = make_record(
+        record,
+        record_fields,
+        record_files,
+        source_id=record.source_id + 1,
+        account_number="2087008012",
+        national_id="UNIQUE-NATIONAL-ID-2",
+        given_name="Different",
+        email="different.person@unicef.org",
+    )
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id, duplicate_record.id])
+
+    record.refresh_from_db()
+    duplicate_record.refresh_from_db()
+    rdi.refresh_from_db()
+    assert record.status == record.STATUS_IMPORTED
+    assert duplicate_record.ignored is True
+    assert duplicate_record.status == duplicate_record.STATUS_ERROR
+    assert duplicate_record.error_message == NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
+    assert PendingAccount.objects.filter(individual__registration_data_import=rdi, number="2087008012").count() == 1
+    assert rdi.status == RegistrationDataImport.DEDUPLICATION
+
+
+def test_import_data_does_not_skip_valid_duplicate_account_after_failed_record_in_same_batch(
+    nigeria_country: object,
+    nigeria_admin_areas: dict,
+    document_type: object,
+    account_type: object,
+    financial_institution_mapping: object,
+    registration: object,
+    user: object,
+    financial_institutions: dict,
+    record_fields: dict,
+    record_files: dict,
+) -> None:
+    assert nigeria_country
+    assert nigeria_admin_areas
+    assert document_type
+    assert account_type
+    assert financial_institution_mapping
+    assert financial_institutions
+
+    invalid_record = RecordFactory(
+        registration=25,
+        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        source_id=1,
+        files=json.dumps(record_files).encode(),
+        fields=make_record_fields(
+            record_fields,
+            account_number="2087008012",
+            national_id="UNIQUE-NATIONAL-ID-FAILED",
+            given_name="Invalid",
+            email="invalid.person@unicef.org",
+            birth_date="not-a-date",
+        ),
+    )
+    valid_record = make_record(
+        invalid_record,
+        record_fields,
+        record_files,
+        source_id=2,
+        account_number="2087008012",
+        national_id="01234567891",
+        given_name="Giulio",
+        email="gfranco@unicef.org",
+    )
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [invalid_record.id, valid_record.id])
+
+    invalid_record.refresh_from_db()
+    valid_record.refresh_from_db()
+    assert invalid_record.status == invalid_record.STATUS_ERROR
+    assert valid_record.status == valid_record.STATUS_IMPORTED
+    assert valid_record.ignored is not True
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 1
+    assert PendingAccount.objects.filter(individual__registration_data_import=rdi, number="2087008012").count() == 1
+
+
+def test_import_data_skips_record_if_account_number_already_imported(
+    nigeria_country: object,
+    nigeria_admin_areas: dict,
+    document_type: object,
+    account_type: object,
+    financial_institution_mapping: object,
+    registration: object,
+    user: object,
+    record: object,
+    program: object,
+    financial_institutions: dict,
+) -> None:
+    assert nigeria_country
+    assert nigeria_admin_areas
+    assert document_type
+    assert account_type
+    assert financial_institution_mapping
+    assert financial_institutions
+
+    pending_individual = PendingIndividualFactory(
+        program=program,
+        business_area=program.business_area,
+    )
+    AccountFactory(individual=pending_individual, number="2087008012")
+
+    service = NigeriaPeopleRegistrationService(registration)
+    rdi = service.create_rdi(user, f"nigeria rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    record.refresh_from_db()
+    rdi.refresh_from_db()
+    assert record.ignored is True
+    assert record.status == record.STATUS_ERROR
+    assert record.error_message == NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON
+    assert rdi.status == RegistrationDataImport.IMPORT_ERROR
+    assert rdi.error_message == "All selected Aurora Records were ignored during processing"
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 0
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
+    assert PendingAccount.objects.filter(individual__registration_data_import=rdi).count() == 0
 
 
 def test_import_data_skips_record_if_national_id_already_imported(
@@ -432,6 +721,7 @@ def test_import_data_skips_record_if_national_id_already_imported(
 
     record.refresh_from_db()
     assert record.ignored is True
+    assert record.status == record.STATUS_ERROR
     assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 0
     assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
     assert (
@@ -442,3 +732,80 @@ def test_import_data_skips_record_if_national_id_already_imported(
         ).count()
         == 0
     )
+
+
+def test_registration_admin_is_nigeria_registration(project: object) -> None:
+    nigeria_registration = RegistrationFactory(project=project, rdi_parser=NigeriaPeopleRegistrationService)
+    non_nigeria_registration = RegistrationFactory(project=project, rdi_parser=None)
+
+    assert RegistrationAdmin.is_nigeria_registration(nigeria_registration) is True
+    assert RegistrationAdmin.is_nigeria_registration(non_nigeria_registration) is False
+
+
+def test_registration_admin_has_ignored_records(registration: object, record: object) -> None:
+    assert RegistrationAdmin.has_ignored_records(registration) is False
+
+    record.ignored = True
+    record.save(update_fields=["ignored"])
+
+    assert RegistrationAdmin.has_ignored_records(registration) is False
+
+    record.registration = registration.source_id
+    record.save(update_fields=["registration"])
+
+    assert RegistrationAdmin.has_ignored_records(registration) is True
+
+
+def test_registration_admin_export_ignored_records_returns_csv(
+    registration: object,
+    record: object,
+    record_fields: dict,
+    user: object,
+) -> None:
+    record.registration = registration.source_id
+    record.fields = make_record_fields(record_fields)
+    record.ignored = True
+    record.status = record.STATUS_ERROR
+    record.error_message = NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON
+    record.save(update_fields=["registration", "fields", "ignored", "status", "error_message"])
+    registration.rdi_parser = NigeriaPeopleRegistrationService
+    registration.save(update_fields=["rdi_parser"])
+
+    request = type("Request", (), {"user": user})()
+    model_admin = RegistrationAdmin(models.Registration, AdminSite())
+    response = RegistrationAdmin.__dict__["export_ignored_records"].func(model_admin, request, registration.pk)
+    csv_rows = list(csv.DictReader(StringIO(response.content.decode())))
+
+    assert response["Content-Type"] == "text/csv"
+    assert response["Content-Disposition"] == (
+        f'attachment; filename="ignored_aurora_records_{registration.source_id}.csv"'
+    )
+    assert csv_rows == [
+        {
+            "record_id": str(record.id),
+            "source_id": str(record.source_id),
+            "registration": str(registration.source_id),
+            "timestamp": str(record.timestamp),
+            "ignored_reason": NigeriaPeopleRegistrationService.DUPLICATE_ACCOUNT_NUMBER_REASON,
+            "account_number": "2087008012",
+            "national_id": "01234567891",
+            "given_name": "Giulio",
+            "middle_name": "D",
+            "family_name": "Franco",
+            "phone_number": "+2348023456789",
+        }
+    ]
+
+
+def test_registration_admin_export_ignored_records_rejects_non_nigeria_registration(
+    registration: object,
+    user: object,
+) -> None:
+    registration.rdi_parser = None
+    request = type("Request", (), {"user": user})()
+    model_admin = RegistrationAdmin(models.Registration, AdminSite())
+
+    response = RegistrationAdmin.__dict__["export_ignored_records"].func(model_admin, request, registration.pk)
+
+    assert response.status_code == 302
+    assert response.url.endswith(f"/aurora/registration/{registration.pk}/change/")
