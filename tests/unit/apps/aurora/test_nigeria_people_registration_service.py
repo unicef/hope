@@ -408,8 +408,6 @@ def test_get_account_number_helpers_cover_empty_and_direct_number_mapping(regist
         },
     }
 
-    assert service._get_account_number_from_account_data({"data": {"number": "2087008012"}}) == "2087008012"
-    assert service._get_account_number_from_account_data({"data": "not-a-dict"}) == ""
     assert service._get_account_number({"bank_account_number_i_c": "2087008013"}, direct_number_mapping) == "2087008013"
     assert service._get_account_number({"bank_account_number_i_c": None}, direct_number_mapping) == ""
     assert service._get_account_number_from_record_data({}, mapping) == ""

@@ -73,13 +73,6 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         return mergedicts(copy.deepcopy(cls.DEFAULT_MAPPING), registration_mapping or {}, [])
 
     @classmethod
-    def _get_account_number_from_account_data(cls, account_data: dict) -> str:
-        data = account_data.get("data", {})
-        if isinstance(data, dict):
-            return str(data.get("number") or "")
-        return ""
-
-    @classmethod
     def _get_account_number(cls, individual_data: dict, mapping: dict) -> str:
         individuals_key = mapping["defaults"].get("individuals_key", "individual-details")
         for field_name, mapped_field in mapping[individuals_key].items():
