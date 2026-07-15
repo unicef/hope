@@ -167,7 +167,7 @@ const PictureErrorEditPage = (): ReactElement => {
           <Box p={5}>
             <ContainerColumnWithBorder>
               <Title>
-                <Typography variant="h6">{t('Picture')}</Typography>
+                <Typography variant="h6">{t('Photo')}</Typography>
               </Title>
               <PictureErrorEditField
                 currentPhotoSrc={currentPictureSrc}

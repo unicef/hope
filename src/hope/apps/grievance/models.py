@@ -196,7 +196,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
             ISSUE_TYPE_UPDATE_DELEGATE: _("Update Delegate"),
-            ISSUE_TYPE_BIOMETRICS_PHOTO: _("Biometrics Photo Fix"),
+            ISSUE_TYPE_BIOMETRICS_PHOTO: _("Biometric Photo Error"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),

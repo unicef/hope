@@ -10,6 +10,7 @@ import {
   getGrievanceCategoryDescriptions,
   getGrievanceIssueTypeDescriptions,
   GRIEVANCE_CATEGORIES_NAMES,
+  GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
 } from '@utils/constants';
 import { ChangeEvent, ReactElement } from 'react';
@@ -86,10 +87,16 @@ function Selection({
 
   const addDisabledProperty = (choices) => {
     if (!choices) return [];
+    // Picture Error (27) tickets are created by the system from a biometric photo error,
+    // so they must never be offered for manual creation.
+    const selectableChoices = choices.filter(
+      (el) => el.value !== GRIEVANCE_ISSUE_TYPES.PICTURE_ERROR,
+    );
     //remove update delegate option for regular programs
-    if (!isSocialDctType) return choices.filter((el) => el.value !== '26');
+    if (!isSocialDctType)
+      return selectableChoices.filter((el) => el.value !== '26');
 
-    return choices.map((choice) => {
+    return selectableChoices.map((choice) => {
       if (
         //Add individual
         choice.value === '16' ||
