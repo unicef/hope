@@ -684,6 +684,7 @@ def submission_channel_tickets(afghanistan: BusinessArea, program_afghanistan1: 
     return {"call_center": call_center_ticket, "suggestion_box": suggestion_box_ticket}
 
 
+@pytest.fixture
 def two_plain_tickets(afghanistan: BusinessArea) -> list:
     ticket1 = GrievanceTicketFactory(business_area=afghanistan)
     ticket1.unicef_id = "GRV-9001"
