@@ -347,6 +347,7 @@ class PaymentGatewayAPI(BaseAPI):
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
+        DOWNLOAD_PAYMENT_INSTRUCTION = "payment_instructions/{remote_id}/download/"
         ABORT_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/abort/"
         CLOSE_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/close/"
         OPEN_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/open/"
@@ -378,6 +379,9 @@ class PaymentGatewayAPI(BaseAPI):
         url = self.get_url(self.Endpoints.CREATE_PAYMENT_INSTRUCTION)
         response_data, _ = self._post(url, data)
         return PaymentInstructionData.create_from_dict(response_data)
+
+    def get_download_payment_instruction_url(self, remote_id: str) -> str:
+        return self.get_url(self.Endpoints.DOWNLOAD_PAYMENT_INSTRUCTION.format(remote_id=remote_id))
 
     def change_payment_instruction_status(
         self,

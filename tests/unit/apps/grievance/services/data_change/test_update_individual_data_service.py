@@ -569,7 +569,7 @@ def test_update_people_individual_hh_plain_fields(
     }
     hh = update_context["household"]
     ind_data = _build_ind_data(hh, fields, new_values, extract=lambda v: v)
-    with django_assert_num_queries(27):
+    with django_assert_num_queries(28):
         _close_ticket_and_refresh(update_context, ind_data, hh)
     _assert_fields_updated(hh, fields, new_values, extract=lambda v: v)
 
@@ -577,7 +577,7 @@ def test_update_people_individual_hh_plain_fields(
 def test_update_people_individual_hh_country_fields(
     update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
-    with django_assert_num_queries(31):
+    with django_assert_num_queries(32):
         fields = ["country_origin", "country"]
         new_values = {"country_origin": "POL", "country": "OTH"}
         hh = update_context["household"]
@@ -589,7 +589,7 @@ def test_update_people_individual_hh_country_fields(
 def test_update_people_individual_hh_currency_field(
     update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
-    with django_assert_num_queries(29):
+    with django_assert_num_queries(30):
         fields = ["currency"]
         new_values = {"currency": "PLN"}
         hh = update_context["household"]
@@ -609,7 +609,7 @@ def test_update_people_individual_hh_admin_area(
             "previous_value": None,
         },
     }
-    with django_assert_num_queries(32):
+    with django_assert_num_queries(33):
         _close_ticket_and_refresh(update_context, ind_data, hh)
     assert hh.admin_area.p_code == "PL22M33"
     assert hh.admin_area.name == "Test Area M"
@@ -638,6 +638,31 @@ def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
     update_context["individual"].refresh_from_db()
     assert update_context["individual"].phone_no == "+485544332211"
     assert update_context["individual"].phone_no_alternative == "+485544334455"
+
+
+def test_close_individual_update_without_household(update_context: dict[str, Any]) -> None:
+    individual_without_household = IndividualFactory(
+        business_area=update_context["business_area"],
+        program=update_context["program"],
+        phone_no="+485656565665",
+    )
+    ticket_details = TicketIndividualDataUpdateDetailsFactory(
+        individual=individual_without_household,
+        ticket__business_area=update_context["business_area"],
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        individual_data={
+            "phone_no": {"approve_status": True, "previous_value": "+485656565665", "value": "+485544332211"},
+        },
+    )
+
+    ticket = ticket_details.ticket
+    service = IndividualDataUpdateService(ticket, ticket.individual_data_update_ticket_details)
+    service.close(update_context["user"])
+
+    individual_without_household.refresh_from_db()
+    assert individual_without_household.household_id is None
+    assert individual_without_household.phone_no == "+485544332211"
 
 
 def test_close_individual_update_invalidates_both_caches(update_context: dict[str, Any]) -> None:

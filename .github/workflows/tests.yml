@@ -69,6 +69,20 @@ jobs:
             sleep 2
           done
 
+      - name: Wait for Elasticsearch to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fs http://localhost:9200/_cluster/health >/dev/null; then
+              echo "Elasticsearch ready"
+              exit 0
+            fi
+            echo "Waiting for Elasticsearch... ($i)"
+            sleep 5
+          done
+          echo "Elasticsearch did not become ready" >&2
+          docker-compose -f development_tools/compose.yml logs elasticsearch || true
+          exit 1
+
       - name: Install Python & UV
         uses: astral-sh/setup-uv@v7
         with:
@@ -187,6 +201,20 @@ jobs:
             echo "Waiting for Redis..."
             sleep 2
           done
+
+      - name: Wait for Elasticsearch to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fs http://localhost:9200/_cluster/health >/dev/null; then
+              echo "Elasticsearch ready"
+              exit 0
+            fi
+            echo "Waiting for Elasticsearch... ($i)"
+            sleep 5
+          done
+          echo "Elasticsearch did not become ready" >&2
+          docker-compose -f development_tools/compose.yml logs elasticsearch || true
+          exit 1
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
