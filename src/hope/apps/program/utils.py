@@ -484,15 +484,14 @@ def enroll_households_to_program(households: QuerySet[Household], program: Progr
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
 
-                hh = household
-                _prepare_and_save_household_copy(hh, program, rdi, individuals_dict, individuals_to_exclude_dict)
-                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(hh)
+                _prepare_and_save_household_copy(household, program, rdi, individuals_dict, individuals_to_exclude_dict)
+                entitlement_cards = CopyProgramPopulation.copy_entitlement_cards_per_household(household)
                 EntitlementCard.objects.bulk_create(entitlement_cards)
 
                 ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
                 Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
-                create_roles_for_new_representation(hh, program, rdi)
+                create_roles_for_new_representation(household, program, rdi)
         except IntegrityError as e:
             error_messages.append(_format_integrity_error(household.unicef_id or "", e))
     rdi.refresh_population_statistics()

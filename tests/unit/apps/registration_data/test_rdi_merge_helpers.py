@@ -254,9 +254,6 @@ def test_process_collisions_no_collision_detected(
     mock_collision_detector.update_household.assert_not_called()
 
 
-# --- _update_household_collections ---
-
-
 def test_update_household_collections_skips_household_without_unicef_id(
     rdi: RegistrationDataImport,
 ) -> None:
