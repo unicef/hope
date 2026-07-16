@@ -131,7 +131,6 @@ export const GrievancesFilters = ({
             label="Search"
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
-            borderRadius="4px 0px 0px 4px"
           />
         </Grid>
         <DocumentSearchField

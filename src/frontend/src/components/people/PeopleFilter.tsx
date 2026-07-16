@@ -94,7 +94,6 @@ export function PeopleFilter({
               }
               label={t('Document Type')}
               value={filter.documentType}
-              borderRadius="0px 4px 4px 0px"
               data-cy="filters-document-type"
               fullWidth
               disableClearable
