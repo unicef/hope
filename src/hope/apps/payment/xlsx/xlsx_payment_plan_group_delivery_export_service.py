@@ -45,10 +45,10 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     A group is bound to a single FSP, so every exported payment plan shares the same FSP XLSX
     template and the sheet has a single, flat header.
 
-    Each export is a batch: only ACCEPTED/FINISHED plans of one ``plan_type`` (REGULAR by default,
-    FOLLOW_UP or TOP_UP on demand) that have not been exported yet (``export_tag`` is null) are
-    included. On success the exported plans are stamped with the next sequential ``export_tag`` so
-    they are excluded from the next export.
+    Each export is a batch: only ACCEPTED/FINISHED plans of one ``plan_type`` (REGULAR by
+    default) that have not been exported yet (``export_tag`` is null) are included. On success
+    the exported plans are stamped with the next sequential ``export_tag`` so they are excluded
+    from the next export.
     """
 
     TITLE = "Payment Plan Group - Payment List"

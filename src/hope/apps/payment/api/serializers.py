@@ -132,6 +132,7 @@ class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
             PaymentPlan.PlanType.REGULAR,
             PaymentPlan.PlanType.FOLLOW_UP,
             PaymentPlan.PlanType.TOP_UP,
+            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
         ],
         required=False,
         default=PaymentPlan.PlanType.REGULAR,
@@ -1937,6 +1938,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     can_export_regular = serializers.SerializerMethodField()
     can_export_follow_up = serializers.SerializerMethodField()
     can_export_top_up = serializers.SerializerMethodField()
+    can_export_top_up_amendment = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1952,6 +1954,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_export_regular",
             "can_export_follow_up",
             "can_export_top_up",
+            "can_export_top_up_amendment",
         ]
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
@@ -2006,6 +2009,9 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
 
     def get_can_export_top_up(self, obj: PaymentPlanGroup) -> bool:
         return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP)
+
+    def get_can_export_top_up_amendment(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))

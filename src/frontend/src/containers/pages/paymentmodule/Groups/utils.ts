@@ -23,6 +23,8 @@ export function planTypeDisplayLabel(planType: string | undefined): string {
       return 'Follow Up';
     case 'TOP_UP':
       return 'Top Up';
+    case 'TOP_UP_AMENDMENT':
+      return 'Top Up Amendment';
     default:
       return '';
   }

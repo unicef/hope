@@ -33,6 +33,9 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
     ...(group?.canExportTopUp
       ? [toOption(PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP)]
       : []),
+    ...(group?.canExportTopUpAmendment
+      ? [toOption(PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP_AMENDMENT)]
+      : []),
   ];
 
   if (group && planTypeOptions.length === 0) return null;

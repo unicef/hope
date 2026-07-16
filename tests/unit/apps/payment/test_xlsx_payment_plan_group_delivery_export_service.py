@@ -387,6 +387,31 @@ def make_payment_gateway_group(
     return build_group
 
 
+@pytest.fixture
+def make_auth_code_group_with_typed_plan(
+    program_cycle, business_area, payment_gateway_fsp, delivery_mechanism, auth_code_template
+):
+    """Build a group with one exportable payment-gateway plan of the given plan type."""
+
+    def build_group(plan_type):
+        group = PaymentPlanGroupFactory(cycle=program_cycle)
+        plan = PaymentPlanFactory(
+            program_cycle=program_cycle,
+            payment_plan_group=group,
+            business_area=business_area,
+            financial_service_provider=payment_gateway_fsp,
+            delivery_mechanism=delivery_mechanism,
+            status=PaymentPlan.Status.ACCEPTED,
+            plan_type=plan_type,
+        )
+        PaymentFactory(
+            parent=plan, financial_service_provider=payment_gateway_fsp, status=Payment.STATUS_DISTRIBUTION_SUCCESS
+        )
+        return group, plan
+
+    return build_group
+
+
 def test_workbook_has_single_sheet_with_group_title(group_with_one_accepted_plan):
     wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).generate_workbook()
 
@@ -835,6 +860,36 @@ def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(
     assert plan.export_tag == 1
     file_temp = plan.export_file_delivery
     assert file_temp is not None
+    assert file_temp.file.name.endswith(".zip")
+    assert file_temp.password is not None
+    assert file_temp.xlsx_password is not None
+
+
+def test_save_xlsx_file_with_auth_code_follow_up_produces_zip_with_suffix(make_auth_code_group_with_typed_plan, user):
+    group, plan = make_auth_code_group_with_typed_plan(PaymentPlan.PlanType.FOLLOW_UP)
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag == 1
+    file_temp = plan.export_file_delivery
+    assert file_temp is not None
+    assert "_follow_up" in file_temp.file.name
+    assert file_temp.file.name.endswith(".zip")
+    assert file_temp.password is not None
+    assert file_temp.xlsx_password is not None
+
+
+def test_save_xlsx_file_with_auth_code_top_up_produces_zip_with_suffix(make_auth_code_group_with_typed_plan, user):
+    group, plan = make_auth_code_group_with_typed_plan(PaymentPlan.PlanType.TOP_UP)
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.TOP_UP).save_xlsx_file(user)
+
+    plan.refresh_from_db()
+    assert plan.export_tag == 1
+    file_temp = plan.export_file_delivery
+    assert file_temp is not None
+    assert "_top_up" in file_temp.file.name
     assert file_temp.file.name.endswith(".zip")
     assert file_temp.password is not None
     assert file_temp.xlsx_password is not None

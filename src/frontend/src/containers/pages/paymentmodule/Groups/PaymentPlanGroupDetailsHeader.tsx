@@ -67,6 +67,13 @@ export function PaymentPlanGroupDetailsHeader({
             label={t('Export Top Ups')}
           />
         )}
+        {group?.canExportTopUpAmendment && (
+          <DeliveryExportXlsxGroupButton
+            group={group}
+            planType={PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP_AMENDMENT}
+            label={t('Export Top Up Amendments')}
+          />
+        )}
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />
