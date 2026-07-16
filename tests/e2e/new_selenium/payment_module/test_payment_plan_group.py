@@ -324,6 +324,10 @@ def test_export_payment_plan_group(
         browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group"]')
         browser.click('[data-cy="button-delivery-export-xlsx-group"]')
 
+        browser.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-group"]')
+        browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group-submit"]')
+        browser.click('[data-cy="button-delivery-export-xlsx-group-submit"]')
+
         browser.wait_for_text("Export started")
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
@@ -358,7 +362,12 @@ def test_export_payment_plan_group_with_auth_code(
         browser.click('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')
 
         browser.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"]')
-        template_input = browser.find_element('[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"] input')
+        # single exportable plan type -> shown as a locked field; the template picker
+        # is the only enabled input in the dialog
+        browser.wait_for_element_visible('[data-cy="locked-delivery-export-xlsx-with-auth-code-group-plan-type"]')
+        template_input = browser.find_element(
+            '[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"] input:not([disabled])'
+        )
         template_input.click()
         template_input.send_keys("Auth Code Template")
         browser.select_listbox_element("Auth Code Template")
