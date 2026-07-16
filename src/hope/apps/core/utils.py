@@ -412,6 +412,11 @@ def to_snake_case(camel_case_string: str) -> str:
     return snake_case[0] + snake_case[1:].lower()
 
 
+def to_camel_case(snake_str: str) -> str:
+    first, *rest = snake_str.split("_")
+    return first + "".join(w.capitalize() for w in rest)
+
+
 def check_concurrency_version_in_mutation(version: int | None, target: Any) -> None:
     if version is None:
         return

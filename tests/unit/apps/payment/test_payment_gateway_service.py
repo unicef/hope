@@ -1,6 +1,5 @@
 from decimal import Decimal
 import json
-import os
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
@@ -70,12 +69,9 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def mock_payment_gateway_env_vars() -> None:
-    with mock.patch.dict(
-        os.environ,
-        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST/"},
-    ):
-        yield
+def mock_payment_gateway_env_vars(settings) -> None:
+    settings.PAYMENT_GATEWAY_API_KEY = "TEST"
+    settings.PAYMENT_GATEWAY_API_URL = "TEST/"
 
 
 def normalize(data: Any) -> dict:
@@ -1275,6 +1271,14 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
 
     response_data = PaymentGatewayAPI().create_payment_instruction({})
     assert isinstance(response_data, PaymentInstructionData)
+
+
+def test_api_get_download_payment_instruction_url() -> None:
+    api = PaymentGatewayAPI()
+
+    response_data = api.get_download_payment_instruction_url("pi-remote-id")
+
+    assert response_data == api.get_url(api.Endpoints.DOWNLOAD_PAYMENT_INSTRUCTION.format(remote_id="pi-remote-id"))
 
 
 def test_payment_instruction_payload_includes_business_area_office_and_payment_country(

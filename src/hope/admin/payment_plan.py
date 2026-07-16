@@ -13,13 +13,16 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.html import format_html
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm
+from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
+from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     AsyncJob,
@@ -27,6 +30,7 @@ from hope.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanGroup,
+    PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     log_create,
 )
@@ -61,6 +65,61 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
         return False
 
 
+class PaymentInstructionInline(admin.TabularInline):
+    model = PaymentPlanSplit
+    extra = 0
+    can_delete = False
+    common_fields = (
+        "id",
+        "order",
+        "split_type",
+    )
+    payment_gateway_fields = (
+        "sent_to_payment_gateway",
+        "download_link",
+    )
+    fields = readonly_fields = (*common_fields, *payment_gateway_fields)
+    verbose_name_plural = "Payment Instructions"
+
+    def get_fields(self, request: HttpRequest, obj: PaymentPlan | None = None) -> tuple[str, ...]:
+        if obj and obj.is_payment_gateway:
+            return (*self.common_fields, *self.payment_gateway_fields)
+        return self.common_fields
+
+    def get_readonly_fields(self, request: HttpRequest, obj: PaymentPlan | None = None) -> tuple[str, ...]:
+        if obj and obj.is_payment_gateway:
+            return (*self.common_fields, *self.payment_gateway_fields)
+        return self.common_fields
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        self._request = request
+        return super().get_queryset(request).order_by("order")
+
+    def download_link(self, obj: PaymentPlanSplit) -> str:
+        request = getattr(self, "_request", None)
+        if not obj.payment_plan.is_payment_gateway or not obj.sent_to_payment_gateway or request is None:
+            return "-"
+        if not has_payment_instruction_download_permission(request):
+            return "-"
+        url = PaymentGatewayAPI().get_download_payment_instruction_url(str(obj.id))
+        return format_html('<a href="{}" target="_blank">Download</a>', url)
+
+    download_link.short_description = "Download"
+
+    def has_add_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+        return False
+
+    def has_change_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
+        return False
+
+
+def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.can_send_to_vision
+
+
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
     return payment_plan.is_payment_gateway and payment_plan.status in [
         PaymentPlan.Status.ACCEPTED,
@@ -73,6 +132,11 @@ def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan)
         Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
         payment_plan.program,
     )
+
+
+def has_payment_instruction_download_permission(request: Any) -> bool:
+    permission = "payment.download_payment_instruction"
+    return request.user.has_perm(permission)
 
 
 @admin.register(PaymentPlan)
@@ -103,7 +167,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
     filter_horizontal = ("payment_plan_purposes",)
-    inlines = [FundsCommitmentItemInline]
+    inlines = [FundsCommitmentItemInline, PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
@@ -186,9 +250,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -207,9 +269,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
-        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
-            request, payment_plan
-        ),
+        permission="payment.pm_sync_payment_plan_with_pg",
     )
     def sync_missing_records_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -247,6 +307,32 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_payment_changelist")
         filter_by_parent = f"&parent__exact={str(pk)}"
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
+
+    @button(
+        visible=lambda btn: can_send_to_vision(btn.original),
+        permission="payment.pm_send_payment_plan",
+    )
+    def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            try:
+                response = VisionAPI().send_payment_plan(payment_plan)
+                self.message_user(
+                    request,
+                    f"Payment plan sent to Vision successfully: {response.get('messageId', '')}",
+                    level="success",
+                )
+            except VisionAPIError as e:
+                self.message_user(request, f"Failed to send to Vision: {e}", level="warning")
+            except VisionAPIMissingCredentialsError as e:
+                self.message_user(request, f"Vision API not configured: {e}", level="error")
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.send_to_vision,
+            message="Do you confirm to send this payment plan to Vision?",
+        )
 
 
 @admin.register(PaymentPlanGroup)
@@ -394,13 +480,6 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
     readonly_fields = ("snapshot_data", "household_id")
 
 
-def has_payment_pg_sync_permission(request: Any, payment: Payment) -> bool:
-    return request.user.has_perm(
-        Permissions.PM_SYNC_PAYMENT_WITH_PG.value,
-        payment.parent.program,
-    )
-
-
 @admin.register(Payment)
 class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id",)
@@ -494,7 +573,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
-        permission=lambda request, payment, *args, **kwargs: has_payment_pg_sync_permission(request, payment),
+        permission="payment.pm_sync_payment_with_pg",
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":

@@ -25,6 +25,7 @@ class PaymentModuleDetails(BaseComponents):
     button_save_exclusions = 'button[data-cy="button-save-exclusions"]'
     supporting_documents_title = 'h6[data-cy="supporting-documents-title"]'
     supporting_documents_empty = 'div[data-cy="supporting-documents-empty"]'
+    supporting_document_item = 'div[data-cy="document-item"]'
     input_exclusion = 'textarea[data-cy="input-exclusion"]'
     input_exclusion_reason = 'textarea[data-cy="input-exclusionReason"]'
     input_households_ids = '[data-cy="input-households-ids"]'
@@ -68,6 +69,7 @@ class PaymentModuleDetails(BaseComponents):
     delete_button = 'button[data-cy="button-delete-pp"]'
     upload_file_button = 'button[data-cy="upload-file-button"]'
     title_input = 'div[data-cy="title-input"]'
+    expand_supporting_documents_button = 'button[data-cy="expand-button"]'
 
     def get_button_lock_plan(self) -> WebElement:
         return self.wait_for(self.button_lock_plan)
@@ -277,3 +279,9 @@ class PaymentModuleDetails(BaseComponents):
 
     def get_supporting_documents_empty(self) -> WebElement:
         return self.wait_for(self.supporting_documents_empty)
+
+    def get_expand_supporting_documents_button(self) -> WebElement:
+        return self.wait_for(self.expand_supporting_documents_button)
+
+    def get_supporting_document_item(self) -> WebElement:
+        return self.wait_for(self.supporting_document_item)
