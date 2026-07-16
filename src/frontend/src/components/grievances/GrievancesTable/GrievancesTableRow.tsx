@@ -62,6 +62,7 @@ export function GrievancesTableRow({
     ticket.id,
     ticket.category,
     baseUrl,
+    ticket.issueType,
   );
   const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 

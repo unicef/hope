@@ -250,6 +250,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
     SYSTEM_CATEGORY_CODES = frozenset(code for code, _label in SYSTEM_CATEGORIES)
+    SYSTEM_ISSUE_TYPES = frozenset({ISSUE_TYPE_BIOMETRICS_PHOTO})
     CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
     CREATE_CATEGORY_CHOICES = (

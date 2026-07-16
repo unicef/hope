@@ -813,6 +813,33 @@ def test_filter_by_grievance_type(
     )
 
 
+def test_biometric_photo_error_is_system_generated_despite_data_change_category(afghanistan: BusinessArea) -> None:
+    photo_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO,
+    )
+    data_update_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+    )
+    grievance_filter = GrievanceTicketFilter()
+    base_qs = GrievanceTicket.objects.all()
+
+    system_ids = set(
+        grievance_filter.filter_grievance_type(base_qs, "grievance_type", "system").values_list("id", flat=True)
+    )
+    user_ids = set(
+        grievance_filter.filter_grievance_type(base_qs, "grievance_type", "user").values_list("id", flat=True)
+    )
+
+    assert photo_ticket.id in system_ids
+    assert photo_ticket.id not in user_ids
+    assert data_update_ticket.id in user_ids
+    assert data_update_ticket.id not in system_ids
+
+
 @pytest.mark.parametrize(
     ("filter_value", "expected_count_for_program", "expected_count_for_global"),
     [

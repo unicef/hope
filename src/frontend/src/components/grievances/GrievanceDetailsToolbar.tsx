@@ -286,6 +286,7 @@ export const GrievanceDetailsToolbar = ({
                 linkedTicket.id,
                 linkedTicket.category,
                 baseUrl,
+                linkedTicket.issueType,
               )}
               target="_blank"
               rel="noopener noreferrer"

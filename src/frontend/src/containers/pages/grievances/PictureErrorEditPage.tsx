@@ -103,6 +103,7 @@ const PictureErrorEditPage = (): ReactElement => {
     ticket.id,
     ticket.category,
     baseUrl,
+    ticket.issueType,
   );
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
