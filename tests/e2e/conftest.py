@@ -837,24 +837,17 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
+def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> None:
     from django.db import connections
-    from django.db.models.signals import post_migrate, pre_migrate
+    from django.db.models.signals import post_migrate
 
     apps, all_sqls = _collect_migration_sql_statements()
 
-    def pre_migration_custom_sql(
-        sender: Any,
-        app_config: Any,
-        verbosity: Any,
-        interactive: Any,
-        using: Any,
-        **kwargs: Any,
-    ) -> None:
+    with django_db_blocker.unblock():
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
         with open(filename, "r") as file:
             pre_sql = file.read()
-        conn = connections[using]
+        conn = connections["default"]
         conn.cursor().execute(pre_sql)
 
     def post_migration_custom_sql(
@@ -875,11 +868,6 @@ def register_custom_sql_signal() -> None:
         for stmt in all_sqls:
             conn.cursor().execute(stmt)
 
-    pre_migrate.connect(
-        pre_migration_custom_sql,
-        dispatch_uid="tests.pre_migrationc_custom_sql",
-        weak=False,
-    )
     post_migrate.connect(
         post_migration_custom_sql,
         dispatch_uid="tests.post_migration_custom_sql",
