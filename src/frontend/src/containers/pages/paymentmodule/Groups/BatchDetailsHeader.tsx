@@ -63,7 +63,7 @@ export function BatchDetailsHeader({
         {hasExportFile ? (
           <DownloadBatchButton groupId={groupId} tag={tag} />
         ) : (
-          <ExportBatchButton groupId={groupId} tag={tag} isBusy={isBusy} />
+          <ExportBatchButton groupId={groupId} tag={tag} planType={planType} isBusy={isBusy} />
         )}
         {hasPassword && <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />}
       </Box>

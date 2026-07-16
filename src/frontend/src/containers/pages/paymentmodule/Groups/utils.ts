@@ -14,14 +14,22 @@ export function isGroupBackgroundActionBusy(
   );
 }
 
-// Suffix shown next to a batch name for non-regular batches, e.g. " Follow Up".
-export function batchPlanTypeLabel(planType: string | undefined): string {
+export function planTypeDisplayLabel(planType: string | undefined): string {
   switch (planType) {
+    case 'REGULAR':
+      return 'Regular';
     case 'FOLLOW_UP':
-      return ' Follow Up';
+      return 'Follow Up';
     case 'TOP_UP':
-      return ' Top Up';
+      return 'Top Up';
     default:
       return '';
   }
+}
+
+// Suffix shown next to a batch name for non-regular batches, e.g. " Follow Up".
+export function batchPlanTypeLabel(planType: string | undefined): string {
+  if (planType === undefined || planType === 'REGULAR') return '';
+  const label = planTypeDisplayLabel(planType);
+  return label ? ` ${label}` : '';
 }

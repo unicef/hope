@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { planTypeDisplayLabel } from '../utils';
 
 export interface GroupExportPlanTypeOption {
   value: PaymentPlanGroupDeliveryExportPlanTypeEnum;
@@ -31,9 +32,15 @@ interface GroupExportXlsxDialogProps {
   exportTag?: number;
   /**
    * Exportable plan types to choose from; a select is shown when there is more than
-   * one. Omit (batch re-export) to send no planType at all.
+   * one, a locked read-only field when there is exactly one. Omit (batch re-export)
+   * to send no planType at all.
    */
   planTypeOptions?: GroupExportPlanTypeOption[];
+  /**
+   * Display-only plan type of the exported data when it is already fixed (batch
+   * re-export: the batch's own type); shown as a locked field, never sent.
+   */
+  lockedPlanType?: string;
   buttonLabel: string;
   dialogTitle: string;
   buttonVariant?: 'contained' | 'outlined';
@@ -50,6 +57,7 @@ export function GroupExportXlsxDialog({
   groupId,
   exportTag,
   planTypeOptions,
+  lockedPlanType,
   buttonLabel,
   dialogTitle,
   buttonVariant = 'contained',
@@ -144,10 +152,27 @@ export function GroupExportXlsxDialog({
       >
         <DialogTitleWrapper data-cy={`dialog-${dataCySuffix}`}>
           <DialogTitle>{dialogTitle}</DialogTitle>
-          <DialogContent>
-            {planTypeOptions && planTypeOptions.length > 1 && (
+          {/* keep top padding despite MUI's `DialogTitle + DialogContent { padding-top: 0 }`,
+              otherwise the first field's shrunk label is clipped */}
+          <DialogContent sx={{ pt: '12px !important' }}>
+            {(lockedPlanType || planTypeOptions?.length === 1) && (
+              <TextField
+                label={t('Plan Type')}
+                value={
+                  lockedPlanType
+                    ? planTypeDisplayLabel(lockedPlanType)
+                    : (planTypeOptions?.[0]?.label ?? '')
+                }
+                size="small"
+                fullWidth
+                disabled
+                data-cy={`locked-${dataCySuffix}-plan-type`}
+                sx={{ mt: 1, mb: 2 }}
+              />
+            )}
+            {!lockedPlanType && (planTypeOptions?.length ?? 0) > 1 && (
               <Autocomplete
-                options={planTypeOptions}
+                options={planTypeOptions ?? []}
                 value={selectedPlanType}
                 onChange={(_, value) => setSelectedPlanType(value)}
                 getOptionLabel={(opt) => opt.label}
