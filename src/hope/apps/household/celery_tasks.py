@@ -38,8 +38,8 @@ def recalculate_population_fields_chunk_async_task_action(job: AsyncJob) -> None
 
     with disable_concurrency(Household), disable_concurrency(Individual):
         program = Program.objects.get(id=program_id) if program_id else None
-        with transaction.atomic():
-            for page in paginator.page_range:
+        for page in paginator.page_range:
+            with transaction.atomic():
                 logger.info(
                     f"recalculate_population_fields_chunk_async_task: Processing page {page} of {paginator.num_pages}"
                 )
