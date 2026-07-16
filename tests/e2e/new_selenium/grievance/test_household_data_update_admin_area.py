@@ -44,7 +44,10 @@ def test_household_data_update_admin_area_resolves_pcode_to_label(
     admin_area_input = '[data-cy="input-householdDataUpdateFields[0].fieldValue"]'
     browser.wait_for_element_visible(admin_area_input).click()
     browser.type(admin_area_input, "Dehsabz")
-    browser.select_listbox_element(ADMIN_AREA_OPTION)
+    # The value field is a FormikAsyncAutocomplete: each keystroke fires a backend
+    # geo-areas query and the listbox only renders once options resolve. Under parallel
+    # CI load that can exceed select_listbox_element's default 10s wait, so give it more.
+    browser.select_listbox_element(ADMIN_AREA_OPTION, timeout=30)
 
     browser.click('button[data-cy="button-submit"]')
 

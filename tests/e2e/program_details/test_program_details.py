@@ -584,6 +584,18 @@ class TestProgrammeDetails:
         page_programme_details.get_button_add_new_programme_cycle().click()
         page_programme_details.fill_data_picker_filter(datetime.now().strftime("%Y-%m-%d"))
         page_programme_details.get_button_next().click()
+        # NEXT PATCHes the default cycle's end date and swaps the dialog to the
+        # "create new cycle" step. The date is typed into a MUI X v9 section field and
+        # may not have committed to Formik by the time NEXT fires; if it hasn't, the
+        # PATCH is skipped, the step never advances, and the cancel below closes the
+        # dialog leaving the end date empty ('-'). Wait for the create step to render so
+        # we know the save committed before cancelling.
+        WebDriverWait(page_programme_details.driver, 15).until(
+            lambda d: any(
+                e.is_displayed()
+                for e in d.find_elements(By.CSS_SELECTOR, page_programme_details.button_create_program_cycle)
+            )
+        )
         # Saving the default cycle's end date re-renders the dialog (the step list shrinks
         # from 2 to 1 and swaps UpdateProgramCycle -> CreateProgramCycle), so the cancel
         # button can go stale mid-transition; retry the click until it lands.
