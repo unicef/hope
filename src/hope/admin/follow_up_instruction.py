@@ -1,3 +1,5 @@
+from typing import Any
+
 from admin_extra_buttons.decorators import button
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponseRedirect
@@ -21,15 +23,20 @@ class FollowUpInstructionAdmin(HOPEModelAdminBase):
     list_filter = ("business_area", "program")
     search_fields = ("id", "unicef_id", "program__name", "program__code")
     readonly_fields = (
-        "status",
-        "background_action_status",
+        "id",
         "created_at",
         "updated_at",
-        "export_file",
-        "reconciliation_import_file",
+        "unicef_id",
+        "business_area",
+        "program",
+        "created_by",
+        "status",
     )
 
     @button(permission="payment.view_followupinstruction")
     def payment_plans(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
         url = reverse("admin:payment_paymentplan_changelist")
         return HttpResponseRedirect(f"{url}?follow_up_instruction__id__exact={pk}")
+
+    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False

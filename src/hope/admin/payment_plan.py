@@ -481,6 +481,9 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
             message="Do you confirm to restart importing reconciliation XLSX file task?",
         )
 
+    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot
