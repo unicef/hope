@@ -25,7 +25,7 @@ export const DocumentSearchField = ({
           onChange={(e) => onChange('documentType', e.target.value)}
           label={t('Document Type')}
           value={type}
-          borderRadius="0px 4px 4px 0px"
+          borderRadius="4px 0px 0px 4px"
           data-cy="filters-document-type"
           fullWidth
           disableClearable
@@ -44,7 +44,7 @@ export const DocumentSearchField = ({
           placeholder="Document Number"
           onChange={(e) => onChange('documentNumber', e.target.value)}
           data-cy="filters-document-number"
-          borderRadius="4px 0px 0px 4px"
+          borderRadius="0px 4px 4px 0px"
         />
       </Grid>
     </Grid>
