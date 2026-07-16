@@ -492,7 +492,7 @@ def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, del
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.REGULAR,
     )
-    PaymentPlanFactory(
+    follow_up_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
@@ -501,7 +501,7 @@ def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, del
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
-    PaymentPlanFactory(
+    top_up_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
@@ -510,7 +510,7 @@ def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, del
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.TOP_UP,
     )
-    return group, regular_plan
+    return group, regular_plan, follow_up_plan, top_up_plan
 
 
 @pytest.fixture
@@ -537,12 +537,83 @@ def group_with_tagged_and_untagged_plans(program_cycle, business_area, fsp, deli
     return group, tagged_plan, untagged_plan
 
 
-def test_follow_up_and_top_up_plans_are_excluded(group_with_follow_up_and_top_up_plans):
-    group, regular_plan = group_with_follow_up_and_top_up_plans
+def test_follow_up_and_top_up_plans_are_excluded_by_default(group_with_follow_up_and_top_up_plans):
+    group, regular_plan, _follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
 
     service = XlsxPaymentPlanGroupDeliveryExportService(group)
 
     assert [plan.id for plan in service.payment_plans] == [regular_plan.id]
+
+
+def test_plan_type_follow_up_selects_only_follow_up_plans(group_with_follow_up_and_top_up_plans):
+    group, _regular_plan, follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
+
+    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+
+    assert [plan.id for plan in service.payment_plans] == [follow_up_plan.id]
+
+
+def test_plan_type_top_up_selects_only_top_up_plans(group_with_follow_up_and_top_up_plans):
+    group, _regular_plan, _follow_up_plan, top_up_plan = group_with_follow_up_and_top_up_plans
+
+    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.TOP_UP)
+
+    assert [plan.id for plan in service.payment_plans] == [top_up_plan.id]
+
+
+def test_save_xlsx_file_follow_up_filename_contains_follow_up(group_with_follow_up_and_top_up_plans, user):
+    group, _regular_plan, follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
+
+    follow_up_plan.refresh_from_db()
+    assert follow_up_plan.export_file_delivery is not None
+    assert "_follow_up" in follow_up_plan.export_file_delivery.file.name
+    assert follow_up_plan.export_file_delivery.file.name.endswith(".xlsx")
+
+
+def test_save_xlsx_file_top_up_filename_contains_top_up(group_with_follow_up_and_top_up_plans, user):
+    group, _regular_plan, _follow_up_plan, top_up_plan = group_with_follow_up_and_top_up_plans
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.TOP_UP).save_xlsx_file(user)
+
+    top_up_plan.refresh_from_db()
+    assert top_up_plan.export_file_delivery is not None
+    assert "_top_up" in top_up_plan.export_file_delivery.file.name
+
+
+def test_save_xlsx_file_follow_up_leaves_other_plan_types_untagged(group_with_follow_up_and_top_up_plans, user):
+    group, regular_plan, follow_up_plan, top_up_plan = group_with_follow_up_and_top_up_plans
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
+
+    regular_plan.refresh_from_db()
+    follow_up_plan.refresh_from_db()
+    top_up_plan.refresh_from_db()
+    assert follow_up_plan.export_tag == 1
+    assert regular_plan.export_tag is None
+    assert top_up_plan.export_tag is None
+
+
+def test_reexport_batch_recovers_plan_type_from_batch(group_with_follow_up_and_top_up_plans, user):
+    group, _regular_plan, follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
+    follow_up_plan.refresh_from_db()
+
+    reexport_service = XlsxPaymentPlanGroupDeliveryExportService(group, export_tag=follow_up_plan.export_tag)
+
+    assert reexport_service.plan_type == PaymentPlan.PlanType.FOLLOW_UP
+
+
+def test_get_email_context_follow_up_batch_name_carries_plan_type(group_with_follow_up_and_top_up_plans, user):
+    group, _regular_plan, _follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
+    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+    service.save_xlsx_file(user)
+
+    context = service.get_email_context(user)
+
+    assert "Batch 1 Follow Up" in context["title"]
+    assert "Batch 1 Follow Up" in context["message"]
 
 
 def test_already_tagged_plans_are_excluded_from_export(group_with_tagged_and_untagged_plans):

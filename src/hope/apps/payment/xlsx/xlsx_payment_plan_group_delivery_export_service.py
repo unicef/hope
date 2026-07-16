@@ -45,10 +45,10 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     A group is bound to a single FSP, so every exported payment plan shares the same FSP XLSX
     template and the sheet has a single, flat header.
 
-    Each export is a batch: only ACCEPTED/FINISHED, REGULAR (no follow-ups / top-ups) plans that
-    have not been exported yet (``export_tag`` is null) are included. On success the exported plans
-    are stamped with the next sequential ``export_tag`` so they are
-    excluded from the next export.
+    Each export is a batch: only ACCEPTED/FINISHED plans of one ``plan_type`` (REGULAR by default,
+    FOLLOW_UP or TOP_UP on demand) that have not been exported yet (``export_tag`` is null) are
+    included. On success the exported plans are stamped with the next sequential ``export_tag`` so
+    they are excluded from the next export.
     """
 
     TITLE = "Payment Plan Group - Payment List"
@@ -59,9 +59,11 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         payment_plan_group: "PaymentPlanGroup",
         fsp_xlsx_template_id: str | None = None,
         export_tag: int | None = None,
+        plan_type: str = PaymentPlan.PlanType.REGULAR,
     ) -> None:
         self.payment_plan_group = payment_plan_group
         self.export_tag = export_tag
+        self.plan_type = plan_type
         self.applied_export_tag: int | None = None
         self.payment_generate_token_and_order_numbers = True
         self.allow_export_fsp_auth_code = False
@@ -70,12 +72,15 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         else:
             plan_qs = payment_plan_group.payment_plans.filter(
                 status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-                plan_type=PaymentPlan.PlanType.REGULAR,
+                plan_type=plan_type,
                 export_tag__isnull=True,
             )
         self.payment_plans = list(
             plan_qs.select_related("financial_service_provider", "delivery_mechanism").order_by("unicef_id")
         )
+        if export_tag is not None and self.payment_plans:
+            # a batch is homogeneous by plan type; on re-export recover it from the batch itself
+            self.plan_type = self.payment_plans[0].plan_type
         self.exported_plan_ids: list = []
         self.skipped_reasons: list[str] = []
         self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = (
@@ -158,20 +163,32 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         all_eligible = Payment.objects.filter(parent__in=self.payment_plans).eligible()
         XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
 
+    def _batch_name(self, tag: int | None) -> str:
+        """Human-readable batch name, e.g. "Batch 2" or "Batch 3 Follow Up"."""
+        if self.plan_type == PaymentPlan.PlanType.REGULAR:
+            return f"Batch {tag}"
+        return f"Batch {tag} {PaymentPlan.PlanType(self.plan_type).label}"
+
+    def _filename_suffix(self) -> str:
+        if self.plan_type == PaymentPlan.PlanType.REGULAR:
+            return ""
+        return f"_{self.plan_type.lower()}"
+
     def get_email_context(self, user: "User") -> dict:
         group = self.payment_plan_group
         tag = self.applied_export_tag
+        batch_name = self._batch_name(tag)
         link = reverse("download-payment-plan-group-batch", args=[str(group.id), tag])
         return {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
             "message": (
-                f"Payment Plan Group {group.unicef_id} Batch {tag} Payment List xlsx file "
+                f"Payment Plan Group {group.unicef_id} {batch_name} Payment List xlsx file "
                 "was generated and below you have the link to download this file."
             ),
             "link": link or "",
-            "title": f"Payment Plan Group {group.unicef_id} Batch {tag} Payment List Generated",
+            "title": f"Payment Plan Group {group.unicef_id} {batch_name} Payment List Generated",
         }
 
     def _next_export_tag(self) -> int:
@@ -232,7 +249,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             self._save_plain_xlsx_file(group, tag, user)
 
     def _save_plain_xlsx_file(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
-        filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}.xlsx"
+        filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}{self._filename_suffix()}.xlsx"
         with NamedTemporaryFile() as tmp:
             file_temp = FileTemp(
                 object_id=str(group.pk),
@@ -256,8 +273,8 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     def _save_xlsx_file_with_auth_code(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
         zip_password = get_random_string(12)
         xlsx_password = get_random_string(12)
-        zip_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}.zip"
-        xlsx_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}.xlsx"
+        zip_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}{self._filename_suffix()}.zip"
+        xlsx_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}{self._filename_suffix()}.xlsx"
 
         with NamedTemporaryFile(suffix=".zip") as tmp_zip:
             with pyzipper.AESZipFile(

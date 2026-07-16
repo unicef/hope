@@ -52,6 +52,20 @@ export function PaymentPlanGroupDetailsHeader({
       <Box display="flex" alignItems="center">
         <EditGroupName group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
+        {group?.hasFollowUpPlans && (
+          <DeliveryExportXlsxGroupButton
+            group={group}
+            planType="FOLLOW_UP"
+            label={t('Export Follow Ups')}
+          />
+        )}
+        {group?.hasTopUpPlans && (
+          <DeliveryExportXlsxGroupButton
+            group={group}
+            planType="TOP_UP"
+            label={t('Export Top Ups')}
+          />
+        )}
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />

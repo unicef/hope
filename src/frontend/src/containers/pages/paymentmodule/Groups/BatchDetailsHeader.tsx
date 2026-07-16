@@ -7,10 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { DownloadBatchButton } from './actions/DownloadBatchButton';
 import { ExportBatchButton } from './actions/ExportBatchButton';
 import { SendXlsxPasswordBatchButton } from './actions/SendXlsxPasswordBatchButton';
+import { batchPlanTypeLabel } from './utils';
 
 interface BatchDetailsHeaderProps {
   groupId: string;
   tag: string;
+  planType?: string;
   hasExportFile: boolean;
   hasPassword: boolean;
   isBusy: boolean;
@@ -19,6 +21,7 @@ interface BatchDetailsHeaderProps {
 export function BatchDetailsHeader({
   groupId,
   tag,
+  planType,
   hasExportFile,
   hasPassword,
   isBusy,
@@ -45,7 +48,10 @@ export function BatchDetailsHeader({
     <PageHeader
       title={
         <Box display="flex" alignItems="baseline" gap={1}>
-          <Box>{t('Batch')}</Box>
+          <Box>
+            {t('Batch')}
+            {batchPlanTypeLabel(planType)}
+          </Box>
           <Box color="text.secondary" fontSize="0.85em">
             {tag}
           </Box>

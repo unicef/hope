@@ -127,6 +127,15 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
+    plan_type = serializers.ChoiceField(
+        choices=[
+            PaymentPlan.PlanType.REGULAR,
+            PaymentPlan.PlanType.FOLLOW_UP,
+            PaymentPlan.PlanType.TOP_UP,
+        ],
+        required=False,
+        default=PaymentPlan.PlanType.REGULAR,
+    )
 
 
 class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
@@ -1912,6 +1921,7 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
 
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField()
+    plan_type = serializers.CharField()
     export_file_link = serializers.CharField(allow_null=True)
     has_password = serializers.BooleanField()
 
@@ -1924,6 +1934,8 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     can_send_to_payment_gateway = serializers.SerializerMethodField()
     batches = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
+    has_follow_up_plans = serializers.SerializerMethodField()
+    has_top_up_plans = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1936,6 +1948,8 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_send_to_payment_gateway",
             "batches",
             "delivery_import_file",
+            "has_follow_up_plans",
+            "has_top_up_plans",
         ]
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
@@ -1955,12 +1969,15 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
                         output_field=IntegerField(),
                     )
                 ),
+                # a batch is exported for a single plan type, so Max just picks that type
+                batch_plan_type=Max("plan_type"),
             )
             .order_by("export_tag")
         )
         return [
             {
                 "export_tag": row["export_tag"],
+                "plan_type": row["batch_plan_type"],
                 "export_file_link": (
                     reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
                     if row["has_file"]
@@ -1970,6 +1987,12 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             }
             for row in tags_qs
         ]
+
+    def get_has_follow_up_plans(self, obj: PaymentPlanGroup) -> bool:
+        return obj.payment_plans.filter(plan_type=PaymentPlan.PlanType.FOLLOW_UP).exists()
+
+    def get_has_top_up_plans(self, obj: PaymentPlanGroup) -> bool:
+        return obj.payment_plans.filter(plan_type=PaymentPlan.PlanType.TOP_UP).exists()
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))

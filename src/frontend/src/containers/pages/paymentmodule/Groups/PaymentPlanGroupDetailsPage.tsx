@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
-import { isGroupBackgroundActionBusy } from './utils';
+import { batchPlanTypeLabel, isGroupBackgroundActionBusy } from './utils';
 
 const initialFilter = {
   search: '',
@@ -134,6 +134,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                   to={`/${baseUrl}/payment-module/groups/${groupId}/batches/${encodeURIComponent(String(batch.exportTag))}`}
                 >
                   {t('Batch')} #{batch.exportTag}
+                  {batchPlanTypeLabel(batch.planType)}
                 </BlackLink>
                 {batch.exportFileLink ? (
                   <Link

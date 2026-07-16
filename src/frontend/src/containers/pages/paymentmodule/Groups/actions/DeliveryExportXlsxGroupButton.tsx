@@ -13,10 +13,15 @@ import { showApiErrorMessages } from '@utils/utils';
 
 interface DeliveryExportXlsxGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
+  /** When provided, only plans of this type are exported (defaults to REGULAR on the backend). */
+  planType?: 'FOLLOW_UP' | 'TOP_UP';
+  label?: string;
 }
 
 export function DeliveryExportXlsxGroupButton({
   group,
+  planType,
+  label,
 }: DeliveryExportXlsxGroupButtonProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
@@ -30,6 +35,7 @@ export function DeliveryExportXlsxGroupButton({
           businessAreaSlug: businessArea,
           programCode: programId,
           id: group?.id,
+          ...(planType ? { requestBody: { planType } } : {}),
         },
       ),
     onSuccess: () => {
@@ -45,6 +51,7 @@ export function DeliveryExportXlsxGroupButton({
 
   const isDisabled =
     !group || loadingExport || isGroupBackgroundActionBusy(group);
+  const dataCySuffix = planType ? `-${planType.toLowerCase().replace('_', '-')}` : '';
 
   return (
     <Box m={2}>
@@ -55,9 +62,9 @@ export function DeliveryExportXlsxGroupButton({
         variant="contained"
         onClick={() => exportXlsx()}
         disabled={isDisabled}
-        data-cy="button-delivery-export-xlsx-group"
+        data-cy={`button-delivery-export-xlsx-group${dataCySuffix}`}
       >
-        {t('Export')}
+        {label ?? t('Export')}
       </LoadingButton>
     </Box>
   );

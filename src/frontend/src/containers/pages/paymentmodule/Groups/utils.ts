@@ -13,3 +13,15 @@ export function isGroupBackgroundActionBusy(
     status === PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION
   );
 }
+
+// Suffix shown next to a batch name for non-regular batches, e.g. " Follow Up".
+export function batchPlanTypeLabel(planType: string | undefined): string {
+  switch (planType) {
+    case 'FOLLOW_UP':
+      return ' Follow Up';
+    case 'TOP_UP':
+      return ' Top Up';
+    default:
+      return '';
+  }
+}

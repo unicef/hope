@@ -408,13 +408,13 @@ def test_open_plans_are_not_indexed(group_with_open_plan):
     assert service.eligible_plans == []
 
 
-def test_follow_up_and_top_up_plans_are_excluded(group_with_follow_up_and_top_up_plans):
+def test_follow_up_and_top_up_plans_are_included(group_with_follow_up_and_top_up_plans):
     ctx = group_with_follow_up_and_top_up_plans
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
 
-    assert [plan.id for plan in service.payment_plans] == [ctx["regular_plan"].id]
+    assert {plan.id for plan in service.payment_plans} == {ctx["regular_plan"].id, ctx["follow_up_plan"].id}
 
 
 def test_payment_gateway_plan_is_skipped_and_its_payments_emit_specific_error(
