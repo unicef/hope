@@ -13,6 +13,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
@@ -37,7 +38,7 @@ interface GroupExportXlsxDialogProps {
    * Display-only plan type of the exported data when it is already fixed (batch
    * re-export: the batch's own type); shown as a locked field, never sent.
    */
-  lockedPlanType?: string;
+  lockedPlanType?: PlanTypeEnum;
   /** Hide the FSP XLSX template picker (plain export resolves templates per plan). */
   showTemplateChoice?: boolean;
   buttonLabel: string;

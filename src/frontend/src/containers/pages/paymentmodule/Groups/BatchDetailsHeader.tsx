@@ -4,6 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { DownloadBatchButton } from './actions/DownloadBatchButton';
 import { ExportBatchButton } from './actions/ExportBatchButton';
 import { SendXlsxPasswordBatchButton } from './actions/SendXlsxPasswordBatchButton';
@@ -12,7 +13,7 @@ import { batchPlanTypeLabel } from './utils';
 interface BatchDetailsHeaderProps {
   groupId: string;
   tag: string;
-  planType?: string;
+  planType?: PlanTypeEnum;
   hasExportFile: boolean;
   hasPassword: boolean;
   isBusy: boolean;

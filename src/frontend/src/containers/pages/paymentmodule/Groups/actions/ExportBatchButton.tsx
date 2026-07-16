@@ -1,3 +1,4 @@
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';
@@ -5,7 +6,7 @@ import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';
 interface ExportBatchButtonProps {
   groupId: string;
   tag: string;
-  planType?: string;
+  planType?: PlanTypeEnum;
   isBusy?: boolean;
 }
 

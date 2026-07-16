@@ -128,12 +128,7 @@ class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
     plan_type = serializers.ChoiceField(
-        choices=[
-            PaymentPlan.PlanType.REGULAR,
-            PaymentPlan.PlanType.FOLLOW_UP,
-            PaymentPlan.PlanType.TOP_UP,
-            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
-        ],
+        choices=PaymentPlan.PlanType.choices,
         required=False,
         default=PaymentPlan.PlanType.REGULAR,
     )
@@ -1922,7 +1917,7 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
 
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField()
-    plan_type = serializers.CharField()
+    plan_type = serializers.ChoiceField(choices=PaymentPlan.PlanType.choices)
     export_file_link = serializers.CharField(allow_null=True)
     has_password = serializers.BooleanField()
 
