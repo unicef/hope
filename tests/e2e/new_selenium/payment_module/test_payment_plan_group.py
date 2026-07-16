@@ -116,7 +116,9 @@ def reconciliation_file(tmp_path, exportable_group: tuple[PaymentPlanGroup, Paym
     group, _ = exportable_group
     # Build the file from the real export service so its header matches exactly what the
     # import expects, then fill in a delivered_quantity for the single payment row.
-    workbook = XlsxPaymentPlanGroupDeliveryExportService(group).generate_workbook()
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(
+        group, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
     delivered_col = headers.index("delivered_quantity") + 1
