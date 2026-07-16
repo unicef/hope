@@ -505,6 +505,7 @@ from hope.config.fragments.kobo import *  # noqa: F403, F401, E402
 from hope.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hope.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hope.config.fragments.matomo import *  # noqa: F403, F401, E402
+from hope.config.fragments.payment_gateway import *  # noqa: F403, F401, E402
 from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
 from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
