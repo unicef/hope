@@ -30,9 +30,6 @@ def test_fsp_template_get_column_from_core_field():
     primary.full_name = "John Doe"
     primary.phone_no = "+48577123654"
     primary.phone_no_alternative = "+48111222333"
-    primary.wallet_name = "wallet_name_Ind_111"
-    primary.blockchain_name = "blockchain_name_Ind_111"
-    primary.wallet_address = "wallet_address_Ind_111"
     primary.save()
 
     country = CountryFactory()
@@ -129,18 +126,6 @@ def test_fsp_template_get_column_from_core_field():
         payment, "national_id_no", admin_areas_dict, countries_dict
     )
     assert national_id_no == document.document_number
-    wallet_name = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
-        payment, "wallet_name", admin_areas_dict, countries_dict
-    )
-    assert wallet_name == primary.wallet_name
-    blockchain_name = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
-        payment, "blockchain_name", admin_areas_dict, countries_dict
-    )
-    assert blockchain_name == primary.blockchain_name
-    wallet_address = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
-        payment, "wallet_address", admin_areas_dict, countries_dict
-    )
-    assert wallet_address == primary.wallet_address
 
     role = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
         payment, "role", admin_areas_dict, countries_dict

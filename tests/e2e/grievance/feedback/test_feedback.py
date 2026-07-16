@@ -263,7 +263,7 @@ class TestFeedback:
         page_new_feedback.get_household_tab()
         page_new_feedback.get_table_empty_row()
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_received_consent().click()
+        page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text
         page_new_feedback.get_description().send_keys("Test")
@@ -278,7 +278,7 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
+    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])
     def test_create_feedback_optional_fields(
         self,
@@ -298,7 +298,7 @@ class TestFeedback:
         page_new_feedback.get_individual_tab()
         page_feedback.get_table_row_loading()
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_received_consent().click()
+        page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text
         page_new_feedback.get_description().send_keys("Test")
@@ -312,7 +312,7 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_feedback_filtering_by_chosen_programme(
         self,
         create_programs: None,
@@ -377,7 +377,7 @@ class TestFeedback:
         page_new_feedback.get_household_tab()
         page_new_feedback.get_household_table_rows(1).click()
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_received_consent().click()
+        page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text
         page_new_feedback.get_description().send_keys("Test")
@@ -408,7 +408,7 @@ class TestFeedback:
         page_new_feedback.get_individual_tab().click()
         page_new_feedback.get_individual_table_row(2).click()
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_received_consent().click()
+        page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text
         page_new_feedback.get_description().send_keys("Test")
@@ -439,7 +439,7 @@ class TestFeedback:
         page_new_feedback.get_individual_tab().click()
         page_new_feedback.get_individual_table_row(2).click()
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_received_consent().click()
+        page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text
         page_new_feedback.get_description().send_keys("Test")
@@ -483,7 +483,7 @@ class TestFeedback:
         assert "English" in page_feedback_details.get_languages_spoken().text
         assert "Shakardara" in page_feedback_details.get_administrative_level2().text
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_linked_ticket(
         self,
         page_grievance_new_ticket: NewTicket,
@@ -503,7 +503,7 @@ class TestFeedback:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("Linked Ticket Referral")
         page_grievance_new_ticket.get_button_next().click()
@@ -536,7 +536,7 @@ class TestFeedback:
         page_new_feedback.get_received_consent()
         page_new_feedback.get_button_next().click()
         assert "Consent is required" in page_new_feedback.get_error().text
-        page_new_feedback.get_received_consent().click()
+        page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
         page_new_feedback.get_description()
         page_new_feedback.get_button_next().click()
@@ -605,6 +605,6 @@ class TestFeedback:
         assert "-" in page_new_feedback.get_label_phone_number().text
         page_new_feedback.get_input_questionnaire_relationship().click()
         assert "Joshua Ronald Alvarez" in page_new_feedback.get_label_relationship_to_hoh().text
-        page_new_feedback.get_received_consent().click()
+        page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
         assert "Feedback" in page_new_feedback.get_label_category().text

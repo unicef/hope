@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any
 import uuid
 
@@ -27,10 +28,17 @@ from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
+from hope.contrib.aurora.services.generic_registration_service import (
+    GenericRegistrationService,
+)
 from hope.models import (
+    AccountType,
     Area,
     Country,
+    DeliveryMechanism,
     DocumentType,
+    FinancialInstitution,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -91,6 +99,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         individuals: list[PendingIndividual] = []
         documents: list[PendingDocument] = []
+        accounts: list[PendingAccount] = []
         record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
@@ -133,10 +142,15 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                     household.head_of_household = individual
                     household.save(update_fields=("head_of_household",))
                 documents.extend(self._prepare_documents(individual_dict, individual))
+                accounts.extend(self._prepare_accounts(individual_dict, individual))
             except ValidationError as e:
                 raise ValidationError({f"individual nr {index + 1}": [str(e)]}) from e
 
         PendingDocument.objects.bulk_create(documents)
+        PendingAccount.objects.bulk_create(accounts)
+
+    def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
+        return []
 
     def _set_default_head_of_household(self, individuals_array: list[dict[str, Any]]) -> None:
         for individual_data in individuals_array:
@@ -244,7 +258,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         for document_key_string, (
             document_number_field_name,
             picture_field_name,
-        ) in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
+        ) in self.DOCUMENT_MAPPING_KEY_DICT.items():
             document_number = individual_dict.get(document_number_field_name)
             certificate_picture = individual_dict.get(picture_field_name, "")
 
@@ -314,3 +328,87 @@ class Registration2024(UkraineBaseRegistrationService):
             individual_dict, self.INDIVIDUAL_FLEX_FIELDS
         )
         return individual_data
+
+
+class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
+    """USDC registration for Ukraine — regular (household-based) programme.
+
+    Maps the finalized USDC form to Households + Individuals. The crypto wallet is stored on a ``PendingAccount``.
+    The account type is taken from the ``transfer_to_digital_wallet`` delivery mechanism so it always matches payout,
+    and its financial institution is the generic one for that account type.
+    """
+
+    DIGITAL_WALLET_DELIVERY_MECHANISM_CODE = "transfer_to_digital_wallet"
+
+    INDIVIDUAL_MAPPING_DICT = {
+        "given_name": "given_name_i_c",
+        "middle_name": "middle_name_i_c",
+        "family_name": "family_name_i_c",
+        "birth_date": "birth_date",
+        "sex": "gender_i_c",
+        "phone_no": "phone_no_i_c",
+        "relationship": "relationship_i_c",
+        "role": "role_i_c",
+    }
+
+    DOCUMENT_MAPPING_KEY_DICT = {
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]: (
+            "tax_id_no_i_c",
+            "tax_id_picture",
+        ),
+    }
+
+    INDIVIDUAL_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
+
+    def _prepare_household_data(
+        self,
+        household_dict: dict,
+        record: Any,
+        registration_data_import: RegistrationDataImport,
+    ) -> dict:
+        household_data = super()._prepare_household_data(household_dict, record, registration_data_import)
+        consent = household_dict.get("consent_h_c")
+        if consent is not None:
+            household_data["consent"] = GenericRegistrationService.get_boolean(consent)
+        return household_data
+
+    def _prepare_individual_data(
+        self,
+        individual_dict: dict,
+        household: PendingHousehold,
+        registration_data_import: RegistrationDataImport,
+    ) -> dict:
+        individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
+        individual_data["estimated_birth_date"] = False
+        if flex_fields := build_flex_arg_dict_from_list_if_exists(individual_dict, self.INDIVIDUAL_FLEX_FIELDS):
+            individual_data["flex_fields"] = flex_fields
+        return individual_data
+
+    def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
+        wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()
+        if not wallet_address:
+            return []
+        wallet_name = (individual_dict.get("wallet_name_i_c") or "").strip()
+        return [
+            PendingAccount(
+                individual=individual,
+                account_type=self._digital_wallet_account_type,
+                number=wallet_address,
+                financial_institution=self._digital_wallet_financial_institution,
+                data={"wallet_address": wallet_address, "wallet_name": wallet_name},
+            )
+        ]
+
+    @cached_property
+    def _digital_wallet_account_type(self) -> AccountType:
+        delivery_mechanism = DeliveryMechanism.objects.filter(code=self.DIGITAL_WALLET_DELIVERY_MECHANISM_CODE).first()
+        if not delivery_mechanism or not delivery_mechanism.account_type:
+            raise ValidationError(
+                f"Delivery mechanism '{self.DIGITAL_WALLET_DELIVERY_MECHANISM_CODE}' has no account type "
+                "configured; sync it from the Payment Gateway before importing USDC wallets."
+            )
+        return delivery_mechanism.account_type
+
+    @cached_property
+    def _digital_wallet_financial_institution(self) -> FinancialInstitution:
+        return FinancialInstitution.get_generic_one(self._digital_wallet_account_type.key, is_valid_iban=False)

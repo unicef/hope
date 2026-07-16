@@ -29807,15 +29807,6 @@
                         "payment_delivery_phone_no": {
                             "type": "string"
                         },
-                        "blockchain_name": {
-                            "type": "string"
-                        },
-                        "wallet_address": {
-                            "type": "string"
-                        },
-                        "wallet_name": {
-                            "type": "string"
-                        },
                         "photo": {
                             "type": "string",
                             "format": "uri",
@@ -35495,21 +35486,6 @@
                             "type": "boolean",
                             "description": "Relationship confirmed status"
                         },
-                        "wallet_name": {
-                            "type": "string",
-                            "description": "Cryptocurrency wallet name",
-                            "maxLength": 64
-                        },
-                        "blockchain_name": {
-                            "type": "string",
-                            "description": "Cryptocurrency blockchain name",
-                            "maxLength": 64
-                        },
-                        "wallet_address": {
-                            "type": "string",
-                            "description": "Cryptocurrency wallet address",
-                            "maxLength": 128
-                        },
                         "duplicate": {
                             "type": "boolean",
                             "description": "Duplicate status [sys]"
@@ -36072,21 +36048,6 @@
                         "sanction_list_last_check": {
                             "type": "string",
                             "readOnly": true
-                        },
-                        "wallet_name": {
-                            "type": "string",
-                            "description": "Cryptocurrency wallet name",
-                            "maxLength": 64
-                        },
-                        "blockchain_name": {
-                            "type": "string",
-                            "description": "Cryptocurrency blockchain name",
-                            "maxLength": 64
-                        },
-                        "wallet_address": {
-                            "type": "string",
-                            "description": "Cryptocurrency wallet address",
-                            "maxLength": 128
                         },
                         "status": {
                             "type": "string",
@@ -36685,15 +36646,6 @@
                         },
                         "flex_fields": {},
                         "payment_delivery_phone_no": {
-                            "type": "string"
-                        },
-                        "blockchain_name": {
-                            "type": "string"
-                        },
-                        "wallet_address": {
-                            "type": "string"
-                        },
-                        "wallet_name": {
                             "type": "string"
                         },
                         "photo": {
@@ -43291,21 +43243,6 @@
                         "relationship_confirmed": {
                             "type": "boolean",
                             "description": "Relationship confirmed status"
-                        },
-                        "wallet_name": {
-                            "type": "string",
-                            "description": "Cryptocurrency wallet name",
-                            "maxLength": 64
-                        },
-                        "blockchain_name": {
-                            "type": "string",
-                            "description": "Cryptocurrency blockchain name",
-                            "maxLength": 64
-                        },
-                        "wallet_address": {
-                            "type": "string",
-                            "description": "Cryptocurrency wallet address",
-                            "maxLength": 128
                         },
                         "duplicate": {
                             "type": "boolean",
