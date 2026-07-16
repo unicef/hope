@@ -3,6 +3,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
 import { Box } from '@mui/material';
+import { PaymentPlanGroupDeliveryExportPlanTypeEnum } from '@restgenerated/models/PaymentPlanGroupDeliveryExportPlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
@@ -14,7 +15,7 @@ import { showApiErrorMessages } from '@utils/utils';
 interface DeliveryExportXlsxGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
   /** When provided, only plans of this type are exported (defaults to REGULAR on the backend). */
-  planType?: 'FOLLOW_UP' | 'TOP_UP';
+  planType?: PaymentPlanGroupDeliveryExportPlanTypeEnum;
   label?: string;
 }
 

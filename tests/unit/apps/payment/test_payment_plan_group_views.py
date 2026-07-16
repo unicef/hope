@@ -538,7 +538,7 @@ def test_retrieve_detail_aggregated_totals(
     assert data["payment_plans_count"] == 2
 
 
-def test_retrieve_detail_has_follow_up_plans_flag(
+def test_retrieve_detail_can_export_follow_up_flag(
     client: Any,
     user: Any,
     business_area: Any,
@@ -555,11 +555,12 @@ def test_retrieve_detail_has_follow_up_plans_flag(
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert data["has_follow_up_plans"] is True
-    assert data["has_top_up_plans"] is False
+    assert data["can_export_regular"] is False
+    assert data["can_export_follow_up"] is True
+    assert data["can_export_top_up"] is False
 
 
-def test_retrieve_detail_has_top_up_plans_flag(
+def test_retrieve_detail_can_export_top_up_flag(
     client: Any,
     user: Any,
     business_area: Any,
@@ -576,11 +577,33 @@ def test_retrieve_detail_has_top_up_plans_flag(
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert data["has_follow_up_plans"] is False
-    assert data["has_top_up_plans"] is True
+    assert data["can_export_regular"] is False
+    assert data["can_export_follow_up"] is False
+    assert data["can_export_top_up"] is True
 
 
-def test_retrieve_detail_plan_type_flags_false_for_regular_only_group(
+def test_retrieve_detail_can_export_regular_flag(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_accepted_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is True
+    assert data["can_export_follow_up"] is False
+    assert data["can_export_top_up"] is False
+
+
+def test_retrieve_detail_can_export_flags_false_for_open_plan(
     client: Any,
     user: Any,
     business_area: Any,
@@ -596,8 +619,28 @@ def test_retrieve_detail_plan_type_flags_false_for_regular_only_group(
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    assert data["has_follow_up_plans"] is False
-    assert data["has_top_up_plans"] is False
+    assert data["can_export_regular"] is False
+    assert data["can_export_follow_up"] is False
+    assert data["can_export_top_up"] is False
+
+
+def test_retrieve_detail_can_export_regular_false_when_already_exported(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_exported_batch: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_exported_batch.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is False
 
 
 def test_delete_group_with_no_plans_succeeds(

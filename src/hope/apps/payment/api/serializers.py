@@ -1934,8 +1934,9 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     can_send_to_payment_gateway = serializers.SerializerMethodField()
     batches = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
-    has_follow_up_plans = serializers.SerializerMethodField()
-    has_top_up_plans = serializers.SerializerMethodField()
+    can_export_regular = serializers.SerializerMethodField()
+    can_export_follow_up = serializers.SerializerMethodField()
+    can_export_top_up = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1948,8 +1949,9 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_send_to_payment_gateway",
             "batches",
             "delivery_import_file",
-            "has_follow_up_plans",
-            "has_top_up_plans",
+            "can_export_regular",
+            "can_export_follow_up",
+            "can_export_top_up",
         ]
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
@@ -1988,11 +1990,22 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             for row in tags_qs
         ]
 
-    def get_has_follow_up_plans(self, obj: PaymentPlanGroup) -> bool:
-        return obj.payment_plans.filter(plan_type=PaymentPlan.PlanType.FOLLOW_UP).exists()
+    def _has_exportable_plans(self, obj: PaymentPlanGroup, plan_type: str) -> bool:
+        """Whether the plan-type export button has anything to export (mirrors the export view filter)."""
+        return obj.payment_plans.filter(
+            plan_type=plan_type,
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            export_tag__isnull=True,
+        ).exists()
 
-    def get_has_top_up_plans(self, obj: PaymentPlanGroup) -> bool:
-        return obj.payment_plans.filter(plan_type=PaymentPlan.PlanType.TOP_UP).exists()
+    def get_can_export_regular(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.REGULAR)
+
+    def get_can_export_follow_up(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.FOLLOW_UP)
+
+    def get_can_export_top_up(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP)
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))

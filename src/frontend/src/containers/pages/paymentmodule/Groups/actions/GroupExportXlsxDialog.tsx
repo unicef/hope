@@ -13,16 +13,27 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
+import { PaymentPlanGroupDeliveryExportPlanTypeEnum } from '@restgenerated/models/PaymentPlanGroupDeliveryExportPlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+export interface GroupExportPlanTypeOption {
+  value: PaymentPlanGroupDeliveryExportPlanTypeEnum;
+  label: string;
+}
+
 interface GroupExportXlsxDialogProps {
   groupId: string;
   /** When provided, sent as `exportTag` in the export request (batch re-export). */
   exportTag?: number;
+  /**
+   * Exportable plan types to choose from; a select is shown when there is more than
+   * one. Omit (batch re-export) to send no planType at all.
+   */
+  planTypeOptions?: GroupExportPlanTypeOption[];
   buttonLabel: string;
   dialogTitle: string;
   buttonVariant?: 'contained' | 'outlined';
@@ -38,6 +49,7 @@ interface GroupExportXlsxDialogProps {
 export function GroupExportXlsxDialog({
   groupId,
   exportTag,
+  planTypeOptions,
   buttonLabel,
   dialogTitle,
   buttonVariant = 'contained',
@@ -50,6 +62,8 @@ export function GroupExportXlsxDialog({
     id: string;
     label: string;
   } | null>(null);
+  const [selectedPlanType, setSelectedPlanType] =
+    useState<GroupExportPlanTypeOption | null>(planTypeOptions?.[0] ?? null);
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
@@ -78,6 +92,7 @@ export function GroupExportXlsxDialog({
           id: groupId,
           requestBody: {
             ...(exportTag !== undefined ? { exportTag } : {}),
+            ...(selectedPlanType ? { planType: selectedPlanType.value } : {}),
             fspXlsxTemplateId: selectedTemplate?.id ?? null,
           },
         },
@@ -95,6 +110,11 @@ export function GroupExportXlsxDialog({
     },
   });
 
+  const handleOpen = (): void => {
+    setSelectedPlanType(planTypeOptions?.[0] ?? null);
+    setOpen(true);
+  };
+
   const handleClose = (): void => {
     setOpen(false);
     setSelectedTemplate(null);
@@ -108,7 +128,7 @@ export function GroupExportXlsxDialog({
           startIcon={<GetApp />}
           color="primary"
           variant={buttonVariant}
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
           disabled={disabled || loadingExport}
           data-cy={`button-${dataCySuffix}`}
         >
@@ -125,6 +145,24 @@ export function GroupExportXlsxDialog({
         <DialogTitleWrapper data-cy={`dialog-${dataCySuffix}`}>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogContent>
+            {planTypeOptions && planTypeOptions.length > 1 && (
+              <Autocomplete
+                options={planTypeOptions}
+                value={selectedPlanType}
+                onChange={(_, value) => setSelectedPlanType(value)}
+                getOptionLabel={(opt) => opt.label}
+                isOptionEqualToValue={(a, b) => a.value === b.value}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={t('Plan Type')}
+                    size="small"
+                    data-cy={`select-${dataCySuffix}-plan-type`}
+                  />
+                )}
+                sx={{ mt: 1, mb: 2 }}
+              />
+            )}
             <Autocomplete
               options={templateOptions}
               value={selectedTemplate}
@@ -148,6 +186,7 @@ export function GroupExportXlsxDialog({
               color="primary"
               variant="contained"
               onClick={() => exportXlsx()}
+              disabled={!!planTypeOptions?.length && !selectedPlanType}
               data-cy={`button-${dataCySuffix}-submit`}
             >
               {t('EXPORT')}
