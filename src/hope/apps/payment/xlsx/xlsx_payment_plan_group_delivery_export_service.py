@@ -79,7 +79,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             plan_qs.select_related("financial_service_provider", "delivery_mechanism").order_by("unicef_id")
         )
         if export_tag is not None and self.payment_plans:
-            # a batch is homogeneous by plan type; on re-export recover it from the batch itself
+            # in batch all payment plans are of the same type
             self.plan_type = self.payment_plans[0].plan_type
         self.exported_plan_ids: list = []
         self.skipped_reasons: list[str] = []
@@ -164,7 +164,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
 
     def _batch_name(self, tag: int | None) -> str:
-        """Human-readable batch name, e.g. "Batch 2" or "Batch 3 Follow Up"."""
         if self.plan_type == PaymentPlan.PlanType.REGULAR:
             return f"Batch {tag}"
         return f"Batch {tag} {PaymentPlan.PlanType(self.plan_type).label}"

@@ -1991,7 +1991,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
         ]
 
     def _has_exportable_plans(self, obj: PaymentPlanGroup, plan_type: str) -> bool:
-        """Whether the plan-type export button has anything to export (mirrors the export view filter)."""
+        """Whether any plan of a plan_type can be exported."""
         return obj.payment_plans.filter(
             plan_type=plan_type,
             status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
