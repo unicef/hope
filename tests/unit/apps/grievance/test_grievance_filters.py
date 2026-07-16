@@ -50,6 +50,7 @@ from hope.apps.grievance.constants import (
     URGENCY_URGENT,
     URGENCY_VERY_URGENT,
 )
+from hope.apps.grievance.filters import GrievanceTicketFilter
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Partner, PaymentVerification, PaymentVerificationPlan, Program, User
@@ -681,6 +682,23 @@ def submission_channel_tickets(afghanistan: BusinessArea, program_afghanistan1: 
     )
     suggestion_box_ticket.programs.set([program_afghanistan1])
     return {"call_center": call_center_ticket, "suggestion_box": suggestion_box_ticket}
+
+
+def two_plain_tickets(afghanistan: BusinessArea) -> list:
+    ticket1 = GrievanceTicketFactory(business_area=afghanistan)
+    ticket1.unicef_id = "GRV-9001"
+    ticket1.save(update_fields=["unicef_id"])
+    ticket2 = GrievanceTicketFactory(business_area=afghanistan)
+    ticket2.unicef_id = "GRV-9002"
+    ticket2.save(update_fields=["unicef_id"])
+    return [ticket1, ticket2]
+
+
+@pytest.fixture
+def finished_program_ticket(afghanistan: BusinessArea, program_afghanistan2: Program) -> Any:
+    ticket = GrievanceTicketFactory(business_area=afghanistan)
+    ticket.programs.add(program_afghanistan2)
+    return ticket
 
 
 def _test_filter(
@@ -1515,3 +1533,68 @@ def test_search(
     ]:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == expected_count
+
+
+def test_order_by_linked_tickets_orders_by_unicef_id(two_plain_tickets: list) -> None:
+    filterset = GrievanceTicketFilter(data={"order_by": "linked_tickets"}, queryset=GrievanceTicket.objects.all())
+
+    result = list(filterset.qs)
+
+    assert result == two_plain_tickets
+
+
+def test_order_by_linked_tickets_descending_reverses_order(two_plain_tickets: list) -> None:
+    filterset = GrievanceTicketFilter(data={"order_by": "-linked_tickets"}, queryset=GrievanceTicket.objects.all())
+
+    result = list(filterset.qs)
+
+    assert result == list(reversed(two_plain_tickets))
+
+
+def test_search_filter_with_comma_separated_unicef_ids(two_plain_tickets: list) -> None:
+    ticket1, ticket2 = two_plain_tickets
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    result = filterset.search_filter(queryset, "search", f"{ticket1.unicef_id}, {ticket2.unicef_id}")
+
+    assert set(result) == {ticket1, ticket2}
+
+
+def test_filter_by_program_without_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.filter_by_program(queryset, "program", "") is queryset
+
+
+def test_fsp_filter_without_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.fsp_filter(queryset, "fsp", "") is queryset
+
+
+def test_filter_grievance_type_with_unknown_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.filter_grievance_type(queryset, "grievance_type", "all") is queryset
+
+
+def test_filter_grievance_status_with_unknown_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.filter_grievance_status(queryset, "grievance_status", "all") is queryset
+
+
+def test_filter_is_active_program_false_returns_finished_program_tickets(
+    finished_program_ticket: Any, two_plain_tickets: list
+) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    result = filterset.filter_is_active_program(queryset, "is_active_program", False)
+
+    assert list(result) == [finished_program_ticket]

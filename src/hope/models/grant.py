@@ -15,6 +15,7 @@ class Grant(Enum):
     API_BENEFICIARY_TICKET_CREATE = auto()
     API_GENERIC_IMPORT = auto()
 
+    API_VISION_PP_CREATE = auto()
     API_DEDUP_FETCH_FINDINGS = auto()
 
     @classmethod

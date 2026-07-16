@@ -160,11 +160,6 @@ def pytest_unconfigure(config: Config) -> None:
     del sys._called_from_pytest
 
 
-disabled_locally_test = pytest.mark.skip(
-    reason="Elasticsearch error - to investigate",
-)
-
-
 @pytest.fixture
 def mock_elasticsearch(mocker: Any) -> Any:
     """Mock ES functions for tests that don't need actual ES.
