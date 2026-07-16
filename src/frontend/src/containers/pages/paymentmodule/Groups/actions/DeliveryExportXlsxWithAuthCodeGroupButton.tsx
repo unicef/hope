@@ -2,7 +2,7 @@ import { PaymentPlanGroupDeliveryExportPlanTypeEnum } from '@restgenerated/model
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
-import { isGroupBackgroundActionBusy } from '../utils';
+import { isGroupBackgroundActionBusy, planTypeDisplayLabel } from '../utils';
 import {
   GroupExportPlanTypeOption,
   GroupExportXlsxDialog,
@@ -17,30 +17,21 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
 }: DeliveryExportXlsxWithAuthCodeGroupButtonProps): ReactElement | null {
   const { t } = useTranslation();
 
+  const toOption = (
+    value: PaymentPlanGroupDeliveryExportPlanTypeEnum,
+  ): GroupExportPlanTypeOption => ({
+    value,
+    label: t(planTypeDisplayLabel(value)),
+  });
   const planTypeOptions: GroupExportPlanTypeOption[] = [
     ...(group?.canExportRegular
-      ? [
-          {
-            value: PaymentPlanGroupDeliveryExportPlanTypeEnum.REGULAR,
-            label: t('Regular'),
-          },
-        ]
+      ? [toOption(PaymentPlanGroupDeliveryExportPlanTypeEnum.REGULAR)]
       : []),
     ...(group?.canExportFollowUp
-      ? [
-          {
-            value: PaymentPlanGroupDeliveryExportPlanTypeEnum.FOLLOW_UP,
-            label: t('Follow Up'),
-          },
-        ]
+      ? [toOption(PaymentPlanGroupDeliveryExportPlanTypeEnum.FOLLOW_UP)]
       : []),
     ...(group?.canExportTopUp
-      ? [
-          {
-            value: PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP,
-            label: t('Top Up'),
-          },
-        ]
+      ? [toOption(PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP)]
       : []),
   ];
 

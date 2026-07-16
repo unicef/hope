@@ -52,7 +52,9 @@ export function DeliveryExportXlsxGroupButton({
 
   const isDisabled =
     !group || loadingExport || isGroupBackgroundActionBusy(group);
-  const dataCySuffix = planType ? `-${planType.toLowerCase().replace('_', '-')}` : '';
+  const dataCySuffix = planType
+    ? `-${planType.toLowerCase().replaceAll('_', '-')}`
+    : '';
 
   return (
     <Box m={2}>

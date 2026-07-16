@@ -14,6 +14,7 @@ export function isGroupBackgroundActionBusy(
   );
 }
 
+// Untranslated label for a plan type — pass the result through t() when rendering.
 export function planTypeDisplayLabel(planType: string | undefined): string {
   switch (planType) {
     case 'REGULAR':
@@ -27,9 +28,8 @@ export function planTypeDisplayLabel(planType: string | undefined): string {
   }
 }
 
-// Suffix shown next to a batch name for non-regular batches, e.g. " Follow Up".
+// Untranslated label shown next to a batch name; empty for regular batches.
 export function batchPlanTypeLabel(planType: string | undefined): string {
-  if (planType === undefined || planType === 'REGULAR') return '';
-  const label = planTypeDisplayLabel(planType);
-  return label ? ` ${label}` : '';
+  if (planType === 'REGULAR') return '';
+  return planTypeDisplayLabel(planType);
 }

@@ -50,7 +50,7 @@ export function BatchDetailsHeader({
         <Box display="flex" alignItems="baseline" gap={1}>
           <Box>
             {t('Batch')}
-            {batchPlanTypeLabel(planType)}
+            {batchPlanTypeLabel(planType) && ` ${t(batchPlanTypeLabel(planType))}`}
           </Box>
           <Box color="text.secondary" fontSize="0.85em">
             {tag}

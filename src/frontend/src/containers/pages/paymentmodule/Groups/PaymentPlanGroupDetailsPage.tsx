@@ -134,7 +134,8 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                   to={`/${baseUrl}/payment-module/groups/${groupId}/batches/${encodeURIComponent(String(batch.exportTag))}`}
                 >
                   {t('Batch')} #{batch.exportTag}
-                  {batchPlanTypeLabel(batch.planType)}
+                  {batchPlanTypeLabel(batch.planType) &&
+                    ` ${t(batchPlanTypeLabel(batch.planType))}`}
                 </BlackLink>
                 {batch.exportFileLink ? (
                   <Link
