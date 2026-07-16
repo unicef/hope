@@ -1,74 +1,34 @@
-import { LoadingButton } from '@core/LoadingButton';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { GetApp } from '@mui/icons-material';
-import { Box } from '@mui/material';
-import { PaymentPlanGroupDeliveryExportPlanTypeEnum } from '@restgenerated/models/PaymentPlanGroupDeliveryExportPlanTypeEnum';
-import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
-import { isGroupBackgroundActionBusy } from '../utils';
-import { showApiErrorMessages } from '@utils/utils';
+import {
+  exportablePlanTypeOptions,
+  isGroupBackgroundActionBusy,
+} from '../utils';
+import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';
 
 interface DeliveryExportXlsxGroupButtonProps {
   group: PaymentPlanGroupDetail | null;
-  /** When provided, only plans of this type are exported (defaults to REGULAR on the backend). */
-  planType?: PaymentPlanGroupDeliveryExportPlanTypeEnum;
-  label?: string;
 }
 
 export function DeliveryExportXlsxGroupButton({
   group,
-  planType,
-  label,
-}: DeliveryExportXlsxGroupButtonProps): ReactElement {
+}: DeliveryExportXlsxGroupButtonProps): ReactElement | null {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
-  const { showMessage } = useSnackbar();
-  const queryClient = useQueryClient();
+  const planTypeOptions = exportablePlanTypeOptions(group, t);
 
-  const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
-    mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          id: group?.id,
-          ...(planType ? { requestBody: { planType } } : {}),
-        },
-      ),
-    onSuccess: () => {
-      showMessage(t('Export started'));
-      queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroup', businessArea, programId, group?.id],
-      });
-    },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage, t('Export failed'));
-    },
-  });
-
-  const isDisabled =
-    !group || loadingExport || isGroupBackgroundActionBusy(group);
-  const dataCySuffix = planType
-    ? `-${planType.toLowerCase().replaceAll('_', '-')}`
-    : '';
+  if (group && planTypeOptions.length === 0) return null;
 
   return (
-    <Box m={2}>
-      <LoadingButton
-        loading={loadingExport}
-        startIcon={<GetApp />}
-        color="primary"
-        variant="contained"
-        onClick={() => exportXlsx()}
-        disabled={isDisabled}
-        data-cy={`button-delivery-export-xlsx-group${dataCySuffix}`}
-      >
-        {label ?? t('Export')}
-      </LoadingButton>
-    </Box>
+    <GroupExportXlsxDialog
+      groupId={group?.id ?? ''}
+      planTypeOptions={planTypeOptions}
+      showTemplateChoice={false}
+      buttonLabel={t('Export')}
+      dialogTitle={t('Export')}
+      buttonVariant="contained"
+      disabled={!group || isGroupBackgroundActionBusy(group)}
+      dataCySuffix="delivery-export-xlsx-group"
+    />
   );
 }

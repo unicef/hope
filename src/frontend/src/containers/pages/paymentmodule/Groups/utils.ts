@@ -1,3 +1,4 @@
+import { PaymentPlanGroupDeliveryExportPlanTypeEnum } from '@restgenerated/models/PaymentPlanGroupDeliveryExportPlanTypeEnum';
 import { PaymentPlanGroupDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanGroupDetailBackgroundActionStatusEnum';
 import { PaymentPlanGroupDetail } from './types';
 
@@ -34,4 +35,33 @@ export function planTypeDisplayLabel(planType: string | undefined): string {
 export function batchPlanTypeLabel(planType: string | undefined): string {
   if (planType === 'REGULAR') return '';
   return planTypeDisplayLabel(planType);
+}
+
+export interface GroupExportPlanTypeOption {
+  value: PaymentPlanGroupDeliveryExportPlanTypeEnum;
+  label: string;
+}
+
+// Plan types the group can currently export, as translated dialog options.
+export function exportablePlanTypeOptions(
+  group: PaymentPlanGroupDetail | null,
+  t: (key: string) => string,
+): GroupExportPlanTypeOption[] {
+  const flagged: Array<
+    [boolean | undefined, PaymentPlanGroupDeliveryExportPlanTypeEnum]
+  > = [
+    [group?.canExportRegular, PaymentPlanGroupDeliveryExportPlanTypeEnum.REGULAR],
+    [
+      group?.canExportFollowUp,
+      PaymentPlanGroupDeliveryExportPlanTypeEnum.FOLLOW_UP,
+    ],
+    [group?.canExportTopUp, PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP],
+    [
+      group?.canExportTopUpAmendment,
+      PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP_AMENDMENT,
+    ],
+  ];
+  return flagged
+    .filter(([canExport]) => canExport)
+    .map(([, value]) => ({ value, label: t(planTypeDisplayLabel(value)) }));
 }

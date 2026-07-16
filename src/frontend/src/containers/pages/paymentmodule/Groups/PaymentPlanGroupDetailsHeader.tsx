@@ -3,7 +3,6 @@ import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
-import { PaymentPlanGroupDeliveryExportPlanTypeEnum } from '@restgenerated/models/PaymentPlanGroupDeliveryExportPlanTypeEnum';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
@@ -52,28 +51,7 @@ export function PaymentPlanGroupDetailsHeader({
     >
       <Box display="flex" alignItems="center">
         <EditGroupName group={group} />
-        {group?.canExportRegular && <DeliveryExportXlsxGroupButton group={group} />}
-        {group?.canExportFollowUp && (
-          <DeliveryExportXlsxGroupButton
-            group={group}
-            planType={PaymentPlanGroupDeliveryExportPlanTypeEnum.FOLLOW_UP}
-            label={t('Export Follow Ups')}
-          />
-        )}
-        {group?.canExportTopUp && (
-          <DeliveryExportXlsxGroupButton
-            group={group}
-            planType={PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP}
-            label={t('Export Top Ups')}
-          />
-        )}
-        {group?.canExportTopUpAmendment && (
-          <DeliveryExportXlsxGroupButton
-            group={group}
-            planType={PaymentPlanGroupDeliveryExportPlanTypeEnum.TOP_UP_AMENDMENT}
-            label={t('Export Top Up Amendments')}
-          />
-        )}
+        <DeliveryExportXlsxGroupButton group={group} />
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />

@@ -13,18 +13,15 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import { PaymentPlanGroupDeliveryExportPlanTypeEnum } from '@restgenerated/models/PaymentPlanGroupDeliveryExportPlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { planTypeDisplayLabel } from '../utils';
-
-export interface GroupExportPlanTypeOption {
-  value: PaymentPlanGroupDeliveryExportPlanTypeEnum;
-  label: string;
-}
+import {
+  GroupExportPlanTypeOption,
+  planTypeDisplayLabel,
+} from '../utils';
 
 interface GroupExportXlsxDialogProps {
   groupId: string;
@@ -41,6 +38,8 @@ interface GroupExportXlsxDialogProps {
    * re-export: the batch's own type); shown as a locked field, never sent.
    */
   lockedPlanType?: string;
+  /** Hide the FSP XLSX template picker (plain export resolves templates per plan). */
+  showTemplateChoice?: boolean;
   buttonLabel: string;
   dialogTitle: string;
   buttonVariant?: 'contained' | 'outlined';
@@ -58,6 +57,7 @@ export function GroupExportXlsxDialog({
   exportTag,
   planTypeOptions,
   lockedPlanType,
+  showTemplateChoice = true,
   buttonLabel,
   dialogTitle,
   buttonVariant = 'contained',
@@ -84,7 +84,7 @@ export function GroupExportXlsxDialog({
         programCode: programId,
         limit: 200,
       }),
-    enabled: open && !!businessArea && !!programId,
+    enabled: open && showTemplateChoice && !!businessArea && !!programId,
   });
   const templateOptions = (templatesData?.results ?? []).map((tmpl) => ({
     id: tmpl.id,
@@ -188,21 +188,23 @@ export function GroupExportXlsxDialog({
                 sx={{ mt: 1, mb: 2 }}
               />
             )}
-            <Autocomplete
-              options={templateOptions}
-              value={selectedTemplate}
-              onChange={(_, value) => setSelectedTemplate(value)}
-              getOptionLabel={(opt) => opt.label}
-              isOptionEqualToValue={(a, b) => a.id === b.id}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={t('FSP XLSX Template (optional)')}
-                  size="small"
-                />
-              )}
-              sx={{ mt: 1 }}
-            />
+            {showTemplateChoice && (
+              <Autocomplete
+                options={templateOptions}
+                value={selectedTemplate}
+                onChange={(_, value) => setSelectedTemplate(value)}
+                getOptionLabel={(opt) => opt.label}
+                isOptionEqualToValue={(a, b) => a.id === b.id}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={t('FSP XLSX Template (optional)')}
+                    size="small"
+                  />
+                )}
+                sx={{ mt: 1 }}
+              />
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>{t('CANCEL')}</Button>
