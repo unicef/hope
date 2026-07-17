@@ -30,7 +30,7 @@ vi.mock('@restgenerated/services/RestService', () => ({
 
 const makeTicket = (
   overrides: Partial<{
-    status: string;
+    status: number;
     photo: Record<string, unknown>;
   }> = {},
 ): GrievanceTicketDetail =>
