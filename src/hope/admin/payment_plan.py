@@ -313,6 +313,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
                     user_id,
                     config.get("fsp_xlsx_template_id"),
                     config.get("export_tag"),
+                    config.get("plan_type"),
                 )
 
             messages.success(request, "Successfully restarted delivery XLSX export.")

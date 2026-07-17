@@ -1,7 +1,10 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanGroupDetail } from '../types';
-import { isGroupBackgroundActionBusy } from '../utils';
+import {
+  exportablePlanTypeOptions,
+  isGroupBackgroundActionBusy,
+} from '../utils';
 import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';
 
 interface DeliveryExportXlsxWithAuthCodeGroupButtonProps {
@@ -10,11 +13,16 @@ interface DeliveryExportXlsxWithAuthCodeGroupButtonProps {
 
 export function DeliveryExportXlsxWithAuthCodeGroupButton({
   group,
-}: DeliveryExportXlsxWithAuthCodeGroupButtonProps): ReactElement {
+}: DeliveryExportXlsxWithAuthCodeGroupButtonProps): ReactElement | null {
   const { t } = useTranslation();
+  const planTypeOptions = exportablePlanTypeOptions(group, t);
+
+  if (group && planTypeOptions.length === 0) return null;
+
   return (
     <GroupExportXlsxDialog
       groupId={group?.id ?? ''}
+      planTypeOptions={planTypeOptions}
       buttonLabel={t('Export with Auth Code')}
       dialogTitle={t('Export with Auth Code')}
       buttonVariant="outlined"

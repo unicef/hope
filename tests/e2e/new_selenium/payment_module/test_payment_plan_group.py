@@ -116,7 +116,9 @@ def reconciliation_file(tmp_path, exportable_group: tuple[PaymentPlanGroup, Paym
     group, _ = exportable_group
     # Build the file from the real export service so its header matches exactly what the
     # import expects, then fill in a delivered_quantity for the single payment row.
-    workbook = XlsxPaymentPlanGroupDeliveryExportService(group).generate_workbook()
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(
+        group, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
     delivered_col = headers.index("delivered_quantity") + 1
@@ -322,6 +324,10 @@ def test_export_payment_plan_group(
         browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group"]')
         browser.click('[data-cy="button-delivery-export-xlsx-group"]')
 
+        browser.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-group"]')
+        browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group-submit"]')
+        browser.click('[data-cy="button-delivery-export-xlsx-group-submit"]')
+
         browser.wait_for_text("Export started")
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
@@ -356,7 +362,12 @@ def test_export_payment_plan_group_with_auth_code(
         browser.click('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')
 
         browser.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"]')
-        template_input = browser.find_element('[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"] input')
+        # single exportable plan type -> shown as a locked field; the template picker
+        # is the only enabled input in the dialog
+        browser.wait_for_element_visible('[data-cy="locked-delivery-export-xlsx-with-auth-code-group-plan-type"]')
+        template_input = browser.find_element(
+            '[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"] input:not([disabled])'
+        )
         template_input.click()
         template_input.send_keys("Auth Code Template")
         browser.select_listbox_element("Auth Code Template")

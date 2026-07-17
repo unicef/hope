@@ -526,10 +526,11 @@ def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_initial_ex
     assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
     mock_terminate.assert_called_once()
     mock_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mock_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag, called_plan_type = mock_task.call_args[0]
     assert called_group.pk == group.pk
     assert called_template_id is None
     assert called_tag is None
+    assert called_plan_type is None
     messages_list = list(get_messages(response.wsgi_request))
     assert any("Successfully restarted" in str(m) for m in messages_list)
 
@@ -562,12 +563,49 @@ def test_restart_exporting_delivery_xlsx_post_terminates_and_requeues_batch_expo
     assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
     mock_terminate.assert_called_once()
     mock_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mock_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag, called_plan_type = mock_task.call_args[0]
     assert called_group.pk == group.pk
     assert called_tag == 2
     assert called_template_id is None
+    assert called_plan_type is None
     messages_list = list(get_messages(response.wsgi_request))
     assert any("Successfully restarted" in str(m) for m in messages_list)
+
+
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
+def test_restart_exporting_delivery_xlsx_post_forwards_plan_type_from_job_config(
+    mock_task, admin_client, group_with_exporting_status
+) -> None:
+    group = group_with_exporting_status
+    AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        job_name="export_payment_plan_group_delivery_xlsx_async_task",
+        action="hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task_action",
+        config={
+            "payment_plan_group_id": str(group.pk),
+            "user_id": "some-user-id",
+            "plan_type": PaymentPlan.PlanType.FOLLOW_UP,
+        },
+    )
+    url = reverse(
+        "admin:payment_paymentplangroup_restart_exporting_delivery_xlsx",
+        args=[group.pk],
+    )
+
+    with (
+        patch("hope.admin.payment_plan.AsyncJob.task_status", new_callable=PropertyMock, return_value=AsyncJob.STARTED),
+        patch("hope.admin.payment_plan.AsyncJob.terminate", autospec=True),
+    ):
+        response = admin_client.post(url)
+
+    assert response.status_code == 302
+    mock_task.assert_called_once()
+    called_group, called_user_id, called_template_id, called_tag, called_plan_type = mock_task.call_args[0]
+    assert called_group.pk == group.pk
+    assert called_tag is None
+    assert called_plan_type == PaymentPlan.PlanType.FOLLOW_UP
 
 
 @patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
