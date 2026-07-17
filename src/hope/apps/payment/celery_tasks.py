@@ -232,7 +232,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
         EmptyDeliveryExportError,
         XlsxPaymentPlanGroupDeliveryExportService,
     )
-    from hope.models import PaymentPlan, PaymentPlanGroup, User
+    from hope.models import PaymentPlanGroup, User
 
     payment_plan_group_id = job.config["payment_plan_group_id"]
     with cache.lock(
@@ -246,7 +246,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
         user = User.objects.get(pk=job.config["user_id"])
         export_tag = job.config.get("export_tag")
         fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
-        plan_type = job.config.get("plan_type", PaymentPlan.PlanType.REGULAR)
+        plan_type = job.config.get("plan_type")
         try:
             service = XlsxPaymentPlanGroupDeliveryExportService(
                 payment_plan_group,
