@@ -80,7 +80,12 @@ export const LinkedPaymentPlansModal = ({
           <VisibilityIcon />
         </IconButton>
       </Box>
-      <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onClick={(e) => e.stopPropagation()}
+        scroll="paper"
+      >
         <DialogTitleWrapper>
           <DialogTitle>{t('Linked Payment Plans')}</DialogTitle>
         </DialogTitleWrapper>
