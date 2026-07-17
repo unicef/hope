@@ -1,11 +1,7 @@
 from faker import Faker
 
-from extras.test_utils.factories import DataCollectingTypeFactory
-from hope.models import (
-    BusinessArea,
-    Country,
-    DataCollectingType,
-)
+from extras.test_utils.factories import DataCollectingTypeFactory, PartnerFactory
+from hope.models import BusinessArea, Country, CountryCodeMap, DataCollectingType
 
 faker = Faker()
 
@@ -177,6 +173,18 @@ business_area_short_name_code_map = {
 }
 
 
+def generate_unicef_partners() -> None:
+    unicef_main_partner = PartnerFactory(name="UNICEF")
+    PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
+    PartnerFactory(name="UNHCR")
+    PartnerFactory(name="WFP")
+
+
+def generate_country_codes() -> None:
+    for country in Country.objects.all():
+        CountryCodeMap.objects.get_or_create(country=country, defaults={"ca_code": country.iso_code3})
+
+
 def generate_business_areas() -> None:
     for country_name, ba_code in business_area_short_name_code_map.items():
         if country := Country.objects.filter(short_name=country_name).first():
@@ -208,7 +216,7 @@ def generate_business_areas() -> None:
 
 
 def generate_data_collecting_types() -> None:
-    all_ba_id_list = list(BusinessArea.objects.all().values_list("id", flat=True))
+    all_ba_id_list = BusinessArea.objects.all().values_list("id", flat=True)
     data_collecting_types = [
         {
             "label": "Partial",
@@ -237,7 +245,7 @@ def generate_data_collecting_types() -> None:
     ]
 
     for data_dict in data_collecting_types:
-        dct = DataCollectingTypeFactory(  # type: ignore[no-untyped-call]
+        dct = DataCollectingTypeFactory(
             label=data_dict["label"],
             code=data_dict["code"],
             type=data_dict["type"],
