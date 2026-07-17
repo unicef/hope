@@ -1720,7 +1720,9 @@ def test_export_delivery_task_creates_batch_file(payment_plan_group_with_accepte
     group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
     group.save(update_fields=["background_action_status"])
 
-    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+    queue_and_run_retry_task(
+        export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk), plan_type=PaymentPlan.PlanType.REGULAR
+    )
 
     group.refresh_from_db()
     plan = group.payment_plans.get(export_tag=1)
@@ -1777,7 +1779,9 @@ def test_export_delivery_task_with_plan_type_exports_only_that_type(
 
 def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
     group = payment_plan_group_with_accepted_plan
-    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+    queue_and_run_retry_task(
+        export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk), plan_type=PaymentPlan.PlanType.REGULAR
+    )
     first_plan = group.payment_plans.get(export_tag=1)
     first_file_id = first_plan.export_file_delivery_id
 
@@ -1788,7 +1792,9 @@ def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_
         financial_service_provider=first_plan.financial_service_provider,
         delivery_mechanism=first_plan.delivery_mechanism,
     )
-    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+    queue_and_run_retry_task(
+        export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk), plan_type=PaymentPlan.PlanType.REGULAR
+    )
 
     first_plan.refresh_from_db()
     new_plan.refresh_from_db()
@@ -1812,7 +1818,12 @@ def test_export_delivery_task_sets_error_status_on_failure(payment_plan_group_wi
         ),
         pytest.raises(Exception, match="Export has failed"),
     ):
-        queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+        queue_and_run_retry_task(
+            export_payment_plan_group_delivery_xlsx_async_task,
+            group,
+            str(user.pk),
+            plan_type=PaymentPlan.PlanType.REGULAR,
+        )
 
     group.refresh_from_db()
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
@@ -1821,7 +1832,9 @@ def test_export_delivery_task_sets_error_status_on_failure(payment_plan_group_wi
 def test_export_delivery_task_reexports_existing_batch(payment_plan_group_with_accepted_plan, user) -> None:
     group = payment_plan_group_with_accepted_plan
 
-    queue_and_run_retry_task(export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk))
+    queue_and_run_retry_task(
+        export_payment_plan_group_delivery_xlsx_async_task, group, str(user.pk), plan_type=PaymentPlan.PlanType.REGULAR
+    )
     plan = group.payment_plans.get(export_tag=1)
     first_file_id = plan.export_file_delivery_id
 
