@@ -6,7 +6,6 @@ from typing import Any
 
 from django.core.serializers.json import DjangoJSONEncoder
 
-from hope.apps.core.notifications.events import RENDERED_EMAIL_SENT
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.payloads import (
     MailjetTemplateEmailPayloadData,
@@ -59,6 +58,7 @@ class BaseRenderedEmailNotificationService:
 
 @dataclass(frozen=True, kw_only=True)
 class RenderedEmailNotification:
+    event_name: str
     service: BaseRenderedEmailNotificationService
     recipient_email: str
     subject: str
@@ -116,7 +116,7 @@ def publish_rendered_email_notification(notification: RenderedEmailNotification)
     try:
         publish_rendered_email_event(
             RenderedEmailEvent(
-                event_name=RENDERED_EMAIL_SENT,
+                event_name=notification.event_name,
                 idempotency_key=_build_rendered_email_idempotency_key(notification),
                 recipients=[notification.recipient_email],
                 subject=notification.subject,
@@ -153,7 +153,9 @@ def _build_rendered_email_idempotency_key(notification: RenderedEmailNotificatio
         ]
     )
     digest = hashlib.sha256(source.encode()).hexdigest()[:16]
-    return f"email.rendered.sent:{_get_service_path(notification.service)}:{notification.recipient_email}:{digest}"
+    return (
+        f"{notification.event_name}:{_get_service_path(notification.service)}:{notification.recipient_email}:{digest}"
+    )
 
 
 def _get_service_path(service: Any) -> str:

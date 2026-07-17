@@ -7,6 +7,18 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from hope.apps.core.notifications.events import (
+    GRIEVANCE_ASSIGNMENT_CHANGED,
+    GRIEVANCE_DEDUPLICATION_CREATED,
+    GRIEVANCE_NOTES_ADDED,
+    GRIEVANCE_OVERDUE,
+    GRIEVANCE_PAYMENT_VERIFICATION_CREATED,
+    GRIEVANCE_SEND_BACK_TO_IN_PROGRESS,
+    GRIEVANCE_SEND_TO_APPROVAL,
+    GRIEVANCE_SENSITIVE_CREATED,
+    GRIEVANCE_SENSITIVE_REMINDER,
+    GRIEVANCE_SYSTEM_FLAGGING_CREATED,
+)
 from hope.apps.core.notifications.publishers import (
     BaseRenderedEmailNotificationService,
     RenderedEmailNotification,
@@ -113,6 +125,7 @@ class GrievanceNotification:
         )
         notification_service = self._prepare_rendered_email_notification_service()
         return email, RenderedEmailNotification(
+            event_name=GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action],
             service=notification_service,
             recipient_email=user_recipient.email,
             subject=subject,
@@ -249,7 +262,7 @@ class GrievanceNotification:
         return f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}"
 
     def _prepare_assignment_changed_subject(self) -> str:
-        return f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}"
+        return f"Grievance & Feedback ticket assigned {self.grievance_ticket.unicef_id}"
 
     def _prepare_assigned_to_recipient(self) -> "list[User] | None":
         if self.grievance_ticket.assigned_to is None:
@@ -306,6 +319,19 @@ class GrievanceNotification:
         ACTION_NOTES_ADDED: GrievanceNoteAddedEmailNotificationService,
         ACTION_OVERDUE: GrievanceOverdueEmailNotificationService,
         ACTION_SENSITIVE_REMINDER: GrievanceSensitiveReminderEmailNotificationService,
+    }
+
+    ACTION_TO_BITCASTER_EVENT = {
+        ACTION_ASSIGNMENT_CHANGED: GRIEVANCE_ASSIGNMENT_CHANGED,
+        ACTION_SYSTEM_FLAGGING_CREATED: GRIEVANCE_SYSTEM_FLAGGING_CREATED,
+        ACTION_DEDUPLICATION_CREATED: GRIEVANCE_DEDUPLICATION_CREATED,
+        ACTION_PAYMENT_VERIFICATION_CREATED: GRIEVANCE_PAYMENT_VERIFICATION_CREATED,
+        ACTION_SENSITIVE_CREATED: GRIEVANCE_SENSITIVE_CREATED,
+        ACTION_SEND_BACK_TO_IN_PROGRESS: GRIEVANCE_SEND_BACK_TO_IN_PROGRESS,
+        ACTION_SEND_TO_APPROVAL: GRIEVANCE_SEND_TO_APPROVAL,
+        ACTION_NOTES_ADDED: GRIEVANCE_NOTES_ADDED,
+        ACTION_OVERDUE: GRIEVANCE_OVERDUE,
+        ACTION_SENSITIVE_REMINDER: GRIEVANCE_SENSITIVE_REMINDER,
     }
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {

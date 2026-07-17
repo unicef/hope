@@ -14,6 +14,12 @@ from django.utils import timezone
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.celery import app
+from hope.apps.core.notifications.events import (
+    PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED,
+    PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED,
+    PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED,
+    PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED,
+)
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
@@ -87,7 +93,7 @@ def create_payment_verification_plan_xlsx_async_task_action(job: AsyncRetryJob) 
     payment_verification_plan.save()
 
     if payment_verification_plan.business_area.enable_email_notification:
-        send_email_notification(service, user)
+        send_email_notification(service, user, event_name=PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED)
 
 
 def create_payment_verification_plan_xlsx_async_task(
@@ -162,7 +168,11 @@ def create_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJob) 
             log_payment_plan_change(payment_plan, old_payment_plan, job.config["user_id"])
 
             if payment_plan.business_area.enable_email_notification:
-                send_email_notification_on_commit(service, user)
+                send_email_notification_on_commit(
+                    service,
+                    user,
+                    event_name=PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED,
+                )
     except Exception:
         logger.exception("Create Payment Plan Generate XLSX Error")
         flow = PaymentPlanFlow(payment_plan)
@@ -274,7 +284,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 service.applied_export_tag is not None
                 and payment_plan_group.cycle.program.business_area.enable_email_notification
             ):
-                send_email_notification(service, user)
+                send_email_notification(service, user, event_name=PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED)
         except EmptyDeliveryExportError as exc:
             # Nothing was exportable (every plan skipped).
             logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
@@ -1151,7 +1161,11 @@ def export_pdf_payment_plan_summary_async_task_action(job: AsyncRetryJob) -> Non
         payment_plan.save()
 
         if payment_plan.business_area.enable_email_notification:
-            send_email_notification_on_commit(service, user)
+            send_email_notification_on_commit(
+                service,
+                user,
+                event_name=PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED,
+            )
 
 
 def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_id: str) -> None:

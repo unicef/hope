@@ -27,6 +27,7 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.notifications.events import PAYMENT_PLAN_RECONCILIATION_OVERDUE
 from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
@@ -1463,6 +1464,7 @@ class PaymentPlanService:
             )
             publish_rendered_email_notification(
                 RenderedEmailNotification(
+                    event_name=PAYMENT_PLAN_RECONCILIATION_OVERDUE,
                     service=notification_service,
                     recipient_email=user.email,
                     subject=context["title"],

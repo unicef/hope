@@ -611,15 +611,21 @@ def chunks(it: Iterable, size: int) -> Iterator[list]:
 
 
 def send_email_notification_on_commit(
-    service: Any, user: Optional["User"] = None, context_kwargs: dict | None = None
+    service: Any,
+    user: Optional["User"] = None,
+    context_kwargs: dict | None = None,
+    *,
+    event_name: str,
 ) -> None:
-    transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs))
+    transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs, event_name=event_name))
 
 
 def send_email_notification(
     service: Any,
     user: Optional["User"] = None,
     context_kwargs: dict | None = None,
+    *,
+    event_name: str,
 ) -> None:
     if context_kwargs:
         context = service.get_email_context(**context_kwargs)
@@ -636,6 +642,7 @@ def send_email_notification(
     )
     publish_rendered_email_notification(
         RenderedEmailNotification(
+            event_name=event_name,
             service=service,
             recipient_email=user.email,
             subject=subject,

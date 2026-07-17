@@ -15,6 +15,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
+from hope.apps.core.notifications.events import SANCTION_LIST_CHECK_RESULTS_GENERATED
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.payloads import EmailAttachmentPayload
 from hope.apps.core.notifications.publishers import (
@@ -174,6 +175,7 @@ class CheckAgainstSanctionListTask:
         if bitcaster_enabled():
             publish_rendered_email_notification(
                 RenderedEmailNotification(
+                    event_name=SANCTION_LIST_CHECK_RESULTS_GENERATED,
                     service=SanctionListCheckResultsEmailNotificationService(),
                     recipient_email=uploaded_file.associated_email,
                     subject=subject,

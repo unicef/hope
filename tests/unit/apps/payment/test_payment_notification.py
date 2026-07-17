@@ -715,8 +715,8 @@ def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
     mock_send.assert_called_once()
     mock_publish.assert_called_once()
     event = mock_publish.call_args.args[0]
-    assert event.event_name == "payment.plan.sent_for_approval"
-    assert event.idempotency_key == f"payment.plan.sent_for_approval:{payment_plan.id}:SEND_FOR_APPROVAL"
+    assert event.event_name == "payment.payment_plan.sent_for_approval"
+    assert event.idempotency_key == f"payment.payment_plan.sent_for_approval:{payment_plan.id}:SEND_FOR_APPROVAL"
     assert event.recipients == payment_notification.email.recipients
     assert event.subject == payment_notification.email.subject
     assert event.mailjet_template_id == 123456

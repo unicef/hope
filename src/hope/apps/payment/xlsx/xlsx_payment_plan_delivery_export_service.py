@@ -16,6 +16,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
+from hope.apps.core.notifications.events import PAYMENT_PLAN_DELIVERY_PASSWORDS_SENT
 from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
 from hope.apps.payment.notifications import PaymentPlanDeliveryPasswordEmailNotificationService
 from hope.apps.payment.validators import generate_numeric_token
@@ -381,6 +382,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         )
         publish_rendered_email_notification(
             RenderedEmailNotification(
+                event_name=PAYMENT_PLAN_DELIVERY_PASSWORDS_SENT,
                 service=notification_service,
                 recipient_email=user.email,
                 subject=context["title"],

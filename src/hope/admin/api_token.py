@@ -17,6 +17,7 @@ from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.apps.account.fields import ChoiceArrayField
+from hope.apps.core.notifications.events import API_TOKEN_ACTION_TO_BITCASTER_EVENT
 from hope.apps.core.notifications.publishers import (
     BaseRenderedEmailNotificationService,
     RenderedEmailNotification,
@@ -129,6 +130,7 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             )
             publish_rendered_email_notification(
                 RenderedEmailNotification(
+                    event_name=API_TOKEN_ACTION_TO_BITCASTER_EVENT[action],
                     service=APITokenEmailNotificationService(),
                     recipient_email=user.email,
                     subject=notification_context["title"],

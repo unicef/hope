@@ -27,6 +27,7 @@ from pypdf import PdfReader
 
 from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.notifications.events import PAYMENT_WESTERN_UNION_REPORT_GENERATED
 from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
 from hope.apps.payment.celery_tasks import send_western_union_report_email_notifications_async_task
 from hope.apps.payment.notifications import WesternUnionReportEmailNotificationService
@@ -786,6 +787,7 @@ class WesternUnionReportsService:
             )
             publish_rendered_email_notification(
                 RenderedEmailNotification(
+                    event_name=PAYMENT_WESTERN_UNION_REPORT_GENERATED,
                     service=notification_service,
                     recipient_email=user.email,
                     subject=context["title"],
