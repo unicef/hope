@@ -198,6 +198,34 @@ def payment_plan_group_with_accepted_plan():
     return group
 
 
+@pytest.fixture
+def payment_plan_group_with_regular_and_follow_up_plans():
+    group = PaymentPlanGroupFactory()
+    fsp = FinancialServiceProviderFactory()
+    delivery_mechanism = DeliveryMechanismFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    regular_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan_group=group,
+        program_cycle=group.cycle,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    follow_up_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        payment_plan_group=group,
+        program_cycle=group.cycle,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_payment_plan=regular_plan,
+    )
+    return group, regular_plan, follow_up_plan
+
+
 @pytest.mark.parametrize(
     ("task", "job_model", "args_builder", "expected_job_name"),
     [
@@ -1710,6 +1738,41 @@ def test_export_delivery_task_queues_job_with_fsp_xlsx_template_id(payment_plan_
 
     job = AsyncRetryJob.objects.latest("pk")
     assert job.config["fsp_xlsx_template_id"] == str(template.pk)
+
+
+def test_export_delivery_task_queues_job_with_plan_type(payment_plan_group_with_accepted_plan, user) -> None:
+    group = payment_plan_group_with_accepted_plan
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        export_payment_plan_group_delivery_xlsx_async_task(
+            group, str(user.pk), plan_type=PaymentPlan.PlanType.FOLLOW_UP
+        )
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.config["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
+
+
+def test_export_delivery_task_with_plan_type_exports_only_that_type(
+    payment_plan_group_with_regular_and_follow_up_plans, user
+) -> None:
+    group, regular_plan, follow_up_plan = payment_plan_group_with_regular_and_follow_up_plans
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    queue_and_run_retry_task(
+        export_payment_plan_group_delivery_xlsx_async_task,
+        group,
+        str(user.pk),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+    regular_plan.refresh_from_db()
+    follow_up_plan.refresh_from_db()
+    assert follow_up_plan.export_tag == 1
+    assert follow_up_plan.export_file_delivery is not None
+    assert "_follow_up" in follow_up_plan.export_file_delivery.file.name
+    assert regular_plan.export_tag is None
+    assert regular_plan.export_file_delivery is None
 
 
 def test_export_delivery_task_keeps_previous_batch_file(payment_plan_group_with_accepted_plan, user) -> None:
