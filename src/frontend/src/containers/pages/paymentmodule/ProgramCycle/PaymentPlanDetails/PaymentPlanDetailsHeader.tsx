@@ -1,4 +1,6 @@
 import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
+import { FinishedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
+import { ReadyForClosurePaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/ReadyForClosurePaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
 import { InReviewPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
@@ -23,7 +25,9 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
+import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -36,6 +40,11 @@ export const PaymentPlanDetailsHeader = ({
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+  const getPlanTypeLabel = usePaymentPlanTypeLabel();
+  const planTypeLabel =
+    paymentPlan.planType && paymentPlan.planType !== PlanTypeEnum.REGULAR
+      ? `${getPlanTypeLabel(paymentPlan.planType)} `
+      : '';
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({
     queryKey: ['programCyclesDetails', businessArea, programCycleId, programId],
@@ -89,11 +98,16 @@ export const PaymentPlanDetailsHeader = ({
   );
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
+  const canMarkReadyForClosure = hasPermissions(
+    PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
+    permissions,
+  );
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
   const canReactivate = hasPermissions(
     PERMISSIONS.PM_REACTIVATE_ABORT,
@@ -171,16 +185,35 @@ export const PaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case PaymentPlanStatusEnum.FINISHED:
     case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
-          canClose={canClose}
           paymentPlan={paymentPlan}
         />
       );
+      break;
+    case PaymentPlanStatusEnum.FINISHED:
+      buttons = (
+        <FinishedPaymentPlanHeaderButtons
+          canSendToPaymentGateway={canSendToPaymentGateway}
+          canSplit={canSplit}
+          paymentPlan={paymentPlan}
+          canMarkReadyForClosure={canMarkReadyForClosure}
+        />
+      );
+      break;
+    case PaymentPlanStatusEnum.READY_FOR_CLOSURE:
+      buttons = (
+        <ReadyForClosurePaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canSendBack={canMarkReadyForClosure}
+          canClose={canClose}
+        />
+      );
+      break;
+    case PaymentPlanStatusEnum.CLOSED:
+      buttons = null;
       break;
     case PaymentPlanStatusEnum.ABORTED:
       buttons = (
@@ -198,6 +231,7 @@ export const PaymentPlanDetailsHeader = ({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
+          {planTypeLabel}
           {t('Payment Plan')} ID:{' '}
           <Box ml={1} mr={2}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>

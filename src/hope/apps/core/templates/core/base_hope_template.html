@@ -171,8 +171,12 @@
             if (muiProgramSelected && muiProgramSelected.slug) {
                 params.set('program', muiProgramSelected.slug);
             }
+            // Build relative URL; URLSearchParams.toString() URL-encodes values, and the
+            // resulting path/query are confined to same-origin via replaceState.
             const newUrl = window.location.pathname + '?' + params.toString();
-            window.history.replaceState({}, '', newUrl);
+            if (newUrl.startsWith('/')) {
+                window.history.replaceState({}, '', newUrl);
+            }
         }
 
         function renderBusinessAreaOptions() {
@@ -182,7 +186,10 @@
                 return;
             }
             if (businessAreaError) {
-                muiSelectMenu.innerHTML = `<div class="mui-select-option">${businessAreaError}</div>`;
+                const errDiv = document.createElement('div');
+                errDiv.className = 'mui-select-option';
+                errDiv.textContent = businessAreaError;
+                muiSelectMenu.appendChild(errDiv);
                 return;
             }
             if (!businessAreaList.length) {
@@ -274,7 +281,10 @@
                 return;
             }
             if (muiProgramError) {
-                muiProgramOptions.innerHTML = `<div class="mui-autocomplete-error">${muiProgramError}</div>`;
+                const errDiv = document.createElement('div');
+                errDiv.className = 'mui-autocomplete-error';
+                errDiv.textContent = muiProgramError;
+                muiProgramOptions.appendChild(errDiv);
                 return;
             }
             if (!muiProgramList.length) {
@@ -285,7 +295,14 @@
             filtered.slice(0, 10).forEach(opt => {
                 const div = document.createElement('div');
                 div.className = 'mui-autocomplete-option' + (muiProgramSelected && opt.name === muiProgramSelected.name ? ' selected' : '');
-                div.innerHTML = `<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${opt.name.length > 22 ? opt.name.slice(0,19)+'...' : opt.name}</span><span class="mui-status-badge ${opt.status==='ACTIVE'?'mui-status-active':'mui-status-draft'}">${opt.status}</span>`;
+                const nameSpan = document.createElement('span');
+                nameSpan.style.cssText = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;';
+                nameSpan.textContent = opt.name.length > 22 ? opt.name.slice(0, 19) + '...' : opt.name;
+                const statusSpan = document.createElement('span');
+                statusSpan.className = 'mui-status-badge ' + (opt.status === 'ACTIVE' ? 'mui-status-active' : 'mui-status-draft');
+                statusSpan.textContent = opt.status;
+                div.appendChild(nameSpan);
+                div.appendChild(statusSpan);
                 div.addEventListener('click', function(e) {
                     muiProgramSelected = opt;
                     muiProgramValue.textContent = opt.name;
@@ -302,7 +319,7 @@
             muiProgramLoading = true;
             muiProgramError = null;
             renderProgramOptions();
-            const businessAreaSlug = window.BUSINESS_AREA_SLUG;
+            const businessAreaSlug = encodeURIComponent(window.BUSINESS_AREA_SLUG);
             fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/?limit=10&ordering=name`)
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to fetch programmes');
@@ -334,7 +351,7 @@
             muiProgramLoading = true;
             muiProgramError = null;
             renderProgramOptions(searchValue);
-            const businessAreaSlug = window.BUSINESS_AREA_SLUG;
+            const businessAreaSlug = encodeURIComponent(window.BUSINESS_AREA_SLUG);
             fetch(`/api/rest/business-areas/${businessAreaSlug}/programs/?search="${encodeURIComponent(searchValue)}"&limit=50&ordering=name`)
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to fetch programmes');

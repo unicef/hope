@@ -37,7 +37,7 @@ def _handle_validation_errors(
     rdi.error_message = error_message
     rdi.save(update_fields=["status", "error_message"])
 
-    logger.warning(f"Import {rdi.id} completed with {len(errors)} validation errors: {error_details}")
+    logger.warning("Import %s completed with %d validation errors: %s", rdi.id, len(errors), error_details)
 
 
 def _handle_import_success(import_data: ImportData, rdi: RegistrationDataImport, logger: logging.Logger) -> None:

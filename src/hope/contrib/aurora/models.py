@@ -35,6 +35,10 @@ class Project(AuroraModel):
         return self.name
 
 
+def get_rdi_policy_choices() -> tuple:
+    return Registration.RDI_POLICIES
+
+
 class Registration(AuroraModel):
     RDI_MANUAL = 1
     RDI_DAILY = 2
@@ -51,7 +55,7 @@ class Registration(AuroraModel):
     metadata = models.JSONField(blank=True, null=True)
     rdi_parser = StrategyField(registry=registry, blank=True, null=True)
     rdi_policy = models.IntegerField(
-        choices=RDI_POLICIES,
+        choices=get_rdi_policy_choices,
         default=1,
     )
     steficon_rule = models.ForeignKey("steficon.RuleCommit", blank=True, null=True, on_delete=models.SET_NULL)
@@ -60,6 +64,10 @@ class Registration(AuroraModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+def get_record_status_choices() -> tuple:
+    return Record.STATUSES_CHOICES
 
 
 class Record(models.Model):
@@ -79,7 +87,7 @@ class Record(models.Model):
     source_id = models.IntegerField(db_index=True)
     data = models.JSONField(default=dict, blank=True, null=True)
     error_message = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
+    status = models.CharField(max_length=16, choices=get_record_status_choices, null=True, blank=True)
 
     unique_field = models.CharField(blank=True, null=True, max_length=255, db_index=True)
     size = models.IntegerField(blank=True, null=True)

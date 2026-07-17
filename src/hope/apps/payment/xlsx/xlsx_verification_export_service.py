@@ -201,7 +201,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         return {
-            "first_name": getattr(user, "first_name", ""),
+            "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
             "message": msg,

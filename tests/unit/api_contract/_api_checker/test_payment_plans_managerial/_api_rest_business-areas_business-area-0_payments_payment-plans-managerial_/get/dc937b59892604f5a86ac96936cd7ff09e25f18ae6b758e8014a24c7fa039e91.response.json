@@ -4,13 +4,13 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "154f8487f2722a3a0a85659273f81b10",
+        "ETag": "55caeb37ebdcbc3d1d1f65f1ffdf0554",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "983"
+        "Content-Length": "985"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/payments/payment-plans-managerial/?limit=50&offset=50",
@@ -30,8 +30,9 @@
                 "total_undelivered_quantity": null,
                 "dispersion_start_date": "2025-01-01",
                 "dispersion_end_date": "2025-01-31",
-                "is_follow_up": false,
+                "plan_type": "STANDARD",
                 "follow_ups": [],
+                "top_ups": [],
                 "program": "Program 0",
                 "program_id": "1bb881a7-de83-4efb-b16c-3da6f461fa13",
                 "program_code": "hrc9",

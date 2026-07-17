@@ -69,7 +69,9 @@ function AcceptanceProcess({
     hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
     (paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
       paymentPlan.status === PaymentPlanStatusEnum.FINISHED ||
-      paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW);
+      paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW ||
+      paymentPlan.status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
+      paymentPlan.status === PaymentPlanStatusEnum.CLOSED);
 
   return (
     <Box m={5}>

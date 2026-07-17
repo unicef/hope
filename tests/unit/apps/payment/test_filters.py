@@ -556,13 +556,45 @@ def test_payment_plan_filter_start_end_dates(business_area):
 
 
 def test_payment_plan_filter_is_follow_up(business_area):
-    follow_up = PaymentPlanFactory(business_area=business_area, is_follow_up=True)
-    PaymentPlanFactory(business_area=business_area, is_follow_up=False)
+    follow_up = PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+    PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.REGULAR)
 
     qs = PaymentPlan.objects.all()
-    filtered = PaymentPlanFilter(data={"business_area": business_area.slug, "is_follow_up": "true"}, queryset=qs).qs
+    filtered = PaymentPlanFilter(data={"business_area": business_area.slug, "plan_type": "FOLLOW_UP"}, queryset=qs).qs
 
     assert list(filtered.values_list("pk", flat=True)) == [follow_up.pk]
+
+
+def test_payment_plan_filter_plan_type_regular(business_area):
+    regular = PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.REGULAR)
+    PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+
+    qs = PaymentPlan.objects.all()
+    filtered = PaymentPlanFilter(data={"business_area": business_area.slug, "plan_type": "REGULAR"}, queryset=qs).qs
+
+    assert list(filtered.values_list("pk", flat=True)) == [regular.pk]
+
+
+def test_payment_plan_filter_plan_type_top_up(business_area):
+    top_up = PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.TOP_UP)
+    PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.REGULAR)
+
+    qs = PaymentPlan.objects.all()
+    filtered = PaymentPlanFilter(data={"business_area": business_area.slug, "plan_type": "TOP_UP"}, queryset=qs).qs
+
+    assert list(filtered.values_list("pk", flat=True)) == [top_up.pk]
+
+
+def test_payment_plan_filter_plan_type_top_up_amendment(business_area):
+    top_up_amendment = PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT)
+    PaymentPlanFactory(business_area=business_area, plan_type=PaymentPlan.PlanType.REGULAR)
+
+    qs = PaymentPlan.objects.all()
+    filtered = PaymentPlanFilter(
+        data={"business_area": business_area.slug, "plan_type": "TOP_UP_AMENDMENT"}, queryset=qs
+    ).qs
+
+    assert list(filtered.values_list("pk", flat=True)) == [top_up_amendment.pk]
 
 
 def test_payment_plan_filter_is_payment_plan_true_excludes_pre_payment(business_area):

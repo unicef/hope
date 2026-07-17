@@ -161,9 +161,9 @@ describe('ProgrammesTable', () => {
       RestService.restBusinessAreasUsersProfileRetrieve,
     ).mockResolvedValue({
       id: 'test-user-id',
-      username: 'testuser',
-      email: 'test@example.com',
-      firstName: 'Test',
+      username: 'mock-user',
+      email: 'mock-user@example.com',
+      firstName: 'Mock',
       lastName: 'User',
       isSuperuser: false,
       partner: {

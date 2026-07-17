@@ -21,7 +21,7 @@ from extras.test_utils.factories import (
     RoleAssignmentFactory,
     RoleFactory,
 )
-from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, Program
+from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, Partner, PaymentPlanPurpose, Program
 
 pytestmark = pytest.mark.django_db()
 
@@ -105,6 +105,7 @@ class TestProgrammeManagement:
         page_programme_details: ProgrammeDetails,
         test_data: dict,
         screenshot_path: str,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -112,14 +113,13 @@ class TestProgrammeManagement:
         # 1st step (Details)
         page_programme_management.get_button_new_program().click()
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("Main Menu")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field().click()
@@ -169,6 +169,7 @@ class TestProgrammeManagement:
         page_programme_details: ProgrammeDetails,
         test_data: dict,
         screenshot_path: str,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -176,10 +177,8 @@ class TestProgrammeManagement:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_freq_of_payment_one_off().click()
@@ -194,6 +193,7 @@ class TestProgrammeManagement:
         page_programme_management.get_input_population().send_keys(test_data["populationGoals"])
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -232,6 +232,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -239,15 +240,14 @@ class TestProgrammeManagement:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys("New Programme")
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_freq_of_payment_one_off().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -287,6 +287,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -294,15 +295,14 @@ class TestProgrammeManagement:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -342,6 +342,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -349,15 +350,14 @@ class TestProgrammeManagement:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -415,6 +415,7 @@ class TestProgrammeManagement:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -422,15 +423,14 @@ class TestProgrammeManagement:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -485,6 +485,7 @@ class TestBusinessAreas:
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
         test_data: dict,
+        payment_plan_purpose: PaymentPlanPurpose,
     ) -> None:
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
@@ -492,15 +493,14 @@ class TestBusinessAreas:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("People")
+        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -512,11 +512,8 @@ class TestBusinessAreas:
         page_programme_management.choose_partner_option("UNHCR")
         page_programme_management.get_label_admin_area().click()
         page_programme_management.choose_area_admin1_by_name("Kabul").click()
-        # ToDo: Create additional waiting mechanism
-        from time import sleep
-
-        sleep(1)
         page_programme_management.get_button_save().click()
+        page_programme_details.wait_for_page_ready()
         # Check Details page
         page_programme_details.wait_for_text_in_any_element("UNHCR", page_programme_details.label_partner_name)
         page_programme_details.wait_for_text_in_any_element("TEST", page_programme_details.label_partner_name)
@@ -557,10 +554,8 @@ class TestComeBackScenarios:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys("Test Name")
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
@@ -690,10 +685,8 @@ class TestManualCalendar:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()
@@ -730,14 +723,8 @@ class TestManualCalendar:
         page_programme_management.get_input_programme_name().send_keys("New name after Edit")
         page_programme_management.clear_input(page_programme_management.get_input_programme_code())
         page_programme_management.get_input_programme_code().send_keys("NEW1")
-        page_programme_management.clear_input(
-            page_programme_management.page_programme_management.get_input_start_date()
-        )
-        page_programme_management.get_input_start_date().send_keys(
-            str(FormatTime(1, 1, 2022).numerically_formatted_date)
-        )
-        page_programme_management.clear_input(page_programme_management.get_input_end_date())
-        page_programme_management.get_input_end_date().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
+        page_programme_management.fill_input_start_date(FormatTime(1, 1, 2022).numerically_formatted_date)
+        page_programme_management.fill_input_end_date(FormatTime(1, 10, 2099).numerically_formatted_date)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -772,12 +759,8 @@ class TestManualCalendar:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys("Test Program Partners")
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(
-            str(FormatTime(1, 1, 2022).numerically_formatted_date)
-        )
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
+        page_programme_management.fill_input_start_date(FormatTime(1, 1, 2022).numerically_formatted_date)
+        page_programme_management.fill_input_end_date(FormatTime(1, 10, 2099).numerically_formatted_date)
         page_programme_management.choose_option_selector("Health")
         page_programme_management.choose_option_data_collecting_type("Partial")
         page_programme_management.get_input_cash_plus().click()
@@ -871,10 +854,8 @@ class TestManualCalendar:
         page_programme_management.get_button_new_program().click()
         # 1st step (Details)
         page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.get_input_start_date().click()
-        page_programme_management.get_input_start_date().send_keys(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.get_input_end_date().click()
-        page_programme_management.get_input_end_date().send_keys(test_data["endDate"].numerically_formatted_date)
+        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
+        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
         page_programme_management.choose_option_selector(test_data["selector"])
         page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
         page_programme_management.get_input_cash_plus().click()

@@ -6,6 +6,10 @@ from hope.models.approval_process import ApprovalProcess
 from hope.models.utils import TimeStampedUUIDModel
 
 
+def get_approval_type_choices() -> tuple:
+    return Approval.TYPE_CHOICES
+
+
 class Approval(TimeStampedUUIDModel):
     APPROVAL = "APPROVAL"
     AUTHORIZATION = "AUTHORIZATION"
@@ -20,7 +24,7 @@ class Approval(TimeStampedUUIDModel):
 
     type = models.CharField(
         max_length=50,
-        choices=TYPE_CHOICES,
+        choices=get_approval_type_choices,
         default=APPROVAL,
         verbose_name=_("Approval type"),
     )

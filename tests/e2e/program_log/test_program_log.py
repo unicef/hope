@@ -28,7 +28,8 @@ class TestProgrammeLog:
         page_programme_details.click_button_finish_program_popup()
         page_program_log.get_nav_program_log().click()
         assert "Update" in page_program_log.get_action_cell().text
-        assert datetime.today().strftime("%-d %b %Y %H") in page_program_log.get_timestamp_cell().text
+        # Date only — asserting the hour flakes when the test crosses an hour boundary
+        assert datetime.today().strftime("%-d %b %Y") in page_program_log.get_timestamp_cell().text
         user = User.objects.first()
         assert f"{user.first_name} {user.last_name}" in page_program_log.get_user_cell().text
         assert "Programme" in page_program_log.get_content_type_cell().text
@@ -51,7 +52,8 @@ class TestProgrammeLog:
         page_program_log.get_nav_activity_log().click()
         assert "Activity Log" in page_program_log.get_page_header_title().text
         assert "Update" in page_program_log.get_action_cell().text
-        assert datetime.today().strftime("%-d %b %Y %H") in page_program_log.get_timestamp_cell().text
+        # Date only — asserting the hour flakes when the test crosses an hour boundary
+        assert datetime.today().strftime("%-d %b %Y") in page_program_log.get_timestamp_cell().text
         user = User.objects.first()
         assert f"{user.first_name} {user.last_name}" in page_program_log.get_user_cell().text
         assert "Programme" in page_program_log.get_content_type_cell().text

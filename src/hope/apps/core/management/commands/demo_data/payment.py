@@ -44,6 +44,8 @@ from hope.models import (
     MergeStatusModel,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
+    PaymentPlanPurpose,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -236,7 +238,7 @@ def create_tp(payment_plan: PaymentPlan) -> None:
     )
 
 
-def generate_payment_plan() -> None:
+def generate_payment_plan() -> None:  # noqa: PLR0915
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
@@ -366,9 +368,13 @@ def generate_payment_plan() -> None:
     )
 
     usd = CurrencyFactory(code="USD", name="United States Dollar")
+    purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
+    program.payment_plan_purposes.add(purpose)
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    pp_name = "Test Payment Plan"
+    pp_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp_name} Group")
     payment_plan = PaymentPlan.objects.update_or_create(
-        name="Test Payment Plan",
+        name=pp_name,
         pk=payment_plan_pk,
         business_area=afghanistan,
         currency=usd,
@@ -377,9 +383,11 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
+        payment_plan_group=pp_group,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
+    payment_plan.payment_plan_purposes.add(purpose)
 
     create_tp(payment_plan)
 
@@ -417,8 +425,10 @@ def generate_payment_plan() -> None:
     )
     payment_plan.update_population_count_fields()
     # add one more PP
+    pp2_name = "Test TP for PM (just click rebuild)"
+    pp2_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp2_name} Group")
     pp2 = PaymentPlan.objects.update_or_create(
-        name="Test TP for PM (just click rebuild)",
+        name=pp2_name,
         status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
         currency=usd,
@@ -427,9 +437,11 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
+        payment_plan_group=pp2_group,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
+    pp2.payment_plan_purposes.add(purpose)
     PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
@@ -506,13 +518,17 @@ def generate_reconciled_payment_plan() -> None:
     root = User.objects.get(username="root")
     now = timezone.now()
     program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
+    purpose = program.payment_plan_purposes.first()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp_1 = FinancialServiceProviderFactory()
     fsp_1.delivery_mechanisms.set([dm_cash])
     FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     usd = CurrencyFactory(code="USD", name="United States Dollar")
+    program_cycle = program.cycles.first()
+    reconciled_name = "Reconciled Payment Plan"
+    reconciled_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{reconciled_name} Group")
     payment_plan = PaymentPlan.objects.update_or_create(
-        name="Reconciled Payment Plan",
+        name=reconciled_name,
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
         currency=usd,
@@ -521,14 +537,16 @@ def generate_reconciled_payment_plan() -> None:
         status_date=now,
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
-        program_cycle=program.cycles.first(),
+        program_cycle=program_cycle,
+        payment_plan_group=reconciled_group,
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
-        is_follow_up=False,
+        plan_type=PaymentPlan.PlanType.REGULAR,
         exchange_rate=234.6742,
         financial_service_provider=fsp_1,
         delivery_mechanism=dm_cash,
     )[0]
+    payment_plan.payment_plan_purposes.add(purpose)
     # update status
     flow = PaymentPlanFlow(payment_plan)
     flow.status_finished()
@@ -648,6 +666,8 @@ def generate_payment_plan_large() -> None:
             "beneficiary_group": beneficiary_group,
         },
     )[0]
+    default_purpose, _ = PaymentPlanPurpose.objects.get_or_create(name="Default Purpose")
+    program.payment_plan_purposes.add(default_purpose)
     program_cycle = ProgramCycleFactory(program=program, title="Large PP Cycle")
 
     rdi = RegistrationDataImportFactory(

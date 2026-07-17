@@ -28,20 +28,25 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
     if not rdi:
         return
 
+    selected_individual_ids: list = list(selected_individuals.values_list("id", flat=True))
+    if not selected_individual_ids:
+        return
+
+    base_exclude = Q(ticket__status=GrievanceTicket.STATUS_CLOSED) | Q(ticket__id=grievance_ticket.id)
     ticket_details_queryset = (
-        (
-            TicketNeedsAdjudicationDetails.objects.filter(
-                Q(possible_duplicates__in=selected_individuals) | Q(golden_records_individual__in=selected_individuals)
-            ).exclude(Q(ticket__status=GrievanceTicket.STATUS_CLOSED) | Q(ticket__id=grievance_ticket.id))
+        TicketNeedsAdjudicationDetails.objects.filter(
+            Q(possible_duplicates__in=selected_individual_ids)
+            | Q(golden_records_individual_id__in=selected_individual_ids)
         )
+        .exclude(base_exclude)
         .prefetch_related("possible_duplicates")
         .distinct()
     )
 
-    selected_individuals_set = {str(i.id) for i in selected_individuals}
+    selected_individuals_set = {str(i) for i in selected_individual_ids}
     for ticket_details in ticket_details_queryset:
         possible_duplicates_set = {str(i.id) for i in ticket_details.possible_duplicates.all()}.union(
-            {str(ticket_details.golden_records_individual.id)}
+            {str(ticket_details.golden_records_individual_id)}
         )
         intersection = selected_individuals_set.intersection(possible_duplicates_set)
         ticket_details.selected_individuals.add(*intersection)  # type: ignore[arg-type]
