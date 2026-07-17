@@ -60,7 +60,7 @@ class BaseRenderedEmailNotificationService:
 @dataclass(frozen=True, kw_only=True)
 class RenderedEmailNotification:
     service: BaseRenderedEmailNotificationService
-    user: Any
+    recipient_email: str
     subject: str
     html_body: str
     text_body: str
@@ -118,7 +118,7 @@ def publish_rendered_email_notification(notification: RenderedEmailNotification)
             RenderedEmailEvent(
                 event_name=RENDERED_EMAIL_SENT,
                 idempotency_key=_build_rendered_email_idempotency_key(notification),
-                recipients=[notification.user.email],
+                recipients=[notification.recipient_email],
                 subject=notification.subject,
                 html_body=notification.html_body,
                 text_body=notification.text_body,
@@ -129,7 +129,6 @@ def publish_rendered_email_notification(notification: RenderedEmailNotification)
                 metadata={
                     "source": "hope",
                     "service": _get_service_path(notification.service),
-                    "user_id": str(notification.user.id),
                 },
             )
         )
@@ -142,15 +141,10 @@ def _json_safe_context(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _build_rendered_email_idempotency_key(notification: RenderedEmailNotification) -> str:
-    user_id = str(
-        getattr(notification.user, "id", "")
-        or getattr(notification.user, "pk", "")
-        or getattr(notification.user, "email", "")
-    )
     source = "|".join(
         [
             _get_service_path(notification.service),
-            user_id,
+            notification.recipient_email,
             notification.service.html_template,
             notification.service.text_template,
             notification.subject,
@@ -159,7 +153,7 @@ def _build_rendered_email_idempotency_key(notification: RenderedEmailNotificatio
         ]
     )
     digest = hashlib.sha256(source.encode()).hexdigest()[:16]
-    return f"email.rendered.sent:{_get_service_path(notification.service)}:{user_id}:{digest}"
+    return f"email.rendered.sent:{_get_service_path(notification.service)}:{notification.recipient_email}:{digest}"
 
 
 def _get_service_path(service: Any) -> str:

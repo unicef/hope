@@ -114,7 +114,7 @@ class GrievanceNotification:
         notification_service = self._prepare_rendered_email_notification_service()
         return email, RenderedEmailNotification(
             service=notification_service,
-            user=user_recipient,
+            recipient_email=user_recipient.email,
             subject=subject,
             html_body=html_body,
             text_body=text_body,

@@ -787,7 +787,7 @@ class WesternUnionReportsService:
             publish_rendered_email_notification(
                 RenderedEmailNotification(
                     service=notification_service,
-                    user=user,
+                    recipient_email=user.email,
                     subject=context["title"],
                     html_body=html_body,
                     text_body=text_body,

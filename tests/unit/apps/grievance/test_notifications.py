@@ -45,7 +45,7 @@ def test_init_builds_recipients_and_emails_for_assignment_changed(
     assert len(notification.emails) == 1
     assert notification.emails[0].recipients == [assignee.email]
     assert len(notification.rendered_email_notifications) == 1
-    assert notification.rendered_email_notifications[0].user == assignee
+    assert notification.rendered_email_notifications[0].recipient_email == assignee.email
     assert (
         notification.rendered_email_notifications[0].service.html_template
         == "assignment_change_notification_email.html"

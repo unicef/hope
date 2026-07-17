@@ -11,7 +11,7 @@ import pytest
 
 from extras.test_utils.factories import UserFactory
 from extras.test_utils.factories.api import APITokenFactory
-from hope.admin.api_token import TOKEN_INFO_EMAIL, APITokenAdmin
+from hope.admin.api_token import EMAIL_ACTION_INFO, APITokenAdmin
 from hope.models import APIToken
 from hope.models.grant import Grant
 
@@ -56,7 +56,7 @@ def test_send_api_token(
 ) -> None:
     request = HttpRequest()
 
-    APITokenAdmin()._send_token_email(request, token, TOKEN_INFO_EMAIL)
+    APITokenAdmin()._send_token_email(request, token, EMAIL_ACTION_INFO)
 
     mocked_requests_post.assert_called_once()
 
@@ -81,7 +81,7 @@ def test_send_api_token(
     assert f"<p>Dear {user.first_name or user.username},</p>" in message["HTMLPart"]
     assert f"Key: {token.key}<br>" in message["HTMLPart"]
     notification = mocked_publish_rendered_email_notification.call_args.args[0]
-    assert notification.user == user
+    assert notification.recipient_email == user.email
     assert notification.subject == f"HOPE API Token {token} infos"
     assert notification.context["token_key"] == token.key
     assert notification.context["show_token_key"] is True

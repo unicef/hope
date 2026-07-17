@@ -734,7 +734,7 @@ def test_send_email_notification_hands_rendered_email_to_notification_publisher(
     user.email_user.assert_called_once_with(subject="Hello", html_body="<html>body</html>", text_body="text body")
     notification = mock_publish.call_args.args[0]
     assert notification.service == service
-    assert notification.user == user
+    assert notification.recipient_email == user.email
     assert notification.subject == "Hello"
     assert notification.html_body == "<html>body</html>"
     assert notification.text_body == "text body"
@@ -762,7 +762,7 @@ def test_send_email_notification_hands_service_metadata_to_notification_publishe
     mock_publish.assert_called_once()
     notification = mock_publish.call_args.args[0]
     assert notification.service == service
-    assert notification.user == user
+    assert notification.recipient_email == user.email
     assert notification.subject == "Hello"
     assert notification.html_body == "<html>body</html>"
     assert notification.text_body == "text body"

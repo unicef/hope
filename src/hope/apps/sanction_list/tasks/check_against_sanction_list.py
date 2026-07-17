@@ -4,7 +4,6 @@ from dataclasses import asdict
 from datetime import date, datetime
 import io
 from itertools import permutations
-from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
 import dateutil.parser
@@ -176,7 +175,7 @@ class CheckAgainstSanctionListTask:
             publish_rendered_email_notification(
                 RenderedEmailNotification(
                     service=SanctionListCheckResultsEmailNotificationService(),
-                    user=SimpleNamespace(id=uploaded_file.id, email=uploaded_file.associated_email),
+                    recipient_email=uploaded_file.associated_email,
                     subject=subject,
                     html_body=html_body,
                     text_body=text_body,

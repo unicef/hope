@@ -224,7 +224,7 @@ def test_publish_rendered_email_notification_skips_when_flag_disabled(mocker: An
     publish_rendered_email_notification(
         RenderedEmailNotification(
             service=RenderedEmailService(),
-            user=SimpleNamespace(id=1, email="user@example.org"),
+            recipient_email="user@example.org",
             subject="Rendered subject",
             html_body="<p>Rendered</p>",
             text_body="Rendered",
@@ -247,7 +247,7 @@ def test_publish_rendered_email_notification_publishes_when_flag_enabled(mocker:
     publish_rendered_email_notification(
         RenderedEmailNotification(
             service=RenderedEmailService(),
-            user=SimpleNamespace(id=1, email="user@example.org"),
+            recipient_email="user@example.org",
             subject="Rendered subject",
             html_body="<p>Rendered</p>",
             text_body="Rendered",
@@ -263,9 +263,8 @@ def test_publish_rendered_email_notification_publishes_when_flag_enabled(mocker:
     assert event.metadata == {
         "source": "hope",
         "service": "tests.RenderedEmailService",
-        "user_id": "1",
     }
-    assert event.idempotency_key.startswith("email.rendered.sent:tests.RenderedEmailService:1:")
+    assert event.idempotency_key.startswith("email.rendered.sent:tests.RenderedEmailService:user@example.org:")
 
 
 def test_publish_rendered_email_notification_normalizes_context_to_json_safe_values(mocker: Any) -> None:
@@ -283,7 +282,7 @@ def test_publish_rendered_email_notification_normalizes_context_to_json_safe_val
     publish_rendered_email_notification(
         RenderedEmailNotification(
             service=RenderedEmailService(),
-            user=SimpleNamespace(id=1, email="user@example.org"),
+            recipient_email="user@example.org",
             subject="Rendered subject",
             html_body="<p>Rendered</p>",
             text_body="Rendered",
@@ -331,7 +330,7 @@ def test_publish_rendered_email_notification_swallows_publish_error(mocker: Any)
     publish_rendered_email_notification(
         RenderedEmailNotification(
             service=RenderedEmailService(),
-            user=SimpleNamespace(id=1, email="user@example.org"),
+            recipient_email="user@example.org",
             subject="Rendered subject",
             html_body="<p>Rendered</p>",
             text_body="Rendered",
@@ -362,10 +361,7 @@ def test_handle_bitcaster_event_skips_when_flag_disabled(mocker: Any) -> None:
     mock_delay.assert_not_called()
 
 
-@override_settings(
-    BITCASTER_EVENT_ALLOWLIST=["payment.plan.sent_for_approval"],
-    FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]},
-)
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
 def test_handle_bitcaster_event_queues_allowed_event(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
     payload = {"correlation_id": "event:1"}
@@ -373,18 +369,6 @@ def test_handle_bitcaster_event_queues_allowed_event(mocker: Any) -> None:
     handle_bitcaster_event(sender=None, event_name="payment.plan.sent_for_approval", payload=payload)
 
     mock_delay.assert_called_once_with("payment.plan.sent_for_approval", payload)
-
-
-@override_settings(
-    BITCASTER_EVENT_ALLOWLIST=["payment.plan.approved"],
-    FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]},
-)
-def test_handle_bitcaster_event_skips_events_outside_allowlist(mocker: Any) -> None:
-    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
-
-    handle_bitcaster_event(sender=None, event_name="payment.plan.sent_for_approval", payload={"correlation_id": "1"})
-
-    mock_delay.assert_not_called()
 
 
 def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any) -> None:

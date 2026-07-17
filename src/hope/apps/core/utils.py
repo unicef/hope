@@ -637,7 +637,7 @@ def send_email_notification(
     publish_rendered_email_notification(
         RenderedEmailNotification(
             service=service,
-            user=user,
+            recipient_email=user.email,
             subject=subject,
             html_body=html_body,
             text_body=text_body,

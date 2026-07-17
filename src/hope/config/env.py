@@ -44,7 +44,6 @@ DEFAULTS = {
     "BITCASTER_ORGANIZATION_SLUG": (str, "unicef"),
     "BITCASTER_PROJECT_SLUG": (str, "hope"),
     "BITCASTER_APPLICATION_SLUG": (str, "hct-mis"),
-    "BITCASTER_EVENT_ALLOWLIST": (list, []),
     "BITCASTER_REQUEST_TIMEOUT": (int, 10),
     "CATCH_ALL_EMAIL": (list, []),
     "DEFAULT_EMAIL_DISPLAY": (str, ""),

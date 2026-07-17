@@ -1847,7 +1847,7 @@ def test_send_notification_emails_sends_to_users_with_permission(
     email_user_mock.assert_called_once()
     publish_mock.assert_called_once()
     notification = publish_mock.call_args.args[0]
-    assert notification.user == user
+    assert notification.recipient_email == user.email
     assert notification.subject == f"Payment Plan {report.report_file.file.name} Western Union report"
     assert notification.html_body == "rendered-html"
     assert notification.text_body == "rendered-text"

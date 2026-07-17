@@ -1786,7 +1786,7 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
                 mock_email_user.assert_called_once()
                 mock_publish.assert_called_once()
                 notification = mock_publish.call_args.args[0]
-                assert notification.user == user
+                assert notification.recipient_email == user.email
                 assert notification.subject == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
                 assert notification.html_body == "rendered-html"
                 assert notification.text_body == "rendered-text"

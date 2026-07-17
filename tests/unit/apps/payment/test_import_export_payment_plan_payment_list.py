@@ -833,7 +833,7 @@ def test_send_file_passwords_with_no_file_temp(user):
     mock_email.assert_called_once()
     publish_mock.assert_called_once()
     notification = publish_mock.call_args.args[0]
-    assert notification.user == user
+    assert notification.recipient_email == user.email
     assert notification.subject == "Test Title file's Passwords"
     assert notification.service.html_template == "payment/xlsx_file_password_email.html"
     assert notification.service.text_template == "payment/xlsx_file_password_email.txt"

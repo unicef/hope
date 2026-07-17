@@ -266,7 +266,7 @@ def test_execute_publishes_bitcaster_notification_with_attachment_context(
 
     notification = mock_publish.call_args.args[0]
     attachment = notification.context["attachments"][0]
-    assert notification.user.email == "checker@example.com"
+    assert notification.recipient_email == "checker@example.com"
     assert notification.ccs == [settings.SANCTION_LIST_CC_MAIL]
     assert notification.context["results_count"] == 1
     assert notification.context["file_name"] == "check.xlsx"

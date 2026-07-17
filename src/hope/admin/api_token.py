@@ -28,52 +28,9 @@ from hope.models import APIToken, BusinessArea
 if TYPE_CHECKING:
     from uuid import UUID
 
-TOKEN_INFO_EMAIL = """
-Dear {friendly_name},
-
-please find below API token infos
-
-Name: {obj}
-Key: {obj.key}
-Grants: {obj.grants}
-Expires: {expire}
-Business Areas: {areas}
-
-Regards
-
-The HOPE Team
-"""  # noqa
-
-TOKEN_CREATED_EMAIL = """
-Dear {friendly_name},
-
-you have been assigned a new API token.
-
-Name: {obj}
-Key: {obj.key}
-Grants: {obj.grants}
-Expires: {expire}
-Business Areas: {areas}
-
-Regards
-
-The HOPE Team
-"""  # noqa
-
-TOKEN_UPDATED_EMAIL = """
-Dear {friendly_name},
-
-your assigned API token {obj} has been updated.
-
-Grants: {obj.grants}
-Expires: {expire}
-Business Areas: {areas}
-
-
-Regards
-
-The HOPE Team
-"""  # noqa
+EMAIL_ACTION_INFO = "info"
+EMAIL_ACTION_CREATED = "created"
+EMAIL_ACTION_UPDATED = "updated"
 
 
 class APITokenEmailNotificationService(BaseRenderedEmailNotificationService):
@@ -141,27 +98,27 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _get_template_message(self, template: str) -> str:
-        if template == TOKEN_CREATED_EMAIL:
+    def _get_template_message(self, action: str) -> str:
+        if action == EMAIL_ACTION_CREATED:
             return "you have been assigned a new API token."
-        if template == TOKEN_UPDATED_EMAIL:
+        if action == EMAIL_ACTION_UPDATED:
             return "your assigned API token {token_name} has been updated."
         return "please find below API token infos"
 
-    def _send_token_email(self, request: HttpRequest, obj: Any, template: str) -> None:
+    def _send_token_email(self, request: HttpRequest, obj: Any, action: str) -> None:
         try:
             user = obj.user
             context = self._get_email_context(request, obj)
             notification_context = {
                 "friendly_name": context["friendly_name"],
-                "message": self._get_template_message(template).format(token_name=str(obj)),
+                "message": self._get_template_message(action).format(token_name=str(obj)),
                 "token_name": str(obj),
                 "token_key": obj.key,
                 "grants": obj.grants,
                 "expire": context["expire"],
                 "areas": context["areas"],
                 "title": f"HOPE API Token {obj} infos",
-                "show_token_key": template != TOKEN_UPDATED_EMAIL,
+                "show_token_key": action != EMAIL_ACTION_UPDATED,
             }
             text_body = render_to_string(APITokenEmailNotificationService.text_template, context=notification_context)
             html_body = render_to_string(APITokenEmailNotificationService.html_template, context=notification_context)
@@ -173,7 +130,7 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             publish_rendered_email_notification(
                 RenderedEmailNotification(
                     service=APITokenEmailNotificationService(),
-                    user=user,
+                    recipient_email=user.email,
                     subject=notification_context["title"],
                     html_body=html_body,
                     text_body=text_body,
@@ -195,7 +152,7 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
     )
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, str(pk))
-        self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
+        self._send_token_email(request, obj, EMAIL_ACTION_INFO)
 
     def changeform_view(
         self,
@@ -223,6 +180,6 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
         obj.valid_for.set(BusinessArea.objects.filter(role_assignments__user=obj.user))
         obj.save()
         if change:
-            self._send_token_email(request, obj, TOKEN_UPDATED_EMAIL)
+            self._send_token_email(request, obj, EMAIL_ACTION_UPDATED)
         else:
-            self._send_token_email(request, obj, TOKEN_CREATED_EMAIL)
+            self._send_token_email(request, obj, EMAIL_ACTION_CREATED)
