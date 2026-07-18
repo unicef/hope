@@ -283,9 +283,9 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
 @pytest.fixture(scope="session", autouse=True)
 def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> None:
     from django.db import connections
-    from django.db.models.signals import post_migrate
+    from django.db.utils import ProgrammingError
 
-    apps, all_sqls = _collect_migration_sql_statements()
+    _apps, all_sqls = _collect_migration_sql_statements()
 
     with django_db_blocker.unblock():
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
@@ -294,23 +294,6 @@ def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> 
         conn = connections["default"]
         conn.cursor().execute(pre_sql)
 
-    def post_migration_custom_sql(
-        sender: Any,
-        app_config: Any,
-        verbosity: Any,
-        interactive: Any,
-        using: Any,
-        **kwargs: Any,
-    ) -> None:
-        from django.db.utils import ProgrammingError
-
-        app_label = app_config.label
-        if app_label not in apps:
-            return
-        apps.remove(app_label)
-        if apps:
-            return
-        conn = connections[using]
         for stmt in all_sqls:
             try:
                 conn.cursor().execute(stmt)
@@ -318,12 +301,6 @@ def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> 
                 if "already exists" in str(e):
                     continue
                 raise
-
-    post_migrate.connect(
-        post_migration_custom_sql,
-        dispatch_uid="tests.post_migration_custom_sql",
-        weak=False,
-    )
 
 
 @pytest.fixture(autouse=True)
