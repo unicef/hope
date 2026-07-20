@@ -1850,7 +1850,12 @@ def test_export_delivery_task_generates_tokens_and_sends_email_when_enabled(
 
     mock_service.generate_token_and_order_numbers.assert_called_once_with(group.cycle.program)
     mock_service.save_xlsx_file.assert_called_once_with(user)
-    mock_send_email.assert_called_once_with(mock_service, user)
+    mock_send_email.assert_called_once_with(
+        mock_service,
+        user,
+        event_name="payment.payment_plan_group.payment_list_xlsx_generated",
+        correlation_id=f"payment.payment_plan_group.payment_list_xlsx_generated:{group.id}:1:{user.id}",
+    )
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")

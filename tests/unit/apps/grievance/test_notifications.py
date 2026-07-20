@@ -257,7 +257,7 @@ def test_assignment_changed_body(assigned_ticket: GrievanceTicket, assignee: Use
 
     text_body, html_body, subject = notification._prepare_assignment_changed_bodies(assignee)
 
-    assert str(assigned_ticket.id) in subject
+    assert assigned_ticket.unicef_id in subject
     assert text_body
     assert html_body
 

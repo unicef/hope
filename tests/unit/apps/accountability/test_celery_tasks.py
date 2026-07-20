@@ -217,7 +217,12 @@ def test_export_survey_sample_task_action_success(
 
     mock_service_cls.assert_called_once_with(survey, user)
     service.export_sample.assert_called_once_with()
-    mock_send_email_notification.assert_called_once_with(service, user)
+    mock_send_email_notification.assert_called_once_with(
+        service,
+        user,
+        event_name="accountability.survey_sample.xlsx_generated",
+        correlation_id=f"accountability.survey_sample.xlsx_generated:{survey.id}:{user.id}",
+    )
     assert job.errors == {}
 
 
