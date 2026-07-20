@@ -1,8 +1,10 @@
-import { Box, Collapse, Grid } from '@mui/material';
+import { Box, Button, Collapse, Grid } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { FC, ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { ClearApplyButtons } from './ClearApplyButtons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { t } from 'i18next';
 
 interface FiltersSectionProps {
   children: ReactElement | ReactElement[];
@@ -10,6 +12,7 @@ interface FiltersSectionProps {
   applyHandler?: () => void;
   isOnPaper?: boolean;
   withApplyClearButtons?: boolean;
+  withHideShowButton?: boolean;
 }
 
 const FiltersPaper = styled(Paper)`
@@ -24,34 +27,36 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
   applyHandler,
   isOnPaper = true,
   withApplyClearButtons = true,
+  withHideShowButton = false,
 }): ReactElement => {
-  const [expanded] = useState(true);
+  const [expanded, setExpanded] = useState(true);
 
   const filtersComponent = (
     <>
-      {/* //TODO: hiding controlers for now */}
-      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
-        <Box
-          sx={{
-            pt: 4,
-            pb: 4,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            width: '100%',
-          }}
-        >
-          {/* <Button
-            variant='text'
-            color='primary'
-            endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
-            onClick={() => setExpanded(!expanded)}
-            data-cy='button-filters-expand'
+      {withHideShowButton && (
+        <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
+          <Box
+            sx={{
+              pt: 4,
+              pb: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+            }}
           >
-            {expanded ? t('HIDE FILTERS') : t('SHOW FILTERS')}
-          </Button> */}
-        </Box>
-      </Grid>
+            <Button
+              variant="text"
+              color="primary"
+              endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
+              onClick={() => setExpanded(!expanded)}
+              data-cy="button-filters-expand"
+            >
+              {expanded ? t('HIDE FILTERS') : t('SHOW FILTERS')}
+            </Button>
+          </Box>
+        </Grid>
+      )}
       <Collapse in={expanded}>
         <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
           {children}

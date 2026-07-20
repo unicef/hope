@@ -10,7 +10,7 @@ const NaTicketsManagementPage = (): ReactElement => {
 
   return (
     <NaTicketsManagement
-      onBack={() => navigate(`/${baseUrl}/grievance/tickets/system-generated`)}
+      onBack={() => navigate(`/${baseUrl}/grievance/tickets/user-generated`)}
     />
   );
 };
