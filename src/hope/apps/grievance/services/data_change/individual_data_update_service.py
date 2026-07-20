@@ -48,6 +48,7 @@ from hope.apps.household.api.caches import (
 )
 from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.apps.household.services.locking import lock_household_then_individual
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 from hope.models.currency import Currency
@@ -315,7 +316,6 @@ class IndividualDataUpdateService(DataChangeService):
             return
         details = self.grievance_ticket.individual_data_update_ticket_details
         individual = details.individual
-        household = individual.household
         individual_data = details.individual_data
         flex_fields_with_additional_data = individual_data.pop("flex_fields", {})
         flex_fields = {
@@ -350,7 +350,7 @@ class IndividualDataUpdateService(DataChangeService):
         if individual.flex_fields is not None:
             merged_flex_fields.update(individual.flex_fields)
         merged_flex_fields.update(flex_fields)
-        new_individual = Individual.objects.select_for_update().get(id=individual.id)
+        household, new_individual = lock_household_then_individual(individual)
 
         self._validate_phone_numbers(only_approved_data)
         self._update_household_fields(household, only_approved_data)  # type: ignore[arg-type]

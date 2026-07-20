@@ -191,6 +191,10 @@ DEFAULTS = {
     "VISION_CLIENT_SECRET": (str, ""),
     "VISION_TOKEN_GRANT_TYPE": (str, "client_credentials"),
     "VISION_DEFAULT_TIMEOUT": (int, 60),
+    "DEDUPLICATION_ENGINE_API_URL": (str, ""),
+    "DEDUPLICATION_ENGINE_API_KEY": (str, ""),
+    "PAYMENT_GATEWAY_API_URL": (str, ""),
+    "PAYMENT_GATEWAY_API_KEY": (str, ""),
 }
 
 env = SmartEnv(**DEFAULTS)

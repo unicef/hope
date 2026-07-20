@@ -69,8 +69,14 @@ The entitle formula is used to define the amount that a household or individual 
 8. Upload the filled excel through UPLOAD RECONCILIATION INFO.
     ![Image](_screenshots/payment/pay_28.png)
 
-9. See the reconciliation summary below
+    In addition to the standard reconciliation columns, the file can contain extra columns provided by the Financial Service Provider (FSP), such as an identity or transaction reference. HOPE stores each non-empty value from these columns against the corresponding Payment Record. Empty values are not stored.
+
+9. See the reconciliation summary below.
     ![Image](_screenshots/payment/pay_30.png)
 
-10. Click EXPORT XLSX on the upper right.
+10. Open a Payment Record to review the imported values. They are displayed in the **Reconciliation Information: Extra Info** section. The information can be used, for example, to manually compare an FSP identity reference with the individual's registration-time [Identification Key](population.md#identification-key).
+
+11. Click EXPORT XLSX on the upper right.
     ![Image](_screenshots/payment/pay_29.png)
+
+Support for additional Payment Record reconciliation fields was introduced by [Change Request 299147: Identity Field customisation & PaymentRecord flex fields](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/299147).
