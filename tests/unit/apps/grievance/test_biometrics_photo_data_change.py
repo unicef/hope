@@ -139,45 +139,6 @@ def two_sided_error_context(business_area: BusinessArea) -> dict[str, Any]:
     return {"rdi": rdi}
 
 
-@pytest.fixture
-def rdi_and_population_error_context(business_area: BusinessArea) -> dict[str, Any]:
-    program = ProgramFactory(name="RDI vs Population HOPE", business_area=business_area)
-    rdi_household = HouseholdFactory(business_area=business_area, program=program, create_role=False)
-    population_household = HouseholdFactory(business_area=business_area, program=program, create_role=False)
-    rdi = rdi_household.registration_data_import
-    rdi_individual = IndividualFactory(
-        household=rdi_household,
-        business_area=business_area,
-        program=program,
-        registration_data_import=rdi,
-        deduplication_golden_record_results={"duplicates": [], "possible_duplicates": []},
-        photo=ContentFile(b"aaa", name="rdi.png"),
-    )
-    population_individual = IndividualFactory(
-        household=population_household,
-        business_area=business_area,
-        program=program,
-        registration_data_import=population_household.registration_data_import,
-        deduplication_golden_record_results={"duplicates": [], "possible_duplicates": []},
-        photo=ContentFile(b"bbb", name="population.png"),
-    )
-    DeduplicationEngineSimilarityPairFactory(
-        program=program,
-        individual1=rdi_individual,
-        individual2=None,
-        similarity_score=0.0,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_412,
-    )
-    DeduplicationEngineSimilarityPairFactory(
-        program=program,
-        individual1=population_individual,
-        individual2=None,
-        similarity_score=0.0,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_429,
-    )
-    return {"rdi": rdi, "rdi_individual": rdi_individual, "population_individual": population_individual}
-
-
 def test_single_sided_error_finding_creates_photo_data_change_ticket(
     one_bad_photo_context: dict[str, Any],
 ) -> None:
@@ -221,21 +182,6 @@ def test_two_sided_finding_creates_no_photo_ticket(two_sided_error_context: dict
     create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
 
     assert GrievanceTicket.objects.count() == 0
-
-
-def test_population_individual_bad_photo_is_not_ticketed(
-    rdi_and_population_error_context: dict[str, Any],
-) -> None:
-    rdi = rdi_and_population_error_context["rdi"]
-    rdi_individual = rdi_and_population_error_context["rdi_individual"]
-    population_individual = rdi_and_population_error_context["population_individual"]
-
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
-
-    assert GrievanceTicket.objects.count() == 1
-    details = TicketIndividualDataUpdateDetails.objects.get()
-    assert str(details.individual_id) == str(rdi_individual.id)
-    assert not TicketIndividualDataUpdateDetails.objects.filter(individual=population_individual).exists()
 
 
 def test_photo_error_ticket_not_duplicated_on_rerun(one_bad_photo_context: dict[str, Any]) -> None:

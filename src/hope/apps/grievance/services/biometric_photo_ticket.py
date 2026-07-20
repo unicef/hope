@@ -25,31 +25,36 @@ def create_biometrics_photo_data_change_tickets(
         if len(present) != 1:
             continue
         individual = present[0]
-        if individual.registration_data_import_id == rdi.id and str(individual.id) not in individuals_with_error:
-            individuals_with_error[str(individual.id)] = individual
+        individuals_with_error[str(individual.id)] = individual
+
+    if not individuals_with_error:
+        return
+
+    already_ticketed_ids = set(
+        TicketIndividualDataUpdateDetails.objects.filter(
+            individual_id__in=individuals_with_error.keys(),
+            ticket__issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO,
+        )
+        .exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+        .values_list("individual_id", flat=True)
+    )
 
     for individual in individuals_with_error.values():
-        _create_biometrics_photo_data_change_ticket(individual, rdi)
+        if individual.id not in already_ticketed_ids:
+            _create_biometrics_photo_data_change_ticket(individual, rdi)
 
 
 def _create_biometrics_photo_data_change_ticket(individual: Individual, rdi: RegistrationDataImport) -> None:
-    ticket_already_exists = (
-        TicketIndividualDataUpdateDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
-        .filter(individual=individual, ticket__issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO)
-        .exists()
-    )
-    if ticket_already_exists:
-        return
-
     household = individual.household
     ticket = GrievanceTicket.objects.create(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO,
         business_area=rdi.program.business_area,
-        admin2=household.admin2 if household else None,
+        admin2_id=household.admin2_id if household else None,
         area=household.village if household else "",
         registration_data_import=rdi,
         submission_channel=SUBMISSION_CHANNEL_HOPE,
+        household_unicef_id=household.unicef_id if household else None,
         description="Biometric deduplication could not read this individual's photo. Upload a valid photo to resolve.",
     )
     ticket.programs.set([individual.program])
@@ -60,4 +65,3 @@ def _create_biometrics_photo_data_change_ticket(individual: Individual, rdi: Reg
         individual=individual,
         individual_data={"photo": {"value": None, "approve_status": False, "previous_value": current_photo}},
     )
-    ticket.save()  # populate household_unicef_id now that the details (and household) exist
