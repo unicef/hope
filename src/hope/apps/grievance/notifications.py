@@ -194,6 +194,10 @@ class GrievanceNotification:
             Q(pk__in=self._users_with_permissions([base_permission]).values("pk"))
             | (Q(pk=creator_id) & Q(pk__in=self._users_with_permissions([creator_permission]).values("pk")))
         )
+        # Never notify the user who sent the ticket for approval about their own action.
+        editor = self.extra_data.get("editor")
+        if editor is not None:
+            queryset = queryset.exclude(id=editor.id)
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()

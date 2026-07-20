@@ -947,3 +947,21 @@ def test_for_approval_recipients_exclude_owner_without_permission(
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
 
     assert list(notification.user_recipients) == [approver]
+
+
+def test_for_approval_recipients_exclude_editor_who_performed_the_action(
+    business_area: BusinessArea, approve_data_change_role: Role
+) -> None:
+    editor = UserFactory(email="dc-editor-approver@example.com")
+    UserRoleAssignmentFactory(user=editor, role=approve_data_change_role, business_area=business_area)
+
+    other_approver = UserFactory(email="dc-other-approver@example.com")
+    UserRoleAssignmentFactory(user=other_approver, role=approve_data_change_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area, category=GrievanceTicket.CATEGORY_DATA_CHANGE, assigned_to=None
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=editor)
+
+    assert list(notification.user_recipients) == [other_approver]

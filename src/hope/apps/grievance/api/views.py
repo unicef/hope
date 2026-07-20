@@ -796,7 +796,9 @@ class GrievanceTicketGlobalViewSet(
         user: Any, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
     ) -> None:
         if ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            notifications.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
+            notifications.append(
+                GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=user)
+            )
         if ticket.status == GrievanceTicket.STATUS_CLOSED:
             clear_cache(ticket.ticket_details, ticket.business_area.slug)
         if (
