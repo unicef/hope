@@ -1,4 +1,5 @@
 from enum import auto
+from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any, Callable
 
@@ -31,6 +32,25 @@ class GrievanceNotification:
     ACTION_OVERDUE = auto()
     ACTION_SEND_TO_APPROVAL = auto()
     ACTION_TICKET_UPDATED = auto()
+
+    ACTION_VIEW_PERMISSIONS = {
+        ACTION_SENSITIVE_CREATED: [
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+        ],
+        ACTION_SYSTEM_FLAGGING_CREATED: [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+        ],
+        ACTION_DEDUPLICATION_CREATED: [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+        ],
+        ACTION_PAYMENT_VERIFICATION_CREATED: [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+        ],
+    }
 
     def __init__(self, grievance_ticket: GrievanceTicket, action: Any, **kwargs: Any) -> None:
         self.grievance_ticket = grievance_ticket
@@ -97,6 +117,7 @@ class GrievanceNotification:
     def _exclude_unmailable(queryset: "QuerySet[User]") -> "QuerySet[User]":
         return queryset.filter(is_active=True).exclude(email="")
 
+    @cached_property
     def _program_scope(self) -> Q:
         program_ids = list(self.grievance_ticket.programs.values_list("pk", flat=True))
         return Q() if not program_ids else Q(program__isnull=True) | Q(program__in=program_ids)
@@ -105,7 +126,7 @@ class GrievanceNotification:
         perm_values = [permission.value for permission in permissions]
         role_assignments = (
             RoleAssignment.objects.filter(
-                self._program_scope(),
+                self._program_scope,
                 role__permissions__overlap=perm_values,
                 business_area=self.grievance_ticket.business_area,
             )
@@ -118,29 +139,14 @@ class GrievanceNotification:
             )
         ).distinct()
 
-    def _prepare_universal_category_created_recipients(self) -> "QuerySet":
-        action_roles_dict = {
-            GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED: "Adjudicator",
-            GrievanceNotification.ACTION_DEDUPLICATION_CREATED: "Adjudicator",
-            GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED: "Releaser",
-        }
-        user_roles = RoleAssignment.objects.filter(
-            self._program_scope(),
-            role__name=action_roles_dict[self.action],
-            business_area=self.grievance_ticket.business_area,
-        ).exclude(expiry_date__lt=timezone.now())
-        queryset = self._exclude_unmailable(User.objects.filter(role_assignments__in=user_roles)).distinct()
-        if self.grievance_ticket.assigned_to:
-            queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
-        return queryset.all()
-
-    def _prepare_sensitive_created_recipients(self) -> "QuerySet[User]":
-        queryset = self._users_with_permissions(
-            [
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
-            ]
-        )
+    def _prepare_permission_based_recipients(self) -> "QuerySet[User]":
+        queryset = self._users_with_permissions(GrievanceNotification.ACTION_VIEW_PERMISSIONS[self.action])
+        if self.action == GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED:
+            # A recipient must additionally hold a payment-verification view permission.
+            payment_users = self._users_with_permissions(
+                [Permissions.PAYMENT_VERIFICATION_VIEW_LIST, Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
+            )
+            queryset = queryset.filter(pk__in=payment_users.values("pk"))
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
@@ -159,12 +165,35 @@ class GrievanceNotification:
         return list(recipients.values())
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
-        user_roles = RoleAssignment.objects.filter(
-            self._program_scope(),
-            role__name="Approver",
-            business_area=self.grievance_ticket.business_area,
-        ).exclude(expiry_date__lt=timezone.now())
-        queryset = self._exclude_unmailable(User.objects.filter(role_assignments__in=user_roles)).distinct()
+        # Approval permission depends on the ticket type, mirroring the approve_* actions on the viewset.
+        approve_permissions_by_category = {
+            GrievanceTicket.CATEGORY_DATA_CHANGE: (
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            ),
+            GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: (
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            ),
+            GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: (
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            ),
+            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: (
+                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
+                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+            ),
+        }
+        permissions = approve_permissions_by_category.get(self.grievance_ticket.category)
+        if permissions is None:
+            return User.objects.none()
+        base_permission, creator_permission = permissions
+        # Base-permission holders, plus the creator when they hold the creator-scoped approve permission.
+        creator_id = self.grievance_ticket.created_by_id
+        queryset = User.objects.filter(
+            Q(pk__in=self._users_with_permissions([base_permission]).values("pk"))
+            | (Q(pk=creator_id) & Q(pk__in=self._users_with_permissions([creator_permission]).values("pk")))
+        )
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
@@ -267,10 +296,10 @@ class GrievanceNotification:
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {
         ACTION_ASSIGNMENT_CHANGED: _prepare_assigned_to_recipient,
-        ACTION_SYSTEM_FLAGGING_CREATED: _prepare_universal_category_created_recipients,
-        ACTION_DEDUPLICATION_CREATED: _prepare_universal_category_created_recipients,
-        ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_universal_category_created_recipients,
-        ACTION_SENSITIVE_CREATED: _prepare_sensitive_created_recipients,
+        ACTION_SYSTEM_FLAGGING_CREATED: _prepare_permission_based_recipients,
+        ACTION_DEDUPLICATION_CREATED: _prepare_permission_based_recipients,
+        ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_permission_based_recipients,
+        ACTION_SENSITIVE_CREATED: _prepare_permission_based_recipients,
         ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_assigned_to_recipient,
         ACTION_OVERDUE: _prepare_assigned_to_recipient,
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_recipients,

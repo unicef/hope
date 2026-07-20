@@ -95,6 +95,81 @@ def sensitive_role() -> Role:
     )
 
 
+@pytest.fixture
+def grievance_view_role() -> Role:
+    return RoleFactory(
+        name="Grievance Viewer",
+        permissions=[
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value,
+        ],
+    )
+
+
+@pytest.fixture
+def payment_verification_role() -> Role:
+    return RoleFactory(
+        name="Payment Verifier",
+        permissions=[
+            Permissions.PAYMENT_VERIFICATION_VIEW_LIST.value,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS.value,
+        ],
+    )
+
+
+@pytest.fixture
+def payment_and_grievance_role() -> Role:
+    return RoleFactory(
+        name="Payment And Grievance Viewer",
+        permissions=[
+            Permissions.PAYMENT_VERIFICATION_VIEW_LIST.value,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS.value,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value,
+        ],
+    )
+
+
+@pytest.fixture
+def approve_data_change_role() -> Role:
+    return RoleFactory(
+        name="Data Change Approver",
+        permissions=[Permissions.GRIEVANCES_APPROVE_DATA_CHANGE.value],
+    )
+
+
+@pytest.fixture
+def approve_flag_and_dedupe_role() -> Role:
+    return RoleFactory(
+        name="Flag And Dedupe Approver",
+        permissions=[Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE.value],
+    )
+
+
+@pytest.fixture
+def approve_payment_verification_role() -> Role:
+    return RoleFactory(
+        name="Payment Verification Approver",
+        permissions=[Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION.value],
+    )
+
+
+@pytest.fixture
+def approve_data_change_as_creator_role() -> Role:
+    return RoleFactory(
+        name="Data Change Creator Approver",
+        permissions=[Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR.value],
+    )
+
+
+@pytest.fixture
+def approve_data_change_as_owner_role() -> Role:
+    return RoleFactory(
+        name="Data Change Owner Approver",
+        permissions=[Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER.value],
+    )
+
+
 def test_init_builds_recipients_and_emails_for_assignment_changed(
     assigned_ticket: GrievanceTicket, assignee: User
 ) -> None:
@@ -135,21 +210,22 @@ def test_default_context_uses_http_when_redirect_not_https(assigned_ticket: Grie
     assert context["ticket_url"].startswith("http://")
 
 
-def test_universal_category_recipients_excludes_assignee_and_expired(business_area: BusinessArea) -> None:
-    adjudicator_role = RoleFactory(name="Adjudicator")
+def test_universal_category_recipients_excludes_assignee_and_expired(
+    business_area: BusinessArea, grievance_view_role: Role
+) -> None:
     recipient = UserFactory(email="recipient@example.com")
-    UserRoleAssignmentFactory(user=recipient, role=adjudicator_role, business_area=business_area)
+    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
 
     expired = UserFactory(email="expired@example.com")
     UserRoleAssignmentFactory(
         user=expired,
-        role=adjudicator_role,
+        role=grievance_view_role,
         business_area=business_area,
         expiry_date=timezone.now() - timedelta(days=1),
     )
 
     assignee = UserFactory(email="assigned@example.com")
-    UserRoleAssignmentFactory(user=assignee, role=adjudicator_role, business_area=business_area)
+    UserRoleAssignmentFactory(user=assignee, role=grievance_view_role, business_area=business_area)
 
     ticket = GrievanceTicketFactory(
         business_area=business_area,
@@ -163,37 +239,38 @@ def test_universal_category_recipients_excludes_assignee_and_expired(business_ar
     assert list(notification.user_recipients) == [recipient]
 
 
-def test_for_approval_recipients_excludes_assignee(business_area: BusinessArea) -> None:
-    approver_role = RoleFactory(name="Approver")
+def test_for_approval_recipients_excludes_assignee(business_area: BusinessArea, approve_data_change_role: Role) -> None:
     approver = UserFactory(email="approver2@example.com")
-    UserRoleAssignmentFactory(user=approver, role=approver_role, business_area=business_area)
+    UserRoleAssignmentFactory(user=approver, role=approve_data_change_role, business_area=business_area)
 
     assignee = UserFactory(email="approver-assignee@example.com")
-    UserRoleAssignmentFactory(user=assignee, role=approver_role, business_area=business_area)
+    UserRoleAssignmentFactory(user=assignee, role=approve_data_change_role, business_area=business_area)
 
-    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+    ticket = GrievanceTicketFactory(
+        business_area=business_area, category=GrievanceTicket.CATEGORY_DATA_CHANGE, assigned_to=assignee
+    )
 
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
 
     assert list(notification.user_recipients) == [approver]
 
 
-def test_for_approval_recipients_without_assignee(business_area: BusinessArea) -> None:
-    approver_role = RoleFactory(name="Approver")
+def test_for_approval_recipients_without_assignee(business_area: BusinessArea, approve_data_change_role: Role) -> None:
     approver = UserFactory(email="approver3@example.com")
-    UserRoleAssignmentFactory(user=approver, role=approver_role, business_area=business_area)
+    UserRoleAssignmentFactory(user=approver, role=approve_data_change_role, business_area=business_area)
 
-    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+    ticket = GrievanceTicketFactory(
+        business_area=business_area, category=GrievanceTicket.CATEGORY_DATA_CHANGE, assigned_to=None
+    )
 
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
 
     assert list(notification.user_recipients) == [approver]
 
 
-def test_universal_category_recipients_without_assignee(business_area: BusinessArea) -> None:
-    adjudicator_role = RoleFactory(name="Adjudicator")
+def test_universal_category_recipients_without_assignee(business_area: BusinessArea, grievance_view_role: Role) -> None:
     recipient = UserFactory(email="adjudicator@example.com")
-    UserRoleAssignmentFactory(user=recipient, role=adjudicator_role, business_area=business_area)
+    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
 
     ticket = GrievanceTicketFactory(
         business_area=business_area,
@@ -552,3 +629,321 @@ def test_non_sensitive_ticket_payload_sent_to_mailjet_keeps_link(
     message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
     assert assigned_ticket.unicef_id in message["HTMLPart"]
     assert "<a href" in message["HTMLPart"]
+
+
+def test_deduplication_recipients_use_grievance_view_permission(
+    business_area: BusinessArea, grievance_view_role: Role
+) -> None:
+    recipient = UserFactory(email="dedupe-viewer@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_DEDUPLICATION_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_system_flagging_recipients_exclude_sensitive_only_permission(
+    business_area: BusinessArea, sensitive_role: Role
+) -> None:
+    sensitive_only = UserFactory(email="sensitive-only@example.com")
+    UserRoleAssignmentFactory(user=sensitive_only, role=sensitive_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_system_flagging_recipients_respect_program_scope(
+    business_area: BusinessArea, grievance_view_role: Role, program: Program, other_program: Program
+) -> None:
+    in_program = UserFactory(email="in-program@example.com")
+    UserRoleAssignmentFactory(user=in_program, role=grievance_view_role, business_area=business_area, program=program)
+
+    out_of_program = UserFactory(email="out-program@example.com")
+    UserRoleAssignmentFactory(
+        user=out_of_program, role=grievance_view_role, business_area=business_area, program=other_program
+    )
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        issue_type=None,
+        assigned_to=None,
+    )
+    ticket.programs.set([program])
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
+
+    assert list(notification.user_recipients) == [in_program]
+
+
+def test_payment_verification_recipients_require_both_permission_groups(
+    business_area: BusinessArea, payment_and_grievance_role: Role
+) -> None:
+    recipient = UserFactory(email="pv-and-grievance@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=payment_and_grievance_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_payment_verification_recipients_exclude_grievance_permission_only(
+    business_area: BusinessArea, grievance_view_role: Role
+) -> None:
+    grievance_only = UserFactory(email="grievance-only@example.com")
+    UserRoleAssignmentFactory(user=grievance_only, role=grievance_view_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_payment_verification_recipients_exclude_payment_permission_only(
+    business_area: BusinessArea, payment_verification_role: Role
+) -> None:
+    payment_only = UserFactory(email="payment-only@example.com")
+    UserRoleAssignmentFactory(user=payment_only, role=payment_verification_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_payment_verification_recipients_allow_permissions_across_separate_roles(
+    business_area: BusinessArea, grievance_view_role: Role, payment_verification_role: Role
+) -> None:
+    recipient = UserFactory(email="split-roles@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
+    UserRoleAssignmentFactory(user=recipient, role=payment_verification_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_for_approval_recipients_data_change_uses_data_change_permission(
+    business_area: BusinessArea, approve_data_change_role: Role, approve_flag_and_dedupe_role: Role
+) -> None:
+    approver = UserFactory(email="dc-approver@example.com")
+    UserRoleAssignmentFactory(user=approver, role=approve_data_change_role, business_area=business_area)
+
+    wrong_approver = UserFactory(email="fd-approver@example.com")
+    UserRoleAssignmentFactory(user=wrong_approver, role=approve_flag_and_dedupe_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area, category=GrievanceTicket.CATEGORY_DATA_CHANGE, assigned_to=None
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [approver]
+
+
+def test_for_approval_recipients_system_flagging_uses_flag_and_dedupe_permission(
+    business_area: BusinessArea, approve_flag_and_dedupe_role: Role
+) -> None:
+    approver = UserFactory(email="sf-approver@example.com")
+    UserRoleAssignmentFactory(user=approver, role=approve_flag_and_dedupe_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [approver]
+
+
+def test_for_approval_recipients_needs_adjudication_uses_flag_and_dedupe_permission(
+    business_area: BusinessArea, approve_flag_and_dedupe_role: Role
+) -> None:
+    approver = UserFactory(email="na-approver@example.com")
+    UserRoleAssignmentFactory(user=approver, role=approve_flag_and_dedupe_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [approver]
+
+
+def test_for_approval_recipients_payment_verification_uses_payment_permission(
+    business_area: BusinessArea, approve_payment_verification_role: Role
+) -> None:
+    approver = UserFactory(email="pv-approver@example.com")
+    UserRoleAssignmentFactory(user=approver, role=approve_payment_verification_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [approver]
+
+
+def test_for_approval_recipients_empty_for_category_without_approval(
+    business_area: BusinessArea, approve_data_change_role: Role
+) -> None:
+    approver = UserFactory(email="referral-approver@example.com")
+    UserRoleAssignmentFactory(user=approver, role=approve_data_change_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_for_approval_recipients_include_creator_with_as_creator_permission(
+    business_area: BusinessArea, approve_data_change_as_creator_role: Role
+) -> None:
+    creator = UserFactory(email="dc-creator-approver@example.com")
+    UserRoleAssignmentFactory(user=creator, role=approve_data_change_as_creator_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        created_by=creator,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [creator]
+
+
+def test_for_approval_recipients_exclude_non_creator_with_as_creator_permission(
+    business_area: BusinessArea, approve_data_change_as_creator_role: Role
+) -> None:
+    non_creator = UserFactory(email="dc-noncreator@example.com")
+    UserRoleAssignmentFactory(user=non_creator, role=approve_data_change_as_creator_role, business_area=business_area)
+    creator = UserFactory(email="dc-actual-creator@example.com")
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        created_by=creator,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_for_approval_recipients_exclude_creator_who_is_also_assignee(
+    business_area: BusinessArea, approve_data_change_as_creator_role: Role
+) -> None:
+    creator_and_assignee = UserFactory(email="dc-creator-owner@example.com")
+    UserRoleAssignmentFactory(
+        user=creator_and_assignee, role=approve_data_change_as_creator_role, business_area=business_area
+    )
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        created_by=creator_and_assignee,
+        assigned_to=creator_and_assignee,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_for_approval_recipients_exclude_owner_scoped_permission(
+    business_area: BusinessArea, approve_data_change_as_owner_role: Role
+) -> None:
+    owner = UserFactory(email="dc-owner-approver@example.com")
+    UserRoleAssignmentFactory(user=owner, role=approve_data_change_as_owner_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        created_by=None,
+        assigned_to=owner,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_for_approval_recipients_exclude_owner_without_permission(
+    business_area: BusinessArea, approve_data_change_role: Role
+) -> None:
+    approver = UserFactory(email="dc-real-approver@example.com")
+    UserRoleAssignmentFactory(user=approver, role=approve_data_change_role, business_area=business_area)
+
+    owner_without_permission = UserFactory(email="dc-owner-noperm@example.com")
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        created_by=None,
+        assigned_to=owner_without_permission,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [approver]
