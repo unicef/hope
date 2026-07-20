@@ -93,27 +93,30 @@ class GrievanceNotification:
             f"A Grievance & Feedback ticket for {self.grievance_ticket.get_category_display()}",
         )
 
+    @staticmethod
+    def _exclude_unmailable(queryset: "QuerySet[User]") -> "QuerySet[User]":
+        return queryset.filter(is_active=True).exclude(email="")
+
+    def _program_scope(self) -> Q:
+        program_ids = list(self.grievance_ticket.programs.values_list("pk", flat=True))
+        return Q() if not program_ids else Q(program__isnull=True) | Q(program__in=program_ids)
+
     def _users_with_permissions(self, permissions: list[Permissions]) -> "QuerySet[User]":
         perm_values = [permission.value for permission in permissions]
-        program_ids = list(self.grievance_ticket.programs.values_list("pk", flat=True))
-        program_scope = Q() if not program_ids else Q(program__isnull=True) | Q(program__in=program_ids)
         role_assignments = (
             RoleAssignment.objects.filter(
-                program_scope,
+                self._program_scope(),
                 role__permissions__overlap=perm_values,
                 business_area=self.grievance_ticket.business_area,
             )
             .exclude(expiry_date__lt=timezone.now())
             .distinct()
         )
-        return (
+        return self._exclude_unmailable(
             User.objects.filter(
-                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments),
-                is_active=True,
+                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
             )
-            .exclude(email="")
-            .distinct()
-        )
+        ).distinct()
 
     def _prepare_universal_category_created_recipients(self) -> "QuerySet":
         action_roles_dict = {
@@ -122,10 +125,11 @@ class GrievanceNotification:
             GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED: "Releaser",
         }
         user_roles = RoleAssignment.objects.filter(
+            self._program_scope(),
             role__name=action_roles_dict[self.action],
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(role_assignments__in=user_roles).distinct()
+        queryset = self._exclude_unmailable(User.objects.filter(role_assignments__in=user_roles)).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
@@ -147,6 +151,8 @@ class GrievanceNotification:
         for user in (self.grievance_ticket.created_by, self.grievance_ticket.assigned_to):
             if user is None:
                 continue
+            if not user.is_active or not user.email:
+                continue
             if editor is not None and user.id == editor.id:
                 continue
             recipients[user.id] = user
@@ -154,10 +160,11 @@ class GrievanceNotification:
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
         user_roles = RoleAssignment.objects.filter(
+            self._program_scope(),
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(role_assignments__in=user_roles).distinct()
+        queryset = self._exclude_unmailable(User.objects.filter(role_assignments__in=user_roles)).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
