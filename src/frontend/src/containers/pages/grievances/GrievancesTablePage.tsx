@@ -183,7 +183,13 @@ export const GrievancesTablePage = (): ReactElement => {
         selectedTab={selectedTab}
       />
       <div ref={tableRef}>
-        <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
+        <GrievancesTable
+          filter={appliedFilter}
+          selectedTab={selectedTab}
+          onOpenNaManagement={() =>
+            navigate(`/${baseUrl}/grievance/na-tickets-management`)
+          }
+        />
       </div>
     </>
   );

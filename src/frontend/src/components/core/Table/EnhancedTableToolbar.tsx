@@ -1,10 +1,11 @@
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 interface EnhancedTableToolbarProps {
   title: string;
+  children?: ReactNode;
 }
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
@@ -20,12 +21,14 @@ const StyledTypography = styled(Typography)({
 
 export function EnhancedTableToolbar({
   title,
+  children,
 }: EnhancedTableToolbarProps): ReactElement {
   return (
     <StyledToolbar>
       <StyledTypography data-cy="table-title" variant="h6">
         {title}
       </StyledTypography>
+      {children}
     </StyledToolbar>
   );
 }
