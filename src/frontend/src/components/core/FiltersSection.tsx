@@ -36,7 +36,14 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
   const filtersComponent = (
     <>
       <Collapse in={expanded}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            pt: 4,
+          }}
+        >
           {children}
           {!withHideShowButton && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>

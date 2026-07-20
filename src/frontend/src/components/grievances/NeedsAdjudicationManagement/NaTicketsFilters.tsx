@@ -84,6 +84,7 @@ export const NaTicketsFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
       withHideShowButton
+      initialExpanded={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid size={{ xs: 3 }}>
