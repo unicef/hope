@@ -1,5 +1,6 @@
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
 import { Box } from '@mui/material';
@@ -7,6 +8,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanGroupDetail } from '../types';
 import { isGroupBackgroundActionBusy } from '../utils';
 import { showApiErrorMessages } from '@utils/utils';
@@ -17,11 +19,12 @@ interface DeliveryExportXlsxGroupButtonProps {
 
 export function DeliveryExportXlsxGroupButton({
   group,
-}: DeliveryExportXlsxGroupButtonProps): ReactElement {
+}: DeliveryExportXlsxGroupButtonProps): ReactElement | null {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
+  const permissions = usePermissions();
 
   const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
     mutationFn: () =>
@@ -42,6 +45,11 @@ export function DeliveryExportXlsxGroupButton({
       showApiErrorMessages(error, showMessage, t('Export failed'));
     },
   });
+
+  if (
+    !hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX, permissions)
+  )
+    return null;
 
   const isDisabled =
     !group || loadingExport || isGroupBackgroundActionBusy(group);

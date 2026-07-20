@@ -207,16 +207,21 @@ const CreateTargetPopulationPage = (): ReactElement => {
                       // @ts-ignore
                       error={errors.paymentPlanGroupId?.value}
                     />
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => setCreateGroupModalOpen(true)}
-                      disabled={!values.programCycleId?.value}
-                      data-cy="button-create-group"
-                      sx={{ whiteSpace: 'nowrap', flexShrink: 0, mt: 1 }}
-                    >
-                      {t('Create Group')}
-                    </Button>
+                    {hasPermissions(
+                      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
+                      permissions,
+                    ) && (
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => setCreateGroupModalOpen(true)}
+                        disabled={!values.programCycleId?.value}
+                        data-cy="button-create-group"
+                        sx={{ whiteSpace: 'nowrap', flexShrink: 0, mt: 1 }}
+                      >
+                        {t('Create Group')}
+                      </Button>
+                    )}
                   </Box>
                 </Grid>
               </Grid>
