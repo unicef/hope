@@ -1695,13 +1695,15 @@ def test_update_grievance_ticket_sends_ticket_updated_notification_on_change(
     complaint_ticket: GrievanceTicket,
     complaint_ticket_detail_url: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Callable,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
     owner = UserFactory()
 
     client = api_client(user)
     with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(owner.id)}, format="json")
+        with django_capture_on_commit_callbacks(execute=True):
+            response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(owner.id)}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
     sent_actions = [notification.action for call in mock_send.call_args_list for notification in call.args[0]]
@@ -1709,7 +1711,7 @@ def test_update_grievance_ticket_sends_ticket_updated_notification_on_change(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
-def test_update_grievance_ticket_skips_notification_when_nothing_changed(
+def test_update_grievance_ticket_sends_notification_even_when_values_unchanged(
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1717,13 +1719,15 @@ def test_update_grievance_ticket_skips_notification_when_nothing_changed(
     complaint_ticket: GrievanceTicket,
     complaint_ticket_detail_url: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Callable,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
 
     client = api_client(user)
     with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(user.id)}, format="json")
+        with django_capture_on_commit_callbacks(execute=True):
+            response = client.patch(complaint_ticket_detail_url, {"priority": complaint_ticket.priority}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
     sent_actions = [notification.action for call in mock_send.call_args_list for notification in call.args[0]]
-    assert GrievanceNotification.ACTION_TICKET_UPDATED not in sent_actions
+    assert GrievanceNotification.ACTION_TICKET_UPDATED in sent_actions

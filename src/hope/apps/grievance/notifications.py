@@ -95,17 +95,25 @@ class GrievanceNotification:
 
     def _users_with_permissions(self, permissions: list[Permissions]) -> "QuerySet[User]":
         perm_values = [permission.value for permission in permissions]
+        program_ids = list(self.grievance_ticket.programs.values_list("pk", flat=True))
+        program_scope = Q() if not program_ids else Q(program__isnull=True) | Q(program__in=program_ids)
         role_assignments = (
             RoleAssignment.objects.filter(
+                program_scope,
                 role__permissions__overlap=perm_values,
                 business_area=self.grievance_ticket.business_area,
             )
             .exclude(expiry_date__lt=timezone.now())
             .distinct()
         )
-        return User.objects.filter(
-            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-        ).distinct()
+        return (
+            User.objects.filter(
+                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments),
+                is_active=True,
+            )
+            .exclude(email="")
+            .distinct()
+        )
 
     def _prepare_universal_category_created_recipients(self) -> "QuerySet":
         action_roles_dict = {

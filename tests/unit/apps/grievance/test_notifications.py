@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     GrievanceTicketFactory,
     PartnerFactory,
     PartnerRoleAssignmentFactory,
+    ProgramFactory,
     RoleFactory,
     TicketNoteFactory,
     UserFactory,
@@ -21,7 +22,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.models import BusinessArea, Role, User
+from hope.models import BusinessArea, Program, Role, User
 
 pytestmark = pytest.mark.django_db
 
@@ -59,6 +60,28 @@ def sensitive_ticket(business_area: BusinessArea, assignee: User) -> GrievanceTi
         category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
     )
+
+
+@pytest.fixture
+def program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(business_area=business_area, name="Sensitive program")
+
+
+@pytest.fixture
+def other_program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(business_area=business_area, name="Other program")
+
+
+@pytest.fixture
+def sensitive_ticket_in_program(business_area: BusinessArea, assignee: User, program: Program) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=assignee,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+    )
+    ticket.programs.set([program])
+    return ticket
 
 
 @pytest.fixture
@@ -439,6 +462,64 @@ def test_ticket_updated_body_states_change_without_details(assigned_ticket: Grie
     assert assigned_ticket.unicef_id in subject
     assert "Changes have been made" in html_body
     assert "Changes have been made" in text_body
+
+
+def test_sensitive_created_recipients_exclude_role_scoped_to_other_program(
+    business_area: BusinessArea,
+    sensitive_ticket_in_program: GrievanceTicket,
+    sensitive_role: Role,
+    other_program: Program,
+) -> None:
+    wrong_program_user = UserFactory(email="wrong-program@example.com")
+    UserRoleAssignmentFactory(
+        user=wrong_program_user, role=sensitive_role, business_area=business_area, program=other_program
+    )
+
+    notification = GrievanceNotification(sensitive_ticket_in_program, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_sensitive_created_recipients_include_role_scoped_to_ticket_program(
+    business_area: BusinessArea,
+    sensitive_ticket_in_program: GrievanceTicket,
+    sensitive_role: Role,
+    program: Program,
+) -> None:
+    recipient = UserFactory(email="right-program@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=sensitive_role, business_area=business_area, program=program)
+
+    notification = GrievanceNotification(sensitive_ticket_in_program, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_sensitive_created_recipients_include_program_scoped_role_when_ticket_has_no_programs(
+    business_area: BusinessArea,
+    sensitive_ticket: GrievanceTicket,
+    sensitive_role: Role,
+    other_program: Program,
+) -> None:
+    recipient = UserFactory(email="scoped-but-no-ticket-program@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=sensitive_role, business_area=business_area, program=other_program)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_sensitive_created_recipients_exclude_inactive_and_blank_email_users(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
+) -> None:
+    inactive = UserFactory(email="inactive@example.com", is_active=False)
+    UserRoleAssignmentFactory(user=inactive, role=sensitive_role, business_area=business_area)
+
+    no_email = UserFactory(email="", username="no_email_user")
+    UserRoleAssignmentFactory(user=no_email, role=sensitive_role, business_area=business_area)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == []
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
