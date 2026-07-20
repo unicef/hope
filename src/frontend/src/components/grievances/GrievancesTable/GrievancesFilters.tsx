@@ -123,6 +123,7 @@ export const GrievancesFilters = ({
     <FiltersSection
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
+      initialExpanded={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid size={{ xs: 3 }}>

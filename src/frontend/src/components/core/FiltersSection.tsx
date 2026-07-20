@@ -13,6 +13,7 @@ interface FiltersSectionProps {
   isOnPaper?: boolean;
   withApplyClearButtons?: boolean;
   withHideShowButton?: boolean;
+  initialExpanded?: boolean;
 }
 
 const FiltersPaper = styled(Paper)`
@@ -28,11 +29,27 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
   isOnPaper = true,
   withApplyClearButtons = true,
   withHideShowButton = false,
+  initialExpanded = true,
 }): ReactElement => {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(initialExpanded);
 
   const filtersComponent = (
     <>
+      <Collapse in={expanded}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+          {children}
+          {!withHideShowButton && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+              {withApplyClearButtons && (
+                <ClearApplyButtons
+                  clearHandler={clearHandler}
+                  applyHandler={applyHandler}
+                />
+              )}
+            </Box>
+          )}
+        </Box>
+      </Collapse>
       {withHideShowButton && (
         <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
           <Box
@@ -41,7 +58,7 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
               pb: 4,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'flex-start',
+              justifyContent: 'space-between',
               width: '100%',
             }}
           >
@@ -54,22 +71,15 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
             >
               {expanded ? t('HIDE FILTERS') : t('SHOW FILTERS')}
             </Button>
-          </Box>
-        </Grid>
-      )}
-      <Collapse in={expanded}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-          {children}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            {withApplyClearButtons && (
+            {expanded && withApplyClearButtons && (
               <ClearApplyButtons
                 clearHandler={clearHandler}
                 applyHandler={applyHandler}
               />
             )}
           </Box>
-        </Box>
-      </Collapse>
+        </Grid>
+      )}
     </>
   );
   return isOnPaper ? (
