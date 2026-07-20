@@ -84,13 +84,9 @@ def recalculate_population_fields_async_task_action(job: AsyncJob) -> None:
     params = {}
     if household_ids:
         params["pk__in"] = household_ids
-    recalculate_composition = None
-    if program_id:
-        program = Program.objects.get(id=program_id)
-        recalculate_composition = program.data_collecting_type.recalculate_composition
+    # No gate on recalculate_composition: recalculate_data itself decides what to compute
+    # (composition only when the flag is on, KAB always), so all selected households flow through.
     queryset = Household.objects.filter(**params).only("pk").order_by("pk")
-    if not recalculate_composition:
-        queryset = queryset.none()
 
     if queryset.exists():
         paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)

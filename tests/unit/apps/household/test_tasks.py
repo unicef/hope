@@ -478,7 +478,8 @@ def test_calculate_children_fields_for_not_collected_individual_data_schedules_a
 
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task")
-def test_recalculate_population_fields_task_action_skips_when_recalculation_disabled(mock_chunk_delay, business_area):
+def test_recalculate_population_fields_task_action_runs_when_recalculation_disabled(mock_chunk_delay, business_area):
+    # KAB always runs, so households of non-recalculating DCTs are no longer skipped.
     program = ProgramFactory(business_area=business_area)
     data_collecting_type = program.data_collecting_type
     data_collecting_type.recalculate_composition = False
@@ -492,7 +493,7 @@ def test_recalculate_population_fields_task_action_skips_when_recalculation_disa
 
     recalculate_population_fields_async_task_action(job)
 
-    mock_chunk_delay.assert_not_called()
+    mock_chunk_delay.assert_called_once()
 
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_async_task")

@@ -410,6 +410,98 @@ class Household(
         help_text="Household unknown sex group count",
     )  # NOT_COLLECTED
 
+    # Known affected beneficiaries (KAB) — denormalised counters mirroring the composition
+    # when it is stored, otherwise derived from linked individuals. See
+    # apps/household/services/household_recalculate_data.py. NULL means "unknown", never 0.
+    kab_female_age_group_0_5_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 0-5"
+    )
+    kab_female_age_group_6_11_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 6-11"
+    )
+    kab_female_age_group_12_17_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 12-17"
+    )
+    kab_female_age_group_18_59_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 18-59"
+    )
+    kab_female_age_group_60_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 60+"
+    )
+    kab_male_age_group_0_5_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 0-5"
+    )
+    kab_male_age_group_6_11_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 6-11"
+    )
+    kab_male_age_group_12_17_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 12-17"
+    )
+    kab_male_age_group_18_59_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 18-59"
+    )
+    kab_male_age_group_60_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 60+"
+    )
+    kab_female_age_group_0_5_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 0-5 with disability"
+    )
+    kab_female_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 6-11 with disability"
+    )
+    kab_female_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 12-17 with disability"
+    )
+    kab_female_age_group_18_59_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 18-59 with disability"
+    )
+    kab_female_age_group_60_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: females aged 60+ with disability"
+    )
+    kab_male_age_group_0_5_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 0-5 with disability"
+    )
+    kab_male_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 6-11 with disability"
+    )
+    kab_male_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 12-17 with disability"
+    )
+    kab_male_age_group_18_59_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 18-59 with disability"
+    )
+    kab_male_age_group_60_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: males aged 60+ with disability"
+    )
+    kab_size = models.PositiveIntegerField(null=True, blank=True, help_text="Known affected beneficiaries: total count")
+    kab_pregnant_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: pregnant members"
+    )
+    kab_children_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: children (under 18)"
+    )
+    kab_female_children_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: female children (under 18)"
+    )
+    kab_male_children_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: male children (under 18)"
+    )
+    kab_children_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: children (under 18) with disability"
+    )
+    kab_female_children_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: female children (under 18) with disability"
+    )
+    kab_male_children_disabled_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: male children (under 18) with disability"
+    )
+    kab_other_sex_group_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: members with other sex"
+    )
+    kab_unknown_sex_group_count = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Known affected beneficiaries: members with sex not collected"
+    )
+
     returnee = models.BooleanField(null=True, blank=True, help_text="Household returnee status")
     fchild_hoh = models.BooleanField(null=True, blank=True, help_text="Female child headed household flag")
     child_hoh = models.BooleanField(null=True, blank=True, help_text="Child headed household flag")
