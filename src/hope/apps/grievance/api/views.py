@@ -47,6 +47,7 @@ from hope.apps.account.permissions import (
     check_permissions,
     has_creator_or_owner_permission,
 )
+from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaVisibilityMixin,
@@ -742,6 +743,13 @@ class GrievanceTicketGlobalViewSet(
             old_object=old_grievance_ticket,
             new_object=grievance_ticket,
         )
+        changes = create_diff(old_grievance_ticket, grievance_ticket, GrievanceTicket.ACTIVITY_LOG_MAPPING)
+        # user_modified is bumped on every update, so it does not count as a real change.
+        changes.pop("user_modified", None)
+        if changes:
+            GrievanceNotification.send_all_notifications(
+                [GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=user)]
+            )
         resp = GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request})
         return Response(resp.data, status.HTTP_200_OK)
 

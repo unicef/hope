@@ -1,5 +1,5 @@
 {% extends 'base_notification_email.txt' %}
 
 {% block content %}
-    You have been assigned to a Grievance & Feedback ticket {{ ticket_url }}. Please take action.
+    You have been assigned to a Grievance & Feedback ticket {% if ticket_url %}{{ ticket_url }}{% else %}{{ ticket_id }}{% endif %}. Please take action.
 {% endblock content %}

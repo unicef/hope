@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Any, Callable
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -49,6 +50,7 @@ from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
 )
+from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -1682,3 +1684,46 @@ def test_update_system_ticket_accepts_echoed_hope_channel(
     assert response.json()["submission_channel"] == SUBMISSION_CHANNEL_HOPE
     system_flagging_ticket_hope.refresh_from_db()
     assert system_flagging_ticket_hope.submission_channel == SUBMISSION_CHANNEL_HOPE
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_sends_ticket_updated_notification_on_change(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket: GrievanceTicket,
+    complaint_ticket_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+    owner = UserFactory()
+
+    client = api_client(user)
+    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
+        response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(owner.id)}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    sent_actions = [notification.action for call in mock_send.call_args_list for notification in call.args[0]]
+    assert GrievanceNotification.ACTION_TICKET_UPDATED in sent_actions
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_skips_notification_when_nothing_changed(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket: GrievanceTicket,
+    complaint_ticket_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
+        response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(user.id)}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    sent_actions = [notification.action for call in mock_send.call_args_list for notification in call.args[0]]
+    assert GrievanceNotification.ACTION_TICKET_UPDATED not in sent_actions

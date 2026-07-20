@@ -1,4 +1,6 @@
 from datetime import timedelta
+import json
+from typing import Any
 from unittest.mock import patch
 
 from constance.test import override_config
@@ -9,14 +11,17 @@ import pytest
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     GrievanceTicketFactory,
+    PartnerFactory,
+    PartnerRoleAssignmentFactory,
     RoleFactory,
     TicketNoteFactory,
     UserFactory,
     UserRoleAssignmentFactory,
 )
+from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.models import BusinessArea, User
+from hope.models import BusinessArea, Role, User
 
 pytestmark = pytest.mark.django_db
 
@@ -34,6 +39,37 @@ def assignee() -> User:
 @pytest.fixture
 def assigned_ticket(business_area: BusinessArea, assignee: User) -> GrievanceTicket:
     return GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+
+
+@pytest.fixture
+def creator() -> User:
+    return UserFactory(first_name="Cre", last_name="Ator", email="creator@example.com")
+
+
+@pytest.fixture
+def editor() -> User:
+    return UserFactory(first_name="Ed", last_name="Itor", email="editor@example.com")
+
+
+@pytest.fixture
+def sensitive_ticket(business_area: BusinessArea, assignee: User) -> GrievanceTicket:
+    return GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=assignee,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+    )
+
+
+@pytest.fixture
+def sensitive_role() -> Role:
+    return RoleFactory(
+        name="Sensitive Viewer",
+        permissions=[
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value,
+        ],
+    )
 
 
 def test_init_builds_recipients_and_emails_for_assignment_changed(
@@ -286,3 +322,152 @@ def test_send_all_notifications_sends_each(assigned_ticket: GrievanceTicket) -> 
         GrievanceNotification.send_all_notifications([notification])
 
     mock_send.assert_called_once()
+
+
+def test_sensitive_created_recipients_from_user_permission(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
+) -> None:
+    recipient = UserFactory(email="sensitive-viewer@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=sensitive_role, business_area=business_area)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_sensitive_created_recipients_match_on_either_permission(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket
+) -> None:
+    list_only_role = RoleFactory(
+        name="List Only Sensitive",
+        permissions=[Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value],
+    )
+    recipient = UserFactory(email="list-only@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=list_only_role, business_area=business_area)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_sensitive_created_recipients_from_partner_permission(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
+) -> None:
+    partner = PartnerFactory(name="Sensitive Partner")
+    PartnerRoleAssignmentFactory(partner=partner, role=sensitive_role, business_area=business_area)
+    recipient = UserFactory(email="partner-user@example.com", partner=partner)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
+def test_sensitive_created_recipients_excludes_assignee_expired_and_unpermitted(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role, assignee: User
+) -> None:
+    UserRoleAssignmentFactory(user=assignee, role=sensitive_role, business_area=business_area)
+
+    expired = UserFactory(email="expired-sensitive@example.com")
+    UserRoleAssignmentFactory(
+        user=expired,
+        role=sensitive_role,
+        business_area=business_area,
+        expiry_date=timezone.now() - timedelta(days=1),
+    )
+
+    unrelated_role = RoleFactory(name="No Sensitive", permissions=[Permissions.GRIEVANCES_CREATE.value])
+    unpermitted = UserFactory(email="no-sensitive@example.com")
+    UserRoleAssignmentFactory(user=unpermitted, role=unrelated_role, business_area=business_area)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_default_context_drops_url_for_sensitive_ticket(sensitive_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    context = notification._prepare_default_context(assignee)
+
+    assert context["ticket_url"] is None
+    assert context["ticket_id"] == sensitive_ticket.unicef_id
+
+
+def test_assignment_body_omits_link_for_sensitive_ticket(sensitive_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    text_body, html_body, _ = notification._prepare_assignment_changed_bodies(assignee)
+
+    assert "<a href" not in html_body
+    assert sensitive_ticket.unicef_id in html_body
+    assert "http" not in text_body
+
+
+def test_assignment_body_keeps_link_for_non_sensitive_ticket(assigned_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    _, html_body, _ = notification._prepare_assignment_changed_bodies(assignee)
+
+    assert "<a href" in html_body
+
+
+def test_ticket_updated_recipients_creator_and_assignee_exclude_editor(
+    business_area: BusinessArea, assignee: User, creator: User, editor: User
+) -> None:
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee, created_by=creator)
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=editor)
+
+    assert {user.id for user in notification.user_recipients} == {creator.id, assignee.id}
+
+
+def test_ticket_updated_recipients_exclude_editor_who_is_creator(
+    business_area: BusinessArea, assignee: User, creator: User
+) -> None:
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee, created_by=creator)
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=creator)
+
+    assert notification.user_recipients == [assignee]
+
+
+def test_ticket_updated_body_states_change_without_details(assigned_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_TICKET_UPDATED)
+
+    text_body, html_body, subject = notification._prepare_ticket_updated_bodies(assignee)
+
+    assert assigned_ticket.unicef_id in subject
+    assert "Changes have been made" in html_body
+    assert "Changes have been made" in text_body
+
+
+@patch("hope.apps.utils.celery_tasks.requests.post")
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
+def test_sensitive_ticket_payload_sent_to_mailjet_has_no_link(
+    mocked_requests_post: Any, sensitive_ticket: GrievanceTicket, assignee: User
+) -> None:
+    mocked_requests_post.return_value.status_code = 200
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    notification.send_email_notification()
+
+    message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
+    assert message["To"] == [{"Email": assignee.email}]
+    assert sensitive_ticket.unicef_id in message["HTMLPart"]
+    assert "<a href" not in message["HTMLPart"]
+    assert "http" not in message["TextPart"]
+
+
+@patch("hope.apps.utils.celery_tasks.requests.post")
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
+def test_non_sensitive_ticket_payload_sent_to_mailjet_keeps_link(
+    mocked_requests_post: Any, assigned_ticket: GrievanceTicket
+) -> None:
+    mocked_requests_post.return_value.status_code = 200
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    notification.send_email_notification()
+
+    message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
+    assert assigned_ticket.unicef_id in message["HTMLPart"]
+    assert "<a href" in message["HTMLPart"]
