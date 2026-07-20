@@ -17,22 +17,13 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hope.apps.core.notifications.events import SANCTION_LIST_CHECK_RESULTS_GENERATED
 from hope.apps.core.notifications.flags import bitcaster_enabled
-from hope.apps.core.notifications.payloads import EmailAttachmentPayload
-from hope.apps.core.notifications.publishers import (
-    BaseRenderedEmailNotificationService,
-    RenderedEmailNotification,
-    publish_rendered_email_notification,
-)
+from hope.apps.core.notifications.payloads import EmailAttachmentPayload, EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import SanctionListIndividual, UploadedXLSXFile
 
 if TYPE_CHECKING:
     from uuid import UUID
-
-
-class SanctionListCheckResultsEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "sanction_list/check_results.html"
-    text_template = "sanction_list/check_results.txt"
 
 
 class CheckAgainstSanctionListTask:
@@ -173,15 +164,12 @@ class CheckAgainstSanctionListTask:
         email.send_email()
 
         if bitcaster_enabled():
-            publish_rendered_email_notification(
-                RenderedEmailNotification(
-                    event_name=SANCTION_LIST_CHECK_RESULTS_GENERATED,
-                    service=SanctionListCheckResultsEmailNotificationService(),
-                    recipient_email=uploaded_file.associated_email,
+            publish_email_notification(
+                SANCTION_LIST_CHECK_RESULTS_GENERATED,
+                EmailPayload(
+                    recipients=[uploaded_file.associated_email],
                     subject=subject,
-                    html_body=html_body,
-                    text_body=text_body,
-                    ccs=[settings.SANCTION_LIST_CC_MAIL],
+                    cc=[settings.SANCTION_LIST_CC_MAIL],
                     context={
                         "results_count": len(results_dict),
                         "file_name": original_file_name,
@@ -189,7 +177,8 @@ class CheckAgainstSanctionListTask:
                         "title": "Sanction List Check",
                         "attachments": [asdict(attachment)],
                     },
-                )
+                ),
+                correlation_id=f"{SANCTION_LIST_CHECK_RESULTS_GENERATED}:{uploaded_file.id}",
             )
 
     def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]) -> None:

@@ -1779,19 +1779,19 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
     with mock.patch.object(User, "email_user") as mock_email_user:
         with mock.patch("hope.apps.payment.services.payment_plan_services.render_to_string") as mock_render_to_string:
             with mock.patch(
-                "hope.apps.payment.services.payment_plan_services.publish_rendered_email_notification"
+                "hope.apps.payment.services.payment_plan_services.publish_email_notification"
             ) as mock_publish:
                 mock_render_to_string.side_effect = ["rendered-html", "rendered-text"]
                 PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
                 mock_email_user.assert_called_once()
                 mock_publish.assert_called_once()
-                notification = mock_publish.call_args.args[0]
-                assert notification.recipient_email == user.email
+                event_name, notification = mock_publish.call_args.args
+                assert event_name == "payment.payment_plan.reconciliation_overdue"
+                assert mock_publish.call_args.kwargs["correlation_id"] == (
+                    f"payment.payment_plan.reconciliation_overdue:{pp.id}:{user.id}"
+                )
+                assert notification.recipients == [user.email]
                 assert notification.subject == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
-                assert notification.html_body == "rendered-html"
-                assert notification.text_body == "rendered-text"
-                assert notification.service.html_template == "payment/pp_reconciliation_overdue_email.html"
-                assert notification.service.text_template == "payment/pp_reconciliation_overdue_email.txt"
                 assert mock_render_to_string.call_count == 2
                 _args, kwargs = mock_render_to_string.call_args
                 context = kwargs["context"]
@@ -1875,7 +1875,7 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
 
     with (
         mock.patch.object(User, "email_user", autospec=True) as mock_email_user,
-        mock.patch("hope.apps.payment.services.payment_plan_services.publish_rendered_email_notification"),
+        mock.patch("hope.apps.payment.services.payment_plan_services.publish_email_notification"),
     ):
         PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
 

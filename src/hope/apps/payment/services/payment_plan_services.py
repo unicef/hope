@@ -28,7 +28,8 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.notifications.events import PAYMENT_PLAN_RECONCILIATION_OVERDUE
-from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
+from hope.apps.core.notifications.payloads import EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
@@ -43,7 +44,6 @@ from hope.apps.payment.celery_tasks import (
     update_exchange_rate_on_release_payments_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
-from hope.apps.payment.notifications import PaymentPlanReconciliationOverdueEmailNotificationService
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
@@ -1433,9 +1433,8 @@ class PaymentPlanService:
             users = users.exclude(is_superuser=True)
 
         if users:
-            notification_service = PaymentPlanReconciliationOverdueEmailNotificationService()
-            text_template = notification_service.text_template
-            html_template = notification_service.html_template
+            text_template = "payment/pp_reconciliation_overdue_email.txt"
+            html_template = "payment/pp_reconciliation_overdue_email.html"
 
             payment_plan_id = str(self.payment_plan.id)
             program_code = self.payment_plan.program.code
@@ -1462,14 +1461,12 @@ class PaymentPlanService:
                 html_body=html_body,
                 text_body=text_body,
             )
-            publish_rendered_email_notification(
-                RenderedEmailNotification(
-                    event_name=PAYMENT_PLAN_RECONCILIATION_OVERDUE,
-                    service=notification_service,
-                    recipient_email=user.email,
+            publish_email_notification(
+                PAYMENT_PLAN_RECONCILIATION_OVERDUE,
+                EmailPayload(
+                    recipients=[user.email],
                     subject=context["title"],
-                    html_body=html_body,
-                    text_body=text_body,
                     context=context,
-                )
+                ),
+                correlation_id=f"{PAYMENT_PLAN_RECONCILIATION_OVERDUE}:{self.payment_plan.id}:{user.id}",
             )

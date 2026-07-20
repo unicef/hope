@@ -9,7 +9,8 @@ from django.utils import timezone
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.notifications.events import PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT
 from hope.apps.core.notifications.flags import bitcaster_enabled
-from hope.apps.core.notifications.publishers import MailjetTemplateEmailEvent, publish_mailjet_template_email_event
+from hope.apps.core.notifications.payloads import EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import PDUOnlineEdit, RoleAssignment, User
 
@@ -118,26 +119,18 @@ class PDUOnlineEditNotification:
                 return
             if bitcaster_enabled():
                 try:
-                    publish_mailjet_template_email_event(
-                        MailjetTemplateEmailEvent(
-                            event_name=PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action],
-                            idempotency_key=(
-                                f"{PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action]}:"
-                                f"{self.pdu_online_edit.id}:{self.action}"
-                            ),
+                    publish_email_notification(
+                        PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action],
+                        EmailPayload(
                             recipients=self.email.recipients,
                             subject=self.email.subject,
-                            mailjet_template_id=config.MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION,
-                            variables=self.email.variables or {},
-                            ccs=self.email.ccs,
-                            metadata={
-                                "business_area": self.pdu_online_edit.business_area.slug,
-                                "program": self.pdu_online_edit.program.code,
-                                "pdu_online_edit_id": str(self.pdu_online_edit.id),
-                                "action": self.action,
-                                "source": "hope",
-                            },
-                        )
+                            context=self.email.variables or {},
+                            cc=self.email.ccs,
+                        ),
+                        correlation_id=(
+                            f"{PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action]}:"
+                            f"{self.pdu_online_edit.id}:{self.action}"
+                        ),
                     )
                 except Exception:
                     logger.exception("Failed to queue PDU Online Edit Bitcaster event")

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict
 import hashlib
 import json
 import logging
@@ -7,156 +7,56 @@ from typing import Any
 from django.core.serializers.json import DjangoJSONEncoder
 
 from hope.apps.core.notifications.flags import bitcaster_enabled
-from hope.apps.core.notifications.payloads import (
-    MailjetTemplateEmailPayloadData,
-    RenderedEmailPayloadData,
-    build_mailjet_template_email_payload,
-    build_rendered_email_payload,
-)
+from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.core.notifications.signals import bitcaster_event_signal
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
-class MailjetTemplateEmailEvent:
-    event_name: str
-    idempotency_key: str
-    recipients: list[str]
-    subject: str
-    mailjet_template_id: int
-    variables: dict[str, Any]
-    ccs: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass(frozen=True, kw_only=True)
-class RenderedEmailEvent:
-    event_name: str
-    idempotency_key: str
-    recipients: list[str]
-    subject: str
-    html_body: str
-    text_body: str
-    html_template: str
-    text_template: str
-    context: dict[str, Any]
-    ccs: list[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-
-class BaseRenderedEmailNotificationService:
-    html_template: str
-    text_template: str
-
-    def __init__(self) -> None:
-        if not getattr(self, "html_template", None):
-            raise NotImplementedError("html_template is required")
-        if not getattr(self, "text_template", None):
-            raise NotImplementedError("text_template is required")
-
-
-@dataclass(frozen=True, kw_only=True)
-class RenderedEmailNotification:
-    event_name: str
-    service: BaseRenderedEmailNotificationService
-    recipient_email: str
-    subject: str
-    html_body: str
-    text_body: str
-    context: dict[str, Any]
-    ccs: list[str] = field(default_factory=list)
-
-
-def publish_mailjet_template_email_event(event: MailjetTemplateEmailEvent) -> None:
-    payload = build_mailjet_template_email_payload(
-        MailjetTemplateEmailPayloadData(
-            idempotency_key=event.idempotency_key,
-            recipients=event.recipients,
-            subject=event.subject,
-            mailjet_template_id=event.mailjet_template_id,
-            variables=event.variables,
-            ccs=event.ccs,
-            metadata=event.metadata,
-        )
-    )
-    bitcaster_event_signal.send(
-        sender=publish_mailjet_template_email_event,
-        event_name=event.event_name,
-        payload=payload,
-    )
-
-
-def publish_rendered_email_event(event: RenderedEmailEvent) -> None:
-    payload = build_rendered_email_payload(
-        RenderedEmailPayloadData(
-            idempotency_key=event.idempotency_key,
-            recipients=event.recipients,
-            subject=event.subject,
-            html_body=event.html_body,
-            text_body=event.text_body,
-            html_template=event.html_template,
-            text_template=event.text_template,
-            context=event.context,
-            ccs=event.ccs,
-            metadata=event.metadata,
-        )
-    )
-    bitcaster_event_signal.send(
-        sender=publish_rendered_email_event,
-        event_name=event.event_name,
-        payload=payload,
-    )
-
-
-def publish_rendered_email_notification(notification: RenderedEmailNotification) -> None:
+def publish_email_notification(
+    event_name: str,
+    payload_data: EmailPayload,
+    correlation_id: str | None = None,
+) -> None:
     if not bitcaster_enabled():
         return
 
     try:
-        publish_rendered_email_event(
-            RenderedEmailEvent(
-                event_name=notification.event_name,
-                idempotency_key=_build_rendered_email_idempotency_key(notification),
-                recipients=[notification.recipient_email],
-                subject=notification.subject,
-                html_body=notification.html_body,
-                text_body=notification.text_body,
-                html_template=notification.service.html_template,
-                text_template=notification.service.text_template,
-                context=_json_safe_context(notification.context),
-                ccs=notification.ccs,
-                metadata={
-                    "source": "hope",
-                    "service": _get_service_path(notification.service),
-                },
-            )
-        )
+        _publish_email_notification(event_name, payload_data, correlation_id)
     except Exception:
-        logger.exception("Failed to queue rendered email Bitcaster event")
+        logger.exception("Failed to queue email Bitcaster event")
+
+
+def _publish_email_notification(
+    event_name: str,
+    payload_data: EmailPayload,
+    correlation_id: str | None = None,
+) -> None:
+    correlation_id = correlation_id or _build_email_correlation_id(event_name, payload_data)
+    payload = asdict(payload_data)
+    payload = _json_safe_context(payload)
+    bitcaster_event_signal.send(
+        sender=publish_email_notification,
+        event_name=event_name,
+        correlation_id=correlation_id,
+        payload=payload,
+    )
 
 
 def _json_safe_context(context: dict[str, Any]) -> dict[str, Any]:
     return json.loads(json.dumps(context, cls=DjangoJSONEncoder, default=str))
 
 
-def _build_rendered_email_idempotency_key(notification: RenderedEmailNotification) -> str:
-    source = "|".join(
-        [
-            _get_service_path(notification.service),
-            notification.recipient_email,
-            notification.service.html_template,
-            notification.service.text_template,
-            notification.subject,
-            notification.html_body,
-            notification.text_body,
-        ]
+def _build_email_correlation_id(event_name: str, payload_data: EmailPayload) -> str:
+    source = json.dumps(
+        {
+            "event_name": event_name,
+            "recipients": payload_data.recipients,
+            "subject": payload_data.subject,
+            "context": _json_safe_context(payload_data.context),
+            "cc": payload_data.cc,
+        },
+        sort_keys=True,
     )
     digest = hashlib.sha256(source.encode()).hexdigest()[:16]
-    return (
-        f"{notification.event_name}:{_get_service_path(notification.service)}:{notification.recipient_email}:{digest}"
-    )
-
-
-def _get_service_path(service: Any) -> str:
-    return f"{service.__class__.__module__}.{service.__class__.__name__}"
+    return f"{event_name}:{':'.join(payload_data.recipients)}:{digest}"

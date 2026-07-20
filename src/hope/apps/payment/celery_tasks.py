@@ -93,7 +93,12 @@ def create_payment_verification_plan_xlsx_async_task_action(job: AsyncRetryJob) 
     payment_verification_plan.save()
 
     if payment_verification_plan.business_area.enable_email_notification:
-        send_email_notification(service, user, event_name=PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED)
+        send_email_notification(
+            service,
+            user,
+            event_name=PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED,
+            correlation_id=f"{PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED}:{payment_verification_plan.id}:{user.id}",
+        )
 
 
 def create_payment_verification_plan_xlsx_async_task(
@@ -172,6 +177,7 @@ def create_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJob) 
                     service,
                     user,
                     event_name=PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED,
+                    correlation_id=f"{PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED}:{payment_plan.id}:{user.id}",
                 )
     except Exception:
         logger.exception("Create Payment Plan Generate XLSX Error")
@@ -284,7 +290,15 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 service.applied_export_tag is not None
                 and payment_plan_group.cycle.program.business_area.enable_email_notification
             ):
-                send_email_notification(service, user, event_name=PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED)
+                send_email_notification(
+                    service,
+                    user,
+                    event_name=PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED,
+                    correlation_id=(
+                        f"{PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED}:"
+                        f"{payment_plan_group.id}:{service.applied_export_tag}:{user.id}"
+                    ),
+                )
         except EmptyDeliveryExportError as exc:
             # Nothing was exportable (every plan skipped).
             logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
@@ -1165,6 +1179,7 @@ def export_pdf_payment_plan_summary_async_task_action(job: AsyncRetryJob) -> Non
                 service,
                 user,
                 event_name=PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED,
+                correlation_id=f"{PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED}:{payment_plan.id}:{user.id}",
             )
 
 

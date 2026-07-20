@@ -13,22 +13,8 @@ from hope.apps.core.notifications.bitcaster_client import BitcasterClient, Bitca
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.handlers import handle_bitcaster_event
 from hope.apps.core.notifications.notifier import NotificationBackend, get_notification_backend, send_notification_event
-from hope.apps.core.notifications.payloads import (
-    EmailAttachmentPayload,
-    MailjetTemplateEmailPayloadData,
-    RenderedEmailPayloadData,
-    build_mailjet_template_email_payload,
-    build_rendered_email_payload,
-)
-from hope.apps.core.notifications.publishers import (
-    BaseRenderedEmailNotificationService,
-    MailjetTemplateEmailEvent,
-    RenderedEmailEvent,
-    RenderedEmailNotification,
-    publish_mailjet_template_email_event,
-    publish_rendered_email_event,
-    publish_rendered_email_notification,
-)
+from hope.apps.core.notifications.payloads import EmailAttachmentPayload, EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.core.notifications.tasks import send_bitcaster_event_task
 
 pytestmark = pytest.mark.django_db
@@ -55,24 +41,26 @@ class FakeBitcasterSDKClient:
         self.transport.session.request("POST", "https://bitcaster.example.org/trigger/")
 
 
-def test_build_mailjet_template_email_payload_limits_bitcaster_delivery_to_recipients() -> None:
-    payload = build_mailjet_template_email_payload(
-        MailjetTemplateEmailPayloadData(
-            idempotency_key="event:1",
+def test_publish_email_notification_limits_bitcaster_delivery_to_recipients(mocker: Any) -> None:
+    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
+    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
+
+    publish_email_notification(
+        "test.email.sent",
+        EmailPayload(
             recipients=["first@example.org", "second@example.org"],
             subject="Subject",
-            mailjet_template_id=123,
-            variables={"name": "Jane"},
-            ccs=["actor@example.org"],
-            metadata={"source": "hope"},
-        )
+            context={"name": "Jane"},
+            cc=["actor@example.org"],
+        ),
+        correlation_id="event:1",
     )
 
-    assert payload["correlation_id"] == "event:1"
+    payload = mock_signal_send.call_args.kwargs["payload"]
+    assert mock_signal_send.call_args.kwargs["correlation_id"] == "event:1"
     assert payload["recipients"] == ["first@example.org", "second@example.org"]
     assert payload["cc"] == ["actor@example.org"]
-    assert payload["metadata"] == {"source": "hope"}
-    assert payload["options"] == {"limit_to": ["first@example.org", "second@example.org"]}
+    assert payload["context"] == {"name": "Jane"}
 
 
 def test_bitcaster_client_configures_sdk_request_timeout(mocker: Any) -> None:
@@ -123,53 +111,28 @@ def test_bitcaster_client_returns_false_when_unconfigured() -> None:
     assert client.trigger_event("payment.payment_plan.sent_for_approval", {"correlation_id": "event:1"}) is False
 
 
-def test_publish_mailjet_template_email_event_sends_payload_to_signal(mocker: Any) -> None:
+def test_publish_email_notification_sends_payload_to_signal(mocker: Any) -> None:
+    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
     mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
 
-    publish_mailjet_template_email_event(
-        MailjetTemplateEmailEvent(
-            event_name="payment.payment_plan.sent_for_approval",
-            idempotency_key="payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
+    publish_email_notification(
+        "payment.payment_plan.sent_for_approval",
+        EmailPayload(
             recipients=["approver@example.org"],
             subject="Payment pending for Approval",
-            mailjet_template_id=123,
-            variables={"payment_plan_id": "PP-1"},
-            ccs=["actor@example.org"],
-            metadata={"payment_plan_id": "1"},
-        )
+            context={"payment_plan_id": "PP-1"},
+            cc=["actor@example.org"],
+        ),
+        correlation_id="payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
     )
 
     payload = mock_signal_send.call_args.kwargs["payload"]
     mock_signal_send.assert_called_once()
     assert mock_signal_send.call_args.kwargs["event_name"] == "payment.payment_plan.sent_for_approval"
-    assert payload["idempotency_key"] == "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL"
-    assert payload["options"] == {"limit_to": ["approver@example.org"]}
-
-
-def test_build_rendered_email_payload_limits_bitcaster_delivery_to_recipients() -> None:
-    payload = build_rendered_email_payload(
-        RenderedEmailPayloadData(
-            idempotency_key="test.rendered_email.sent:service:1",
-            recipients=["user@example.org"],
-            subject="Rendered subject",
-            html_body="<p>Rendered</p>",
-            text_body="Rendered",
-            html_template="email.html",
-            text_template="email.txt",
-            context={"title": "Rendered subject"},
-            ccs=["cc@example.org"],
-            metadata={"service": "Service"},
-        )
+    assert mock_signal_send.call_args.kwargs["correlation_id"] == (
+        "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL"
     )
-
-    assert payload["correlation_id"] == "test.rendered_email.sent:service:1"
-    assert payload["provider"] == "rendered"
-    assert payload["recipients"] == ["user@example.org"]
-    assert payload["cc"] == ["cc@example.org"]
-    assert payload["html_template"] == "email.html"
-    assert payload["text_template"] == "email.txt"
-    assert payload["context"] == {"title": "Rendered subject"}
-    assert payload["options"] == {"limit_to": ["user@example.org"]}
+    assert payload["context"] == {"payment_plan_id": "PP-1"}
 
 
 def test_email_attachment_payload_serializes_with_asdict() -> None:
@@ -186,109 +149,76 @@ def test_email_attachment_payload_serializes_with_asdict() -> None:
     }
 
 
-def test_publish_rendered_email_event_sends_payload_to_signal(mocker: Any) -> None:
+def test_publish_email_notification_generates_idempotency_key(mocker: Any) -> None:
+    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
     mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
 
-    publish_rendered_email_event(
-        RenderedEmailEvent(
-            event_name="test.rendered_email.sent",
-            idempotency_key="test.rendered_email.sent:service:1",
+    publish_email_notification(
+        "test.email.sent",
+        EmailPayload(
             recipients=["user@example.org"],
             subject="Rendered subject",
-            html_body="<p>Rendered</p>",
-            text_body="Rendered",
-            html_template="email.html",
-            text_template="email.txt",
             context={"title": "Rendered subject"},
-            ccs=["cc@example.org"],
-            metadata={"service": "Service"},
-        )
+            cc=["cc@example.org"],
+        ),
     )
 
     payload = mock_signal_send.call_args.kwargs["payload"]
     mock_signal_send.assert_called_once()
-    assert mock_signal_send.call_args.kwargs["event_name"] == "test.rendered_email.sent"
-    assert payload["idempotency_key"] == "test.rendered_email.sent:service:1"
+    assert mock_signal_send.call_args.kwargs["event_name"] == "test.email.sent"
+    assert mock_signal_send.call_args.kwargs["correlation_id"].startswith("test.email.sent:user@example.org:")
     assert payload["cc"] == ["cc@example.org"]
-    assert payload["options"] == {"limit_to": ["user@example.org"]}
 
 
-def test_publish_rendered_email_notification_skips_when_flag_disabled(mocker: Any) -> None:
+def test_publish_email_notification_skips_when_flag_disabled(mocker: Any) -> None:
     mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=False)
-    mock_publish = mocker.patch("hope.apps.core.notifications.publishers.publish_rendered_email_event")
+    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
 
-    class RenderedEmailService(BaseRenderedEmailNotificationService):
-        html_template = "email.html"
-        text_template = "email.txt"
-
-    publish_rendered_email_notification(
-        RenderedEmailNotification(
-            event_name="test.rendered_email.sent",
-            service=RenderedEmailService(),
-            recipient_email="user@example.org",
-            subject="Rendered subject",
-            html_body="<p>Rendered</p>",
-            text_body="Rendered",
-            context={"title": "Rendered subject"},
-        )
+    publish_email_notification(
+        "test.email.sent",
+        EmailPayload(
+            recipients=["user@example.org"],
+            subject="Subject",
+            context={"title": "Subject"},
+        ),
     )
 
-    mock_publish.assert_not_called()
+    mock_signal_send.assert_not_called()
 
 
-def test_publish_rendered_email_notification_publishes_when_flag_enabled(mocker: Any) -> None:
+def test_publish_email_notification_publishes_when_flag_enabled(mocker: Any) -> None:
     mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
-    mock_publish = mocker.patch("hope.apps.core.notifications.publishers.publish_rendered_email_event")
+    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
 
-    class RenderedEmailService(BaseRenderedEmailNotificationService):
-        html_template = "email.html"
-        text_template = "email.txt"
-
-    RenderedEmailService.__module__ = "tests"
-    publish_rendered_email_notification(
-        RenderedEmailNotification(
-            event_name="test.rendered_email.sent",
-            service=RenderedEmailService(),
-            recipient_email="user@example.org",
-            subject="Rendered subject",
-            html_body="<p>Rendered</p>",
-            text_body="Rendered",
-            context={"title": "Rendered subject"},
-        )
+    publish_email_notification(
+        "test.email.sent",
+        EmailPayload(
+            recipients=["user@example.org"],
+            subject="Subject",
+            context={"title": "Subject"},
+        ),
     )
 
-    event = mock_publish.call_args.args[0]
-    assert event.event_name == "test.rendered_email.sent"
-    assert event.recipients == ["user@example.org"]
-    assert event.html_template == "email.html"
-    assert event.text_template == "email.txt"
-    assert event.metadata == {
-        "source": "hope",
-        "service": "tests.RenderedEmailService",
-    }
-    assert event.idempotency_key.startswith("test.rendered_email.sent:tests.RenderedEmailService:user@example.org:")
+    payload = mock_signal_send.call_args.kwargs["payload"]
+    assert mock_signal_send.call_args.kwargs["event_name"] == "test.email.sent"
+    assert payload["recipients"] == ["user@example.org"]
+    assert payload["subject"] == "Subject"
+    assert payload["context"] == {"title": "Subject"}
 
 
-def test_publish_rendered_email_notification_normalizes_context_to_json_safe_values(mocker: Any) -> None:
+def test_publish_email_notification_normalizes_context_to_json_safe_values(mocker: Any) -> None:
     mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
-    mock_publish = mocker.patch("hope.apps.core.notifications.publishers.publish_rendered_email_event")
+    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
 
     class UnknownContextValue:
         def __str__(self) -> str:
             return "unknown-context-value"
 
-    class RenderedEmailService(BaseRenderedEmailNotificationService):
-        html_template = "email.html"
-        text_template = "email.txt"
-
-    publish_rendered_email_notification(
-        RenderedEmailNotification(
-            event_name="test.rendered_email.sent",
-            service=RenderedEmailService(),
-            recipient_email="user@example.org",
-            subject="Rendered subject",
-            html_body="<p>Rendered</p>",
-            text_body="Rendered",
+    publish_email_notification(
+        "test.email.sent",
+        EmailPayload(
+            recipients=["user@example.org"],
+            subject="Subject",
             context={
                 "date": date(2050, 1, 2),
                 "expires_at": datetime(2050, 1, 1, 12, 30, 0),
@@ -301,11 +231,11 @@ def test_publish_rendered_email_notification_normalizes_context_to_json_safe_val
                     "custom": UnknownContextValue(),
                 },
             },
-        )
+        ),
     )
 
-    event = mock_publish.call_args.args[0]
-    assert event.context == {
+    payload = mock_signal_send.call_args.kwargs["payload"]
+    assert payload["context"] == {
         "date": "2050-01-02",
         "expires_at": "2050-01-01 12:30:00",
         "uuid": "12345678-1234-5678-1234-567812345678",
@@ -319,36 +249,21 @@ def test_publish_rendered_email_notification_normalizes_context_to_json_safe_val
     }
 
 
-def test_publish_rendered_email_notification_swallows_publish_error(mocker: Any) -> None:
+def test_publish_email_notification_swallows_publish_error(mocker: Any) -> None:
     mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
     mocker.patch(
-        "hope.apps.core.notifications.publishers.publish_rendered_email_event",
+        "hope.apps.core.notifications.publishers.bitcaster_event_signal.send",
         side_effect=RuntimeError("queue failed"),
     )
 
-    class RenderedEmailService(BaseRenderedEmailNotificationService):
-        html_template = "email.html"
-        text_template = "email.txt"
-
-    publish_rendered_email_notification(
-        RenderedEmailNotification(
-            event_name="test.rendered_email.sent",
-            service=RenderedEmailService(),
-            recipient_email="user@example.org",
-            subject="Rendered subject",
-            html_body="<p>Rendered</p>",
-            text_body="Rendered",
-            context={"title": "Rendered subject"},
-        )
+    publish_email_notification(
+        "test.email.sent",
+        EmailPayload(
+            recipients=["user@example.org"],
+            subject="Subject",
+            context={"title": "Subject"},
+        ),
     )
-
-
-def test_base_rendered_email_notification_service_requires_templates() -> None:
-    class MissingTextTemplateService(BaseRenderedEmailNotificationService):
-        html_template = "email.html"
-
-    with pytest.raises(NotImplementedError, match="text_template is required"):
-        MissingTextTemplateService()
 
 
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
@@ -364,6 +279,7 @@ def test_handle_bitcaster_event_skips_when_flag_disabled(mocker: Any) -> None:
         sender=None,
         event_name="payment.payment_plan.sent_for_approval",
         payload={"correlation_id": "1"},
+        correlation_id="1",
     )
 
     mock_delay.assert_not_called()
@@ -372,16 +288,20 @@ def test_handle_bitcaster_event_skips_when_flag_disabled(mocker: Any) -> None:
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
 def test_handle_bitcaster_event_queues_allowed_event(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
-    payload = {"correlation_id": "event:1"}
+    payload = {"recipients": ["user@example.org"]}
 
-    handle_bitcaster_event(sender=None, event_name="payment.payment_plan.sent_for_approval", payload=payload)
+    handle_bitcaster_event(
+        sender=None,
+        event_name="payment.payment_plan.sent_for_approval",
+        payload=payload,
+        correlation_id="event:1",
+    )
 
-    mock_delay.assert_called_once_with("payment.payment_plan.sent_for_approval", payload)
+    mock_delay.assert_called_once_with("payment.payment_plan.sent_for_approval", payload, "event:1")
 
 
 def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any) -> None:
     payload = {
-        "correlation_id": "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
         "options": {"limit_to": ["approver@example.org"]},
     }
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
@@ -391,7 +311,11 @@ def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any
     )
     mock_send = mocker.patch("hope.apps.core.notifications.tasks.send_notification_event", return_value=True)
 
-    send_bitcaster_event_task("payment.payment_plan.sent_for_approval", payload)
+    send_bitcaster_event_task(
+        "payment.payment_plan.sent_for_approval",
+        payload,
+        "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
+    )
 
     mock_send.assert_called_once_with(
         "payment.payment_plan.sent_for_approval",
@@ -405,7 +329,7 @@ def test_send_bitcaster_event_task_skips_when_flag_disabled(mocker: Any) -> None
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=False)
     mock_backend = mocker.patch("hope.apps.core.notifications.tasks.get_notification_backend")
 
-    send_bitcaster_event_task("payment.payment_plan.sent_for_approval", {"correlation_id": "1"})
+    send_bitcaster_event_task("payment.payment_plan.sent_for_approval", {}, "1")
 
     mock_backend.assert_not_called()
 
@@ -418,13 +342,13 @@ def test_send_bitcaster_event_task_skips_when_backend_not_configured(mocker: Any
     )
     mock_send = mocker.patch("hope.apps.core.notifications.tasks.send_notification_event")
 
-    send_bitcaster_event_task("payment.payment_plan.sent_for_approval", {"correlation_id": "1"})
+    send_bitcaster_event_task("payment.payment_plan.sent_for_approval", {}, "1")
 
     mock_send.assert_not_called()
 
 
 def test_send_bitcaster_event_task_retries_when_backend_returns_false(mocker: Any) -> None:
-    payload = {"correlation_id": "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL", "options": {}}
+    payload = {"options": {}}
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
     mocker.patch(
         "hope.apps.core.notifications.tasks.get_notification_backend",
@@ -434,13 +358,17 @@ def test_send_bitcaster_event_task_retries_when_backend_returns_false(mocker: An
     mock_retry = mocker.patch.object(send_bitcaster_event_task, "retry", side_effect=Retry())
 
     with pytest.raises(Retry):
-        send_bitcaster_event_task("payment.payment_plan.sent_for_approval", payload)
+        send_bitcaster_event_task(
+            "payment.payment_plan.sent_for_approval",
+            payload,
+            "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
+        )
 
     mock_retry.assert_called_once()
 
 
 def test_send_bitcaster_event_task_retries_unexpected_exception(mocker: Any) -> None:
-    payload = {"correlation_id": "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL", "options": {}}
+    payload = {"options": {}}
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
     mocker.patch(
         "hope.apps.core.notifications.tasks.get_notification_backend",
@@ -450,7 +378,11 @@ def test_send_bitcaster_event_task_retries_unexpected_exception(mocker: Any) -> 
     mock_retry = mocker.patch.object(send_bitcaster_event_task, "retry", side_effect=Retry())
 
     with pytest.raises(Retry):
-        send_bitcaster_event_task("payment.payment_plan.sent_for_approval", payload)
+        send_bitcaster_event_task(
+            "payment.payment_plan.sent_for_approval",
+            payload,
+            "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
+        )
 
     mock_retry.assert_called_once()
 

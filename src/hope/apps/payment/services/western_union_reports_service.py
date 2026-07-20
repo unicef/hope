@@ -28,9 +28,9 @@ from pypdf import PdfReader
 from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.notifications.events import PAYMENT_WESTERN_UNION_REPORT_GENERATED
-from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
+from hope.apps.core.notifications.payloads import EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.payment.celery_tasks import send_western_union_report_email_notifications_async_task
-from hope.apps.payment.notifications import WesternUnionReportEmailNotificationService
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 from hope.apps.payment.utils import get_link
 from hope.models import (
@@ -753,9 +753,8 @@ class WesternUnionReportsService:
             user for user in User.objects.all() if user.has_perm(Permissions.RECEIVE_PARSED_WU_QCF.name, business_area)
         ]
         if users:
-            notification_service = WesternUnionReportEmailNotificationService()
-            text_template = notification_service.text_template
-            html_template = notification_service.html_template
+            text_template = "payment/western_union_report_email.txt"
+            html_template = "payment/western_union_report_email.html"
 
             path_name = "download-payment-plan-invoice-report-pdf"
             payment_plan = report.payment_plan
@@ -785,16 +784,14 @@ class WesternUnionReportsService:
                 html_body=html_body,
                 text_body=text_body,
             )
-            publish_rendered_email_notification(
-                RenderedEmailNotification(
-                    event_name=PAYMENT_WESTERN_UNION_REPORT_GENERATED,
-                    service=notification_service,
-                    recipient_email=user.email,
+            publish_email_notification(
+                PAYMENT_WESTERN_UNION_REPORT_GENERATED,
+                EmailPayload(
+                    recipients=[user.email],
                     subject=context["title"],
-                    html_body=html_body,
-                    text_body=text_body,
                     context=context,
-                )
+                ),
+                correlation_id=f"{PAYMENT_WESTERN_UNION_REPORT_GENERATED}:{report.id}:{user.id}",
             )
 
 

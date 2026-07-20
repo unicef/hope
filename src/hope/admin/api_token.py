@@ -18,11 +18,8 @@ from smart_admin.modeladmin import SmartModelAdmin
 from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.core.notifications.events import API_TOKEN_ACTION_TO_BITCASTER_EVENT
-from hope.apps.core.notifications.publishers import (
-    BaseRenderedEmailNotificationService,
-    RenderedEmailNotification,
-    publish_rendered_email_notification,
-)
+from hope.apps.core.notifications.payloads import EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
 
@@ -33,10 +30,8 @@ EMAIL_ACTION_INFO = "info"
 EMAIL_ACTION_CREATED = "created"
 EMAIL_ACTION_UPDATED = "updated"
 
-
-class APITokenEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "admin/api_token_email.html"
-    text_template = "admin/api_token_email.txt"
+API_CREDENTIAL_EMAIL_HTML_TEMPLATE = "admin/api_token_email.html"
+API_CREDENTIAL_EMAIL_TEXT_TEMPLATE = "admin/api_token_email.txt"
 
 
 class APITokenForm(forms.ModelForm):
@@ -121,23 +116,21 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
                 "title": f"HOPE API Token {obj} infos",
                 "show_token_key": action != EMAIL_ACTION_UPDATED,
             }
-            text_body = render_to_string(APITokenEmailNotificationService.text_template, context=notification_context)
-            html_body = render_to_string(APITokenEmailNotificationService.html_template, context=notification_context)
+            text_body = render_to_string(API_CREDENTIAL_EMAIL_TEXT_TEMPLATE, context=notification_context)
+            html_body = render_to_string(API_CREDENTIAL_EMAIL_HTML_TEMPLATE, context=notification_context)
             user.email_user(
                 subject=notification_context["title"],
                 html_body=html_body,
                 text_body=text_body,
             )
-            publish_rendered_email_notification(
-                RenderedEmailNotification(
-                    event_name=API_TOKEN_ACTION_TO_BITCASTER_EVENT[action],
-                    service=APITokenEmailNotificationService(),
-                    recipient_email=user.email,
+            publish_email_notification(
+                API_TOKEN_ACTION_TO_BITCASTER_EVENT[action],
+                EmailPayload(
+                    recipients=[user.email],
                     subject=notification_context["title"],
-                    html_body=html_body,
-                    text_body=text_body,
                     context=notification_context,
-                )
+                ),
+                correlation_id=f"{API_TOKEN_ACTION_TO_BITCASTER_EVENT[action]}:{obj.id}:{action}",
             )
             self.message_user(request, f"Email sent to {obj.user.email}", messages.SUCCESS)
         except OSError:

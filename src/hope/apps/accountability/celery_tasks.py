@@ -26,7 +26,12 @@ def export_survey_sample_async_task_action(job: AsyncJob) -> None:
     service.export_sample()
 
     if survey.business_area.enable_email_notification:
-        send_email_notification(service, user, event_name=ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED)
+        send_email_notification(
+            service,
+            user,
+            event_name=ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED,
+            correlation_id=f"{ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED}:{survey.id}:{user.id}",
+        )
 
 
 def send_survey_to_users_async_task_action(job: AsyncJob) -> None:

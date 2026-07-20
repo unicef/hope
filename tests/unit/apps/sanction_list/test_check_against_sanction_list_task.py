@@ -257,17 +257,17 @@ def test_execute_publishes_bitcaster_notification_with_attachment_context(
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
     mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.bitcaster_enabled", return_value=True)
-    mock_publish = mocker.patch(
-        "hope.apps.sanction_list.tasks.check_against_sanction_list.publish_rendered_email_notification"
-    )
+    mock_publish = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.publish_email_notification")
     uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
 
     CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
 
-    notification = mock_publish.call_args.args[0]
+    event_name, notification = mock_publish.call_args.args
+    assert event_name == "sanction_list.check.results_generated"
+    assert mock_publish.call_args.kwargs["correlation_id"] == (f"sanction_list.check.results_generated:{uploaded.id}")
     attachment = notification.context["attachments"][0]
-    assert notification.recipient_email == "checker@example.com"
-    assert notification.ccs == [settings.SANCTION_LIST_CC_MAIL]
+    assert notification.recipients == ["checker@example.com"]
+    assert notification.cc == [settings.SANCTION_LIST_CC_MAIL]
     assert notification.context["results_count"] == 1
     assert notification.context["file_name"] == "check.xlsx"
     assert attachment["filename"] == f"{notification.subject}.xlsx"

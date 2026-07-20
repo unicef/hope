@@ -15,7 +15,7 @@ class NotifyError(Exception):
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
-def send_bitcaster_event_task(self: Task, event_name: str, payload: dict[str, Any]) -> None:
+def send_bitcaster_event_task(self: Task, event_name: str, payload: dict[str, Any], correlation_id: str) -> None:
     if not bitcaster_enabled():
         return
 
@@ -29,7 +29,7 @@ def send_bitcaster_event_task(self: Task, event_name: str, payload: dict[str, An
             event_name,
             payload,
             options=payload.get("options") or {},
-            cid=payload["correlation_id"],
+            cid=correlation_id,
         )
         if not success:
             logger.warning("Bitcaster client returned false for event '%s'.", event_name)

@@ -33,7 +33,8 @@ from PIL import Image
 import pytz
 from rest_framework.exceptions import ValidationError
 
-from hope.apps.core.notifications.publishers import RenderedEmailNotification, publish_rendered_email_notification
+from hope.apps.core.notifications.payloads import EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -616,8 +617,17 @@ def send_email_notification_on_commit(
     context_kwargs: dict | None = None,
     *,
     event_name: str,
+    correlation_id: str | None = None,
 ) -> None:
-    transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs, event_name=event_name))
+    transaction.on_commit(
+        lambda: send_email_notification(
+            service,
+            user,
+            context_kwargs,
+            event_name=event_name,
+            correlation_id=correlation_id,
+        )
+    )
 
 
 def send_email_notification(
@@ -626,6 +636,7 @@ def send_email_notification(
     context_kwargs: dict | None = None,
     *,
     event_name: str,
+    correlation_id: str | None = None,
 ) -> None:
     if context_kwargs:
         context = service.get_email_context(**context_kwargs)
@@ -640,16 +651,14 @@ def send_email_notification(
         html_body=html_body,
         text_body=text_body,
     )
-    publish_rendered_email_notification(
-        RenderedEmailNotification(
-            event_name=event_name,
-            service=service,
-            recipient_email=user.email,
+    publish_email_notification(
+        event_name,
+        EmailPayload(
+            recipients=[user.email],
             subject=subject,
-            html_body=html_body,
-            text_body=text_body,
             context=context,
-        )
+        ),
+        correlation_id=correlation_id,
     )
 
 

@@ -19,11 +19,8 @@ from hope.apps.core.notifications.events import (
     GRIEVANCE_SENSITIVE_REMINDER,
     GRIEVANCE_SYSTEM_FLAGGING_CREATED,
 )
-from hope.apps.core.notifications.publishers import (
-    BaseRenderedEmailNotificationService,
-    RenderedEmailNotification,
-    publish_rendered_email_notification,
-)
+from hope.apps.core.notifications.payloads import EmailPayload
+from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import RoleAssignment, User
@@ -33,40 +30,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
-class GrievanceAssignmentChangedEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "assignment_change_notification_email.html"
-    text_template = "assignment_change_notification_email.txt"
-
-
-class GrievanceUniversalCategoryCreatedEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "universal_category_created_notification_email.html"
-    text_template = "universal_category_created_notification_email.txt"
-
-
-class GrievanceSendBackToInProgressEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "send_back_to_in_progress_notification_email.html"
-    text_template = "send_back_to_in_progress_notification_email.txt"
-
-
-class GrievanceSendForApprovalEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "send_for_approve_notification_email.html"
-    text_template = "send_for_approve_notification_email.txt"
-
-
-class GrievanceNoteAddedEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "note_added_notification_email.html"
-    text_template = "note_added_notification_email.txt"
-
-
-class GrievanceOverdueEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "overdue_notification_email.html"
-    text_template = "overdue_notification_email.txt"
-
-
-class GrievanceSensitiveReminderEmailNotificationService(BaseRenderedEmailNotificationService):
-    html_template = "sensitive_reminder_notification_email.html"
-    text_template = "sensitive_reminder_notification_email.txt"
+type PreparedEmailPayload = tuple[str, EmailPayload, str]
 
 
 class GrievanceNotification:
@@ -104,7 +68,7 @@ class GrievanceNotification:
         func: Callable = GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action]
         return func(self)
 
-    def _prepare_emails(self) -> tuple[list[MailjetClient], list[RenderedEmailNotification]]:
+    def _prepare_emails(self) -> tuple[list[MailjetClient], list[PreparedEmailPayload]]:
         emails = []
         rendered_email_notifications = []
         if not self.user_recipients:
@@ -115,7 +79,7 @@ class GrievanceNotification:
             rendered_email_notifications.append(rendered_email_notification)
         return emails, rendered_email_notifications
 
-    def _prepare_email(self, user_recipient: "User") -> tuple[MailjetClient, RenderedEmailNotification]:
+    def _prepare_email(self, user_recipient: "User") -> tuple[MailjetClient, PreparedEmailPayload]:
         text_body, html_body, subject, context = self._prepare_rendered_email_data(user_recipient)
         email = MailjetClient(
             subject=subject,
@@ -123,15 +87,20 @@ class GrievanceNotification:
             html_body=html_body,
             text_body=text_body,
         )
-        notification_service = self._prepare_rendered_email_notification_service()
-        return email, RenderedEmailNotification(
-            event_name=GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action],
-            service=notification_service,
-            recipient_email=user_recipient.email,
-            subject=subject,
-            html_body=html_body,
-            text_body=text_body,
-            context=context,
+        return (
+            email,
+            (
+                GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action],
+                EmailPayload(
+                    recipients=[user_recipient.email],
+                    subject=subject,
+                    context=context,
+                ),
+                (
+                    f"{GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action]}:"
+                    f"{self.grievance_ticket.id}:{self.action}:{user_recipient.id}"
+                ),
+            ),
         )
 
     def send_email_notification(self) -> None:
@@ -141,21 +110,18 @@ class GrievanceNotification:
                     self.emails, self.rendered_email_notifications, strict=True
                 ):
                     email.send_email()
-                    publish_rendered_email_notification(rendered_email_notification)
+                    event_name, payload, correlation_id = rendered_email_notification
+                    publish_email_notification(event_name, payload, correlation_id=correlation_id)
             except Exception as e:
                 logger.exception(e)
-
-    def _prepare_rendered_email_notification_service(self) -> BaseRenderedEmailNotificationService:
-        service_cls = GrievanceNotification.ACTION_RENDERED_EMAIL_SERVICE_DICT[self.action]
-        return service_cls()
 
     def _prepare_rendered_email_data(self, user_recipient: "User") -> tuple[str, str, str, dict[str, Any]]:
         prepare_context_method = GrievanceNotification.ACTION_PREPARE_CONTEXT_DICT[self.action]
         prepare_subject_method = GrievanceNotification.ACTION_PREPARE_SUBJECT_DICT[self.action]
-        notification_service = self._prepare_rendered_email_notification_service()
+        text_template, html_template = GrievanceNotification.ACTION_EMAIL_TEMPLATE_DICT[self.action]
         context = prepare_context_method(self, user_recipient)
-        text_body = render_to_string(notification_service.text_template, context=context)
-        html_body = render_to_string(notification_service.html_template, context=context)
+        text_body = render_to_string(text_template, context=context)
+        html_body = render_to_string(html_template, context=context)
         return text_body, html_body, prepare_subject_method(self), context
 
     def _prepare_universal_category_created_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
@@ -205,11 +171,7 @@ class GrievanceNotification:
         return text_body, html_body, subject
 
     def _prepare_for_approval_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        notification_service = GrievanceSendForApprovalEmailNotificationService()
-        text_body = render_to_string(notification_service.text_template, context=context)
-        html_body = render_to_string(notification_service.html_template, context=context)
-        subject = self._prepare_for_approval_subject()
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
         return text_body, html_body, subject
 
     def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
@@ -308,17 +270,41 @@ class GrievanceNotification:
         ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_subject,
     }
 
-    ACTION_RENDERED_EMAIL_SERVICE_DICT = {
-        ACTION_ASSIGNMENT_CHANGED: GrievanceAssignmentChangedEmailNotificationService,
-        ACTION_SYSTEM_FLAGGING_CREATED: GrievanceUniversalCategoryCreatedEmailNotificationService,
-        ACTION_DEDUPLICATION_CREATED: GrievanceUniversalCategoryCreatedEmailNotificationService,
-        ACTION_PAYMENT_VERIFICATION_CREATED: GrievanceUniversalCategoryCreatedEmailNotificationService,
-        ACTION_SENSITIVE_CREATED: GrievanceUniversalCategoryCreatedEmailNotificationService,
-        ACTION_SEND_BACK_TO_IN_PROGRESS: GrievanceSendBackToInProgressEmailNotificationService,
-        ACTION_SEND_TO_APPROVAL: GrievanceSendForApprovalEmailNotificationService,
-        ACTION_NOTES_ADDED: GrievanceNoteAddedEmailNotificationService,
-        ACTION_OVERDUE: GrievanceOverdueEmailNotificationService,
-        ACTION_SENSITIVE_REMINDER: GrievanceSensitiveReminderEmailNotificationService,
+    ACTION_EMAIL_TEMPLATE_DICT = {
+        ACTION_ASSIGNMENT_CHANGED: (
+            "assignment_change_notification_email.txt",
+            "assignment_change_notification_email.html",
+        ),
+        ACTION_SYSTEM_FLAGGING_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_DEDUPLICATION_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_PAYMENT_VERIFICATION_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_SENSITIVE_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_SEND_BACK_TO_IN_PROGRESS: (
+            "send_back_to_in_progress_notification_email.txt",
+            "send_back_to_in_progress_notification_email.html",
+        ),
+        ACTION_SEND_TO_APPROVAL: (
+            "send_for_approve_notification_email.txt",
+            "send_for_approve_notification_email.html",
+        ),
+        ACTION_NOTES_ADDED: ("note_added_notification_email.txt", "note_added_notification_email.html"),
+        ACTION_OVERDUE: ("overdue_notification_email.txt", "overdue_notification_email.html"),
+        ACTION_SENSITIVE_REMINDER: (
+            "sensitive_reminder_notification_email.txt",
+            "sensitive_reminder_notification_email.html",
+        ),
     }
 
     ACTION_TO_BITCASTER_EVENT = {
