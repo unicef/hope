@@ -475,6 +475,7 @@ def test_group_payment_plan_list_export_tag_links_to_batch(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
@@ -501,6 +502,7 @@ def test_batch_detail_shows_download_button_when_file_present(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}/batches/1")
@@ -524,6 +526,7 @@ def test_batch_detail_shows_reexport_button_when_file_missing(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}/batches/1")
