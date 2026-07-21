@@ -105,17 +105,19 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
         try:
             user = obj.user
             context = self._get_email_context(request, obj)
+            show_token_key = action != EMAIL_ACTION_UPDATED
             notification_context = {
                 "friendly_name": context["friendly_name"],
                 "message": self._get_template_message(action).format(token_name=str(obj)),
                 "token_name": str(obj),
-                "token_key": obj.key,
                 "grants": obj.grants,
                 "expire": context["expire"],
                 "areas": context["areas"],
                 "title": f"HOPE API Token {obj} infos",
-                "show_token_key": action != EMAIL_ACTION_UPDATED,
+                "show_token_key": show_token_key,
             }
+            if show_token_key:
+                notification_context["token_key"] = obj.key
             text_body = render_to_string(API_CREDENTIAL_EMAIL_TEXT_TEMPLATE, context=notification_context)
             html_body = render_to_string(API_CREDENTIAL_EMAIL_HTML_TEMPLATE, context=notification_context)
             user.email_user(
