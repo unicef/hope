@@ -22,6 +22,8 @@ from hope.apps.household.const import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    UNHCR,
+    WFP,
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
@@ -166,7 +168,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     data["country"] = GeoCountry.objects.get(iso_code2=Country(country).code)
 
                 if is_identity:
-                    partner, _ = Partner.objects.get_or_create(name="WFP" if document_name == "scope_id" else "UNHCR")
+                    partner, _ = Partner.objects.get_or_create(name=WFP if document_name == "scope_id" else UNHCR)
                     identities.append(
                         PendingIndividualIdentity(
                             partner=partner,
