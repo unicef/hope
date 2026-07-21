@@ -69,11 +69,13 @@ class BulkActionService:
 
         self._clear_cache(business_area_slug)
 
-        GrievanceNotification.send_all_notifications(
-            [
-                GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=action_user)
-                for ticket in GrievanceTicket.objects.filter(id__in=reassigned_ids)
-            ]
+        transaction.on_commit(
+            lambda: GrievanceNotification.send_all_notifications(
+                [
+                    GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=action_user)
+                    for ticket in GrievanceTicket.objects.filter(id__in=reassigned_ids)
+                ]
+            )
         )
         return queryset
 
