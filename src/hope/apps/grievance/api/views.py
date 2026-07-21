@@ -1397,6 +1397,7 @@ class GrievanceTicketGlobalViewSet(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["assigned_to"],
             self.business_area_slug,  # type: ignore
+            action_user=request.user,
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,

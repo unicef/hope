@@ -1,4 +1,5 @@
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 from rest_framework.exceptions import ValidationError
@@ -11,6 +12,7 @@ from hope.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.models import BusinessArea, User
 
@@ -124,6 +126,50 @@ def test_bulk_update_assignee(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.assigned_to == user_two
     assert grievance_ticket1.status == GrievanceTicket.STATUS_FOR_APPROVAL
     assert grievance_ticket2.status == GrievanceTicket.STATUS_ASSIGNED
+
+
+def test_bulk_update_assignee_notifies_new_assignee(grievance_context: dict[str, Any]) -> None:
+    user = grievance_context["users"]["user"]
+    user_two = grievance_context["users"]["user_two"]
+    business_area = grievance_context["business_area"]
+    grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
+
+    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
+        BulkActionService().bulk_assign(
+            [grievance_ticket1.id, grievance_ticket2.id],
+            user_two.id,
+            business_area.slug,
+            action_user=user,
+        )
+
+    sent_notifications = mock_send.call_args.args[0]
+    assert {notification.action for notification in sent_notifications} == {
+        GrievanceNotification.ACTION_ASSIGNMENT_CHANGED
+    }
+    assert {notification.grievance_ticket.id for notification in sent_notifications} == {
+        grievance_ticket1.id,
+        grievance_ticket2.id,
+    }
+    assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
+
+
+def test_bulk_update_assignee_skips_notification_when_assignee_unchanged(grievance_context: dict[str, Any]) -> None:
+    user = grievance_context["users"]["user"]
+    user_two = grievance_context["users"]["user_two"]
+    business_area = grievance_context["business_area"]
+    _, _, _, grievance_ticket4 = grievance_context["grievance_tickets"]
+
+    assert grievance_ticket4.assigned_to == user_two
+
+    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
+        BulkActionService().bulk_assign(
+            [grievance_ticket4.id],
+            user_two.id,
+            business_area.slug,
+            action_user=user,
+        )
+
+    assert mock_send.call_args.args[0] == []
 
 
 def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:

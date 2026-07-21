@@ -165,41 +165,49 @@ class GrievanceNotification:
         return list(recipients.values())
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
-        # Approval permission depends on the ticket type, mirroring the approve_* actions on the viewset.
+        # Approval permission depends on the ticket type
         approve_permissions_by_category = {
             GrievanceTicket.CATEGORY_DATA_CHANGE: (
                 Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
                 Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
             ),
             GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: (
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ),
             GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: (
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ),
             GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: (
                 Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
                 Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
             ),
         }
         permissions = approve_permissions_by_category.get(self.grievance_ticket.category)
         if permissions is None:
             return User.objects.none()
-        base_permission, creator_permission = permissions
-        # Base-permission holders, plus the creator when they hold the creator-scoped approve permission.
-        creator_id = self.grievance_ticket.created_by_id
+        base_permission, creator_permission, owner_permission = permissions
+        # General-permission holders, plus the creator/owner when they hold their scoped approve permission.
         queryset = User.objects.filter(
             Q(pk__in=self._users_with_permissions([base_permission]).values("pk"))
-            | (Q(pk=creator_id) & Q(pk__in=self._users_with_permissions([creator_permission]).values("pk")))
+            | (
+                Q(pk=self.grievance_ticket.created_by_id)
+                & Q(pk__in=self._users_with_permissions([creator_permission]).values("pk"))
+            )
+            | (
+                Q(pk=self.grievance_ticket.assigned_to_id)
+                & Q(pk__in=self._users_with_permissions([owner_permission]).values("pk"))
+            )
         )
         # Never notify the user who sent the ticket for approval about their own action.
         editor = self.extra_data.get("editor")
         if editor is not None:
             queryset = queryset.exclude(id=editor.id)
-        if self.grievance_ticket.assigned_to:
-            queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
 
     def _prepare_sensitive_reminder_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
@@ -280,9 +288,14 @@ class GrievanceNotification:
         )
 
     def _prepare_assigned_to_recipient(self) -> "list[User] | None":
-        if self.grievance_ticket.assigned_to is None:
+        assigned_to = self.grievance_ticket.assigned_to
+        if assigned_to is None:
             return []
-        return [self.grievance_ticket.assigned_to]
+        # Never notify the user who performed the action about their own action.
+        editor = self.extra_data.get("editor")
+        if editor is not None and assigned_to.id == editor.id:
+            return []
+        return [assigned_to]
 
     ACTION_PREPARE_BODIES_DICT = {
         ACTION_ASSIGNMENT_CHANGED: _prepare_assignment_changed_bodies,
@@ -318,8 +331,13 @@ class GrievanceNotification:
     ) -> list["GrievanceNotification"]:
         notifications = []
         if grievance_ticket.assigned_to:
+            # created_by is the actor at creation; skip the assignment email when they assign to themselves.
             notifications.append(
-                GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+                GrievanceNotification(
+                    grievance_ticket,
+                    GrievanceNotification.ACTION_ASSIGNMENT_CHANGED,
+                    editor=grievance_ticket.created_by,
+                )
             )
         category_action_dict = {
             GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED,

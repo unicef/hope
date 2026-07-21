@@ -494,9 +494,11 @@ class GrievanceMutationMixin:
         self, approver: User, ticket: GrievanceTicket, assigned_to: User | None, messages: list
     ) -> None:
         if assigned_to != ticket.assigned_to:
-            messages.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
             self._set_status_based_on_assigned_to(approver, ticket, messages)
             ticket.assigned_to = assigned_to
+            messages.append(
+                GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=approver)
+            )
         elif ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
             ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
             messages.append(

@@ -11,6 +11,7 @@ from hope.apps.account.permissions import Permissions, check_creator_or_owner_pe
 from hope.apps.core.utils import clear_cache_for_key
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.ticket_status_changer_service import TicketStatusChangerService
 from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.models import User, log_create
@@ -49,11 +50,14 @@ class BulkActionService:
         tickets_ids: Sequence[str],
         assigned_to_id: str | None,
         business_area_slug: str,
+        action_user: User | None = None,
     ) -> QuerySet[GrievanceTicket]:
         user = get_object_or_404(User, id=assigned_to_id)
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
 
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
+        # Capture which tickets actually change assignee before the update, to notify only those new assignees.
+        reassigned_ids = list(queryset.exclude(assigned_to=user).values_list("id", flat=True))
 
         updated_count = queryset.update(assigned_to=user, updated_at=timezone.now())
         if updated_count != len(tickets_ids):
@@ -64,6 +68,13 @@ class BulkActionService:
         increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
 
         self._clear_cache(business_area_slug)
+
+        GrievanceNotification.send_all_notifications(
+            [
+                GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=action_user)
+                for ticket in GrievanceTicket.objects.filter(id__in=reassigned_ids)
+            ]
+        )
         return queryset
 
     @transaction.atomic

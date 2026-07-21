@@ -1711,6 +1711,34 @@ def test_update_grievance_ticket_sends_ticket_updated_notification_on_change(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_notifies_new_assignee(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket: GrievanceTicket,
+    complaint_ticket_detail_url: str,
+    create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+    owner = UserFactory(email="new-assignee@example.com")
+
+    client = api_client(user)
+    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(owner.id)}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    sent = [
+        (notification.action, [recipient.id for recipient in notification.user_recipients])
+        for call in mock_send.call_args_list
+        for notification in call.args[0]
+    ]
+    assert (GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, [owner.id]) in sent
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_sends_notification_even_when_values_unchanged(
     api_client: Any,
     user: User,
