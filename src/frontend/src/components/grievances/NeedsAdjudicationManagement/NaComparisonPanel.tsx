@@ -1,6 +1,7 @@
 import { BlackLink } from '@core/BlackLink';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { GrievanceIndividualPhotoModal } from '@components/grievances/GrievancesPhotoModals/GrievanceIndividualPhotoModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Box,
@@ -68,6 +69,18 @@ const comparisonRows: ComparisonRow[] = [
     label: 'Village',
     render: (i) => i?.household?.village || i?.household?.admin2?.name || '-',
     compare: (i) => i?.household?.village || i?.household?.admin2?.name || '',
+  },
+  {
+    label: 'Photo',
+    render: (i) =>
+      i?.id ? (
+        <GrievanceIndividualPhotoModal individualId={i.id} isCurrent />
+      ) : (
+        '-'
+      ),
+    // Photos are expected to differ between two distinct individuals, so
+    // don't apply the "differs" highlight to this row.
+    compare: () => '',
   },
 ];
 

@@ -1,5 +1,16 @@
+from io import BytesIO
+
+from django.core.files.base import ContentFile
+from PIL import Image
+
 from extras.test_utils.factories import GrievanceTicketFactory, TicketNeedsAdjudicationDetailsFactory
 from hope.models import Area, Individual, Program, RegistrationDataImport
+
+
+def _fake_photo(color: str) -> ContentFile:
+    buffer = BytesIO()
+    Image.new("RGB", (200, 200), color).save(buffer, format="JPEG")
+    return ContentFile(buffer.getvalue(), name="photo.jpg")
 
 
 def generate_fake_grievances() -> None:
@@ -9,6 +20,9 @@ def generate_fake_grievances() -> None:
     golden_records_individual = ind_qs[0]
     jan1 = ind_qs[1]
     jan2 = ind_qs[2]
+    golden_records_individual.photo.save("golden.jpg", _fake_photo("steelblue"), save=True)
+    jan1.photo.save("jan1.jpg", _fake_photo("indianred"), save=True)
+    jan2.photo.save("jan2.jpg", _fake_photo("darkseagreen"), save=True)
     ba = program.business_area
     rdi = RegistrationDataImport.objects.filter(business_area=ba).first()
     grievance = GrievanceTicketFactory(
