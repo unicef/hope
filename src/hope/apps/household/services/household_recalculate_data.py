@@ -67,7 +67,11 @@ AGE_GROUP_FIELDS: tuple[str, ...] = tuple(f for f in KAB_SOURCE_FIELDS if "_age_
 def recalculate_data(
     household: Household, save: bool = True, run_from_migration: bool = False
 ) -> tuple[Household, list[str]]:
-    household = Household.objects.select_for_update().get(id=household.id)
+    household = (
+        Household.objects.select_for_update(of=("self",))
+        .select_related("program__data_collecting_type")
+        .get(id=household.id)
+    )
 
     updated_fields: list[str] = []
     if household.program.data_collecting_type.recalculate_composition:
