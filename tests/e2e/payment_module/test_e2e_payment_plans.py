@@ -700,9 +700,8 @@ class TestPaymentPlans:
         page_payment_module.get_nav_payment_module().click()
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
-        page_payment_module_details.get_button_create_exclusions().click()
         with pytest.raises(ElementClickInterceptedException):
-            page_payment_module_details.get_button_save_exclusions().click()
+            page_payment_module_details.get_button_create_exclusions().click()
 
     def test_payment_plan_save_exclude_people(
         self,
