@@ -1791,7 +1791,6 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
                     f"payment.payment_plan.reconciliation_overdue:{pp.id}:{user.id}"
                 )
                 assert notification.recipients == [user.email]
-                assert notification.subject == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
                 assert mock_render_to_string.call_count == 2
                 _args, kwargs = mock_render_to_string.call_args
                 context = kwargs["context"]

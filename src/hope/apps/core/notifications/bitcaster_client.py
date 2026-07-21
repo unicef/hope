@@ -65,6 +65,7 @@ class BitcasterClient:
         return True
 
     def _configure_request_timeout(self, sdk_client: Any) -> None:
+        # Temporary workaround until https://github.com/bitcaster-io/bitcaster-sdk/pull/11 is released.
         original_request = sdk_client.transport.session.request
 
         def request_with_timeout(method: str, url: str, **kwargs: Any) -> Any:

@@ -383,7 +383,6 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             PAYMENT_PLAN_DELIVERY_PASSWORDS_SENT,
             EmailPayload(
                 recipients=[user.email],
-                subject=context["title"],
                 context=context,
             ),
             correlation_id=(

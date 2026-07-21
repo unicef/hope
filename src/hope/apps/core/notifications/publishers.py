@@ -52,7 +52,6 @@ def _build_email_correlation_id(event_name: str, payload_data: EmailPayload) -> 
         {
             "event_name": event_name,
             "recipients": payload_data.recipients,
-            "subject": payload_data.subject,
             "context": _json_safe_context(payload_data.context),
             "cc": payload_data.cc,
         },

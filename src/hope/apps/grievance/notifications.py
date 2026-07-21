@@ -94,7 +94,6 @@ class GrievanceNotification:
                 event_name,
                 EmailPayload(
                     recipients=[user_recipient.email],
-                    subject=subject,
                     context=context,
                 ),
                 self._prepare_correlation_id(event_name, user_recipient),
@@ -104,7 +103,9 @@ class GrievanceNotification:
     def _prepare_correlation_id(self, event_name: str, user_recipient: "User") -> str:
         parts = [event_name, str(self.grievance_ticket.id), str(self.action), str(user_recipient.id)]
         if self.action == GrievanceNotification.ACTION_NOTES_ADDED:
-            parts.append(str(self.extra_data["ticket_note"].id))
+            ticket_note = self.extra_data.get("ticket_note")
+            if ticket_note is not None:
+                parts.append(str(ticket_note.id))
         return ":".join(parts)
 
     def send_email_notification(self) -> None:
@@ -200,7 +201,7 @@ class GrievanceNotification:
         created_by = self.extra_data.get("created_by")
         ticket_note = self.extra_data.get("ticket_note")
         context["created_by"] = f"{created_by.first_name} {created_by.last_name}"
-        context["ticket_note_description"] = ticket_note.description
+        context["ticket_note_description"] = getattr(ticket_note, "description", "")
         return context
 
     def _prepare_send_back_to_in_progress_context(self, user_recipient: "User") -> dict[str, Any]:

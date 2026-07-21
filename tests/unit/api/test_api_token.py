@@ -86,6 +86,5 @@ def test_send_api_token(
         f"api.api_token.info_sent:{token.id}:info"
     )
     assert notification.recipients == [user.email]
-    assert notification.subject == f"HOPE API Token {token} infos"
     assert notification.context["token_key"] == token.key
     assert notification.context["show_token_key"] is True

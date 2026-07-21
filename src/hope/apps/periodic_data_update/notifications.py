@@ -8,7 +8,6 @@ from django.utils import timezone
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.notifications.events import PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT
-from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.utils.mailjet import MailjetClient
@@ -117,23 +116,17 @@ class PDUOnlineEditNotification:
             except Exception:
                 logger.exception("Failed to send PDU Online Edit notification")
                 return
-            if bitcaster_enabled():
-                try:
-                    publish_email_notification(
-                        PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action],
-                        EmailPayload(
-                            recipients=self.email.recipients,
-                            subject=self.email.subject,
-                            context=self.email.variables or {},
-                            cc=self.email.ccs,
-                        ),
-                        correlation_id=(
-                            f"{PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action]}:"
-                            f"{self.pdu_online_edit.id}:{self.action}"
-                        ),
-                    )
-                except Exception:
-                    logger.exception("Failed to queue PDU Online Edit Bitcaster event")
+            publish_email_notification(
+                PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action],
+                EmailPayload(
+                    recipients=self.email.recipients,
+                    context=self.email.variables or {},
+                    cc=self.email.ccs,
+                ),
+                correlation_id=(
+                    f"{PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT[self.action]}:{self.pdu_online_edit.id}:{self.action}"
+                ),
+            )
 
     def _prepare_body_variables(self) -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"

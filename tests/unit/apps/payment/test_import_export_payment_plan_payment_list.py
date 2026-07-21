@@ -838,7 +838,6 @@ def test_send_file_passwords_with_no_file_temp(user):
         f"payment.payment_plan.delivery_passwords_sent:missing:{user.id}"
     )
     assert notification.recipients == [user.email]
-    assert notification.subject == "Test Title file's Passwords"
     assert notification.context["title"] == "Test Title file's Passwords"
     call_kwargs = mock_email.call_args[1]
     assert "Test Title" in call_kwargs["subject"]

@@ -788,7 +788,6 @@ class WesternUnionReportsService:
                 PAYMENT_WESTERN_UNION_REPORT_GENERATED,
                 EmailPayload(
                     recipients=[user.email],
-                    subject=context["title"],
                     context=context,
                 ),
                 correlation_id=f"{PAYMENT_WESTERN_UNION_REPORT_GENERATED}:{report.id}:{user.id}",

@@ -1465,7 +1465,6 @@ class PaymentPlanService:
                 PAYMENT_PLAN_RECONCILIATION_OVERDUE,
                 EmailPayload(
                     recipients=[user.email],
-                    subject=context["title"],
                     context=context,
                 ),
                 correlation_id=f"{PAYMENT_PLAN_RECONCILIATION_OVERDUE}:{self.payment_plan.id}:{user.id}",

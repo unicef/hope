@@ -735,7 +735,6 @@ def test_send_email_notification_hands_context_to_notification_publisher(mocker)
     event_name, notification = mock_publish.call_args.args
     assert event_name == "test.email.sent"
     assert notification.recipients == [user.email]
-    assert notification.subject == "Hello"
     assert notification.context == {"title": "Hello"}
     assert mock_publish.call_args.kwargs["correlation_id"] is None
 
@@ -762,7 +761,6 @@ def test_send_email_notification_hands_service_metadata_to_notification_publishe
     event_name, notification = mock_publish.call_args.args
     assert event_name == "test.email.sent"
     assert notification.recipients == [user.email]
-    assert notification.subject == "Hello"
     assert notification.context == {"title": "Hello", "link": "https://example.org/file"}
 
 

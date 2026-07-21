@@ -1850,7 +1850,6 @@ def test_send_notification_emails_sends_to_users_with_permission(
         f"payment.western_union_report.generated:{report.id}:{user.id}"
     )
     assert notification.recipients == [user.email]
-    assert notification.subject == f"Payment Plan {report.report_file.file.name} Western Union report"
     render_to_string_mock.assert_any_call(
         "payment/western_union_report_email.html",
         context={

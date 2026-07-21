@@ -129,7 +129,6 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
                 API_TOKEN_ACTION_TO_BITCASTER_EVENT[action],
                 EmailPayload(
                     recipients=[user.email],
-                    subject=notification_context["title"],
                     context=notification_context,
                 ),
                 correlation_id=f"{API_TOKEN_ACTION_TO_BITCASTER_EVENT[action]}:{obj.id}:{action}",

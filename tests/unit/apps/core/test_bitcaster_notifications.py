@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from datetime import date, datetime
 from decimal import Decimal
 from types import SimpleNamespace
@@ -13,7 +12,7 @@ from hope.apps.core.notifications.bitcaster_client import BitcasterClient, Bitca
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.handlers import handle_bitcaster_event
 from hope.apps.core.notifications.notifier import NotificationBackend, get_notification_backend, send_notification_event
-from hope.apps.core.notifications.payloads import EmailAttachmentPayload, EmailPayload
+from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.core.notifications.tasks import send_bitcaster_event_task
 
@@ -49,7 +48,6 @@ def test_publish_email_notification_limits_bitcaster_delivery_to_recipients(mock
         "test.email.sent",
         EmailPayload(
             recipients=["first@example.org", "second@example.org"],
-            subject="Subject",
             context={"name": "Jane"},
             cc=["actor@example.org"],
         ),
@@ -119,7 +117,6 @@ def test_publish_email_notification_sends_payload_to_signal(mocker: Any) -> None
         "payment.payment_plan.sent_for_approval",
         EmailPayload(
             recipients=["approver@example.org"],
-            subject="Payment pending for Approval",
             context={"payment_plan_id": "PP-1"},
             cc=["actor@example.org"],
         ),
@@ -135,20 +132,6 @@ def test_publish_email_notification_sends_payload_to_signal(mocker: Any) -> None
     assert payload["context"] == {"payment_plan_id": "PP-1"}
 
 
-def test_email_attachment_payload_serializes_with_asdict() -> None:
-    attachment = EmailAttachmentPayload(
-        filename="results.xlsx",
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        base64_content="base64-content",
-    )
-
-    assert asdict(attachment) == {
-        "filename": "results.xlsx",
-        "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "base64_content": "base64-content",
-    }
-
-
 def test_publish_email_notification_generates_idempotency_key(mocker: Any) -> None:
     mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
     mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
@@ -157,7 +140,6 @@ def test_publish_email_notification_generates_idempotency_key(mocker: Any) -> No
         "test.email.sent",
         EmailPayload(
             recipients=["user@example.org"],
-            subject="Rendered subject",
             context={"title": "Rendered subject"},
             cc=["cc@example.org"],
         ),
@@ -178,7 +160,6 @@ def test_publish_email_notification_skips_when_flag_disabled(mocker: Any) -> Non
         "test.email.sent",
         EmailPayload(
             recipients=["user@example.org"],
-            subject="Subject",
             context={"title": "Subject"},
         ),
     )
@@ -194,7 +175,6 @@ def test_publish_email_notification_publishes_when_flag_enabled(mocker: Any) -> 
         "test.email.sent",
         EmailPayload(
             recipients=["user@example.org"],
-            subject="Subject",
             context={"title": "Subject"},
         ),
     )
@@ -202,7 +182,7 @@ def test_publish_email_notification_publishes_when_flag_enabled(mocker: Any) -> 
     payload = mock_signal_send.call_args.kwargs["payload"]
     assert mock_signal_send.call_args.kwargs["event_name"] == "test.email.sent"
     assert payload["recipients"] == ["user@example.org"]
-    assert payload["subject"] == "Subject"
+    assert "subject" not in payload
     assert payload["context"] == {"title": "Subject"}
 
 
@@ -218,7 +198,6 @@ def test_publish_email_notification_normalizes_context_to_json_safe_values(mocke
         "test.email.sent",
         EmailPayload(
             recipients=["user@example.org"],
-            subject="Subject",
             context={
                 "date": date(2050, 1, 2),
                 "expires_at": datetime(2050, 1, 1, 12, 30, 0),
@@ -260,7 +239,6 @@ def test_publish_email_notification_swallows_publish_error(mocker: Any) -> None:
         "test.email.sent",
         EmailPayload(
             recipients=["user@example.org"],
-            subject="Subject",
             context={"title": "Subject"},
         ),
     )

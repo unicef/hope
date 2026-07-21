@@ -655,7 +655,6 @@ def send_email_notification(
         event_name,
         EmailPayload(
             recipients=[user.email],
-            subject=subject,
             context=context,
         ),
         correlation_id=correlation_id,

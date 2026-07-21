@@ -227,6 +227,22 @@ def test_rendered_email_notification_context_uses_action_specific_context(
     assert payload.context["ticket_note_description"] == ticket_note.description
 
 
+def test_note_notification_tolerates_missing_ticket_note(
+    assigned_ticket: GrievanceTicket,
+    assignee: User,
+    note_author: User,
+) -> None:
+    notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+    )
+
+    _event_name, payload, correlation_id = notification.rendered_email_notifications[0]
+    assert payload.context["ticket_note_description"] == ""
+    assert correlation_id == (f"grievance.ticket.notes_added:{assigned_ticket.id}:{notification.action}:{assignee.id}")
+
+
 def test_different_notes_have_different_correlation_ids(
     assigned_ticket: GrievanceTicket,
     ticket_notes: tuple[TicketNote, TicketNote],
