@@ -133,11 +133,14 @@ class GrievanceNotification:
             .exclude(expiry_date__lt=timezone.now())
             .distinct()
         )
-        return self._exclude_unmailable(
+        users = self._exclude_unmailable(
             User.objects.filter(
                 Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
             )
-        ).distinct()
+        )
+        if settings.ENV == "prod":
+            users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
+        return users.distinct()
 
     def _prepare_permission_based_recipients(self) -> "QuerySet[User]":
         queryset = self._users_with_permissions(GrievanceNotification.ACTION_VIEW_PERMISSIONS[self.action])

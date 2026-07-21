@@ -206,6 +206,33 @@ def test_assignment_changed_recipient_excludes_editor_who_assigned_themselves(
     assert notification.user_recipients == []
 
 
+@override_settings(ENV="prod")
+def test_users_with_permissions_exclude_staff_and_superuser_in_prod(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
+) -> None:
+    staff = UserFactory(email="staff@example.com", is_staff=True)
+    UserRoleAssignmentFactory(user=staff, role=sensitive_role, business_area=business_area)
+
+    superuser = UserFactory(email="super@example.com", is_superuser=True)
+    UserRoleAssignmentFactory(user=superuser, role=sensitive_role, business_area=business_area)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == []
+
+
+@override_settings(ENV="prod")
+def test_users_with_permissions_keep_regular_users_in_prod(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
+) -> None:
+    recipient = UserFactory(email="regular@example.com")
+    UserRoleAssignmentFactory(user=recipient, role=sensitive_role, business_area=business_area)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert list(notification.user_recipients) == [recipient]
+
+
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=True)
 def test_default_context_uses_https_when_redirect_is_https(assigned_ticket: GrievanceTicket, assignee: User) -> None:
     notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
