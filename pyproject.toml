@@ -91,7 +91,7 @@ dependencies = [
   "openpyxl-image-loader>=1.0.5,<2",
   "paramiko>=4,<6",
   "phonenumbers>=8.12.49,<10",
-  "pillow>=10.2,<13",
+  "pillow>=12.3.0,<13",
   "prompt-toolkit>=3.0.29,<4",
   "psycopg2-binary>=2.9.3,<3",
   "ptyprocess>=0.7,<1",
@@ -198,7 +198,7 @@ docs = [
   "mkdocs-pdf-export-plugin>=0.5.10",
   "mkdocs-simple-hooks>=0.1.5",
   "mkdocstrings[python]>=0.24.1",
-  "pillow>=10.4",
+  "pillow>=12.3.0",
   "pymdown-extensions>=10.21.3",
   "requests>=2.32.3",
 ]
