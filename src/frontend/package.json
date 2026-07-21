@@ -59,7 +59,7 @@
     "string.prototype.replaceall": "^1.0.11",
     "styled-components": "6.4.2",
     "use-deep-compare-effect": "^1.8.1",
-    "uuid": "^13.0.2",
+    "uuid": "^14.0.1",
     "yup": "1.7.1"
   },
   "devDependencies": {
