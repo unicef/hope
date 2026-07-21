@@ -36,7 +36,7 @@ export const NaTicketListItem = ({
       borderBottom="1px solid rgba(0, 0, 0, 0.08)"
       display="flex"
       justifyContent="space-between"
-      alignItems="flex-start"
+      alignItems="stretch"
       sx={{
         cursor: 'pointer',
         backgroundColor: selected ? 'rgba(0, 0, 0, 0.06)' : 'transparent',
@@ -57,6 +57,17 @@ export const NaTicketListItem = ({
         <Typography variant="body2" color="textSecondary">
           <UniversalMoment>{ticket.createdAt}</UniversalMoment>
         </Typography>
+      </Box>
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="space-between"
+        alignItems="flex-end"
+      >
+        <StatusBox
+          status={urgencyLabel}
+          statusToColor={grievanceTicketBadgeColors}
+        />
         {managed && (
           <Typography
             variant="body2"
@@ -68,10 +79,6 @@ export const NaTicketListItem = ({
           </Typography>
         )}
       </Box>
-      <StatusBox
-        status={urgencyLabel}
-        statusToColor={grievanceTicketBadgeColors}
-      />
     </Box>
   );
 };
