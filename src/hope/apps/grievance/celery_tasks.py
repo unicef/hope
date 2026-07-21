@@ -10,7 +10,7 @@ from hope.apps.core.celery import app
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, Individual, PeriodicAsyncJob
+from hope.models import AsyncJob, AsyncRetryJob, Individual, PeriodicAsyncJob, User
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +63,33 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual_async_ta
         },
         group_key="grievance",
         description=f"Deduplicate and sanctions-check grievance individual {individual_id}",
+    )
+
+
+def bulk_assign_notifications_async_task_action(job: AsyncJob) -> None:
+    ticket_ids = job.config["ticket_ids"]
+    action_user_id = job.config.get("action_user_id")
+    action_user = User.objects.filter(id=action_user_id).first() if action_user_id else None
+    GrievanceNotification.send_all_notifications(
+        [
+            GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=action_user)
+            for ticket in GrievanceTicket.objects.filter(id__in=ticket_ids)
+        ]
+    )
+
+
+def bulk_assign_notifications_async_task(ticket_ids: list[str], action_user_id: str | None) -> None:
+    action_user_id = str(action_user_id) if action_user_id else None
+    AsyncJob.queue_task(
+        job_name=bulk_assign_notifications_async_task.__name__,
+        owner_id=action_user_id,
+        action="hope.apps.grievance.celery_tasks.bulk_assign_notifications_async_task_action",
+        config={
+            "ticket_ids": [str(ticket_id) for ticket_id in ticket_ids],
+            "action_user_id": action_user_id,
+        },
+        group_key="grievance",
+        description=f"Send assignment-change notifications for {len(ticket_ids)} grievance ticket(s)",
     )
 
 

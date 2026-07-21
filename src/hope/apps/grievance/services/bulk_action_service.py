@@ -9,9 +9,9 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions, check_creator_or_owner_permission
 from hope.apps.core.utils import clear_cache_for_key
+from hope.apps.grievance.celery_tasks import bulk_assign_notifications_async_task
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.ticket_status_changer_service import TicketStatusChangerService
 from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.models import User, log_create
@@ -69,14 +69,8 @@ class BulkActionService:
 
         self._clear_cache(business_area_slug)
 
-        transaction.on_commit(
-            lambda: GrievanceNotification.send_all_notifications(
-                [
-                    GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=action_user)
-                    for ticket in GrievanceTicket.objects.filter(id__in=reassigned_ids)
-                ]
-            )
-        )
+        if reassigned_ids:
+            bulk_assign_notifications_async_task(reassigned_ids, action_user.id if action_user else None)
         return queryset
 
     @transaction.atomic
