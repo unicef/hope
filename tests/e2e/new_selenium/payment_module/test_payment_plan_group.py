@@ -37,6 +37,56 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
+def plan_with_follow_up(program_cycle: ProgramCycle) -> tuple[PaymentPlan, PaymentPlan]:
+    """A source Payment Plan plus a follow-up child plan pointing at it.
+
+    The eye icon / Linked Payment Plans modal renders only when a plan's follow_ups
+    (child_plans with plan_type FOLLOW_UP) is non-empty, so the source plan is what
+    shows the eye icon and the follow-up is the record listed inside the modal.
+    """
+    ba = program_cycle.program.business_area
+    source = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        business_area=ba,
+        status=PaymentPlan.Status.FINISHED,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+    follow_up = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        business_area=ba,
+        status=PaymentPlan.Status.OPEN,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_payment_plan=source,
+    )
+    return source, follow_up
+
+
+def _assert_linked_plans_modal_opens_and_closes(
+    browser: HopeTestBrowser,
+    source: PaymentPlan,
+    follow_up: PaymentPlan,
+) -> None:
+    """Open the Linked Payment Plans modal via the eye icon, verify it lists the
+    linked follow-up plan, and close it — asserting neither click bubbles to the
+    ClickableTableRow and navigates to the plan details page (the stopPropagation fix)."""
+    browser.wait_for_text(source.unicef_id)
+    browser.wait_for_element_clickable('[data-cy="button-eye-linked-plans"]')
+    browser.click('[data-cy="button-eye-linked-plans"]')
+
+    browser.wait_for_element_visible('[data-cy="table-cell-linked-payment-plan-id"]')
+    browser.wait_for_text(follow_up.unicef_id, '[role="dialog"]')
+
+    # Regression guard: the eye click must not navigate to the plan details page,
+    # so the source plan id never appears in the URL while the modal is open.
+    assert str(source.id) not in browser.get_current_url()
+
+    # Close the modal; the Close click must also not bubble/navigate.
+    browser.click('[data-cy="button-close"]')
+    browser.wait_for_element_not_visible('[data-cy="table-cell-linked-payment-plan-id"]')
+    assert str(source.id) not in browser.get_current_url()
+
+
+@pytest.fixture
 def group_fsp() -> FinancialServiceProvider:
     return FinancialServiceProviderFactory(
         name="Group Delivery FSP",
@@ -530,3 +580,49 @@ def test_batch_detail_shows_reexport_button_when_file_missing(
 
         browser.wait_for_element_visible('[data-cy="button-export-batch"]')
         browser.assert_element_absent('[data-cy="button-download-batch"]')
+
+
+def test_linked_payment_plans_modal_on_cycle_details(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    plan_with_follow_up: tuple[PaymentPlan, PaymentPlan],
+) -> None:
+    source, follow_up = plan_with_follow_up
+    cycle = source.program_cycle
+    program = cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_VIEW_DETAILS,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/program-cycles/{cycle.id}")
+
+        _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
+
+
+def test_linked_payment_plans_modal_on_payment_plans_list(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    plan_with_follow_up: tuple[PaymentPlan, PaymentPlan],
+) -> None:
+    source, follow_up = plan_with_follow_up
+    program = source.program_cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_VIEW_DETAILS,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans")
+
+        _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
