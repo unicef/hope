@@ -6,12 +6,14 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NaTicketListItem } from './NaTicketListItem';
+import { NaMark } from './naTypes';
 
 interface NaTicketsListProps {
   tickets: GrievanceTicketList[];
   isLoading: boolean;
   choicesData?: GrievanceChoices;
   selectedTicketId: string | null;
+  marks: Record<string, NaMark>;
   onSelect: (id: string) => void;
   page: number;
   rowsPerPage: number;
@@ -25,6 +27,7 @@ export const NaTicketsList = ({
   isLoading,
   choicesData,
   selectedTicketId,
+  marks,
   onSelect,
   page,
   rowsPerPage,
@@ -66,6 +69,7 @@ export const NaTicketsList = ({
               ticket={ticket}
               urgencyChoices={urgencyChoices}
               selected={ticket.id === selectedTicketId}
+              managed={!!marks[ticket.id]}
               onSelect={() => onSelect(ticket.id)}
             />
           ))

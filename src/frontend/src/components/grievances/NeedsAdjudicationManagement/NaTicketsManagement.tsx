@@ -1,7 +1,7 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
@@ -16,6 +16,7 @@ import { useLocation } from 'react-router-dom';
 import { NaComparisonPanel } from './NaComparisonPanel';
 import { NaTicketsFilters } from './NaTicketsFilters';
 import { NaTicketsList } from './NaTicketsList';
+import { NaMark } from './naTypes';
 
 // Needs Adjudication category id (see GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION = '8')
 const NEEDS_ADJUDICATION_CATEGORY = Number(
@@ -58,6 +59,20 @@ export const NaTicketsManagement = ({
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+  // Session-local adjudication marks per ticket id (not persisted).
+  const [marks, setMarks] = useState<Record<string, NaMark>>({});
+
+  const setMark = (ticketId: string, mark: NaMark): void =>
+    setMarks((prev) => ({ ...prev, [ticketId]: mark }));
+
+  const clearMark = (ticketId: string): void =>
+    setMarks((prev) => {
+      const next = { ...prev };
+      delete next[ticketId];
+      return next;
+    });
+
+  const managedCount = Object.keys(marks).length;
 
   const queryVariables = useMemo(
     () => ({
@@ -150,15 +165,20 @@ export const NaTicketsManagement = ({
         ]}
         handleBack={onBack}
       >
-        {/* TODO: wire FINALIZE to the needs-adjudication resolution flow */}
-        <Button
-          variant="contained"
-          color="primary"
-          disabled
-          data-cy="button-na-finalize"
-        >
-          {t('Finalize')}
-        </Button>
+        <Box display="flex" alignItems="center" gap={4}>
+          <Typography variant="body2" data-cy="na-tickets-managed-count">
+            {t('Tickets managed')}: {managedCount}
+          </Typography>
+          {/* TODO: wire FINALIZE to the needs-adjudication resolution flow */}
+          <Button
+            variant="contained"
+            color="primary"
+            disabled
+            data-cy="button-na-finalize"
+          >
+            {t('Finalize')}
+          </Button>
+        </Box>
       </PageHeader>
       {choicesLoading ? (
         <LoadingComponent />
@@ -182,6 +202,7 @@ export const NaTicketsManagement = ({
                 isLoading={listLoading}
                 choicesData={choicesData}
                 selectedTicketId={selectedTicketId}
+                marks={marks}
                 onSelect={setSelectedTicketId}
                 page={page}
                 rowsPerPage={rowsPerPage}
@@ -194,7 +215,16 @@ export const NaTicketsManagement = ({
               />
             </Box>
             <Box flex={1}>
-              <NaComparisonPanel ticketId={selectedTicketId} />
+              <NaComparisonPanel
+                ticketId={selectedTicketId}
+                mark={selectedTicketId ? marks[selectedTicketId] : undefined}
+                onMark={(mark) => {
+                  if (selectedTicketId) setMark(selectedTicketId, mark);
+                }}
+                onClear={() => {
+                  if (selectedTicketId) clearMark(selectedTicketId);
+                }}
+              />
             </Box>
           </Box>
         </>

@@ -4,12 +4,14 @@ import { Box, Typography } from '@mui/material';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { grievanceTicketBadgeColors } from '@utils/utils';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getIssueTypeToDisplay } from '../utils/createGrievanceUtils';
 
 interface NaTicketListItemProps {
   ticket: GrievanceTicketList;
   urgencyChoices: Array<Record<string, any>>;
   selected: boolean;
+  managed: boolean;
   onSelect: () => void;
 }
 
@@ -17,8 +19,10 @@ export const NaTicketListItem = ({
   ticket,
   urgencyChoices,
   selected,
+  managed,
   onSelect,
 }: NaTicketListItemProps): ReactElement => {
+  const { t } = useTranslation();
   const urgencyLabel =
     urgencyChoices.find((choice) => choice.value === ticket.urgency)?.name ||
     '-';
@@ -53,6 +57,16 @@ export const NaTicketListItem = ({
         <Typography variant="body2" color="textSecondary">
           <UniversalMoment>{ticket.createdAt}</UniversalMoment>
         </Typography>
+        {managed && (
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            fontStyle="italic"
+            data-cy="na-ticket-managed-label"
+          >
+            {t('Ticket managed')}
+          </Typography>
+        )}
       </Box>
       <StatusBox
         status={urgencyLabel}
