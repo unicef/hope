@@ -38,5 +38,5 @@ class FollowUpInstructionAdmin(HOPEModelAdminBase):
         url = reverse("admin:payment_paymentplan_changelist")
         return HttpResponseRedirect(f"{url}?follow_up_instruction__id__exact={pk}")
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False

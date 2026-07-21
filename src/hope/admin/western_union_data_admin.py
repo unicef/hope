@@ -16,7 +16,7 @@ class WesternUnionDataAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     def matched_invoices_list(self, obj: WesternUnionData) -> str:
         return ", ".join(obj.matched_invoices.values_list("name", flat=True))
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False
 
     matched_invoices_list.short_description = "Matched Invoices"

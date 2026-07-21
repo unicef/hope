@@ -109,5 +109,5 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             success_message="Successfully activated.",
         )
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False

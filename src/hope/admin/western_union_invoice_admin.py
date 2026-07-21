@@ -78,5 +78,5 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
             return redirect(f"{request.path}?{query_params.urlencode()}")
         return super().changelist_view(request, extra_context)
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False

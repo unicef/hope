@@ -165,6 +165,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "total_undelivered_quantity_usd",
         "steficon_targeting_applied_date",
         "steficon_applied_date",
+        "plan_type",
         "export_tag",
         "exclude_household_error",
         "status_date",
@@ -329,7 +330,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             message="Do you confirm to send this payment plan to Vision?",
         )
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False
 
 
@@ -481,7 +482,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
             message="Do you confirm to restart importing reconciliation XLSX file task?",
         )
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False
 
 
@@ -627,7 +628,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             message="Do you confirm to Sync with Payment Gateway?",
         )
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False
 
 
@@ -642,5 +643,5 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
         "payment_plan",
     )
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False

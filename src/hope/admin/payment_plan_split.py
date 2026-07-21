@@ -24,5 +24,5 @@ class PaymentPlanSplitAdmin(HOPEModelAdminBase):
         "order",
     ]
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False

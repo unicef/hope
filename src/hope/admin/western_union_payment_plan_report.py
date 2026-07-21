@@ -23,5 +23,5 @@ class WesternUnionPaymentPlanReportAdmin(AutocompleteForeignKeyMixin, AdminFilte
 
     payment_plan_admin_link.short_description = "Payment Plan"
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self: Any, request: Any) -> bool:
         return False
