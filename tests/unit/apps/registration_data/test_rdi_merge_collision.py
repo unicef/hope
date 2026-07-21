@@ -167,6 +167,206 @@ def merged_household(
     return (household, (ind1, ind2))
 
 
+@pytest.fixture
+def pending_household_one(program: Program, in_review_rdi: RegistrationDataImport) -> Household:
+    individual = PendingIndividualFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="MULTI-IND-KEY-001",
+        registration_data_import=in_review_rdi,
+        household=None,
+        birth_date=datetime.date(2000, 1, 1),
+    )
+    household = PendingHouseholdFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=program.business_area,
+        program=program,
+        size=11,
+        identification_key="MULTI-HH-KEY-001",
+        registration_data_import=in_review_rdi,
+        head_of_household=individual,
+        create_role=False,
+    )
+    individual.household = household
+    individual.save(update_fields=["household"])
+    return household
+
+
+@pytest.fixture
+def pending_household_two(program: Program, in_review_rdi: RegistrationDataImport) -> Household:
+    individual = PendingIndividualFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="MULTI-IND-KEY-002",
+        registration_data_import=in_review_rdi,
+        household=None,
+        birth_date=datetime.date(2000, 1, 1),
+    )
+    household = PendingHouseholdFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=program.business_area,
+        program=program,
+        size=12,
+        identification_key="MULTI-HH-KEY-002",
+        registration_data_import=in_review_rdi,
+        head_of_household=individual,
+        create_role=False,
+    )
+    individual.household = household
+    individual.save(update_fields=["household"])
+    return household
+
+
+@pytest.fixture
+def pending_household_three(program: Program, in_review_rdi: RegistrationDataImport) -> Household:
+    individual = PendingIndividualFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="MULTI-IND-KEY-003",
+        registration_data_import=in_review_rdi,
+        household=None,
+        birth_date=datetime.date(2000, 1, 1),
+    )
+    household = PendingHouseholdFactory(
+        rdi_merge_status=MergeStatusModel.PENDING,
+        business_area=program.business_area,
+        program=program,
+        size=13,
+        identification_key="MULTI-HH-KEY-003",
+        registration_data_import=in_review_rdi,
+        head_of_household=individual,
+        create_role=False,
+    )
+    individual.household = household
+    individual.save(update_fields=["household"])
+    return household
+
+
+@pytest.fixture
+def merged_target_one(program: Program, merged_rdi: RegistrationDataImport) -> Household:
+    individual = IndividualFactory(
+        rdi_merge_status=MergeStatusModel.MERGED,
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="MULTI-IND-KEY-001",
+        registration_data_import=merged_rdi,
+        household=None,
+        birth_date=datetime.date(1990, 1, 1),
+    )
+    return HouseholdFactory(
+        rdi_merge_status=MergeStatusModel.MERGED,
+        business_area=program.business_area,
+        program=program,
+        size=1,
+        identification_key="MULTI-HH-KEY-001",
+        registration_data_import=merged_rdi,
+        head_of_household=individual,
+        create_role=False,
+    )
+
+
+@pytest.fixture
+def merged_target_two(program: Program, merged_rdi: RegistrationDataImport) -> Household:
+    individual = IndividualFactory(
+        rdi_merge_status=MergeStatusModel.MERGED,
+        business_area=program.business_area,
+        program=program,
+        sex=MALE,
+        identification_key="MULTI-IND-KEY-002",
+        registration_data_import=merged_rdi,
+        household=None,
+        birth_date=datetime.date(1990, 1, 1),
+    )
+    return HouseholdFactory(
+        rdi_merge_status=MergeStatusModel.MERGED,
+        business_area=program.business_area,
+        program=program,
+        size=1,
+        identification_key="MULTI-HH-KEY-002",
+        registration_data_import=merged_rdi,
+        head_of_household=individual,
+        create_role=False,
+    )
+
+
+def test_process_collisions_multiple_households(
+    program: Program,
+    pending_household_one: Household,
+    pending_household_two: Household,
+    pending_household_three: Household,
+    merged_target_one: Household,
+    merged_target_two: Household,
+    in_review_rdi: RegistrationDataImport,
+) -> None:
+    """Two of three pending households collide, each with a different merged target.
+
+    1. Colliding households are excluded from the merge list; the rest stay in it
+    2. Each merged target is updated with its colliding household's data and deleted sources
+    3. Every collided target gets the in-review RDI in extra_rdis
+    """
+    from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+    from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
+
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save(update_fields=["collision_detector"])
+    household_ids = [pending_household_one.id, pending_household_two.id, pending_household_three.id]
+
+    households_to_merge_ids, household_ids_to_exclude = RdiMergeTask()._process_collisions(in_review_rdi, household_ids)
+
+    assert households_to_merge_ids == [pending_household_three.id]
+    assert set(household_ids_to_exclude) == {pending_household_one.id, pending_household_two.id}
+
+    assert not Household.all_objects.filter(id=pending_household_one.id).exists()
+    assert not Household.all_objects.filter(id=pending_household_two.id).exists()
+    assert Household.all_objects.filter(id=pending_household_three.id).exists()
+
+    merged_target_one.refresh_from_db()
+    merged_target_two.refresh_from_db()
+    assert merged_target_one.size == 11
+    assert merged_target_two.size == 12
+
+    assert in_review_rdi in merged_target_one.extra_rdis.all()
+    assert in_review_rdi in merged_target_two.extra_rdis.all()
+
+
+def test_process_collisions_detection_query_count(
+    program: Program,
+    pending_household_one: Household,
+    pending_household_two: Household,
+    pending_household_three: Household,
+    in_review_rdi: RegistrationDataImport,
+    django_assert_num_queries: object,
+) -> None:
+    """Collision detection issues a constant number of queries regardless of household count.
+
+    One query fetches the chunk of pending households, one loads the program's
+    identification keys. A detector reading household fields outside .only("id",
+    "identification_key") would add one deferred-field query per household and
+    break this count.
+    """
+    from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+    from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
+
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save(update_fields=["collision_detector"])
+    household_ids = [pending_household_one.id, pending_household_two.id, pending_household_three.id]
+
+    with django_assert_num_queries(2):
+        households_to_merge_ids, household_ids_to_exclude = RdiMergeTask()._process_collisions(
+            in_review_rdi, household_ids
+        )
+
+    assert set(households_to_merge_ids) == set(household_ids)
+    assert household_ids_to_exclude == []
+
+
 def test_merge_rdi_with_collision(
     program: Program,
     pending_household: tuple[Household, Individual],
