@@ -81,6 +81,7 @@ class GrievanceNotification:
 
     def _prepare_email(self, user_recipient: "User") -> tuple[MailjetClient, PreparedEmailPayload]:
         text_body, html_body, subject, context = self._prepare_rendered_email_data(user_recipient)
+        event_name = GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action]
         email = MailjetClient(
             subject=subject,
             recipients=[user_recipient.email],
@@ -90,18 +91,21 @@ class GrievanceNotification:
         return (
             email,
             (
-                GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action],
+                event_name,
                 EmailPayload(
                     recipients=[user_recipient.email],
                     subject=subject,
                     context=context,
                 ),
-                (
-                    f"{GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action]}:"
-                    f"{self.grievance_ticket.id}:{self.action}:{user_recipient.id}"
-                ),
+                self._prepare_correlation_id(event_name, user_recipient),
             ),
         )
+
+    def _prepare_correlation_id(self, event_name: str, user_recipient: "User") -> str:
+        parts = [event_name, str(self.grievance_ticket.id), str(self.action), str(user_recipient.id)]
+        if self.action == GrievanceNotification.ACTION_NOTES_ADDED:
+            parts.append(str(self.extra_data["ticket_note"].id))
+        return ":".join(parts)
 
     def send_email_notification(self) -> None:
         if config.SEND_GRIEVANCES_NOTIFICATION and self.enable_email_notification:

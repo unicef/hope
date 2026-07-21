@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
     UserFactory,
     UserRoleAssignmentFactory,
 )
-from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.models import GrievanceTicket, TicketNote
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.models import BusinessArea, User
 
@@ -34,6 +34,16 @@ def assignee() -> User:
 @pytest.fixture
 def assigned_ticket(business_area: BusinessArea, assignee: User) -> GrievanceTicket:
     return GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+
+
+@pytest.fixture
+def ticket_notes(assigned_ticket: GrievanceTicket) -> tuple[TicketNote, TicketNote]:
+    return TicketNoteFactory(ticket=assigned_ticket), TicketNoteFactory(ticket=assigned_ticket)
+
+
+@pytest.fixture
+def note_author() -> User:
+    return UserFactory(first_name="Note", last_name="Author")
 
 
 def test_init_builds_recipients_and_emails_for_assignment_changed(
@@ -215,6 +225,56 @@ def test_rendered_email_notification_context_uses_action_specific_context(
     _event_name, payload, _correlation_id = notification.rendered_email_notifications[0]
     assert payload.context["created_by"] == "Note Author"
     assert payload.context["ticket_note_description"] == ticket_note.description
+
+
+def test_different_notes_have_different_correlation_ids(
+    assigned_ticket: GrievanceTicket,
+    ticket_notes: tuple[TicketNote, TicketNote],
+    note_author: User,
+) -> None:
+    first_note, second_note = ticket_notes
+
+    first_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=first_note,
+    )
+    second_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=second_note,
+    )
+
+    first_correlation_id = first_notification.rendered_email_notifications[0][2]
+    second_correlation_id = second_notification.rendered_email_notifications[0][2]
+    assert first_correlation_id != second_correlation_id
+
+
+def test_same_note_has_stable_correlation_id(
+    assigned_ticket: GrievanceTicket,
+    ticket_notes: tuple[TicketNote, TicketNote],
+    note_author: User,
+) -> None:
+    ticket_note = ticket_notes[0]
+
+    first_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=ticket_note,
+    )
+    retried_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=ticket_note,
+    )
+
+    first_correlation_id = first_notification.rendered_email_notifications[0][2]
+    retried_correlation_id = retried_notification.rendered_email_notifications[0][2]
+    assert first_correlation_id == retried_correlation_id
 
 
 def test_send_back_to_in_progress_body_uses_approver(assigned_ticket: GrievanceTicket, assignee: User) -> None:
