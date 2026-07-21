@@ -41,6 +41,7 @@ from hope.models import (
     Facility,
     ImportData,
     KoboImportedSubmission,
+    Partner,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -165,12 +166,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     data["country"] = GeoCountry.objects.get(iso_code2=Country(country).code)
 
                 if is_identity:
-                    partner = "WFP" if document_name == "scope_id" else "UNHCR"
+                    partner, _ = Partner.objects.get_or_create(name="WFP" if document_name == "scope_id" else "UNHCR")
                     identities.append(
                         PendingIndividualIdentity(
                             partner=partner,
                             individual=data["individual"],
-                            document_number=data.get("number", ""),
+                            number=data.get("number", ""),
                             country=data.get("country"),
                         )
                     )
