@@ -28,7 +28,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.11",
     "@mui/material": "^7.3.11",
-    "@mui/styled-engine-sc": "^7.3.10",
+    "@mui/styled-engine-sc": "^9.1.1",
     "@mui/system": "^7.3.11",
     "@mui/x-date-pickers": "^9.4.0",
     "@mui/x-tree-view": "8.27.2",
