@@ -2615,6 +2615,7 @@ class PaymentPlanGroupViewSet(
         serializer.is_valid(raise_exception=True)
         export_tag = serializer.validated_data["export_tag"]
         fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
+        plan_type = serializer.validated_data["plan_type"]
 
         if fsp_xlsx_template_id is not None:
             template = get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=fsp_xlsx_template_id)
@@ -2630,7 +2631,7 @@ class PaymentPlanGroupViewSet(
         else:
             exportable_plans = payment_plan_group.payment_plans.filter(
                 status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-                plan_type=PaymentPlan.PlanType.REGULAR,
+                plan_type=plan_type,
                 export_tag__isnull=True,
             )
             if not exportable_plans.exists():
@@ -2643,7 +2644,10 @@ class PaymentPlanGroupViewSet(
             # Reject up-front if every plan would be filtered out (e.g. no FSP XLSX template mapping),
             # so the user gets the error on click instead of a silently failing background task.
             exportable_ids = XlsxPaymentPlanGroupDeliveryExportService(
-                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
+                payment_plan_group,
+                fsp_xlsx_template_id=fsp_xlsx_template_id,
+                export_tag=export_tag,
+                plan_type=plan_type,
             ).preview_export()
             if not exportable_ids:
                 raise ValidationError(EmptyDeliveryExportError.MESSAGE)
@@ -2652,7 +2656,7 @@ class PaymentPlanGroupViewSet(
         payment_plan_group.save(update_fields=["background_action_status"])
         transaction.on_commit(
             lambda: export_payment_plan_group_delivery_xlsx_async_task(
-                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
+                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag, plan_type
             )
         )
         return Response(
@@ -2699,7 +2703,6 @@ class PaymentPlanGroupViewSet(
             raise ValidationError("Another background action is already in progress.")
         importable_plans = payment_plan_group.payment_plans.filter(
             status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-            plan_type=PaymentPlan.PlanType.REGULAR,
         )
         if not importable_plans.exists():
             raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")

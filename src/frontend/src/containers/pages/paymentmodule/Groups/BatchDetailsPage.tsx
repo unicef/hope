@@ -63,7 +63,7 @@ const BatchDetailsPage = (): ReactElement => {
 
   return (
     <>
-      <BatchDetailsHeader groupId={groupId} tag={tag} hasExportFile={hasExportFile} hasPassword={hasPassword} isBusy={isBusy} />
+      <BatchDetailsHeader groupId={groupId} tag={tag} planType={batch?.planType} hasExportFile={hasExportFile} hasPassword={hasPassword} isBusy={isBusy} />
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}
