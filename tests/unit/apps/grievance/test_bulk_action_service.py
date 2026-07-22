@@ -202,6 +202,28 @@ def test_bulk_assign_notifications_task_action_builds_notification_for_new_assig
     assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
 
 
+def test_bulk_assign_notifications_task_action_without_action_user(
+    grievance_context: dict[str, Any],
+) -> None:
+    user_two = grievance_context["users"]["user_two"]
+    grievance_ticket1, _, _, _ = grievance_context["grievance_tickets"]
+    grievance_ticket1.assigned_to = user_two
+    grievance_ticket1.save(update_fields=["assigned_to"])
+    job = SimpleNamespace(
+        config={
+            "ticket_ids": [str(grievance_ticket1.id)],
+            "action_user_id": None,
+        }
+    )
+
+    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
+        bulk_assign_notifications_async_task_action(job)
+
+    sent_notifications = mock_send.call_args.args[0]
+    assert all(notification.extra_data.get("editor") is None for notification in sent_notifications)
+    assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
+
+
 def test_bulk_assign_notifications_async_task_queues_job_with_serialized_config(
     grievance_context: dict[str, Any],
 ) -> None:

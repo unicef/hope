@@ -428,7 +428,7 @@ def test_send_back_to_in_progress_body_uses_approver(assigned_ticket: GrievanceT
 
 
 def test_for_approval_body(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
 
     text_body, html_body, subject = notification._prepare_for_approval_bodies(assignee)
 
@@ -648,6 +648,22 @@ def test_ticket_updated_recipients_exclude_editor_who_is_creator(
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=creator)
 
     assert notification.user_recipients == [assignee]
+
+
+def test_ticket_updated_recipients_dedupe_when_creator_is_assignee(business_area: BusinessArea, creator: User) -> None:
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=creator, created_by=creator)
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=UserFactory())
+
+    assert notification.user_recipients == [creator]
+
+
+def test_ticket_updated_recipients_empty_without_creator_or_assignee(business_area: BusinessArea) -> None:
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None, created_by=None)
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=UserFactory())
+
+    assert notification.user_recipients == []
 
 
 def test_ticket_updated_body_states_change_without_details(assigned_ticket: GrievanceTicket, assignee: User) -> None:
