@@ -206,7 +206,7 @@ def test_download_payment_plan_payment_list_redirects_with_permission(
 
 
 def test_download_payment_plan_payment_list_wrong_status_raises(rf, create_user_role_with_permissions, user):
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_LIST], payment_plan.business_area)
 
     request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan.id]))
