@@ -251,9 +251,13 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
         user = User.objects.get(pk=job.config["user_id"])
         export_tag = job.config.get("export_tag")
         fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
+        plan_type = job.config.get("plan_type")
         try:
             service = XlsxPaymentPlanGroupDeliveryExportService(
-                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
+                payment_plan_group,
+                fsp_xlsx_template_id=fsp_xlsx_template_id,
+                export_tag=export_tag,
+                plan_type=plan_type,
             )
             if service.payment_plans and service.payment_generate_token_and_order_numbers:
                 program = payment_plan_group.cycle.program
@@ -295,11 +299,14 @@ def export_payment_plan_group_delivery_xlsx_async_task(
     user_id: str,
     fsp_xlsx_template_id: str | None = None,
     export_tag: int | None = None,
+    plan_type: str | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
     config: dict = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
     if fsp_xlsx_template_id is not None:
         config["fsp_xlsx_template_id"] = fsp_xlsx_template_id
+    if plan_type is not None:
+        config["plan_type"] = plan_type
     if export_tag is not None:
         config["export_tag"] = export_tag
         description = f"Re-export payment plan group delivery xlsx batch {export_tag} for {payment_plan_group_id}"

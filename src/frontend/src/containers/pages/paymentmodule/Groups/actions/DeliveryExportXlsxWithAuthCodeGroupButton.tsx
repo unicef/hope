@@ -3,7 +3,10 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanGroupDetail } from '../types';
-import { isGroupBackgroundActionBusy } from '../utils';
+import {
+  exportablePlanTypeOptions,
+  isGroupBackgroundActionBusy,
+} from '../utils';
 import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';
 
 interface DeliveryExportXlsxWithAuthCodeGroupButtonProps {
@@ -24,10 +27,14 @@ export function DeliveryExportXlsxWithAuthCodeGroupButton({
     !hasPermissions(PERMISSIONS.PM_DOWNLOAD_FSP_AUTH_CODE, permissions)
   )
     return null;
+  const planTypeOptions = exportablePlanTypeOptions(group, t);
+
+  if (group && planTypeOptions.length === 0) return null;
 
   return (
     <GroupExportXlsxDialog
       groupId={group?.id ?? ''}
+      planTypeOptions={planTypeOptions}
       buttonLabel={t('Export with Auth Code')}
       dialogTitle={t('Export with Auth Code')}
       buttonVariant="outlined"
