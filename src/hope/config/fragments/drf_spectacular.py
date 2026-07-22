@@ -9,6 +9,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
     "ENUM_NAME_OVERRIDES": {
         "PaymentPlanStatusEnum": "hope.models.payment_plan.PaymentPlan.Status",
+        "PlanTypeEnum": "hope.models.payment_plan.PaymentPlan.PlanType",
         "PaymentStatusEnum": "hope.models.payment.Payment.STATUS_CHOICE",
         "ProgramStatusEnum": "hope.models.program.Program.STATUS_CHOICE",
         "GrievanceTicketStatusEnum": "hope.apps.grievance.models.GrievanceTicket.STATUS_CHOICES",

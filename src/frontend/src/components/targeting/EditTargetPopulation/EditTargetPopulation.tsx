@@ -1,6 +1,7 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
@@ -37,6 +38,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 interface EditTargetPopulationProps {
   paymentPlan: TargetPopulationDetail;
@@ -55,6 +57,7 @@ const EditTargetPopulation = ({
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const permissions = usePermissions();
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [modalCycle, setModalCycle] = useState<{ value: string; name: string }>(
     {
@@ -294,20 +297,24 @@ const EditTargetPopulation = ({
                     variant="outlined"
                     size="small"
                   />
-                  {paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && (
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => {
-                        setModalCycle(values.programCycleId);
-                        setCreateGroupModalOpen(true);
-                      }}
-                      data-cy="button-change-group"
-                      sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
-                    >
-                      {t('Change Group')}
-                    </Button>
-                  )}
+                  {paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN &&
+                    hasPermissions(
+                      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
+                      permissions,
+                    ) && (
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => {
+                          setModalCycle(values.programCycleId);
+                          setCreateGroupModalOpen(true);
+                        }}
+                        data-cy="button-change-group"
+                        sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                      >
+                        {t('Change Group')}
+                      </Button>
+                    )}
                 </Box>
               </Grid>
             </Grid>
