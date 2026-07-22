@@ -11,7 +11,20 @@ from extras.test_utils.factories import (
     IndividualFactory,
     ProgramFactory,
 )
-from hope.apps.household.const import COUSIN, FEMALE, HEAD
+from hope.apps.household.const import (
+    COUSIN,
+    DISABLED,
+    FEMALE,
+    HEAD,
+    MALE,
+    NON_BENEFICIARY,
+    NOT_COLLECTED,
+    OTHER,
+)
+from hope.apps.household.services.household_recalculate_data import (
+    _aggregate_composition,
+    aggregate_composition_by_household_id,
+)
 from hope.models import BusinessArea, Household
 
 pytestmark = pytest.mark.django_db
@@ -132,3 +145,57 @@ def test_backfill_copy_query_count_is_constant_per_batch(
     household_present.refresh_from_db()
 
     assert household_present.kab_size == 7
+
+
+@pytest.fixture
+def household_boundary_cases(make_household: Callable[..., Household]) -> Household:
+    """Every counter dimension plus birth dates exactly on the 6/18/60-year cutoffs,
+    so any divergence between the Python-date and SQL-interval cutoff arithmetic shows up."""
+    household = make_household(collects_individual_data=True)
+    household.last_registration_date = timezone.make_aware(datetime.datetime(2024, 1, 1))
+    household.save(update_fields=["last_registration_date"])
+
+    head = household.head_of_household
+    head.relationship = HEAD
+    head.sex = FEMALE
+    head.birth_date = datetime.date(2018, 1, 1)  # exactly 6 years before last_registration_date
+    head.withdrawn = False
+    head.duplicate = False
+    head.save()
+
+    common = {
+        "household": household,
+        "business_area": household.business_area,
+        "program": household.program,
+        "registration_data_import": household.registration_data_import,
+        "withdrawn": False,
+        "duplicate": False,
+    }
+    IndividualFactory(**common, relationship=COUSIN, sex=MALE, birth_date=datetime.date(2006, 1, 1))  # exactly 18y
+    IndividualFactory(**common, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(1964, 1, 1))  # exactly 60y
+    IndividualFactory(
+        **{**common, "disability": DISABLED}, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(2015, 1, 1)
+    )
+    IndividualFactory(**common, relationship=COUSIN, sex=FEMALE, birth_date=datetime.date(1990, 1, 1), pregnant=True)
+    IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=OTHER, birth_date=datetime.date(1990, 1, 1))
+    IndividualFactory(
+        **{**common, "withdrawn": True}, relationship=COUSIN, sex=NOT_COLLECTED, birth_date=datetime.date(1990, 1, 1)
+    )
+    IndividualFactory(
+        **{**common, "duplicate": True}, relationship=COUSIN, sex=MALE, birth_date=datetime.date(1990, 1, 1)
+    )
+    return household
+
+
+def test_batch_aggregate_matches_per_household_aggregate(household_boundary_cases: Household) -> None:
+    batch = aggregate_composition_by_household_id([household_boundary_cases.pk])[household_boundary_cases.pk]
+
+    assert batch == _aggregate_composition(household_boundary_cases)
+
+
+def test_backfill_result_matches_recalculate_aggregate(household_boundary_cases: Household) -> None:
+    call_command("backfill_kab")
+    household_boundary_cases.refresh_from_db()
+
+    expected = _aggregate_composition(household_boundary_cases)
+    assert {field: getattr(household_boundary_cases, f"kab_{field}") for field in expected} == expected

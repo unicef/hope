@@ -15,6 +15,7 @@ Households matching neither phase keep NULL KAB (unknown, by definition).
 from collections.abc import Iterator
 import functools
 import operator
+import time
 
 from django.core.management.base import BaseCommand, CommandParser
 from django.db.models import F, Q, QuerySet
@@ -62,11 +63,16 @@ class Command(BaseCommand):
             program_computed = 0
             households = Household.objects.filter(program_id=program_id)
             for pks in _pk_batches(households.filter(COMPOSITION_PRESENT), batch_size):
+                batch_start = time.monotonic()
                 program_copied += Household.objects.filter(pk__in=pks).update(**copy)
-                self.stdout.write(f"{prefix}: copied batch of {len(pks)}, total copied {program_copied}")
+                self.stdout.write(
+                    f"{prefix}: copied batch of {len(pks)} in {time.monotonic() - batch_start:.1f}s,"
+                    f" total copied {program_copied}"
+                )
             if collects_individual_data:
                 to_compute = households.filter(~COMPOSITION_PRESENT, kab_size__isnull=True)
                 for pks in _pk_batches(to_compute, batch_size):
+                    batch_start = time.monotonic()
                     # ponytail: no per-row lock/transaction — the backfill is idempotent and any
                     # concurrent write re-triggers recalculate_data for its household anyway.
                     counts = aggregate_composition_by_household_id(pks)
@@ -79,7 +85,10 @@ class Command(BaseCommand):
                         updates.append(household)
                     Household.objects.bulk_update(updates, KAB_FIELDS, batch_size=500)
                     program_computed += len(pks)
-                    self.stdout.write(f"{prefix}: computed batch of {len(pks)}, total computed {program_computed}")
+                    self.stdout.write(
+                        f"{prefix}: computed batch of {len(pks)} in {time.monotonic() - batch_start:.1f}s,"
+                        f" total computed {program_computed}"
+                    )
             copied += program_copied
             computed += program_computed
             self.stdout.write(f"{prefix}: done, copied {program_copied}, computed {program_computed}")
