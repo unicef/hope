@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -519,7 +520,7 @@ class GrievanceMutationMixin:
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
 
-        GrievanceNotification.send_all_notifications(messages)
+        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(messages))
         return grievance_ticket
 
     def _set_status_based_on_assigned_to(
