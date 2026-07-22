@@ -6,7 +6,10 @@ import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import BusinessAreaFactory, GrievanceTicketFactory, UserFactory
-from hope.apps.grievance.celery_tasks import bulk_assign_notifications_async_task_action
+from hope.apps.grievance.celery_tasks import (
+    bulk_assign_notifications_async_task,
+    bulk_assign_notifications_async_task_action,
+)
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_NOT_SET,
@@ -197,6 +200,32 @@ def test_bulk_assign_notifications_task_action_builds_notification_for_new_assig
         grievance_ticket2.id,
     }
     assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
+
+
+def test_bulk_assign_notifications_async_task_queues_job_with_serialized_config(
+    grievance_context: dict[str, Any],
+) -> None:
+    user = grievance_context["users"]["user"]
+    grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
+
+    with patch("hope.apps.grievance.celery_tasks.AsyncJob.queue_task") as mock_queue_task:
+        bulk_assign_notifications_async_task([grievance_ticket1.id, grievance_ticket2.id], user.id)
+
+    kwargs = mock_queue_task.call_args.kwargs
+    assert kwargs["config"]["ticket_ids"] == [str(grievance_ticket1.id), str(grievance_ticket2.id)]
+    assert kwargs["config"]["action_user_id"] == str(user.id)
+    assert kwargs["owner_id"] == str(user.id)
+    assert kwargs["group_key"] == "grievance"
+    assert kwargs["action"] == "hope.apps.grievance.celery_tasks.bulk_assign_notifications_async_task_action"
+
+
+def test_bulk_assign_notifications_async_task_queues_job_without_action_user() -> None:
+    with patch("hope.apps.grievance.celery_tasks.AsyncJob.queue_task") as mock_queue_task:
+        bulk_assign_notifications_async_task(["11111111-1111-1111-1111-111111111111"], None)
+
+    kwargs = mock_queue_task.call_args.kwargs
+    assert kwargs["config"]["action_user_id"] is None
+    assert kwargs["owner_id"] is None
 
 
 def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:

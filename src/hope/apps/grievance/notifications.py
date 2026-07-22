@@ -150,8 +150,11 @@ class GrievanceNotification:
                 [Permissions.PAYMENT_VERIFICATION_VIEW_LIST, Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
             )
             queryset = queryset.filter(pk__in=payment_users.values("pk"))
-        if self.grievance_ticket.assigned_to:
-            queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
+        # Assignee gets a dedicated assignment email; the editor is the user performing the creation.
+        editor = self.extra_data.get("editor")
+        exclude_ids = [user.id for user in (self.grievance_ticket.assigned_to, editor) if user]
+        if exclude_ids:
+            queryset = queryset.exclude(id__in=exclude_ids)
         return queryset.all()
 
     def _prepare_creator_and_assignee_recipients(self) -> "list[User]":
@@ -330,16 +333,18 @@ class GrievanceNotification:
 
     @classmethod
     def prepare_notification_for_ticket_creation(
-        cls: "GrievanceNotification", grievance_ticket: GrievanceTicket
+        cls: "GrievanceNotification", grievance_ticket: GrievanceTicket, actor: "User | None" = None
     ) -> list["GrievanceNotification"]:
+        # actor is the user performing the creation; falls back to created_by for system/unattributed paths.
+        editor = actor if actor is not None else grievance_ticket.created_by
         notifications = []
         if grievance_ticket.assigned_to:
-            # created_by is the actor at creation; skip the assignment email when they assign to themselves.
+            # Skip the assignment email when the actor assigns the ticket to themselves.
             notifications.append(
                 GrievanceNotification(
                     grievance_ticket,
                     GrievanceNotification.ACTION_ASSIGNMENT_CHANGED,
-                    editor=grievance_ticket.created_by,
+                    editor=editor,
                 )
             )
         category_action_dict = {
@@ -350,7 +355,7 @@ class GrievanceNotification:
         }
         action = category_action_dict.get(grievance_ticket.category)
         if action:
-            notifications.append(GrievanceNotification(grievance_ticket, action))
+            notifications.append(GrievanceNotification(grievance_ticket, action, editor=editor))
 
         return notifications
 

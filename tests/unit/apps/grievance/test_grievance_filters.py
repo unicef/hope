@@ -267,7 +267,7 @@ def tickets(
         priority=PRIORITY_HIGH,
         urgency=URGENCY_URGENT,
     )
-    ticket0.unicef_id = "GRV-0001"
+    ticket0.unicef_id = "GRV-SEARCH-TARGET"
     ticket0.save()
     ticket0.programs.add(program_afghanistan1)
 
@@ -684,6 +684,7 @@ def submission_channel_tickets(afghanistan: BusinessArea, program_afghanistan1: 
     return {"call_center": call_center_ticket, "suggestion_box": suggestion_box_ticket}
 
 
+@pytest.fixture
 def two_plain_tickets(afghanistan: BusinessArea) -> list:
     ticket1 = GrievanceTicketFactory(business_area=afghanistan)
     ticket1.unicef_id = "GRV-9001"
@@ -1506,7 +1507,7 @@ def test_filter_by_cross_area(
 @pytest.mark.parametrize(
     ("filter_value", "expected_count_for_program", "expected_count_for_global"),
     [
-        ("GRV-0001", 1, 1),
+        ("GRV-SEARCH-TARGET", 1, 1),
         ("HH-0001", 4, 4),
         ("IND-0002", 2, 5),
         ("Tom", 4, 4),

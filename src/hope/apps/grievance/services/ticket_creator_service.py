@@ -96,7 +96,7 @@ class TicketCreatorService:
         grievances = self._create_details(extras, grievance_ticket)
 
         GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket, actor=user)
         )
 
         for grievance in grievances:

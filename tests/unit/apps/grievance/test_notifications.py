@@ -233,6 +233,46 @@ def test_users_with_permissions_keep_regular_users_in_prod(
     assert list(notification.user_recipients) == [recipient]
 
 
+def test_sensitive_created_excludes_the_actor(
+    business_area: BusinessArea, sensitive_role: Role, assignee: User
+) -> None:
+    actor = UserFactory(email="creator-actor@example.com")
+    UserRoleAssignmentFactory(user=actor, role=sensitive_role, business_area=business_area)
+    other = UserFactory(email="other-viewer@example.com")
+    UserRoleAssignmentFactory(user=other, role=sensitive_role, business_area=business_area)
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=assignee,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED, editor=actor)
+
+    assert list(notification.user_recipients) == [other]
+
+
+def test_prepare_notification_for_ticket_creation_excludes_actor_from_sensitive_recipients(
+    business_area: BusinessArea, sensitive_role: Role
+) -> None:
+    actor = UserFactory(email="actor-clicker@example.com")
+    UserRoleAssignmentFactory(user=actor, role=sensitive_role, business_area=business_area)
+    other = UserFactory(email="other-sensitive-viewer@example.com")
+    UserRoleAssignmentFactory(user=other, role=sensitive_role, business_area=business_area)
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=None,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+    )
+
+    notifications = GrievanceNotification.prepare_notification_for_ticket_creation(ticket, actor=actor)
+
+    assert len(notifications) == 1
+    assert notifications[0].action == GrievanceNotification.ACTION_SENSITIVE_CREATED
+    assert list(notifications[0].user_recipients) == [other]
+
+
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=True)
 def test_default_context_uses_https_when_redirect_is_https(assigned_ticket: GrievanceTicket, assignee: User) -> None:
     notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
