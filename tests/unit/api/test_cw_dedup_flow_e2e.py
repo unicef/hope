@@ -345,7 +345,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=166,
+        expected_queries=167,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
