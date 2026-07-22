@@ -1,4 +1,7 @@
-import { isShowIssueType } from '@components/grievances/utils/createGrievanceUtils';
+import {
+  isShowIssueType,
+  SYSTEM_GENERATED_ISSUE_TYPES,
+} from '@components/grievances/utils/createGrievanceUtils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
 import { FiltersSection } from '@core/FiltersSection';
@@ -18,6 +21,7 @@ import { LanguageAutocompleteRestFilter } from '@shared/autocompletes/LanguageAu
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import {
+  GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
@@ -76,14 +80,22 @@ export const GrievancesFilters = ({
     '*',
   );
 
-  const categoryChoices = useMemo(
-    () =>
-      filter.grievanceType ===
-      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
-        ? choicesData.grievanceTicketManualCategoryChoices
-        : choicesData.grievanceTicketSystemCategoryChoices,
-    [choicesData, filter.grievanceType],
-  );
+  const isUserGeneratedTab =
+    filter.grievanceType ===
+    GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated];
+
+  const categoryChoices = useMemo(() => {
+    if (isUserGeneratedTab)
+      return choicesData.grievanceTicketManualCategoryChoices;
+    // Data Change is a manual category, but it also owns a system-generated issue type
+    // (Picture Error), so it has to be selectable on the system tab too.
+    const dataChangeCategory = choicesData.grievanceTicketCategoryChoices?.find(
+      (item) => item.value?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE,
+    );
+    return dataChangeCategory
+      ? [...choicesData.grievanceTicketSystemCategoryChoices, dataChangeCategory]
+      : choicesData.grievanceTicketSystemCategoryChoices;
+  }, [choicesData, isUserGeneratedTab]);
 
   const showIssueType = isShowIssueType(filter.category);
 
@@ -112,12 +124,18 @@ export const GrievancesFilters = ({
   const subCategoriesObj = issueTypeDict[filter.category]?.subCategories || [];
 
   // Transform to array of { name, value }
-  const subcategories = Object.entries(subCategoriesObj).map(
-    ([value, name]) => ({
+  const subcategories = Object.entries(subCategoriesObj)
+    .map(([value, name]) => ({
       name,
       value,
-    }),
-  );
+    }))
+    // Data Change shows on both tabs, so split its issue types by who creates them.
+    .filter(({ value }) => {
+      if (filter.category?.toString() !== GRIEVANCE_CATEGORIES.DATA_CHANGE)
+        return true;
+      const isSystemIssueType = SYSTEM_GENERATED_ISSUE_TYPES.includes(value);
+      return isUserGeneratedTab ? !isSystemIssueType : isSystemIssueType;
+    });
 
   return (
     <FiltersSection

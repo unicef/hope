@@ -18,33 +18,35 @@ def create_biometrics_photo_data_change_tickets(
         "individual1__household", "individual2__household", "individual1__program", "individual2__program"
     )
 
-    individuals_with_error: dict[str, Individual] = {}
+    errors: dict[str, tuple[Individual, str]] = {}
     for pair in deduplication_pairs:
         present = [individual for individual in (pair.individual1, pair.individual2) if individual]
         # Defensive: the engine only ever names one individual on a photo error.
         if len(present) != 1:
             continue
         individual = present[0]
-        individuals_with_error[str(individual.id)] = individual
+        errors[str(individual.id)] = (individual, f"{pair.status_code} - {pair.get_status_code_display()}")
 
-    if not individuals_with_error:
+    if not errors:
         return
 
     already_ticketed_ids = set(
         TicketIndividualDataUpdateDetails.objects.filter(
-            individual_id__in=individuals_with_error.keys(),
+            individual_id__in=errors.keys(),
             ticket__issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO,
         )
         .exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
         .values_list("individual_id", flat=True)
     )
 
-    for individual in individuals_with_error.values():
+    for individual, error_description in errors.values():
         if individual.id not in already_ticketed_ids:
-            _create_biometrics_photo_data_change_ticket(individual, rdi)
+            _create_biometrics_photo_data_change_ticket(individual, rdi, error_description)
 
 
-def _create_biometrics_photo_data_change_ticket(individual: Individual, rdi: RegistrationDataImport) -> None:
+def _create_biometrics_photo_data_change_ticket(
+    individual: Individual, rdi: RegistrationDataImport, error_description: str
+) -> None:
     household = individual.household
     ticket = GrievanceTicket.objects.create(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -55,7 +57,10 @@ def _create_biometrics_photo_data_change_ticket(individual: Individual, rdi: Reg
         registration_data_import=rdi,
         submission_channel=SUBMISSION_CHANNEL_HOPE,
         household_unicef_id=household.unicef_id if household else None,
-        description="Biometric deduplication could not read this individual's photo. Upload a valid photo to resolve.",
+        description=(
+            f"Biometric deduplication could not read this individual's photo "
+            f"({error_description}). Upload a valid photo to resolve."
+        ),
     )
     ticket.programs.set([individual.program])
 

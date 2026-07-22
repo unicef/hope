@@ -160,6 +160,17 @@ def test_single_sided_error_finding_creates_photo_data_change_ticket(
     }
 
 
+def test_ticket_description_reports_the_engine_status_code(one_bad_photo_context: dict[str, Any]) -> None:
+    rdi = one_bad_photo_context["rdi"]
+
+    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+
+    assert GrievanceTicket.objects.get().description == (
+        "Biometric deduplication could not read this individual's photo "
+        "(412 - No face detected). Upload a valid photo to resolve."
+    )
+
+
 def test_each_bad_photo_individual_gets_its_own_ticket(two_bad_photos_context: dict[str, Any]) -> None:
     rdi = two_bad_photos_context["rdi"]
     ind_a = two_bad_photos_context["ind_a"]

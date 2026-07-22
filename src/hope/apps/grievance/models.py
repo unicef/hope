@@ -542,7 +542,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         # System-generated tickets always use the HOPE channel; users cannot set it to anything else.
-        if self.category in self.SYSTEM_CATEGORY_CODES:
+        if self.category in self.SYSTEM_CATEGORY_CODES or self.issue_type in self.SYSTEM_ISSUE_TYPES:
             self.submission_channel = SUBMISSION_CHANNEL_HOPE
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:

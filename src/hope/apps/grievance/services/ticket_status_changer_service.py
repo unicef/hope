@@ -66,7 +66,7 @@ class TicketStatusChangerService:
         if self.ticket.issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO:
             return
         details = self.ticket.individual_data_update_ticket_details
-        photo = (details.individual_data or {}).get("photo", {}) if details else {}
+        photo = (details.individual_data or {}).get("photo", {})
         if not photo.get("value"):
             log_and_raise("A valid photo must be uploaded before this ticket can be sent for approval")
 

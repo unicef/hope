@@ -14,7 +14,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Typography } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isPermissionDeniedError, showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -32,6 +32,7 @@ const PictureErrorEditPage = (): ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
+  const queryClient = useQueryClient();
 
   const {
     data: ticket,
@@ -68,6 +69,15 @@ const PictureErrorEditPage = (): ReactElement => {
           id: data.id,
           formData: data.formData,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'businessAreasGrievanceTicketsRetrieve',
+            businessAreaSlug,
+            id,
+          ],
+        });
+      },
     });
 
   if (ticketLoading || currentUserDataLoading) return <LoadingComponent />;
