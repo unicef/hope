@@ -48,12 +48,15 @@ def pair_both_individuals_none(program: Any) -> Any:
     )
 
 
-def test_create_needs_adjudication_tickets_for_biometrics_raises_when_both_individuals_none(
+def test_create_needs_adjudication_tickets_for_biometrics_skips_pair_when_both_individuals_none(
     pair_both_individuals_none: Any,
     rdi: Any,
 ) -> None:
-    """When both individual1 and individual2 are None, an AttributeError is raised."""
+    """When both individual1 and individual2 are None, the pair is skipped."""
+    from hope.apps.grievance.models import GrievanceTicket
+
     pairs_qs = DeduplicationEngineSimilarityPair.objects.filter(id=pair_both_individuals_none.id)
 
-    with pytest.raises(AttributeError):
-        create_needs_adjudication_tickets_for_biometrics(pairs_qs, rdi)
+    create_needs_adjudication_tickets_for_biometrics(pairs_qs, rdi)
+
+    assert not GrievanceTicket.objects.exists()
