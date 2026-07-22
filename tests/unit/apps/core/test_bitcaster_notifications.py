@@ -11,7 +11,7 @@ import pytest
 from hope.apps.core.notifications.bitcaster_client import BitcasterClient, BitcasterClientConfig
 from hope.apps.core.notifications.flags import bitcaster_enabled
 from hope.apps.core.notifications.handlers import handle_bitcaster_event
-from hope.apps.core.notifications.notifier import NotificationBackend, get_notification_backend, send_notification_event
+from hope.apps.core.notifications.notifier import NotificationBackend, get_notification_backend
 from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.core.notifications.tasks import send_bitcaster_event_task
@@ -283,11 +283,11 @@ def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any
         "options": {"limit_to": ["approver@example.org"]},
     }
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
+    backend = SimpleNamespace(is_configured=True, trigger_event=mocker.Mock(return_value=True))
     mocker.patch(
         "hope.apps.core.notifications.tasks.get_notification_backend",
-        return_value=SimpleNamespace(is_configured=True),
+        return_value=backend,
     )
-    mock_send = mocker.patch("hope.apps.core.notifications.tasks.send_notification_event", return_value=True)
 
     send_bitcaster_event_task(
         "payment.payment_plan.sent_for_approval",
@@ -295,7 +295,7 @@ def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any
         "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
     )
 
-    mock_send.assert_called_once_with(
+    backend.trigger_event.assert_called_once_with(
         "payment.payment_plan.sent_for_approval",
         payload,
         options={"limit_to": ["approver@example.org"]},
@@ -314,25 +314,25 @@ def test_send_bitcaster_event_task_skips_when_flag_disabled(mocker: Any) -> None
 
 def test_send_bitcaster_event_task_skips_when_backend_not_configured(mocker: Any) -> None:
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
+    backend = SimpleNamespace(is_configured=False, trigger_event=mocker.Mock())
     mocker.patch(
         "hope.apps.core.notifications.tasks.get_notification_backend",
-        return_value=SimpleNamespace(is_configured=False),
+        return_value=backend,
     )
-    mock_send = mocker.patch("hope.apps.core.notifications.tasks.send_notification_event")
 
     send_bitcaster_event_task("payment.payment_plan.sent_for_approval", {}, "1")
 
-    mock_send.assert_not_called()
+    backend.trigger_event.assert_not_called()
 
 
 def test_send_bitcaster_event_task_retries_when_backend_returns_false(mocker: Any) -> None:
     payload = {"options": {}}
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
+    backend = SimpleNamespace(is_configured=True, trigger_event=mocker.Mock(return_value=False))
     mocker.patch(
         "hope.apps.core.notifications.tasks.get_notification_backend",
-        return_value=SimpleNamespace(is_configured=True),
+        return_value=backend,
     )
-    mocker.patch("hope.apps.core.notifications.tasks.send_notification_event", return_value=False)
     mock_retry = mocker.patch.object(send_bitcaster_event_task, "retry", side_effect=Retry())
 
     with pytest.raises(Retry):
@@ -343,16 +343,17 @@ def test_send_bitcaster_event_task_retries_when_backend_returns_false(mocker: An
         )
 
     mock_retry.assert_called_once()
+    assert isinstance(mock_retry.call_args.kwargs["exc"], RuntimeError)
 
 
 def test_send_bitcaster_event_task_retries_unexpected_exception(mocker: Any) -> None:
     payload = {"options": {}}
     mocker.patch("hope.apps.core.notifications.tasks.bitcaster_enabled", return_value=True)
+    backend = SimpleNamespace(is_configured=True, trigger_event=mocker.Mock(side_effect=RuntimeError("boom")))
     mocker.patch(
         "hope.apps.core.notifications.tasks.get_notification_backend",
-        return_value=SimpleNamespace(is_configured=True),
+        return_value=backend,
     )
-    mocker.patch("hope.apps.core.notifications.tasks.send_notification_event", side_effect=RuntimeError("boom"))
     mock_retry = mocker.patch.object(send_bitcaster_event_task, "retry", side_effect=Retry())
 
     with pytest.raises(Retry):
@@ -381,24 +382,3 @@ def test_notification_backend_protocol_stub_methods_are_covered() -> None:
             options={"limit_to": ["user@example.org"]},
             cid="1",
         )
-
-
-def test_send_notification_event_delegates_to_backend(mocker: Any) -> None:
-    backend = SimpleNamespace(trigger_event=mocker.Mock(return_value=True))
-    mocker.patch("hope.apps.core.notifications.notifier.get_notification_backend", return_value=backend)
-
-    assert (
-        send_notification_event(
-            "payment.payment_plan.sent_for_approval",
-            {"correlation_id": "1"},
-            options={"limit_to": ["user@example.org"]},
-            cid="1",
-        )
-        is True
-    )
-    backend.trigger_event.assert_called_once_with(
-        "payment.payment_plan.sent_for_approval",
-        {"correlation_id": "1"},
-        options={"limit_to": ["user@example.org"]},
-        cid="1",
-    )
