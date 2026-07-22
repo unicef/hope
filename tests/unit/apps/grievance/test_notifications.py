@@ -1144,6 +1144,7 @@ def test_for_approval_recipients_for_sensitive_target_close_permission_holders(
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
         assigned_to=None,
     )
 
@@ -1161,6 +1162,7 @@ def test_for_approval_recipients_for_complaint_target_close_permission_holders(
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
         assigned_to=None,
     )
 
@@ -1178,6 +1180,7 @@ def test_for_approval_recipients_for_sensitive_exclude_holders_without_close_per
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
         assigned_to=None,
     )
 
@@ -1195,6 +1198,7 @@ def test_for_approval_recipients_for_sensitive_include_creator_with_as_creator_c
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
         created_by=creator,
         assigned_to=None,
     )
@@ -1215,6 +1219,7 @@ def test_for_approval_recipients_for_sensitive_exclude_editor_who_performed_the_
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
         assigned_to=None,
     )
 
