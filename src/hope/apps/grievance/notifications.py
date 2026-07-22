@@ -193,6 +193,16 @@ class GrievanceNotification:
                 Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
                 Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
             ),
+            GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: (
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+            ),
+            GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: (
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+            ),
         }
         permissions = approve_permissions_by_category.get(self.grievance_ticket.category)
         if permissions is None:

@@ -170,6 +170,22 @@ def approve_data_change_as_owner_role() -> Role:
     )
 
 
+@pytest.fixture
+def close_ticket_role() -> Role:
+    return RoleFactory(
+        name="Ticket Closer",
+        permissions=[Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK.value],
+    )
+
+
+@pytest.fixture
+def close_ticket_as_creator_role() -> Role:
+    return RoleFactory(
+        name="Ticket Closer Creator",
+        permissions=[Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR.value],
+    )
+
+
 def test_init_builds_recipients_and_emails_for_assignment_changed(
     assigned_ticket: GrievanceTicket, assignee: User
 ) -> None:
@@ -1117,3 +1133,91 @@ def test_for_approval_recipients_exclude_editor_who_performed_the_action(
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=editor)
 
     assert list(notification.user_recipients) == [other_approver]
+
+
+def test_for_approval_recipients_for_sensitive_target_close_permission_holders(
+    business_area: BusinessArea, close_ticket_role: Role
+) -> None:
+    closer = UserFactory(email="sensitive-closer@example.com")
+    UserRoleAssignmentFactory(user=closer, role=close_ticket_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [closer]
+
+
+def test_for_approval_recipients_for_complaint_target_close_permission_holders(
+    business_area: BusinessArea, close_ticket_role: Role
+) -> None:
+    closer = UserFactory(email="complaint-closer@example.com")
+    UserRoleAssignmentFactory(user=closer, role=close_ticket_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [closer]
+
+
+def test_for_approval_recipients_for_sensitive_exclude_holders_without_close_permission(
+    business_area: BusinessArea, sensitive_role: Role
+) -> None:
+    viewer = UserFactory(email="sensitive-viewer-noclose@example.com")
+    UserRoleAssignmentFactory(user=viewer, role=sensitive_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == []
+
+
+def test_for_approval_recipients_for_sensitive_include_creator_with_as_creator_close_permission(
+    business_area: BusinessArea, close_ticket_as_creator_role: Role
+) -> None:
+    creator = UserFactory(email="sensitive-creator-closer@example.com")
+    UserRoleAssignmentFactory(user=creator, role=close_ticket_as_creator_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        created_by=creator,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [creator]
+
+
+def test_for_approval_recipients_for_sensitive_exclude_editor_who_performed_the_action(
+    business_area: BusinessArea, close_ticket_role: Role
+) -> None:
+    editor = UserFactory(email="sensitive-editor-closer@example.com")
+    UserRoleAssignmentFactory(user=editor, role=close_ticket_role, business_area=business_area)
+    other_closer = UserFactory(email="sensitive-other-closer@example.com")
+    UserRoleAssignmentFactory(user=other_closer, role=close_ticket_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=editor)
+
+    assert list(notification.user_recipients) == [other_closer]
