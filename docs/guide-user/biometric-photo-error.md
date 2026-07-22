@@ -37,7 +37,6 @@ The specific code is recorded in the **ticket description**, so the operator can
 
 > Biometric deduplication could not read this individual's photo (412 - No face detected). Upload a valid photo to resolve.
 
-
 ---
 
 ## What the ticket looks like
