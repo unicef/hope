@@ -751,7 +751,7 @@ class GrievanceTicketGlobalViewSet(
         return Response(resp.data, status.HTTP_200_OK)
 
     def _validate_status_change_preconditions(
-        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int, notifications: list
+        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int
     ) -> None:
         if permissions_to_use := self.get_permissions_for_status_change(
             new_status, grievance_ticket.status, grievance_ticket.is_feedback
@@ -763,18 +763,17 @@ class GrievanceTicketGlobalViewSet(
                 grievance_ticket,
             )
 
-        if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
-            if not check_permissions(
+        if (
+            new_status == GrievanceTicket.STATUS_ASSIGNED
+            and not grievance_ticket.assigned_to
+            and not check_permissions(
                 user,
                 [Permissions.GRIEVANCE_ASSIGN],
                 business_area=self.business_area,
                 program=grievance_ticket.programs.first(),
-            ):
-                raise PermissionDenied
-
-            notifications.append(
-                GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
             )
+        ):
+            raise PermissionDenied
         if new_status == GrievanceTicket.STATUS_CLOSED and isinstance(
             grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
         ):
@@ -842,7 +841,7 @@ class GrievanceTicketGlobalViewSet(
                 status=status.HTTP_202_ACCEPTED,
             )
 
-        self._validate_status_change_preconditions(user, grievance_ticket, new_status, notifications)
+        self._validate_status_change_preconditions(user, grievance_ticket, new_status)
 
         status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
         status_changer.change_status(new_status)
