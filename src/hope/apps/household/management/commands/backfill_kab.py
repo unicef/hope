@@ -22,11 +22,12 @@ from django.db.models import F, Q, QuerySet
 from hope.apps.household.services.household_recalculate_data import (
     AGE_GROUP_FIELDS,
     KAB_SOURCE_FIELDS,
-    recalculate_data,
+    aggregate_composition_by_household_id,
 )
 from hope.models import Household, Program
 
 COMPOSITION_PRESENT = functools.reduce(operator.or_, (Q(**{f"{field}__isnull": False}) for field in AGE_GROUP_FIELDS))
+KAB_FIELDS = [f"kab_{field}" for field in KAB_SOURCE_FIELDS]
 
 
 def _pk_batches(queryset: QuerySet, batch_size: int) -> Iterator[list]:
@@ -66,8 +67,17 @@ class Command(BaseCommand):
             if collects_individual_data:
                 to_compute = households.filter(~COMPOSITION_PRESENT, kab_size__isnull=True)
                 for pks in _pk_batches(to_compute, batch_size):
-                    for household in Household.objects.filter(pk__in=pks).only("pk").iterator():
-                        recalculate_data(household)
+                    # ponytail: no per-row lock/transaction — the backfill is idempotent and any
+                    # concurrent write re-triggers recalculate_data for its household anyway.
+                    counts = aggregate_composition_by_household_id(pks)
+                    updates = []
+                    for pk in pks:
+                        household = Household(pk=pk)
+                        row = counts.get(pk)
+                        for field in KAB_SOURCE_FIELDS:
+                            setattr(household, f"kab_{field}", row[field] if row else 0)
+                        updates.append(household)
+                    Household.objects.bulk_update(updates, KAB_FIELDS, batch_size=500)
                     program_computed += len(pks)
                     self.stdout.write(f"{prefix}: computed batch of {len(pks)}, total computed {program_computed}")
             copied += program_copied

@@ -20,6 +20,8 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
 )
 from hope.apps.core.field_attributes.fields_types import Scope
+from hope.apps.household.celery_tasks import recalculate_population_fields_async_task
+from hope.apps.household.services.household_recalculate_data import RECALCULATION_INDIVIDUAL_FIELDS
 from hope.apps.utils.phone import calculate_phone_numbers_validity
 from hope.models import Individual, log_create
 
@@ -81,6 +83,13 @@ class IndividualXlsxUpdate:
             individuals.append(individual)
 
         Individual.objects.bulk_update(individuals, columns)
+
+        if RECALCULATION_INDIVIDUAL_FIELDS.intersection(columns):
+            household_ids = sorted(
+                {str(individual.household_id) for individual in individuals if individual.household_id}
+            )
+            if household_ids:
+                recalculate_population_fields_async_task(household_ids=household_ids)
 
     @staticmethod
     def _column_name_by_attr(attr: dict) -> str | None:

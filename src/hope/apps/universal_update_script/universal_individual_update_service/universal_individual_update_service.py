@@ -7,7 +7,12 @@ import openpyxl
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
+from hope.apps.household.celery_tasks import recalculate_population_fields_async_task
 from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.apps.household.services.household_recalculate_data import (
+    KAB_SOURCE_FIELDS,
+    RECALCULATION_INDIVIDUAL_FIELDS,
+)
 from hope.apps.registration_data.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
@@ -433,6 +438,12 @@ class UniversalIndividualUpdateService:
             Household.objects.filter(id__in=[household.id for household in households_to_update]),
             get_household_doc(str(self.program.id)),
         )
+        if RECALCULATION_INDIVIDUAL_FIELDS.intersection(individual_fields_to_update) or set(
+            KAB_SOURCE_FIELDS
+        ).intersection(household_fields_to_update):
+            household_ids = sorted({str(household.pk) for household in households_to_update})
+            if household_ids:
+                recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
         documents_to_update.clear()
         documents_to_create.clear()
         households_to_update.clear()

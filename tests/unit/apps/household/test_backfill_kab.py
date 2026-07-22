@@ -110,3 +110,25 @@ def test_backfill_skips_already_computed_household(household_already_computed: H
     household_already_computed.refresh_from_db()
 
     assert household_already_computed.kab_size == 99
+
+
+def test_backfill_compute_query_count_is_constant_per_batch(
+    household_from_individuals: Household, django_assert_num_queries: Any
+) -> None:
+    # programs list + empty phase-1 fetch + phase-2 pk fetch + grouped aggregate + bulk_update + empty next-batch fetch
+    with django_assert_num_queries(6):
+        call_command("backfill_kab")
+    household_from_individuals.refresh_from_db()
+
+    assert household_from_individuals.kab_size == 2
+
+
+def test_backfill_copy_query_count_is_constant_per_batch(
+    household_present: Household, django_assert_num_queries: Any
+) -> None:
+    # programs list + phase-1 pk fetch + set-based copy UPDATE + empty next-batch fetch
+    with django_assert_num_queries(4):
+        call_command("backfill_kab")
+    household_present.refresh_from_db()
+
+    assert household_present.kab_size == 7

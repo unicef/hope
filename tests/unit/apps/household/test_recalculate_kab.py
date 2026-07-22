@@ -17,7 +17,9 @@ from hope.apps.household.const import (
     HEAD,
     MALE,
     NON_BENEFICIARY,
+    NOT_COLLECTED,
     NOT_DISABLED,
+    OTHER,
 )
 from hope.apps.household.services.household_recalculate_data import (
     AGE_GROUP_FIELDS,
@@ -271,6 +273,59 @@ def test_idempotent_on_flag_flip(household_from_individuals: Callable[..., House
     assert household.kab_size is None
 
 
+@pytest.fixture
+def household_with_sex_variants(make_household: Callable[..., Household]) -> Household:
+    """For each of OTHER/NOT_COLLECTED sex: one active beneficiary (counted) plus
+    non-beneficiary, withdrawn and duplicate variants (all excluded from the counters)."""
+    household = make_household(recalculate_composition=False, collects_individual_data=True)
+    household.last_registration_date = timezone.make_aware(datetime.datetime(2024, 1, 1))
+    household.save(update_fields=["last_registration_date"])
+
+    head = household.head_of_household
+    head.relationship = HEAD
+    head.sex = FEMALE
+    head.birth_date = datetime.date(1990, 1, 1)
+    head.withdrawn = False
+    head.duplicate = False
+    head.save()
+
+    common = {
+        "household": household,
+        "business_area": household.business_area,
+        "program": household.program,
+        "registration_data_import": household.registration_data_import,
+        "withdrawn": False,
+        "duplicate": False,
+        "birth_date": datetime.date(1990, 1, 1),
+    }
+    IndividualFactory(**common, relationship=COUSIN, sex=OTHER)
+    IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=OTHER)
+    IndividualFactory(**{**common, "withdrawn": True}, relationship=COUSIN, sex=OTHER)
+    IndividualFactory(**{**common, "duplicate": True}, relationship=COUSIN, sex=OTHER)
+    IndividualFactory(**common, relationship=COUSIN, sex=NOT_COLLECTED)
+    IndividualFactory(**common, relationship=NON_BENEFICIARY, sex=NOT_COLLECTED)
+    IndividualFactory(**{**common, "withdrawn": True}, relationship=COUSIN, sex=NOT_COLLECTED)
+    IndividualFactory(**{**common, "duplicate": True}, relationship=COUSIN, sex=NOT_COLLECTED)
+    return household
+
+
+@pytest.mark.parametrize(
+    ("field", "expected"),
+    [
+        ("kab_other_sex_group_count", 1),
+        ("kab_unknown_sex_group_count", 1),
+        ("kab_size", 3),  # head + one active OTHER + one active NOT_COLLECTED beneficiary
+    ],
+)
+def test_sex_group_counts_exclude_inactive_and_non_beneficiaries(
+    household_with_sex_variants: Household, field: str, expected: int
+) -> None:
+    recalculate_data(household_with_sex_variants)
+    household_with_sex_variants.refresh_from_db()
+
+    assert getattr(household_with_sex_variants, field) == expected
+
+
 def test_async_task_populates_kab_for_non_recalculating_dct(
     household_from_individuals: Callable[..., Household],
     django_capture_on_commit_callbacks: Any,
@@ -288,6 +343,28 @@ def test_async_task_populates_kab_for_non_recalculating_dct(
 
     with django_capture_on_commit_callbacks(execute=True):
         recalculate_population_fields_async_task_action(job)
+    household.refresh_from_db()
+
+    assert household.kab_size == 4
+
+
+def test_chunk_task_query_count_per_household(
+    household_from_individuals: Callable[..., Household],
+    django_assert_num_queries: Any,
+) -> None:
+    household = household_from_individuals(recalculate_composition=False, collects_individual_data=True)
+    job = AsyncJob.objects.create(
+        type="JOB_TASK",
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task_action",
+        config={"households_ids": [str(household.pk)], "program_id": str(household.program_id)},
+    )
+
+    from hope.apps.household.celery_tasks import recalculate_population_fields_chunk_async_task_action
+
+    # program get + page savepoint/release + households select + individuals prefetch
+    # + per-household: savepoint/release + locked refetch + aggregate; then one bulk_update
+    with django_assert_num_queries(10):
+        recalculate_population_fields_chunk_async_task_action(job)
     household.refresh_from_db()
 
     assert household.kab_size == 4

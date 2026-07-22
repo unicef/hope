@@ -28,6 +28,7 @@ from hope.models import (
     AccountType,
     Area,
     AreaType,
+    AsyncJob,
     Country,
     Currency,
     Document,
@@ -1041,3 +1042,39 @@ def test_get_individual_row_raises_for_multiple_wallets(
     service = UniversalIndividualUpdateService(universal_update_with_accounts)
     with pytest.raises(ValueError, match="Multiple wallets found"):
         service.get_individual_row(individual)
+
+
+def test_batch_update_schedules_population_recalculation(individual: Individual, program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.batch_update(
+        individual_fields_to_update=["flex_fields", "sex"],
+        document_fields_to_update=["document_number", "status", "country"],
+        individuals_to_update=[individual],
+        household_fields_to_update=["flex_fields"],
+        households_to_update=[individual.household],
+    )
+
+    job = AsyncJob.objects.get(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    )
+    assert job.config["household_ids"] == [str(individual.household_id)]
+    assert job.config["program_id"] == str(program.id)
+
+
+def test_batch_update_skips_recalculation_without_recalc_fields(individual: Individual, program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.batch_update(
+        individual_fields_to_update=["flex_fields", "given_name"],
+        document_fields_to_update=["document_number", "status", "country"],
+        individuals_to_update=[individual],
+        household_fields_to_update=["flex_fields", "address"],
+        households_to_update=[individual.household],
+    )
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    ).exists()
