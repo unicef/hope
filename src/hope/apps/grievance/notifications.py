@@ -343,18 +343,16 @@ class GrievanceNotification:
 
     @classmethod
     def prepare_notification_for_ticket_creation(
-        cls: "GrievanceNotification", grievance_ticket: GrievanceTicket, actor: "User | None" = None
+        cls: "GrievanceNotification", grievance_ticket: GrievanceTicket
     ) -> list["GrievanceNotification"]:
-        # actor is the user performing the creation; falls back to created_by for system/unattributed paths.
-        editor = actor if actor is not None else grievance_ticket.created_by
         notifications = []
         if grievance_ticket.assigned_to:
-            # Skip the assignment email when the actor assigns the ticket to themselves.
+            # Skip the assignment email when the creator assigns the ticket to themselves.
             notifications.append(
                 GrievanceNotification(
                     grievance_ticket,
                     GrievanceNotification.ACTION_ASSIGNMENT_CHANGED,
-                    editor=editor,
+                    editor=grievance_ticket.created_by,
                 )
             )
         category_action_dict = {
@@ -365,7 +363,7 @@ class GrievanceNotification:
         }
         action = category_action_dict.get(grievance_ticket.category)
         if action:
-            notifications.append(GrievanceNotification(grievance_ticket, action, editor=editor))
+            notifications.append(GrievanceNotification(grievance_ticket, action, editor=grievance_ticket.created_by))
 
         return notifications
 

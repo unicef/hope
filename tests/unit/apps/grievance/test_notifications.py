@@ -268,21 +268,22 @@ def test_sensitive_created_excludes_the_actor(
     assert list(notification.user_recipients) == [other]
 
 
-def test_prepare_notification_for_ticket_creation_excludes_actor_from_sensitive_recipients(
+def test_prepare_notification_for_ticket_creation_excludes_creator_from_sensitive_recipients(
     business_area: BusinessArea, sensitive_role: Role
 ) -> None:
-    actor = UserFactory(email="actor-clicker@example.com")
-    UserRoleAssignmentFactory(user=actor, role=sensitive_role, business_area=business_area)
+    creator = UserFactory(email="creator-clicker@example.com")
+    UserRoleAssignmentFactory(user=creator, role=sensitive_role, business_area=business_area)
     other = UserFactory(email="other-sensitive-viewer@example.com")
     UserRoleAssignmentFactory(user=other, role=sensitive_role, business_area=business_area)
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         assigned_to=None,
+        created_by=creator,
         category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
     )
 
-    notifications = GrievanceNotification.prepare_notification_for_ticket_creation(ticket, actor=actor)
+    notifications = GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
 
     assert len(notifications) == 1
     assert notifications[0].action == GrievanceNotification.ACTION_SENSITIVE_CREATED
@@ -678,6 +679,18 @@ def test_ticket_updated_recipients_empty_without_creator_or_assignee(business_ar
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None, created_by=None)
 
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=UserFactory())
+
+    assert notification.user_recipients == []
+
+
+def test_ticket_updated_recipients_skip_inactive_and_blank_email(business_area: BusinessArea, creator: User) -> None:
+    inactive_assignee = UserFactory(email="inactive@example.com", is_active=False)
+    blank_email_creator = UserFactory(email="")
+    ticket = GrievanceTicketFactory(
+        business_area=business_area, assigned_to=inactive_assignee, created_by=blank_email_creator
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=creator)
 
     assert notification.user_recipients == []
 
