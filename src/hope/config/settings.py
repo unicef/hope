@@ -351,6 +351,9 @@ DATAMART_USER = env("DATAMART_USER")
 DATAMART_PASSWORD = env("DATAMART_PASSWORD")
 DATAMART_URL = env("DATAMART_URL")
 
+DEDUPLICATION_ENGINE_API_URL = env("DEDUPLICATION_ENGINE_API_URL")
+DEDUPLICATION_ENGINE_API_KEY = env("DEDUPLICATION_ENGINE_API_KEY")
+
 COUNTRIES_OVERRIDE = {
     "U": {
         "name": _("Unknown or Not Applicable"),
@@ -445,6 +448,7 @@ FLAGS = {
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
+    "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
 }
 
 MARKDOWNIFY = {
@@ -501,10 +505,12 @@ from hope.config.fragments.kobo import *  # noqa: F403, F401, E402
 from hope.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hope.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hope.config.fragments.matomo import *  # noqa: F403, F401, E402
+from hope.config.fragments.payment_gateway import *  # noqa: F403, F401, E402
 from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
 from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
+from hope.config.fragments.vision import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

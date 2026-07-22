@@ -72,6 +72,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     BulkUpdateGrievanceTicketsUrgencySerializer,
     CreateGrievanceTicketSerializer,
     GrievanceChoicesSerializer,
+    GrievanceCloseAsUniqueSerializer,
     GrievanceCreateNoteSerializer,
     GrievanceDeleteHouseholdApproveStatusSerializer,
     GrievanceHouseholdDataChangeApproveSerializer,
@@ -95,6 +96,9 @@ from hope.apps.grievance.models import (
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.apps.grievance.services.data_change_services import update_data_change_extras
+from hope.apps.grievance.services.needs_adjudication_ticket_services import (
+    mark_unique_and_close,
+)
 from hope.apps.grievance.services.payment_verification_services import (
     update_ticket_payment_verification_service,
 )
@@ -409,6 +413,7 @@ class GrievanceTicketGlobalViewSet(
         "create": CreateGrievanceTicketSerializer,
         "partial_update": UpdateGrievanceTicketSerializer,
         "status_change": GrievanceStatusChangeSerializer,
+        "close_as_unique": GrievanceCloseAsUniqueSerializer,
         "create_note": GrievanceCreateNoteSerializer,
         "approve_individual_data_change": GrievanceIndividualDataChangeApproveSerializer,
         "approve_household_data_change": GrievanceHouseholdDataChangeApproveSerializer,
@@ -482,6 +487,11 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
             Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
             Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ],
+        "close_as_unique": [
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
@@ -565,7 +575,13 @@ class GrievanceTicketGlobalViewSet(
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
-            .prefetch_related("programs", *to_prefetch)
+            .prefetch_related(
+                "programs",
+                *to_prefetch,
+                # feeds TicketNeedsAdjudicationDetails.documents_no_longer_conflict() (can_close_as_unique)
+                "needs_adjudication_ticket_details__golden_records_individual__documents__type",
+                "needs_adjudication_ticket_details__possible_duplicates__documents__type",
+            )
             .annotate(
                 has_social_worker_program_annotated=Exists(
                     Program.objects.filter(
@@ -827,6 +843,73 @@ class GrievanceTicketGlobalViewSet(
         )
 
         GrievanceNotification.send_all_notifications(notifications)
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @transaction.atomic
+    @extend_schema(request=GrievanceCloseAsUniqueSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="close-as-unique")
+    def close_as_unique(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+        user = request.user
+
+        check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
+
+        ticket_details = grievance_ticket.ticket_details
+        if not isinstance(ticket_details, TicketNeedsAdjudicationDetails):
+            raise ValidationError("Ticket is not a Needs Adjudication ticket.")
+
+        check_creator_or_owner_permission(
+            user,
+            [
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+            ],
+            self.business_area,
+            grievance_ticket,
+        )
+
+        partner = user.partner
+        individual_ids = [
+            ticket_details.golden_records_individual_id,
+            *ticket_details.possible_duplicates.values_list("id", flat=True),
+        ]
+        all_individuals = Individual.objects.filter(id__in=individual_ids).select_related(
+            "household__admin2", "program"
+        )
+        for individual in all_individuals:
+            household = individual.household
+            if (
+                household
+                and household.admin2
+                and not partner.has_area_access(
+                    area_id=household.admin2.id,
+                    program_id=individual.program.id,
+                )
+            ):
+                raise PermissionDenied("Permission Denied: User does not have access to close ticket")
+
+        old_grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket.pk)
+
+        mark_unique_and_close(ticket_details, user)  # type: ignore[arg-type]
+        grievance_ticket.refresh_from_db()
+
+        clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
+
+        log_create(
+            GrievanceTicket.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            grievance_ticket.programs.all(),
+            old_object=old_grievance_ticket,
+            new_object=grievance_ticket,
+        )
         return Response(
             GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,

@@ -1,6 +1,8 @@
+import { usePermissions } from '@hooks/usePermissions';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';
 
 interface ExportBatchButtonProps {
@@ -15,8 +17,15 @@ export function ExportBatchButton({
   tag,
   planType,
   isBusy = false,
-}: ExportBatchButtonProps): ReactElement {
+}: ExportBatchButtonProps): ReactElement | null {
   const { t } = useTranslation();
+  const permissions = usePermissions();
+
+  if (
+    !hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX, permissions)
+  )
+    return null;
+
   return (
     <GroupExportXlsxDialog
       groupId={groupId}

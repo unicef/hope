@@ -13,6 +13,7 @@ from django.utils import timezone
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from flags.state import flag_enabled
 from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -126,7 +127,11 @@ from hope.apps.payment.services.verification_plan_status_change_services import 
     VerificationPlanStatusChangeServices,
 )
 from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVerifier
-from hope.apps.payment.utils import calculate_counts, from_received_to_status
+from hope.apps.payment.utils import (
+    calculate_counts,
+    from_received_to_status,
+    log_payment_plan_supporting_document,
+)
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
@@ -145,6 +150,7 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
+from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     BusinessArea,
@@ -809,6 +815,7 @@ class PaymentPlanViewSet(
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
+        "send_to_vision": [Permissions.PM_SEND_TO_VISION],
         "custom_exchange_rate": [
             Permissions.PM_CUSTOM_EXCHANGE_RATE,
         ],
@@ -939,6 +946,7 @@ class PaymentPlanViewSet(
             payment_plan,
             serializer.validated_data["excluded_households_ids"],
             serializer.validated_data.get("exclusion_reason", ""),
+            str(request.user.pk),
         )
 
         flow = PaymentPlanFlow(payment_plan)
@@ -1063,7 +1071,8 @@ class PaymentPlanViewSet(
             flow = PaymentPlanFlow(payment_plan)
             flow.background_action_status_steficon_run()
             payment_plan.save()
-            transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule))
+            user_id = str(request.user.pk)
+            transaction.on_commit(lambda: payment_plan_apply_engine_rule_async_task(payment_plan, engine_rule, user_id))
 
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1150,7 +1159,8 @@ class PaymentPlanViewSet(
             payment_plan.save()
             payment_plan = import_service.create_import_xlsx_file(request.user)
 
-            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan))
+            user_id = str(request.user.pk)
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx_async_task(payment_plan, user_id))
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
@@ -1196,7 +1206,10 @@ class PaymentPlanViewSet(
             payment_plan.flat_amount_value = flat_amount_value
             payment_plan.save()
             payment_plan.refresh_from_db(fields=["background_action_status", "flat_amount_value"])
-            transaction.on_commit(lambda: payment_plan_set_entitlement_flat_amount_async_task(payment_plan))
+            flat_amount_user_id = str(request.user.pk)
+            transaction.on_commit(
+                lambda: payment_plan_set_entitlement_flat_amount_async_task(payment_plan, flat_amount_user_id)
+            )
             response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
             return Response(
                 data=response_serializer.data,
@@ -1402,6 +1415,26 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=True, methods=["post"], url_path="send-to-vision")
+    def send_to_vision(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        if not bool(flag_enabled("VISION_INTEGRATION_ACTIVE", request=request)):
+            raise PermissionDenied("Send to Vision feature is not enabled")
+
+        payment_plan = self.get_object()
+        if not payment_plan.can_send_to_vision:
+            raise PermissionDenied("Payment plan cannot be sent to Vision")
+
+        try:
+            response = VisionAPI().send_payment_plan(payment_plan)
+            return Response(
+                {"message": f"Payment plan sent to Vision successfully: {response.get('messageId', '')}"},
+                status=status.HTTP_200_OK,
+            )
+        except VisionAPIError as e:
+            raise ValidationError(f"Failed to send to Vision: {e}")
+        except VisionAPIMissingCredentialsError as e:
+            raise ValidationError(f"Vision API not configured: {e}")
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
@@ -2151,7 +2184,7 @@ class TargetPopulationViewSet(
         tp.steficon_rule_targeting = engine_rule.latest
         tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
         tp.save()
-        payment_plan_apply_steficon_hh_selection_async_task(tp, str(engine_rule.id))
+        payment_plan_apply_steficon_hh_selection_async_task(tp, str(engine_rule.id), str(request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -2303,9 +2336,17 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
         )
 
     @transaction.atomic
+    def perform_create(self, serializer: Any) -> None:
+        document = serializer.save()
+        log_payment_plan_supporting_document(document.payment_plan, self.request.user, document.title, created=True)
+
+    @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         document = self.get_object()
+        payment_plan = document.payment_plan
+        title = document.title
         document.delete()
+        log_payment_plan_supporting_document(payment_plan, request.user, title, created=False)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
@@ -2397,7 +2438,7 @@ class PaymentViewSet(
     @transaction.atomic
     def mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment = self.get_object()
-        mark_as_failed(payment)
+        mark_as_failed(payment, str(request.user.pk))
         return Response(
             data=PaymentDetailSerializer(payment, context={"request": request}).data,
             status=status.HTTP_200_OK,
@@ -2417,7 +2458,7 @@ class PaymentViewSet(
         delivered_quantity = serializer.validated_data.get("delivered_quantity")
         delivery_date = serializer.validated_data.get("delivery_date")
         delivery_date = datetime.combine(delivery_date, datetime.min.time())
-        revert_mark_as_failed(payment, Decimal(delivered_quantity), delivery_date)
+        revert_mark_as_failed(payment, Decimal(delivered_quantity), delivery_date, str(request.user.pk))
         return Response(
             data=PaymentDetailSerializer(payment, context={"request": request}).data,
             status=status.HTTP_200_OK,
@@ -2696,7 +2737,10 @@ class PaymentPlanGroupViewSet(
             PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
         )
         payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status"])
-        transaction.on_commit(lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group))
+        user_id = str(request.user.pk)
+        transaction.on_commit(
+            lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group, user_id)
+        )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
             status=status.HTTP_200_OK,

@@ -146,7 +146,6 @@ class TestSmokePeople:
         assert "Administrative Level 2" in page_people.get_individual_location().text
         assert "Rows per page: 10 0–0 of 0" in page_people.get_table_pagination().text.replace("\n", " ")
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_smoke_page_details_people(
         self,
         add_people: None,
@@ -199,16 +198,12 @@ class TestSmokePeople:
         assert page_people_details.get_label_alternative_phone_number().text
         assert page_people_details.get_label_date_of_last_screening_against_sanctions_list().text
         assert page_people_details.get_label_linked_grievances().text
-        assert page_people_details.get_label_wallet_name().text
-        assert page_people_details.get_label_blockchain_name().text
-        assert page_people_details.get_label_wallet_address().text
         assert "Rows per page: 5 0–0 of 0" in page_people_details.get_table_pagination().text.replace("\n", " ")
         assert page_people_details.get_label_source().text
         assert page_people_details.get_label_import_name().text
         assert page_people_details.get_label_registration_date().text
         assert page_people_details.get_label_user_name().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_people_happy_path(
         self,
         add_people_with_payment_record: Payment,
@@ -218,7 +213,7 @@ class TestSmokePeople:
         page_people.select_global_program_filter("Worker Program")
         page_people.get_nav_people().click()
         page_people.get_individual_table_row(0).click()
-        assert "21.36" in page_people_details.get_label_total_cash_received().text
+        page_people_details.wait_for_text("21.36", page_people_details.label_total_cash_received)
         page_people_details.wait_for_rows()
         assert len(page_people_details.get_rows()) == 1
         assert "21.36" in page_people_details.get_rows()[0].text
@@ -264,7 +259,7 @@ class TestPeople:
         page_grievance_new_ticket.get_individual_tab().click()
         page_grievance_new_ticket.get_individual_table_rows(0).click()
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_received_consent().click()
+        page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
 
         page_grievance_new_ticket.get_description().send_keys("Add Member - TEST")

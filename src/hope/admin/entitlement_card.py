@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class EntitlementCardAdmin(HOPEModelAdminBase):
     list_display = ("id", "card_number", "status", "card_type", "service_provider")
     search_fields = ("card_number",)
+    readonly_fields = ("id",)
     date_hierarchy = "created_at"
     list_filter = (
         "status",

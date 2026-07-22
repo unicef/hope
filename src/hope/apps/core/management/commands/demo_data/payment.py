@@ -206,6 +206,7 @@ def generate_delivery_mechanisms() -> None:
         ("IBAN Provider Bank", FinancialInstitution.FinancialInstitutionType.BANK),
         ("Generic Bank", FinancialInstitution.FinancialInstitutionType.BANK),
         ("Generic Telco Company", FinancialInstitution.FinancialInstitutionType.TELCO),
+        ("Generic Crypto", FinancialInstitution.FinancialInstitutionType.OTHER),
     ]
 
     for fi_name, fi_type in generic_fis:

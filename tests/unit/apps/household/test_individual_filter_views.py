@@ -15,10 +15,15 @@ from extras.test_utils.factories import (
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdFactory,
+    IndividualFactory,
     PartnerFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     UserFactory,
+)
+from extras.test_utils.factories.grievance import (
+    TicketComplaintDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import (
@@ -28,9 +33,14 @@ from hope.apps.household.const import (
     NEEDS_ADJUDICATION,
     NOT_COLLECTED,
     OTHER,
+    SANCTION_LIST_CONFIRMED_MATCH,
+    SANCTION_LIST_POSSIBLE_MATCH,
     STATUS_ACTIVE,
+    STATUS_DUPLICATE,
+    STATUS_WITHDRAWN,
     UNIQUE,
 )
+from hope.apps.household.filters import IndividualFilter, IndividualOfficeSearchFilter, MergedIndividualFilter
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import BusinessArea, Individual, MergeStatusModel, Program
 
@@ -96,6 +106,74 @@ def list_url(afghanistan: BusinessArea, program: Program) -> str:
         "api:households:individuals-list",
         kwargs={"business_area_slug": afghanistan.slug, "program_code": program.code},
     )
+
+
+@pytest.fixture
+def flagged_individuals(afghanistan: BusinessArea, program: Program) -> dict[str, Individual]:
+    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
+    duplicate = IndividualFactory(
+        duplicate=True,
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        registration_data_import=household.registration_data_import,
+    )
+    withdrawn = IndividualFactory(
+        withdrawn=True,
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        registration_data_import=household.registration_data_import,
+    )
+    possible_match = IndividualFactory(
+        sanction_list_possible_match=True,
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        registration_data_import=household.registration_data_import,
+    )
+    confirmed_match = IndividualFactory(
+        sanction_list_confirmed_match=True,
+        household=household,
+        program=program,
+        business_area=afghanistan,
+        registration_data_import=household.registration_data_import,
+    )
+    return {
+        "duplicate": duplicate,
+        "withdrawn": withdrawn,
+        "possible_match": possible_match,
+        "confirmed_match": confirmed_match,
+    }
+
+
+@pytest.fixture
+def golden_duplicate_individual(afghanistan: BusinessArea, program: Program) -> Individual:
+    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
+    individual = household.head_of_household
+    individual.deduplication_golden_record_status = DUPLICATE
+    individual.save(update_fields=["deduplication_golden_record_status"])
+    return individual
+
+
+@pytest.fixture
+def individual_update_ticket(afghanistan: BusinessArea, program: Program) -> dict[str, Any]:
+    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
+    individual = household.head_of_household
+    ticket_details = TicketIndividualDataUpdateDetailsFactory(individual=individual, individual_data={})
+    ticket = ticket_details.ticket
+    ticket.unicef_id = "GRV-8003"
+    ticket.save(update_fields=["unicef_id"])
+    return {"ticket": ticket, "individual": individual}
+
+
+@pytest.fixture
+def empty_complaint_ticket() -> Any:
+    ticket_details = TicketComplaintDetailsFactory(household=None, individual=None, payment=None)
+    ticket = ticket_details.ticket
+    ticket.unicef_id = "GRV-8004"
+    ticket.save(update_fields=["unicef_id"])
+    return ticket
 
 
 def _test_filter_individuals_in_list(
@@ -550,3 +628,85 @@ def test_search_db_no_program_filter(
     result_ids = [result["id"] for result in response_data]
     assert str(individuals[1].id) in result_ids
     assert str(individuals[3].id) in result_ids
+
+
+def test_flags_filter_matches_duplicate_and_sanction_list_flags(flagged_individuals: dict[str, Individual]) -> None:
+    queryset = Individual.objects.all()
+    individual_filter = IndividualFilter(data={}, queryset=queryset, request=None)
+
+    result = individual_filter.flags_filter(
+        queryset,
+        "flags",
+        [DUPLICATE, SANCTION_LIST_POSSIBLE_MATCH, SANCTION_LIST_CONFIRMED_MATCH],
+    )
+
+    assert set(result) == {
+        flagged_individuals["duplicate"],
+        flagged_individuals["possible_match"],
+        flagged_individuals["confirmed_match"],
+    }
+
+
+def test_status_filter_matches_duplicate_and_withdrawn(flagged_individuals: dict[str, Individual]) -> None:
+    queryset = Individual.objects.all()
+    individual_filter = IndividualFilter(data={}, queryset=queryset, request=None)
+
+    result = individual_filter.status_filter(queryset, "status", [STATUS_DUPLICATE, STATUS_WITHDRAWN])
+
+    assert set(result) == {flagged_individuals["duplicate"], flagged_individuals["withdrawn"]}
+
+
+def test_filter_is_active_program_with_none_returns_queryset_unchanged(db: Any) -> None:
+    queryset = Individual.objects.all()
+    individual_filter = IndividualFilter(data={}, queryset=queryset, request=None)
+
+    assert individual_filter.filter_is_active_program(queryset, "is_active_program", None) is queryset
+
+
+def test_merged_individual_filter_rdi_id_filters_by_rdi(golden_duplicate_individual: Individual) -> None:
+    queryset = Individual.all_objects.all()
+    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
+
+    result = individual_filter.filter_rdi_id(
+        queryset, None, str(golden_duplicate_individual.registration_data_import_id)
+    )
+
+    assert list(result) == [golden_duplicate_individual]
+
+
+def test_merged_individual_filter_duplicates_only_true(golden_duplicate_individual: Individual) -> None:
+    queryset = Individual.all_objects.all()
+    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
+
+    result = individual_filter.filter_duplicates_only(queryset, None, True)
+
+    assert list(result) == [golden_duplicate_individual]
+
+
+def test_merged_individual_filter_duplicates_only_false_returns_queryset_unchanged(
+    golden_duplicate_individual: Individual,
+) -> None:
+    queryset = Individual.all_objects.all()
+    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
+
+    assert individual_filter.filter_duplicates_only(queryset, None, False) is queryset
+
+
+def test_office_search_filter_by_grievance_returns_ticket_individual(
+    individual_update_ticket: dict[str, Any],
+) -> None:
+    queryset = Individual.objects.all()
+    individual_filter = IndividualOfficeSearchFilter(data={}, queryset=queryset, request=None)
+
+    result = individual_filter.filter_by_grievance_for_office_search(queryset, "GRV-8003")
+
+    assert list(result) == [individual_update_ticket["individual"]]
+
+
+def test_office_search_filter_by_grievance_without_individual_returns_none(empty_complaint_ticket: Any) -> None:
+    queryset = Individual.objects.all()
+    individual_filter = IndividualOfficeSearchFilter(data={}, queryset=queryset, request=None)
+
+    result = individual_filter.filter_by_grievance_for_office_search(queryset, "GRV-8004")
+
+    assert list(result) == []
