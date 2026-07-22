@@ -859,7 +859,7 @@ class GrievanceTicketGlobalViewSet(
             new_object=grievance_ticket,
         )
 
-        GrievanceNotification.send_all_notifications(notifications)
+        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(notifications))
         return Response(
             GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
@@ -962,7 +962,7 @@ class GrievanceTicketGlobalViewSet(
             created_by=user,
             ticket_note=ticket_note,
         )
-        notification.send_email_notification()
+        transaction.on_commit(notification.send_email_notification)
 
         return Response(TicketNoteSerializer(ticket_note).data, status=status.HTTP_201_CREATED)
 

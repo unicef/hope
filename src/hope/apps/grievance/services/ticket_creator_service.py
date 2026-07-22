@@ -1,6 +1,7 @@
 import abc
 
 from django.contrib.auth.models import AbstractUser
+from django.db import transaction
 from django.utils import timezone
 
 from hope.apps.grievance.models import (
@@ -95,8 +96,10 @@ class TicketCreatorService:
 
         grievances = self._create_details(extras, grievance_ticket)
 
-        GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+        transaction.on_commit(
+            lambda: GrievanceNotification.send_all_notifications(
+                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+            )
         )
 
         for grievance in grievances:
