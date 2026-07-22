@@ -68,6 +68,29 @@ def one_bad_photo_context(business_area: BusinessArea, user: User) -> dict[str, 
 
 
 @pytest.fixture
+def integer_status_code_context(business_area: BusinessArea) -> dict[str, Any]:
+    program = ProgramFactory(name="Integer Status Code HOPE", business_area=business_area)
+    household = HouseholdFactory(business_area=business_area, program=program, create_role=False)
+    rdi = household.registration_data_import
+    individual = IndividualFactory(
+        household=household,
+        business_area=business_area,
+        program=program,
+        registration_data_import=rdi,
+        deduplication_golden_record_results={"duplicates": [], "possible_duplicates": []},
+        photo=ContentFile(b"aaa", name="bad.png"),
+    )
+    DeduplicationEngineSimilarityPairFactory(
+        program=program,
+        individual1=individual,
+        individual2=None,
+        similarity_score=0.0,
+        status_code=418,
+    )
+    return {"rdi": rdi, "individual": individual}
+
+
+@pytest.fixture
 def two_bad_photos_context(business_area: BusinessArea) -> dict[str, Any]:
     program = ProgramFactory(name="Two Bad Photos HOPE", business_area=business_area)
     household_a = HouseholdFactory(business_area=business_area, program=program, create_role=False)
@@ -168,6 +191,19 @@ def test_ticket_description_reports_the_engine_status_code(one_bad_photo_context
     assert GrievanceTicket.objects.get().description == (
         "Biometric deduplication could not read this individual's photo "
         "(412 - No face detected). Upload a valid photo to resolve."
+    )
+
+
+def test_ticket_description_labels_a_status_code_reported_as_an_integer(
+    integer_status_code_context: dict[str, Any],
+) -> None:
+    rdi = integer_status_code_context["rdi"]
+
+    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+
+    assert GrievanceTicket.objects.get().description == (
+        "Biometric deduplication could not read this individual's photo "
+        "(418 - Image quality below threshold). Upload a valid photo to resolve."
     )
 
 
