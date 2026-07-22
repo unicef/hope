@@ -389,9 +389,6 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["excluded_individuals"] == []
     assert data["can_create_follow_up"] is False
     assert data["can_split"] is True
-    assert data["can_export_xlsx"] is False
-    assert data["can_download_xlsx"] is False
-    assert data["can_send_xlsx_password"] is False
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
     assert data["can_send_to_vision"] is True
@@ -440,7 +437,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
     payment_plan.save(update_fields=["currency"])
     payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
 
-    with django_assert_num_queries(22):
+    with django_assert_num_queries(21):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["id"] == str(payment_plan.id)
@@ -457,7 +454,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
     payment_plan.currency = None
     payment_plan.save(update_fields=["currency"])
 
-    with django_assert_num_queries(22):
+    with django_assert_num_queries(21):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["unore_exchange_rate"] is None
@@ -476,118 +473,13 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     payment_plan.custom_exchange_rate = False
     payment_plan.save(update_fields=["currency", "custom_exchange_rate"])
 
-    with django_assert_num_queries(22):
+    with django_assert_num_queries(21):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     expected_rate = payment_plan.get_unore_exchange_rate()
     assert expected_rate is not None
     assert data["unore_exchange_rate"] == expected_rate
     assert data["unore_exchange_rate_unavailable"] is False
-
-
-@pytest.mark.parametrize(
-    "pp_status",
-    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
-)
-def test_payment_plan_detail_can_export_xlsx(
-    payment_plan_detail_context: dict[str, Any],
-    pp_status: str,
-) -> None:
-    payment_plan = payment_plan_detail_context["payment_plan"]
-    user = payment_plan_detail_context["user"]
-    business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = pp_status
-    payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
-    payment_plan.save(update_fields=["status", "financial_service_provider"])
-
-    role = RoleFactory(
-        name="Role with Permissions in BA",
-        permissions=[Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value],
-    )
-    RoleAssignmentFactory(user=user, role=role, business_area=business_area)
-
-    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["can_export_xlsx"] is False
-
-
-@pytest.mark.parametrize(
-    ("payment_status", "expected_result"),
-    [
-        (Payment.STATUS_SENT_TO_PG, False),
-        (Payment.STATUS_SENT_TO_FSP, True),
-    ],
-)
-def test_payment_plan_detail_can_export_xlsx_for_payment_gateway_statuses(
-    payment_plan_detail_context: dict[str, Any],
-    payment_status: str,
-    expected_result: bool,
-) -> None:
-    payment_plan = payment_plan_detail_context["payment_plan"]
-    user = payment_plan_detail_context["user"]
-    business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
-    payment_plan.save(update_fields=["status", "financial_service_provider"])
-    payment_plan.eligible_payments.update(status=payment_status)
-
-    role = RoleFactory(
-        name="Role with Permissions in BA",
-        permissions=[Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value],
-    )
-    RoleAssignmentFactory(user=user, role=role, business_area=business_area)
-
-    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["can_export_xlsx"] is expected_result
-
-
-@pytest.mark.parametrize(
-    "pp_status",
-    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
-)
-def test_payment_plan_detail_can_download_xlsx(
-    payment_plan_detail_context: dict[str, Any],
-    pp_status: str,
-) -> None:
-    payment_plan = payment_plan_detail_context["payment_plan"]
-    user = payment_plan_detail_context["user"]
-    business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = pp_status
-    payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
-    payment_plan.save(update_fields=["status", "financial_service_provider"])
-
-    role = RoleFactory(
-        name="Role with Permissions in BA",
-        permissions=[Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value],
-    )
-    RoleAssignmentFactory(user=user, role=role, business_area=business_area)
-
-    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["can_download_xlsx"] is False
-
-
-@pytest.mark.parametrize(
-    "pp_status",
-    [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE],
-)
-def test_payment_plan_detail_can_send_xlsx_password(
-    payment_plan_detail_context: dict[str, Any],
-    pp_status: str,
-) -> None:
-    payment_plan = payment_plan_detail_context["payment_plan"]
-    user = payment_plan_detail_context["user"]
-    business_area = payment_plan_detail_context["business_area"]
-    payment_plan.status = pp_status
-    payment_plan.financial_service_provider = payment_plan_detail_context["fsp_api"]
-    payment_plan.save(update_fields=["status", "financial_service_provider"])
-
-    role = RoleFactory(
-        name="Role with Permissions in BA",
-        permissions=[Permissions.PM_SEND_XLSX_PASSWORD.value],
-    )
-    RoleAssignmentFactory(user=user, role=role, business_area=business_area)
-
-    data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["can_send_xlsx_password"] is False
 
 
 def test_approval_process_serializer_all_fields(approval_process_context: dict[str, Any]) -> None:

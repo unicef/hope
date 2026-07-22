@@ -846,8 +846,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     program_cycle = ProgramCycleSmallSerializer()
     is_payment_gateway = serializers.BooleanField(read_only=True)
     is_instruction_managed = serializers.BooleanField(read_only=True)
-    has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
-    has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
+    has_payment_list_export_file = serializers.BooleanField(source="has_entitlement_file")
     imported_file_name = serializers.CharField()
     payments_conflicts_count = serializers.SerializerMethodField()
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
@@ -870,9 +869,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_split = serializers.SerializerMethodField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    can_export_xlsx = serializers.SerializerMethodField()
-    can_download_xlsx = serializers.SerializerMethodField()
-    can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     steficon_rule = RuleCommitSerializer(read_only=True)
@@ -898,7 +894,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "is_payment_gateway",
             "is_instruction_managed",
             "has_payment_list_export_file",
-            "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
             "imported_file_date",
             "payments_conflicts_count",
@@ -925,9 +920,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
-            "can_export_xlsx",
-            "can_download_xlsx",
-            "can_send_xlsx_password",
             "approval_process",
             "total_entitled_quantity_usd",
             "total_entitled_quantity_revised_usd",
@@ -1019,17 +1011,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 ),
             )
         return self._payments_summary_cache[cache_key]
-
-    @staticmethod
-    def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
-        delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
-        financial_service_provider = getattr(payment_plan, "financial_service_provider", None)
-        if not delivery_mechanism or not financial_service_provider:
-            return False
-        return bool(financial_service_provider.get_xlsx_template(delivery_mechanism))
-
-    def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
-        return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
 
     def get_payments_conflicts_count(self, payment_plan: PaymentPlan) -> int:
         # count conflict only for OPEN PaymentPlan
@@ -1123,49 +1104,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["error_count"]
-
-    def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
-            user = self.context.get("request").user
-            if obj.is_payment_gateway:
-                if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
-                    return False
-                return self._payments_summary(obj)["pg_xlsx_export_blocking_count"] == 0
-
-            if not user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, obj.business_area):
-                return False
-            return self._has_fsp_delivery_mechanism_xlsx_template(obj)
-
-        return False
-
-    def get_can_download_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
-            user = self.context.get("request").user
-            if obj.is_payment_gateway:
-                if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
-                    return False
-                return obj.has_export_file
-
-            if not user.has_perm(Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, obj.business_area):
-                return False
-            return obj.has_export_file
-
-        return False
-
-    def get_can_send_xlsx_password(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
-            user = self.context.get("request").user
-            if obj.is_payment_gateway:
-                if not user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, obj.business_area):
-                    return False
-                return obj.has_export_file
-        return False
 
     def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)

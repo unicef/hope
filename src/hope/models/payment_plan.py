@@ -170,12 +170,6 @@ class PaymentPlan(
         Status.DRAFT,
     )
 
-    EXPORTABLE_STATUSES = (
-        Status.ACCEPTED,
-        Status.FINISHED,
-        Status.READY_FOR_CLOSURE,
-    )
-
     HARD_CONFLICT_STATUSES = (
         Status.LOCKED,
         Status.LOCKED_FSP,
@@ -1114,44 +1108,17 @@ class PaymentPlan(
         return self.available_payment_records().count() > 0
 
     @property
-    def has_export_file(self) -> bool:
-        """Check if export file exists.
-
-        for Locked plan return export_file_entitlement file
-        for Accepted and Finished export_file_delivery file
-        """
+    def has_entitlement_file(self) -> bool:
         try:
-            if self.status == PaymentPlan.Status.LOCKED:
-                return self.export_file_entitlement is not None
-            if self.status in (
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-                PaymentPlan.Status.READY_FOR_CLOSURE,
-            ):
-                return self.export_file_delivery is not None
-            return False
+            return self.export_file_entitlement is not None
         except FileTemp.DoesNotExist:
             return False
 
     @property
-    def payment_list_export_file_link(self) -> str | None:
-        """Return expor file which is different in various statues.
-
-        for Locked plan return export_file_entitlement file link
-        for Accepted and Finished export_file_delivery file link
-        """
-        pp_status_to_file_field: dict[str, str] = {
-            PaymentPlan.Status.LOCKED: "export_file_entitlement",
-            PaymentPlan.Status.ACCEPTED: "export_file_delivery",
-            PaymentPlan.Status.FINISHED: "export_file_delivery",
-            PaymentPlan.Status.READY_FOR_CLOSURE: "export_file_delivery",
-        }
-
-        file_field = pp_status_to_file_field.get(self.status)
-        if file_field:
-            file_obj = getattr(self, file_field, None)
-            return file_obj.file.url if file_obj and file_obj.file else None
-        return None
+    def entitlement_export_file_link(self) -> str | None:
+        """Return the entitlement export file link (payment-list download is entitlement-only)."""
+        file_obj = self.export_file_entitlement
+        return file_obj.file.url if file_obj and file_obj.file else None
 
     @property
     def imported_file_name(self) -> str:
