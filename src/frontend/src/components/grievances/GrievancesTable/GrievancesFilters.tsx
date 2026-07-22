@@ -220,12 +220,12 @@ export const GrievancesFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
-            value={filter.category}
+            value={filter.category?.toString() ?? ''}
             fullWidth
             data-cy="filters-category"
           >
             {categoryChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
+              <MenuItem key={item.value} value={item.value?.toString()}>
                 {item.name}
               </MenuItem>
             ))}
