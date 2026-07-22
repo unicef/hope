@@ -28,7 +28,7 @@ export function isShowIssueType(category: any): boolean {
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   );
 }
-export const SYSTEM_GENERATED_ISSUE_TYPES = [GRIEVANCE_ISSUE_TYPES.PICTURE_ERROR];
+export const SYSTEM_GENERATED_ISSUE_TYPES = [GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR];
 
 export function isSystemGenerated(category: any, issueType?: number): boolean {
   const cat = category?.toString();
@@ -424,7 +424,7 @@ export const getGrievanceEditPath = (
   if (!ticketId || !category) {
     return null;
   }
-  if (issueType?.toString() === GRIEVANCE_ISSUE_TYPES.PICTURE_ERROR) {
+  if (issueType?.toString() === GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR) {
     return `/${baseUrl}/grievance/edit-ticket/picture-error/${ticketId}`;
   }
   return `/${baseUrl}/grievance/edit-ticket/${matchGrievanceUrlByCategory(

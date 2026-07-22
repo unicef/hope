@@ -87,10 +87,10 @@ function Selection({
 
   const addDisabledProperty = (choices) => {
     if (!choices) return [];
-    // Picture Error (27) tickets are created by the system from a biometric photo error,
+    // Biometric Photo Error (27) tickets are created by the system from a biometric photo error,
     // so they must never be offered for manual creation.
     const selectableChoices = choices.filter(
-      (el) => el.value !== GRIEVANCE_ISSUE_TYPES.PICTURE_ERROR,
+      (el) => el.value !== GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR,
     );
     //remove update delegate option for regular programs
     if (!isSocialDctType)

@@ -88,7 +88,7 @@ export const GrievancesFilters = ({
     if (isUserGeneratedTab)
       return choicesData.grievanceTicketManualCategoryChoices;
     // Data Change is a manual category, but it also owns a system-generated issue type
-    // (Picture Error), so it has to be selectable on the system tab too.
+    // (Biometric Photo Error), so it has to be selectable on the system tab too.
     const dataChangeCategory = choicesData.grievanceTicketCategoryChoices?.find(
       (item) => item.value?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE,
     );

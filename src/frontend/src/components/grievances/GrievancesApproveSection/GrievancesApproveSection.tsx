@@ -107,7 +107,7 @@ function GrievancesApproveSection({
       );
     }
     if (
-      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.PICTURE_ERROR
+      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR
     ) {
       return (
         <RequestedPhotoErrorDataChange

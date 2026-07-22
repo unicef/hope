@@ -123,8 +123,8 @@ const PictureErrorEditPage = (): ReactElement => {
     },
   ];
 
-  const photoDetail = ticket.ticketDetails?.individualData?.photo;
-  const currentPictureSrc = photoDetail?.value ?? photoDetail?.previousValue;
+  const currentPictureSrc =
+    ticket.ticketDetails?.individualData?.photo?.previousValue;
 
   return (
     <Formik
