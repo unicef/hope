@@ -51,14 +51,19 @@ export const DedupeBox = ({
     <GreyBox>
       <Grid container spacing={3}>
         <Grid size={12}>
-          <Box display="flex" alignItems="flex-start">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+            }}
+          >
             <Label data-cy={`label-${label}`} color="textSecondary">
               {label}
             </Label>
           </Box>
         </Grid>
         <Grid size={12}>
-          <Grid container direction="column">
+          <Grid container sx={{ flexDirection: 'column' }}>
             {options.map((option) => {
               const biographicalData = option.options?.[0];
               const biometricData = option.options?.[1];
@@ -83,7 +88,11 @@ export const DedupeBox = ({
                         </Bold>
                       </Grid>
                       <Grid size={6}>
-                        <Box ml={2}>
+                        <Box
+                          sx={{
+                            ml: 2,
+                          }}
+                        >
                           <BoldGrey data-cy={`value-${option.name}`}>
                             (
                             {showBiographicalDeduplicationResult
@@ -106,7 +115,11 @@ export const DedupeBox = ({
                         </Bold>
                       </Grid>
                       <Grid size={6}>
-                        <Box ml={2}>
+                        <Box
+                          sx={{
+                            ml: 2,
+                          }}
+                        >
                           <BoldGrey data-cy={`value-${option.name}-biometric`}>
                             (
                             {showBiometricDeduplicationResult

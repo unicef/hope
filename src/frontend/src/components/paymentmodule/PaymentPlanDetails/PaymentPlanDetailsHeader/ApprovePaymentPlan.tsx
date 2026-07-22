@@ -80,8 +80,7 @@ export function ApprovePaymentPlan({
       paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const approvalNumberRequired =
       latestApprovalProcess?.approvalNumberRequired;
-    const approvalsCount =
-      latestApprovalProcess?.actions?.approval?.length;
+    const approvalsCount = latestApprovalProcess?.actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };
@@ -105,7 +104,11 @@ export function ApprovePaymentPlan({
       {({ submitForm }) => (
         <>
           {approveDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"
@@ -129,11 +132,19 @@ export function ApprovePaymentPlan({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   {t('Are you sure you want to approve this Payment Plan?')}
                 </Box>
                 {shouldShowLastApproverMessage() && (
-                  <Box p={5}>
+                  <Box
+                    sx={{
+                      p: 5,
+                    }}
+                  >
                     <GreyText>
                       {t(
                         'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',

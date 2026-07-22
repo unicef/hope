@@ -80,7 +80,13 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
         <ContentWrapper>
           <Grid container>
             <Grid size={{ xs: 4 }}>
-              <Grid container spacing={0} justifyContent="flex-start">
+              <Grid
+                container
+                spacing={0}
+                sx={{
+                  justifyContent: 'flex-start',
+                }}
+              >
                 <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
@@ -119,8 +125,10 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
               <Grid
                 container
                 spacing={0}
-                justifyContent="flex-start"
-                alignItems="center"
+                sx={{
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                }}
               >
                 <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
@@ -164,7 +172,13 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
               </Grid>
             </Grid>
             <Grid size={{ xs: 4 }}>
-              <Grid container spacing={0} justifyContent="flex-end">
+              <Grid
+                container
+                spacing={0}
+                sx={{
+                  justifyContent: 'flex-end',
+                }}
+              >
                 <Grid size={{ xs: 12 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>

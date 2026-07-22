@@ -23,7 +23,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
 
-  const handleNextClick = async(): Promise<void> => {
+  const handleNextClick = async (): Promise<void> => {
     if (handleNext) {
       await handleNext();
     }
@@ -39,7 +39,12 @@ export const DetailsStep: FC<DetailsStepProps> = ({
       {errors?.documentationToUpdate && (
         <FormHelperText error>{errors.documentationToUpdate}</FormHelperText>
       )}
-      <Box display="flex" justifyContent="space-between">
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <Button
           data-cy="button-cancel"
           component={Link}

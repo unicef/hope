@@ -52,9 +52,18 @@ export function LockedPaymentPlanHeaderButtons({
   });
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canUnlock && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LoadingButton
             loading={loadingUnlock}
             variant="outlined"
@@ -70,7 +79,11 @@ export function LockedPaymentPlanHeaderButtons({
       )}
       <LockFspPaymentPlan paymentPlan={paymentPlan} permissions={permissions} />
       {canAbort && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <AbortPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}

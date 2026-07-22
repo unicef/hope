@@ -17,7 +17,13 @@ export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
 
   return (
     <Grid size={{ xs: 4 }}>
-      <Grid container spacing={0} justifyContent="flex-end">
+      <Grid
+        container
+        spacing={0}
+        sx={{
+          justifyContent: 'flex-end',
+        }}
+      >
         <Grid>
           <SummaryBorder>
             <LabelizedField label={t('Total Number of People')}>

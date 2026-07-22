@@ -225,18 +225,36 @@ export const PaymentPlanDetailsHeader = ({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           {t('Payment Plan')} ID:{' '}
-          <Box ml={1} mr={2}>
+          <Box
+            sx={{
+              ml: 1,
+              mr: 2,
+            }}
+          >
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
-          <Box mr={2}>
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
             />
           </Box>
-          <Box mr={2}>
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             {paymentPlan.backgroundActionStatus && (
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}

@@ -90,7 +90,8 @@ export const GrievancesTable = ({
       urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
       preferredLanguage: filter.preferredLanguage,
       programCode: isAllPrograms ? filter.program : programCode,
-      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
+      isActiveProgram:
+        filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
     [
@@ -399,11 +400,13 @@ export const GrievancesTable = ({
       <Paper>
         <EnhancedTableToolbar title={t('Grievance Tickets List')} />
         <Box
-          display="flex"
-          flexDirection="row"
-          marginX={6}
-          gap={4}
           component="div"
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            marginX: 6,
+            gap: 4,
+          }}
         >
           <BulkAssignModal
             selectedTickets={selectedTickets}

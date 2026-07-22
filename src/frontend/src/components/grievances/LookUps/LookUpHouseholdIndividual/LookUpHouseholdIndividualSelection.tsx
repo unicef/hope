@@ -50,7 +50,12 @@ export function LookUpHouseholdIndividualSelection({
         redirectedFromRelatedTicket={redirectedFromRelatedTicket}
         isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
       />
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <LookUpHouseholdIndividualSelectionDisplay
           disableUnselectHousehold={
             redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly

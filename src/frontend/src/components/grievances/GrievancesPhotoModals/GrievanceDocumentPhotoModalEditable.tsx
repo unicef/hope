@@ -17,9 +17,21 @@ export function GrievanceDocumentPhotoModalEditable({
   const picUrl = photoSrc;
 
   return (
-    <Box style={{ height: '100%' }} display="flex" alignItems="center">
+    <Box
+      style={{ height: '100%' }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display="flex" alignItems="center">
+        <Box
+          style={{ height: '100%' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <input
             type="file"
             accept="image/*"

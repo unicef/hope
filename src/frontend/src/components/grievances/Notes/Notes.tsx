@@ -102,9 +102,11 @@ export function Notes({
       <Grid size={{ xs: 10 }}>
         <Grid size={{ xs: 12 }}>
           <Box
-            display="flex"
-            justifyContent="space-between"
             data-cy="note-name"
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
           >
             <Name>{name}</Name>
             <Date>
@@ -137,7 +139,11 @@ export function Notes({
 
   return (
     <Grid size={{ xs: 8 }}>
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <Formik
           initialValues={initialValues}
           onSubmit={(values, { resetForm }) => {
@@ -161,7 +167,12 @@ export function Notes({
                   </Grid>
                   <Grid size={{ xs: 10 }}>
                     <Grid size={{ xs: 12 }}>
-                      <Box display="flex" justifyContent="space-between">
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
+                      >
                         <Name>{renderUserName(meData)}</Name>
                       </Box>
                     </Grid>
@@ -176,7 +187,13 @@ export function Notes({
                             label="Add a note ..."
                             component={FormikTextField}
                           />
-                          <Box mt={2} display="flex" justifyContent="flex-end">
+                          <Box
+                            sx={{
+                              mt: 2,
+                              display: 'flex',
+                              justifyContent: 'flex-end',
+                            }}
+                          >
                             <LoadingButton
                               data-cy="button-add-note"
                               loading={loading}

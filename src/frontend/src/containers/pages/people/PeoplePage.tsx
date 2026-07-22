@@ -177,10 +177,12 @@ const PeoplePage = (): ReactElement => {
                 }}
               />
               <Box
-                display="flex"
-                flexDirection="column"
                 data-cy="page-details-container"
                 ref={tableRef}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
               >
                 <PeopleListTable
                   filter={appliedFilter}

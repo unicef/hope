@@ -78,7 +78,11 @@ export function VerifyPaymentGrievance({
       {({ values }) => (
         <Form>
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"

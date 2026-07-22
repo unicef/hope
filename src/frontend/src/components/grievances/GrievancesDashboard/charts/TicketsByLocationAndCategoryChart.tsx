@@ -70,12 +70,24 @@ export const TicketsByLocationAndCategoryChart: FC<
   };
 
   return (
-    <Box flexDirection="column">
+    <Box
+      sx={{
+        flexDirection: 'column',
+      }}
+    >
       <div style={{ height: '400px' }}>
         <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
       </div>
       {data.labels.length > lessDataCount ? (
-        <Box textAlign="center" mt={4} ml={2} mr={2} letterSpacing={1.75}>
+        <Box
+          sx={{
+            textAlign: 'center',
+            mt: 4,
+            ml: 2,
+            mr: 2,
+            letterSpacing: 1.75,
+          }}
+        >
           <Button
             variant="outlined"
             color="primary"

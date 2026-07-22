@@ -66,7 +66,7 @@ export function BulkBaseModal({
       {buttonTitle}
     </Button>
   );
-  const onAccept = async(): Promise<void> => {
+  const onAccept = async (): Promise<void> => {
     try {
       await onSave(selectedTickets);
       setDialogOpen(false);
@@ -88,7 +88,12 @@ export function BulkBaseModal({
           <DialogTitle id="scroll-dialog-title">{title}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box mt={2} mb={6}>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 6,
+            }}
+          >
             <StyledContainer>
               <Typography>
                 {t('Tickets ID')}:{' '}

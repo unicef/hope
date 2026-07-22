@@ -58,7 +58,13 @@ export const PaymentPlanGroupsFilters = ({
       clearHandler={clearFilter}
       applyHandler={applyFilterChanges}
     >
-      <Grid container spacing={3} alignItems="flex-end">
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={4}>
           <SearchTextField
             label={t('Search')}

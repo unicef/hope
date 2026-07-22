@@ -102,7 +102,12 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
       </Grid>
       <Grid size={{ xs: 10 }}>
         <Grid size={{ xs: 12 }}>
-          <Box display="flex" justifyContent="space-between">
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
             <Name>{name}</Name>
             <Date>
               <UniversalMoment withTime>{date}</UniversalMoment>
@@ -134,7 +139,11 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
 
   return (
     <Grid size={{ xs: 8 }}>
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <Formik
           initialValues={initialValues}
           onSubmit={async (values, { resetForm }) => {
@@ -157,7 +166,12 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
                     </Grid>
                     <Grid size={{ xs: 10 }}>
                       <Grid size={{ xs: 12 }}>
-                        <Box display="flex" justifyContent="space-between">
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                          }}
+                        >
                           <Name>{renderUserName(meData)}</Name>
                         </Box>
                       </Grid>
@@ -173,9 +187,11 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
                               component={FormikTextField}
                             />
                             <Box
-                              mt={2}
-                              display="flex"
-                              justifyContent="flex-end"
+                              sx={{
+                                mt: 2,
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                              }}
                             >
                               <LoadingButton
                                 loading={loading}

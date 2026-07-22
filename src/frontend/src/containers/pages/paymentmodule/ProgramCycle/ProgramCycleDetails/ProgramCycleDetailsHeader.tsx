@@ -168,7 +168,13 @@ export const ProgramCycleDetailsHeader = ({
 
   const buttons = (
     <>
-      <Box display="flex" mt={2} mb={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 2,
+          mb: 2,
+        }}
+      >
         {programCycle.status !== 'Finished' &&
           hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
             <Box>
@@ -186,8 +192,15 @@ export const ProgramCycleDetailsHeader = ({
             </Box>
           )}
 
-        {hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE, permissions) && (
-          <Box ml={2}>
+        {hasPermissions(
+          PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
+          permissions,
+        ) && (
+          <Box
+            sx={{
+              ml: 2,
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
@@ -206,7 +219,11 @@ export const ProgramCycleDetailsHeader = ({
             PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
             permissions,
           ) && (
-            <Box ml={2}>
+            <Box
+              sx={{
+                ml: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -224,7 +241,11 @@ export const ProgramCycleDetailsHeader = ({
             PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
             permissions,
           ) && (
-            <Box ml={2}>
+            <Box
+              sx={{
+                ml: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -258,7 +279,9 @@ export const ProgramCycleDetailsHeader = ({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateGroupOpen(false)}>{t('Cancel')}</Button>
+          <Button onClick={() => setCreateGroupOpen(false)}>
+            {t('Cancel')}
+          </Button>
           <Button
             onClick={handleCreateGroup}
             variant="contained"
@@ -275,8 +298,18 @@ export const ProgramCycleDetailsHeader = ({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems={'center'}>
-          <Box display="flex" flexDirection="column">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <Box>{programCycle.title}</Box>
           </Box>
         </Box>
