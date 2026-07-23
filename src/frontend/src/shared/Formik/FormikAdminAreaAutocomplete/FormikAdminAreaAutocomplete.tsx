@@ -23,7 +23,12 @@ export function FormikAdminAreaAutocomplete({
     }
   };
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {label && <FieldLabel>{label}</FieldLabel>}
       <AdminAreaFixedAutocomplete
         disabled={disabled}

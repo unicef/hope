@@ -21,7 +21,7 @@ export function ExistingAccountsFieldArray({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
-    <Grid container spacing={3} direction="column">
+    <Grid container spacing={3} sx={{ flexDirection: 'column' }}>
       <FieldArray
         name="individualDataUpdateAccountsToEdit"
         render={(arrayHelpers) =>
@@ -32,8 +32,10 @@ export function ExistingAccountsFieldArray({
                   <Grid
                     container
                     direction="row"
-                    alignItems="center"
                     spacing={3}
+                    sx={{
+                      alignItems: 'center',
+                    }}
                   >
                     <EditAccountRow
                       values={values}
@@ -47,7 +49,15 @@ export function ExistingAccountsFieldArray({
               ))}
             </>
           ) : (
-            isEditTicket && <Box ml={2}>-</Box>
+            isEditTicket && (
+              <Box
+                sx={{
+                  ml: 2,
+                }}
+              >
+                -
+              </Box>
+            )
           )
         }
       />

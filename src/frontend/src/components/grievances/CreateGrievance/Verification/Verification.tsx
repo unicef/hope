@@ -37,11 +37,19 @@ function Verification({
     <BoxWithBorders>
       <>
         {values.selectedHousehold && !isSocialDctType && (
-          <Box py={4}>
+          <Box
+            sx={{
+              py: 4,
+            }}
+          >
             <Typography variant="subtitle2">
               {`${beneficiaryGroup?.groupLabel} Questionnaire`}
             </Typography>
-            <Box py={4}>
+            <Box
+              sx={{
+                py: 4,
+              }}
+            >
               <HouseholdQuestionnaire
                 values={values}
                 programCode={programCode}
@@ -54,7 +62,11 @@ function Verification({
             <Typography variant="subtitle2">
               {`${beneficiaryGroup?.memberLabel} Questionnaire`}
             </Typography>
-            <Box py={4}>
+            <Box
+              sx={{
+                py: 4,
+              }}
+            >
               <IndividualQuestionnaire values={values} />
             </Box>
             <BoxWithBorderBottom />

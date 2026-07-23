@@ -7,15 +7,30 @@ interface FormikFileFieldProps {
   label?: string;
 }
 
-export function FormikFileField({ field, form, label }: FormikFileFieldProps): ReactElement {
+export function FormikFileField({
+  field,
+  form,
+  label,
+}: FormikFileFieldProps): ReactElement {
   return (
-    <Box style={{ height: '100%' }} display="flex" flexDirection="column">
+    <Box
+      style={{ height: '100%' }}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {label && (
         <Typography variant="caption" color="textSecondary" sx={{ mb: 0.5 }}>
           {label}
         </Typography>
       )}
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         <input
           type="file"
           accept="image/*"

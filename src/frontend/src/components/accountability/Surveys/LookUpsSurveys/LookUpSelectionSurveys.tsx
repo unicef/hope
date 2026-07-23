@@ -60,13 +60,22 @@ export function LookUpSelectionSurveys({
   return (
     <Box>
       <BoxWithBorderBottom
-        p={4}
-        m={4}
-        display="flex"
-        alignItems="center"
-        bgcolor="#F5F5F5"
+        sx={{
+          p: 4,
+          m: 4,
+          display: 'flex',
+          alignItems: 'center',
+          bgcolor: '#F5F5F5',
+        }}
       >
-        <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
+        <Box
+          sx={{
+            pl: 5,
+            pr: 5,
+            fontWeight: '500',
+            fontSize: 'medium',
+          }}
+        >
           {t('Look up for')}
         </Box>
         <RadioGroup
@@ -88,7 +97,12 @@ export function LookUpSelectionSurveys({
           ))}
         </RadioGroup>
       </BoxWithBorderBottom>
-      <Box p={4} mt={4}>
+      <Box
+        sx={{
+          p: 4,
+          mt: 4,
+        }}
+      >
         <Box>
           {selectedTab === SurveyTabsValues.WHOLE_PROGRAM_POPULATION && (
             <Box>

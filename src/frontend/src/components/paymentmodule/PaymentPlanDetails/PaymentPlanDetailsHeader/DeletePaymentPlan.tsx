@@ -77,7 +77,11 @@ export function DeletePaymentPlan({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <IconButton
           onClick={() => setDeleteDialogOpen(true)}
           disabled={!isActiveProgram}
@@ -98,7 +102,11 @@ export function DeletePaymentPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               {t('Are you sure you want to remove this Payment Plan?')}
             </Box>
           </DialogContainer>

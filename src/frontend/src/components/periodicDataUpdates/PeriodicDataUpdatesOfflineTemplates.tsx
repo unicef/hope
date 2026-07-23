@@ -189,8 +189,20 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   const renderTemplateRow = (row: PDUXlsxTemplateList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>
-        <Box display="flex" alignItems="center">
-          <Box mr={2}>{row.id}</Box> <AdminButton adminUrl={row.adminUrl} />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
+            {row.id}
+          </Box>{' '}
+          <AdminButton adminUrl={row.adminUrl} />
         </Box>
       </TableCell>
       <TableCell data-cy={`template-name-${row.id}`}>{row.name}</TableCell>

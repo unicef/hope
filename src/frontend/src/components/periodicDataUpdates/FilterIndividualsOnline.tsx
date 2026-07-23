@@ -43,7 +43,13 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
 
   return (
     <FiltersSection isOnPaper={isOnPaper} withApplyClearButtons={false}>
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={3}>
           <RdiAutocompleteRestFilter
             value={filter.registrationDataImportId}

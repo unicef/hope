@@ -85,7 +85,11 @@ export const AdminAreaFixedAutocomplete = ({
   }
 
   return (
-    <Box mt={1}>
+    <Box
+      sx={{
+        mt: 1,
+      }}
+    >
       <StyledAutocomplete
         options={areasData || []}
         defaultValue={
@@ -114,16 +118,19 @@ export const AdminAreaFixedAutocomplete = ({
             variant="outlined"
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
+            slotProps={{
+              ...params.slotProps,
+              input: {
+                ...params.slotProps.input,
+                endAdornment: (
+                  <>
+                    {loading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                    {params.slotProps.input.endAdornment}
+                  </>
+                ),
+              },
             }}
           />
         )}

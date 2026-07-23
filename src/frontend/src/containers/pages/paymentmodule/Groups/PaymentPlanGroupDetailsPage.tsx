@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
-import { isGroupBackgroundActionBusy } from './utils';
+import { batchPlanTypeLabel, isGroupBackgroundActionBusy } from './utils';
 
 const initialFilter = {
   search: '',
@@ -56,16 +56,24 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
   useEffect(() => {
     const isBusy = isGroupBackgroundActionBusy(group ?? null);
     if (wasBusy.current && !isBusy) {
-      queryClient.invalidateQueries({ queryKey: ['businessAreasPaymentPlans'] });
-      queryClient.invalidateQueries({ queryKey: ['businessAreasProgramsPaymentPlansList'] });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
     }
     wasBusy.current = isBusy;
   }, [group, queryClient]);
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL, permissions))
+  if (
+    !hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL, permissions)
+  )
     return (
-      <PermissionDenied permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL} />
+      <PermissionDenied
+        permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL}
+      />
     );
   if (isLoading) return <LoadingComponent />;
 
@@ -125,15 +133,19 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
             {group.batches.map((batch) => (
               <Box
                 key={batch.exportTag}
-                display="flex"
-                alignItems="center"
-                gap={2}
-                py={1}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  py: 1,
+                }}
               >
                 <BlackLink
                   to={`/${baseUrl}/payment-module/groups/${groupId}/batches/${encodeURIComponent(String(batch.exportTag))}`}
                 >
                   {t('Batch')} #{batch.exportTag}
+                  {batchPlanTypeLabel(batch.planType) &&
+                    ` ${t(batchPlanTypeLabel(batch.planType))}`}
                 </BlackLink>
                 {batch.exportFileLink ? (
                   <Link

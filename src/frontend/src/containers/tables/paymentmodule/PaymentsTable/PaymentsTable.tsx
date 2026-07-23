@@ -171,7 +171,11 @@ const PaymentsTable = ({
 
   return (
     <>
-      <Box p={4}>
+      <Box
+        sx={{
+          p: 4,
+        }}
+      >
         <PaymentsFilters
           filter={filter}
           setFilter={setFilter}
@@ -183,7 +187,13 @@ const PaymentsTable = ({
       <div ref={tableRef}>
         <TableWrapper>
           <Paper>
-            <StyledBox p={6} display="flex" justifyContent="space-between">
+            <StyledBox
+              sx={{
+                p: 6,
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography data-cy="table-title" variant="h6">
                 {t('Payee List')}
               </Typography>

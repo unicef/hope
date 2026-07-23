@@ -46,7 +46,12 @@ export function EditAccountRow({
         }
         onDelete={() => {}}
       />
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         <Button
           variant="outlined"
           color="primary"
@@ -88,12 +93,17 @@ export function EditAccountRow({
       })}
       <Grid size={11}></Grid>
       <Grid size={1}>
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <IconButton
             onClick={() => {
               arrayHelpers.push({
                 id: account.id,
-                dataFields: [ ...account.dataFields ],
+                dataFields: [...account.dataFields],
                 financialInstitution: account.financialInstitution,
                 number: account.number,
                 accountType: account.accountTypeKey,

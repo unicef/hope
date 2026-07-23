@@ -73,7 +73,12 @@ export function IdentitiesToRemoveTable({
   return (
     <>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Identities to be removed')}</Typography>
         </Box>
       </TableTitle>
@@ -96,7 +101,7 @@ export function IdentitiesToRemoveTable({
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
                       checked={selectedIdentitiesToRemove.includes(index)}
-                      inputProps={{ 'aria-labelledby': 'xd' }}
+                      slotProps={{ input: { 'aria-labelledby': 'xd' } }}
                     />
                   ) : (
                     selectedIdentitiesToRemove.includes(index) && (

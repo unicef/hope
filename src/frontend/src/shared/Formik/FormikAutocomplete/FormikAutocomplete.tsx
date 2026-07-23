@@ -24,7 +24,11 @@ export function FormikAutocomplete({
   const helperText = showError ? form.errors[field.name] : '';
 
   return (
-    <Box mt={2}>
+    <Box
+      sx={{
+        mt: 2,
+      }}
+    >
       <Autocomplete
         id="combo-box-demo"
         size="small"

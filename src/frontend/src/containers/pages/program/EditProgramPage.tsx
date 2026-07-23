@@ -426,7 +426,11 @@ const EditProgramPage = (): ReactElement => {
                   />
                 }
               >
-                <Box p={3}>
+                <Box
+                  sx={{
+                    p: 3,
+                  }}
+                >
                   <>
                     <Fade in={step === 0} timeout={600}>
                       <div>
@@ -437,7 +441,11 @@ const EditProgramPage = (): ReactElement => {
                             programId={id}
                             errors={errors}
                             programHasRdi={programHasRdi}
-                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).filter((p) => p.isUsedInPp).map((p) => p.id)}
+                            lockedPurposeIds={(
+                              program.paymentPlanPurposes ?? []
+                            )
+                              .filter((p) => p.isUsedInPp)
+                              .map((p) => p.id)}
                           />
                         )}
                       </div>

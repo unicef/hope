@@ -77,7 +77,12 @@ export function DocumentsTable({
   return (
     <>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Documents to be added')}</Typography>
         </Box>
       </TableTitle>
@@ -98,7 +103,7 @@ export function DocumentsTable({
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                     }
                     checked={selectedDocuments.includes(index)}
-                    inputProps={{ 'aria-labelledby': 'selected' }}
+                    slotProps={{ input: { 'aria-labelledby': 'selected' } }}
                   />
                 ) : (
                   selectedDocuments.includes(index) && (

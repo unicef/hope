@@ -172,7 +172,11 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
           </>
         }
       >
-        <Box mr={2}>
+        <Box
+          sx={{
+            mr: 2,
+          }}
+        >
           {individual?.photo ? (
             <IndividualPhotoModal individual={individual} />
           ) : null}

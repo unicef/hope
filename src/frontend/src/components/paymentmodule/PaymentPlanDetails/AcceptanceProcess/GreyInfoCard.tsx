@@ -41,14 +41,29 @@ export function GreyInfoCard({
     const { info, createdAt, comment } = action;
     return (
       info && (
-        <Box alignItems="center" display="flex" key={createdAt}>
+        <Box
+          key={createdAt}
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+          }}
+        >
           {info}
-          <Box ml={1}>
+          <Box
+            sx={{
+              ml: 1,
+            }}
+          >
             <GreyText>
               on <UniversalMoment>{createdAt}</UniversalMoment>
             </GreyText>
           </Box>
-          <Box p={1} ml={1}>
+          <Box
+            sx={{
+              p: 1,
+              ml: 1,
+            }}
+          >
             {comment ? (
               <MessageDialog
                 comment={comment}
@@ -65,19 +80,30 @@ export function GreyInfoCard({
   });
 
   return (
-    <Box display="flex" flexDirection="column">
-      <Box p={3}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <GreyTitle>
           {topMessage} on <UniversalMoment>{topDate}</UniversalMoment>
         </GreyTitle>
       </Box>
       <GreyBox
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        ml={3}
-        mr={3}
-        p={3}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          ml: 3,
+          mr: 3,
+          p: 3,
+        }}
       >
         {mappedApprovals}
       </GreyBox>

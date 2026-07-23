@@ -120,7 +120,11 @@ export function CreateImportFromXlsxForm({
   return (
     <FormikProvider value={formik}>
       <DropzoneField loading={saveXlsxLoading} />
-      <Box mt={2}>
+      <Box
+        sx={{
+          mt: 2,
+        }}
+      >
         <Field
           name="name"
           fullWidth

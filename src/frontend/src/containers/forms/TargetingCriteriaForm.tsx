@@ -1,7 +1,7 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -470,7 +470,12 @@ export const TargetingCriteriaForm = ({
                   )}
                 />
                 {householdFiltersAvailable || isSocialDctType ? (
-                  <Box display="flex" flexDirection="column">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
                     <ButtonBox>
                       <Button
                         onClick={() =>
@@ -479,7 +484,7 @@ export const TargetingCriteriaForm = ({
                             .push({ fieldName: '' })
                         }
                         color="primary"
-                        startIcon={<AddCircleOutline />}
+                        startIcon={<AddCircleOutlined />}
                         data-cy="button-household-rule"
                       >
                         ADD{' '}
@@ -501,7 +506,11 @@ export const TargetingCriteriaForm = ({
                     <Grid container spacing={3}>
                       <>
                         <Grid size={{ xs: 12 }}>
-                          <Box pb={3}>
+                          <Box
+                            sx={{
+                              pb: 3,
+                            }}
+                          >
                             <Field
                               data-cy="input-included-individual-ids"
                               name="individualIds"
@@ -543,7 +552,12 @@ export const TargetingCriteriaForm = ({
                         </ArrayFieldWrapper>
                       )}
                     />
-                    <Box display="flex" flexDirection="column">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
                       <ButtonBox>
                         <Button
                           data-cy="button-individual-rule"
@@ -555,7 +569,7 @@ export const TargetingCriteriaForm = ({
                               })
                           }
                           color="primary"
-                          startIcon={<AddCircleOutline />}
+                          startIcon={<AddCircleOutlined />}
                         >
                           {`ADD ${beneficiaryGroup?.memberLabel.toUpperCase()}
                           RULE GROUP`}
@@ -570,18 +584,26 @@ export const TargetingCriteriaForm = ({
                     <AndDividerLabel>And</AndDividerLabel>
                   </AndDivider>
                   {criteriaIndex === 0 && (
-                    <Box mt={2} display="flex" flexDirection="column">
+                    <Box
+                      sx={{
+                        mt: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
                       <ButtonBox style={{ width: '600px' }}>
                         <Button
                           data-cy="button-payment-channel-rule"
                           onClick={() => handlePaymentChannelButtonClick()}
                           color="primary"
-                          startIcon={<AddCircleOutline />}
+                          startIcon={<AddCircleOutlined />}
                         >
                           <Box
                             style={{ textAlign: 'left' }}
-                            display="flex"
-                            flexDirection="column"
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                            }}
                           >
                             <Box>PAYMENT CHANNEL VALIDATION</Box>
                             <Box>(Delivery mechanism and FSP requirements)</Box>
@@ -589,7 +611,11 @@ export const TargetingCriteriaForm = ({
                         </Button>
                       </ButtonBox>
                       <Collapse in={openPaymentChannelCollapse}>
-                        <Box mt={4}>
+                        <Box
+                          sx={{
+                            mt: 4,
+                          }}
+                        >
                           <Grid container spacing={3}>
                             <Grid size={{ xs: 12 }}>
                               <Field
@@ -643,7 +669,12 @@ export const TargetingCriteriaForm = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <StyledBox display="flex" justifyContent="flex-end">
+                  <StyledBox
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
                     <div>
                       <Button
                         onClick={() => {

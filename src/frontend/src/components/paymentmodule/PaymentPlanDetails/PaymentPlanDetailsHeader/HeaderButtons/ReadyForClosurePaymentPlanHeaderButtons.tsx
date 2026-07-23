@@ -51,10 +51,19 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       <>
         {paymentPlan.hasPaymentListExportFile && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <Button
               color="primary"
               component="a"
@@ -71,7 +80,11 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
         )}
 
         {canSendBack && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <LoadingButton
               color="primary"
               variant="contained"
@@ -86,7 +99,11 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
         )}
 
         {canClose && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"

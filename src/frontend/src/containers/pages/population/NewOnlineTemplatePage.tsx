@@ -287,12 +287,18 @@ const NewOnlineTemplatePage = (): ReactElement => {
                 />
               )}
               <Box
-                display="flex"
-                mt={4}
-                justifyContent="flex-start"
-                width="100%"
+                sx={{
+                  display: 'flex',
+                  mt: 4,
+                  justifyContent: 'flex-start',
+                  width: '100%',
+                }}
               >
-                <Box mr={2}>
+                <Box
+                  sx={{
+                    mr: 2,
+                  }}
+                >
                   <Button
                     variant="outlined"
                     color="secondary"
@@ -303,9 +309,17 @@ const NewOnlineTemplatePage = (): ReactElement => {
                     Cancel
                   </Button>
                 </Box>
-                <Box display="flex">
+                <Box
+                  sx={{
+                    display: 'flex',
+                  }}
+                >
                   {activeStep > 0 && activeStep < 4 && (
-                    <Box mr={2}>
+                    <Box
+                      sx={{
+                        mr: 2,
+                      }}
+                    >
                       <Button
                         data-cy="back-button"
                         variant="outlined"
