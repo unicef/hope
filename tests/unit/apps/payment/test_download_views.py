@@ -202,11 +202,11 @@ def test_download_payment_plan_payment_list_redirects_with_permission(
     response = download_payment_plan_payment_list(request, str(payment_plan_with_entitlement_file.id))
 
     assert response.status_code == 302
-    assert response.url == payment_plan_with_entitlement_file.payment_list_export_file_link
+    assert response.url == payment_plan_with_entitlement_file.entitlement_export_file_link
 
 
 def test_download_payment_plan_payment_list_wrong_status_raises(rf, create_user_role_with_permissions, user):
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
     create_user_role_with_permissions(user, [Permissions.PM_VIEW_LIST], payment_plan.business_area)
 
     request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan.id]))
@@ -214,7 +214,7 @@ def test_download_payment_plan_payment_list_wrong_status_raises(rf, create_user_
 
     with pytest.raises(
         ValidationError,
-        match="Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.",
+        match="Export XLSX is possible only for Payment Plan within status LOCK.",
     ):
         download_payment_plan_payment_list(request, str(payment_plan.id))
 
@@ -239,7 +239,7 @@ def test_download_payment_plan_payment_list_empty_file_raises(rf, create_user_ro
     request = rf.get(reverse("download-payment-plan-payment-list", args=[payment_plan.id]))
     request.user = user
 
-    with pytest.raises(ValueError, match="Payment plan export file link must not be None"):
+    with pytest.raises(ValueError, match="Payment plan entitlement export file link must not be None"):
         download_payment_plan_payment_list(request, str(payment_plan.id))
 
 

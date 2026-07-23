@@ -71,8 +71,6 @@ export function FinishedPaymentPlanHeaderButtons({
     },
   });
 
-  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
-
   return (
     <Box
       sx={{
@@ -103,27 +101,6 @@ export function FinishedPaymentPlanHeaderButtons({
             canSplit={canSplit}
           />
         </Box>
-        {paymentPlan.hasPaymentListExportFile && (
-          <Box
-            sx={{
-              m: 2,
-            }}
-          >
-            <Button
-              color="primary"
-              component="a"
-              variant="contained"
-              data-cy="button-download-xlsx"
-              download
-              href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-              disabled={shouldDisableDownloadXlsx}
-              data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
-            >
-              {t('Download XLSX')}
-            </Button>
-          </Box>
-        )}
-
         {canSendToPaymentGateway && (
           <Box
             sx={{

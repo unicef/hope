@@ -692,7 +692,7 @@ def test_pp_entitlement_export_xlsx(
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
         payment_plan_actions_context["pp"].refresh_from_db()
-        assert payment_plan_actions_context["pp"].has_export_file is True
+        assert payment_plan_actions_context["pp"].has_entitlement_file is True
 
 
 def test_pp_entitlement_export_xlsx_invalid_status(
