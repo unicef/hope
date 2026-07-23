@@ -274,6 +274,8 @@ class PaymentPlan(
         REVIEW = "REVIEW", "Review"
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
+        MARK_READY_FOR_CLOSURE = "MARK_READY_FOR_CLOSURE", "Mark Ready for Closure"
+        SEND_BACK_TO_FINISHED = "SEND_BACK_TO_FINISHED", "Send Back to Finished"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
         SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
 
