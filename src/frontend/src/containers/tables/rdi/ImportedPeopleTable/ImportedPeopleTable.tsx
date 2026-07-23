@@ -99,9 +99,19 @@ export function ImportedPeopleTable({
   return (
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
-        <Grid container justifyContent="flex-end" spacing={3}>
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            justifyContent: 'flex-end',
+          }}
+        >
           <Grid>
-            <Box p={3}>
+            <Box
+              sx={{
+                p: 3,
+              }}
+            >
               <FormControlLabel
                 control={
                   <Checkbox

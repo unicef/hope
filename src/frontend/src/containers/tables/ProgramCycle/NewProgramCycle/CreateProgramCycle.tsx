@@ -137,7 +137,12 @@ const CreateProgramCycle = ({
           <>
             <DialogTitleWrapper>
               <DialogTitle>
-                <Box display="flex" justifyContent="space-between">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <Box>{t('Add New Programme Cycle')}</Box>
                   {step && <Box>{step}</Box>}
                 </Box>

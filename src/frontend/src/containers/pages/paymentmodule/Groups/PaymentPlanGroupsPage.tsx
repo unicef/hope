@@ -26,9 +26,9 @@ const PaymentPlanGroupsPage = (): ReactElement => {
   );
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST, permissions))
     return (
-      <PermissionDenied permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL} />
+      <PermissionDenied permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST} />
     );
 
   return (

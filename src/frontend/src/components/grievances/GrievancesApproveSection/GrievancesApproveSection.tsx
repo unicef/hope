@@ -122,7 +122,12 @@ function GrievancesApproveSection({
 
   return (
     <Grid container size={12}>
-      <Box sx={{ width: '100%' }} p={3}>
+      <Box
+        sx={{
+          p: 3,
+          width: '100%',
+        }}
+      >
         {matchDetailsComponent()}
       </Box>
     </Grid>

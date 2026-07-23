@@ -1,5 +1,6 @@
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Lock } from '@mui/icons-material';
 import { Box } from '@mui/material';
@@ -8,6 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 
 interface SendXlsxPasswordBatchButtonProps {
   groupId: string;
@@ -17,10 +19,11 @@ interface SendXlsxPasswordBatchButtonProps {
 export function SendXlsxPasswordBatchButton({
   groupId,
   tag,
-}: SendXlsxPasswordBatchButtonProps): ReactElement {
+}: SendXlsxPasswordBatchButtonProps): ReactElement | null {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const permissions = usePermissions();
 
   const { mutateAsync: sendPassword, isPending: loadingSend } = useMutation({
     mutationFn: () =>
@@ -40,8 +43,15 @@ export function SendXlsxPasswordBatchButton({
     },
   });
 
+  if (!hasPermissions(PERMISSIONS.PM_SEND_XLSX_PASSWORD, permissions))
+    return null;
+
   return (
-    <Box m={2}>
+    <Box
+      sx={{
+        m: 2,
+      }}
+    >
       <LoadingButton
         loading={loadingSend}
         startIcon={<Lock />}

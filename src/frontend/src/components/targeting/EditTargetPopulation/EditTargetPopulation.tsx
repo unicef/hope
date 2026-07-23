@@ -1,6 +1,7 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
@@ -37,6 +38,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 interface EditTargetPopulationProps {
   paymentPlan: TargetPopulationDetail;
@@ -55,6 +57,7 @@ const EditTargetPopulation = ({
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const permissions = usePermissions();
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [modalCycle, setModalCycle] = useState<{ value: string; name: string }>(
     {
@@ -257,10 +260,21 @@ const EditTargetPopulation = ({
             data-cy="edit-target-population-header"
           />
           <PaperContainer data-cy="paper-container">
-            <Box pt={3} pb={3}>
+            <Box
+              sx={{
+                pt: 3,
+                pb: 3,
+              }}
+            >
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
-            <Grid container mb={5} spacing={3}>
+            <Grid
+              container
+              spacing={3}
+              sx={{
+                mb: 5,
+              }}
+            >
               <Grid size={6}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
@@ -285,7 +299,13 @@ const EditTargetPopulation = ({
                 />
               </Grid>
               <Grid size={6}>
-                <Box display="flex" alignItems="center" gap={2}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                  }}
+                >
                   <TextField
                     label={t('Group')}
                     value={values.paymentPlanGroupId?.name || ''}
@@ -294,20 +314,24 @@ const EditTargetPopulation = ({
                     variant="outlined"
                     size="small"
                   />
-                  {paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && (
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => {
-                        setModalCycle(values.programCycleId);
-                        setCreateGroupModalOpen(true);
-                      }}
-                      data-cy="button-change-group"
-                      sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
-                    >
-                      {t('Change Group')}
-                    </Button>
-                  )}
+                  {paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN &&
+                    hasPermissions(
+                      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
+                      permissions,
+                    ) && (
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => {
+                          setModalCycle(values.programCycleId);
+                          setCreateGroupModalOpen(true);
+                        }}
+                        data-cy="button-change-group"
+                        sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                      >
+                        {t('Change Group')}
+                      </Button>
+                    )}
                 </Box>
               </Grid>
             </Grid>
@@ -350,7 +374,12 @@ const EditTargetPopulation = ({
                 </Grid>
               )}
             </Grid>
-            <Box pt={6} pb={6}>
+            <Box
+              sx={{
+                pt: 6,
+                pb: 6,
+              }}
+            >
               <Divider />
             </Box>
             <FieldArray
@@ -374,12 +403,14 @@ const EditTargetPopulation = ({
             data-cy="exclusions"
           />
           <Box
-            pt={3}
-            pb={3}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
             data-cy="save-message-box"
+            sx={{
+              pt: 3,
+              pb: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t(

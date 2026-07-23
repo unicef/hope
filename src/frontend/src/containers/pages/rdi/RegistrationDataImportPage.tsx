@@ -87,9 +87,18 @@ function RegistrationDataImportPage(): ReactElement {
 
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {deduplicationFlags?.canRunDeduplication && (
-          <Box mr={3}>
+          <Box
+            sx={{
+              mr: 3,
+            }}
+          >
             <ButtonTooltip
               variant="contained"
               color="primary"

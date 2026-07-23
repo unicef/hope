@@ -67,7 +67,13 @@ export const LinkedPaymentPlansModal = ({
 
   return (
     <>
-      <Box display="flex" alignItems="center" gap={0.5}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+        }}
+      >
         <span>{linkedPlans.length}</span>
         <IconButton
           color="primary"
@@ -80,13 +86,22 @@ export const LinkedPaymentPlansModal = ({
           <VisibilityIcon />
         </IconButton>
       </Box>
-      <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onClick={(e) => e.stopPropagation()}
+        scroll="paper"
+      >
         <DialogTitleWrapper>
           <DialogTitle>{t('Linked Payment Plans')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            <Box mb={2}>
+            <Box
+              sx={{
+                mb: 2,
+              }}
+            >
               <LabelizedField label={t('Original Payment Plan')}>
                 {canViewDetails ? (
                   <BlackLink

@@ -34,7 +34,15 @@ export function DashboardPaper({
       extraPaddingLeft={extraPaddingLeft}
       color={color}
     >
-      {title && <Box mb={extraPaddingTitle ? 6 : 2}>{title}</Box>}
+      {title && (
+        <Box
+          sx={{
+            mb: extraPaddingTitle ? 6 : 2,
+          }}
+        >
+          {title}
+        </Box>
+      )}
       {children}
     </StyledPaper>
   );

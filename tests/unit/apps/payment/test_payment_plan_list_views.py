@@ -13,11 +13,7 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
-    DeliveryMechanismFactory,
-    FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory,
     FollowUpInstructionFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -28,7 +24,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import FinancialServiceProvider, Payment, PaymentPlan, Program
+from hope.models import Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -424,7 +420,6 @@ def test_payment_plan_detail(
     assert payment_plan["start_date"] is None
     assert payment_plan["program"]["name"] == payment_plan_detail_context["program_active"].name
     assert payment_plan["has_payment_list_export_file"] is False
-    assert payment_plan["has_fsp_delivery_mechanism_xlsx_template"] is False
     assert payment_plan["imported_file_name"] == ""
     assert payment_plan["payments_conflicts_count"] == 0
     assert payment_plan["delivery_mechanism"] is None
@@ -438,9 +433,6 @@ def test_payment_plan_detail(
     assert payment_plan["can_send_to_payment_gateway"] is False
     assert payment_plan["can_split"] is False
     assert payment_plan["total_households_count_with_valid_phone_no"] == 0
-    assert payment_plan["can_export_xlsx"] is False
-    assert payment_plan["can_download_xlsx"] is False
-    assert payment_plan["can_send_xlsx_password"] is False
     purpose = payment_plan_detail_context["purpose"]
     assert payment_plan["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
     group = payment_plan_detail_context["group"]
@@ -483,39 +475,6 @@ def test_follow_ups_and_top_ups_return_correct_children(
     follow_up_ids = [p["id"] for p in data["follow_ups"]]
     assert top_up_ids == [str(top_up.id)]
     assert follow_up_ids == [str(follow_up.id)]
-
-
-def test_has_fsp_delivery_mechanism_xlsx_template(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    xlsx_temp = FinancialServiceProviderXlsxTemplateFactory()
-    dm = DeliveryMechanismFactory()
-    fsp = FinancialServiceProviderFactory(
-        name="Test FSP 1",
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        vision_vendor_number=123,
-    )
-    fsp.xlsx_templates.set([xlsx_temp])
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=fsp,
-        delivery_mechanism=dm,
-        xlsx_template=xlsx_temp,
-    )
-    payment_plan_detail_context["pp"].delivery_mechanism = dm
-    payment_plan_detail_context["pp"].financial_service_provider = fsp
-    payment_plan_detail_context["pp"].save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan = response.json()
-    assert payment_plan["has_fsp_delivery_mechanism_xlsx_template"] is True
 
 
 def test_can_create_follow_up(
@@ -655,78 +614,6 @@ def test_get_can_split_returns_false_when_instruction_managed(
     response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["can_split"] is False
-
-
-def test_get_can_export_xlsx_returns_false_when_instruction_managed(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    instruction = FollowUpInstructionFactory(
-        program=payment_plan_detail_context["program_active"],
-        business_area=payment_plan_detail_context["business_area"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.follow_up_instruction = instruction
-    pp.status = PaymentPlan.Status.ACCEPTED
-    pp.save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_export_xlsx"] is False
-
-
-def test_get_can_download_xlsx_returns_false_when_instruction_managed(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    instruction = FollowUpInstructionFactory(
-        program=payment_plan_detail_context["program_active"],
-        business_area=payment_plan_detail_context["business_area"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.follow_up_instruction = instruction
-    pp.status = PaymentPlan.Status.ACCEPTED
-    pp.save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_download_xlsx"] is False
-
-
-def test_get_can_send_xlsx_password_returns_false_when_instruction_managed(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    instruction = FollowUpInstructionFactory(
-        program=payment_plan_detail_context["program_active"],
-        business_area=payment_plan_detail_context["business_area"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.follow_up_instruction = instruction
-    pp.status = PaymentPlan.Status.ACCEPTED
-    pp.save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_send_xlsx_password"] is False
 
 
 def test_filter_by_status(payment_plan_filter_context: dict[str, Any]) -> None:

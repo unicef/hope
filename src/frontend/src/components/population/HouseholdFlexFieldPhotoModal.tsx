@@ -34,7 +34,12 @@ export function HouseholdFlexFieldPhotoModal({ field }): ReactElement {
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       -
     </Box>
   );

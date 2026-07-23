@@ -119,7 +119,11 @@ const PaymentPlanDetails = ({
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <Box mr={1}>
+                <Box
+                  sx={{
+                    mr: 1,
+                  }}
+                >
                   <LabelizedField label={t('FX Rate Applied')}>
                     {exchangeRate}
                   </LabelizedField>
@@ -139,21 +143,34 @@ const PaymentPlanDetails = ({
                 </Tooltip>
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <Box mr={1}>
+                <Box
+                  sx={{
+                    mr: 1,
+                  }}
+                >
                   <LabelizedField label={t('FSP')}>
                     {paymentPlan.financialServiceProvider.name}
                   </LabelizedField>
                 </Box>
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <Box mr={1}>
+                <Box
+                  sx={{
+                    mr: 1,
+                  }}
+                >
                   <LabelizedField label={t('Delivery Mechanism')}>
                     {paymentPlan.deliveryMechanism.name}
                   </LabelizedField>
                 </Box>
               </Grid>
             </Grid>
-            <Grid container direction="column" size={{ xs: 3 }} spacing={6}>
+            <Grid
+              container
+              sx={{ flexDirection: 'column' }}
+              size={{ xs: 3 }}
+              spacing={6}
+            >
               <Grid size={{ xs: 12 }}>
                 <FieldBorder color="#84A1CA">
                   <RelatedFollowUpPaymentPlans

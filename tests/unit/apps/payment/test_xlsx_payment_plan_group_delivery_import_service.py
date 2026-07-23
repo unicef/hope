@@ -180,7 +180,21 @@ def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, del
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
-    return {"group": group, "regular_plan": regular_plan, "follow_up_plan": follow_up_plan}
+    top_up_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+    )
+    return {
+        "group": group,
+        "regular_plan": regular_plan,
+        "follow_up_plan": follow_up_plan,
+        "top_up_plan": top_up_plan,
+    }
 
 
 @pytest.fixture
@@ -408,13 +422,17 @@ def test_open_plans_are_not_indexed(group_with_open_plan):
     assert service.eligible_plans == []
 
 
-def test_follow_up_and_top_up_plans_are_excluded(group_with_follow_up_and_top_up_plans):
+def test_follow_up_and_top_up_plans_are_included(group_with_follow_up_and_top_up_plans):
     ctx = group_with_follow_up_and_top_up_plans
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
 
-    assert [plan.id for plan in service.payment_plans] == [ctx["regular_plan"].id]
+    assert {plan.id for plan in service.payment_plans} == {
+        ctx["regular_plan"].id,
+        ctx["follow_up_plan"].id,
+        ctx["top_up_plan"].id,
+    }
 
 
 def test_payment_gateway_plan_is_skipped_and_its_payments_emit_specific_error(

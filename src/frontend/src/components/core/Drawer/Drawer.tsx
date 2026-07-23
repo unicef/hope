@@ -179,11 +179,19 @@ export const Drawer = ({
         <List>
           <DrawerItems open={open} currentLocation={currentLocation} />
         </List>
-        <Box mb={2}>
+        <Box
+          sx={{
+            mb: 2,
+          }}
+        >
           <Divider />
         </Box>
         {open && (
-          <Box mb={2}>
+          <Box
+            sx={{
+              mb: 2,
+            }}
+          >
             <ResourcesText>{t('Resources')}</ResourcesText>
           </Box>
         )}
@@ -194,7 +202,11 @@ export const Drawer = ({
               target="_blank"
               href={item.href}
             >
-              <Box display="flex">
+              <Box
+                sx={{
+                  display: 'flex',
+                }}
+              >
                 <Icon>{item.icon}</Icon>
                 <Text primary={item.name} />
               </Box>

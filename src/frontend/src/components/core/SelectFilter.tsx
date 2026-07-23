@@ -76,7 +76,12 @@ export const SelectFilter = ({
         size="small"
         data-cy={dataCy}
       >
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <InputLabel>{label}</InputLabel>
           <StyledSelect
             size="small"
@@ -102,11 +107,18 @@ export const SelectFilter = ({
               const selectedOptions = Children.toArray(children).filter(
                 (child): child is ReactElement<any> =>
                   isValidElement(child) &&
-                  selectedValues.includes((child as ReactElement<any>).props.value),
+                  selectedValues.includes(
+                    (child as ReactElement<any>).props.value,
+                  ),
               );
 
               return (
-                <Box display="flex" alignItems="center">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
                   {icon && (
                     <StartInputAdornment position="start">
                       {icon}

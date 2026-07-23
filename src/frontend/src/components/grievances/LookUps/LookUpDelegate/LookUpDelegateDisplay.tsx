@@ -28,7 +28,12 @@ export const LookUpDelegateDisplay = ({
     <StyledBox disabled={disabled}>
       <Grid container>
         <Grid>
-          <Box display="flex" flexDirection="column">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             {t('Delegate')}:
             <BlueText data-cy="delegate-individual">
               {values.selectedDelegate?.unicefId ||
@@ -39,8 +44,18 @@ export const LookUpDelegateDisplay = ({
         </Grid>
         {disabled || (
           <Grid>
-            <Box p={2}>
-              <Grid container justifyContent="center" alignItems="center">
+            <Box
+              sx={{
+                p: 2,
+              }}
+            >
+              <Grid
+                container
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <Grid>
                   <LightGrey>
                     <EditIcon

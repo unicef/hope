@@ -32,6 +32,7 @@ from hope.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    PendingIndividualIdentity,
     RegistrationDataImport,
 )
 from hope.models.financial_institution import FinancialInstitution
@@ -55,9 +56,8 @@ def countries() -> dict:
 @pytest.fixture
 def business_area(countries: dict) -> object:
     business_area = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
-    business_area.kobo_username = "1234ABC"
     business_area.postpone_deduplication = True
-    business_area.save(update_fields=["kobo_username", "postpone_deduplication"])
+    business_area.save(update_fields=["postpone_deduplication"])
     return business_area
 
 
@@ -455,6 +455,58 @@ def test_handle_documents_and_identities(
 
     assert birth_certificate == "birth_certificate"
     assert national_passport == "national_passport"
+
+
+def test_handle_documents_and_identities_creates_identities_with_resolved_partner(
+    business_area: object,
+    registration_data_import: object,
+    program: object,
+) -> None:
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+    individual = IndividualFactory(
+        program=program,
+        business_area=business_area,
+        registration_data_import=registration_data_import,
+        rdi_merge_status=MergeStatusModel.PENDING,
+    )
+    documents_and_identities = [
+        {
+            "scope_id": {
+                "number": "WFP-123",
+                "individual": individual,
+                "issuing_country": Country("AFG"),
+            }
+        },
+        {
+            "unhcr_id": {
+                "number": "UNHCR-456",
+                "individual": individual,
+                "issuing_country": Country("AFG"),
+            }
+        },
+    ]
+
+    task._handle_documents_and_identities(documents_and_identities)
+
+    assert PendingIndividualIdentity.objects.count() == 2
+    assert (
+        PendingIndividualIdentity.objects.filter(
+            number="WFP-123",
+            partner__name="WFP",
+            country__iso_code2="AF",
+            individual=individual,
+        ).count()
+        == 1
+    )
+    assert (
+        PendingIndividualIdentity.objects.filter(
+            number="UNHCR-456",
+            partner__name="UNHCR",
+            country__iso_code2="AF",
+            individual=individual,
+        ).count()
+        == 1
+    )
 
 
 def test_handle_household_dict(

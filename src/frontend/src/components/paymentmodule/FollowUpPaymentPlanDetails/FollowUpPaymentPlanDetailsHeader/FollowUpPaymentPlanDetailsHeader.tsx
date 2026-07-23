@@ -75,9 +75,7 @@ export function FollowUpPaymentPlanDetailsHeader({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-  const canSendToVision =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_VISION, permissions) &&
-    paymentPlan.canSendToVision;
+
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
@@ -190,9 +188,18 @@ export function FollowUpPaymentPlanDetailsHeader({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           {t('Follow-up Payment Plan')} ID:{' '}
-          <Box ml={1}>
+          <Box
+            sx={{
+              ml: 1,
+            }}
+          >
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
           <StatusWrapper>

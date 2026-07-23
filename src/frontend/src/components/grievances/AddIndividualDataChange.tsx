@@ -1,5 +1,5 @@
 import { Button, Grid, Typography } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
@@ -232,7 +232,7 @@ function AddIndividualDataChange({
                 <Grid size={12}>
                   <Button
                     color="primary"
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     disabled={isEditTicket}
                     onClick={() => {
                       arrayHelpers.push({
@@ -279,7 +279,7 @@ function AddIndividualDataChange({
                 <Grid size={12}>
                   <Button
                     color="primary"
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     onClick={() => {
                       arrayHelpers.push({
                         id: crypto.randomUUID(),
