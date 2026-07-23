@@ -5,7 +5,7 @@ import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
@@ -42,12 +42,10 @@ import { usePersistedCount } from '@hooks/usePersistedCount';
 interface GrievancesTableProps {
   filter;
   selectedTab;
-  onOpenNaManagement: () => void;
 }
 
 export const GrievancesTable = ({
   filter,
-  onOpenNaManagement,
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, businessAreaSlug, programCode, isAllPrograms } =
     useBaseUrl();
@@ -410,17 +408,7 @@ export const GrievancesTable = ({
   return (
     <TableWrapper>
       <Paper>
-        <EnhancedTableToolbar title={t('Grievance Tickets List')}>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={onOpenNaManagement}
-            data-cy="button-na-tickets-management"
-            sx={{ whiteSpace: 'nowrap', px: 4, flexShrink: 0 }}
-          >
-            {t('NA Tickets Management')}
-          </Button>
-        </EnhancedTableToolbar>
+        <EnhancedTableToolbar title={t('Grievance Tickets List')} />
         <Box
           display="flex"
           flexDirection="row"

@@ -1,5 +1,6 @@
 import React, { ReactElement, useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { Box, Button } from '@mui/material';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -153,22 +154,36 @@ export const GrievancesTablePage = (): ReactElement => {
   return (
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
-        {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-          <ButtonTooltip
-            variant="contained"
+        <Box display="flex" alignItems="center" gap={2}>
+          {/* //TODO: add permission */}
+          <Button
+            variant="outlined"
             color="primary"
-            component={Link}
-            title={t(
-              'Programme has to be active to create a new Grievance Ticket',
-            )}
-            to={`/${baseUrl}/grievance/new-ticket`}
-            dataCy="button-new-ticket"
-            dataPerm={`${PERMISSIONS.GRIEVANCES_CREATE}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST} ${PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}`}
-            disabled={!isActiveProgram}
+            onClick={() =>
+              navigate(`/${baseUrl}/grievance/na-tickets-management`)
+            }
+            data-cy="button-na-tickets-management"
+            sx={{ whiteSpace: 'nowrap', px: 4, flexShrink: 0 }}
           >
-            {t('NEW TICKET')}
-          </ButtonTooltip>
-        )}
+            {t('NA Tickets Management')}
+          </Button>
+          {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+            <ButtonTooltip
+              variant="contained"
+              color="primary"
+              component={Link}
+              title={t(
+                'Programme has to be active to create a new Grievance Ticket',
+              )}
+              to={`/${baseUrl}/grievance/new-ticket`}
+              dataCy="button-new-ticket"
+              dataPerm={`${PERMISSIONS.GRIEVANCES_CREATE}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST} ${PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}`}
+              disabled={!isActiveProgram}
+            >
+              {t('NEW TICKET')}
+            </ButtonTooltip>
+          )}
+        </Box>
       </PageHeader>
       <GrievancesFilters
         choicesData={choicesData}
@@ -183,13 +198,7 @@ export const GrievancesTablePage = (): ReactElement => {
         selectedTab={selectedTab}
       />
       <div ref={tableRef}>
-        <GrievancesTable
-          filter={appliedFilter}
-          selectedTab={selectedTab}
-          onOpenNaManagement={() =>
-            navigate(`/${baseUrl}/grievance/na-tickets-management`)
-          }
-        />
+        <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
       </div>
     </>
   );
