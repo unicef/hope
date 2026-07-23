@@ -30415,7 +30415,7 @@
                         "UNIQUE_IN_BATCH"
                     ],
                     "type": "string",
-                    "description": "* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in batch\n* `UNIQUE_IN_BATCH` - Unique in batch"
+                    "description": "* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in RDI\n* `UNIQUE_IN_BATCH` - Unique in RDI"
                 },
                 "BiometricDeduplicationGoldenRecordStatusEnum": {
                     "enum": [
@@ -31607,7 +31607,7 @@
                         "UNIQUE_IN_BATCH"
                     ],
                     "type": "string",
-                    "description": "* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in batch\n* `UNIQUE_IN_BATCH` - Unique in batch"
+                    "description": "* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in RDI\n* `UNIQUE_IN_BATCH` - Unique in RDI"
                 },
                 "DeduplicationEngineSimilarityPairIndividual": {
                     "type": "object",
@@ -35546,7 +35546,7 @@
                                     "$ref": "#/components/schemas/BiometricDeduplicationBatchStatusEnum"
                                 }
                             ],
-                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in batch\n* `UNIQUE_IN_BATCH` - Unique in batch"
+                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in RDI\n* `UNIQUE_IN_BATCH` - Unique in RDI"
                         },
                         "biometric_deduplication_golden_record_results": {
                             "description": "Deduplication golden record results [sys]"
@@ -36277,7 +36277,7 @@
                                     "$ref": "#/components/schemas/DeduplicationBatchStatusEnum"
                                 }
                             ],
-                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in batch\n* `UNIQUE_IN_BATCH` - Unique in batch"
+                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in RDI\n* `UNIQUE_IN_BATCH` - Unique in RDI"
                         },
                         "deduplication_batch_status_display": {
                             "type": "string"
@@ -36288,7 +36288,7 @@
                                     "$ref": "#/components/schemas/BiometricDeduplicationBatchStatusEnum"
                                 }
                             ],
-                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in batch\n* `UNIQUE_IN_BATCH` - Unique in batch"
+                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in RDI\n* `UNIQUE_IN_BATCH` - Unique in RDI"
                         },
                         "biometric_deduplication_batch_status_display": {
                             "type": "string"
@@ -43304,7 +43304,7 @@
                                     "$ref": "#/components/schemas/BiometricDeduplicationBatchStatusEnum"
                                 }
                             ],
-                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in batch\n* `UNIQUE_IN_BATCH` - Unique in batch"
+                            "description": "Deduplication batch status [sys]\n\n* `DUPLICATE_IN_BATCH` - Duplicate in RDI\n* `NOT_PROCESSED` - Not Processed\n* `SIMILAR_IN_BATCH` - Similar in RDI\n* `UNIQUE_IN_BATCH` - Unique in RDI"
                         },
                         "biometric_deduplication_golden_record_results": {
                             "description": "Deduplication golden record results [sys]"
