@@ -84,12 +84,10 @@ class IndividualXlsxUpdate:
 
         Individual.objects.bulk_update(individuals, columns)
 
-        if RECALCULATION_INDIVIDUAL_FIELDS.intersection(columns):
-            household_ids = sorted(
-                {str(individual.household_id) for individual in individuals if individual.household_id}
-            )
-            if household_ids:
-                recalculate_population_fields_async_task(household_ids=household_ids)
+        # An empty `household_ids` must never reach the task — it would recalculate every household.
+        household_ids = sorted({str(individual.household_id) for individual in individuals if individual.household_id})
+        if household_ids and RECALCULATION_INDIVIDUAL_FIELDS.intersection(columns):
+            recalculate_population_fields_async_task(household_ids=household_ids)
 
     @staticmethod
     def _column_name_by_attr(attr: dict) -> str | None:

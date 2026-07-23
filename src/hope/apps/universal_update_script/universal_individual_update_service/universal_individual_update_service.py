@@ -438,12 +438,14 @@ class UniversalIndividualUpdateService:
             Household.objects.filter(id__in=[household.id for household in households_to_update]),
             get_household_doc(str(self.program.id)),
         )
-        if RECALCULATION_INDIVIDUAL_FIELDS.intersection(individual_fields_to_update) or set(
-            KAB_SOURCE_FIELDS
-        ).intersection(household_fields_to_update):
-            household_ids = sorted({str(household.pk) for household in households_to_update})
-            if household_ids:
-                recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
+        # The trailing batch can be empty; an empty `household_ids` must never reach the task —
+        # it would recalculate every household.
+        household_ids = sorted({str(household.pk) for household in households_to_update})
+        if household_ids and (
+            RECALCULATION_INDIVIDUAL_FIELDS.intersection(individual_fields_to_update)
+            or set(KAB_SOURCE_FIELDS).intersection(household_fields_to_update)
+        ):
+            recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
         documents_to_update.clear()
         documents_to_create.clear()
         households_to_update.clear()
