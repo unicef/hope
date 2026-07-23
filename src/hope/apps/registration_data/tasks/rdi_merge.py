@@ -59,17 +59,25 @@ logger = logging.getLogger(__name__)
 
 class RdiMergeTask:
     def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list]:
+        collision_detector = obj_hct.program.collision_detector
+
         household_ids_to_exclude = []
+        collided_ids = set()
         for ids in chunks(household_ids, 1000):
-            households_chunks = PendingHousehold.objects.filter(id__in=ids)
-            for household in households_chunks:
-                collided_id = obj_hct.program.collision_detector.detect_collision(household)
-                if not collided_id:
-                    continue
-                household_ids_to_exclude.append(household.id)
-                obj_hct.program.collision_detector.update_household(household)
-                updated_household = Household.objects.get(id=collided_id)
-                updated_household.extra_rdis.add(obj_hct)
+            for household in PendingHousehold.objects.filter(id__in=ids).only("id", "identification_key"):
+                if collided_id := collision_detector.detect_collision(household):
+                    household_ids_to_exclude.append(household.id)
+                    collided_ids.add(collided_id)
+
+        # acquire all collision-target locks up front in one pk-ordered statement, to avoid
+        # deadlocks; the writes below can then run in any order
+        evaluate_qs(Household.objects.filter(id__in=collided_ids).select_for_update().only("pk").order_by("pk"))
+        for ids in chunks(household_ids_to_exclude, 1000):
+            for household in PendingHousehold.objects.filter(id__in=ids):
+                collision_detector.update_household(household)
+
+        obj_hct.extra_hh_rdis.add(*collided_ids)
+
         households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
         return households_to_merge_ids, household_ids_to_exclude
 
@@ -162,7 +170,7 @@ class RdiMergeTask:
 
     def execute(self, registration_data_import_id: str) -> None:
         try:
-            obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
+            obj_hct = RegistrationDataImport.objects.select_related("program").get(id=registration_data_import_id)
             households = PendingHousehold.objects.filter(registration_data_import=obj_hct)
 
             individuals = PendingIndividual.objects.filter(registration_data_import=obj_hct).order_by(
@@ -208,14 +216,15 @@ class RdiMergeTask:
                     self._update_merge_statuses(households_to_merge_ids, individuals_to_merge_ids)
                     self._populate_index_individuals(obj_hct)
 
-                    individuals = evaluate_qs(
-                        Individual.objects.filter(registration_data_import=obj_hct)
-                        .select_for_update(of=("self",))
-                        .order_by("pk")
-                    )
+                    # lock households before individuals - same order as recalculate_data, to avoid deadlocks
                     households = evaluate_qs(
                         Household.objects.filter(registration_data_import=obj_hct)
                         .select_related("household_collection", "business_area")
+                        .select_for_update(of=("self",))
+                        .order_by("pk")
+                    )
+                    individuals = evaluate_qs(
+                        Individual.objects.filter(registration_data_import=obj_hct)
                         .select_for_update(of=("self",))
                         .order_by("pk")
                     )
@@ -344,7 +353,7 @@ class RdiMergeTask:
         }
 
         for household in households:
-            household_from_collection = existing_households_by_unicef_id.get(household.unicef_id)
+            household_from_collection = existing_households_by_unicef_id.get(household.unicef_id or "")
             if household_from_collection:
                 if collection := household_from_collection.household_collection:
                     household.household_collection = collection
@@ -374,7 +383,7 @@ class RdiMergeTask:
 
         for individual in individuals_list:
             # find other individual with the same unicef_id and group them in the same collection
-            individual_from_collection = existing_individuals_by_unicef_id.get(individual.unicef_id)
+            individual_from_collection = existing_individuals_by_unicef_id.get(individual.unicef_id or "")
             if individual_from_collection:
                 if collection := individual_from_collection.individual_collection:
                     individual.individual_collection = collection

@@ -8,8 +8,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Table,
-  TableBody,
   Typography,
 } from '@mui/material';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
@@ -25,7 +23,7 @@ export const StyledLink = styled.div`
   display: flex;
   align-content: center;
 `;
-const StyledTable = styled(Table)`
+const StyledContainer = styled.div`
   min-width: 400px;
   max-width: 800px;
 `;
@@ -91,18 +89,16 @@ export function BulkBaseModal({
         </DialogTitleWrapper>
         <DialogContent>
           <Box mt={2} mb={6}>
-            <StyledTable>
+            <StyledContainer>
               <Typography>
                 {t('Tickets ID')}:{' '}
                 <Bold data-cy="selected-tickets">
                   {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
                 </Bold>
               </Typography>
-            </StyledTable>
+            </StyledContainer>
           </Box>
-          <StyledTable>
-            <TableBody data-cy="dropdown">{children}</TableBody>
-          </StyledTable>
+          <StyledContainer data-cy="dropdown">{children}</StyledContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>

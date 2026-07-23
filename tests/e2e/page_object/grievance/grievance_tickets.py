@@ -60,7 +60,7 @@ class GrievanceTickets(BaseComponents):
     selected_tickets = 'span[data-cy="selected-tickets"]'
     button_cancel = 'button[data-cy="button-cancel"]'
     button_save = 'button[data-cy="button-save"]'
-    dropdown = 'tbody[data-cy="dropdown"]'
+    dropdown = 'div[data-cy="dropdown"]'
     status_container = '[data-cy="status-container"]'
     date_title_filter_popup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     days_filter_popup = (

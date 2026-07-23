@@ -273,8 +273,12 @@ function ExcludeSection({
     }
 
     if (noExclusions && !deletedIds.length) {
+      const createExclusionsDisabled =
+        !isActiveProgram || !hasExcludePermission || !hasOpenOrLockedStatus;
+
       return (
-        <Button
+        <ButtonTooltip
+          title={getTooltipText()}
           variant="contained"
           color="primary"
           data-cy="button-create-exclusions"
@@ -282,10 +286,10 @@ function ExcludeSection({
             setExclusionsOpen(true);
             setEdit(true);
           }}
-          disabled={!isActiveProgram}
+          disabled={createExclusionsDisabled}
         >
           {t('Create')}
-        </Button>
+        </ButtonTooltip>
       );
     }
 

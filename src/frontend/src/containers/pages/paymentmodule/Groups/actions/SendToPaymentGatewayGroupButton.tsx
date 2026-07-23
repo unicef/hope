@@ -1,10 +1,12 @@
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanGroupDetail } from '../types';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
@@ -20,6 +22,7 @@ export function SendToPaymentGatewayGroupButton({
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
+  const permissions = usePermissions();
 
   const {
     mutateAsync: sendToPaymentGateway,
@@ -43,6 +46,13 @@ export function SendToPaymentGatewayGroupButton({
   });
 
   if (!group) return null;
+  if (
+    !hasPermissions(
+      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY,
+      permissions,
+    )
+  )
+    return null;
 
   return (
     <Box m={2}>
