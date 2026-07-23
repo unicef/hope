@@ -777,7 +777,7 @@ class PaymentPlan(
         file_field = self.export_file_entitlement.file
         self.export_file_entitlement.delete()
         self.export_file_entitlement = None
-        # Storage delete is not transactional: delete the file only once the transaction commits,
+        # Storage delete is not transactional: delete the file when the transaction commits
         transaction.on_commit(lambda: file_field.delete(save=False))
 
     def remove_export_file_delivery(self) -> None:
@@ -794,7 +794,7 @@ class PaymentPlan(
         if file_temp is not None:
             file_field = file_temp.file
             file_temp.delete()
-            # Storage delete is not transactional; defer it so a rollback can't leave the row
+            # Storage delete is not transactional: delete the file when the transaction commits
             transaction.on_commit(lambda: file_field.delete(save=False))
 
     def remove_export_files(self) -> None:
