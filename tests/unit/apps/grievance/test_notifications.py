@@ -186,6 +186,14 @@ def close_ticket_as_creator_role() -> Role:
     )
 
 
+@pytest.fixture
+def close_feedback_ticket_role() -> Role:
+    return RoleFactory(
+        name="Feedback Ticket Closer",
+        permissions=[Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK.value],
+    )
+
+
 def test_init_builds_recipients_and_emails_for_assignment_changed(
     assigned_ticket: GrievanceTicket, assignee: User
 ) -> None:
@@ -1182,6 +1190,27 @@ def test_for_approval_recipients_for_complaint_target_close_permission_holders(
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
 
     assert list(notification.user_recipients) == [closer]
+
+
+def test_for_approval_recipients_for_referral_target_feedback_close_permission_holders(
+    business_area: BusinessArea, close_feedback_ticket_role: Role, close_ticket_role: Role
+) -> None:
+    feedback_closer = UserFactory(email="referral-closer@example.com")
+    UserRoleAssignmentFactory(user=feedback_closer, role=close_feedback_ticket_role, business_area=business_area)
+
+    excluding_feedback_closer = UserFactory(email="referral-wrong-closer@example.com")
+    UserRoleAssignmentFactory(user=excluding_feedback_closer, role=close_ticket_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [feedback_closer]
 
 
 def test_for_approval_recipients_for_sensitive_exclude_holders_without_close_permission(

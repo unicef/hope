@@ -203,6 +203,12 @@ class GrievanceNotification:
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ),
+            # Referral is a feedback-type ticket, so closing/approving is gated by the feedback permission.
+            GrievanceTicket.CATEGORY_REFERRAL: (
+                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+            ),
         }
         permissions = approve_permissions_by_category.get(self.grievance_ticket.category)
         if permissions is None:
