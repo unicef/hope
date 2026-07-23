@@ -66,21 +66,17 @@ def download_payment_plan_payment_list(
     if not request.user.has_perm(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
         raise PermissionDenied({"required_permissions": [Permissions.PM_VIEW_LIST.value]})
 
-    if payment_plan.status not in (
-        PaymentPlan.Status.LOCKED,
-        PaymentPlan.Status.ACCEPTED,
-        PaymentPlan.Status.FINISHED,
-    ):
-        raise ValidationError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
+    if payment_plan.status != PaymentPlan.Status.LOCKED:
+        raise ValidationError("Export XLSX is possible only for Payment Plan within status LOCK.")
 
-    if not payment_plan.has_export_file:
+    if not payment_plan.has_entitlement_file:
         log_and_raise(
             f"XLSX File not found. PaymentPlan ID: {payment_plan.unicef_id}",
             error_type=FileNotFoundError,
         )
-    link = payment_plan.payment_list_export_file_link
+    link = payment_plan.entitlement_export_file_link
     if link is None:
-        raise ValueError("Payment plan export file link must not be None")
+        raise ValueError("Payment plan entitlement export file link must not be None")
     return redirect(link)
 
 
