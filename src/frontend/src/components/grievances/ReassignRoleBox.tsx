@@ -145,8 +145,18 @@ export const ReassignRoleBox = ({
       }
 
       return (
-        <Box mb={2} mt={2} key={el.id}>
-          <Box mb={2}>
+        <Box
+          key={el.id}
+          sx={{
+            mb: 2,
+            mt: 2,
+          }}
+        >
+          <Box
+            sx={{
+              mb: 2,
+            }}
+          >
             <LabelizedField label={t('ROLE')}>
               <>{capitalize(el.role)} Collector</>
             </LabelizedField>
@@ -211,10 +221,25 @@ export const ReassignRoleBox = ({
         </Typography>
       </OrangeTitle>
       {showMessage()}
-      <Box mt={3} display="flex" flexDirection="column">
+      <Box
+        sx={{
+          mt: 3,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {shouldShowReassignHoH && (
-          <Box mb={2} mt={2}>
-            <Box mb={2}>
+          <Box
+            sx={{
+              mb: 2,
+              mt: 2,
+            }}
+          >
+            <Box
+              sx={{
+                mb: 2,
+              }}
+            >
               <LabelizedField label={t('ROLE')}>
                 <>{t(`Head of ${beneficiaryGroup?.groupLabel}`)}</>
               </LabelizedField>

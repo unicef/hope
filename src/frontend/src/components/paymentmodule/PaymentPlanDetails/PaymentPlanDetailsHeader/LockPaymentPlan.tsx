@@ -67,7 +67,11 @@ export function LockPaymentPlan({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <Button
           color="primary"
           variant="contained"
@@ -90,13 +94,21 @@ export function LockPaymentPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               {t(
                 'After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.',
               )}
             </Box>
             {paymentPlan.paymentsConflictsCount > 0 && (
-              <Box p={5}>
+              <Box
+                sx={{
+                  p: 5,
+                }}
+              >
                 <GreyText>
                   {t('Note:')}{' '}
                   {paymentPlan.paymentsConflictsCount === 1

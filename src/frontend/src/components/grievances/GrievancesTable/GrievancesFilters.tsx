@@ -124,7 +124,13 @@ export const GrievancesFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             value={filter.search}
@@ -255,7 +261,13 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
-          <Grid container spacing={3} alignItems="flex-end">
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              alignItems: 'flex-end',
+            }}
+          >
             <Grid size={{ xs: 6 }}>
               <NumberTextField
                 topLabel={t('Similarity Score')}
@@ -363,8 +375,12 @@ export const GrievancesFilters = ({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
-              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>
+                {t('Active Programmes')}
+              </MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>
+                {t('All Programmes')}
+              </MenuItem>
             </SelectFilter>
           </Grid>
         )}

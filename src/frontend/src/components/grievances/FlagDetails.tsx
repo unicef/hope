@@ -77,7 +77,12 @@ export const FlagDetails = ({
   return (
     <ApproveBox>
       <Title>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Flag Details')}</Typography>
           <Box>
             <ViewSanctionList

@@ -65,9 +65,27 @@ export const IndividualFlags: FC<IndividualFlagsProps> = ({ individual }) => {
 
   return (
     <>
-      <Box mr={2}>{getDuplicateTooltip(individual)}</Box>
-      <Box mr={2}>{getSanctionListPossibleMatchTooltip(individual)}</Box>
-      <Box mr={2}>{getSanctionListConfirmedMatchTooltip(individual)}</Box>
+      <Box
+        sx={{
+          mr: 2,
+        }}
+      >
+        {getDuplicateTooltip(individual)}
+      </Box>
+      <Box
+        sx={{
+          mr: 2,
+        }}
+      >
+        {getSanctionListPossibleMatchTooltip(individual)}
+      </Box>
+      <Box
+        sx={{
+          mr: 2,
+        }}
+      >
+        {getSanctionListConfirmedMatchTooltip(individual)}
+      </Box>
     </>
   );
 };

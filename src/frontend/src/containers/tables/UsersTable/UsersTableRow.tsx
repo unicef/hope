@@ -62,18 +62,38 @@ export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {
         </TableCell>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={2}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box margin={1} data-cy="country-role">
+            <Box
+              data-cy="country-role"
+              sx={{
+                margin: 1,
+              }}
+            >
               <GreyText>Country / Program / Role</GreyText>
             </Box>
-            <Box margin={1} data-cy="mapped-country-role">
+            <Box
+              data-cy="mapped-country-role"
+              sx={{
+                margin: 1,
+              }}
+            >
               {mappedRoles?.length ? mappedRoles : 'No roles assigned.'}
             </Box>
             {mappedPartnerRoles?.length > 0 && (
               <>
-                <Box margin={1} data-cy="partner-role">
+                <Box
+                  data-cy="partner-role"
+                  sx={{
+                    margin: 1,
+                  }}
+                >
                   <GreyText>Partner Roles</GreyText>
                 </Box>
-                <Box margin={1} data-cy="mapped-partner-role">
+                <Box
+                  data-cy="mapped-partner-role"
+                  sx={{
+                    margin: 1,
+                  }}
+                >
                   {mappedPartnerRoles}
                 </Box>
               </>

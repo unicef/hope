@@ -2258,7 +2258,7 @@ class PaymentPlanManagerialViewSet(
         with transaction.atomic():
             for payment_plan in payment_plans:
                 self._perform_payment_plan_status_action(
-                    cast("PaymentPlan", payment_plan),
+                    payment_plan,
                     input_data,
                     self.business_area,
                     request,

@@ -69,7 +69,12 @@ export function TicketsAlreadyExist({ values }): ReactElement {
       baseUrl,
     );
     return (
-      <Box key={ticket.id} mb={1}>
+      <Box
+        key={ticket.id}
+        sx={{
+          mb: 1,
+        }}
+      >
         <ContentLink href={grievanceDetailsPath}>{ticket.unicefId}</ContentLink>
       </Box>
     );
@@ -94,7 +99,13 @@ export function TicketsAlreadyExist({ values }): ReactElement {
             'There is an open ticket(s) in the same category for the related entity. Please review them before proceeding.',
           )}
         </Typography>
-        <Box mt={3} display="flex" flexDirection="column">
+        <Box
+          sx={{
+            mt: 3,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           {mappedTickets}
         </Box>
       </StyledBox>

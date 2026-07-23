@@ -235,7 +235,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("allowed_business_areas",),
         ("payment_gateway_id",),
     )
-    readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
+    readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration", "payment_gateway_id")
     inlines = (FspNameMappingInline, FSPXlsxTemplateInline)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:

@@ -91,7 +91,12 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
         permissions={permissions}
@@ -111,7 +116,10 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
-          <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
+          <ConversionToUsd
+            paymentPlan={paymentPlan}
+            permissions={permissions}
+          />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
           <PaymentsTable
             businessArea={businessArea}

@@ -17,7 +17,13 @@ export function PhotoModalHeader({
   return (
     <DialogTitleWrapper>
       <DialogTitle>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <span>{title}</span>
           {showRotate ? (
             <RotateImg turnAngle={turnAngle} setTurnAngle={setTurnAngle} />
