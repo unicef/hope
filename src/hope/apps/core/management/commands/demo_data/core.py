@@ -1,6 +1,6 @@
 from faker import Faker
 
-from extras.test_utils.factories import DataCollectingTypeFactory, PartnerFactory
+from extras.test_utils.factories import DataCollectingTypeFactory
 from hope.models import BusinessArea, Country, CountryCodeMap, DataCollectingType
 
 faker = Faker()
@@ -171,13 +171,6 @@ business_area_short_name_code_map = {
     "Guatemala": "1680",
     "Uruguay": "4620",
 }
-
-
-def generate_unicef_partners() -> None:
-    unicef_main_partner = PartnerFactory(name="UNICEF")
-    PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
-    PartnerFactory(name="UNHCR")
-    PartnerFactory(name="WFP")
 
 
 def generate_country_codes() -> None:
