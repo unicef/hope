@@ -60,11 +60,15 @@ export function AccountTable({
     accountValue[field.key] = field.value;
   }
 
-
   return (
     <>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">
             {t('Account to be created')} - {account.value.accountType}
           </Typography>
@@ -85,7 +89,7 @@ export function AccountTable({
                     ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                   }
                   checked={selectedAccounts.includes(index)}
-                  inputProps={{ 'aria-labelledby': 'selected' }}
+                  slotProps={{ input: { 'aria-labelledby': 'selected' } }}
                 />
               ) : (
                 selectedAccounts.includes(index) && (

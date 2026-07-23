@@ -136,7 +136,11 @@ function RegistrationDetails({
         </Grid>
         <Grid container>
           <Grid size={{ xs: 6 }}>
-            <Box mt={2}>
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
               <BigValueContainer>
                 <LabelizedField
                   label={`${beneficiaryGroup?.memberLabelPlural} with records at HOPE`}
@@ -165,11 +169,21 @@ function RegistrationDetails({
         <Typography variant="h6">{t('Import Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid alignItems="center" container>
+        <Grid
+          container
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Grid size={{ xs: 'auto' }}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 6 }}>
-                <Box display="flex" flexDirection="column">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
                   <LabelizedField label={t('status')}>
                     <StatusBox
                       status={registration?.status}
@@ -183,7 +197,12 @@ function RegistrationDetails({
               </Grid>
               {registration?.biometricDeduplicationEnabled && (
                 <Grid size={{ xs: 6 }}>
-                  <Box display="flex" flexDirection="column">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
                     <LabelizedField
                       label={t('Biometrics Deduplication Status')}
                     >
@@ -234,7 +253,7 @@ function RegistrationDetails({
           {registration.status ===
           RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED ? null : (
             <Grid size={{ xs: 'auto' }}>
-              <Grid container direction="column">
+              <Grid container sx={{ flexDirection: 'column' }}>
                 <Grid container size={{ xs: 12 }} spacing={3}>
                   <Grid size={{ xs: 4 }}></Grid>
                   <Grid size={{ xs: 4 }}>

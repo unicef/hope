@@ -49,7 +49,13 @@ export function EditIdentityRow({
     values?.individualDataUpdateIdentitiesToRemove || [];
   const removed = identitiesToRemove.includes(identity.id);
   return isEdited ? (
-    <Grid container alignItems="center" spacing={3}>
+    <Grid
+      container
+      spacing={3}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <AgencyField
         id={id.toString()}
         key={`${id}-${identity.number}-${identity.partner}`}
@@ -66,7 +72,12 @@ export function EditIdentityRow({
         isEdited={isEdited}
         values={values}
       />
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
@@ -82,7 +93,14 @@ export function EditIdentityRow({
       </Box>
     </Grid>
   ) : (
-    <Grid container alignItems="center" spacing={3} key={identity.id}>
+    <Grid
+      container
+      spacing={3}
+      key={identity.id}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <Grid size={4}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID AGENCY1')} value={identity.partner} />
@@ -101,7 +119,12 @@ export function EditIdentityRow({
       <Grid size={1}>
         {!removed ? (
           !isEditTicket && (
-            <Box display="flex" alignItems="center">
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
               <IconButton
                 onClick={() => {
                   setFieldValue(
@@ -128,7 +151,14 @@ export function EditIdentityRow({
             </Box>
           )
         ) : (
-          <Box display="flex" alignItems="center" height={48} color="red">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              height: 48,
+              color: 'red',
+            }}
+          >
             {t('REMOVED')}
           </Box>
         )}

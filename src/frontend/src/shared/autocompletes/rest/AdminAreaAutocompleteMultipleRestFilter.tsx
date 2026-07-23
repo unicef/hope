@@ -89,9 +89,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
         setNewValue(value);
       } else {
         if (areasData) {
-          const areaMap = new Map(
-            areasData.map((area) => [area.id, area]),
-          );
+          const areaMap = new Map(areasData.map((area) => [area.id, area]));
 
           const formattedValue = value.map((id) => {
             if (id === null || id === undefined) return { name: '', value: '' };
@@ -139,7 +137,6 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     }
   }, [businessArea, refetch]);
 
-   
   const handleChange = (event, newValue) => {
     setNewValue(newValue);
     onChange(event, newValue);
@@ -201,8 +198,8 @@ export function AdminAreaAutocompleteMultipleRestFilter({
             onClick={() => {
               if (!open) handleOpen();
             }}
-            InputProps={{
-              ...params.InputProps,
+            slotProps={{
+              ...params.slotProps,
             }}
           />
         );

@@ -109,8 +109,18 @@ export function AccessDenied() {
           </SmallerPermissions>
         )}
       </TextContainer>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <Box mr={4}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            mr: 4,
+          }}
+        >
           <Button
             endIcon={<Refresh />}
             variant="outlined"

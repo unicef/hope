@@ -37,16 +37,36 @@ export const LookUpLinkedTicketsDisplay = ({
   };
   return (
     <StyledBox disabled={disabled}>
-      <Grid container justifyContent="space-between">
+      <Grid
+        container
+        sx={{
+          justifyContent: 'space-between',
+        }}
+      >
         <Grid>
-          <Box display="flex" flexDirection="column">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
         {!isEditTicket && !disabled && (
           <Grid>
-            <Box p={2}>
-              <Grid container justifyContent="center" alignItems="center">
+            <Box
+              sx={{
+                p: 2,
+              }}
+            >
+              <Grid
+                container
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <Grid>
                   <LightGrey>
                     <EditIcon

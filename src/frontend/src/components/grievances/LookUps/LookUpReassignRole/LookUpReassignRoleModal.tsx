@@ -187,8 +187,16 @@ export function LookUpReassignRoleModal({
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Box display="flex">
-                <Box mr={1}>
+              <Box
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                <Box
+                  sx={{
+                    mr: 1,
+                  }}
+                >
                   <Field
                     name="identityVerified"
                     label="Identity Verified*"

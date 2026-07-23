@@ -30,7 +30,12 @@ export function FormikRadioGroup({
     }
   };
   return (
-    <Box mt={otherProps.noMargin ? 0 : 6} mb={otherProps.noMargin ? 0 : 2}>
+    <Box
+      sx={{
+        mt: otherProps.noMargin ? 0 : 6,
+        mb: otherProps.noMargin ? 0 : 2,
+      }}
+    >
       <FormLabelContainer>
         <Typography variant="caption">{otherProps.label}</Typography>
       </FormLabelContainer>
@@ -51,7 +56,13 @@ export function FormikRadioGroup({
             dataCy?: string;
           }) => (
             <Box key={each.value}>
-              <Box mb={1} display="flex" alignItems={alignItems}>
+              <Box
+                sx={{
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: alignItems,
+                }}
+              >
                 <Radio
                   color="primary"
                   value={each.value}
@@ -59,11 +70,27 @@ export function FormikRadioGroup({
                   data-cy={each?.dataCy}
                 />
                 {withGreyBox ? (
-                  <GreyBox p={2}>
-                    <Box ml={2}>{each.optionLabel || each.name}</Box>
+                  <GreyBox
+                    sx={{
+                      p: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        ml: 2,
+                      }}
+                    >
+                      {each.optionLabel || each.name}
+                    </Box>
                   </GreyBox>
                 ) : (
-                  <Box ml={2}>{each.optionLabel || each.name}</Box>
+                  <Box
+                    sx={{
+                      ml: 2,
+                    }}
+                  >
+                    {each.optionLabel || each.name}
+                  </Box>
                 )}
               </Box>
             </Box>

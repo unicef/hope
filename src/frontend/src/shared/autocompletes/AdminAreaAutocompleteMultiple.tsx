@@ -88,8 +88,9 @@ export function AdminAreaAutocompleteMultiple({
         <StyledTextField
           {...params}
           slotProps={{
+            ...params.slotProps,
             htmlInput: {
-              ...params.inputProps,
+              ...params.slotProps.htmlInput,
               value: inputValue,
             },
           }}

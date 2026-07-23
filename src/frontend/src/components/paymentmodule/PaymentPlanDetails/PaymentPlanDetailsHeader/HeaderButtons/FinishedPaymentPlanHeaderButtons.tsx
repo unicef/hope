@@ -30,26 +30,26 @@ export function FinishedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
 
-  const { mutateAsync: markReadyForClosure, isPending: loadingReadyForClosure } =
-    useMutation({
-      mutationFn: () =>
-        RestService.restBusinessAreasProgramsPaymentPlansReadyForClosureRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: paymentPlan.id,
-          },
-        ),
-      onSuccess: () => {
-        showMessage(t('Payment Plan marked as ready for closure.'));
-        queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
-        });
-      },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
-      },
-    });
+  const {
+    mutateAsync: markReadyForClosure,
+    isPending: loadingReadyForClosure,
+  } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansReadyForClosureRetrieve({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: paymentPlan.id,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan marked as ready for closure.'));
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+    },
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
 
   const {
     mutateAsync: sendToPaymentGateway,
@@ -74,18 +74,41 @@ export function FinishedPaymentPlanHeaderButtons({
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       <>
         {paymentPlan.canCreateFollowUp && (
-          <Box p={2}>
-            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="followup" />
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <CreateChildPaymentPlan
+              paymentPlan={paymentPlan}
+              variant="followup"
+            />
           </Box>
         )}
-        <Box p={2}>
-          <SplitIntoPaymentLists paymentPlan={paymentPlan} canSplit={canSplit} />
+        <Box
+          sx={{
+            p: 2,
+          }}
+        >
+          <SplitIntoPaymentLists
+            paymentPlan={paymentPlan}
+            canSplit={canSplit}
+          />
         </Box>
         {paymentPlan.hasPaymentListExportFile && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <Button
               color="primary"
               component="a"
@@ -102,7 +125,11 @@ export function FinishedPaymentPlanHeaderButtons({
         )}
 
         {canSendToPaymentGateway && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <Button
               type="button"
               color="primary"
@@ -118,7 +145,11 @@ export function FinishedPaymentPlanHeaderButtons({
         )}
 
         {canMarkReadyForClosure && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <LoadingButton
               color="primary"
               variant="contained"

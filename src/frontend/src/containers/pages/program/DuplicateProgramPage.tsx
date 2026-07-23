@@ -404,7 +404,11 @@ const DuplicateProgramPage = (): ReactElement => {
                 />
               }
             >
-              <Box p={3}>
+              <Box
+                sx={{
+                  p: 3,
+                }}
+              >
                 <Fade in={step === 0} timeout={600}>
                   <div>
                     {step === 0 && (

@@ -45,7 +45,14 @@ export const EditHouseholdDataChangeFieldRow = ({
   }, [itemValue.fieldName]);
 
   return (
-    <Grid container size={12} spacing={2} alignItems="center">
+    <Grid
+      container
+      size={12}
+      spacing={2}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <Grid size={4}>
         <Field
           name={`householdDataUpdateFields[${index}].fieldName`}

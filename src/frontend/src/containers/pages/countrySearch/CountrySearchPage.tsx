@@ -39,7 +39,12 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 
 const OfficeSearchPage = (): ReactElement => {
   const NoResultsMessage = (
-    <Box mt={4} textAlign="center">
+    <Box
+      sx={{
+        mt: 4,
+        textAlign: 'center',
+      }}
+    >
       <Typography variant="h6">
         No results found. Please adjust your search criteria and try again.
       </Typography>
@@ -305,15 +310,23 @@ const OfficeSearchPage = (): ReactElement => {
     <>
       <PageHeader title={t('Country Search')} />
       <Box
-        display="flex"
-        flexDirection="column"
         data-cy="page-details-container"
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
         <FiltersSection
           clearHandler={handleClearFilter}
           applyHandler={handleApplyFilter}
         >
-          <Grid container alignItems="flex-end" spacing={3}>
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              alignItems: 'flex-end',
+            }}
+          >
             <Grid size={3}>
               <FormControl fullWidth size="small">
                 <InputLabel id="search-for-label">Search For</InputLabel>

@@ -80,7 +80,12 @@ function CommunicationDetailsPage(): ReactElement {
         }
         flags={<AdminButton adminUrl={message.adminUrl} />}
       />
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <CommunicationDetails message={message} />
         <CommunicationMessageDetails message={message} />
         <RecipientsTable

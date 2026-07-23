@@ -39,7 +39,12 @@ export function OtherRelatedTickets({
         );
 
         return (
-          <Box key={edge.id} mb={1}>
+          <Box
+            key={edge.id}
+            sx={{
+              mb: 1,
+            }}
+          >
             <ContentLink href={grievanceDetailsPath}>
               {edge.unicefId}
             </ContentLink>
@@ -83,7 +88,12 @@ export function OtherRelatedTickets({
       <Title>
         <Typography variant="h6">{t('Other Related Tickets')}</Typography>
       </Title>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <LabelizedField
           label={`For ${beneficiaryGroup?.groupLabel} ${ticket.household?.unicefId || '-'}`}
         >
@@ -94,7 +104,11 @@ export function OtherRelatedTickets({
         </LabelizedField>
         {!show &&
         (closedLinkedTickets.length > 0 || closedExistingTickets.length > 0) ? (
-          <Box mt={3}>
+          <Box
+            sx={{
+              mt: 3,
+            }}
+          >
             <BlueBold onClick={() => setShow(true)}>
               {t('SHOW CLOSED TICKETS')} (
               {closedLinkedTickets.length + closedExistingTickets.length})
@@ -102,7 +116,12 @@ export function OtherRelatedTickets({
           </Box>
         ) : null}
         {show && (
-          <Box mb={3} mt={3}>
+          <Box
+            sx={{
+              mb: 3,
+              mt: 3,
+            }}
+          >
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
               label={`${t(`For ${beneficiaryGroup?.groupLabel}`)} ${ticket.household?.unicefId || '-'}`}

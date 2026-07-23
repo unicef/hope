@@ -407,8 +407,17 @@ const EditGrievancePage = (): ReactElement => {
               title={`${t('Edit Ticket')} #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}
             >
-              <Box display="flex" alignContent="center">
-                <Box mr={3}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignContent: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    mr: 3,
+                  }}
+                >
                   <Button component={Link} to={grievanceDetailsPath}>
                     {t('Cancel')}
                   </Button>
@@ -600,7 +609,11 @@ const EditGrievancePage = (): ReactElement => {
                         </Grid>
                       </Grid>
                       {canAddDocumentation && (
-                        <Box mt={3}>
+                        <Box
+                          sx={{
+                            mt: 3,
+                          }}
+                        >
                           <Title>
                             <Typography variant="h6">
                               {t(
@@ -624,7 +637,11 @@ const EditGrievancePage = (): ReactElement => {
                     </BoxPadding>
                     <BoxPadding>
                       <Grid size={{ xs: 6 }}>
-                        <Box py={3}>
+                        <Box
+                          sx={{
+                            py: 3,
+                          }}
+                        >
                           <LookUpLinkedTickets
                             values={values}
                             onValueChange={setFieldValue}
@@ -638,7 +655,11 @@ const EditGrievancePage = (): ReactElement => {
                           GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                         <BoxWithBottomBorders>
                           <Grid size={{ xs: 6 }}>
-                            <Box py={3}>
+                            <Box
+                              sx={{
+                                py: 3,
+                              }}
+                            >
                               <LookUpPaymentRecord
                                 values={values}
                                 disabled={Boolean(ticket.paymentRecord)}

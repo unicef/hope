@@ -91,7 +91,11 @@ export function RevertForceFailedButton({
 
   return (
     <Box>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <Button
           color="primary"
           variant="contained"

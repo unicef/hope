@@ -16,20 +16,40 @@ export function AcceptedPaymentPlanHeaderButtons({
   isInstructionManaged = false,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       <>
         {paymentPlan.canCreateFollowUp && (
-          <Box p={2}>
-            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="followup" />
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <CreateChildPaymentPlan
+              paymentPlan={paymentPlan}
+              variant="followup"
+            />
           </Box>
         )}
         {paymentPlan.canCreateTopUp && (
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="topup" />
           </Box>
         )}
         {paymentPlan.canCreateTopUpAmendment && (
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <CreateChildPaymentPlan
               paymentPlan={paymentPlan}
               variant="amendment"
@@ -37,7 +57,11 @@ export function AcceptedPaymentPlanHeaderButtons({
           </Box>
         )}
         {!isInstructionManaged && (
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <SplitIntoPaymentLists
               paymentPlan={paymentPlan}
               canSplit={canSplit}

@@ -262,7 +262,12 @@ export function RequestedHouseholdDataChange({
       {({ submitForm, setFieldValue, values }) => (
         <ApproveBox>
           <Title>
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography variant="h6">Requested Data Change</Typography>
               {shouldShowEditButton(values) ? (
                 <Button
