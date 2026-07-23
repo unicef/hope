@@ -1,9 +1,11 @@
 import { XlsxImportDialog } from '@core/XlsxImportDialog';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanGroupDetail } from '../types';
 import { isGroupBackgroundActionBusy } from '../utils';
 
@@ -13,9 +15,15 @@ interface DeliveryImportXlsxGroupButtonProps {
 
 export function DeliveryImportXlsxGroupButton({
   group,
-}: DeliveryImportXlsxGroupButtonProps): ReactElement {
+}: DeliveryImportXlsxGroupButtonProps): ReactElement | null {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+  const permissions = usePermissions();
+
+  if (
+    !hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX, permissions)
+  )
+    return null;
 
   return (
     <XlsxImportDialog

@@ -44,7 +44,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.payment_plans: list[PaymentPlan] = list(
             payment_plan_group.payment_plans.filter(
                 status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-                plan_type=PaymentPlan.PlanType.REGULAR,
             ).order_by("unicef_id")
         )
         self.eligible_plans: list[PaymentPlan] = []

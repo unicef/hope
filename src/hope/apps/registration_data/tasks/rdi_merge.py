@@ -353,7 +353,7 @@ class RdiMergeTask:
         }
 
         for household in households:
-            household_from_collection = existing_households_by_unicef_id.get(household.unicef_id)
+            household_from_collection = existing_households_by_unicef_id.get(household.unicef_id or "")
             if household_from_collection:
                 if collection := household_from_collection.household_collection:
                     household.household_collection = collection
@@ -383,7 +383,7 @@ class RdiMergeTask:
 
         for individual in individuals_list:
             # find other individual with the same unicef_id and group them in the same collection
-            individual_from_collection = existing_individuals_by_unicef_id.get(individual.unicef_id)
+            individual_from_collection = existing_individuals_by_unicef_id.get(individual.unicef_id or "")
             if individual_from_collection:
                 if collection := individual_from_collection.individual_collection:
                     individual.individual_collection = collection

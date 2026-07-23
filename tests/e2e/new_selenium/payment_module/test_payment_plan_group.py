@@ -37,6 +37,56 @@ pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
+def plan_with_follow_up(program_cycle: ProgramCycle) -> tuple[PaymentPlan, PaymentPlan]:
+    """A source Payment Plan plus a follow-up child plan pointing at it.
+
+    The eye icon / Linked Payment Plans modal renders only when a plan's follow_ups
+    (child_plans with plan_type FOLLOW_UP) is non-empty, so the source plan is what
+    shows the eye icon and the follow-up is the record listed inside the modal.
+    """
+    ba = program_cycle.program.business_area
+    source = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        business_area=ba,
+        status=PaymentPlan.Status.FINISHED,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    )
+    follow_up = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        business_area=ba,
+        status=PaymentPlan.Status.OPEN,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_payment_plan=source,
+    )
+    return source, follow_up
+
+
+def _assert_linked_plans_modal_opens_and_closes(
+    browser: HopeTestBrowser,
+    source: PaymentPlan,
+    follow_up: PaymentPlan,
+) -> None:
+    """Open the Linked Payment Plans modal via the eye icon, verify it lists the
+    linked follow-up plan, and close it — asserting neither click bubbles to the
+    ClickableTableRow and navigates to the plan details page (the stopPropagation fix)."""
+    browser.wait_for_text(source.unicef_id)
+    browser.wait_for_element_clickable('[data-cy="button-eye-linked-plans"]')
+    browser.click('[data-cy="button-eye-linked-plans"]')
+
+    browser.wait_for_element_visible('[data-cy="table-cell-linked-payment-plan-id"]')
+    browser.wait_for_text(follow_up.unicef_id, '[role="dialog"]')
+
+    # Regression guard: the eye click must not navigate to the plan details page,
+    # so the source plan id never appears in the URL while the modal is open.
+    assert str(source.id) not in browser.get_current_url()
+
+    # Close the modal; the Close click must also not bubble/navigate.
+    browser.click('[data-cy="button-close"]')
+    browser.wait_for_element_not_visible('[data-cy="table-cell-linked-payment-plan-id"]')
+    assert str(source.id) not in browser.get_current_url()
+
+
+@pytest.fixture
 def group_fsp() -> FinancialServiceProvider:
     return FinancialServiceProviderFactory(
         name="Group Delivery FSP",
@@ -116,7 +166,9 @@ def reconciliation_file(tmp_path, exportable_group: tuple[PaymentPlanGroup, Paym
     group, _ = exportable_group
     # Build the file from the real export service so its header matches exactly what the
     # import expects, then fill in a delivered_quantity for the single payment row.
-    workbook = XlsxPaymentPlanGroupDeliveryExportService(group).generate_workbook()
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(
+        group, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
     delivered_col = headers.index("delivered_quantity") + 1
@@ -322,6 +374,10 @@ def test_export_payment_plan_group(
         browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group"]')
         browser.click('[data-cy="button-delivery-export-xlsx-group"]')
 
+        browser.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-group"]')
+        browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group-submit"]')
+        browser.click('[data-cy="button-delivery-export-xlsx-group-submit"]')
+
         browser.wait_for_text("Export started")
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
@@ -356,7 +412,12 @@ def test_export_payment_plan_group_with_auth_code(
         browser.click('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')
 
         browser.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"]')
-        template_input = browser.find_element('[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"] input')
+        # single exportable plan type -> shown as a locked field; the template picker
+        # is the only enabled input in the dialog
+        browser.wait_for_element_visible('[data-cy="locked-delivery-export-xlsx-with-auth-code-group-plan-type"]')
+        template_input = browser.find_element(
+            '[data-cy="dialog-delivery-export-xlsx-with-auth-code-group"] input:not([disabled])'
+        )
         template_input.click()
         template_input.send_keys("Auth Code Template")
         browser.select_listbox_element("Auth Code Template")
@@ -475,6 +536,7 @@ def test_group_payment_plan_list_export_tag_links_to_batch(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
@@ -501,6 +563,7 @@ def test_batch_detail_shows_download_button_when_file_present(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}/batches/1")
@@ -524,9 +587,56 @@ def test_batch_detail_shows_reexport_button_when_file_missing(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
         browser.login(username="noperm_user", password="testtest2")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}/batches/1")
 
         browser.wait_for_element_visible('[data-cy="button-export-batch"]')
         browser.assert_element_absent('[data-cy="button-download-batch"]')
+
+
+def test_linked_payment_plans_modal_on_cycle_details(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    plan_with_follow_up: tuple[PaymentPlan, PaymentPlan],
+) -> None:
+    source, follow_up = plan_with_follow_up
+    cycle = source.program_cycle
+    program = cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_VIEW_DETAILS,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/program-cycles/{cycle.id}")
+
+        _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
+
+
+def test_linked_payment_plans_modal_on_payment_plans_list(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    plan_with_follow_up: tuple[PaymentPlan, PaymentPlan],
+) -> None:
+    source, follow_up = plan_with_follow_up
+    program = source.program_cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_VIEW_DETAILS,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans")
+
+        _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
