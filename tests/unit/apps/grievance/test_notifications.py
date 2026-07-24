@@ -230,6 +230,20 @@ def test_assignment_changed_recipient_excludes_editor_who_assigned_themselves(
     assert notification.user_recipients == []
 
 
+def test_note_added_recipient_excludes_assignee_who_wrote_the_note(
+    assigned_ticket: GrievanceTicket, assignee: User
+) -> None:
+    notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=assignee,
+        editor=assignee,
+    )
+
+    assert notification.user_recipients == []
+    assert notification.emails == []
+
+
 @override_settings(ENV="prod")
 def test_users_with_permissions_exclude_staff_and_superuser_in_prod(
     business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role

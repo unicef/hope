@@ -959,6 +959,7 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket,
             GrievanceNotification.ACTION_NOTES_ADDED,
             created_by=user,
+            editor=user,
             ticket_note=ticket_note,
         )
         transaction.on_commit(notification.send_email_notification)
