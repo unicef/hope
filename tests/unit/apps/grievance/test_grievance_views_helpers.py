@@ -53,6 +53,20 @@ def test_validate_preconditions_no_permissions_needed(mock_check_permission, moc
     mock_check_permission.assert_not_called()
 
 
+@patch("hope.apps.grievance.api.views.check_permissions", return_value=False)
+def test_validate_preconditions_assign_without_permission_denied(
+    mock_check_permissions, mock_viewset, mock_user, mock_ticket
+):
+    mock_ticket.status = GrievanceTicket.STATUS_NEW
+    mock_ticket.is_feedback = False
+    mock_ticket.assigned_to = None
+
+    with pytest.raises(PermissionDenied):
+        GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
+            mock_viewset, mock_user, mock_ticket, GrievanceTicket.STATUS_ASSIGNED
+        )
+
+
 @pytest.fixture
 def adjudication_selected_individual(db) -> Individual:
     area = AreaFactory()

@@ -1062,7 +1062,7 @@ def test_for_approval_recipients_empty_for_category_without_approval(
 
     ticket = GrievanceTicketFactory(
         business_area=business_area,
-        category=GrievanceTicket.CATEGORY_REFERRAL,
+        category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
         issue_type=None,
         assigned_to=None,
     )
