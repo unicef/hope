@@ -200,9 +200,9 @@ def test_export_survey_sample_task_schedules_async_job(
 @patch("hope.apps.accountability.celery_tasks.send_email_notification")
 @patch("hope.apps.accountability.celery_tasks.ExportSurveySampleService")
 def test_export_survey_sample_task_action_success(
-    mocker: Any,
     mock_service_cls: Mock,
     mock_send_email_notification: Mock,
+    mocker: Any,
     survey,
     user,
 ) -> None:
@@ -227,9 +227,9 @@ def test_export_survey_sample_task_action_success(
 @patch("hope.apps.accountability.celery_tasks.send_email_notification")
 @patch("hope.apps.accountability.celery_tasks.ExportSurveySampleService")
 def test_export_survey_sample_task_action_success_without_email_notification(
-    mocker: Any,
     mock_service_cls: Mock,
     mock_send_email_notification: Mock,
+    mocker: Any,
     survey,
     user,
 ) -> None:
