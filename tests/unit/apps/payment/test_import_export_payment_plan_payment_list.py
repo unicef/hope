@@ -821,22 +821,22 @@ def test_as_plain_text_returns_str_unchanged():
     assert XlsxPaymentPlanDeliveryExportService._as_plain_text("plain") == "plain"
 
 
-def test_send_file_passwords_with_no_file_temp(user):
+def test_send_file_passwords_with_no_file_temp(user, business_area):
     with (
         patch.object(user, "email_user") as mock_email,
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_email_notification"
-        ) as publish_mock,
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
+            "payment_delivery_export_passwords_generated.send_robust"
+        ) as event_mock,
     ):
-        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, None, "Test Title")
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, None, "Test Title", business_area)
 
     mock_email.assert_called_once()
-    publish_mock.assert_called_once()
-    event_name, notification = publish_mock.call_args.args
-    assert event_name == "payment.payment_plan.delivery_passwords_sent"
-    assert publish_mock.call_args.kwargs["correlation_id"] == (
-        f"payment.payment_plan.delivery_passwords_sent:missing:{user.id}"
-    )
+    event_mock.assert_called_once()
+    assert event_mock.call_args.kwargs["instance"] is None
+    assert event_mock.call_args.kwargs["business_area"] == business_area
+    assert event_mock.call_args.kwargs["correlation_id"] == f"payment-delivery-passwords:missing:{user.id}"
+    notification = event_mock.call_args.kwargs["payload"]
     assert notification.recipients == [user.email]
     assert notification.context["title"] == "Test Title file's Passwords"
     call_kwargs = mock_email.call_args[1]
@@ -845,7 +845,7 @@ def test_send_file_passwords_with_no_file_temp(user):
     assert "XLSX file password: \n" in call_kwargs["text_body"]
 
 
-def test_send_file_passwords_with_file_temp_sends_passwords(user):
+def test_send_file_passwords_with_file_temp_sends_passwords(user, business_area):
     file_temp = FileTempFactory()
     file_temp.password = "zip-pw"
     file_temp.xlsx_password = "xlsx-pw"
@@ -854,15 +854,14 @@ def test_send_file_passwords_with_file_temp_sends_passwords(user):
     with (
         patch.object(user, "email_user") as mock_email,
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_email_notification"
-        ) as publish_mock,
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
+            "payment_delivery_export_passwords_generated.send_robust"
+        ) as event_mock,
     ):
-        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, "My Plan")
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, "My Plan", business_area)
 
     mock_email.assert_called_once()
-    assert publish_mock.call_args.kwargs["correlation_id"] == (
-        f"payment.payment_plan.delivery_passwords_sent:{file_temp.id}:{user.id}"
-    )
+    assert event_mock.call_args.kwargs["correlation_id"] == f"payment-delivery-passwords:{file_temp.id}:{user.id}"
     call_kwargs = mock_email.call_args[1]
     assert "My Plan" in call_kwargs["subject"]
     assert "ZIP file password: zip-pw" in call_kwargs["text_body"]
@@ -872,7 +871,10 @@ def test_send_file_passwords_with_file_temp_sends_passwords(user):
 def test_send_delivery_passwords_sends_email_with_plan_title(payment_plan, user):
     with (
         patch.object(user, "email_user") as mock_email,
-        patch("hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_email_notification"),
+        patch(
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
+            "payment_delivery_export_passwords_generated.send_robust"
+        ),
     ):
         XlsxPaymentPlanDeliveryExportService.send_delivery_passwords(user, payment_plan)
 
@@ -880,20 +882,24 @@ def test_send_delivery_passwords_sends_email_with_plan_title(payment_plan, user)
     assert f"Payment Plan {payment_plan.unicef_id}" in mock_email.call_args[1]["subject"]
 
 
-def test_send_delivery_passwords_for_file_sends_email_with_label(user):
+def test_send_delivery_passwords_for_file_sends_email_with_label(user, business_area):
     file_temp = FileTempFactory()
     with (
         patch.object(user, "email_user") as mock_email,
         patch(
-            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service.publish_email_notification"
-        ) as publish_mock,
+            "hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service."
+            "payment_delivery_export_passwords_generated.send_robust"
+        ) as event_mock,
     ):
-        XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, file_temp, "Batch Label")
+        XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(
+            user,
+            file_temp,
+            "Batch Label",
+            business_area,
+        )
 
     mock_email.assert_called_once()
-    assert publish_mock.call_args.kwargs["correlation_id"] == (
-        f"payment.payment_plan.delivery_passwords_sent:{file_temp.id}:{user.id}"
-    )
+    assert event_mock.call_args.kwargs["correlation_id"] == f"payment-delivery-passwords:{file_temp.id}:{user.id}"
     assert "Batch Label" in mock_email.call_args[1]["subject"]
 
 

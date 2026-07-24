@@ -16,9 +16,8 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
     get_core_fields_attributes,
 )
-from hope.apps.core.notifications.events import PAYMENT_PLAN_DELIVERY_PASSWORDS_SENT
 from hope.apps.core.notifications.payloads import EmailPayload
-from hope.apps.core.notifications.publishers import publish_email_notification
+from hope.apps.payment.events import payment_delivery_export_passwords_generated
 from hope.apps.payment.validators import generate_numeric_token
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.utils.exceptions import log_and_raise
@@ -35,7 +34,7 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
-    from hope.models import FinancialServiceProvider, User
+    from hope.models import BusinessArea, FinancialServiceProvider, User
 
 logger = logging.getLogger(__name__)
 
@@ -350,7 +349,12 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
                 zip_file.writestr(filename, tmp.read())
 
     @staticmethod
-    def _send_file_passwords(user: "User", file_temp: FileTemp | None, title: str) -> None:
+    def _send_file_passwords(
+        user: "User",
+        file_temp: FileTemp | None,
+        title: str,
+        business_area: "BusinessArea",
+    ) -> None:
         text_template = "payment/xlsx_file_password_email.txt"
         html_template = "payment/xlsx_file_password_email.html"
         zip_password = XlsxPaymentPlanDeliveryExportService._as_plain_text(file_temp.password if file_temp else None)
@@ -374,20 +378,20 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         }
         html_body = render_to_string(html_template, context=context)
         text_body = render_to_string(text_template, context=context)
+        payment_delivery_export_passwords_generated.send_robust(
+            sender=FileTemp,
+            instance=file_temp,
+            business_area=business_area,
+            payload=EmailPayload(
+                recipients=[user.email],
+                context=context,
+            ),
+            correlation_id=f"payment-delivery-passwords:{file_temp.id if file_temp else 'missing'}:{user.id}",
+        )
         user.email_user(
             subject=context["title"],
             html_body=html_body,
             text_body=text_body,
-        )
-        publish_email_notification(
-            PAYMENT_PLAN_DELIVERY_PASSWORDS_SENT,
-            EmailPayload(
-                recipients=[user.email],
-                context=context,
-            ),
-            correlation_id=(
-                f"{PAYMENT_PLAN_DELIVERY_PASSWORDS_SENT}:{file_temp.id if file_temp else 'missing'}:{user.id}"
-            ),
         )
 
     @staticmethod
@@ -396,11 +400,17 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             user,
             payment_plan.export_file_delivery,
             f"Payment Plan {payment_plan.unicef_id} Payment List",
+            payment_plan.business_area,
         )
 
     @staticmethod
-    def send_delivery_passwords_for_file(user: "User", file_temp: FileTemp | None, label: str) -> None:
-        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, label)
+    def send_delivery_passwords_for_file(
+        user: "User",
+        file_temp: FileTemp | None,
+        label: str,
+        business_area: "BusinessArea",
+    ) -> None:
+        XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, label, business_area)
 
     @staticmethod
     def _as_plain_text(value: str | bytes | memoryview | None) -> str:

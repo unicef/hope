@@ -26,7 +26,13 @@ from hope.apps.payment.services.western_union_reports_service import (
     QCFReportPaymentRowData,
     QCFReportsService,
 )
-from hope.models import Payment, WesternUnionData, WesternUnionInvoice, WesternUnionInvoicePayment
+from hope.models import (
+    Payment,
+    WesternUnionData,
+    WesternUnionInvoice,
+    WesternUnionInvoicePayment,
+    WesternUnionPaymentPlanReport,
+)
 
 pytestmark = pytest.mark.django_db
 SAMPLE_DIR = Path(__file__).parent / "test_file"
@@ -1829,7 +1835,9 @@ def test_send_notification_emails_sends_to_users_with_permission(
         patch("hope.apps.payment.services.western_union_reports_service.User.objects.all", return_value=[user]),
         patch.object(user, "has_perm", return_value=True),
         patch.object(user, "email_user") as email_user_mock,
-        patch("hope.apps.payment.services.western_union_reports_service.publish_email_notification") as publish_mock,
+        patch(
+            "hope.apps.payment.services.western_union_reports_service.western_union_report_generated.send_robust"
+        ) as event_mock,
         patch(
             "hope.apps.payment.services.western_union_reports_service.render_to_string",
             side_effect=["rendered-html", "rendered-text"],
@@ -1843,12 +1851,12 @@ def test_send_notification_emails_sends_to_users_with_permission(
         service.send_notification_emails(report)
 
     email_user_mock.assert_called_once()
-    publish_mock.assert_called_once()
-    event_name, notification = publish_mock.call_args.args
-    assert event_name == "payment.western_union_report.generated"
-    assert publish_mock.call_args.kwargs["correlation_id"] == (
-        f"payment.western_union_report.generated:{report.id}:{user.id}"
-    )
+    event_mock.assert_called_once()
+    assert event_mock.call_args.kwargs["sender"] is WesternUnionPaymentPlanReport
+    assert event_mock.call_args.kwargs["instance"] == report
+    assert event_mock.call_args.kwargs["business_area"] == report.payment_plan.business_area
+    assert event_mock.call_args.kwargs["correlation_id"] == f"western-union-report:{report.id}:{user.id}"
+    notification = event_mock.call_args.kwargs["payload"]
     assert notification.recipients == [user.email]
     render_to_string_mock.assert_any_call(
         "payment/western_union_report_email.html",
@@ -1880,11 +1888,13 @@ def test_send_notification_emails_skips_when_no_users_have_permission(
         patch("hope.apps.payment.services.western_union_reports_service.User.objects.all", return_value=[user]),
         patch.object(user, "has_perm", return_value=False),
         patch.object(user, "email_user") as email_user_mock,
-        patch("hope.apps.payment.services.western_union_reports_service.publish_email_notification") as publish_mock,
+        patch(
+            "hope.apps.payment.services.western_union_reports_service.western_union_report_generated.send_robust"
+        ) as event_mock,
         patch("hope.apps.payment.services.western_union_reports_service.render_to_string") as render_to_string_mock,
     ):
         service.send_notification_emails(report)
 
     email_user_mock.assert_not_called()
-    publish_mock.assert_not_called()
+    event_mock.assert_not_called()
     render_to_string_mock.assert_not_called()

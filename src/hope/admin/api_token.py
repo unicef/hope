@@ -16,10 +16,9 @@ from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.admin.utils import AutocompleteForeignKeyMixin
+from hope.api.events import api_credential_created, api_credential_info_requested, api_credential_updated
 from hope.apps.account.fields import ChoiceArrayField
-from hope.apps.core.notifications.events import API_TOKEN_ACTION_TO_BITCASTER_EVENT
 from hope.apps.core.notifications.payloads import EmailPayload
-from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
 
@@ -29,6 +28,12 @@ if TYPE_CHECKING:
 EMAIL_ACTION_INFO = "info"
 EMAIL_ACTION_CREATED = "created"
 EMAIL_ACTION_UPDATED = "updated"
+
+API_TOKEN_ACTION_TO_EVENT = {
+    EMAIL_ACTION_INFO: api_credential_info_requested,
+    EMAIL_ACTION_CREATED: api_credential_created,
+    EMAIL_ACTION_UPDATED: api_credential_updated,
+}
 
 API_CREDENTIAL_EMAIL_HTML_TEMPLATE = "admin/api_token_email.html"
 API_CREDENTIAL_EMAIL_TEXT_TEMPLATE = "admin/api_token_email.txt"
@@ -120,18 +125,19 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
                 notification_context["token_key"] = obj.key
             text_body = render_to_string(API_CREDENTIAL_EMAIL_TEXT_TEMPLATE, context=notification_context)
             html_body = render_to_string(API_CREDENTIAL_EMAIL_HTML_TEMPLATE, context=notification_context)
+            API_TOKEN_ACTION_TO_EVENT[action].send_robust(
+                sender=APIToken,
+                instance=obj,
+                payload=EmailPayload(
+                    recipients=[user.email],
+                    context=notification_context,
+                ),
+                correlation_id=f"api-token:{obj.id}:{action}",
+            )
             user.email_user(
                 subject=notification_context["title"],
                 html_body=html_body,
                 text_body=text_body,
-            )
-            publish_email_notification(
-                API_TOKEN_ACTION_TO_BITCASTER_EVENT[action],
-                EmailPayload(
-                    recipients=[user.email],
-                    context=notification_context,
-                ),
-                correlation_id=f"{API_TOKEN_ACTION_TO_BITCASTER_EVENT[action]}:{obj.id}:{action}",
             )
             self.message_user(request, f"Email sent to {obj.user.email}", messages.SUCCESS)
         except OSError:

@@ -27,10 +27,9 @@ from pypdf import PdfReader
 
 from hope.apps.account.models import User
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.notifications.events import PAYMENT_WESTERN_UNION_REPORT_GENERATED
 from hope.apps.core.notifications.payloads import EmailPayload
-from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.payment.celery_tasks import send_western_union_report_email_notifications_async_task
+from hope.apps.payment.events import western_union_report_generated
 from hope.apps.payment.services.western_union_ftp import WesternUnionFTPClient
 from hope.apps.payment.utils import get_link
 from hope.models import (
@@ -779,18 +778,20 @@ class WesternUnionReportsService:
             }
             html_body = render_to_string(html_template, context=context)
             text_body = render_to_string(text_template, context=context)
+            western_union_report_generated.send_robust(
+                sender=WesternUnionPaymentPlanReport,
+                instance=report,
+                business_area=business_area,
+                payload=EmailPayload(
+                    recipients=[user.email],
+                    context=context,
+                ),
+                correlation_id=f"western-union-report:{report.id}:{user.id}",
+            )
             user.email_user(
                 subject=context["title"],
                 html_body=html_body,
                 text_body=text_body,
-            )
-            publish_email_notification(
-                PAYMENT_WESTERN_UNION_REPORT_GENERATED,
-                EmailPayload(
-                    recipients=[user.email],
-                    context=context,
-                ),
-                correlation_id=f"{PAYMENT_WESTERN_UNION_REPORT_GENERATED}:{report.id}:{user.id}",
             )
 
 

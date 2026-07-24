@@ -1,3 +1,4 @@
+from functools import partial
 import logging
 from typing import Any, cast
 
@@ -51,6 +52,11 @@ from hope.apps.periodic_data_update.celery_tasks import (
     import_periodic_data_update_async_task,
     merge_pdu_online_edit_async_task,
     send_pdu_online_edit_notification_emails_async_task,
+)
+from hope.apps.periodic_data_update.events import (
+    pdu_online_edit_approved,
+    pdu_online_edit_sent_back,
+    pdu_online_edit_sent_for_approval,
 )
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 from hope.models import (
@@ -299,13 +305,23 @@ class PDUOnlineEditViewSet(
             instance.sent_back_comment.delete()
         instance.status = PDUOnlineEdit.Status.READY
         instance.save()
+        action_date = timezone.now()
 
         # Send notification email
         send_pdu_online_edit_notification_emails_async_task(
             instance,
             "SEND_FOR_APPROVAL",
             str(request.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            f"{action_date:%-d %B %Y}",
+        )
+        transaction.on_commit(
+            partial(
+                pdu_online_edit_sent_for_approval.send_robust,
+                sender=PDUOnlineEdit,
+                instance=instance,
+                actor=request.user,
+                action_date=f"{action_date:%-d %B %Y}",
+            )
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
@@ -362,13 +378,23 @@ class PDUOnlineEditViewSet(
             created_by=request.user,
             pdu_online_edit=instance,
         )
+        action_date = timezone.now()
 
         # Send notification email
         send_pdu_online_edit_notification_emails_async_task(
             instance,
             "SEND_BACK",
             str(request.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            f"{action_date:%-d %B %Y}",
+        )
+        transaction.on_commit(
+            partial(
+                pdu_online_edit_sent_back.send_robust,
+                sender=PDUOnlineEdit,
+                instance=instance,
+                actor=request.user,
+                action_date=f"{action_date:%-d %B %Y}",
+            )
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
@@ -389,6 +415,7 @@ class PDUOnlineEditViewSet(
             approved_by=request.user,
             approved_at=timezone.now(),
         )
+        action_date = timezone.now()
 
         # Send notification emails for each approved PDU Edit
         for pdu_edit in pdu_edits:
@@ -397,7 +424,16 @@ class PDUOnlineEditViewSet(
                 pdu_edit,
                 "APPROVE",
                 str(request.user.pk),
-                f"{timezone.now():%-d %B %Y}",
+                f"{action_date:%-d %B %Y}",
+            )
+            transaction.on_commit(
+                partial(
+                    pdu_online_edit_approved.send_robust,
+                    sender=PDUOnlineEdit,
+                    instance=pdu_edit,
+                    actor=request.user,
+                    action_date=f"{action_date:%-d %B %Y}",
+                )
             )
 
         return Response(

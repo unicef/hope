@@ -629,7 +629,6 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
 )
 def test_send_email_notification_returns_when_email_send_fails(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email", side_effect=RuntimeError("send failed"))
-    mock_publish = mocker.patch("hope.apps.payment.notifications.publish_email_notification")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
@@ -638,8 +637,6 @@ def test_send_email_notification_returns_when_email_send_fails(notification_setu
     )
 
     payment_notification.send_email_notification()
-
-    mock_publish.assert_not_called()
 
 
 @override_config(
@@ -647,11 +644,8 @@ def test_send_email_notification_returns_when_email_send_fails(notification_setu
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
 )
-def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
-    notification_setup: dict, mocker: Any
-) -> None:
+def test_send_email_notification_uses_resolved_recipients(notification_setup: dict, mocker: Any) -> None:
     mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
-    mock_publish = mocker.patch("hope.apps.payment.notifications.publish_email_notification")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
@@ -661,17 +655,10 @@ def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
 
     payment_notification.send_email_notification()
 
-    payment_plan = notification_setup["payment_plan"]
     mock_send.assert_called_once()
-    mock_publish.assert_called_once()
-    event_name, payload = mock_publish.call_args.args
-    assert event_name == "payment.payment_plan.sent_for_approval"
-    assert mock_publish.call_args.kwargs["correlation_id"] == (
-        f"payment.payment_plan.sent_for_approval:{payment_plan.id}:SEND_FOR_APPROVAL"
-    )
-    assert payload.recipients == payment_notification.email.recipients
-    assert payload.context == payment_notification.email.variables
-    assert payload.cc == payment_notification.email.ccs
+    assert payment_notification.email.recipients
+    assert payment_notification.email.variables
+    assert payment_notification.email.ccs
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)

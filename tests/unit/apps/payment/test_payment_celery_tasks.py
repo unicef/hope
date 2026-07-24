@@ -1488,7 +1488,12 @@ def test_send_password_action_sends_passwords_when_plan_found(
 
     send_payment_plan_group_delivery_xlsx_password_async_task_action(job)
 
-    mock_send.assert_called_once_with(user, file_temp, f"Payment Plan Group {group.unicef_id} Batch 1 Payment List")
+    mock_send.assert_called_once_with(
+        user,
+        file_temp,
+        f"Payment Plan Group {group.unicef_id} Batch 1 Payment List",
+        group.cycle.program.business_area,
+    )
 
 
 def test_send_password_action_raises_when_no_exported_plan_found(user: Any) -> None:
@@ -1926,12 +1931,7 @@ def test_export_delivery_task_generates_tokens_and_sends_email_when_enabled(
 
     mock_service.generate_token_and_order_numbers.assert_called_once_with(group.cycle.program)
     mock_service.save_xlsx_file.assert_called_once_with(user)
-    mock_send_email.assert_called_once_with(
-        mock_service,
-        user,
-        event_name="payment.payment_plan_group.payment_list_xlsx_generated",
-        correlation_id=f"payment.payment_plan_group.payment_list_xlsx_generated:{group.id}:1:{user.id}",
-    )
+    mock_send_email.assert_called_once_with(mock_service, user)
 
 
 @patch("hope.apps.payment.celery_tasks.send_email_notification")

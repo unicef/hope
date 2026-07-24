@@ -1,3 +1,4 @@
+from functools import partial
 import itertools
 from typing import TYPE_CHECKING, Any
 
@@ -87,6 +88,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
+from hope.apps.grievance.events import grievance_notes_added
 from hope.apps.grievance.filters import GrievanceTicketFilter, GrievanceTicketOfficeSearchFilter
 from hope.apps.grievance.models import (
     GrievanceTicket,
@@ -944,6 +946,15 @@ class GrievanceTicketGlobalViewSet(
             GrievanceNotification.ACTION_NOTES_ADDED,
             created_by=user,
             ticket_note=ticket_note,
+        )
+        transaction.on_commit(
+            partial(
+                grievance_notes_added.send_robust,
+                sender=GrievanceTicket,
+                instance=grievance_ticket,
+                created_by=user,
+                ticket_note=ticket_note,
+            )
         )
         notification.send_email_notification()
 

@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from functools import partial
 import logging
 from typing import Any, cast
 
@@ -14,16 +15,17 @@ from django.utils import timezone
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.celery import app
-from hope.apps.core.notifications.events import (
-    PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED,
-    PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED,
-    PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED,
-    PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED,
-)
+from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
+)
+from hope.apps.payment.events import (
+    payment_plan_group_payment_list_xlsx_generated,
+    payment_plan_payment_list_pdf_generated,
+    payment_plan_payment_list_xlsx_generated,
+    payment_verification_plan_xlsx_generated,
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow, PaymentPlanFlow
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
@@ -91,14 +93,19 @@ def create_payment_verification_plan_xlsx_async_task_action(job: AsyncRetryJob) 
 
     payment_verification_plan.xlsx_file_exporting = False
     payment_verification_plan.save()
+    payment_verification_plan_xlsx_generated.send_robust(
+        sender=PaymentVerificationPlan,
+        instance=payment_verification_plan,
+        business_area=payment_verification_plan.business_area,
+        payload=EmailPayload(
+            recipients=[user.email],
+            context=service.get_email_context(user),
+        ),
+        correlation_id=f"payment-verification-plan-xlsx:{payment_verification_plan.id}:{user.id}",
+    )
 
     if payment_verification_plan.business_area.enable_email_notification:
-        send_email_notification(
-            service,
-            user,
-            event_name=PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED,
-            correlation_id=f"{PAYMENT_VERIFICATION_PLAN_XLSX_GENERATED}:{payment_verification_plan.id}:{user.id}",
-        )
+        send_email_notification(service, user)
 
 
 def create_payment_verification_plan_xlsx_async_task(
@@ -171,14 +178,22 @@ def create_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJob) 
             flow.background_action_status_none()
             payment_plan.save()
             log_payment_plan_change(payment_plan, old_payment_plan, job.config["user_id"])
+            transaction.on_commit(
+                partial(
+                    payment_plan_payment_list_xlsx_generated.send_robust,
+                    sender=PaymentPlan,
+                    instance=payment_plan,
+                    business_area=payment_plan.business_area,
+                    payload=EmailPayload(
+                        recipients=[user.email],
+                        context=service.get_email_context(user),
+                    ),
+                    correlation_id=f"payment-plan-xlsx:{payment_plan.id}:{user.id}",
+                )
+            )
 
             if payment_plan.business_area.enable_email_notification:
-                send_email_notification_on_commit(
-                    service,
-                    user,
-                    event_name=PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED,
-                    correlation_id=f"{PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED}:{payment_plan.id}:{user.id}",
-                )
+                send_email_notification_on_commit(service, user)
     except Exception:
         logger.exception("Create Payment Plan Generate XLSX Error")
         flow = PaymentPlanFlow(payment_plan)
@@ -290,19 +305,21 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 service.save_xlsx_file(user)
                 payment_plan_group.background_action_status = None
                 payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
-            if (
-                service.applied_export_tag is not None
-                and payment_plan_group.cycle.program.business_area.enable_email_notification
-            ):
-                send_email_notification(
-                    service,
-                    user,
-                    event_name=PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED,
+            if service.applied_export_tag is not None:
+                payment_plan_group_payment_list_xlsx_generated.send_robust(
+                    sender=PaymentPlanGroup,
+                    instance=payment_plan_group,
+                    business_area=payment_plan_group.cycle.program.business_area,
+                    payload=EmailPayload(
+                        recipients=[user.email],
+                        context=service.get_email_context(user),
+                    ),
                     correlation_id=(
-                        f"{PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED}:"
-                        f"{payment_plan_group.id}:{service.applied_export_tag}:{user.id}"
+                        f"payment-plan-group-xlsx:{payment_plan_group.id}:{service.applied_export_tag}:{user.id}"
                     ),
                 )
+                if payment_plan_group.cycle.program.business_area.enable_email_notification:
+                    send_email_notification(service, user)
         except EmptyDeliveryExportError as exc:
             # Nothing was exportable (every plan skipped).
             logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
@@ -358,7 +375,12 @@ def send_payment_plan_group_delivery_xlsx_password_async_task_action(job: AsyncR
     if plan is None:
         raise Exception(f"No exported batch file found for group {group.id} with export_tag={export_tag}.")
     label = f"Payment Plan Group {group.unicef_id} Batch {export_tag} Payment List"
-    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, plan.export_file_delivery, label)
+    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(
+        user,
+        plan.export_file_delivery,
+        label,
+        group.cycle.program.business_area,
+    )
 
 
 def send_payment_plan_group_delivery_xlsx_password_async_task(
@@ -1180,14 +1202,22 @@ def export_pdf_payment_plan_summary_async_task_action(job: AsyncRetryJob) -> Non
 
         payment_plan.export_pdf_file_summary = file_pdf_obj
         payment_plan.save()
+        transaction.on_commit(
+            partial(
+                payment_plan_payment_list_pdf_generated.send_robust,
+                sender=PaymentPlan,
+                instance=payment_plan,
+                business_area=payment_plan.business_area,
+                payload=EmailPayload(
+                    recipients=[user.email],
+                    context=service.get_email_context(user),
+                ),
+                correlation_id=f"payment-plan-pdf:{payment_plan.id}:{user.id}",
+            )
+        )
 
         if payment_plan.business_area.enable_email_notification:
-            send_email_notification_on_commit(
-                service,
-                user,
-                event_name=PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED,
-                correlation_id=f"{PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED}:{payment_plan.id}:{user.id}",
-            )
+            send_email_notification_on_commit(service, user)
 
 
 def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_id: str) -> None:

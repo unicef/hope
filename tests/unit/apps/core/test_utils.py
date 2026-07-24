@@ -687,12 +687,11 @@ def test_rows_iterator_skips_header_and_empty_rows():
 
 def test_send_email_notification_with_user_renders_html_and_text(mocker):
     mocker.patch("hope.apps.core.utils.render_to_string", side_effect=["<html>body</html>", "text body"])
-    mocker.patch("hope.apps.core.utils.publish_email_notification")
     user = MagicMock()
     service = MagicMock(html_template="email.html", text_template="email.txt")
     service.get_email_context.return_value = {"title": "Hello"}
 
-    send_email_notification(service, user=user, event_name="test.email.sent")
+    send_email_notification(service, user=user)
 
     service.get_email_context.assert_called_once_with(user)
     user.email_user.assert_called_once_with(subject="Hello", html_body="<html>body</html>", text_body="text body")
@@ -700,11 +699,10 @@ def test_send_email_notification_with_user_renders_html_and_text(mocker):
 
 def test_send_email_notification_without_user_falls_back_to_service_user(mocker):
     mocker.patch("hope.apps.core.utils.render_to_string", return_value="rendered")
-    mocker.patch("hope.apps.core.utils.publish_email_notification")
     service = MagicMock(html_template="h", text_template="t")
     service.get_email_context.return_value = {"title": "Hi"}
 
-    send_email_notification(service, event_name="test.email.sent")
+    send_email_notification(service)
 
     service.get_email_context.assert_called_once_with()
     service.user.email_user.assert_called_once()
@@ -712,105 +710,34 @@ def test_send_email_notification_without_user_falls_back_to_service_user(mocker)
 
 def test_send_email_notification_with_context_kwargs_passes_them(mocker):
     mocker.patch("hope.apps.core.utils.render_to_string", return_value="rendered")
-    mocker.patch("hope.apps.core.utils.publish_email_notification")
     user = MagicMock()
     service = MagicMock(html_template="h", text_template="t")
     service.get_email_context.return_value = {"title": "Hi"}
 
-    send_email_notification(service, user=user, context_kwargs={"foo": "bar"}, event_name="test.email.sent")
+    send_email_notification(service, user=user, context_kwargs={"foo": "bar"})
 
     service.get_email_context.assert_called_once_with(foo="bar")
-
-
-def test_send_email_notification_hands_context_to_notification_publisher(mocker):
-    mocker.patch("hope.apps.core.utils.render_to_string", side_effect=["<html>body</html>", "text body"])
-    mock_publish = mocker.patch("hope.apps.core.utils.publish_email_notification")
-    user = MagicMock(id=1, email="user@example.org")
-    service = MagicMock(html_template="email.html", text_template="email.txt")
-    service.get_email_context.return_value = {"title": "Hello"}
-
-    send_email_notification(service, user=user, event_name="test.email.sent")
-
-    user.email_user.assert_called_once_with(subject="Hello", html_body="<html>body</html>", text_body="text body")
-    event_name, notification = mock_publish.call_args.args
-    assert event_name == "test.email.sent"
-    assert notification.recipients == [user.email]
-    assert notification.context == {"title": "Hello"}
-    assert mock_publish.call_args.kwargs["correlation_id"] is None
-
-
-def test_send_email_notification_hands_service_metadata_to_notification_publisher(mocker):
-    mocker.patch("hope.apps.core.utils.render_to_string", side_effect=["<html>body</html>", "text body"])
-    mock_publish = mocker.patch("hope.apps.core.utils.publish_email_notification")
-    user = MagicMock(id=1, email="user@example.org")
-
-    class RenderedEmailService:
-        html_template = "email.html"
-        text_template = "email.txt"
-
-        def __init__(self):
-            self.get_email_context = MagicMock(return_value={"title": "Hello", "link": "https://example.org/file"})
-
-    RenderedEmailService.__module__ = "tests"
-    service = RenderedEmailService()
-
-    send_email_notification(service, user=user, event_name="test.email.sent")
-
-    user.email_user.assert_called_once_with(subject="Hello", html_body="<html>body</html>", text_body="text body")
-    mock_publish.assert_called_once()
-    event_name, notification = mock_publish.call_args.args
-    assert event_name == "test.email.sent"
-    assert notification.recipients == [user.email]
-    assert notification.context == {"title": "Hello", "link": "https://example.org/file"}
-
-
-def test_send_email_notification_forwards_correlation_id_to_notification_publisher(mocker):
-    mocker.patch("hope.apps.core.utils.render_to_string", side_effect=["<html>body</html>", "text body"])
-    mock_publish = mocker.patch("hope.apps.core.utils.publish_email_notification")
-    user = MagicMock(id=1, email="user@example.org")
-    service = MagicMock(html_template="email.html", text_template="email.txt")
-    service.get_email_context.return_value = {"title": "Hello"}
-
-    send_email_notification(
-        service,
-        user=user,
-        event_name="test.email.sent",
-        correlation_id="test.email.sent:source:1",
-    )
-
-    assert mock_publish.call_args.kwargs["correlation_id"] == "test.email.sent:source:1"
 
 
 def test_send_email_notification_on_commit_schedules_callback(mocker):
     on_commit = mocker.patch("hope.apps.core.utils.transaction.on_commit")
 
-    send_email_notification_on_commit(MagicMock(), user=MagicMock(), event_name="test.email.sent")
+    send_email_notification_on_commit(MagicMock(), user=MagicMock())
 
     assert on_commit.call_count == 1
     assert callable(on_commit.call_args[0][0])
 
 
-def test_send_email_notification_on_commit_preserves_correlation_id(mocker):
+def test_send_email_notification_on_commit_preserves_arguments(mocker):
     on_commit = mocker.patch("hope.apps.core.utils.transaction.on_commit")
     mock_send = mocker.patch("hope.apps.core.utils.send_email_notification")
     service = MagicMock()
     user = MagicMock()
 
-    send_email_notification_on_commit(
-        service,
-        user=user,
-        event_name="test.email.sent",
-        correlation_id="test.email.sent:source:1",
-    )
+    send_email_notification_on_commit(service, user=user)
     on_commit.call_args.args[0]()
 
-    mock_send.assert_called_once_with(
-        service,
-        user,
-        None,
-        event_name="test.email.sent",
-        correlation_id="test.email.sent:source:1",
-    )
+    mock_send.assert_called_once_with(service, user, None)
 
 
 def test_autocomplete_filter_temp_choices_returns_label_when_lookup_val_present():

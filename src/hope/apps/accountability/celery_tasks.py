@@ -1,9 +1,10 @@
 import logging
 
+from hope.apps.accountability.events import survey_sample_xlsx_generated
 from hope.apps.accountability.services.export_survey_sample_service import (
     ExportSurveySampleService,
 )
-from hope.apps.core.notifications.events import ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED
+from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import send_email_notification
 from hope.apps.utils.sentry import set_sentry_business_area_tag
@@ -24,14 +25,19 @@ def export_survey_sample_async_task_action(job: AsyncJob) -> None:
 
     service = ExportSurveySampleService(survey, user)
     service.export_sample()
+    survey_sample_xlsx_generated.send_robust(
+        sender=Survey,
+        instance=survey,
+        business_area=survey.business_area,
+        payload=EmailPayload(
+            recipients=[user.email],
+            context=service.get_email_context(),
+        ),
+        correlation_id=f"survey-sample:{survey.id}:{user.id}",
+    )
 
     if survey.business_area.enable_email_notification:
-        send_email_notification(
-            service,
-            user,
-            event_name=ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED,
-            correlation_id=f"{ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED}:{survey.id}:{user.id}",
-        )
+        send_email_notification(service, user)
 
 
 def send_survey_to_users_async_task_action(job: AsyncJob) -> None:

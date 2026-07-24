@@ -380,7 +380,6 @@ def test_send_email_notification_returns_when_email_send_fails(
         "hope.apps.periodic_data_update.notifications.MailjetClient.send_email",
         side_effect=RuntimeError("send failed"),
     )
-    mock_publish = mocker.patch("hope.apps.periodic_data_update.notifications.publish_email_notification")
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
@@ -390,19 +389,16 @@ def test_send_email_notification_returns_when_email_send_fails(
 
     pdu_notification.send_email_notification()
 
-    mock_publish.assert_not_called()
-
 
 @override_config(
     SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
 )
-def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
+def test_send_email_notification_uses_resolved_recipients(
     pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, mocker: Any
 ) -> None:
     mock_send = mocker.patch("hope.apps.periodic_data_update.notifications.MailjetClient.send_email")
-    mock_publish = mocker.patch("hope.apps.periodic_data_update.notifications.publish_email_notification")
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
@@ -413,15 +409,9 @@ def test_send_email_notification_publishes_bitcaster_with_resolved_recipients(
     pdu_notification.send_email_notification()
 
     mock_send.assert_called_once()
-    mock_publish.assert_called_once()
-    event_name, payload = mock_publish.call_args.args
-    assert event_name == "pdu.online_edit.sent_for_approval"
-    assert mock_publish.call_args.kwargs["correlation_id"] == (
-        f"pdu.online_edit.sent_for_approval:{pdu_with_authorized_users.id}:SEND_FOR_APPROVAL"
-    )
-    assert payload.recipients == pdu_notification.email.recipients
-    assert payload.context == pdu_notification.email.variables
-    assert payload.cc == pdu_notification.email.ccs
+    assert pdu_notification.email.recipients
+    assert pdu_notification.email.variables
+    assert pdu_notification.email.ccs
 
 
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=False)

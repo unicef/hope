@@ -136,6 +136,8 @@ def test_send_back_success(
     program: Program,
     pdu_edit_ready_authorized: PDUOnlineEdit,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
+    mocker: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -147,7 +149,9 @@ def test_send_back_success(
     url = get_send_back_url(afghanistan, program, pdu_edit_ready_authorized.id)
     comment_text = "Please review the vaccination data for accuracy"
     data = {"comment": comment_text}
-    response = authenticated_client.post(url, data=data)
+    mock_event = mocker.patch("hope.apps.periodic_data_update.api.views.pdu_online_edit_sent_back.send_robust")
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url, data=data)
 
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
@@ -163,6 +167,8 @@ def test_send_back_success(
     assert comment.comment == comment_text
     assert comment.created_by == user
     assert comment.created_at is not None
+    assert mock_event.call_args.kwargs["sender"] is PDUOnlineEdit
+    assert mock_event.call_args.kwargs["instance"] == pdu_edit_ready_authorized
 
 
 def test_send_back_not_authorized_user(

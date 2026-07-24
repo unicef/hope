@@ -41,7 +41,7 @@ def token(user, afghanistan) -> APIToken:
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
-@patch("hope.admin.api_token.publish_email_notification")
+@patch("hope.admin.api_token.api_credential_info_requested.send_robust")
 @patch.object(APITokenAdmin, "message_user", return_value=None)
 @patch.object(APITokenAdmin, "__init__", return_value=None)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
@@ -49,7 +49,7 @@ def token(user, afghanistan) -> APIToken:
 def test_send_api_token(
     mocked_admin_init: MagicMock,
     mocked_message_user: MagicMock,
-    mocked_publish_email_notification: MagicMock,
+    mocked_event: MagicMock,
     mocked_requests_post: MagicMock,
     token: APIToken,
     user: User,
@@ -80,11 +80,11 @@ def test_send_api_token(
     assert f"Key: {token.key}" in message["TextPart"]
     assert f"<p>Dear {user.first_name or user.username},</p>" in message["HTMLPart"]
     assert f"Key: {token.key}<br>" in message["HTMLPart"]
-    event_name, notification = mocked_publish_email_notification.call_args.args
-    assert event_name == "api.api_token.info_sent"
-    assert mocked_publish_email_notification.call_args.kwargs["correlation_id"] == (
-        f"api.api_token.info_sent:{token.id}:info"
-    )
+    mocked_event.assert_called_once()
+    assert mocked_event.call_args.kwargs["sender"] is APIToken
+    assert mocked_event.call_args.kwargs["instance"] == token
+    assert mocked_event.call_args.kwargs["correlation_id"] == f"api-token:{token.id}:info"
+    notification = mocked_event.call_args.kwargs["payload"]
     assert notification.recipients == [user.email]
     assert notification.context["token_key"] == token.key
     assert notification.context["show_token_key"] is True

@@ -4,13 +4,6 @@ PAYMENT_PLAN_APPROVED = "payment.payment_plan.approved"
 PAYMENT_PLAN_AUTHORIZED = "payment.payment_plan.authorized"
 PAYMENT_PLAN_RELEASED = "payment.payment_plan.released"
 
-PAYMENT_PLAN_ACTION_TO_BITCASTER_EVENT = {
-    "SEND_FOR_APPROVAL": PAYMENT_PLAN_SENT_FOR_APPROVAL,
-    "APPROVE": PAYMENT_PLAN_APPROVED,
-    "AUTHORIZE": PAYMENT_PLAN_AUTHORIZED,
-    "REVIEW": PAYMENT_PLAN_RELEASED,
-}
-
 PAYMENT_PLAN_PAYMENT_LIST_XLSX_GENERATED = "payment.payment_plan.payment_list_xlsx_generated"
 PAYMENT_PLAN_PAYMENT_LIST_PDF_GENERATED = "payment.payment_plan.payment_list_pdf_generated"
 PAYMENT_PLAN_GROUP_PAYMENT_LIST_XLSX_GENERATED = "payment.payment_plan_group.payment_list_xlsx_generated"
@@ -25,13 +18,6 @@ PDU_ONLINE_EDIT_SENT_FOR_APPROVAL = "pdu.online_edit.sent_for_approval"
 PDU_ONLINE_EDIT_APPROVED = "pdu.online_edit.approved"
 PDU_ONLINE_EDIT_SENT_BACK = "pdu.online_edit.sent_back"
 
-PDU_ONLINE_EDIT_ACTION_TO_BITCASTER_EVENT = {
-    "SEND_FOR_APPROVAL": PDU_ONLINE_EDIT_SENT_FOR_APPROVAL,
-    "APPROVE": PDU_ONLINE_EDIT_APPROVED,
-    "SEND_BACK": PDU_ONLINE_EDIT_SENT_BACK,
-}
-
-
 # Accountability
 ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED = "accountability.survey_sample.xlsx_generated"
 
@@ -40,13 +26,6 @@ ACCOUNTABILITY_SURVEY_SAMPLE_XLSX_GENERATED = "accountability.survey_sample.xlsx
 API_CREDENTIAL_INFO_SENT = "api.api_token.info_sent"
 API_CREDENTIAL_CREATED = "api.api_token.created"
 API_CREDENTIAL_UPDATED = "api.api_token.updated"
-
-API_TOKEN_ACTION_TO_BITCASTER_EVENT = {
-    "info": API_CREDENTIAL_INFO_SENT,
-    "created": API_CREDENTIAL_CREATED,
-    "updated": API_CREDENTIAL_UPDATED,
-}
-
 
 # Grievance
 GRIEVANCE_ASSIGNMENT_CHANGED = "grievance.ticket.assignment_changed"

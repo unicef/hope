@@ -7,20 +7,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from hope.apps.core.notifications.events import (
-    GRIEVANCE_ASSIGNMENT_CHANGED,
-    GRIEVANCE_DEDUPLICATION_CREATED,
-    GRIEVANCE_NOTES_ADDED,
-    GRIEVANCE_OVERDUE,
-    GRIEVANCE_PAYMENT_VERIFICATION_CREATED,
-    GRIEVANCE_SEND_BACK_TO_IN_PROGRESS,
-    GRIEVANCE_SEND_TO_APPROVAL,
-    GRIEVANCE_SENSITIVE_CREATED,
-    GRIEVANCE_SENSITIVE_REMINDER,
-    GRIEVANCE_SYSTEM_FLAGGING_CREATED,
-)
 from hope.apps.core.notifications.payloads import EmailPayload
-from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import RoleAssignment, User
@@ -30,7 +17,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-type PreparedEmailPayload = tuple[str, EmailPayload, str]
+type PreparedEmailPayload = tuple[EmailPayload, str]
 
 
 class GrievanceNotification:
@@ -81,7 +68,6 @@ class GrievanceNotification:
 
     def _prepare_email(self, user_recipient: "User") -> tuple[MailjetClient, PreparedEmailPayload]:
         text_body, html_body, subject, context = self._prepare_rendered_email_data(user_recipient)
-        event_name = GrievanceNotification.ACTION_TO_BITCASTER_EVENT[self.action]
         email = MailjetClient(
             subject=subject,
             recipients=[user_recipient.email],
@@ -91,17 +77,16 @@ class GrievanceNotification:
         return (
             email,
             (
-                event_name,
                 EmailPayload(
                     recipients=[user_recipient.email],
                     context=context,
                 ),
-                self._prepare_correlation_id(event_name, user_recipient),
+                self._prepare_correlation_id(user_recipient),
             ),
         )
 
-    def _prepare_correlation_id(self, event_name: str, user_recipient: "User") -> str:
-        parts = [event_name, str(self.grievance_ticket.id), str(self.action), str(user_recipient.id)]
+    def _prepare_correlation_id(self, user_recipient: "User") -> str:
+        parts = ["grievance-ticket", str(self.grievance_ticket.id), str(self.action), str(user_recipient.id)]
         if self.action == GrievanceNotification.ACTION_NOTES_ADDED:
             ticket_note = self.extra_data.get("ticket_note")
             if ticket_note is not None:
@@ -111,12 +96,8 @@ class GrievanceNotification:
     def send_email_notification(self) -> None:
         if config.SEND_GRIEVANCES_NOTIFICATION and self.enable_email_notification:
             try:
-                for email, rendered_email_notification in zip(
-                    self.emails, self.rendered_email_notifications, strict=True
-                ):
+                for email in self.emails:
                     email.send_email()
-                    event_name, payload, correlation_id = rendered_email_notification
-                    publish_email_notification(event_name, payload, correlation_id=correlation_id)
             except Exception as e:
                 logger.exception(e)
 
@@ -310,19 +291,6 @@ class GrievanceNotification:
             "sensitive_reminder_notification_email.txt",
             "sensitive_reminder_notification_email.html",
         ),
-    }
-
-    ACTION_TO_BITCASTER_EVENT = {
-        ACTION_ASSIGNMENT_CHANGED: GRIEVANCE_ASSIGNMENT_CHANGED,
-        ACTION_SYSTEM_FLAGGING_CREATED: GRIEVANCE_SYSTEM_FLAGGING_CREATED,
-        ACTION_DEDUPLICATION_CREATED: GRIEVANCE_DEDUPLICATION_CREATED,
-        ACTION_PAYMENT_VERIFICATION_CREATED: GRIEVANCE_PAYMENT_VERIFICATION_CREATED,
-        ACTION_SENSITIVE_CREATED: GRIEVANCE_SENSITIVE_CREATED,
-        ACTION_SEND_BACK_TO_IN_PROGRESS: GRIEVANCE_SEND_BACK_TO_IN_PROGRESS,
-        ACTION_SEND_TO_APPROVAL: GRIEVANCE_SEND_TO_APPROVAL,
-        ACTION_NOTES_ADDED: GRIEVANCE_NOTES_ADDED,
-        ACTION_OVERDUE: GRIEVANCE_OVERDUE,
-        ACTION_SENSITIVE_REMINDER: GRIEVANCE_SENSITIVE_REMINDER,
     }
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {

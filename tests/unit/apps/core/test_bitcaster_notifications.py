@@ -5,16 +5,20 @@ from typing import Any
 from uuid import UUID
 
 from celery.exceptions import Retry
+from constance.test import override_config
 from django.test import override_settings
 import pytest
 
+from hope.apps.accountability.events import survey_sample_xlsx_generated
 from hope.apps.core.notifications.bitcaster_client import BitcasterClient, BitcasterClientConfig
 from hope.apps.core.notifications.flags import bitcaster_enabled
-from hope.apps.core.notifications.handlers import handle_bitcaster_event
 from hope.apps.core.notifications.notifier import NotificationBackend, get_notification_backend
 from hope.apps.core.notifications.payloads import EmailPayload
-from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.core.notifications.tasks import send_bitcaster_event_task
+from hope.apps.grievance.events import grievance_assignment_changed
+from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.payment.events import payment_plan_approved
+from hope.models import PaymentPlan, Survey
 
 pytestmark = pytest.mark.django_db
 
@@ -38,27 +42,6 @@ class FakeBitcasterSDKClient:
     def trigger(self, **kwargs: Any) -> None:
         self.trigger_kwargs = kwargs
         self.transport.session.request("POST", "https://bitcaster.example.org/trigger/")
-
-
-def test_publish_email_notification_limits_bitcaster_delivery_to_recipients(mocker: Any) -> None:
-    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
-    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
-
-    publish_email_notification(
-        "test.email.sent",
-        EmailPayload(
-            recipients=["first@example.org", "second@example.org"],
-            context={"name": "Jane"},
-            cc=["actor@example.org"],
-        ),
-        correlation_id="event:1",
-    )
-
-    payload = mock_signal_send.call_args.kwargs["payload"]
-    assert mock_signal_send.call_args.kwargs["correlation_id"] == "event:1"
-    assert payload["recipients"] == ["first@example.org", "second@example.org"]
-    assert payload["cc"] == ["actor@example.org"]
-    assert payload["context"] == {"name": "Jane"}
 
 
 def test_bitcaster_client_configures_sdk_request_timeout(mocker: Any) -> None:
@@ -109,95 +92,19 @@ def test_bitcaster_client_returns_false_when_unconfigured() -> None:
     assert client.trigger_event("payment.payment_plan.sent_for_approval", {"correlation_id": "event:1"}) is False
 
 
-def test_publish_email_notification_sends_payload_to_signal(mocker: Any) -> None:
-    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
-    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
-
-    publish_email_notification(
-        "payment.payment_plan.sent_for_approval",
-        EmailPayload(
-            recipients=["approver@example.org"],
-            context={"payment_plan_id": "PP-1"},
-            cc=["actor@example.org"],
-        ),
-        correlation_id="payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL",
-    )
-
-    payload = mock_signal_send.call_args.kwargs["payload"]
-    mock_signal_send.assert_called_once()
-    assert mock_signal_send.call_args.kwargs["event_name"] == "payment.payment_plan.sent_for_approval"
-    assert mock_signal_send.call_args.kwargs["correlation_id"] == (
-        "payment.payment_plan.sent_for_approval:1:SEND_FOR_APPROVAL"
-    )
-    assert payload["context"] == {"payment_plan_id": "PP-1"}
-
-
-def test_publish_email_notification_generates_idempotency_key(mocker: Any) -> None:
-    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
-    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
-
-    publish_email_notification(
-        "test.email.sent",
-        EmailPayload(
-            recipients=["user@example.org"],
-            context={"title": "Rendered subject"},
-            cc=["cc@example.org"],
-        ),
-    )
-
-    payload = mock_signal_send.call_args.kwargs["payload"]
-    mock_signal_send.assert_called_once()
-    assert mock_signal_send.call_args.kwargs["event_name"] == "test.email.sent"
-    assert mock_signal_send.call_args.kwargs["correlation_id"].startswith("test.email.sent:user@example.org:")
-    assert payload["cc"] == ["cc@example.org"]
-
-
-def test_publish_email_notification_skips_when_flag_disabled(mocker: Any) -> None:
-    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=False)
-    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
-
-    publish_email_notification(
-        "test.email.sent",
-        EmailPayload(
-            recipients=["user@example.org"],
-            context={"title": "Subject"},
-        ),
-    )
-
-    mock_signal_send.assert_not_called()
-
-
-def test_publish_email_notification_publishes_when_flag_enabled(mocker: Any) -> None:
-    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
-    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
-
-    publish_email_notification(
-        "test.email.sent",
-        EmailPayload(
-            recipients=["user@example.org"],
-            context={"title": "Subject"},
-        ),
-    )
-
-    payload = mock_signal_send.call_args.kwargs["payload"]
-    assert mock_signal_send.call_args.kwargs["event_name"] == "test.email.sent"
-    assert payload["recipients"] == ["user@example.org"]
-    assert "subject" not in payload
-    assert payload["context"] == {"title": "Subject"}
-
-
-def test_publish_email_notification_normalizes_context_to_json_safe_values(mocker: Any) -> None:
-    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
-    mock_signal_send = mocker.patch("hope.apps.core.notifications.publishers.bitcaster_event_signal.send")
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+def test_email_event_handler_serializes_payload_and_queues_event(mocker: Any) -> None:
+    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
 
     class UnknownContextValue:
         def __str__(self) -> str:
             return "unknown-context-value"
 
-    publish_email_notification(
-        "test.email.sent",
-        EmailPayload(
+    survey_sample_xlsx_generated.send(
+        sender=Survey,
+        payload=EmailPayload(
             recipients=["user@example.org"],
+            cc=["cc@example.org"],
             context={
                 "date": date(2050, 1, 2),
                 "expires_at": datetime(2050, 1, 1, 12, 30, 0),
@@ -211,9 +118,14 @@ def test_publish_email_notification_normalizes_context_to_json_safe_values(mocke
                 },
             },
         ),
+        correlation_id="survey-sample:1",
     )
 
-    payload = mock_signal_send.call_args.kwargs["payload"]
+    event_name, payload, correlation_id = mock_delay.call_args.args
+    assert event_name == "accountability.survey_sample.xlsx_generated"
+    assert correlation_id == "survey-sample:1"
+    assert payload["recipients"] == ["user@example.org"]
+    assert payload["cc"] == ["cc@example.org"]
     assert payload["context"] == {
         "date": "2050-01-02",
         "expires_at": "2050-01-01 12:30:00",
@@ -228,16 +140,31 @@ def test_publish_email_notification_normalizes_context_to_json_safe_values(mocke
     }
 
 
-def test_publish_email_notification_swallows_publish_error(mocker: Any) -> None:
-    mocker.patch("hope.apps.core.notifications.publishers.bitcaster_enabled", return_value=True)
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+def test_email_event_handler_generates_correlation_id(mocker: Any) -> None:
+    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
+
+    survey_sample_xlsx_generated.send(
+        sender=Survey,
+        payload=EmailPayload(
+            recipients=["user@example.org"],
+            context={"title": "Subject"},
+        ),
+    )
+
+    assert mock_delay.call_args.args[2].startswith("accountability.survey_sample.xlsx_generated:user@example.org:")
+
+
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+def test_email_event_handler_swallows_queue_error(mocker: Any) -> None:
     mocker.patch(
-        "hope.apps.core.notifications.publishers.bitcaster_event_signal.send",
+        "hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay",
         side_effect=RuntimeError("queue failed"),
     )
 
-    publish_email_notification(
-        "test.email.sent",
-        EmailPayload(
+    survey_sample_xlsx_generated.send(
+        sender=Survey,
+        payload=EmailPayload(
             recipients=["user@example.org"],
             context={"title": "Subject"},
         ),
@@ -253,10 +180,9 @@ def test_bitcaster_enabled_reads_django_flags() -> None:
 def test_handle_bitcaster_event_skips_when_flag_disabled(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
 
-    handle_bitcaster_event(
-        sender=None,
-        event_name="payment.payment_plan.sent_for_approval",
-        payload={"correlation_id": "1"},
+    survey_sample_xlsx_generated.send(
+        sender=Survey,
+        payload=EmailPayload(recipients=["user@example.org"], context={}),
         correlation_id="1",
     )
 
@@ -264,18 +190,101 @@ def test_handle_bitcaster_event_skips_when_flag_disabled(mocker: Any) -> None:
 
 
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
 def test_handle_bitcaster_event_queues_allowed_event(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
-    payload = {"recipients": ["user@example.org"]}
+    notification_class = mocker.patch("hope.apps.payment.notifications.PaymentNotification")
+    notification = notification_class.return_value
+    notification.email.recipients = ["user@example.org"]
+    notification.email.variables = {"payment_plan_id": "PP-1"}
+    notification.email.ccs = ["actor@example.org"]
+    payment_plan = SimpleNamespace(
+        id=1,
+        business_area=SimpleNamespace(enable_email_notification=True),
+    )
+    actor = SimpleNamespace()
 
-    handle_bitcaster_event(
-        sender=None,
-        event_name="payment.payment_plan.sent_for_approval",
-        payload=payload,
-        correlation_id="event:1",
+    payment_plan_approved.send(
+        sender=PaymentPlan,
+        instance=payment_plan,
+        actor=actor,
+        action_date="1 January 2025",
     )
 
-    mock_delay.assert_called_once_with("payment.payment_plan.sent_for_approval", payload, "event:1")
+    notification_class.assert_called_once_with(payment_plan, "APPROVE", actor, "1 January 2025")
+    mock_delay.assert_called_once_with(
+        "payment.payment_plan.approved",
+        {
+            "recipients": ["user@example.org"],
+            "context": {"payment_plan_id": "PP-1"},
+            "cc": ["actor@example.org"],
+        },
+        "payment-plan:1:APPROVE",
+    )
+
+
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+def test_email_event_handler_skips_when_business_area_notifications_are_disabled(mocker: Any) -> None:
+    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
+
+    survey_sample_xlsx_generated.send(
+        sender=Survey,
+        business_area=SimpleNamespace(enable_email_notification=False),
+        payload=EmailPayload(recipients=["user@example.org"], context={}),
+        correlation_id="1",
+    )
+
+    mock_delay.assert_not_called()
+
+
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_grievance_event_handler_prepares_and_queues_notification(mocker: Any) -> None:
+    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
+    notification_class = mocker.patch("hope.apps.core.notifications.handlers.GrievanceNotification")
+    notification_class.return_value.rendered_email_notifications = [
+        (
+            EmailPayload(recipients=["user@example.org"], context={"ticket_id": "GRV-1"}),
+            "grievance-ticket:1",
+        )
+    ]
+    ticket = SimpleNamespace(
+        business_area=SimpleNamespace(enable_email_notification=True),
+    )
+
+    grievance_assignment_changed.send(sender=GrievanceTicket, instance=ticket)
+
+    assert notification_class.call_args.args[0] == ticket
+    mock_delay.assert_called_once_with(
+        "grievance.ticket.assignment_changed",
+        {
+            "recipients": ["user@example.org"],
+            "context": {"ticket_id": "GRV-1"},
+            "cc": [],
+        },
+        "grievance-ticket:1",
+    )
+
+
+@pytest.mark.parametrize(
+    ("app_enabled", "business_area_enabled"),
+    [(False, True), (True, False)],
+)
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+def test_grievance_event_handler_respects_notification_flags(
+    mocker: Any,
+    app_enabled: bool,
+    business_area_enabled: bool,
+) -> None:
+    notification_class = mocker.patch("hope.apps.core.notifications.handlers.GrievanceNotification")
+    ticket = SimpleNamespace(
+        business_area=SimpleNamespace(enable_email_notification=business_area_enabled),
+    )
+
+    with override_config(SEND_GRIEVANCES_NOTIFICATION=app_enabled):
+        grievance_assignment_changed.send(sender=GrievanceTicket, instance=ticket)
+
+    notification_class.assert_not_called()
 
 
 def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any) -> None:

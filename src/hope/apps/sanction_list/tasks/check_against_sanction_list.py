@@ -14,9 +14,8 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.core.notifications.events import SANCTION_LIST_CHECK_RESULTS_GENERATED
 from hope.apps.core.notifications.payloads import EmailPayload
-from hope.apps.core.notifications.publishers import publish_email_notification
+from hope.apps.sanction_list.events import sanction_list_check_results_generated
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import SanctionListIndividual, UploadedXLSXFile
 
@@ -156,12 +155,10 @@ class CheckAgainstSanctionListTask:
             filename=attachment_filename,
             mimetype=attachment_content_type,
         )
-        # Bitcaster publishing is additive during migration, so the legacy email remains enabled.
-        email.send_email()
-
-        publish_email_notification(
-            SANCTION_LIST_CHECK_RESULTS_GENERATED,
-            EmailPayload(
+        sanction_list_check_results_generated.send_robust(
+            sender=UploadedXLSXFile,
+            instance=uploaded_file,
+            payload=EmailPayload(
                 recipients=[uploaded_file.associated_email],
                 cc=[settings.SANCTION_LIST_CC_MAIL],
                 context={
@@ -171,8 +168,9 @@ class CheckAgainstSanctionListTask:
                     "title": "Sanction List Check",
                 },
             ),
-            correlation_id=f"{SANCTION_LIST_CHECK_RESULTS_GENERATED}:{uploaded_file.id}",
+            correlation_id=f"sanction-list-check-results:{uploaded_file.id}",
         )
+        email.send_email()
 
     def join_names_and_birthday(self, attachment_ws: Worksheet, results_dict: dict[Any, Any]) -> None:
         for row_number, individual in results_dict.items():

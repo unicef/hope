@@ -1776,30 +1776,34 @@ def test_send_reconciliation_overdue_email(business_area: Any) -> None:
     program.send_reconciliation_window_expiry_notifications = True
     program.save()
 
-    with mock.patch.object(User, "email_user") as mock_email_user:
-        with mock.patch("hope.apps.payment.services.payment_plan_services.render_to_string") as mock_render_to_string:
-            with mock.patch(
-                "hope.apps.payment.services.payment_plan_services.publish_email_notification"
-            ) as mock_publish:
-                mock_render_to_string.side_effect = ["rendered-html", "rendered-text"]
-                PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
-                mock_email_user.assert_called_once()
-                mock_publish.assert_called_once()
-                event_name, notification = mock_publish.call_args.args
-                assert event_name == "payment.payment_plan.reconciliation_overdue"
-                assert mock_publish.call_args.kwargs["correlation_id"] == (
-                    f"payment.payment_plan.reconciliation_overdue:{pp.id}:{user.id}"
-                )
-                assert notification.recipients == [user.email]
-                assert mock_render_to_string.call_count == 2
-                _args, kwargs = mock_render_to_string.call_args
-                context = kwargs["context"]
-                assert context["message"] == (
-                    f"Please be informed that Payment Plan: {pp.unicef_id} has exceeded its"
-                    f" reconciliation window of {pp.program.reconciliation_window_in_days} days."
-                    " Please take the necessary steps to complete the reconciliation process timely."
-                )
-                assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
+    with (
+        mock.patch.object(User, "email_user") as mock_email_user,
+        mock.patch("hope.apps.payment.services.payment_plan_services.render_to_string") as mock_render_to_string,
+        mock.patch(
+            "hope.apps.payment.services.payment_plan_services.payment_plan_reconciliation_overdue.send_robust"
+        ) as mock_event,
+    ):
+        mock_render_to_string.side_effect = ["rendered-html", "rendered-text"]
+        PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
+        mock_email_user.assert_called_once()
+        mock_event.assert_called_once()
+        assert mock_event.call_args.kwargs["sender"] is PaymentPlan
+        assert mock_event.call_args.kwargs["instance"] == pp
+        assert mock_event.call_args.kwargs["business_area"] == business_area
+        assert mock_event.call_args.kwargs["correlation_id"] == (
+            f"payment-plan-reconciliation-overdue:{pp.id}:{user.id}"
+        )
+        notification = mock_event.call_args.kwargs["payload"]
+        assert notification.recipients == [user.email]
+        assert mock_render_to_string.call_count == 2
+        _args, kwargs = mock_render_to_string.call_args
+        context = kwargs["context"]
+        assert context["message"] == (
+            f"Please be informed that Payment Plan: {pp.unicef_id} has exceeded its"
+            f" reconciliation window of {pp.program.reconciliation_window_in_days} days."
+            " Please take the necessary steps to complete the reconciliation process timely."
+        )
+        assert context["title"] == f"Payment Plan {pp.unicef_id} Reconciliation Overdue"
 
 
 def test_get_collector() -> None:
@@ -1874,7 +1878,7 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
 
     with (
         mock.patch.object(User, "email_user", autospec=True) as mock_email_user,
-        mock.patch("hope.apps.payment.services.payment_plan_services.publish_email_notification"),
+        mock.patch("hope.apps.payment.services.payment_plan_services.payment_plan_reconciliation_overdue.send_robust"),
     ):
         PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
 
@@ -1961,7 +1965,7 @@ def test_check_payment_plan_and_update_status_does_not_change_when_count_below_r
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
 def test_check_payment_plan_and_update_status_triggers_when_count_meets_required(
-    mock_flow_cls, mock_notify, locked_payment_plan
+    mock_flow_cls, mock_notify, locked_payment_plan, django_capture_on_commit_callbacks
 ):
     service = PaymentPlanService(payment_plan=locked_payment_plan)
     service.action = PaymentPlan.Action.APPROVE.value
@@ -1969,10 +1973,17 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
     approval_process = mock.MagicMock()
     approval_process.approvals.filter.return_value.count.return_value = 5
 
-    with patch.object(service, "get_required_number_by_approval_type", return_value=5):
+    with (
+        patch.object(service, "get_required_number_by_approval_type", return_value=5),
+        patch("hope.apps.payment.services.payment_plan_services.payment_plan_approved.send_robust") as mock_event,
+        django_capture_on_commit_callbacks(execute=True),
+    ):
         service.check_payment_plan_and_update_status(approval_process)
 
     mock_flow_cls.return_value.status_approve.assert_called_once()
+    assert mock_event.call_args.kwargs["sender"] is PaymentPlan
+    assert mock_event.call_args.kwargs["instance"] == locked_payment_plan
+    assert mock_event.call_args.kwargs["actor"] == service.user
 
 
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):

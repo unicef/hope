@@ -1110,6 +1110,7 @@ def test_grievance_status_change_close_na_without_access(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_create_ticket_note(
+    mocker: Any,
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1118,18 +1119,25 @@ def test_create_ticket_note(
     document_types: None,
     complaint_ticket_create_note_url: str,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Callable,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_ADD_NOTE], afghanistan, program)
 
     input_data = {"version": complaint_ticket.version, "description": "test new note"}
 
     client = api_client(user)
-    response = client.post(complaint_ticket_create_note_url, input_data, format="json")
+    mock_event = mocker.patch("hope.apps.grievance.api.views.grievance_notes_added.send_robust")
+    with django_capture_on_commit_callbacks(execute=True):
+        response = client.post(complaint_ticket_create_note_url, input_data, format="json")
 
     resp_data = response.json()
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in resp_data
     assert resp_data["description"] == "test new note"
+    assert mock_event.call_args.kwargs["sender"] is GrievanceTicket
+    assert mock_event.call_args.kwargs["instance"] == complaint_ticket
+    assert mock_event.call_args.kwargs["created_by"] == user
+    assert mock_event.call_args.kwargs["ticket_note"].description == "test new note"
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

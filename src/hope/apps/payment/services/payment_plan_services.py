@@ -1,4 +1,5 @@
 import datetime
+from functools import partial
 from itertools import groupby
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Union, cast
@@ -27,9 +28,7 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.notifications.events import PAYMENT_PLAN_RECONCILIATION_OVERDUE
 from hope.apps.core.notifications.payloads import EmailPayload
-from hope.apps.core.notifications.publishers import publish_email_notification
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
@@ -42,6 +41,13 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_to_payment_gateway_async_task,
     update_exchange_rate_on_release_payments_async_task,
+)
+from hope.apps.payment.events import (
+    payment_plan_approved,
+    payment_plan_authorized,
+    payment_plan_reconciliation_overdue,
+    payment_plan_released,
+    payment_plan_sent_for_approval,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
@@ -162,11 +168,12 @@ class PaymentPlanService:
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_send_to_approval()
         self.payment_plan.save()
+        action_date = timezone.now()
         # create new ApprovalProcess
         ApprovalProcess.objects.create(
             payment_plan=self.payment_plan,
             sent_for_approval_by=self.user,
-            sent_for_approval_date=timezone.now(),
+            sent_for_approval_date=action_date,
             approval_number_required=self.payment_plan.approval_number_required,
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
@@ -175,7 +182,16 @@ class PaymentPlanService:
             self.payment_plan,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value,
             str(self.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            f"{action_date:%-d %B %Y}",
+        )
+        transaction.on_commit(
+            partial(
+                payment_plan_sent_for_approval.send_robust,
+                sender=PaymentPlan,
+                instance=self.payment_plan,
+                actor=self.user,
+                action_date=f"{action_date:%-d %B %Y}",
+            )
         )
         return self.payment_plan
 
@@ -436,15 +452,31 @@ class PaymentPlanService:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_reject()
 
+            action_date = timezone.now()
             if notification_action:
                 send_payment_notification_emails_async_task(
                     self.payment_plan,
                     notification_action.value,
                     str(self.user.id),
-                    f"{timezone.now():%-d %B %Y}",
+                    f"{action_date:%-d %B %Y}",
                 )
 
             self.payment_plan.save()
+            if notification_action:
+                event = {
+                    PaymentPlan.Action.APPROVE: payment_plan_approved,
+                    PaymentPlan.Action.AUTHORIZE: payment_plan_authorized,
+                    PaymentPlan.Action.REVIEW: payment_plan_released,
+                }[notification_action]
+                transaction.on_commit(
+                    partial(
+                        event.send_robust,
+                        sender=PaymentPlan,
+                        instance=self.payment_plan,
+                        actor=self.user,
+                        action_date=f"{action_date:%-d %B %Y}",
+                    )
+                )
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
@@ -1456,16 +1488,18 @@ class PaymentPlanService:
             html_body = render_to_string(html_template, context=context)
             text_body = render_to_string(text_template, context=context)
 
+            payment_plan_reconciliation_overdue.send_robust(
+                sender=PaymentPlan,
+                instance=self.payment_plan,
+                business_area=business_area,
+                payload=EmailPayload(
+                    recipients=[user.email],
+                    context=context,
+                ),
+                correlation_id=f"payment-plan-reconciliation-overdue:{self.payment_plan.id}:{user.id}",
+            )
             user.email_user(
                 subject=context["title"],
                 html_body=html_body,
                 text_body=text_body,
-            )
-            publish_email_notification(
-                PAYMENT_PLAN_RECONCILIATION_OVERDUE,
-                EmailPayload(
-                    recipients=[user.email],
-                    context=context,
-                ),
-                correlation_id=f"{PAYMENT_PLAN_RECONCILIATION_OVERDUE}:{self.payment_plan.id}:{user.id}",
             )
