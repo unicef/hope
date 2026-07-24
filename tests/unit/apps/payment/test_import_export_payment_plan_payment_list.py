@@ -626,7 +626,7 @@ def test_export_payment_plan_payment_list(payment_plan, payments, user):
     export_service = XlsxPaymentPlanExportService(payment_plan)
     export_service.save_xlsx_file(user)
 
-    assert payment_plan.has_export_file
+    assert payment_plan.has_entitlement_file
 
     wb = export_service.generate_workbook()
 

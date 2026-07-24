@@ -65,7 +65,11 @@ export const PeriodicDataUpdates = (): ReactElement => {
 
   return (
     <>
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <Paper elevation={1} sx={{ mb: 0, borderRadius: 2 }}>
           <BaseSection
             title="Periodic Data Updates"
@@ -91,9 +95,19 @@ export const PeriodicDataUpdates = (): ReactElement => {
       <Fade in={true} timeout={500} key={value}>
         <div>
           {value === 0 && (
-            <Box p={3}>
+            <Box
+              sx={{
+                p: 3,
+              }}
+            >
               <Paper>
-                <Box display="flex" justifyContent="flex-end" p={6}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    p: 6,
+                  }}
+                >
                   <ButtonTooltip
                     variant="contained"
                     color="primary"
@@ -112,9 +126,19 @@ export const PeriodicDataUpdates = (): ReactElement => {
             </Box>
           )}
           {value === 1 && (
-            <Box p={3}>
+            <Box
+              sx={{
+                p: 3,
+              }}
+            >
               <Paper>
-                <Box display="flex" justifyContent="flex-end" p={6}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    p: 6,
+                  }}
+                >
                   <PeriodDataUpdatesUploadDialog />
                 </Box>
                 <PeriodicDataUpdatesOfflineEdits />

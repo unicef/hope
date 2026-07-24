@@ -40,9 +40,19 @@ export function FollowUpInstructionDetailsHeader({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="baseline" gap={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 1,
+          }}
+        >
           <Box>{instruction.unicefId ?? t('Follow-up Instruction')}</Box>
-          <Box ml={1}>
+          <Box
+            sx={{
+              ml: 1,
+            }}
+          >
             <StatusBox
               status={instruction.status}
               statusToColor={paymentPlanStatusToColor}
@@ -61,7 +71,13 @@ export function FollowUpInstructionDetailsHeader({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={instruction.adminUrl} />}
     >
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+        }}
+      >
         {instruction.hasExportFile && instruction.exportFileLink && (
           <Button
             variant="outlined"

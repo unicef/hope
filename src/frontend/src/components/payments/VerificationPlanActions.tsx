@@ -154,10 +154,20 @@ export function VerificationPlanActions({
 
   return (
     <Title>
-      <Box display="flex" alignItems="center" justifyContent="flex-end">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+        }}
+      >
         {isPending && (
           <>
-            <Box mr={2}>
+            <Box
+              sx={{
+                mr: 2,
+              }}
+            >
               {canDelete && (
                 <DeleteVerificationPlan
                   paymentPlanId={paymentPlanNode.id}
@@ -172,7 +182,12 @@ export function VerificationPlanActions({
               />
             )}
             {canActivate && (
-              <Box alignItems="center" display="flex">
+              <Box
+                sx={{
+                  alignItems: 'center',
+                  display: 'flex',
+                }}
+              >
                 <ActivateVerificationPlan
                   paymentVerificationPlanId={verificationPlan.id}
                   paymentPlanId={paymentPlanNode.id}
@@ -182,11 +197,19 @@ export function VerificationPlanActions({
           </>
         )}
         {isActive && (
-          <Box display="flex">
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
             {verificationChannelXLSX && (
               <>
                 {canExport && (
-                  <Box p={2}>
+                  <Box
+                    sx={{
+                      p: 2,
+                    }}
+                  >
                     <LoadingButton
                       loading={exportXlsxMutation.isPending}
                       disabled={
@@ -218,7 +241,11 @@ export function VerificationPlanActions({
                 )}
 
                 {canDownload && (
-                  <Box p={2}>
+                  <Box
+                    sx={{
+                      p: 2,
+                    }}
+                  >
                     <StyledLink
                       download
                       href={`/api/download-payment-verification-plan/${verificationPlan.id}`}
@@ -249,7 +276,12 @@ export function VerificationPlanActions({
                 )}
 
                 {canImport && (
-                  <Box p={2} data-cy="import-xlsx">
+                  <Box
+                    data-cy="import-xlsx"
+                    sx={{
+                      p: 2,
+                    }}
+                  >
                     <ImportXlsx
                       paymentVerificationPlanId={verificationPlan.id}
                       paymentPlanId={paymentPlanNode.id}
@@ -272,7 +304,11 @@ export function VerificationPlanActions({
                     />
                   )}
                 {canMarkInvalid && (
-                  <Box p={2}>
+                  <Box
+                    sx={{
+                      p: 2,
+                    }}
+                  >
                     <LoadingButton
                       loading={invalidVerificationPlanMutation.isPending}
                       color="primary"

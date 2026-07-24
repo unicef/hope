@@ -25,10 +25,19 @@ export function OpenPaymentPlanHeaderButtons({
   const { isActiveProgram } = useProgramContext();
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canRemove && <DeletePaymentPlan paymentPlan={paymentPlan} />}
       {canEdit && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             variant="outlined"
             color="primary"
@@ -43,7 +52,11 @@ export function OpenPaymentPlanHeaderButtons({
         </Box>
       )}
       {canLock && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LockPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}

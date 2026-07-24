@@ -95,7 +95,11 @@ export function RejectPaymentPlan({
       {({ submitForm }) => (
         <>
           {rejectDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <ErrorButton
               data-cy="button-reject"
               onClick={() => setRejectDialogOpen(true)}
@@ -115,10 +119,18 @@ export function RejectPaymentPlan({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   {t('Are you sure you want to reject this payment plan?')}
                 </Box>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   <GreyText>
                     {t(
                       'Note: Upon proceeding this payment plan will be automatically moved to locked status.',

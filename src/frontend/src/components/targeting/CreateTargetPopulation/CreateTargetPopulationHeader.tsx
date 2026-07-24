@@ -60,7 +60,11 @@ const CreateTargetPopulationHeader = ({
       }
     >
       <>
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             data-cy="button-cancel"
             component={Link}
@@ -69,7 +73,11 @@ const CreateTargetPopulationHeader = ({
             {t('Cancel')}
           </Button>
         </Box>
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LoadingButton
             variant="contained"
             color="primary"

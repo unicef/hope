@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
@@ -108,3 +108,6 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             " (also sending messages via Rapid Pro).",
             success_message="Successfully activated.",
         )
+
+    def has_add_permission(self: Any, request: Any) -> bool:
+        return False

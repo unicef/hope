@@ -88,7 +88,12 @@ export const NeedsAdjudicationDetailsNew = ({
   return (
     <ApproveBox>
       <Title>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography
             data-cy="approve-box-needs-adjudication-title"
             variant="h6"

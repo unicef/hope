@@ -114,9 +114,12 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
           label={label}
           onClick={(e) => e.stopPropagation()}
           onChange={handleInputChange}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: <>{params.InputProps.endAdornment}</>,
+          slotProps={{
+            ...params.slotProps,
+            input: {
+              ...params.slotProps.input,
+              endAdornment: <>{params.slotProps.input.endAdornment}</>,
+            },
           }}
         />
       )}

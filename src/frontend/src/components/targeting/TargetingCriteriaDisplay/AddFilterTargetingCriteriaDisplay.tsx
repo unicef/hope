@@ -1,6 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
@@ -195,7 +195,12 @@ const AddFilterTargetingCriteriaDisplay = ({
 
   if (householdFiltersAvailable || individualFiltersAvailable) {
     return (
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <Title>
           <div />
           {isEdit && helpers && (
@@ -223,8 +228,18 @@ const AddFilterTargetingCriteriaDisplay = ({
           criteriaIndex={criteriaIndex}
         />
         <ContentWrapper>
-          <Box display="flex" flexDirection="column">
-            <Box display="flex" flexWrap="wrap">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+              }}
+            >
               {rules.length
                 ? rules?.map((criteria, index) => (
                     <Fragment key={criteria.id || index}>
@@ -268,16 +283,19 @@ const AddFilterTargetingCriteriaDisplay = ({
                       onClick={handleAddFilter}
                       data-cy="button-target-population-add-criteria"
                     >
-                      <AddCircleOutline />
+                      <AddCircleOutlined />
                       <p>{t('Add Filter')}</p>
                     </AddCriteria>
                   ) : (
                     <Box
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                      py={4}
-                      sx={{ color: 'text.secondary', fontStyle: 'italic' }}
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        py: 4,
+                        color: 'text.secondary',
+                        fontStyle: 'italic',
+                      }}
                     >
                       {t('No targeting criteria defined')}
                     </Box>

@@ -105,7 +105,11 @@ export function MarkAsReleasedPaymentPlan({
       {({ submitForm }) => (
         <>
           {markAsReleasedDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"
@@ -128,13 +132,21 @@ export function MarkAsReleasedPaymentPlan({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   {t(
                     'Are you sure you want to mark this Payment Plan as released?',
                   )}
                 </Box>
                 {shouldShowLastReviewerMessage() && (
-                  <Box p={5}>
+                  <Box
+                    sx={{
+                      p: 5,
+                    }}
+                  >
                     <GreyText>
                       {t(
                         'Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status',

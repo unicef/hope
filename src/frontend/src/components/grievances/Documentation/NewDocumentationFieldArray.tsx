@@ -1,5 +1,5 @@
 import { Button, FormHelperText, Grid } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { DocumentationField } from './DocumentationField';
@@ -28,10 +28,12 @@ export function NewDocumentationFieldArray({
                 container
                 size={12}
                 direction="row"
-                alignItems="center"
                 spacing={3}
                 key={`${index}-documentation-file`}
-                sx={{ mb: 2 }}
+                sx={{
+                  alignItems: 'center',
+                  mb: 2,
+                }}
               >
                 <DocumentationField
                   index={index}
@@ -51,7 +53,7 @@ export function NewDocumentationFieldArray({
                     file: null,
                   });
                 }}
-                startIcon={<AddCircleOutline />}
+                startIcon={<AddCircleOutlined />}
               >
                 {t(
                   values.documentation?.length > 0

@@ -15,13 +15,19 @@ export const FspSection = ({ paymentPlan }: FspSectionProps): ReactElement => {
   const { t } = useTranslation();
 
   return (
-    <Box m={5}>
+    <Box
+      sx={{
+        m: 5,
+      }}
+    >
       <ContainerColumnWithBorder>
         <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={4}
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mt: 4,
+          }}
         >
           <Typography variant="h6">{t('FSPs')}</Typography>
         </Box>

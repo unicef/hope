@@ -95,7 +95,11 @@ export function AbortPaymentPlan({
       {({ submitForm }) => (
         <>
           {abortDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               color="secondary"
               variant="outlined"
@@ -119,7 +123,11 @@ export function AbortPaymentPlan({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   {t('Are you sure you want to abort this Payment Plan?')}
                 </Box>
                 <Form>

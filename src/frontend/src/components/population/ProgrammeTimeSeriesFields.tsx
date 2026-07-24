@@ -75,7 +75,11 @@ export const ProgrammeTimeSeriesFields = ({
   }
 
   return (
-    <Box mb={3}>
+    <Box
+      sx={{
+        mb: 3,
+      }}
+    >
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">

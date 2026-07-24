@@ -1986,6 +1986,65 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
     assert mock_event.call_args.kwargs["actor"] == service.user
 
 
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_ready_for_closure_sends_notification(mock_notify, user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    PaymentPlanService(payment_plan).ready_for_closure(user=user)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    mock_notify.assert_called_once_with(
+        payment_plan,
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+        str(user.pk),
+        mock.ANY,
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_ready_for_closure_suppresses_notification_when_notify_false(
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    PaymentPlanService(payment_plan).ready_for_closure(user, notify=False)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    mock_notify.assert_not_called()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_send_back_to_finished_sends_notification(
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+
+    PaymentPlanService(payment_plan).send_back_to_finished(user=user)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.FINISHED
+    mock_notify.assert_called_once_with(
+        payment_plan,
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+        str(user.pk),
+        mock.ANY,
+    )
+
+
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):
     service = PaymentPlanService(payment_plan=locked_payment_plan_with_payments)
     payments = locked_payment_plan_with_payments.eligible_payments.all()

@@ -48,25 +48,49 @@ export function BatchDetailsHeader({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="baseline" gap={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 1,
+          }}
+        >
           <Box>
             {t('Batch')}
-            {batchPlanTypeLabel(planType) && ` ${t(batchPlanTypeLabel(planType))}`}
+            {batchPlanTypeLabel(planType) &&
+              ` ${t(batchPlanTypeLabel(planType))}`}
           </Box>
-          <Box color="text.secondary" fontSize="0.85em">
+          <Box
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.85em',
+            }}
+          >
             {tag}
           </Box>
         </Box>
       }
       breadCrumbs={breadCrumbsItems}
     >
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {hasExportFile ? (
           <DownloadBatchButton groupId={groupId} tag={tag} />
         ) : (
-          <ExportBatchButton groupId={groupId} tag={tag} planType={planType} isBusy={isBusy} />
+          <ExportBatchButton
+            groupId={groupId}
+            tag={tag}
+            planType={planType}
+            isBusy={isBusy}
+          />
         )}
-        {hasPassword && <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />}
+        {hasPassword && (
+          <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />
+        )}
       </Box>
     </PageHeader>
   );

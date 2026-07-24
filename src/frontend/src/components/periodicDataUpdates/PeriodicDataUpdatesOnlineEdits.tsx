@@ -9,19 +9,40 @@ import OtherPeriodicDataUpdates from '@components/periodicDataUpdates/OtherPerio
 function PeriodicDataUpdatesOnlineEdits() {
   return (
     <>
-      <Box pr={3} pl={3}>
+      <Box
+        sx={{
+          pr: 3,
+          pl: 3,
+        }}
+      >
         <NewPeriodicDataUpdates />
       </Box>
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <PeriodicDataUpdatePendingForApproval />
       </Box>
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <PeriodicDataUpdatePendingForMerge />
       </Box>
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <MergedPeriodicDataUpdates />
       </Box>
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <OtherPeriodicDataUpdates />
       </Box>
     </>

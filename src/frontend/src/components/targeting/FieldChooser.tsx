@@ -24,7 +24,13 @@ export const FieldChooser = ({
 }): ReactElement => {
   const { t } = useTranslation();
   return (
-    <Box mb={2} display="flex" justifyContent="space-between">
+    <Box
+      sx={{
+        mb: 2,
+        display: 'flex',
+        justifyContent: 'space-between',
+      }}
+    >
       <Field
         name={`${baseName}.fieldName`}
         label={t('Select Field')}

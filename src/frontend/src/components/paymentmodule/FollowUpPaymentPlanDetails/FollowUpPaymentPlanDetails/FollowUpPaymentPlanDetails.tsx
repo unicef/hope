@@ -97,8 +97,17 @@ export function FollowUpPaymentPlanDetails({
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
-              <Box display="flex" alignItems="center">
-                <Box mr={1}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    mr: 1,
+                  }}
+                >
                   <LabelizedField label={t('FX Rate Applied')}>
                     {exchangeRate}
                   </LabelizedField>
