@@ -9,7 +9,7 @@ not wired into es_populate_delta -- kept only for a multi-alias shadow setup.
 import os
 
 from django.conf import settings
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 
 
 def register_shadow_connection(alias: str = "v9", env_var: str = "ELASTICSEARCH_HOST_V9") -> bool:

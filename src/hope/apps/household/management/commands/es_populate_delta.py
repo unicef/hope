@@ -209,7 +209,7 @@ class Command(BaseCommand):
 
     def _process_program(self, pid: str, since: datetime, using: str, opts: dict) -> tuple[str, str]:
         """Sync one program: full-populate if the index is missing, else upsert/delete only the delta."""
-        from elasticsearch_dsl import connections
+        from elasticsearch.dsl import connections
 
         from hope.apps.household.documents import get_household_doc, get_individual_doc
 
@@ -337,7 +337,7 @@ class Command(BaseCommand):
 
     def _print_server_version(self, using: str) -> None:
         # Confirm which ES server we are about to write to (host + version) before any work.
-        from elasticsearch_dsl import connections
+        from elasticsearch.dsl import connections
 
         host = settings.ELASTICSEARCH_DSL[using]["hosts"]
         try:

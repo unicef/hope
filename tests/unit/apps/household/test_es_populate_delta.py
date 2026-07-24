@@ -39,7 +39,7 @@ DELTA = f"{_MOD}.Command._program_delta"
 APPLY = f"{_MOD}.Command._apply_delta"
 GET_IND_DOC = "hope.apps.household.documents.get_individual_doc"
 GET_HH_DOC = "hope.apps.household.documents.get_household_doc"
-GET_CONN = "elasticsearch_dsl.connections.get_connection"
+GET_CONN = "elasticsearch.dsl.connections.get_connection"
 REMOVE = "hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids"
 
 OPTS = {"dry_run": False, "chunk_size": 2000, "parallel": False, "threads": 4, "verify": False}
@@ -262,9 +262,7 @@ def test_process_program_existing_index_applies_delta(
 @patch(GET_HH_DOC)
 @patch(GET_IND_DOC)
 @patch(GET_CONN)
-def test_process_program_dry_run_does_not_apply(
-    mock_conn, mock_ind_doc, mock_hh_doc, mock_delta, mock_apply
-) -> None:
+def test_process_program_dry_run_does_not_apply(mock_conn, mock_ind_doc, mock_hh_doc, mock_delta, mock_apply) -> None:
     mock_conn.return_value.indices.exists.return_value = True
     opts = {**OPTS, "dry_run": True}
 
