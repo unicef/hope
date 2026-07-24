@@ -8,7 +8,7 @@ from hope.models import DataCollectingType
 
 pytestmark = pytest.mark.django_db
 
-_migration = importlib.import_module("hope.apps.core.migrations.0030_migration")
+_migration = importlib.import_module("hope.apps.core.migrations.0031_migration")
 set_collects_individual_data = _migration.set_collects_individual_data
 reverse_set_collects_individual_data = _migration.reverse_set_collects_individual_data
 
