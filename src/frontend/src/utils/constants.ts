@@ -7,8 +7,6 @@ export const PROGRAM_STATE_FILTER = {
   ALL: 'all',
 } as const;
 
-// UI-only filter option lists (not backed by a server enum). `label` values are
-// passed through `t()` at the render site to preserve i18n.
 export const YES_NO_CHOICES = [
   { value: 'YES', label: 'Yes' },
   { value: 'NO', label: 'No' },
@@ -40,15 +38,19 @@ export const PAYMENT_PLAN_STATES = {
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]: 'Entitlement Formula Run',
-  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]: 'Entitlement Formula Error',
+  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
+    'Entitlement Formula Run',
+  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
+    'Entitlement Formula Error',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: 'XLSX Export Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
+    'XLSX Export Error',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
     'XLSX Importing Entitlements',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: 'XLSX Import Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
+    'XLSX Import Error',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
     'Applying Custom Exchange Rate',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
