@@ -18,7 +18,8 @@ from hope.apps.core.notifications.tasks import send_bitcaster_event_task
 from hope.apps.grievance.events import grievance_assignment_changed
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.payment.events import payment_plan_approved
-from hope.models import PaymentPlan, Survey
+from hope.apps.periodic_data_update.events import pdu_online_edit_approved
+from hope.models import PaymentPlan, PDUOnlineEdit, Survey
 
 pytestmark = pytest.mark.django_db
 
@@ -220,6 +221,40 @@ def test_handle_bitcaster_event_queues_allowed_event(mocker: Any) -> None:
             "cc": ["actor@example.org"],
         },
         "payment-plan:1:APPROVE",
+    )
+
+
+@override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
+@override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
+def test_pdu_online_edit_event_handler_queues_allowed_event(mocker: Any) -> None:
+    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
+    notification_class = mocker.patch("hope.apps.periodic_data_update.notifications.PDUOnlineEditNotification")
+    notification = notification_class.return_value
+    notification.email.recipients = ["merger@example.org"]
+    notification.email.variables = {"pdu_online_edit_id": "PDU-1"}
+    notification.email.ccs = ["actor@example.org"]
+    pdu_online_edit = SimpleNamespace(
+        id=1,
+        business_area=SimpleNamespace(enable_email_notification=True),
+    )
+    actor = SimpleNamespace()
+
+    pdu_online_edit_approved.send(
+        sender=PDUOnlineEdit,
+        instance=pdu_online_edit,
+        actor=actor,
+        action_date="1 January 2025",
+    )
+
+    notification_class.assert_called_once_with(pdu_online_edit, "APPROVE", actor, "1 January 2025")
+    mock_delay.assert_called_once_with(
+        "pdu.online_edit.approved",
+        {
+            "recipients": ["merger@example.org"],
+            "context": {"pdu_online_edit_id": "PDU-1"},
+            "cc": ["actor@example.org"],
+        },
+        "pdu-online-edit:1:APPROVE",
     )
 
 
