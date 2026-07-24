@@ -1648,6 +1648,15 @@ def test_update_grievance_ticket_notifies_new_assignee(
         for notification in call.args[0]
     ]
     assert (GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, [owner.id]) in sent
+    # The new assignee gets the dedicated assignment email, not also the ticket-updated one.
+    ticket_updated_recipients = [
+        recipient.id
+        for call in mock_send.call_args_list
+        for notification in call.args[0]
+        if notification.action == GrievanceNotification.ACTION_TICKET_UPDATED
+        for recipient in notification.user_recipients
+    ]
+    assert owner.id not in ticket_updated_recipients
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

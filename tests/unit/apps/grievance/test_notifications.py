@@ -699,6 +699,18 @@ def test_ticket_updated_recipients_creator_and_assignee_exclude_editor(
     assert {user.id for user in notification.user_recipients} == {creator.id, assignee.id}
 
 
+def test_ticket_updated_recipients_exclude_assignee_when_reassigned(
+    business_area: BusinessArea, assignee: User, creator: User, editor: User
+) -> None:
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee, created_by=creator)
+
+    notification = GrievanceNotification(
+        ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=editor, exclude_assignee=True
+    )
+
+    assert {user.id for user in notification.user_recipients} == {creator.id}
+
+
 def test_ticket_updated_recipients_exclude_editor_who_is_creator(
     business_area: BusinessArea, assignee: User, creator: User
 ) -> None:

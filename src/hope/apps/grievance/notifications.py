@@ -103,10 +103,16 @@ class GrievanceNotification:
             except Exception as e:  # pragma: no cover
                 logger.exception(e)
 
+    @staticmethod
+    def _render_bodies(template_base: str, context: dict[str, Any]) -> tuple[str, str]:
+        return (
+            render_to_string(f"{template_base}_notification_email.txt", context=context),
+            render_to_string(f"{template_base}_notification_email.html", context=context),
+        )
+
     def _prepare_universal_category_created_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("universal_category_created_notification_email.txt", context=context)
-        html_body = render_to_string("universal_category_created_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("universal_category_created", context)
         return (
             text_body,
             html_body,
@@ -116,6 +122,16 @@ class GrievanceNotification:
     @staticmethod
     def _exclude_unmailable(queryset: "QuerySet[User]") -> "QuerySet[User]":
         return queryset.filter(is_active=True).exclude(email="")
+
+    @staticmethod
+    def _exclude_users(queryset: "QuerySet[User]", *users: "User | None") -> "QuerySet[User]":
+        ids = [user.id for user in users if user is not None]
+        return queryset.exclude(id__in=ids) if ids else queryset
+
+    @property
+    def _editor(self) -> "User | None":
+        # The user who performed the action; never notified about their own action.
+        return self.extra_data.get("editor")
 
     @cached_property
     def _program_scope(self) -> Q:
@@ -151,16 +167,17 @@ class GrievanceNotification:
             )
             queryset = queryset.filter(pk__in=payment_users.values("pk"))
         # Assignee gets a dedicated assignment email; the editor is the user performing the creation.
-        editor = self.extra_data.get("editor")
-        exclude_ids = [user.id for user in (self.grievance_ticket.assigned_to, editor) if user]
-        if exclude_ids:
-            queryset = queryset.exclude(id__in=exclude_ids)
-        return queryset.all()
+        return self._exclude_users(queryset, self.grievance_ticket.assigned_to, self._editor).all()
 
     def _prepare_creator_and_assignee_recipients(self) -> "list[User]":
-        editor = self.extra_data.get("editor")
+        editor = self._editor
+        candidates = [self.grievance_ticket.created_by]
+        # When the same request reassigned the ticket, the new assignee already gets a dedicated
+        # assignment email, so skip them here to avoid a duplicate notification.
+        if not self.extra_data.get("exclude_assignee"):
+            candidates.append(self.grievance_ticket.assigned_to)
         recipients = {}
-        for user in (self.grievance_ticket.created_by, self.grievance_ticket.assigned_to):
+        for user in candidates:
             if user is None:
                 continue
             if not user.is_active or not user.email:
@@ -227,16 +244,12 @@ class GrievanceNotification:
             )
         )
         # Never notify the user who sent the ticket for approval about their own action.
-        editor = self.extra_data.get("editor")
-        if editor is not None:
-            queryset = queryset.exclude(id=editor.id)
-        return queryset.all()
+        return self._exclude_users(queryset, self._editor).all()
 
     def _prepare_sensitive_reminder_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         context["hours_ago"] = (timezone.now() - self.grievance_ticket.created_at).days * 24
-        text_body = render_to_string("sensitive_reminder_notification_email.txt", context=context)
-        html_body = render_to_string("sensitive_reminder_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("sensitive_reminder", context)
         return (
             text_body,
             html_body,
@@ -246,8 +259,7 @@ class GrievanceNotification:
     def _prepare_overdue_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         context["days_ago"] = (timezone.now() - self.grievance_ticket.created_at).days
-        text_body = render_to_string("overdue_notification_email.txt", context=context)
-        html_body = render_to_string("overdue_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("overdue", context)
         return (
             text_body,
             html_body,
@@ -259,8 +271,7 @@ class GrievanceNotification:
         created_by = self.extra_data.get("created_by")
         context["created_by"] = f"{created_by.first_name} {created_by.last_name}"
         context["ticket_note"] = self.extra_data.get("ticket_note")
-        text_body = render_to_string("note_added_notification_email.txt", context=context)
-        html_body = render_to_string("note_added_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("note_added", context)
         return (
             text_body,
             html_body,
@@ -271,8 +282,7 @@ class GrievanceNotification:
         context = self._prepare_default_context(user_recipient)
         approver = self.extra_data.get("approver")
         context["approver"] = f"{approver.first_name} {approver.last_name}"
-        text_body = render_to_string("send_back_to_in_progress_notification_email.txt", context=context)
-        html_body = render_to_string("send_back_to_in_progress_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("send_back_to_in_progress", context)
         return (
             text_body,
             html_body,
@@ -281,8 +291,7 @@ class GrievanceNotification:
 
     def _prepare_for_approval_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("send_for_approve_notification_email.txt", context=context)
-        html_body = render_to_string("send_for_approve_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("send_for_approve", context)
         return (
             text_body,
             html_body,
@@ -291,8 +300,7 @@ class GrievanceNotification:
 
     def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("assignment_change_notification_email.txt", context=context)
-        html_body = render_to_string("assignment_change_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("assignment_change", context)
         return (
             text_body,
             html_body,
@@ -301,8 +309,7 @@ class GrievanceNotification:
 
     def _prepare_ticket_updated_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("ticket_updated_notification_email.txt", context=context)
-        html_body = render_to_string("ticket_updated_notification_email.html", context=context)
+        text_body, html_body = self._render_bodies("ticket_updated", context)
         return (
             text_body,
             html_body,
@@ -314,7 +321,7 @@ class GrievanceNotification:
         if assigned_to is None:
             return []
         # Never notify the user who performed the action about their own action.
-        editor = self.extra_data.get("editor")
+        editor = self._editor
         if editor is not None and assigned_to.id == editor.id:
             return []
         if not assigned_to.is_active or not assigned_to.email:
