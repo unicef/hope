@@ -47,7 +47,11 @@ export function SendXlsxPasswordBatchButton({
     return null;
 
   return (
-    <Box m={2}>
+    <Box
+      sx={{
+        m: 2,
+      }}
+    >
       <LoadingButton
         loading={loadingSend}
         startIcon={<Lock />}

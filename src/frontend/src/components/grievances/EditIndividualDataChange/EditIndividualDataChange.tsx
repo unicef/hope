@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { ReactElement, useEffect } from 'react';
@@ -193,7 +193,7 @@ function EditIndividualDataChange({
                       onClick={() => {
                         arrayHelpers.push({ fieldName: null, fieldValue: '' });
                       }}
-                      startIcon={<AddCircleOutline />}
+                      startIcon={<AddCircleOutlined />}
                       data-cy="button-add-new-field"
                       disabled={isEditTicket}
                     >
@@ -207,7 +207,11 @@ function EditIndividualDataChange({
         </BoxWithBorders>
       )}
       <BoxWithBorders>
-        <Box mt={3}>
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
           <Title>
             <Typography variant="h6">
               {t(
@@ -231,7 +235,11 @@ function EditIndividualDataChange({
         </Box>
       </BoxWithBorders>
       <BoxWithBorders>
-        <Box mt={3}>
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
           <Title>
             <Typography variant="h6">{t('Identities')}</Typography>
           </Title>
@@ -250,7 +258,11 @@ function EditIndividualDataChange({
         </Box>
       </BoxWithBorders>
       <BoxWithBorders>
-        <Box mt={3}>
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
           <Title>
             <Typography variant="h6">{t('Accounts')}</Typography>
           </Title>

@@ -1,7 +1,7 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { IndividualList } from '@restgenerated/models/IndividualList';
@@ -177,7 +177,7 @@ function EditPeopleDataChange({
                     onClick={() => {
                       arrayHelpers.push({ fieldName: null, fieldValue: '' });
                     }}
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     data-cy="button-add-new-field"
                     disabled={isEditTicket}
                   >
@@ -190,7 +190,11 @@ function EditPeopleDataChange({
         </BoxWithBorders>
       )}
       <BoxWithBorders>
-        <Box mt={3}>
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
           <Title>
             <Typography variant="h6">
               {t(
@@ -214,7 +218,11 @@ function EditPeopleDataChange({
         </Box>
       </BoxWithBorders>
       <BoxWithBorders>
-        <Box mt={3}>
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
           <Title>
             <Typography variant="h6">{t('Accounts')}</Typography>
           </Title>

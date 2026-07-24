@@ -1,9 +1,4 @@
-from typing import TYPE_CHECKING, cast
-
 from rest_framework.exceptions import ValidationError
-
-if TYPE_CHECKING:
-    from hope.models import Individual
 
 from hope.apps.periodic_data_update.service.periodic_data_update_base_service import (
     PDUDataExtractionService,
@@ -34,7 +29,6 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
         edit_data = []
 
         for individual in individuals:
-            individual = cast("Individual", individual)
             pdu_fields = {}
             is_individual_allowed = False
             for round_info in self.rounds_data:

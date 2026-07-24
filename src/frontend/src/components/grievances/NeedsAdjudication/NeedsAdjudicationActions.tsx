@@ -65,12 +65,19 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
 
   return (
     <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      mt={2}
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mt: 2,
+      }}
     >
-      <Box display="flex" gap={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+        }}
+      >
         <Button
           onClick={() =>
             navigate(`/${baseUrl}/grievance/new-ticket`, {

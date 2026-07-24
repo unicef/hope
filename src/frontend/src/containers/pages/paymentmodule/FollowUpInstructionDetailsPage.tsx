@@ -79,7 +79,12 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
   }
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <FollowUpInstructionDetailsHeader
         instruction={instruction}
         permissions={permissions}

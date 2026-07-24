@@ -154,11 +154,11 @@ export const EditVerificationPlan = ({
             ? values.excludedAdminAreasRandom || []
             : [],
           age: values.ageCheckbox
-            ? ({
+            ? {
                 min: values.filterAgeMin || 0,
                 max: values.filterAgeMax || 999,
-              })
-            : ({ min: 0, max: 999 }),
+              }
+            : { min: 0, max: 999 },
           sex: values.sexCheckbox ? values.filterSex || '' : '',
         },
       };
@@ -417,7 +417,11 @@ export const EditVerificationPlan = ({
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
-                    <Box pt={6}>
+                    <Box
+                      sx={{
+                        pt: 6,
+                      }}
+                    >
                       {mappedAdminAreas && (
                         <Field
                           name="excludedAdminAreasFull"
@@ -427,12 +431,18 @@ export const EditVerificationPlan = ({
                           component={FormikMultiSelectField}
                         />
                       )}
-                      <Box pt={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                        }}
+                      >
                         <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight="fontWeightBold"
+                          sx={{
+                            pb: 3,
+                            pt: 3,
+                            fontSize: 16,
+                            fontWeight: 'fontWeightBold',
+                          }}
                         >
                           Sample size:{' '}
                           {isNaN(sampleSizesData?.sampleSize?.sampleSize)
@@ -446,7 +456,12 @@ export const EditVerificationPlan = ({
                             : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
                           {getSampleSizePercentage()}
                         </Box>
-                        <Box fontSize={12} color="#797979">
+                        <Box
+                          sx={{
+                            fontSize: 12,
+                            color: '#797979',
+                          }}
+                        >
                           {t('This option is recommended for RapidPro')}
                         </Box>
                         <Field
@@ -495,7 +510,11 @@ export const EditVerificationPlan = ({
                     </Box>
                   </TabPanel>
                   <TabPanel value={selectedTab} index={1}>
-                    <Box pt={3}>
+                    <Box
+                      sx={{
+                        pt: 3,
+                      }}
+                    >
                       <Field
                         name="confidenceInterval"
                         label={t('Confidence Interval')}
@@ -515,8 +534,17 @@ export const EditVerificationPlan = ({
                       <Typography variant="caption">
                         {t('Cluster Filters')}
                       </Typography>
-                      <Box flexDirection="column" display="flex">
-                        <Box display="flex">
+                      <Box
+                        sx={{
+                          flexDirection: 'column',
+                          display: 'flex',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                          }}
+                        >
                           <Field
                             name="adminCheckbox"
                             label={t('Administrative Level')}
@@ -548,7 +576,11 @@ export const EditVerificationPlan = ({
                         <Grid container>
                           {values.ageCheckbox && (
                             <Grid size={{ xs: 12 }}>
-                              <Box mt={6}>
+                              <Box
+                                sx={{
+                                  mt: 6,
+                                }}
+                              >
                                 <Grid container>
                                   <Grid size={{ xs: 4 }}>
                                     <Field
@@ -574,7 +606,11 @@ export const EditVerificationPlan = ({
                           )}
                           {values.sexCheckbox && (
                             <Grid size={{ xs: 5 }}>
-                              <Box mt={6}>
+                              <Box
+                                sx={{
+                                  mt: 6,
+                                }}
+                              >
                                 <Field
                                   name="filterSex"
                                   label={t('Gender')}
@@ -601,10 +637,12 @@ export const EditVerificationPlan = ({
                       </Box>
 
                       <Box
-                        pb={3}
-                        pt={3}
-                        fontSize={16}
-                        fontWeight="fontWeightBold"
+                        sx={{
+                          pb: 3,
+                          pt: 3,
+                          fontSize: 16,
+                          fontWeight: 'fontWeightBold',
+                        }}
                       >
                         Sample size:{' '}
                         {isNaN(sampleSizesData?.sampleSize?.sampleSize)

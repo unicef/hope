@@ -44,7 +44,13 @@ export const PaymentPlanDetailsResults = ({
       <ContentWrapper>
         <Grid container>
           <Grid size={{ xs: 4 }}>
-            <Grid container spacing={3} justifyContent="flex-start">
+            <Grid
+              container
+              spacing={3}
+              sx={{
+                justifyContent: 'flex-start',
+              }}
+            >
               <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.femaleChildren}>
                   <LabelizedField
@@ -83,8 +89,10 @@ export const PaymentPlanDetailsResults = ({
             <Grid
               container
               spacing={0}
-              justifyContent="flex-start"
-              alignItems="center"
+              sx={{
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+              }}
             >
               <Grid size={{ xs: 4 }}>
                 <ChartContainer data-cy="chart-container">

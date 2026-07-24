@@ -74,9 +74,19 @@ function AcceptanceProcess({
       paymentPlan.status === PaymentPlanStatusEnum.CLOSED);
 
   return (
-    <Box m={5}>
+    <Box
+      sx={{
+        m: 5,
+      }}
+    >
       <ContainerColumnWithBorder>
-        <Box display="flex" justifyContent="space-between" mt={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            mt: 4,
+          }}
+        >
           <Title>
             <Typography variant="h6">{t('Acceptance Process')}</Typography>
           </Title>

@@ -21,24 +21,45 @@ export function DraftProgramDetailsPageHeaderButtons({
   canDuplicate,
 }: DraftProgramDetailsPageHeaderPropTypes): ReactElement {
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canRemove && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <DeleteProgram program={program} />
         </Box>
       )}
       {canEdit && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <EditProgramMenu program={program} />
         </Box>
       )}
       {canActivate && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <ActivateProgram program={program} />
         </Box>
       )}
       {canDuplicate && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <DuplicateProgramButtonLink program={program} />
         </Box>
       )}

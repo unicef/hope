@@ -235,8 +235,18 @@ export function TableRestComponent<T>({
               <IconContainer>
                 <Icon fontSize="inherit" />
               </IconContainer>
-              <MuiBox mt={2}>{t('No results')}</MuiBox>
-              <SmallerText mt={2}>
+              <MuiBox
+                sx={{
+                  mt: 2,
+                }}
+              >
+                {t('No results')}
+              </MuiBox>
+              <SmallerText
+                sx={{
+                  mt: 2,
+                }}
+              >
                 {t(
                   'Try adjusting your search or your filters to find what you are looking for.',
                 )}
@@ -255,7 +265,13 @@ export function TableRestComponent<T>({
       <StyledTableContainer>
         <StyledBox>
           {title ? <EnhancedTableToolbar title={title} /> : null}
-          <StyledBox p={5}>{actions || null}</StyledBox>
+          <StyledBox
+            sx={{
+              p: 5,
+            }}
+          >
+            {actions || null}
+          </StyledBox>
         </StyledBox>
 
         <StyledTable>

@@ -1348,7 +1348,7 @@ class PaymentPlanService:
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
 
-    def ready_for_closure(self) -> PaymentPlan:
+    def ready_for_closure(self, user: "User", *, notify: bool = True) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.FINISHED:
             raise ValidationError(
                 f"Mark as Ready for Closure is possible only within Status {PaymentPlan.Status.FINISHED}"
@@ -1357,15 +1357,28 @@ class PaymentPlanService:
         flow.status_ready_for_closure()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        if notify:
+            send_payment_notification_emails_async_task(
+                self.payment_plan,
+                PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+                str(user.pk),
+                f"{timezone.now():%-d %B %Y}",
+            )
         return self.payment_plan
 
-    def send_back_to_finished(self) -> PaymentPlan:
+    def send_back_to_finished(self, user: "User") -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
             raise ValidationError(f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_finished()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        send_payment_notification_emails_async_task(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+            str(user.pk),
+            f"{timezone.now():%-d %B %Y}",
+        )
         return self.payment_plan
 
     def close(self, closure_comment: str | None = None, user_id: str | None = None) -> PaymentPlan:

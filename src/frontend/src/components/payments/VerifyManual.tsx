@@ -94,7 +94,11 @@ export function VerifyManual({
       {({ values }) => (
         <Form id={formId}>
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"

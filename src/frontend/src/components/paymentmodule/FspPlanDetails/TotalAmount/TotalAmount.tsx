@@ -8,9 +8,17 @@ export function TotalAmount(): ReactElement {
   const { t } = useTranslation();
 
   return (
-    <Box m={5}>
+    <Box
+      sx={{
+        m: 5,
+      }}
+    >
       <ContainerColumnWithBorder>
-        <Box mt={4}>
+        <Box
+          sx={{
+            mt: 4,
+          }}
+        >
           <Title>
             <Typography variant="h6">
               {t('Total Amount')}

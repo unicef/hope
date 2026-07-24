@@ -18,8 +18,20 @@ class AccountAdmin(HOPEModelAdminBase):
         "is_unique",
         "rdi_merge_status",
     )
-
-    readonly_fields = ("unique_key", "signature_hash")
+    readonly_fields = (
+        "id",
+        "rdi_merge_status",
+        "created_at",
+        "updated_at",
+        "signature_hash",
+        "individual",
+        "account_type",
+        "financial_institution",
+        "number",
+        "data",
+        "unique_key",
+        "is_unique",
+    )
     search_fields = (
         "number",
         "individual__unicef_id",
@@ -56,13 +68,29 @@ class AccountAdmin(HOPEModelAdminBase):
     def get_program(self, obj: Account) -> Program:
         return obj.individual.program
 
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
 
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_active", "transfer_type", "account_type")
     search_fields = ("code", "name")
     list_filter = ("is_active", "transfer_type")
-    readonly_fields = ("code",)
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+        "payment_gateway_id",
+        "code",
+        "name",
+        "is_active",
+        "transfer_type",
+        "account_type",
+    )
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
 
 
 @admin.register(AccountType)
@@ -70,6 +98,9 @@ class AccountTypeAdmin(HOPEModelAdminBase):
     list_display = ("key", "unique_fields", "payment_gateway_id")
     search_fields = ("key", "payment_gateway_id")
     readonly_fields = ("key",)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
 
 
 @admin.register(DeliveryMechanismConfig)

@@ -68,8 +68,20 @@ export const ProgramFieldSeriesStep = ({
             {values.pduFields && values.pduFields.length > 0
               ? values.pduFields.map((_field, index) => {
                   return (
-                    <Box key={index} pt={3} pb={3}>
-                      <Grid container spacing={3} alignItems="flex-start">
+                    <Box
+                      key={index}
+                      sx={{
+                        pt: 3,
+                        pb: 3,
+                      }}
+                    >
+                      <Grid
+                        container
+                        spacing={3}
+                        sx={{
+                          alignItems: 'flex-start',
+                        }}
+                      >
                         <Grid size={3}>
                           <Field
                             name={`pduFields.${index}.label`}
@@ -212,7 +224,11 @@ export const ProgramFieldSeriesStep = ({
                   );
                 })
               : null}
-            <Box mt={6}>
+            <Box
+              sx={{
+                mt: 6,
+              }}
+            >
               <Button
                 variant="outlined"
                 color="primary"
@@ -236,7 +252,13 @@ export const ProgramFieldSeriesStep = ({
           </div>
         )}
       />
-      <Box mt={3} display="flex" justifyContent="space-between">
+      <Box
+        sx={{
+          mt: 3,
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <Button
           data-cy="button-cancel"
           component={Link}
@@ -248,8 +270,16 @@ export const ProgramFieldSeriesStep = ({
         >
           {t('Cancel')}
         </Button>
-        <Box display="flex">
-          <Box mr={2}>
+        <Box
+          sx={{
+            display: 'flex',
+          }}
+        >
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             <Button
               data-cy="button-back"
               variant="outlined"

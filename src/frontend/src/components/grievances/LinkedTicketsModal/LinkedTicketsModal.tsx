@@ -156,7 +156,9 @@ function LinkedTicketsModal({
         </TableRow>
       );
     }
-    return <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>;
+    return (
+      <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>
+    );
   };
 
   return (
@@ -173,7 +175,12 @@ function LinkedTicketsModal({
           <DialogTitle>{t('Related Tickets')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box mt={2} mb={6}>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 6,
+            }}
+          >
             <Typography>
               <Bold>
                 Ticket ID

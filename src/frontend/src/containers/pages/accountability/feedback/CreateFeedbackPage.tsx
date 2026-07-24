@@ -302,7 +302,12 @@ function CreateFeedbackPage(): ReactElement {
                       )}
                       {activeStep === FeedbackSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display="flex" flexDirection="column">
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                            }}
+                          >
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -317,13 +322,21 @@ function CreateFeedbackPage(): ReactElement {
                           {values.selectedHousehold && (
                             <>
                               {!isSocialDctType && (
-                                <Box py={4}>
+                                <Box
+                                  sx={{
+                                    py: 4,
+                                  }}
+                                >
                                   <Typography variant="subtitle2">
                                     {t(
                                       `${beneficiaryGroup?.groupLabel} Questionnaire`,
                                     )}
                                   </Typography>
-                                  <Box py={4}>
+                                  <Box
+                                    sx={{
+                                      py: 4,
+                                    }}
+                                  >
                                     <HouseholdQuestionnaire
                                       values={values}
                                       programCode={
@@ -343,7 +356,11 @@ function CreateFeedbackPage(): ReactElement {
                                   `${beneficiaryGroup?.memberLabel} Questionnaire`,
                                 )}
                               </Typography>
-                              <Box py={4}>
+                              <Box
+                                sx={{
+                                  py: 4,
+                                }}
+                              >
                                 <IndividualQuestionnaire values={values} />
                               </Box>
                               <BoxWithBorderBottom />
@@ -365,7 +382,11 @@ function CreateFeedbackPage(): ReactElement {
                       {activeStep === steps.length - 1 && (
                         <BoxPadding>
                           <OverviewContainer>
-                            <Box p={6}>
+                            <Box
+                              sx={{
+                                p: 6,
+                              }}
+                            >
                               <Grid container spacing={6}>
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField label={t('Category')}>
@@ -501,8 +522,18 @@ function CreateFeedbackPage(): ReactElement {
                           {errors.verificationRequired}
                         </FormHelperText>
                       ) : null}
-                      <Box pt={3} display="flex" flexDirection="row">
-                        <Box mr={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                          display: 'flex',
+                          flexDirection: 'row',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            mr: 3,
+                          }}
+                        >
                           <Button
                             component={Link}
                             to={`/${baseUrl}/grievance/feedback`}
@@ -511,7 +542,12 @@ function CreateFeedbackPage(): ReactElement {
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display="flex" ml="auto">
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            ml: 'auto',
+                          }}
+                        >
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}

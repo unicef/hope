@@ -52,7 +52,13 @@ export function PaymentsFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container spacing={3} alignItems="flex-end">
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={3}>
           <SearchTextField
             label={t('Payment ID')}

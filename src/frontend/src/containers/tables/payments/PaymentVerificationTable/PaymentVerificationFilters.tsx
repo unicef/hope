@@ -65,7 +65,13 @@ const PaymentVerificationFilters = ({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container alignItems="flex-start" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-start',
+        }}
+      >
         <Grid size={3}>
           <SearchTextField
             value={filter.search}

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -56,7 +58,18 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
         "reports__payment_plan__name",
     ]
 
-    readonly_fields = ["matched_data", "error_msg"]
+    readonly_fields = [
+        "id",
+        "name",
+        "is_legacy",
+        "date",
+        "file",
+        "advice_name",
+        "matched_data",
+        "net_amount",
+        "charges",
+        "error_msg",
+    ]
 
     def changelist_view(self, request: HttpRequest, extra_context: dict[str, object] | None = None) -> HttpResponse:
         if self.LEGACY_FILTER_PARAM not in request.GET:
@@ -64,3 +77,6 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
             query_params[self.LEGACY_FILTER_PARAM] = "0"
             return redirect(f"{request.path}?{query_params.urlencode()}")
         return super().changelist_view(request, extra_context)
+
+    def has_add_permission(self: Any, request: Any) -> bool:
+        return False
