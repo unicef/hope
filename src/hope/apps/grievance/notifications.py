@@ -317,6 +317,8 @@ class GrievanceNotification:
         editor = self.extra_data.get("editor")
         if editor is not None and assigned_to.id == editor.id:
             return []
+        if not assigned_to.is_active or not assigned_to.email:
+            return []
         return [assigned_to]
 
     ACTION_PREPARE_BODIES_DICT = {

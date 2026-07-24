@@ -230,6 +230,26 @@ def test_assignment_changed_recipient_excludes_editor_who_assigned_themselves(
     assert notification.user_recipients == []
 
 
+def test_assignment_changed_recipient_excludes_inactive_assignee(business_area: BusinessArea) -> None:
+    inactive_assignee = UserFactory(email="inactive-assignee@example.com", is_active=False)
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=inactive_assignee)
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    assert notification.user_recipients == []
+    assert notification.emails == []
+
+
+def test_assignment_changed_recipient_excludes_assignee_without_email(business_area: BusinessArea) -> None:
+    no_email_assignee = UserFactory(email="")
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=no_email_assignee)
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    assert notification.user_recipients == []
+    assert notification.emails == []
+
+
 def test_note_added_recipient_excludes_assignee_who_wrote_the_note(
     assigned_ticket: GrievanceTicket, assignee: User
 ) -> None:
