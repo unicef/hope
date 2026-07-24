@@ -42,7 +42,7 @@ class UniversalIndividualUpdateService:
         ignore_empty_values: bool = True,
         deduplicate_es: bool = True,
         deduplicate_documents: bool = True,
-        batch_size: int = 100,
+        batch_size: int = 1000,
     ) -> None:
         self.universal_update = universal_update
         self.business_area = universal_update.program.business_area
@@ -438,18 +438,33 @@ class UniversalIndividualUpdateService:
             Household.objects.filter(id__in=[household.id for household in households_to_update]),
             get_household_doc(str(self.program.id)),
         )
-        # The trailing batch can be empty; an empty `household_ids` must never reach the task —
-        # it would recalculate every household.
-        household_ids = sorted({str(household.pk) for household in households_to_update})
-        if household_ids and (
-            RECALCULATION_INDIVIDUAL_FIELDS.intersection(individual_fields_to_update)
-            or set(KAB_SOURCE_FIELDS).intersection(household_fields_to_update)
-        ):
-            recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
         documents_to_update.clear()
         documents_to_create.clear()
         households_to_update.clear()
         individuals_to_update.clear()
+
+    def schedule_population_recalculation(self, individual_ids: list[str]) -> None:
+        """Queue one deduplicated recalculation job for all households touched by the update.
+
+        Runs as a separate pass after the whole update loop, so the job count does not
+        depend on the batch size and households spanning batches are not recalculated twice.
+        """
+        updates_recalculation_input = RECALCULATION_INDIVIDUAL_FIELDS.intersection(
+            field for field, _, _ in self.individual_fields.values()
+        ) or set(KAB_SOURCE_FIELDS).intersection(field for field, _, _ in self.household_fields.values())
+        if not updates_recalculation_input:
+            return
+        household_ids = sorted(
+            {
+                str(household_id)
+                for household_id in Individual.objects.filter(
+                    id__in=individual_ids, household_id__isnull=False
+                ).values_list("household_id", flat=True)
+            }
+        )
+        # An empty list must never reach the task — the action treats it as a no-op guard.
+        if household_ids:
+            recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
 
     def get_excel_value(self, value: Any) -> Any:
         return get_generator_handler(value)(value)
@@ -558,6 +573,7 @@ class UniversalIndividualUpdateService:
             return
         self.print_message("Validation successful")
         processed_individuals_ids = self.handle_update(sheet, headers)
+        self.schedule_population_recalculation(processed_individuals_ids)
         if self.deduplicate_es:
             self.print_message("Deduplicating individuals Elasticsearch")
             DeduplicateTask(self.business_area.slug, self.program.id).deduplicate_individuals_against_population(

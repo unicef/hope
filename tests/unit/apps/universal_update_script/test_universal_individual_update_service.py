@@ -1044,17 +1044,13 @@ def test_get_individual_row_raises_for_multiple_wallets(
         service.get_individual_row(individual)
 
 
-def test_batch_update_schedules_population_recalculation(individual: Individual, program: Program) -> None:
-    universal_update = UniversalUpdate.objects.create(program=program)
+def test_schedule_population_recalculation_queues_single_deduplicated_job(
+    individual: Individual, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
     service = UniversalIndividualUpdateService(universal_update)
 
-    service.batch_update(
-        individual_fields_to_update=["flex_fields", "sex"],
-        document_fields_to_update=["document_number", "status", "country"],
-        individuals_to_update=[individual],
-        household_fields_to_update=["flex_fields"],
-        households_to_update=[individual.household],
-    )
+    service.schedule_population_recalculation([str(individual.id), str(individual.id)])
 
     job = AsyncJob.objects.get(
         action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
@@ -1063,35 +1059,26 @@ def test_batch_update_schedules_population_recalculation(individual: Individual,
     assert job.config["program_id"] == str(program.id)
 
 
-def test_batch_update_skips_recalculation_for_empty_batch(program: Program) -> None:
-    # The trailing batch is empty when the row count is a multiple of the batch size.
-    universal_update = UniversalUpdate.objects.create(program=program)
+def test_schedule_population_recalculation_skips_when_no_individuals_processed(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
     service = UniversalIndividualUpdateService(universal_update)
 
-    service.batch_update(
-        individual_fields_to_update=["flex_fields", "sex"],
-        document_fields_to_update=["document_number", "status", "country"],
-        individuals_to_update=[],
-        household_fields_to_update=["flex_fields"],
-        households_to_update=[],
-    )
+    service.schedule_population_recalculation([])
 
     assert not AsyncJob.objects.filter(
         action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
     ).exists()
 
 
-def test_batch_update_skips_recalculation_without_recalc_fields(individual: Individual, program: Program) -> None:
-    universal_update = UniversalUpdate.objects.create(program=program)
+def test_schedule_population_recalculation_skips_without_recalc_fields(
+    individual: Individual, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(
+        program=program, individual_fields=["given_name"], household_fields=["address"]
+    )
     service = UniversalIndividualUpdateService(universal_update)
 
-    service.batch_update(
-        individual_fields_to_update=["flex_fields", "given_name"],
-        document_fields_to_update=["document_number", "status", "country"],
-        individuals_to_update=[individual],
-        household_fields_to_update=["flex_fields", "address"],
-        households_to_update=[individual.household],
-    )
+    service.schedule_population_recalculation([str(individual.id)])
 
     assert not AsyncJob.objects.filter(
         action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
