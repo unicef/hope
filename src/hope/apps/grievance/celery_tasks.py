@@ -73,7 +73,9 @@ def bulk_assign_notifications_async_task_action(job: AsyncJob) -> None:
     GrievanceNotification.send_all_notifications(
         [
             GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=action_user)
-            for ticket in GrievanceTicket.objects.filter(id__in=ticket_ids)
+            for ticket in GrievanceTicket.objects.filter(id__in=ticket_ids).select_related(
+                "business_area", "assigned_to"
+            )
         ]
     )
 

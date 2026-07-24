@@ -2,6 +2,8 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import patch
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -222,6 +224,33 @@ def test_bulk_assign_notifications_task_action_without_action_user(
     sent_notifications = mock_send.call_args.args[0]
     assert all(notification.extra_data.get("editor") is None for notification in sent_notifications)
     assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
+
+
+def test_bulk_assign_notifications_task_action_does_not_scale_queries_per_ticket(
+    grievance_context: dict[str, Any],
+) -> None:
+    user = grievance_context["users"]["user"]
+    user_two = grievance_context["users"]["user_two"]
+    ticket1, ticket2, ticket3, _ = grievance_context["grievance_tickets"]
+    for ticket in (ticket1, ticket2, ticket3):
+        ticket.assigned_to = user_two
+        ticket.save(update_fields=["assigned_to"])
+    single_job = SimpleNamespace(config={"ticket_ids": [str(ticket1.id)], "action_user_id": str(user.id)})
+    many_job = SimpleNamespace(
+        config={
+            "ticket_ids": [str(ticket1.id), str(ticket2.id), str(ticket3.id)],
+            "action_user_id": str(user.id),
+        }
+    )
+
+    with patch.object(GrievanceNotification, "send_all_notifications"):
+        bulk_assign_notifications_async_task_action(single_job)  # warm up any one-off caches
+        with CaptureQueriesContext(connection) as single_ctx:
+            bulk_assign_notifications_async_task_action(single_job)
+        with CaptureQueriesContext(connection) as many_ctx:
+            bulk_assign_notifications_async_task_action(many_job)
+
+    assert len(many_ctx.captured_queries) == len(single_ctx.captured_queries)
 
 
 def test_bulk_assign_notifications_async_task_queues_job_with_serialized_config(

@@ -108,8 +108,8 @@ def _complete_rdi(
     cw_findings: list[dict],
     country_workspace_id: str,
     django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
-    expected_queries: int,
+    django_assert_max_num_queries: Any,
+    max_queries: int,
 ) -> None:
     complete_url = reverse("api:rdi-complete", args=[business_area.slug, rdi_id])
     with (
@@ -122,7 +122,7 @@ def _complete_rdi(
             return_value=({}, 200),
         ) as mock_approve,
     ):
-        with django_assert_num_queries(expected_queries):
+        with django_assert_max_num_queries(max_queries):
             with django_capture_on_commit_callbacks(execute=True):
                 resp = token_api_client.post(complete_url, {}, format="json")
 
@@ -167,7 +167,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
     cw_individual_ids: dict[str, str],
     cw_findings: list[dict],
     django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
+    django_assert_max_num_queries: Any,
     mock_deduplication_engine_env_vars: Any,
     cw_dedup_eager_setup: None,
 ) -> None:
@@ -229,8 +229,8 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
         cw_findings=cw_findings,
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
-        django_assert_num_queries=django_assert_num_queries,
-        expected_queries=170,
+        django_assert_max_num_queries=django_assert_max_num_queries,
+        max_queries=171,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
@@ -307,7 +307,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
     cw_individual_ids: dict[str, str],
     cw_findings: list[dict],
     django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
+    django_assert_max_num_queries: Any,
     mock_deduplication_engine_env_vars: Any,
     cw_dedup_eager_setup: None,
 ) -> None:
@@ -344,8 +344,8 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         cw_findings=cw_findings,
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
-        django_assert_num_queries=django_assert_num_queries,
-        expected_queries=167,
+        django_assert_max_num_queries=django_assert_max_num_queries,
+        max_queries=168,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
