@@ -13,7 +13,7 @@ from django.core.validators import (
     MinValueValidator,
     ProhibitNullCharactersValidator,
 )
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
@@ -770,9 +770,11 @@ class PaymentPlan(
             return ""
 
     def remove_export_file_entitlement(self) -> None:
-        self.export_file_entitlement.file.delete(save=False)
+        file_field = self.export_file_entitlement.file
         self.export_file_entitlement.delete()
         self.export_file_entitlement = None
+        # Storage delete is not transactional: delete the file when the transaction commits
+        transaction.on_commit(lambda: file_field.delete(save=False))
 
     def remove_export_file_delivery(self) -> None:
         # The batch export shares one FileTemp across every plan in the batch (same export_tag).
@@ -786,8 +788,10 @@ class PaymentPlan(
             return
         file_temp = FileTemp.objects.filter(pk=file_temp_id).first()
         if file_temp is not None:
-            file_temp.file.delete(save=False)
+            file_field = file_temp.file
             file_temp.delete()
+            # Storage delete is not transactional: delete the file when the transaction commits
+            transaction.on_commit(lambda: file_field.delete(save=False))
 
     def remove_export_files(self) -> None:
         # remove export_file_entitlement

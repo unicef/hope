@@ -18,6 +18,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanGroupFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from hope.apps.payment.utils import get_link
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
     EmptyDeliveryExportError,
@@ -983,8 +984,11 @@ def test_get_email_context_link_points_to_batch_download(group_with_one_accepted
 
     context = service.get_email_context(user)
 
-    expected_link = reverse("download-payment-plan-group-batch", args=[str(group_with_one_accepted_plan.id), 1])
+    expected_link = get_link(
+        reverse("download-payment-plan-group-batch", args=[str(group_with_one_accepted_plan.id), 1])
+    )
     assert context["link"] == expected_link
+    assert context["link"].startswith("http")
 
 
 def test_get_email_context_message_and_title_carry_group_and_batch(group_with_one_accepted_plan, user):

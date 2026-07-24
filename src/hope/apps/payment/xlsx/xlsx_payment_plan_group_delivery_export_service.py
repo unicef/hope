@@ -13,6 +13,7 @@ from django.utils.crypto import get_random_string
 import openpyxl
 import pyzipper
 
+from hope.apps.payment.utils import get_link
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.models import (
@@ -177,7 +178,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         group = self.payment_plan_group
         tag = self.applied_export_tag
         batch_name = self._batch_name(tag)
-        link = reverse("download-payment-plan-group-batch", args=[str(group.id), tag])
+        link = get_link(reverse("download-payment-plan-group-batch", args=[str(group.id), tag]))
         return {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
