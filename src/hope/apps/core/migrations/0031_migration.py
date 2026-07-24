@@ -17,6 +17,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name="datacollectingtype",
+            name="recalculate_composition",
+            field=models.BooleanField(
+                default=False,
+                help_text="When enabled, household composition counters (age/gender disaggregation, size, "
+                "children counts) are automatically recalculated from linked individuals data",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="datacollectingtype",
+            name="weight",
+            field=models.PositiveSmallIntegerField(
+                default=0, help_text="Ordering weight: types with a higher weight are listed first"
+            ),
+        ),
         migrations.AddField(
             model_name="datacollectingtype",
             name="collects_individual_data",

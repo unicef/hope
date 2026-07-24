@@ -10,6 +10,10 @@ from extras.test_utils.factories import (
     IndividualFactory,
     ProgramFactory,
 )
+from hope.apps.household.celery_tasks import (
+    recalculate_population_fields_async_task_action,
+    recalculate_population_fields_chunk_async_task_action,
+)
 from hope.apps.household.const import (
     COUSIN,
     DISABLED,
@@ -339,8 +343,6 @@ def test_async_task_populates_kab_for_non_recalculating_dct(
         config={"household_ids": [str(household.pk)], "program_id": str(household.program_id)},
     )
 
-    from hope.apps.household.celery_tasks import recalculate_population_fields_async_task_action
-
     with django_capture_on_commit_callbacks(execute=True):
         recalculate_population_fields_async_task_action(job)
     household.refresh_from_db()
@@ -359,11 +361,9 @@ def test_chunk_task_query_count_per_household(
         config={"households_ids": [str(household.pk)], "program_id": str(household.program_id)},
     )
 
-    from hope.apps.household.celery_tasks import recalculate_population_fields_chunk_async_task_action
-
-    # program get + page savepoint/release + households select + individuals prefetch
-    # + per-household: savepoint/release + locked refetch + aggregate; then one bulk_update
-    with django_assert_num_queries(10):
+    # program get + page savepoint/release + households select + one grouped aggregate for the page
+    # + per-household: savepoint/release + locked refetch (no per-household aggregate); then one bulk_update
+    with django_assert_num_queries(9):
         recalculate_population_fields_chunk_async_task_action(job)
     household.refresh_from_db()
 

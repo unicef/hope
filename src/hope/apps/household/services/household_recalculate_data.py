@@ -68,8 +68,16 @@ AGE_GROUP_FIELDS: tuple[str, ...] = tuple(f for f in KAB_SOURCE_FIELDS if "_age_
 
 @transaction.atomic
 def recalculate_data(
-    household: Household, save: bool = True, run_from_migration: bool = False
+    household: Household,
+    save: bool = True,
+    run_from_migration: bool = False,
+    composition_counts: dict | None = None,
 ) -> tuple[Household, list[str]]:
+    """Recalculate composition (when the DCT flag is on) and KAB (always) for one household.
+
+    `composition_counts` lets batch callers pass this household's row from
+    `aggregate_composition_by_household_id` so KAB does not re-count individuals per household.
+    """
     household = (
         Household.objects.select_for_update(of=("self",))
         .select_related("program__data_collecting_type")
@@ -80,7 +88,7 @@ def recalculate_data(
     if household.program.data_collecting_type.recalculate_composition:
         updated_fields += _recalculate_composition(household, run_from_migration)
     # KAB always runs and always yields fields, so there is always something to persist.
-    updated_fields += _recalculate_kab(household)
+    updated_fields += _recalculate_kab(household, composition_counts)
     updated_fields.append("updated_at")
 
     if save:
@@ -89,11 +97,11 @@ def recalculate_data(
     return household, updated_fields
 
 
-def _recalculate_kab(household: Household) -> list[str]:
+def _recalculate_kab(household: Household, composition_counts: dict | None = None) -> list[str]:
     if any(getattr(household, field) is not None for field in AGE_GROUP_FIELDS):
         values: dict[str, int | None] = {field: getattr(household, field) for field in KAB_SOURCE_FIELDS}
     elif household.program.data_collecting_type.collects_individual_data:
-        values = _aggregate_composition(household)
+        values = composition_counts if composition_counts is not None else _aggregate_composition(household)
     else:
         values = dict.fromkeys(KAB_SOURCE_FIELDS)
     for field, value in values.items():
@@ -210,7 +218,7 @@ def _aggregate_composition(household: Household) -> dict:
 def aggregate_composition_by_household_id(household_ids: list) -> dict:
     """Compute the same counters as `_aggregate_composition` in one grouped query for many households.
 
-    Households without any individuals are absent from the result. Used by the KAB backfill.
+    Every requested id gets an entry; households without individuals get all-zero counters.
     """
     rows = (
         Individual.objects.filter(household_id__in=household_ids)
@@ -218,4 +226,7 @@ def aggregate_composition_by_household_id(household_ids: list) -> dict:
         .order_by()  # clear default ordering so GROUP BY stays on household_id only
         .annotate(**_composition_counts(_years_ago_sql))
     )
-    return {row.pop("household_id"): row for row in rows}
+    result = {row.pop("household_id"): row for row in rows}
+    for household_id in household_ids:
+        result.setdefault(household_id, dict.fromkeys(KAB_SOURCE_FIELDS, 0))
+    return result

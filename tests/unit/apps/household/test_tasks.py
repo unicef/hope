@@ -496,6 +496,43 @@ def test_recalculate_population_fields_task_action_runs_when_recalculation_disab
     mock_chunk_delay.assert_called_once()
 
 
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task")
+def test_recalculate_population_fields_task_action_noops_on_empty_household_ids(
+    mock_chunk_delay, business_area, program_source
+):
+    # Without the guard an empty list would select every household in the DB.
+    HouseholdFactory(business_area=business_area, program=program_source)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action",
+        {"household_ids": [], "program_id": None},
+    )
+
+    recalculate_population_fields_async_task_action(job)
+
+    mock_chunk_delay.assert_not_called()
+
+
+@freeze_time("2024-05-15")
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_async_task")
+def test_interval_recalculate_population_fields_task_action_skips_individuals_without_household(
+    mock_recalculate_task, business_area, program_source
+):
+    birthday_today = timezone.now().date().replace(year=1990)
+    household = HouseholdFactory(business_area=business_area, program=program_source)
+    IndividualFactory(
+        household=household, business_area=business_area, program=program_source, birth_date=birthday_today
+    )
+    IndividualFactory(household=None, business_area=business_area, program=program_source, birth_date=birthday_today)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task_action",
+        {},
+    )
+
+    interval_recalculate_population_fields_async_task_action(job)
+
+    mock_recalculate_task.assert_called_once_with(household_ids=[str(household.pk)])
+
+
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_async_task")
 @patch("hope.models.Individual.objects.filter")
 def test_interval_recalculate_population_fields_task_action_collects_household_ids(

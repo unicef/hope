@@ -73,15 +73,14 @@ class Command(BaseCommand):
                 to_compute = households.filter(~COMPOSITION_PRESENT, kab_size__isnull=True)
                 for pks in _pk_batches(to_compute, batch_size):
                     batch_start = time.monotonic()
-                    # ponytail: no per-row lock/transaction — the backfill is idempotent and any
+                    # No per-row locking or transaction needed: the backfill is idempotent and any
                     # concurrent write re-triggers recalculate_data for its household anyway.
                     counts = aggregate_composition_by_household_id(pks)
                     updates = []
                     for pk in pks:
                         household = Household(pk=pk)
-                        row = counts.get(pk)
-                        for field in KAB_SOURCE_FIELDS:
-                            setattr(household, f"kab_{field}", row[field] if row else 0)
+                        for field, value in counts[pk].items():
+                            setattr(household, f"kab_{field}", value)
                         updates.append(household)
                     Household.objects.bulk_update(updates, KAB_FIELDS, batch_size=500)
                     program_computed += len(pks)
