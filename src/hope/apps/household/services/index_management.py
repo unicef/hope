@@ -27,19 +27,37 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
         es.options(ignore_status=[400, 404]).indices.delete(index=concrete)
 
 
+def create_versioned_index(es: Elasticsearch, doc_class: type) -> None:
+    """Create ``<name>_v1`` with the alias attached in the same call.
+
+    Blue-green convention: the app addresses the suffix-less name, which is an ALIAS onto the
+    physical ``_vN``. Creating both in one call means the index is born on the alias scheme —
+    there is never a bare physical index squatting on the logical name.
+    """
+    index = doc_class._index
+    body = index.to_dict()
+    es.indices.create(
+        index=f"{index._name}_v1",
+        settings=body.get("settings"),
+        mappings=body.get("mappings"),
+        aliases={index._name: {}},
+    )
+
+
 def create_program_indexes(program_id: str, using: str = "default") -> tuple[bool, str]:
-    """Create Elasticsearch indexes for a program."""
+    """Create Elasticsearch indexes for a program (physical ``_v1`` + suffix-less alias)."""
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
 
         es: Elasticsearch = connections.get_connection(using)
 
+        # exists() also matches aliases, so bootstrapped and newly-created programs both skip
         if not es.indices.exists(index=individual_doc_class._index._name):
-            individual_doc_class._index.create()
+            create_versioned_index(es, individual_doc_class)
 
         if not es.indices.exists(index=household_doc_class._index._name):
-            household_doc_class._index.create()
+            create_versioned_index(es, household_doc_class)
 
         return True, ""
     except Exception as e:  # pragma: no cover  # noqa
