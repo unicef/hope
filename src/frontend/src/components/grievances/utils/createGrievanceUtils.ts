@@ -50,8 +50,7 @@ export const selectedIssueType = (formValues, issueTypeDict): string => {
   return (
     (
       subcategories.find((el) => el.value === issueType) as
-        | { name: string; value: string }
-        | undefined
+        { name: string; value: string } | undefined
     )?.name || '-'
   );
 };

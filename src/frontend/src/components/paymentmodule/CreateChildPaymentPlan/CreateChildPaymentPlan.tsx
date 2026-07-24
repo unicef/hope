@@ -166,7 +166,11 @@ export function CreateChildPaymentPlan({
     >
       {({ submitForm, values }) => (
         <Form>
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               variant="outlined"
               color="primary"
@@ -192,12 +196,25 @@ export function CreateChildPaymentPlan({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   {isFollowUp && (
                     <>
-                      <Box display="flex" flexDirection="column">
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
                         {paymentPlan.unsuccessfulPaymentsCount === 0 && (
-                          <Box mb={2}>
+                          <Box
+                            sx={{
+                              mb: 2,
+                            }}
+                          >
                             <FieldBorder color="#FF0200">
                               <GreyText>
                                 {t(
@@ -208,7 +225,11 @@ export function CreateChildPaymentPlan({
                           </Box>
                         )}
                         {paymentPlan.totalWithdrawnHouseholdsCount > 0 && (
-                          <Box mb={4}>
+                          <Box
+                            sx={{
+                              mb: 4,
+                            }}
+                          >
                             <FieldBorder color="#FF0200">
                               <GreyText>
                                 {t(
@@ -221,7 +242,11 @@ export function CreateChildPaymentPlan({
                       </Box>
                       <Grid container spacing={3}>
                         <Grid size={{ xs: 6 }}>
-                          <Box mt={2}>
+                          <Box
+                            sx={{
+                              mt: 2,
+                            }}
+                          >
                             <Typography>
                               {t('Main Payment Plan Details')}
                             </Typography>
@@ -248,7 +273,11 @@ export function CreateChildPaymentPlan({
                       </Grid>
                     </>
                   )}
-                  <Box mb={3}>
+                  <Box
+                    sx={{
+                      mb: 3,
+                    }}
+                  >
                     <Typography>{t('Set the Dispersion Dates')}</Typography>
                   </Box>
                   <Grid container spacing={3}>

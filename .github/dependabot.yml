@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/src/frontend"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     labels:
       - "dependencies"
       - "frontend"

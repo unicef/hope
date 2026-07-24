@@ -37,7 +37,12 @@ export function PaymentPlanTargeting({
         <Typography variant="h6">{t('Target Population')}</Typography>
       </Title>
       <OverviewContainer>
-        <StyledBox display="flex" flexDirection="column">
+        <StyledBox
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           <Grid container spacing={3}>
             <Grid size={{ xs: 6 }}>
               <Field

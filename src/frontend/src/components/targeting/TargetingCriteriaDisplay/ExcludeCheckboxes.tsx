@@ -31,9 +31,19 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
-    <Box mt={3} p={3}>
+    <Box
+      sx={{
+        mt: 3,
+        p: 3,
+      }}
+    >
       {isDetailsPage ? (
-        <Box mt={3} p={3}>
+        <Box
+          sx={{
+            mt: 3,
+            p: 3,
+          }}
+        >
           <Grid container spacing={3}>
             <Grid size={6}>
               {isStandardDctType && (
@@ -112,7 +122,12 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
           </Grid>
         </Box>
       ) : (
-        <Box mt={3} p={3}>
+        <Box
+          sx={{
+            mt: 3,
+            p: 3,
+          }}
+        >
           <Grid container spacing={3}>
             {isStandardDctType && (
               <Grid size={6}>

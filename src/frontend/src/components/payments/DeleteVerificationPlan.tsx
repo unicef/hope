@@ -66,7 +66,11 @@ export function DeleteVerificationPlan({
   };
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setDeleteDialogOpen(true)}
@@ -88,7 +92,11 @@ export function DeleteVerificationPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               <div>
                 {t(
                   'Are you sure you would like to remove this verification plan?',

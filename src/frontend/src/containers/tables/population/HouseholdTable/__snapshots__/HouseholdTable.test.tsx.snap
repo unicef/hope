@@ -54,7 +54,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                   >
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -79,7 +79,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Household ID
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -104,7 +104,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Status
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -129,7 +129,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Head of Household
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -154,7 +154,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Household Size
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -179,7 +179,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Administrative Level 2
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -204,7 +204,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Residence Status
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -229,7 +229,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Total Cash Received
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -254,7 +254,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Registration Date
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -279,7 +279,7 @@ exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
                     Facility Name
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"

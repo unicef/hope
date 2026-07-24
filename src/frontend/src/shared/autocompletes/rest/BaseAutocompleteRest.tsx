@@ -92,7 +92,6 @@ export function BaseAutocompleteRest({
         }
       }}
       isOptionEqualToValue={(option, selectedValue) =>
-         
         handleOptionSelected(option as any, selectedValue as any)
       }
       getOptionLabel={handleOptionLabel}
@@ -113,15 +112,16 @@ export function BaseAutocompleteRest({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             slotProps={{
+              ...params.slotProps,
               input: {
-                ...params.InputProps,
+                ...params.slotProps.input,
                 startAdornment,
                 endAdornment: (
                   <>
                     {isLoading ? (
                       <CircularProgress color="inherit" size={20} />
                     ) : null}
-                    {params.InputProps.endAdornment}
+                    {params.slotProps.input.endAdornment}
                   </>
                 ),
               },

@@ -38,7 +38,12 @@ export function RelatedTopUpPaymentPlans({
 
   return (
     <LabelizedField label={t('Related Top-Up Payment Plans')}>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {topUpLinks || '-'}
         {topUps?.length > 5 && (
           <Button

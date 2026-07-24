@@ -78,7 +78,12 @@ export const TargetPopulationCore = ({
     <>
       {targetPopulation.rules?.length ? (
         <PaperContainer>
-          <Box pt={3} pb={3}>
+          <Box
+            sx={{
+              pt: 3,
+              pb: 3,
+            }}
+          >
             <Typography variant="h6">{t('Targeting Criteria')}</Typography>
           </Box>
           <AddFilterTargetingCriteriaDisplay
@@ -99,12 +104,20 @@ export const TargetPopulationCore = ({
                   `Excluded Target Population Entries (${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural})`,
                 )}
           </Typography>
-          <Box mt={2}>
+          <Box
+            sx={{
+              mt: 2,
+            }}
+          >
             <Grid container>
               <Grid size={6}>{targetPopulation?.excludedIds}</Grid>
             </Grid>
           </Box>
-          <Box mt={2}>
+          <Box
+            sx={{
+              mt: 2,
+            }}
+          >
             <Grid container>
               <Grid size={6}>{targetPopulation?.exclusionReason}</Grid>
             </Grid>

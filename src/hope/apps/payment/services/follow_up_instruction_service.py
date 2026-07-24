@@ -211,7 +211,9 @@ class FollowUpInstructionService:
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             service = PaymentPlanService(payment_plan)
-            service.ready_for_closure()
+            # Bulk close auto-advances FINISHED → READY_FOR_CLOSURE → CLOSED with no manual pause,
+            # so suppress the "ready for closure" email.
+            service.ready_for_closure(user, notify=False)
             updated_payment_plan = service.close(
                 closure_comment="Comment",
                 user_id=str(user.pk),

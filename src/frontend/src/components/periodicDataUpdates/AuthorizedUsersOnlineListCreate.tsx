@@ -109,7 +109,13 @@ export const AuthorizedUsersOnlineListCreate: React.FC<
   if (error) {
     return (
       <BaseSection title={t('Authorized Users Online')}>
-        <Box color="error.main">{t('Failed to load authorized users.')}</Box>
+        <Box
+          sx={{
+            color: 'error.main',
+          }}
+        >
+          {t('Failed to load authorized users.')}
+        </Box>
       </BaseSection>
     );
   }

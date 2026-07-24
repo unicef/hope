@@ -23,14 +23,24 @@ export function GrievanceDashboardCard({
   return (
     <DashboardCard color="#FFF">
       <CardTitle>{topLabel}</CardTitle>
-      <Grid container alignItems="center">
+      <Grid
+        container
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Grid>
           <CardAmountSmaller data-cy={`${dataCy}-top-number`}>
             {topNumber}
           </CardAmountSmaller>
         </Grid>
       </Grid>
-      <Grid container alignItems="center">
+      <Grid
+        container
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Grid size={6}>
           <LabelizedField
             dataCy={`${dataCy}-system-generated`}

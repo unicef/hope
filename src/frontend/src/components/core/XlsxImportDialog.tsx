@@ -82,7 +82,11 @@ export function XlsxImportDialog({
 
   return (
     <>
-      <Box m={buttonMargin}>
+      <Box
+        sx={{
+          m: buttonMargin,
+        }}
+      >
         <Button
           startIcon={<Publish />}
           color="primary"

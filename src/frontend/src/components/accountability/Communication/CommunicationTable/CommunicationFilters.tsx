@@ -50,7 +50,13 @@ export function CommunicationFilters({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={{ xs: 4 }}>
           <TargetPopulationAutocompleteRestFilter
             name="targetPopulation"
@@ -75,7 +81,14 @@ export function CommunicationFilters({
             additionalVariables={{ isMessageCreator: true }}
           />
         </Grid>
-        <Grid container size={{ xs: 6 }} spacing={3} alignItems="flex-end">
+        <Grid
+          container
+          size={{ xs: 6 }}
+          spacing={3}
+          sx={{
+            alignItems: 'flex-end',
+          }}
+        >
           <Grid size={{ xs: 6 }}>
             <DatePickerFilter
               topLabel={t('Creation Date')}

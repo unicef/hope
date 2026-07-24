@@ -72,7 +72,11 @@ export function LockFspPaymentPlan({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <Button
           color="primary"
           variant="contained"
@@ -96,7 +100,11 @@ export function LockFspPaymentPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               {t(
                 'After you lock the FSP in this Payment Plan, you will be able to send the Payment Plan for approval.',
               )}

@@ -66,7 +66,11 @@ export function DiscardVerificationPlan({
   };
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setDiscardDialogOpen(true)}
@@ -88,7 +92,11 @@ export function DiscardVerificationPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               <div>
                 {t(
                   'Are you sure you would like to remove payment verification records',

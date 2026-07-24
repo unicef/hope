@@ -154,7 +154,13 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
   if (editError || availableError) {
     return (
       <BaseSection title={t('Authorized Users Online')}>
-        <Box color="error.main">{t('Failed to load authorized users.')}</Box>
+        <Box
+          sx={{
+            color: 'error.main',
+          }}
+        >
+          {t('Failed to load authorized users.')}
+        </Box>
       </BaseSection>
     );
   }
@@ -256,7 +262,10 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
               </TableHead>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id} data-cy={`authorized-user-row-${user.id}`}>
+                  <TableRow
+                    key={user.id}
+                    data-cy={`authorized-user-row-${user.id}`}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selected.includes(user.id)}

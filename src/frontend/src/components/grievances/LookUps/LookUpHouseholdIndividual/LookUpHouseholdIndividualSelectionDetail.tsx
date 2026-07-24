@@ -179,7 +179,11 @@ export function LookUpHouseholdIndividualSelectionDetail({
       <Box>
         {!isSocialDctType && (
           <TabPanel value={selectedTab} index={0}>
-            <Box mt={2}>
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
               <HouseholdFilters
                 filter={filterHH}
                 choicesData={householdChoicesData}

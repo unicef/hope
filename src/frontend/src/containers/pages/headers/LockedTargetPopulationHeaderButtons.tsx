@@ -78,7 +78,12 @@ export function LockedTargetPopulationHeaderButtons({
   });
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canDuplicate && (
         <IconContainer>
           <Button
@@ -90,7 +95,11 @@ export function LockedTargetPopulationHeaderButtons({
         </IconContainer>
       )}
       {canUnlock && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LoadingButton
             loading={loadingUnlock}
             color="primary"
@@ -104,7 +113,11 @@ export function LockedTargetPopulationHeaderButtons({
         </Box>
       )}
       {canSend && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Tooltip
             title={
               targetPopulation.program.status !== ProgramStatusEnum.ACTIVE

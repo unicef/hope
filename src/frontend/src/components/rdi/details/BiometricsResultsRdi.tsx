@@ -31,13 +31,15 @@ export interface BiometricsResultsProps {
 
 const Placeholder: FC = () => (
   <Box
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-    width="45%"
-    height="200px"
-    border="1px solid #ccc"
     data-cy="placeholder"
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '45%',
+      height: '200px',
+      border: '1px solid #ccc',
+    }}
   >
     <PersonIcon color="primary" style={{ fontSize: 100 }} />
   </Box>
@@ -102,7 +104,11 @@ const BiometricsResultsRdi = ({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         {canViewBiometricsResults && (
           <Button
             onClick={(e) => {
@@ -129,8 +135,19 @@ const BiometricsResultsRdi = ({
         </DialogTitleWrapper>
         <DialogContent data-cy="dialog-content">
           <DialogContainer>
-            <Box display="flex" justifyContent="space-between" p={5}>
-              <Box display="flex" flexDirection="column">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                p: 5,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 {individual1Data?.photo ? (
                   <img
                     src={individual1Data?.photo}
@@ -150,7 +167,12 @@ const BiometricsResultsRdi = ({
                   {individual1Data?.fullName}
                 </Typography>
               </Box>
-              <Box display="flex" flexDirection="column">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 {individual2Data?.photo ? (
                   <img
                     src={individual2Data?.photo}
@@ -171,7 +193,12 @@ const BiometricsResultsRdi = ({
                 </Typography>
               </Box>
             </Box>
-            <Box p={5} data-cy="results-info">
+            <Box
+              data-cy="results-info"
+              sx={{
+                p: 5,
+              }}
+            >
               <div>
                 <strong>
                   {t('Algorithm similarity score:')} {similarityScore}

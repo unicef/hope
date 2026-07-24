@@ -48,30 +48,20 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
     },
   });
 
-  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
-
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       <>
-        {paymentPlan.hasPaymentListExportFile && (
-          <Box m={2}>
-            <Button
-              color="primary"
-              component="a"
-              variant="contained"
-              data-cy="button-download-xlsx"
-              download
-              href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-              disabled={shouldDisableDownloadXlsx}
-              data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
-            >
-              {t('Download XLSX')}
-            </Button>
-          </Box>
-        )}
-
         {canSendBack && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <LoadingButton
               color="primary"
               variant="contained"
@@ -86,7 +76,11 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
         )}
 
         {canClose && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"

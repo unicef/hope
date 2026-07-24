@@ -108,9 +108,9 @@ def test_download_payment_plan_payment_list_raises_value_error_when_link_is_none
     request.user = user
 
     with patch(
-        "hope.models.PaymentPlan.payment_list_export_file_link",
+        "hope.models.PaymentPlan.entitlement_export_file_link",
         new_callable=PropertyMock,
         return_value=None,
     ):
-        with pytest.raises(ValueError, match="Payment plan export file link must not be None"):
+        with pytest.raises(ValueError, match="Payment plan entitlement export file link must not be None"):
             download_payment_plan_payment_list(request, str(payment_plan_with_export_file.id))
