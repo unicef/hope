@@ -7,11 +7,12 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { Choice } from '@restgenerated/models/Choice';
 import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -41,6 +42,17 @@ export function VerifyManual({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { programCode, businessAreaSlug } = useBaseUrl();
+  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
+    queryKey: ['verificationStatusChoices'],
+    queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
+  });
+  // Manual verification only allows marking a payment received / not received.
+  const statusChoices = (verificationStatusChoices ?? [])
+    .filter((choice) => ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value))
+    .map((choice) => ({
+      ...choice,
+      dataCy: `choice-${choice.value.toLowerCase().replace(/_/g, '-')}`,
+    }));
   const paymentQueryKey = [
     'payment',
     businessAreaSlug,
@@ -127,18 +139,7 @@ export function VerifyManual({
                       name="status"
                       label="Status"
                       style={{ flexDirection: 'row' }}
-                      choices={[
-                        {
-                          value: 'RECEIVED',
-                          name: t('Received'),
-                          dataCy: 'choice-received',
-                        },
-                        {
-                          value: 'NOT_RECEIVED',
-                          name: t('Not Received'),
-                          dataCy: 'choice-not-received',
-                        },
-                      ]}
+                      choices={statusChoices}
                       component={FormikRadioGroup}
                     />
                   </Grid>

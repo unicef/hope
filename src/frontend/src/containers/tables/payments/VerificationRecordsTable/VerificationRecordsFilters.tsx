@@ -52,13 +52,12 @@ export function VerificationRecordsFilters({
     queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
   });
 
-  const verificationChannelChoices = [
-    { name: 'Manual', value: 'MANUAL' },
-    { name: 'RapidPro', value: 'RAPIDPRO' },
-    { name: 'XLSX', value: 'XLSX' },
-  ];
+  const { data: verificationChannelChoices } = useQuery<Array<Choice>>({
+    queryKey: ['verificationChannelChoices'],
+    queryFn: () => RestService.restChoicesPaymentVerificationChannelList(),
+  });
 
-  if (!verificationStatusChoices) {
+  if (!verificationStatusChoices || !verificationChannelChoices) {
     return null;
   }
 

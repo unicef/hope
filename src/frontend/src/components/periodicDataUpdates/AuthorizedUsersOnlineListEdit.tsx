@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
+import { AUTHORIZED_USER_ROLE_CHOICES } from '@utils/constants';
 import { useParams } from 'react-router-dom';
 
 interface AuthorizedUsersOnlineListEditProps {
@@ -213,27 +214,21 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
                         : selectedPermissions.map((value: string) => (
                             <Chip
                               key={value}
-                              label={
-                                value === 'canEdit'
-                                  ? t('Authorized for Edit')
-                                  : value === 'canApprove'
-                                    ? t('Authorized for Approve')
-                                    : t('Authorized for Merge')
-                              }
+                              label={t(
+                                AUTHORIZED_USER_ROLE_CHOICES.find(
+                                  (choice) => choice.value === value,
+                                )?.label ?? value,
+                              )}
                             />
                           ))}
                     </Box>
                   )}
                 >
-                  <MenuItem value="canEdit">
-                    {t('Authorized for Edit')}
-                  </MenuItem>
-                  <MenuItem value="canApprove">
-                    {t('Authorized for Approve')}
-                  </MenuItem>
-                  <MenuItem value="canMerge">
-                    {t('Authorized for Merge')}
-                  </MenuItem>
+                  {AUTHORIZED_USER_ROLE_CHOICES.map((choice) => (
+                    <MenuItem key={choice.value} value={choice.value}>
+                      {t(choice.label)}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>

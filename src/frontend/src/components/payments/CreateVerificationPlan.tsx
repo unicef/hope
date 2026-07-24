@@ -40,8 +40,10 @@ import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { AreaList } from '@restgenerated/models/AreaList';
+import { Choice } from '@restgenerated/models/Choice';
 import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
 import { RestService } from '@restgenerated/services/RestService';
+import { useSexChoices } from '@hooks/useSexChoices';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -164,6 +166,15 @@ export const CreateVerificationPlan = ({
   const { businessArea, baseUrl, programId: programCode } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const queryClient = useQueryClient();
+  const sexChoices = useSexChoices();
+  const { data: verificationChannelChoices } = useQuery<Array<Choice>>({
+    queryKey: ['verificationChannelChoices'],
+    queryFn: () => RestService.restChoicesPaymentVerificationChannelList(),
+  });
+  const channelChoices = (verificationChannelChoices ?? []).map((choice) => ({
+    ...choice,
+    dataCy: `radio-${choice.value.toLowerCase()}`,
+  }));
 
   const createVerificationPlanMutation = useMutation({
     mutationFn: (data: PaymentVerificationPlanCreate) =>
@@ -596,19 +607,7 @@ export const CreateVerificationPlan = ({
                                   name="filterSex"
                                   label={t('Gender')}
                                   color="primary"
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                    { value: 'OTHER', name: t('Other') },
-                                    {
-                                      value: 'NOT_COLLECTED',
-                                      name: t('Not Collected'),
-                                    },
-                                    {
-                                      value: 'NOT_ANSWERED',
-                                      name: t('Not Answered'),
-                                    },
-                                  ]}
+                                  choices={sexChoices}
                                   component={FormikSelectField}
                                 />
                               </Box>
@@ -634,19 +633,7 @@ export const CreateVerificationPlan = ({
                         label={t('Verification Channel')}
                         style={{ flexDirection: 'row' }}
                         alignItems="center"
-                        choices={[
-                          {
-                            value: 'RAPIDPRO',
-                            name: 'RAPIDPRO',
-                            dataCy: 'radio-rapidpro',
-                          },
-                          { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                          {
-                            value: 'MANUAL',
-                            name: 'MANUAL',
-                            dataCy: 'radio-manual',
-                          },
-                        ]}
+                        choices={channelChoices}
                         component={FormikRadioGroup}
                       />
                       {values.verificationChannel === 'RAPIDPRO' && (

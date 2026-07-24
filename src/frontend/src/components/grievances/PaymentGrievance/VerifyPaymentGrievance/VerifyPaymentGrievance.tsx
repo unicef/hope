@@ -2,7 +2,7 @@ import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
@@ -13,6 +13,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { Choice } from '@restgenerated/models/Choice';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
@@ -29,6 +30,14 @@ export function VerifyPaymentGrievance({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
+  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
+    queryKey: ['verificationStatusChoices'],
+    queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
+  });
+  // Grievance verification only allows marking a payment received / not received.
+  const statusChoices = (verificationStatusChoices ?? []).filter((choice) =>
+    ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value),
+  );
 
   const { mutateAsync: mutate } = useMutation({
     mutationFn: (values: any) => {
@@ -110,10 +119,7 @@ export function VerifyPaymentGrievance({
                       name="newStatus"
                       label="Status"
                       style={{ flexDirection: 'row' }}
-                      choices={[
-                        { value: 'RECEIVED', name: t('Received') },
-                        { value: 'NOT_RECEIVED', name: t('Not Received') },
-                      ]}
+                      choices={statusChoices}
                       component={FormikRadioGroup}
                     />
                   </Grid>

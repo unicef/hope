@@ -7,6 +7,24 @@ export const PROGRAM_STATE_FILTER = {
   ALL: 'all',
 } as const;
 
+// UI-only filter option lists (not backed by a server enum). `label` values are
+// passed through `t()` at the render site to preserve i18n.
+export const YES_NO_CHOICES = [
+  { value: 'YES', label: 'Yes' },
+  { value: 'NO', label: 'No' },
+] as const;
+
+export const PROGRAM_STATE_CHOICES = [
+  { value: PROGRAM_STATE_FILTER.ACTIVE, label: 'Active Programmes' },
+  { value: PROGRAM_STATE_FILTER.ALL, label: 'All Programmes' },
+] as const;
+
+export const AUTHORIZED_USER_ROLE_CHOICES = [
+  { value: 'canEdit', label: 'Authorized for Edit' },
+  { value: 'canApprove', label: 'Authorized for Approve' },
+  { value: 'canMerge', label: 'Authorized for Merge' },
+] as const;
+
 export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatusEnum.OPEN]: 'Open',
   [PaymentPlanStatusEnum.LOCKED]: 'Locked',

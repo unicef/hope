@@ -12,6 +12,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { MessageCreate } from '@restgenerated/models/MessageCreate';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSexChoices } from '@hooks/useSexChoices';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
@@ -120,6 +121,7 @@ function prepareSampleSizeRequest(
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const sexChoices = useSexChoices();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: (data: MessageCreate) =>
       RestService.restBusinessAreasProgramsMessagesCreate({
@@ -671,19 +673,7 @@ const CreateCommunicationPage = (): ReactElement => {
                                   name="filterSex"
                                   label={t('Gender')}
                                   color="primary"
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                    { value: 'OTHER', name: t('Other') },
-                                    {
-                                      value: 'NOT_COLLECTED',
-                                      name: t('Not Collected'),
-                                    },
-                                    {
-                                      value: 'NOT_ANSWERED',
-                                      name: t('Not Answered'),
-                                    },
-                                  ]}
+                                  choices={sexChoices}
                                   component={FormikSelectField}
                                 />
                               </Grid>

@@ -10,6 +10,7 @@ import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSexChoices } from '@hooks/useSexChoices';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
@@ -110,6 +111,7 @@ const CreateSurveyPage = (): ReactElement => {
   });
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const sexChoices = useSexChoices();
   const permissions = usePermissions();
   const confirm = useConfirmation();
   const { pathname } = location;
@@ -702,19 +704,7 @@ const CreateSurveyPage = (): ReactElement => {
                                   name="filterSex"
                                   label={t('Gender')}
                                   color="primary"
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                    { value: 'OTHER', name: t('Other') },
-                                    {
-                                      value: 'NOT_COLLECTED',
-                                      name: t('Not Collected'),
-                                    },
-                                    {
-                                      value: 'NOT_ANSWERED',
-                                      name: t('Not Answered'),
-                                    },
-                                  ]}
+                                  choices={sexChoices}
                                   component={FormikSelectField}
                                 />
                               </Grid>
