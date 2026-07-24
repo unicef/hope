@@ -53,9 +53,18 @@ export function AbortedPaymentPlanHeaderButtons({
   };
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canReactivate && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             variant="contained"
             color="primary"

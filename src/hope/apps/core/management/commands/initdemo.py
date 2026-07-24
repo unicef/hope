@@ -64,7 +64,7 @@ from django.utils import timezone
 import elasticsearch
 from flags.models import FlagState
 
-from extras.test_utils.factories.account import create_superuser
+from extras.test_utils.factories.account import create_superuser, generate_unicef_partners
 from extras.test_utils.factories.geo import generate_area_types
 from hope.apps.core.management.commands.demo_data.accountability import generate_feedback, generate_messages
 from hope.apps.core.management.commands.demo_data.aurora import generate_aurora_test_data
@@ -72,7 +72,6 @@ from hope.apps.core.management.commands.demo_data.core import (
     generate_business_areas,
     generate_country_codes,
     generate_data_collecting_types,
-    generate_unicef_partners,
 )
 from hope.apps.core.management.commands.demo_data.engine import generate_rule_formulas
 from hope.apps.core.management.commands.demo_data.grievance import generate_fake_grievances

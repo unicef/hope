@@ -67,7 +67,11 @@ export function ForceFailedButton({
 
   return (
     <Box>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <Button
           color="primary"
           variant="contained"
@@ -91,7 +95,11 @@ export function ForceFailedButton({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               {t('Are you sure you would like to mark payment as failed?')}
             </Box>
           </DialogContainer>

@@ -87,7 +87,13 @@ export function ReconciliationSummary({
         <Grid container>
           <Grid size={12}>
             <Grid size={12}>
-              <Grid container spacing={0} justifyContent="flex-start">
+              <Grid
+                container
+                spacing={0}
+                sx={{
+                  justifyContent: 'flex-start',
+                }}
+              >
                 {datasets.map(({ color, label, value }) => (
                   <Grid size={2} key={label}>
                     <FieldBorder color={color}>
@@ -125,7 +131,13 @@ export function ReconciliationSummary({
             </Grid>
             <ReconciliationWrapUp>
               <Grid size={12}>
-                <Grid container spacing={0} justifyContent="flex-start">
+                <Grid
+                  container
+                  spacing={0}
+                  sx={{
+                    justifyContent: 'flex-start',
+                  }}
+                >
                   <Grid size={2}>
                     <FieldBorder color="#4E606A">
                       <LabelizedField

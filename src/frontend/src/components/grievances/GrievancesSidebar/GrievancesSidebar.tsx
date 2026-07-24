@@ -63,9 +63,7 @@ export function GrievancesSidebar({
 
     const rolesInHouseholds = individual?.rolesInHouseholds || [];
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
-    const hasRolesToReassign = rolesInHouseholds.some(
-      (el) => el.role !== null,
-    );
+    const hasRolesToReassign = rolesInHouseholds.some((el) => el.role !== null);
 
     let isProperDataChange = true;
     if (
@@ -95,8 +93,17 @@ export function GrievancesSidebar({
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     ) {
       return (
-        <Box display="flex" flexDirection="column">
-          <Box mt={3}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <Box
+            sx={{
+              mt: 3,
+            }}
+          >
             {ticket.ticketDetails?.hasMultiplePaymentVerifications ? (
               <PaymentIds
                 verifications={
@@ -108,7 +115,11 @@ export function GrievancesSidebar({
               />
             ) : null}
           </Box>
-          <Box mt={3}>
+          <Box
+            sx={{
+              mt: 3,
+            }}
+          >
             <OtherRelatedTickets ticket={ticket} />
           </Box>
         </Box>
@@ -116,8 +127,17 @@ export function GrievancesSidebar({
     }
     if (shouldShowReassignBoxDataChange()) {
       return (
-        <Box p={3}>
-          <Box display="flex" flexDirection="column">
+        <Box
+          sx={{
+            p: 3,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <ReassignRoleBox
               shouldDisplayButton
               shouldDisableButton={ticket.ticketDetails?.approveStatus}
@@ -130,8 +150,17 @@ export function GrievancesSidebar({
 
     if (shouldShowReassignMultipleBoxDataChange()) {
       return (
-        <Box p={3}>
-          <Box display="flex" flexDirection="column">
+        <Box
+          sx={{
+            p: 3,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <ReassignMultipleRoleBox ticket={ticket} />
           </Box>
         </Box>
@@ -139,8 +168,17 @@ export function GrievancesSidebar({
     }
 
     return (
-      <Box p={3}>
-        <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           <OtherRelatedTickets ticket={ticket} />
         </Box>
       </Box>

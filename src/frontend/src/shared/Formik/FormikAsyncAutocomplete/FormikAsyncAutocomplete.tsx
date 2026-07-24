@@ -36,7 +36,7 @@ export function FormikAsyncAutocomplete({
 
   const { data, isLoading } = useQuery({
     queryKey: ['asyncAutocomplete', restEndpoint, inputValue, variables],
-    queryFn: async() => {
+    queryFn: async () => {
       if (restEndpoint === 'adminAreas') {
         return RestService.restBusinessAreasGeoAreasList({
           businessAreaSlug: variables?.businessArea || '',
@@ -77,7 +77,13 @@ export function FormikAsyncAutocomplete({
           {...params}
           label={label}
           variant="outlined"
-          inputProps={{ ...params.inputProps, 'data-cy': `input-${field.name}` }}
+          slotProps={{
+            ...params.slotProps,
+            htmlInput: {
+              ...params.slotProps.htmlInput,
+              'data-cy': `input-${field.name}`,
+            },
+          }}
         />
       )}
       filterOptions={(option) => option}

@@ -42,7 +42,12 @@ export const TicketsByStatusChart = ({
   };
 
   return (
-    <Box mt={6} height="300px">
+    <Box
+      sx={{
+        mt: 6,
+        height: '300px',
+      }}
+    >
       <Doughnut data={chartData} options={options} />
     </Box>
   );

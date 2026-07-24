@@ -76,7 +76,13 @@ export const PaymentPlansFilters = ({
       <Title>
         <Typography variant="h6">{t('Payment Plans Filters')}</Typography>
       </Title>
-      <Grid container spacing={3} alignItems="flex-end">
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={3}>
           <SearchTextField
             label={t('Search')}
@@ -104,7 +110,12 @@ export const PaymentPlansFilters = ({
           </SelectFilter>
         </Grid>
         <Grid size={3}>
-          <Box display="flex" flexDirection="column">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <NumberTextField
               id="totalEntitledQuantityFromFilter"
               topLabel={t('Total Entitled Quantity (USD)')}

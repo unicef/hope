@@ -1529,7 +1529,7 @@ class PaymentPlanViewSet(
     def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).ready_for_closure()
+        payment_plan = PaymentPlanService(payment_plan).ready_for_closure(user=cast("User", request.user))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1545,7 +1545,7 @@ class PaymentPlanViewSet(
     def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).send_back_to_finished()
+        payment_plan = PaymentPlanService(payment_plan).send_back_to_finished(user=cast("User", request.user))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -2258,7 +2258,7 @@ class PaymentPlanManagerialViewSet(
         with transaction.atomic():
             for payment_plan in payment_plans:
                 self._perform_payment_plan_status_action(
-                    cast("PaymentPlan", payment_plan),
+                    payment_plan,
                     input_data,
                     self.business_area,
                     request,

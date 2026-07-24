@@ -70,7 +70,7 @@ export const ManagerialConsolePage: FC = () => {
     data: inApprovalData,
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansInApproval', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
@@ -160,9 +160,17 @@ export const ManagerialConsolePage: FC = () => {
     <>
       <PageHeader title={t('Managerial Console')} />
       {canApprove && (
-        <Box mb={6}>
+        <Box
+          sx={{
+            mb: 6,
+          }}
+        >
           {canApprove && (
-            <Box mb={6}>
+            <Box
+              sx={{
+                mb: 6,
+              }}
+            >
               <ApprovalSection
                 selectedApproved={selectedApproved}
                 setSelectedApproved={setSelectedApproved}
@@ -176,7 +184,11 @@ export const ManagerialConsolePage: FC = () => {
         </Box>
       )}
       {canAuthorize && (
-        <Box mb={6}>
+        <Box
+          sx={{
+            mb: 6,
+          }}
+        >
           <AuthorizationSection
             selectedAuthorized={selectedAuthorized}
             setSelectedAuthorized={setSelectedAuthorized}
@@ -188,7 +200,11 @@ export const ManagerialConsolePage: FC = () => {
         </Box>
       )}
       {canReview && (
-        <Box mb={6}>
+        <Box
+          sx={{
+            mb: 6,
+          }}
+        >
           <PendingForReleaseSection
             selectedInReview={selectedInReview}
             setSelectedInReview={setSelectedInReview}

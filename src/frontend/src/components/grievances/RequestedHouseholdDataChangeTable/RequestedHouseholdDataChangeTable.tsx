@@ -181,7 +181,7 @@ function RequestedHouseholdDataChangeTable(
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
                       checked={isRoleSelected}
-                      inputProps={{ 'aria-labelledby': labelId }}
+                      slotProps={{ input: { 'aria-labelledby': labelId } }}
                     />
                   ) : (
                     isRoleSelected && (
@@ -195,10 +195,15 @@ function RequestedHouseholdDataChangeTable(
                   {`Roles (${role.full_name})`}
                 </TableCell>
                 <TableCell align="left">
-                  {role.previous_value === null ? 'No role' : (roleDisplayMap[role.previous_value] || role.previous_value)}
+                  {role.previous_value === null
+                    ? 'No role'
+                    : roleDisplayMap[role.previous_value] ||
+                      role.previous_value}
                 </TableCell>
                 <TableCell align="left">
-                  {role.value === null ? 'No role' : (roleDisplayMap[role.value] || role.value)}
+                  {role.value === null
+                    ? 'No role'
+                    : roleDisplayMap[role.value] || role.value}
                 </TableCell>
               </TableRow>
             );

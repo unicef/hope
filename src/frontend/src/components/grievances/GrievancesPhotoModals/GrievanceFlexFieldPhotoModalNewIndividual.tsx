@@ -48,11 +48,23 @@ export function GrievanceFlexFieldPhotoModalNewIndividual({
   const picUrl: string = data.flexFields?.[flexField.name];
 
   return (
-    <Box style={{ height: '100%' }} display="flex" alignItems="center">
+    <Box
+      style={{ height: '100%' }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {picUrl ? (
         <PhotoModal src={picUrl} />
       ) : (
-        <Box style={{ height: '100%' }} display="flex" alignItems="center">
+        <Box
+          style={{ height: '100%' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           -
         </Box>
       )}

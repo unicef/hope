@@ -73,7 +73,7 @@ export const individualDataRow = (
             color="primary"
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             checked={isItemSelected}
-            inputProps={{ 'aria-labelledby': labelId }}
+            slotProps={{ input: { 'aria-labelledby': labelId } }}
             data-cy="checkbox-requested-data-change"
           />
         ) : (
@@ -92,7 +92,12 @@ export const individualDataRow = (
         </Capitalize>
       </TableCell>
       <TableCell align="left" data-cy="current-value">
-        <CurrentValue field={field} value={currentValue} individualId={individual?.id} fieldName={row[0]} />
+        <CurrentValue
+          field={field}
+          value={currentValue}
+          individualId={individual?.id}
+          fieldName={row[0]}
+        />
       </TableCell>
       <TableCell align="left" data-cy="new-value">
         <NewValue field={field} value={newValue} fieldName={row[0]} />

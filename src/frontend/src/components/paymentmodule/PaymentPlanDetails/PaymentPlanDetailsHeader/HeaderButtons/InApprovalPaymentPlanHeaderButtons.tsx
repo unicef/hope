@@ -19,7 +19,12 @@ export function InApprovalPaymentPlanHeaderButtons({
   canAbort,
 }: InApprovalPaymentPlanHeaderButtonsProps): ReactElement {
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
       {canApprove && <ApprovePaymentPlan paymentPlan={paymentPlan} />}
       {canAbort && <AbortPaymentPlan paymentPlan={paymentPlan} />}

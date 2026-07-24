@@ -150,7 +150,7 @@ export function GrievancesTableRow({
           }}
           checked={isSelected}
           disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
-          inputProps={{ 'aria-labelledby': ticket.unicefId }}
+          slotProps={{ input: { 'aria-labelledby': ticket.unicefId } }}
         />
       </TableCell>
       <TableCell align="left">
