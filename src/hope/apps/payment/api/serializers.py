@@ -13,6 +13,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
+from hope.api.utils import CurrencySlugRelatedField
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -620,7 +621,7 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     target_population_id = serializers.UUIDField(source="id")
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
-    currency = serializers.SlugRelatedField(slug_field="code", queryset=Currency.objects.all(), allow_null=True)
+    currency = CurrencySlugRelatedField(slug_field="code", queryset=Currency.objects.active(), allow_null=True)
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:

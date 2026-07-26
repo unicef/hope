@@ -70,6 +70,20 @@ def test_get_unore_exchange_rate_calls_client_with_currency_code(
         )
 
 
+def test_get_unore_exchange_rate_uses_vision_code_when_different_from_code() -> None:
+    currency = Currency.objects.create(code="SYP", name="Syrian Pound", vision_code="SYP01")
+    payment_plan = PaymentPlanFactory(currency=currency)
+    mock_client = mock.Mock()
+    mock_client.get_exchange_rate_for_currency_code.return_value = 0.01
+
+    result = payment_plan.get_unore_exchange_rate(exchange_rates_client=mock_client)
+
+    assert result == 0.01
+    mock_client.get_exchange_rate_for_currency_code.assert_called_once_with(
+        "SYP01", payment_plan.currency_exchange_date
+    )
+
+
 def test_get_unore_exchange_rate_raises_for_null_currency(
     payment_plan_no_currency: PaymentPlan, django_assert_num_queries
 ) -> None:

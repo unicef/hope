@@ -21,6 +21,7 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializerUpload,
 )
+from hope.api.utils import CurrencySlugRelatedField
 from hope.apps.household.const import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -80,11 +81,11 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE, required=False, allow_blank=True)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    currency = serializers.SlugRelatedField(
+    currency = CurrencySlugRelatedField(
         slug_field="code",
         required=False,
         allow_null=True,
-        queryset=Currency.objects.all(),
+        queryset=Currency.objects.active(),
     )
 
     phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)

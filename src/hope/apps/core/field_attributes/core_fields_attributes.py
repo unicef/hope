@@ -724,7 +724,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "_choices": lambda *args, **kwargs: [
-            {"label": {"English(EN)": c.name}, "value": c.code} for c in Currency.objects.all().order_by("code")
+            {"label": {"English(EN)": c.name}, "value": c.code} for c in Currency.objects.active().order_by("code")
         ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",

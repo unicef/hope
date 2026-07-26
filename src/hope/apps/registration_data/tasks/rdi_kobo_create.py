@@ -137,8 +137,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             if value in (None, ""):
                 correct_value = None
             else:
-                correct_value = Currency.objects.filter(code=value).first()
-                if correct_value is None:
+                try:
+                    correct_value = Currency.objects.resolve_code(value)
+                except Currency.DoesNotExist:
                     raise ValueError(f"Unknown currency code '{value}' on household #{self.household_count}")
         else:
             correct_value = self._cast_value(value, field)

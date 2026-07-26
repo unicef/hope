@@ -110,7 +110,7 @@ def handle_currency_field(
 ) -> Currency | None:
     if value is None or value == "":
         return None
-    return Currency.objects.filter(code=value).first()
+    return Currency.objects.resolve_code(value)
 
 
 def validate_currency(
@@ -118,7 +118,7 @@ def validate_currency(
 ) -> str | None:
     if value is None or value == "":
         return None
-    if not Currency.objects.filter(code=value).exists():
+    if not Currency.objects.active().filter(code=value).exists():
         return f"Invalid currency code {value}"
     return None
 
