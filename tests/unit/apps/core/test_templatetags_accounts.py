@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.test import RequestFactory
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import RoleAssignmentFactory, StorageFileFactory, UserFactory
@@ -30,6 +29,16 @@ def storage_file(user: User) -> StorageFile:
     return StorageFileFactory(created_by=user)
 
 
+@pytest.fixture(autouse=True)
+def enable_is_root():
+    FlagState.objects.get_or_create(
+        name="IS_ROOT",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
+
+
 def test_get_related_uses_explicit_related_name_accessor(user: User, role_assignment: RoleAssignment) -> None:
     field = User._meta.get_field("role_assignments")
 
@@ -56,25 +65,15 @@ def test_get_admin_link_returns_admin_change_url(user: User) -> None:
     assert get_admin_link(user) == f"/api/unicorn/account/user/{user.pk}/change/"
 
 
-def test_is_root_true_for_superuser_with_valid_token(superuser: User, settings: Any) -> None:
-    settings.ROOT_TOKEN = "root-token"
-    request = RequestFactory().get("/", headers={"x-root-token": "root-token"})
+def test_is_root_true_for_superuser(superuser: User) -> None:
+    request = RequestFactory().get("/")
     request.user = superuser
 
     assert _is_root(request) is True
 
 
-def test_is_root_false_for_superuser_with_wrong_token(superuser: User, settings: Any) -> None:
-    settings.ROOT_TOKEN = "root-token"
-    request = RequestFactory().get("/", headers={"x-root-token": "wrong-token"})
-    request.user = superuser
-
-    assert _is_root(request) is False
-
-
-def test_is_root_false_for_non_superuser_with_valid_token(user: User, settings: Any) -> None:
-    settings.ROOT_TOKEN = "root-token"
-    request = RequestFactory().get("/", headers={"x-root-token": "root-token"})
+def test_is_root_false_for_non_superuser(user: User) -> None:
+    request = RequestFactory().get("/")
     request.user = user
 
     assert _is_root(request) is False

@@ -1,5 +1,6 @@
 from django.contrib.admin import AdminSite
 from django.http import HttpRequest
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import FileTempFactory, UserFactory
@@ -14,12 +15,20 @@ def admin_instance() -> FileTempAdmin:
     return FileTempAdmin(FileTemp, AdminSite())
 
 
+@pytest.fixture(autouse=True)
+def enable_is_root():
+    FlagState.objects.get_or_create(
+        name="IS_ROOT",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
+
+
 @pytest.fixture
-def root_request(settings) -> HttpRequest:
-    settings.ROOT_TOKEN = "root-token"
+def root_request() -> HttpRequest:
     request = HttpRequest()
     request.user = UserFactory(is_superuser=True)
-    request.META["HTTP_X_ROOT_TOKEN"] = "root-token"
     return request
 
 

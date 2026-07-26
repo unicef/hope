@@ -4,9 +4,9 @@ from django.contrib import messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from django.test import override_settings
 from django.urls import reverse
 from django.utils.crypto import get_random_string
+from flags.models import FlagState
 import pytest
 from rest_framework import status
 
@@ -71,6 +71,16 @@ def payment_plan_url(payment_plan):
     return reverse("admin:payment_paymentplan_change", args=[payment_plan.id])
 
 
+@pytest.fixture(autouse=True)
+def enable_is_root():
+    FlagState.objects.get_or_create(
+        name="IS_ROOT",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
+
+
 @pytest.mark.parametrize(
     ("pp_status", "background_action_status", "html_element"),
     [
@@ -109,7 +119,6 @@ def test_buttons_are_visible_according_to_status(
     assert html_element in response.rendered_content
 
 
-@override_settings(ROOT_TOKEN="test-token123")
 def test_restart_prepare_payment_plan_task_success(admin_client, admin_user, program_cycle, business_area) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
@@ -123,7 +132,6 @@ def test_restart_prepare_payment_plan_task_success(admin_client, admin_user, pro
             "admin:payment_paymentplan_restart_preparing_payment_plan",
             args=[str(payment_plan.id)],
         ),
-        HTTP_X_ROOT_TOKEN="test-token123",
     )
     assert response.status_code == status.HTTP_302_FOUND
 
@@ -133,7 +141,6 @@ def test_restart_prepare_payment_plan_task_success(admin_client, admin_user, pro
     )
 
 
-@override_settings(ROOT_TOKEN="test-token123")
 def test_restart_prepare_payment_plan_task_incorrect_status(
     admin_client, admin_user, program_cycle, business_area
 ) -> None:
@@ -149,7 +156,6 @@ def test_restart_prepare_payment_plan_task_incorrect_status(
             "admin:payment_paymentplan_restart_preparing_payment_plan",
             args=[payment_plan.id],
         ),
-        HTTP_X_ROOT_TOKEN="test-token123",
     )
     assert response.status_code == status.HTTP_302_FOUND
 
@@ -159,7 +165,6 @@ def test_restart_prepare_payment_plan_task_incorrect_status(
     )
 
 
-@override_settings(ROOT_TOKEN="test-token123")
 def test_restart_prepare_payment_plan_task_already_running(
     admin_client, admin_user, program_cycle, business_area
 ) -> None:
@@ -183,7 +188,6 @@ def test_restart_prepare_payment_plan_task_already_running(
             "admin:payment_paymentplan_restart_preparing_payment_plan",
             args=[payment_plan.id],
         ),
-        HTTP_X_ROOT_TOKEN="test-token123",
     )
     assert response.status_code == status.HTTP_302_FOUND
 
@@ -194,7 +198,6 @@ def test_restart_prepare_payment_plan_task_already_running(
     cache.delete(cache_key)
 
 
-@override_settings(ROOT_TOKEN="test-token123")
 def test_restart_importing_reconciliation_xlsx_file(admin_client, admin_user, program_cycle, business_area) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
@@ -205,7 +208,6 @@ def test_restart_importing_reconciliation_xlsx_file(admin_client, admin_user, pr
     )
     response = admin_client.post(
         reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
-        HTTP_X_ROOT_TOKEN="test-token123",
     )
     assert response.status_code == status.HTTP_302_FOUND
 
@@ -226,7 +228,6 @@ def test_restart_importing_reconciliation_xlsx_file(admin_client, admin_user, pr
 
     response = admin_client.post(
         reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
-        HTTP_X_ROOT_TOKEN="test-token123",
     )
     assert response.status_code == status.HTTP_302_FOUND
     assert (
@@ -236,7 +237,6 @@ def test_restart_importing_reconciliation_xlsx_file(admin_client, admin_user, pr
     )
 
 
-@override_settings(ROOT_TOKEN="test-token123")
 def test_restart_importing_reconciliation_xlsx_file_restarts_active_async_job(
     admin_client, admin_user, program_cycle, business_area
 ) -> None:
@@ -274,7 +274,6 @@ def test_restart_importing_reconciliation_xlsx_file_restarts_active_async_job(
     ):
         response = admin_client.post(
             reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
-            HTTP_X_ROOT_TOKEN="test-token123",
         )
 
     assert response.status_code == status.HTTP_302_FOUND

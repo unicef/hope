@@ -5,11 +5,11 @@ from unittest.mock import Mock, patch
 import uuid
 
 from constance.test import override_config
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.test import Client
 from django.urls import reverse
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
@@ -86,6 +86,16 @@ def admin_client(admin_user: Any) -> Client:
     client = Client()
     client.login(username="root", password="password")
     return client
+
+
+@pytest.fixture(autouse=True)
+def enable_is_root():
+    FlagState.objects.get_or_create(
+        name="IS_ROOT",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
 
 
 @patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task")
@@ -345,7 +355,7 @@ def test_delete_rdi_merged(
     assert Document.objects.count() == 1
 
     url = reverse("admin:registration_data_registrationdataimport_delete_merged_rdi", args=[rdi.pk])
-    response = django_app.get(url, user=admin_user, headers={"X-Root-Token": settings.ROOT_TOKEN})
+    response = django_app.get(url, user=admin_user)
     assert response.status_code == 200
     content = response.content.decode()
     assert "DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING" in content
