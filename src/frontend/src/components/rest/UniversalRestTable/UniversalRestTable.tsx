@@ -111,6 +111,8 @@ export const UniversalRestTable = <T, K>({
       newVariables.ordering = ordering;
     }
 
+    // newVariables is assembled dynamically; bridge it to the caller's query
+    // variables type K.
     const newState = newVariables as unknown as K;
 
     if (!isEqual(newState, queryVariables)) {

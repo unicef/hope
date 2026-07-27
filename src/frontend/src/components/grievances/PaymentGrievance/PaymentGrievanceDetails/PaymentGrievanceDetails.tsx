@@ -23,7 +23,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { GrievanceUpdateApproveStatus } from '@restgenerated/models/GrievanceUpdateApproveStatus';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { formatFigure, showApiErrorMessages } from '@utils/utils';
+import { formatFigure, ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -80,7 +80,7 @@ export function PaymentGrievanceDetails({
         ],
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

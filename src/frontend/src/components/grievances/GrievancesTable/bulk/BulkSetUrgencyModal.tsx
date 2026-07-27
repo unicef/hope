@@ -6,7 +6,7 @@ import { BulkUpdateGrievanceTicketsUrgency } from '@restgenerated/models/BulkUpd
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -59,7 +59,7 @@ export function BulkSetUrgencyModal({
       }
       setSelected([]);
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

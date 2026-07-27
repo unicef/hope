@@ -20,14 +20,16 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 `;
 
 interface AddIndividualFieldsData {
-  countriesChoices: Array<{ value: any; labelEn?: string }>;
-  identityTypeChoices: Array<{ value: any; labelEn?: string }>;
+  countriesChoices: Array<{ value: string; labelEn?: string }>;
+  identityTypeChoices: Array<{ value: string; labelEn?: string }>;
 }
 
 export interface EditIdentityRowProps {
-  setFieldValue: (field: string, value: any) => void;
+  setFieldValue: (field: string, value: unknown) => void;
+  // Formik form-values bag for the identity field array (dynamic shape).
   values: any;
   identity: IndividualIdentity;
+  // Custom field-array helper whose `remove` takes an object, not a Formik index.
   arrayHelpers: any;
   addIndividualFieldsData: AddIndividualFieldsData;
   id: number;

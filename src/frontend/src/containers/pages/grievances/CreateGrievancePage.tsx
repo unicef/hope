@@ -83,6 +83,10 @@ function EmptyComponent(): ReactElement {
   return null;
 }
 
+// `rolesInHousehold` is generated as `Record<string, any>` but is an array of
+// role entries at runtime; this is the shape the delegate lookup relies on.
+type HouseholdRoleEntry = { role: string; individual?: unknown };
+
 function FormikSelectedEntitiesSync({
   fetchedHousehold,
   fetchedIndividual,
@@ -138,7 +142,7 @@ function FormikSelectedEntitiesSync({
   React.useEffect(() => {
     if (householdForDelegate) {
       const alternateRole = (
-        householdForDelegate.rolesInHousehold as any[]
+        householdForDelegate.rolesInHousehold as HouseholdRoleEntry[]
       )?.find((r) => r.role === 'ALTERNATE');
       const delegate = alternateRole?.individual ?? null;
       setFieldValue('selectedDelegate', delegate);
@@ -283,7 +287,7 @@ const CreateGrievancePage = (): ReactElement => {
         : null;
 
     const alternateRole = (
-      indObject?.household?.rolesInHousehold as any[]
+      indObject?.household?.rolesInHousehold as HouseholdRoleEntry[]
     )?.find((r) => r.role === 'ALTERNATE');
     return alternateRole?.individual ?? null;
   })();

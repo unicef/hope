@@ -8,9 +8,11 @@ import { PaginatedRegistrationDataImportListList } from '@restgenerated/models/P
 import { RestService } from '@restgenerated/services/RestService';
 import {
   createHandleApplyFilterChange,
+  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
+import { AutocompleteOption } from './types';
 
 export function RdiAutocompleteRestFilter({
   disabled,
@@ -25,12 +27,12 @@ export function RdiAutocompleteRestFilter({
 }: {
   disabled?: boolean;
   name?: string;
-  filter?: any;
+  filter?: Filter;
   value?: string;
-  initialFilter?: any;
-  appliedFilter?: any;
-  setAppliedFilter?: (filter: any) => void;
-  setFilter?: (filter: any) => void;
+  initialFilter?: Filter;
+  appliedFilter?: Filter;
+  setAppliedFilter?: (filter: Filter) => void;
+  setFilter?: (filter: Filter) => void;
   onChange?: (selectedItem: string | null) => void;
 }): ReactElement {
   const { t } = useTranslation();
@@ -107,14 +109,17 @@ export function RdiAutocompleteRestFilter({
     name: rdi.name,
   }));
 
-  const handleOptionSelected = (option: any, selectedValue: any) => {
+  const handleOptionSelected = (
+    option: AutocompleteOption,
+    selectedValue: AutocompleteOption | string,
+  ) => {
     if (typeof selectedValue === 'string') {
       return option?.id === selectedValue;
     }
     return option?.id === selectedValue?.id;
   };
 
-  const handleOptionLabel = (option: any) => {
+  const handleOptionLabel = (option: AutocompleteOption | string) => {
     if (typeof option === 'string') {
       const matchingRdi = registrationDataImports.find(
         (rdi) => rdi.id === option,

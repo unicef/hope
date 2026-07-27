@@ -255,7 +255,8 @@ export const TargetingCriteriaForm = ({
   const filteredIndividualData = useMemo(
     () => ({
       allFieldsAttributes: data
-        //@ts-ignore
+        // @ts-expect-error codegen types this endpoint as PaginatedFieldAttributeList,
+        // but it returns a bare FieldAttribute[] at runtime.
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     }),
@@ -264,7 +265,8 @@ export const TargetingCriteriaForm = ({
 
   const filteredHouseholdData = useMemo(
     () => ({
-      //@ts-ignore
+      // @ts-expect-error codegen types this endpoint as PaginatedFieldAttributeList,
+      // but it returns a bare FieldAttribute[] at runtime.
       allFieldsAttributes: data?.filter(associatedWith('Household')),
     }),
     [data],
@@ -272,7 +274,8 @@ export const TargetingCriteriaForm = ({
 
   const allDataChoicesDictTmp = useMemo(
     () =>
-      // @ts-ignore
+      // @ts-expect-error codegen types this endpoint as PaginatedFieldAttributeList,
+      // but it returns a bare FieldAttribute[] at runtime.
       data?.reduce((acc, item) => {
         acc[item.name] = item.choices;
         return acc;
@@ -379,16 +382,14 @@ export const TargetingCriteriaForm = ({
               </DialogTitleWrapper>
               <DialogContent>
                 {
-                  // @ts-ignore
-                  errors.nonFieldErrors && (
+                  (errors as { nonFieldErrors?: string[] }).nonFieldErrors && (
                     <DialogError>
                       <ul>
-                        {
-                          // @ts-ignore
-                          errors.nonFieldErrors.map((message) => (
-                            <li key={message}>{message}</li>
-                          ))
-                        }
+                        {(
+                          errors as { nonFieldErrors?: string[] }
+                        ).nonFieldErrors.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))}
                       </ul>
                     </DialogError>
                   )

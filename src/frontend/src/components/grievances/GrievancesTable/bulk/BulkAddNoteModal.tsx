@@ -10,7 +10,7 @@ import { BulkGrievanceTicketsAddNote } from '@restgenerated/models/BulkGrievance
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -57,7 +57,7 @@ export function BulkAddNoteModal({
       }
       setSelected([]);
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

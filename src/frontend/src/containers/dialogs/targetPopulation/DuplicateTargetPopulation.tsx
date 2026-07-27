@@ -121,6 +121,8 @@ export const DuplicateTargetPopulation = ({
                 paymentPlanGroupId: values.paymentPlanGroupId.value,
                 paymentPlanPurposes: values.paymentPlanPurposes,
               },
+              // The mutation's generated return type differs from the actual
+              // duplicated-target-population response; cast to read `res.id`.
             })) as unknown as TargetPopulationDetail;
             setOpen(false);
             showMessage(t('Target Population Duplicated'));

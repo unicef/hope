@@ -10,7 +10,7 @@ import { BulkUpdateGrievanceTicketsPriority } from '@restgenerated/models/BulkUp
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -67,7 +67,7 @@ export const BulkSetPriorityModal = ({
       }
       setSelected([]);
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

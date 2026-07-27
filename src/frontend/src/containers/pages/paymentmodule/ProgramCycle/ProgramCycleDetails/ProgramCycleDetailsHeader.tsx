@@ -106,6 +106,8 @@ export const ProgramCycleDetailsHeader = ({
         programCode: programId,
         // Generated PaymentPlanGroupCreate marks readonly id/unicefId as
         // required; only name + cycle are accepted on create.
+        // The generated PaymentPlanGroupCreate model doesn't match the actual
+        // create payload ({ name, cycle }); cast until codegen is corrected.
         requestBody: {
           name,
           cycle: programCycle.id,

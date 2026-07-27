@@ -20,7 +20,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export type RoleReassignData = {
@@ -151,7 +151,7 @@ export function RequestedIndividualDataChange({
         ],
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

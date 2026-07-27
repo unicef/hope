@@ -17,7 +17,7 @@ import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRo
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
+import { getFilterFromQueryParams, ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -75,7 +75,7 @@ export function LookUpReassignRoleModal({
       });
       showMessage(t('Role Reassigned'));
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

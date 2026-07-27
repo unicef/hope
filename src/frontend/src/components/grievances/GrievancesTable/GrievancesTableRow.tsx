@@ -11,7 +11,7 @@ import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
-  showApiErrorMessages,
+  ApiErrorShape, showApiErrorMessages,
 } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
@@ -87,7 +87,7 @@ export function GrievancesTableRow({
         ],
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
