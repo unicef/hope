@@ -10,6 +10,9 @@ Two phases per program:
      kab_size is never NULL once computed, so already-processed households are skipped
      and an interrupted run resumes where it left off.
 Households matching neither phase keep NULL KAB (unknown, by definition).
+
+Re-run this command after enabling `collects_individual_data` on a DCT by hand: flipping the
+flag does not recalculate anything, and households skipped by an earlier run are picked up here.
 """
 
 from collections.abc import Iterator
@@ -43,7 +46,10 @@ def _pk_batches(queryset: QuerySet, batch_size: int) -> Iterator[list]:
 
 
 class Command(BaseCommand):
-    help = "Backfill kab_* counters on households (idempotent, program by program)."
+    help = (
+        "Backfill kab_* counters on households (idempotent, program by program). "
+        "Re-run after enabling collects_individual_data on a DCT by hand."
+    )
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("--batch-size", type=int, default=5000)
