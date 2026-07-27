@@ -105,6 +105,32 @@ def populate_program_indexes(
         return False, str(e)
 
 
+def ensure_program_indexes(
+    program_id: str,
+    batch_size: int = 2000,
+    parallel: bool = False,
+    thread_count: int = 4,
+    using: str = "default",
+) -> tuple[bool, str]:
+    """Create missing indexes (``_v1`` + alias) and upsert-populate. Never deletes anything.
+
+    The safe choice for every AUTOMATIC path (signals, bulk console actions): an existing live
+    index keeps serving while populate upserts into it. Stale-document cleanup is the job of an
+    explicit blue-green reindex, not of this function.
+    """
+    success, msg = create_program_indexes(program_id, using=using)
+    if not success:  # pragma: no cover
+        return False, f"Create failed: {msg}"
+
+    success, msg = populate_program_indexes(
+        program_id, batch_size, parallel=parallel, thread_count=thread_count, using=using
+    )
+    if not success:  # pragma: no cover
+        return False, f"Populate failed: {msg}"
+
+    return True, f"Ensured indexes for program {program_id}"
+
+
 def rebuild_program_indexes(
     program_id: str,
     batch_size: int = 2000,
@@ -112,7 +138,13 @@ def rebuild_program_indexes(
     thread_count: int = 4,
     using: str = "default",
 ) -> tuple[bool, str]:
-    """Rebuild Elasticsearch indexes for a program (delete, create, populate)."""
+    """Rebuild Elasticsearch indexes for a program (delete, create, populate).
+
+    DESTRUCTIVE: deletes the live index first, so search/dedup see an empty index until populate
+    finishes. Reserved for the explicit admin "Rebuild Index" button as a recovery tool — automatic
+    paths must use ``ensure_program_indexes`` instead. The end state is alias-consistent (the
+    rebuilt index is ``_v1`` behind the suffix-less alias).
+    """
     success, msg = delete_program_indexes(program_id, using=using)
     if not success:  # pragma: no cover
         return False, f"Delete failed: {msg}"
