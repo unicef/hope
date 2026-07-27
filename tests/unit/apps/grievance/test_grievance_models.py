@@ -45,6 +45,17 @@ def system_flagging_ticket(business_area: Any) -> Any:
 
 
 @pytest.fixture
+def photo_error_ticket(business_area: Any, user: Any) -> Any:
+    return GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO,
+        business_area=business_area,
+        created_by=user,
+        submission_channel=SUBMISSION_CHANNEL_HOPE,
+    )
+
+
+@pytest.fixture
 def ticket_data_change_no_issue_type_unsaved(business_area: Any, user: Any) -> Any:
     # CATEGORY_DATA_CHANGE uses a dict mapping — issue_type=None should cause ticket_details to return None.
     # We build without saving because save() validates issue_type.
@@ -112,3 +123,11 @@ def test_system_ticket_submission_channel_forced_to_hope(system_flagging_ticket:
 
     system_flagging_ticket.refresh_from_db()
     assert system_flagging_ticket.submission_channel == SUBMISSION_CHANNEL_HOPE
+
+
+def test_system_issue_type_submission_channel_forced_to_hope(photo_error_ticket: Any) -> None:
+    photo_error_ticket.submission_channel = SUBMISSION_CHANNEL_CALL_CENTER
+    photo_error_ticket.save()
+
+    photo_error_ticket.refresh_from_db()
+    assert photo_error_ticket.submission_channel == SUBMISSION_CHANNEL_HOPE

@@ -57,7 +57,18 @@ class TicketStatusChangerService:
         self.ticket.status = GrievanceTicket.STATUS_ON_HOLD
 
     def _change_status_for_approval(self) -> None:
+        self._validate_biometrics_photo_assigned()
         self.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+
+    def _validate_biometrics_photo_assigned(self) -> None:
+        # A rerouted biometric photo-fix ticket is created with an empty photo value; the
+        # operator must upload a valid photo before the ticket can proceed to approval.
+        if self.ticket.issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO:
+            return
+        details = self.ticket.individual_data_update_ticket_details
+        photo = (details.individual_data or {}).get("photo", {})
+        if not photo.get("value"):
+            log_and_raise("A valid photo must be uploaded before this ticket can be sent for approval")
 
     def _change_status_closed(self) -> None:
         self.ticket.status = GrievanceTicket.STATUS_CLOSED
