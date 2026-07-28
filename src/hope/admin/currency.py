@@ -23,7 +23,7 @@ class CurrencyAdmin(HOPEModelAdminBase):
         if len(active) != 1 or len(inactive) != 1:
             self.message_user(
                 request,
-                "Select exactly two currencies: one active and one inactive.",
+                "Select exactly two currencies: one selected currency must be active and the other inactive.",
                 level=messages.ERROR,
             )
             return
