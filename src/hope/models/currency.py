@@ -12,6 +12,9 @@ class CurrencyQuerySet(models.QuerySet):
     def resolve_code(self, code: str) -> "Currency":
         return self.get(code=code, active=True)
 
+    def resolve_code_or_none(self, code: str) -> "Currency | None":
+        return self.filter(code=code, active=True).first()
+
 
 CurrencyManager = models.Manager.from_queryset(CurrencyQuerySet)
 
