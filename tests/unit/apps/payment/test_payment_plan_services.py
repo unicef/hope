@@ -1422,6 +1422,31 @@ def test_unlock_fsp(user: User, business_area: Any, cycle: ProgramCycle) -> None
     assert payment_plan.status == PaymentPlan.Status.LOCKED
 
 
+@pytest.fixture
+def payment_plan_importing_fsp_extra_fields(user: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED_FSP,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    )
+
+
+def test_unlock_fsp_rejects_active_fsp_extra_fields_import(
+    payment_plan_importing_fsp_extra_fields: PaymentPlan,
+) -> None:
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(payment_plan_importing_fsp_extra_fields).unlock_fsp()
+
+
+def test_send_for_approval_rejects_active_fsp_extra_fields_import(
+    payment_plan_importing_fsp_extra_fields: PaymentPlan,
+) -> None:
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(payment_plan_importing_fsp_extra_fields).send_for_approval()
+
+
 def test_update_pp_program_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program, title="New Cycle ABC")
     new_group = PaymentPlanGroupFactory(cycle=new_cycle)

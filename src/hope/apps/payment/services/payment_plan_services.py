@@ -156,6 +156,8 @@ class PaymentPlanService:
         return self.actions_map.get(self.action)
 
     def send_for_approval(self) -> PaymentPlan:
+        if self.payment_plan.background_action_status is not None:
+            raise ValidationError("Another background action is already in progress.")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_send_to_approval()
         self.payment_plan.save()
@@ -317,6 +319,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock_fsp(self) -> PaymentPlan | None:
+        if self.payment_plan.background_action_status is not None:
+            raise ValidationError("Another background action is already in progress.")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_unlock_fsp()
         self.payment_plan.save()

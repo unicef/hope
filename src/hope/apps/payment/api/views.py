@@ -1189,8 +1189,8 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["get"], url_path="fsp-extra-fields-template")
     def fsp_extra_fields_template(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         payment_plan = self.get_object()
-        if payment_plan.status != PaymentPlan.Status.LOCKED:
-            raise ValidationError("FSP extra fields template is available only for LOCKED Payment Plans.")
+        if payment_plan.status != PaymentPlan.Status.LOCKED_FSP:
+            raise ValidationError("FSP extra fields template is available only for LOCKED_FSP Payment Plans.")
 
         service = XlsxPaymentPlanFspExtraFieldsExportService(payment_plan)
         output = BytesIO()
@@ -1215,8 +1215,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def fsp_extra_fields_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        if payment_plan.status != PaymentPlan.Status.LOCKED:
-            raise ValidationError("FSP extra fields can be imported only for LOCKED Payment Plans.")
+        if payment_plan.status != PaymentPlan.Status.LOCKED_FSP:
+            raise ValidationError("FSP extra fields can be imported only for LOCKED_FSP Payment Plans.")
         if payment_plan.background_action_status is not None:
             raise ValidationError("Another background action is already in progress.")
 

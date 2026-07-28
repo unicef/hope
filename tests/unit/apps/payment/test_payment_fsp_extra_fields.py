@@ -31,7 +31,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def payment_plan():
-    return PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+    return PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP)
 
 
 @pytest.fixture

@@ -115,7 +115,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
-          {status === PaymentPlanStatusEnum.LOCKED &&
+          {status === PaymentPlanStatusEnum.LOCKED_FSP &&
             !paymentPlan.isInstructionManaged && (
               <FspExtraFields
                 paymentPlan={paymentPlan}
