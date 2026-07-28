@@ -193,7 +193,7 @@ class Command(BaseCommand):
             if status != "no delta":
                 synced += 1
             if opts["verify"] and not opts["dry_run"]:
-                vok, vmsg = check_program_indexes(str(pid))
+                vok, vmsg = check_program_indexes(str(pid), using=using)
                 self.stdout.write((self.style.SUCCESS if vok else self.style.WARNING)(f"    verify: {vmsg}"))
 
         if failed:
@@ -223,9 +223,9 @@ class Command(BaseCommand):
         if not es.indices.exists(index=ind_index) or not es.indices.exists(index=hh_index):
             if opts["dry_run"]:
                 return "would-populate (no index)", f"index {ind_index} / {hh_index}"
-            ok, msg = create_program_indexes(pid)
+            ok, msg = create_program_indexes(pid, using=using)
             if ok:
-                ok, msg = populate_program_indexes(pid, batch_size=opts["chunk_size"])
+                ok, msg = populate_program_indexes(pid, batch_size=opts["chunk_size"], using=using)
             return ("populated (new index)", msg) if ok else ("failed", msg)
 
         delta = self._program_delta(pid, since)
@@ -238,11 +238,11 @@ class Command(BaseCommand):
         if opts["dry_run"]:
             return "would-sync delta", counts
 
-        self._apply_delta(pid, delta, ind_doc, hh_doc, opts)
+        self._apply_delta(delta, ind_doc, hh_doc, using, opts)
         return "delta synced", counts
 
     @staticmethod
-    def _apply_delta(pid: str, delta: dict, ind_doc: type, hh_doc: type, opts: dict) -> None:
+    def _apply_delta(delta: dict, ind_doc: type, hh_doc: type, using: str, opts: dict) -> None:
         from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
         from hope.models import Household, Individual
 
@@ -250,14 +250,14 @@ class Command(BaseCommand):
         parallel = opts["parallel"]
         if delta["ind_present"]:
             qs = Individual.all_merge_status_objects.filter(id__in=delta["ind_present"]).iterator(chunk_size=chunk)
-            ind_doc().update(qs, action="index", parallel=parallel)
+            ind_doc().update(qs, action="index", parallel=parallel, using=using)
         if delta["hh_present"]:
             qs = Household.objects.filter(id__in=delta["hh_present"]).iterator(chunk_size=chunk)
-            hh_doc().update(qs, action="index", parallel=parallel)
+            hh_doc().update(qs, action="index", parallel=parallel, using=using)
         if delta["ind_removed"]:
-            remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["ind_removed"]], ind_doc)
+            remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["ind_removed"]], ind_doc, using=using)
         if delta["hh_removed"]:
-            remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["hh_removed"]], hh_doc)
+            remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["hh_removed"]], hh_doc, using=using)
 
     @staticmethod
     def _program_delta(pid: str, since: datetime) -> dict:
@@ -353,7 +353,7 @@ class Command(BaseCommand):
         # here; orphan cleanup (hard-deletes) is a separate id-diff pass, not built yet.
         mismatched = []
         for pid, code in code_by_id.items():
-            ok, msg = check_program_indexes(str(pid))
+            ok, msg = check_program_indexes(str(pid), using=using)
             if not ok:
                 mismatched.append((code, pid, msg))
         self.stdout.write(f"Reconcile (read-only): {len(mismatched)} of {len(code_by_id)} program(s) drift.")

@@ -30,7 +30,7 @@ RECORD_KEYS = {
 
 def _run(tmp_path: Path, *extra: str) -> list[dict]:
     log = tmp_path / "m.jsonl"
-    call_command(CMD, "--sleep", "0", "--log", str(log), *extra, stdout=StringIO())
+    call_command(CMD, "--sleep", "0", "--log", str(log), "--i-am-sure", *extra, stdout=StringIO())
     return [json.loads(line) for line in log.read_text().splitlines()]
 
 
@@ -84,7 +84,16 @@ def test_empty_db_warns_and_writes_no_log(tmp_path: Path) -> None:
     out = StringIO()
     log = tmp_path / "m.jsonl"
 
-    call_command(CMD, "--sleep", "0", "--passes", "1", "--log", str(log), stdout=out)
+    call_command(CMD, "--sleep", "0", "--passes", "1", "--log", str(log), "--i-am-sure", stdout=out)
 
     assert "nothing to mutate" in out.getvalue()
     assert not log.exists()
+
+
+def test_refuses_to_run_outside_debug_without_confirmation(tmp_path: Path, settings) -> None:
+    from django.core.management.base import CommandError
+
+    settings.DEBUG = False
+
+    with pytest.raises(CommandError, match="--i-am-sure"):
+        call_command(CMD, "--sleep", "0", "--passes", "1", "--log", str(tmp_path / "m.jsonl"), stdout=StringIO())

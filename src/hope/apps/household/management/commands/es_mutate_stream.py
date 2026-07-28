@@ -32,7 +32,7 @@ import time
 from typing import IO, Any
 import uuid
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db.models import QuerySet
 from django.utils import timezone
 
@@ -50,11 +50,26 @@ class Command(BaseCommand):
         parser.add_argument("--batch", type=int, default=5, help="Records touched per model per pass.")
         parser.add_argument("--passes", type=int, default=0, help="Number of passes (0 = forever).")
         parser.add_argument(
-            "--delete-every", type=int, default=10, help="Soft-delete 1 individual every N passes (0 = off)."
+            "--delete-every",
+            type=int,
+            default=0,
+            help="Soft-delete 1 individual every N passes (0 = off, the default - deletion is opt-in).",
         )
         parser.add_argument("--log", default="mutate_log.jsonl", help="JSONL log path (appended, never clobbered).")
+        parser.add_argument(
+            "--i-am-sure",
+            action="store_true",
+            help="Required outside DEBUG: this tool permanently mutates real beneficiary data.",
+        )
 
     def handle(self, *args: Any, **opts: Any) -> None:
+        from django.conf import settings
+
+        if not settings.DEBUG and not opts["i_am_sure"]:
+            raise CommandError(
+                "es_mutate_stream is a dev/test tool that mutates real data in a loop. "
+                "Re-run with --i-am-sure if this environment is disposable (e.g. an ephemeral rehearsal)."
+            )
         ind_total = Individual.all_merge_status_objects.count()
         hh_total = Household.objects.count()
         self.stdout.write(f"start: individuals={ind_total} households={hh_total} -> log={opts['log']} (Ctrl+C stops)")

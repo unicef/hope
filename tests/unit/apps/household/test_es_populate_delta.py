@@ -284,11 +284,12 @@ def test_apply_delta_upserts_present_and_removes_soft_deleted(mock_remove) -> No
     hh_doc = MagicMock()
     delta = {"ind_present": {present.id}, "ind_removed": {removed_id}, "hh_present": set(), "hh_removed": set()}
 
-    Command._apply_delta(str(prog.id), delta, ind_doc, hh_doc, OPTS)
+    Command._apply_delta(delta, ind_doc, hh_doc, "default", OPTS)
 
     ind_doc.return_value.update.assert_called_once()
     assert ind_doc.return_value.update.call_args.kwargs["action"] == "index"
-    mock_remove.assert_called_once_with([str(removed_id)], ind_doc)
+    assert ind_doc.return_value.update.call_args.kwargs["using"] == "default"
+    mock_remove.assert_called_once_with([str(removed_id)], ind_doc, using="default")
 
 
 def test_command_never_imports_index_delete() -> None:
