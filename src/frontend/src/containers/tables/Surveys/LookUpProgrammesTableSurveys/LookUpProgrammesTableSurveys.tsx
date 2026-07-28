@@ -10,7 +10,7 @@ import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 
@@ -93,6 +93,7 @@ export function LookUpProgrammesTableSurveys({
           withPagination: true,
         }),
       ),
+    placeholderData: keepPreviousData,
     enabled: !!queryVariables.businessAreaSlug,
   });
 

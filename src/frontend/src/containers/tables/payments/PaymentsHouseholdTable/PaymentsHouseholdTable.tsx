@@ -6,7 +6,7 @@ import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPayment
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useState } from 'react';
@@ -63,6 +63,7 @@ function PaymentsHouseholdTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const { data: countData } = useQuery<CountResponse>({

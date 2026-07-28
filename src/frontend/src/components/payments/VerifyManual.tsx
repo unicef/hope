@@ -61,8 +61,7 @@ export function VerifyManual({
         },
       ),
 
-    onSuccess: async (data) => {
-      queryClient.setQueryData(paymentQueryKey, data);
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: paymentQueryKey,
       });

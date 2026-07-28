@@ -8,7 +8,7 @@ import { adjustHeadCells } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { createApiParams } from '@utils/apiUtils';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
@@ -83,6 +83,7 @@ function PaymentPlansTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const { data: dataPaymentPlansCount } = useQuery<CountResponse>({

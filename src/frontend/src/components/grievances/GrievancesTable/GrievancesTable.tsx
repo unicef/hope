@@ -11,7 +11,7 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
@@ -189,6 +189,7 @@ export const GrievancesTable = ({
         ),
       ),
     enabled: isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   //ALL PROGRAMS COUNT
@@ -227,6 +228,7 @@ export const GrievancesTable = ({
         ),
       ),
     enabled: !isAllPrograms,
+    placeholderData: keepPreviousData,
   });
   //SELECTED PROGRAM COUNT
   const { data: selectedProgramGrievanceTicketsCount } =

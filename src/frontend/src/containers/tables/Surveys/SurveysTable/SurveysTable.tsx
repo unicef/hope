@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
 import { PaginatedSurveyList } from '@restgenerated/models/PaginatedSurveyList';
@@ -78,6 +78,7 @@ function SurveysTable({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
   });
 

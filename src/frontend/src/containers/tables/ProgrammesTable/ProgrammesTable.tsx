@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
@@ -86,6 +86,7 @@ function ProgrammesTable({
           withPagination: true,
         }),
       ),
+    placeholderData: keepPreviousData,
     enabled: !!queryVariables.businessAreaSlug,
   });
 

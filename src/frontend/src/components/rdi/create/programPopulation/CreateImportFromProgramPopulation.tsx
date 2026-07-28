@@ -8,7 +8,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete/FormikAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, FormikProvider, useFormik } from 'formik';
@@ -79,6 +79,7 @@ export const CreateImportFromProgramPopulationForm = ({
             { withPagination: true },
           ),
         ),
+      placeholderData: keepPreviousData,
     });
 
   const onSubmit = async (values): Promise<void> => {

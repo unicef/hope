@@ -5,7 +5,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
@@ -111,6 +111,7 @@ export const PeopleListTable = ({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
   });
 
   return (

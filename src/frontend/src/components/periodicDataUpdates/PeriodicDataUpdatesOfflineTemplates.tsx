@@ -12,7 +12,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Box, IconButton, TableCell, Tooltip } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -173,6 +173,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const selectedTemplate = templatesData?.results?.find(

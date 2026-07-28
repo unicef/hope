@@ -60,7 +60,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       }
       return false;
     },
-    refetchIntervalInBackground: true,
   });
 
   if (isLoading) return <LoadingComponent />;

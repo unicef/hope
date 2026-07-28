@@ -8,7 +8,7 @@ import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPayment
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 interface LookUpPaymentRecordTableProps {
   openInNewTab?: boolean;
@@ -90,6 +90,7 @@ export function LookUpPaymentRecordTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   // Count queries for global and program payments

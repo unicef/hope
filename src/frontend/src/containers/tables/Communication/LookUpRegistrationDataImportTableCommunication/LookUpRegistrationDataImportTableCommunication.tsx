@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
 import { RestService } from '@restgenerated/services/RestService';
 import type { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
@@ -98,6 +98,7 @@ function LookUpRegistrationDataImportTableCommunication({
             { withPagination: true },
           ),
         ),
+      placeholderData: keepPreviousData,
     });
 
   const { data: countData } = useQuery<CountResponse>({

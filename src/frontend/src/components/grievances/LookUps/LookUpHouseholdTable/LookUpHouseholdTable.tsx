@@ -6,7 +6,7 @@ import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
@@ -124,6 +124,7 @@ export function LookUpHouseholdTable({
         ),
       ),
     enabled: !!businessArea && !isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   //selectedProgram
@@ -161,6 +162,7 @@ export function LookUpHouseholdTable({
       );
     },
     enabled: isAllPrograms,
+    placeholderData: keepPreviousData,
   });
   //allPrograms
 

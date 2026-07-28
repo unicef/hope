@@ -2,7 +2,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -69,6 +69,7 @@ export function TargetPopulationHouseholdTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   // Add count query for pending payments

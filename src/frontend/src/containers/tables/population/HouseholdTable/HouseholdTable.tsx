@@ -12,7 +12,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { TableCell } from '@mui/material';
 import { Box } from '@mui/system';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   adjustHeadCells,
   formatCurrencyWithSymbol,
@@ -126,6 +126,7 @@ export const HouseholdTable = ({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
   });
 
   const { data: countData } = useQuery<CountResponse>({

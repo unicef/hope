@@ -1,7 +1,7 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -152,6 +152,7 @@ function RegistrationDataImportTable({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
   });
 
   const { data: countData } = useQuery<{ count: number }>({

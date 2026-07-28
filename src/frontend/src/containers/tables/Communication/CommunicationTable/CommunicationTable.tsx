@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import type { MessageList } from '@restgenerated/models/MessageList';
 import type { PaginatedMessageListList } from '@restgenerated/models/PaginatedMessageListList';
@@ -69,6 +69,7 @@ function CommunicationTable({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
   });
 
   const { data: countData } = useQuery<CountResponse>({

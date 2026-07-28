@@ -11,7 +11,12 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
   programCycleStatusToColor,
@@ -76,6 +81,7 @@ export const ProgramCyclesTablePaymentModule = ({
           ),
         );
       },
+      placeholderData: keepPreviousData,
       enabled: shouldFetchData,
     });
 

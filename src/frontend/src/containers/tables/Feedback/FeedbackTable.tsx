@@ -9,7 +9,7 @@ import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { PaginatedFeedbackListList } from '@restgenerated/models/PaginatedFeedbackListList';
@@ -88,6 +88,7 @@ function FeedbackTable({
         ),
       ),
     enabled: !isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   // Selected Program Count
@@ -123,6 +124,7 @@ function FeedbackTable({
       );
     },
     enabled: isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   // All Programs Count

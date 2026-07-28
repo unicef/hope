@@ -98,7 +98,7 @@ const EditGrievancePage = (): ReactElement => {
     isLoading: ticketLoading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,

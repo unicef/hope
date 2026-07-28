@@ -7,7 +7,7 @@ import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { adjustHeadCells } from '@utils/utils';
@@ -151,6 +151,7 @@ export function LookUpIndividualTable({
         ),
       ),
     enabled: !!businessArea && !!programId && !isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   // Selected Program Count
@@ -186,6 +187,7 @@ export function LookUpIndividualTable({
       );
     },
     enabled: !!businessArea && isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   // All Programs Count

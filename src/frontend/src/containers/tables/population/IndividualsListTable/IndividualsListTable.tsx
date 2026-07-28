@@ -3,7 +3,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -128,6 +128,7 @@ export function IndividualsListTable({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
   });
 
   const { data: countData } = useQuery<CountResponse>({

@@ -39,7 +39,6 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
       return false;
     },
-    refetchIntervalInBackground: true,
   });
 
   if (loading && !paymentPlan) return <LoadingComponent />;

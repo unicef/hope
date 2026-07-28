@@ -25,7 +25,7 @@ import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, grievanceTicketStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useState } from 'react';
@@ -95,6 +95,7 @@ export function LinkedGrievancesModal({
         );
       }
     },
+    placeholderData: keepPreviousData,
     refetchOnWindowFocus: false,
   });
 

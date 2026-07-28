@@ -4,7 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
@@ -89,6 +89,7 @@ function PaymentVerificationTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const itemsCount = usePersistedCount(page, countData);

@@ -4,7 +4,7 @@ import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -75,6 +75,7 @@ export function ImportedPeopleTable({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
   });
 
   const { data: countData } = useQuery({

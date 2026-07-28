@@ -8,7 +8,7 @@ import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPayment
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
@@ -115,6 +115,7 @@ const PaymentsTable = ({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   // Payments count

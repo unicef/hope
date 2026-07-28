@@ -9,7 +9,7 @@ import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPay
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import React, { ReactElement, useEffect, useState } from 'react';
@@ -93,6 +93,7 @@ export const PaymentPlansTable = ({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
     enabled: !!businessArea && !!programId,
   });
 

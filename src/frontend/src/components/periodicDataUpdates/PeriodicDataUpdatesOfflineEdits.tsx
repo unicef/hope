@@ -11,7 +11,7 @@ import { IconButton, TableCell } from '@mui/material';
 import { PaginatedPDUXlsxUploadListList } from '@restgenerated/models/PaginatedPDUXlsxUploadListList';
 import { PDUXlsxUploadList } from '@restgenerated/models/PDUXlsxUploadList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -103,6 +103,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const { data: uploadsCountData } = useQuery({

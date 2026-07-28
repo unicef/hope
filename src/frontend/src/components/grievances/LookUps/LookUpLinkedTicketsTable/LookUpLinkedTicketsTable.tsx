@@ -5,7 +5,7 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { MouseEvent, ReactElement, useState, useEffect, useMemo } from 'react';
@@ -100,6 +100,7 @@ export function LookUpLinkedTicketsTable({
           );
         }
       },
+      placeholderData: keepPreviousData,
       enabled: !choicesLoading && !!choicesData,
     },
   );

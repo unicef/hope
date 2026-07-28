@@ -2,7 +2,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
@@ -116,6 +116,7 @@ function LookUpHouseholdTableCommunication({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
   });
 
   const [selected, setSelected] = useState<string[]>(

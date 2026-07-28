@@ -4,7 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -121,6 +121,7 @@ export function TargetPopulationTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const handleRadioChange = (id: string): void => {

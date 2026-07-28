@@ -10,7 +10,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { programCycleStatusToColor, formatFigure } from '@utils/utils';
 import React, { ReactElement, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -57,6 +57,7 @@ const ProgramCyclesTableProgramDetails = ({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({

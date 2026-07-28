@@ -4,7 +4,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -94,6 +94,7 @@ export function VerificationsTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const { selectedProgram } = useProgramContext();

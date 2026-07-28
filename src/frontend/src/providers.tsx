@@ -15,7 +15,16 @@ interface ProvidersProps {
   children: ReactNode[];
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // Data is considered fresh for 60 seconds
+      gcTime: 10 * 60 * 1000, // Keep unused data in cache for 10 minutes
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+      retry: 1, // Retry a failed query once (down from the default of 3)
+    },
+  },
+});
 
 export const Providers: FC<ProvidersProps> = ({ children }) => {
   return (
