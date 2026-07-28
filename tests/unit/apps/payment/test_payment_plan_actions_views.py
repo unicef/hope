@@ -41,6 +41,7 @@ from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import (
+    FileTemp,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -188,6 +189,62 @@ def locked_fsp_extra_fields_actions_context(
     return context
 
 
+@pytest.fixture
+def retryable_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    context = fsp_extra_fields_actions_context
+    context["pp"].background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    context["pp"].save(update_fields=["background_action_status"])
+    return context
+
+
+@pytest.fixture
+def active_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    context = fsp_extra_fields_actions_context
+    context["pp"].background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    context["pp"].save(update_fields=["background_action_status"])
+    return context
+
+
+@pytest.fixture
+def unsupported_file_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        **fsp_extra_fields_actions_context,
+        "import_file": SimpleUploadedFile("fsp_extra_fields.csv", b"payment_id,fsp_reference"),
+    }
+
+
+@pytest.fixture
+def unreadable_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        **fsp_extra_fields_actions_context,
+        "import_file": SimpleUploadedFile("fsp_extra_fields.xlsx", b"not-an-xlsx-workbook"),
+    }
+
+
+@pytest.fixture
+def invalid_workbook_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["fsp_reference"])
+    worksheet.append(["FSP-001"])
+    stream = BytesIO()
+    workbook.save(stream)
+    return {
+        **fsp_extra_fields_actions_context,
+        "import_file": SimpleUploadedFile("fsp_extra_fields.xlsx", stream.getvalue()),
+    }
+
+
 def test_fsp_extra_fields_template_is_available_for_locked_fsp(
     fsp_extra_fields_actions_context: dict[str, Any],
 ) -> None:
@@ -207,11 +264,13 @@ def test_fsp_extra_fields_template_is_not_available_for_locked(
     assert "available only for LOCKED_FSP" in str(response.data)
 
 
+@patch("hope.apps.payment.api.views.import_payment_plan_fsp_extra_fields_from_xlsx_async_task")
 def test_fsp_extra_fields_import_is_available_for_locked_fsp(
+    mock_import_task: Mock,
     fsp_extra_fields_actions_context: dict[str, Any],
     django_capture_on_commit_callbacks: Any,
 ) -> None:
-    with django_capture_on_commit_callbacks(execute=False):
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = fsp_extra_fields_actions_context["client"].post(
             fsp_extra_fields_actions_context["import_url"],
             {"file": fsp_extra_fields_actions_context["import_file"]},
@@ -223,6 +282,115 @@ def test_fsp_extra_fields_import_is_available_for_locked_fsp(
     assert (
         fsp_extra_fields_actions_context["pp"].background_action_status
         == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    )
+    assert len(callbacks) == 1
+    file_temp = FileTemp.objects.get(object_id=fsp_extra_fields_actions_context["pp"].pk)
+    assert file_temp.created_by == fsp_extra_fields_actions_context["user"]
+    assert file_temp.file.name.endswith(".xlsx")
+    mock_import_task.assert_called_once_with(
+        fsp_extra_fields_actions_context["pp"],
+        str(file_temp.id),
+        str(fsp_extra_fields_actions_context["user"].pk),
+    )
+
+
+def test_fsp_extra_fields_import_can_retry_after_error(
+    retryable_fsp_extra_fields_actions_context: dict[str, Any],
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=False) as callbacks:
+        response = retryable_fsp_extra_fields_actions_context["client"].post(
+            retryable_fsp_extra_fields_actions_context["import_url"],
+            {"file": retryable_fsp_extra_fields_actions_context["import_file"]},
+            format="multipart",
+        )
+
+    retryable_fsp_extra_fields_actions_context["pp"].refresh_from_db(fields=["background_action_status"])
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        retryable_fsp_extra_fields_actions_context["pp"].background_action_status
+        == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    )
+    assert len(callbacks) == 1
+
+
+def test_fsp_extra_fields_import_rejects_active_background_action(
+    active_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = active_fsp_extra_fields_actions_context["client"].post(
+        active_fsp_extra_fields_actions_context["import_url"],
+        {"file": active_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Another background action is already in progress." in str(response.data)
+    assert FileTemp.objects.filter(object_id=active_fsp_extra_fields_actions_context["pp"].pk).exists() is False
+
+
+def test_fsp_extra_fields_import_requires_file(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = fsp_extra_fields_actions_context["client"].post(
+        fsp_extra_fields_actions_context["import_url"],
+        {},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "file" in response.data
+    assert FileTemp.objects.filter(object_id=fsp_extra_fields_actions_context["pp"].pk).exists() is False
+
+
+def test_fsp_extra_fields_import_rejects_unsupported_file_type(
+    unsupported_file_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = unsupported_file_fsp_extra_fields_actions_context["client"].post(
+        unsupported_file_fsp_extra_fields_actions_context["import_url"],
+        {"file": unsupported_file_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Unsupported file type (csv)." in str(response.data["file"])
+    assert (
+        FileTemp.objects.filter(object_id=unsupported_file_fsp_extra_fields_actions_context["pp"].pk).exists() is False
+    )
+
+
+def test_fsp_extra_fields_import_rejects_unreadable_xlsx(
+    unreadable_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = unreadable_fsp_extra_fields_actions_context["client"].post(
+        unreadable_fsp_extra_fields_actions_context["import_url"],
+        {"file": unreadable_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Invalid XLSX file. Upload another file." in str(response.data)
+    assert FileTemp.objects.filter(object_id=unreadable_fsp_extra_fields_actions_context["pp"].pk).exists() is False
+
+
+def test_fsp_extra_fields_import_returns_workbook_validation_errors(
+    invalid_workbook_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = invalid_workbook_fsp_extra_fields_actions_context["client"].post(
+        invalid_workbook_fsp_extra_fields_actions_context["import_url"],
+        {"file": invalid_workbook_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data == [
+        {
+            "sheet": "Sheet",
+            "coordinates": None,
+            "message": "Header payment_id is required exactly once",
+        }
+    ]
+    assert (
+        FileTemp.objects.filter(object_id=invalid_workbook_fsp_extra_fields_actions_context["pp"].pk).exists() is False
     )
 
 

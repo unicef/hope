@@ -25,6 +25,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATES } from '../../../../utils/constants';
 
 interface FspExtraFieldsProps {
   paymentPlan: PaymentPlanDetail;
@@ -72,8 +73,12 @@ export function FspExtraFields({
     PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
     permissions,
   );
-  const actionsDisabled =
-    !isActiveProgram || paymentPlan.backgroundActionStatus !== null;
+  const backgroundActionInProgress =
+    paymentPlan.backgroundActionStatus != null &&
+    !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATES.includes(
+      paymentPlan.backgroundActionStatus,
+    );
+  const actionsDisabled = !isActiveProgram || backgroundActionInProgress;
 
   const handleImport = async (): Promise<void> => {
     if (!file) return;

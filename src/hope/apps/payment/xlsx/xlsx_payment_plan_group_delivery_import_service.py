@@ -88,9 +88,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         payment_plan_by_id = {str(payment_plan.id): payment_plan for payment_plan in self.eligible_plans}
         for unicef_id, parent_id, extras in payments:
             self.payment_to_plan[str(unicef_id)] = payment_plan_by_id[str(parent_id)]
-            fsp_extra_fields = extras.get(Payment.FSP_EXTRA_FIELDS_KEY, {}) if isinstance(extras, dict) else {}
-            if isinstance(fsp_extra_fields, dict):
-                self.fsp_owned_headers.update(fsp_extra_fields)
+            self.fsp_owned_headers.update(extras.get(Payment.FSP_EXTRA_FIELDS_KEY, {}))
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)

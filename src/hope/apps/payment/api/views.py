@@ -1217,7 +1217,10 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         if payment_plan.status != PaymentPlan.Status.LOCKED_FSP:
             raise ValidationError("FSP extra fields can be imported only for LOCKED_FSP Payment Plans.")
-        if payment_plan.background_action_status is not None:
+        if (
+            payment_plan.background_action_status is not None
+            and payment_plan.background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
             raise ValidationError("Another background action is already in progress.")
 
         serializer = self.get_serializer(data=request.data)
@@ -1227,9 +1230,7 @@ class PaymentPlanViewSet(
         try:
             import_service.open_workbook()
         except BadZipFile:
-            raise ValidationError(
-                "Wrong file type or password protected .zip file. Upload another file, or remove the password."
-            )
+            raise ValidationError("Invalid XLSX file. Upload another file.")
         import_service.validate()
         if import_service.errors:
             return Response(

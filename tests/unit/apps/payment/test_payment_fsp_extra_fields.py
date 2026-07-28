@@ -11,6 +11,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanFactory,
 )
 from hope.apps.payment.api.serializers import PaymentDetailSerializer
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
     XlsxPaymentPlanDeliveryExportService,
 )
@@ -198,6 +199,12 @@ def test_fsp_extra_fields_template_contains_only_fsp_fields(
         ("PAYMENT-002", "", "", "second-payment", ""),
     ]
     assert "reconciliation_code" not in rows[0]
+
+
+def test_fsp_extra_fields_import_background_action_starts_at_locked_fsp(payment_plan):
+    PaymentPlanFlow(payment_plan).background_action_status_xlsx_importing_fsp_extra_fields()
+
+    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
 
 
 def test_manual_fsp_export_appends_fsp_extra_fields(
