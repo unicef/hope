@@ -76,10 +76,10 @@ class Command(BaseCommand):
                         extra = f", soft-deleted {uid}" if uid else ""
                     stamp = timezone.now().isoformat(timespec="seconds")
                     self.stdout.write(f"[{stamp}] pass {i}: touched {ni} ind / {nh} hh{extra}")
-                except Exception as e:  # noqa: BLE001  # pragma: no cover  # keep loop alive on transient error
+                except Exception as e:  # noqa: BLE001  # keep loop alive on transient error
                     self.stdout.write(self.style.ERROR(f"pass {i}: error, continuing -- {e}"))
                 time.sleep(opts["sleep"])
-        except KeyboardInterrupt:  # pragma: no cover
+        except KeyboardInterrupt:
             self.stdout.write(f"\nstopped at pass {i}. log: {opts['log']}")
         finally:
             fh.close()
@@ -143,7 +143,7 @@ class Command(BaseCommand):
     @classmethod
     def _soft_delete_one(cls, fh: IO[str]) -> str | None:
         rows = cls._random_window(Individual.all_merge_status_objects.select_related("household"), 1)
-        if not rows:  # pragma: no cover
+        if not rows:
             return None
         ind = rows[0]
         hh = ind.household

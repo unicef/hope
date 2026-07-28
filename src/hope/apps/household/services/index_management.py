@@ -119,13 +119,13 @@ def ensure_program_indexes(
     explicit blue-green reindex, not of this function.
     """
     success, msg = create_program_indexes(program_id, using=using)
-    if not success:  # pragma: no cover
+    if not success:
         return False, f"Create failed: {msg}"
 
     success, msg = populate_program_indexes(
         program_id, batch_size, parallel=parallel, thread_count=thread_count, using=using
     )
-    if not success:  # pragma: no cover
+    if not success:
         return False, f"Populate failed: {msg}"
 
     return True, f"Ensured indexes for program {program_id}"

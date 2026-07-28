@@ -71,6 +71,25 @@ def test_ensure_skips_create_when_index_exists(program: Program, es_with_indexes
     es_with_indexes.indices.create.assert_not_called()
 
 
+def test_ensure_reports_create_failure(program: Program) -> None:
+    with patch(f"{_IM}.create_program_indexes", return_value=(False, "boom")):
+        ok, msg = ensure_program_indexes(str(program.id))
+
+    assert not ok
+    assert msg == "Create failed: boom"
+
+
+def test_ensure_reports_populate_failure(program: Program) -> None:
+    with (
+        patch(f"{_IM}.create_program_indexes", return_value=(True, "")),
+        patch(f"{_IM}.populate_program_indexes", return_value=(False, "boom")),
+    ):
+        ok, msg = ensure_program_indexes(str(program.id))
+
+    assert not ok
+    assert msg == "Populate failed: boom"
+
+
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_program_activation_signal_uses_ensure_not_rebuild(draft_program: Program) -> None:
     with (
