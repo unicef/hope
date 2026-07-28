@@ -84,9 +84,9 @@ export function FspExtraFields({
   };
 
   return (
-    <Box m={5}>
+    <Box sx={{ m: 5 }}>
       <ContainerColumnWithBorder>
-        <Box mt={4}>
+        <Box sx={{ mt: 4 }}>
           <Title>
             <Typography variant="h6">{t('FSP Extra Fields')}</Typography>
           </Title>
@@ -96,8 +96,8 @@ export function FspExtraFields({
             )}
           </Typography>
         </Box>
-        <Grid container spacing={3} py={4}>
-          <Grid size={{ xs: 6 }} textAlign="center">
+        <Grid container spacing={3} sx={{ py: 4 }}>
+          <Grid size={{ xs: 6 }} sx={{ textAlign: 'center' }}>
             <Button
               component="a"
               download
@@ -108,7 +108,7 @@ export function FspExtraFields({
               {t('Download Template')}
             </Button>
           </Grid>
-          <Grid size={{ xs: 6 }} textAlign="center">
+          <Grid size={{ xs: 6 }} sx={{ textAlign: 'center' }}>
             <Button
               startIcon={<Publish />}
               disabled={actionsDisabled || !canImport}
