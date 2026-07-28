@@ -1,7 +1,26 @@
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 import pytest
 
 from hope.models.currency import Currency
+
+
+@pytest.mark.django_db
+def test_full_clean_backfills_vision_code_from_code():
+    currency = Currency(code="TST", name="Test")
+
+    currency.full_clean()
+
+    assert currency.vision_code == "TST"
+
+
+@pytest.mark.django_db
+def test_full_clean_reports_duplicate_vision_code_as_validation_error():
+    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    duplicate = Currency(code="SYP", name="Syrian pound", active=True)
+
+    with pytest.raises(ValidationError):
+        duplicate.full_clean()
 
 
 @pytest.mark.django_db

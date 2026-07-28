@@ -52,6 +52,11 @@ class Currency(models.Model):
             return f"{self.code} ({self.vision_code}) - {self.name}"
         return f"{self.code} - {self.name}"
 
+    def clean(self) -> None:
+        super().clean()
+        if not self.vision_code:
+            self.vision_code = self.code
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.vision_code:
             self.vision_code = self.code
