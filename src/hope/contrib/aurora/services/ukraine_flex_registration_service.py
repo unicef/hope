@@ -362,18 +362,15 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             raise ValidationError("USDC registration expects exactly one individual per household")
 
         individual_dict = individuals_array[0]
-        consent_dict = record_data_dict.get("consent", [{}])[0]
 
-        household = self._build_household(consent_dict, record, registration_data_import)
+        household = self._build_household(record, registration_data_import)
         individual = self._build_head_of_household(individual_dict, household, record, registration_data_import)
 
         PendingDocument.objects.bulk_create(self._prepare_documents(individual_dict, individual))
         PendingAccount.objects.bulk_create(self._prepare_accounts(individual_dict, individual))
 
-    def _build_household(
-        self, consent_dict: dict, record: Any, registration_data_import: RegistrationDataImport
-    ) -> PendingHousehold:
-        household_data = self._prepare_household_data(consent_dict, record, registration_data_import)
+    def _build_household(self, record: Any, registration_data_import: RegistrationDataImport) -> PendingHousehold:
+        household_data = self._prepare_household_data({}, record, registration_data_import)
         household_data["size"] = 1
         household = self._create_object_and_validate(household_data, PendingHousehold)
         household.detail_id = record.source_id
