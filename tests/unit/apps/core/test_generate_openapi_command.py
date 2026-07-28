@@ -48,12 +48,13 @@ def test_choices_cover_all_viewset_actions(generated: SimpleNamespace) -> None:
         "payment-plan-status",
         "payment-plan-type",
         "payment-record-delivery-type",
-        "payment-verification-channel",
+        "payment-verification-plan-channel",
         "payment-verification-plan-sampling",
         "payment-verification-plan-status",
         "payment-verification-status",
         "payment-verification-summary-status",
         "permissions",
+        "sex",
     }
 
 
@@ -70,12 +71,13 @@ def test_every_choice_has_value_and_name(generated: SimpleNamespace) -> None:
         "payment-plan-background-action-status",
         "payment-plan-status",
         "payment-plan-type",
-        "payment-verification-channel",
+        "payment-verification-plan-channel",
         "payment-verification-plan-sampling",
         "payment-verification-plan-status",
         "payment-verification-status",
         "payment-verification-summary-status",
         "permissions",
+        "sex",
     ],
 )
 def test_enum_backed_endpoints_are_populated(generated: SimpleNamespace, endpoint: str) -> None:
