@@ -6,7 +6,7 @@ import pytest
 
 from hope.apps.core.tasks_schedules import TASKS_SCHEDULES
 
-migration = import_module("hope.apps.core.migrations.0030_migration")
+migration = import_module("hope.apps.core.migrations.0032_migration")
 
 
 @pytest.fixture
