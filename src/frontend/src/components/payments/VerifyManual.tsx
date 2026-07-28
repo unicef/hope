@@ -14,7 +14,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatNormalCaseValue, showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -59,7 +59,6 @@ export function VerifyManual({
     .filter((choice) => ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value))
     .map((choice) => ({
       ...choice,
-      name: formatNormalCaseValue(choice.name),
       dataCy: `choice-${choice.value.toLowerCase().replace(/_/g, '-')}`,
     }));
   const paymentQueryKey = [

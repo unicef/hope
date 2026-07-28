@@ -18,7 +18,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
-import { formatNormalCaseValue, showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketDetail;
@@ -43,12 +43,9 @@ export function VerifyPaymentGrievance({
     }
   }, [isStatusChoicesError, statusChoicesError, showMessage]);
   // Grievance verification only allows marking a payment received / not received.
-  const statusChoices = (verificationStatusChoices ?? [])
-    .filter((choice) => ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value))
-    .map((choice) => ({
-      ...choice,
-      name: formatNormalCaseValue(choice.name),
-    }));
+  const statusChoices = (verificationStatusChoices ?? []).filter((choice) =>
+    ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value),
+  );
 
   const { mutateAsync: mutate } = useMutation({
     mutationFn: (values: any) => {
