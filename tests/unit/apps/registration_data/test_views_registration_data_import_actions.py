@@ -281,7 +281,7 @@ def test_erase_rdi_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
 def test_erase_rdi(
     mock_remove_es: Mock,
     api_client: APIClient,
@@ -368,6 +368,46 @@ def test_erase_rdi_with_invalid_status(api_client: APIClient, program: Program, 
     assert not rdi.erased
 
 
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
+def test_erase_rdi_rolls_back_when_elasticsearch_fails(
+    mock_remove_es: Mock,
+    api_client: APIClient,
+    program: Program,
+    business_area: BusinessArea,
+) -> None:
+    mock_remove_es.side_effect = Exception("Elasticsearch is down")
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IMPORT_ERROR,
+    )
+    create_household_and_individuals(
+        household_data={
+            "registration_data_import": rdi,
+            "program": program,
+            "business_area": business_area,
+        },
+        individuals_data=[
+            {"program": program, "registration_data_import": rdi},
+            {"program": program, "registration_data_import": rdi},
+        ],
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-erase",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    with pytest.raises(Exception, match="Elasticsearch is down"):
+        api_client.post(url, {}, format="json")
+
+    assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+    assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
+    rdi.refresh_from_db()
+    assert not rdi.erased
+
+
 @override_settings(
     DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
     DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
@@ -399,7 +439,7 @@ def test_refuse_rdi_without_permission(
         "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
     },
 )
-@patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
 def test_refuse_rdi(
     remove_elasticsearch_documents_by_matching_ids_moc: Any,
     api_client: APIClient,
@@ -457,6 +497,47 @@ def test_refuse_rdi(
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[1][0][1].__name__
         == f"HouseholdDocument_{program.business_area.slug}_{program.code}"
     )
+
+
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
+def test_refuse_rdi_rolls_back_when_elasticsearch_fails(
+    mock_remove_es: Mock,
+    api_client: APIClient,
+    program: Program,
+    business_area: BusinessArea,
+) -> None:
+    mock_remove_es.side_effect = Exception("Elasticsearch is down")
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+    )
+    create_household_and_individuals(
+        household_data={
+            "registration_data_import": rdi,
+            "program": program,
+            "business_area": business_area,
+        },
+        individuals_data=[
+            {"program": program, "registration_data_import": rdi},
+            {"program": program, "registration_data_import": rdi},
+        ],
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-refuse",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    with pytest.raises(Exception, match="Elasticsearch is down"):
+        api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
+
+    assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+    assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.IN_REVIEW
+    assert rdi.refuse_reason in (None, "")
 
 
 def test_refuse_rdi_with_invalid_status(api_client: APIClient, program: Program, business_area: BusinessArea) -> None:

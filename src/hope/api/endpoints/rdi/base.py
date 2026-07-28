@@ -2,6 +2,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING, Any, cast
 
 from django.db.models import QuerySet
+from django.db.models.deletion import ProtectedError
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.http.response import Http404, HttpResponseBase
@@ -17,7 +18,16 @@ from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
 from hope.apps.registration_data.celery_tasks import rdi_dispatcher_task
-from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
+from hope.apps.registration_data.services.rdi_removal import remove_rdi_population
+from hope.models import (
+    Country,
+    Grant,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+    User,
+)
 
 if TYPE_CHECKING:
     from hope.models import BusinessArea
@@ -226,3 +236,37 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
                 {"id": self.selected_rdi.pk, "status": self.selected_rdi.status},
             ]
         )
+
+
+class DeleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
+    """Api to hard-delete an RDI (and everything tied to it) for a CW-managed business area.
+
+    RDI is deletable in every status except ``MERGED`` (terminal -> 409). An in-flight merge
+    holding the row lock is not waited on -> 409 ``rdi_merge_in_progress`` (retryable).
+    """
+
+    permission = Grant.API_RDI_DELETE
+
+    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        try:
+            with atomic():
+                base_qs = RegistrationDataImport.objects.filter(
+                    id=self.kwargs["rdi"],
+                    business_area=self.selected_business_area,
+                    country_workspace_id__isnull=False,
+                )
+                try:
+                    rdi = base_qs.select_for_update(skip_locked=True, of=("self",)).select_related("program").get()
+                except RegistrationDataImport.DoesNotExist:
+                    if base_qs.exists():
+                        return Response({"error": "rdi_merge_in_progress"}, status=status.HTTP_409_CONFLICT)
+                    raise Http404
+
+                if rdi.status == RegistrationDataImport.MERGED:
+                    return Response({"error": "rdi_already_merged"}, status=status.HTTP_409_CONFLICT)
+
+                remove_rdi_population(rdi, delete_rdi=True, swallow_es_errors=True)
+        except ProtectedError:
+            return Response({"error": "rdi_has_dependents"}, status=status.HTTP_409_CONFLICT)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

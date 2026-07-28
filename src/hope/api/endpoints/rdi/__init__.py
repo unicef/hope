@@ -1,6 +1,7 @@
 from hope.api.endpoints.rdi.base import (  # noqa: F401
     CompleteRDIView,
     CreateRDIView,
+    DeleteRDIView,
     PushLaxToRDIView,
     PushToRDIView,
 )
