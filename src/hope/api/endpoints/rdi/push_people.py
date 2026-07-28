@@ -82,7 +82,6 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE, required=False, allow_blank=True)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     currency = CurrencySlugRelatedField(
-        slug_field="code",
         required=False,
         allow_null=True,
         queryset=Currency.objects.active(),

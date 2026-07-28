@@ -6,7 +6,7 @@ from hope.models.currency import Currency
 
 
 class _CurrencyCarrierSerializer(serializers.Serializer):
-    currency = CurrencySlugRelatedField(slug_field="code", queryset=Currency.objects.all(), allow_null=True)
+    currency = CurrencySlugRelatedField(queryset=Currency.objects.all(), allow_null=True)
 
 
 @pytest.mark.django_db
@@ -48,6 +48,19 @@ def test_field_unknown_code_is_validation_error():
 
     assert not serializer.is_valid()
     assert "currency" in serializer.errors
+
+
+def test_field_defaults_slug_field_to_code():
+    field = CurrencySlugRelatedField(queryset=Currency.objects.all())
+
+    assert field.slug_field == "code"
+
+
+def test_field_rejects_an_overridden_slug_field():
+    # Honouring another slug field would make reads use it while writes still resolved
+    # by code, so the kwarg is refused outright rather than silently ignored.
+    with pytest.raises(TypeError):
+        CurrencySlugRelatedField(slug_field="vision_code", queryset=Currency.objects.all())
 
 
 @pytest.mark.django_db

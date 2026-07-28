@@ -184,7 +184,6 @@ class HouseholdSerializer(serializers.ModelSerializer):
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     currency = CurrencySlugRelatedField(
-        slug_field="code",
         required=False,
         allow_null=True,
         queryset=Currency.objects.active(),

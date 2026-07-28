@@ -621,7 +621,7 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     target_population_id = serializers.UUIDField(source="id")
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
-    currency = CurrencySlugRelatedField(slug_field="code", queryset=Currency.objects.active(), allow_null=True)
+    currency = CurrencySlugRelatedField(queryset=Currency.objects.active(), allow_null=True)
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:

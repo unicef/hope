@@ -559,7 +559,6 @@ class HouseholdSerializer(serializers.ModelSerializer):
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     consent_sign = serializers.CharField(allow_blank=True, required=False)
     currency = CurrencySlugRelatedField(
-        slug_field="code",
         required=False,
         allow_null=True,
         queryset=Currency.objects.active(),

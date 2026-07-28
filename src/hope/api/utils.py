@@ -6,6 +6,9 @@ from rest_framework.authentication import SessionAuthentication
 
 
 class CurrencySlugRelatedField(serializers.SlugRelatedField):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(slug_field="code", **kwargs)
+
     def to_internal_value(self, data: Any) -> Any:
         queryset = self.get_queryset()
         try:
