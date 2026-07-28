@@ -28,9 +28,6 @@ from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-from hope.contrib.aurora.services.generic_registration_service import (
-    GenericRegistrationService,
-)
 from hope.models import (
     AccountType,
     Area,
@@ -408,18 +405,6 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         household.save(update_fields=("head_of_household",))
         PendingIndividualRoleInHousehold.objects.create(individual=individual, household=household, role=ROLE_PRIMARY)
         return individual
-
-    def _prepare_household_data(
-        self,
-        household_dict: dict,
-        record: Any,
-        registration_data_import: RegistrationDataImport,
-    ) -> dict:
-        household_data = super()._prepare_household_data(household_dict, record, registration_data_import)
-        consent = GenericRegistrationService.get(household_dict, "consent_h_c")
-        if consent is not None:
-            household_data["consent"] = GenericRegistrationService.get_boolean(consent)
-        return household_data
 
     def _prepare_individual_data(
         self,
