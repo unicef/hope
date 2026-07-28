@@ -182,7 +182,11 @@ export const HouseholdTable = ({
       >
         <TableCell align="left">
           <>
-            <Box mr={2}>
+            <Box
+              sx={{
+                mr: 2,
+              }}
+            >
               {household.hasDuplicates && (
                 <WarningTooltip
                   confirmed
@@ -190,12 +194,20 @@ export const HouseholdTable = ({
                 />
               )}
             </Box>
-            <Box mr={2}>
+            <Box
+              sx={{
+                mr: 2,
+              }}
+            >
               {household.sanctionListPossibleMatch && (
                 <FlagTooltip message={t('Sanction List Possible Match')} />
               )}
             </Box>
-            <Box mr={2}>
+            <Box
+              sx={{
+                mr: 2,
+              }}
+            >
               {household.sanctionListConfirmedMatch && (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}

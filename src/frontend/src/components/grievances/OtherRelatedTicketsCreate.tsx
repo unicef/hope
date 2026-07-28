@@ -52,7 +52,12 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
           baseUrl,
         );
         return (
-          <Box key={el.id} mb={1}>
+          <Box
+            key={el.id}
+            sx={{
+              mb: 1,
+            }}
+          >
             <ContentLink href={grievanceDetailsPath}>{el.unicefId}</ContentLink>
           </Box>
         );
@@ -77,21 +82,35 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
       <Title>
         <Typography variant="h6">{t('Other Related Tickets')}</Typography>
       </Title>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <LabelizedField
           label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
         {!show && closedExistingTickets.length ? (
-          <Box mt={3}>
+          <Box
+            sx={{
+              mt: 3,
+            }}
+          >
             <BlueBold onClick={() => setShow(true)}>
               {t('SHOW CLOSED TICKETS')} ({closedExistingTickets.length})
             </BlueBold>
           </Box>
         ) : null}
         {show && (
-          <Box mb={3} mt={3}>
+          <Box
+            sx={{
+              mb: 3,
+              mt: 3,
+            }}
+          >
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
               label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}

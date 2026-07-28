@@ -421,7 +421,7 @@ export const GlobalProgramSelect = () => {
                 placeholder="Search programmes"
                 variant="outlined"
                 size="small"
-                ref={params.InputProps.ref}
+                ref={params.slotProps.input.ref}
                 autoFocus
                 onChange={handleOnChangeInput}
                 onKeyDown={handleEnter}
@@ -430,14 +430,14 @@ export const GlobalProgramSelect = () => {
                 }}
                 slotProps={{
                   htmlInput: {
-                    ...params.inputProps,
+                    ...params.slotProps.htmlInput,
                     'data-cy': 'search-input-gpf',
                   },
                   input: {
-                    ...params.InputProps,
+                    ...params.slotProps.input,
                     endAdornment: (
                       <>
-                        {params.InputProps?.endAdornment}
+                        {params.slotProps.input?.endAdornment}
                         <InputAdornment position="end">
                           {loadingPrograms && <CircularProgress />}
                           {inputValue && (

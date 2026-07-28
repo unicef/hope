@@ -138,7 +138,12 @@ function SurveyDetailsPage(): ReactElement {
       >
         {renderActions()}
       </PageHeader>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <SurveyDetails survey={survey} />
         <RecipientsTable
           canViewDetails={hasPermissions(

@@ -56,12 +56,27 @@ export function DeleteHouseholdGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} to be withdrawn`}</Typography>
           {approveStatus && ticket.ticketDetails.reasonHousehold && (
-            <Box display="flex" alignItems="center">
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
               <Info />
-              <Box mr={2}>
+              <Box
+                sx={{
+                  mr: 2,
+                }}
+              >
                 <p>
                   This {beneficiaryGroup?.groupLabel} is a duplicate of a{' '}
                   {beneficiaryGroup?.groupLabel} ID:

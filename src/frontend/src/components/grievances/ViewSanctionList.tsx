@@ -52,7 +52,11 @@ export function ViewSanctionList({
           <DialogTitle>{t('Sanction List View')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box mb={3}>
+          <Box
+            sx={{
+              mb: 3,
+            }}
+          >
             <Grid container spacing={3}>
               <Grid>
                 <SearchTextField

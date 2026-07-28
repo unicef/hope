@@ -1,6 +1,6 @@
 import { Button, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { DocumentField } from '../DocumentField';
@@ -67,7 +67,7 @@ export function NewDocumentFieldArray({
                     number: '',
                   });
                 }}
-                startIcon={<AddCircleOutline />}
+                startIcon={<AddCircleOutlined />}
               >
                 {t('Add Document')}
               </Button>

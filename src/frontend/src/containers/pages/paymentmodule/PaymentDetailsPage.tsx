@@ -93,7 +93,12 @@ function PaymentDetailsPage(): ReactElement {
       >
         {renderButton()}
       </PageHeader>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <PaymentDetails
           payment={payment}
           canViewActivityLog={hasPermissions(

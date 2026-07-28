@@ -59,7 +59,6 @@ def afghanistan(db):
         region_name="SAR",
         slug="afghanistan",
         has_data_sharing_agreement=True,
-        kobo_token="XXX",
         active=True,
     )
 

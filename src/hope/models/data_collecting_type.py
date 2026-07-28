@@ -26,8 +26,19 @@ class DataCollectingType(TimeStampedModel):
     )
     individual_filters_available = models.BooleanField(default=False)
     household_filters_available = models.BooleanField(default=True)
-    recalculate_composition = models.BooleanField(default=False)
-    weight = models.PositiveSmallIntegerField(default=0)
+    recalculate_composition = models.BooleanField(
+        default=False,
+        help_text="When enabled, household composition counters (age/gender disaggregation, size, "
+        "children counts) are automatically recalculated from linked individuals data",
+    )
+    collects_individual_data = models.BooleanField(
+        default=False,
+        help_text="Whether this data collecting type registers individual members data; "
+        "when enabled, known affected beneficiaries may be derived by counting linked individuals",
+    )
+    weight = models.PositiveSmallIntegerField(
+        default=0, help_text="Ordering weight: types with a higher weight are listed first"
+    )
     compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
     limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
 

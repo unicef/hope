@@ -47,7 +47,11 @@ export const ProgramSelect: FC<ProgramSelectProps> = ({
       endAdornment={
         selectedProgram !== '' && (
           <InputAdornment position="end">
-            <Box mr={2}>
+            <Box
+              sx={{
+                mr: 2,
+              }}
+            >
               <IconButton
                 size="small"
                 onClick={(event) => {

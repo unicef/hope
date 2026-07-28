@@ -145,3 +145,19 @@ def test_dct_form_keeps_type_error_out_when_type_is_unchanged(
         "DCTs of different types cannot be compatible with each other. "
         "Following DCTs are not of type STANDARD: ['Social']"
     ]
+
+
+def test_dct_form_allows_editing_collects_individual_data(standard_dct: DataCollectingType) -> None:
+    form = DataCollectingTypeForm(
+        data={
+            "code": standard_dct.code,
+            "label": standard_dct.label,
+            "type": DataCollectingType.Type.STANDARD,
+            "weight": 1,
+            "collects_individual_data": True,
+        },
+        instance=standard_dct,
+    )
+
+    assert form.is_valid() is True
+    assert form.save().collects_individual_data is True

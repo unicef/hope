@@ -24,26 +24,30 @@ export function SendToPaymentGatewayGroupButton({
   const queryClient = useQueryClient();
   const permissions = usePermissions();
 
-  const {
-    mutateAsync: sendToPaymentGateway,
-    isPending: loadingSend,
-  } = useMutation({
-    mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        id: group?.id,
-      }),
-    onSuccess: () => {
-      showMessage(t('Sending to Payment Gateway started'));
-      queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroup', businessArea, programId, group.id],
-      });
-    },
-    onError: (error) => {
-      showApiErrorMessages(error, showMessage, t('Send to Payment Gateway failed'));
-    },
-  });
+  const { mutateAsync: sendToPaymentGateway, isPending: loadingSend } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate(
+          {
+            businessAreaSlug: businessArea,
+            programCode: programId,
+            id: group?.id,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Sending to Payment Gateway started'));
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlanGroup', businessArea, programId, group.id],
+        });
+      },
+      onError: (error) => {
+        showApiErrorMessages(
+          error,
+          showMessage,
+          t('Send to Payment Gateway failed'),
+        );
+      },
+    });
 
   if (!group) return null;
   if (
@@ -55,7 +59,11 @@ export function SendToPaymentGatewayGroupButton({
     return null;
 
   return (
-    <Box m={2}>
+    <Box
+      sx={{
+        m: 2,
+      }}
+    >
       <LoadingButton
         loading={loadingSend}
         color="primary"

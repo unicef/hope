@@ -46,9 +46,18 @@ function FeedbackDetailsToolbar({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={feedback.adminUrl} />}
     >
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {canEdit && (
-          <Box mr={3}>
+          <Box
+            sx={{
+              mr: 3,
+            }}
+          >
             <ButtonTooltip
               color="primary"
               variant="outlined"
@@ -65,7 +74,11 @@ function FeedbackDetailsToolbar({
           </Box>
         )}
         {!hasLinkedGrievance && (
-          <Box mr={3}>
+          <Box
+            sx={{
+              mr: 3,
+            }}
+          >
             <ButtonTooltip
               onClick={() =>
                 navigate(`/${baseUrl}/grievance/new-ticket`, {

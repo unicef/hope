@@ -2,7 +2,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { ReactElement, ReactNode, useEffect, useRef } from 'react';
 import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
 
- 
 type OptionType = any;
 
 export function BaseAutocomplete({
@@ -33,7 +32,7 @@ export function BaseAutocomplete({
   loading: boolean;
   allEdges;
   handleChange: (event, newValue) => void;
-   
+
   handleClose: (_: any, reason: string) => void;
   handleOptionSelected: (option: OptionType, value: OptionType) => boolean;
   handleOptionLabel: (option: OptionType) => string;
@@ -81,7 +80,6 @@ export function BaseAutocomplete({
       onOpen={handleOpen}
       onClose={handleClose}
       isOptionEqualToValue={(option, selectedValue) =>
-         
         handleOptionSelected(option as any, selectedValue as any)
       }
       getOptionLabel={handleOptionLabel}
@@ -97,15 +95,16 @@ export function BaseAutocomplete({
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           slotProps={{
+            ...params.slotProps,
             input: {
-              ...params.InputProps,
+              ...params.slotProps.input,
               startAdornment,
               endAdornment: (
                 <>
                   {loading ? (
                     <CircularProgress color="inherit" size={20} />
                   ) : null}
-                  {params.InputProps.endAdornment}
+                  {params.slotProps.input.endAdornment}
                 </>
               ),
             },

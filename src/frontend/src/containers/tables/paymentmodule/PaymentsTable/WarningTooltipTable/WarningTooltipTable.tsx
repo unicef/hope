@@ -128,11 +128,21 @@ export function WarningTooltipTable({
         <DialogTitle>{t('Warning')}</DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
-        <Box mt={4} mb={2} display="flex">
+        <Box
+          sx={{
+            mt: 4,
+            mb: 2,
+            display: 'flex',
+          }}
+        >
           {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
           {t('details')}:
         </Box>
-        <GreyBox p={3}>
+        <GreyBox
+          sx={{
+            p: 3,
+          }}
+        >
           <Grid container>
             <Grid size={6}>
               <LabelizedField label={t('Start Date')}>
@@ -146,7 +156,13 @@ export function WarningTooltipTable({
             </Grid>
           </Grid>
         </GreyBox>
-        <Box mt={10} mb={10} display="flex">
+        <Box
+          sx={{
+            mt: 10,
+            mb: 10,
+            display: 'flex',
+          }}
+        >
           {`${beneficiaryGroup?.groupLabel} ID`}{' '}
           <Bold>{payment.householdUnicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:

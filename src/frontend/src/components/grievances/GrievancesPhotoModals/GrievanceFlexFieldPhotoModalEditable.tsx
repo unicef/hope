@@ -51,9 +51,21 @@ export function GrievanceFlexFieldPhotoModalEditable({
     : flexFields[flexField.name]?.value;
 
   return (
-    <Box style={{ height: '100%' }} display="flex" alignItems="center">
+    <Box
+      style={{ height: '100%' }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display="flex" alignItems="center">
+        <Box
+          style={{ height: '100%' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <FormikFileField field={field} form={form} />
         </Box>
       ) : (
