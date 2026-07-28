@@ -307,7 +307,7 @@ export function CreateChildPaymentPlan({
                           )}
                         </GreyText>
                       </Box>
-                      <Grid container spacing={3} alignItems="center">
+                      <Grid container spacing={3} sx={{ alignItems: 'center' }}>
                         <Grid size={{ xs: 6 }}>
                           <Field
                             name="fixedAmount"
