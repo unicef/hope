@@ -118,3 +118,30 @@ def test_resolve_code_raises_when_only_deprecated_row_exists():
 
     with pytest.raises(Currency.DoesNotExist):
         Currency.objects.resolve_code("SYP")
+
+
+@pytest.mark.django_db
+def test_resolve_code_or_none_returns_active_row():
+    currency = Currency.objects.create(code="TST", name="Test", active=True)
+
+    assert Currency.objects.resolve_code_or_none("TST") == currency
+
+
+@pytest.mark.django_db
+def test_resolve_code_or_none_returns_none_for_unknown_code():
+    assert Currency.objects.resolve_code_or_none("MISSING") is None
+
+
+@pytest.mark.django_db
+def test_resolve_code_or_none_returns_none_when_only_deprecated_row_exists():
+    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+    assert Currency.objects.resolve_code_or_none("SYP") is None
+
+
+@pytest.mark.django_db
+def test_resolve_code_or_none_prefers_active_over_deprecated_for_shared_code():
+    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    new = Currency.objects.create(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+
+    assert Currency.objects.resolve_code_or_none("SYP") == new

@@ -598,6 +598,19 @@ def test_update_people_individual_hh_currency_field(
         _assert_fields_updated(hh, fields, new_values, extract=lambda v: v.code)
 
 
+def test_update_people_individual_hh_currency_field_resolves_active_row_for_shared_code(
+    update_context: dict[str, Any], hh_field_reference_data: None
+) -> None:
+    CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    new_syp = CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == new_syp
+
+
 def test_update_people_individual_hh_admin_area(
     update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:

@@ -701,3 +701,23 @@ def test_close_resolves_currency_from_code(all_currencies) -> None:
 
     usd_currency = Currency.objects.get(code="USD")
     assert household.currency == usd_currency
+
+
+def test_close_resolves_active_currency_for_shared_code() -> None:
+    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    new_syp = Currency.objects.create(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+    household = HouseholdFactory(create_role=False, currency=None)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        household_data={
+            "currency": {"value": "SYP", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+
+    service = HouseholdDataUpdateService(ticket, {})
+    service.close(UserFactory())
+    household.refresh_from_db()
+
+    assert household.currency == new_syp

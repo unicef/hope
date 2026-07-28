@@ -138,7 +138,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 correct_value = None
             else:
                 try:
-                    correct_value = Currency.objects.resolve_code(value)
+                    correct_value = Currency.objects.resolve_code(value)  # type: ignore[arg-type]
                 except Currency.DoesNotExist:
                     raise ValueError(f"Unknown currency code '{value}' on household #{self.household_count}")
         else:

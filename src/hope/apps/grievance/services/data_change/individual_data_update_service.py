@@ -299,7 +299,7 @@ class IndividualDataUpdateService(DataChangeService):
             if hh_country := hh_approved_data.get("country"):
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
             if hh_currency := hh_approved_data.get("currency"):
-                hh_approved_data["currency"] = Currency.objects.filter(code=hh_currency).first()
+                hh_approved_data["currency"] = Currency.objects.resolve_code_or_none(hh_currency)
             admin_area_title = hh_approved_data.pop("admin_area_title", None)
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
 
