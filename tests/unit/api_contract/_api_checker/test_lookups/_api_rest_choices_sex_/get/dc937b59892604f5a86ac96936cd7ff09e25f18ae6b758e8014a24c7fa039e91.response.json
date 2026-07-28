@@ -8,20 +8,28 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "106"
+        "Content-Length": "196"
     },
     "data": [
         {
-            "name": "MANUAL",
-            "value": "MANUAL"
+            "name": "Female",
+            "value": "FEMALE"
         },
         {
-            "name": "RAPIDPRO",
-            "value": "RAPIDPRO"
+            "name": "Male",
+            "value": "MALE"
         },
         {
-            "name": "XLSX",
-            "value": "XLSX"
+            "name": "Not answered",
+            "value": "NOT_ANSWERED"
+        },
+        {
+            "name": "Not collected",
+            "value": "NOT_COLLECTED"
+        },
+        {
+            "name": "Other",
+            "value": "OTHER"
         }
     ],
     "content_type": "application/json"

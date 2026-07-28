@@ -1,8 +1,8 @@
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
@@ -10,14 +10,15 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { Choice } from '@restgenerated/models/Choice';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
-import { showApiErrorMessages } from '@utils/utils';
+import { formatNormalCaseValue, showApiErrorMessages } from '@utils/utils';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketDetail;
@@ -30,14 +31,24 @@ export function VerifyPaymentGrievance({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
-  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
-    queryKey: ['verificationStatusChoices'],
-    queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
-  });
+  const {
+    data: verificationStatusChoices,
+    isLoading: isStatusChoicesLoading,
+    isError: isStatusChoicesError,
+    error: statusChoicesError,
+  } = useVerificationStatusChoices();
+  useEffect(() => {
+    if (isStatusChoicesError) {
+      showApiErrorMessages(statusChoicesError, showMessage);
+    }
+  }, [isStatusChoicesError, statusChoicesError, showMessage]);
   // Grievance verification only allows marking a payment received / not received.
-  const statusChoices = (verificationStatusChoices ?? []).filter((choice) =>
-    ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value),
-  );
+  const statusChoices = (verificationStatusChoices ?? [])
+    .filter((choice) => ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value))
+    .map((choice) => ({
+      ...choice,
+      name: formatNormalCaseValue(choice.name),
+    }));
 
   const { mutateAsync: mutate } = useMutation({
     mutationFn: (values: any) => {
@@ -115,13 +126,17 @@ export function VerifyPaymentGrievance({
               <DialogContainer>
                 <Grid container>
                   <Grid size={{ xs: 12 }}>
-                    <Field
-                      name="newStatus"
-                      label="Status"
-                      style={{ flexDirection: 'row' }}
-                      choices={statusChoices}
-                      component={FormikRadioGroup}
-                    />
+                    {isStatusChoicesLoading ? (
+                      <LoadingComponent />
+                    ) : (
+                      <Field
+                        name="newStatus"
+                        label="Status"
+                        style={{ flexDirection: 'row' }}
+                        choices={statusChoices}
+                        component={FormikRadioGroup}
+                      />
+                    )}
                   </Grid>
                   <Grid size={{ xs: 6 }}>
                     {values.newStatus === 'RECEIVED' && (

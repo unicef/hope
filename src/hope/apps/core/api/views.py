@@ -33,6 +33,7 @@ from hope.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
+from hope.apps.household.const import SEX_CHOICE
 from hope.models import (
     AccountType,
     BusinessArea,
@@ -193,9 +194,15 @@ class ChoicesViewSet(ViewSet):
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
-    @action(detail=False, methods=["get"], url_path="payment-verification-channel")
-    def payment_verification_channel(self, request: Request) -> Response:
+    @action(detail=False, methods=["get"], url_path="payment-verification-plan-channel")
+    def payment_verification_plan_channel(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="sex")
+    def sex(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(SEX_CHOICE), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

@@ -6,9 +6,8 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { Choice } from '@restgenerated/models/Choice';
+import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
+import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -47,17 +46,10 @@ export function VerificationRecordsFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
-    queryKey: ['verificationStatusChoices'],
-    queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
-  });
+  const { data: verificationStatusChoices } = useVerificationStatusChoices();
+  const verificationChannelChoices = useVerificationChannelChoices();
 
-  const { data: verificationChannelChoices } = useQuery<Array<Choice>>({
-    queryKey: ['verificationChannelChoices'],
-    queryFn: () => RestService.restChoicesPaymentVerificationChannelList(),
-  });
-
-  if (!verificationStatusChoices || !verificationChannelChoices) {
+  if (!verificationStatusChoices || !verificationChannelChoices.length) {
     return null;
   }
 

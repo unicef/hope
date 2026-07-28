@@ -6,16 +6,17 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
-import { Choice } from '@restgenerated/models/Choice';
 import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatNormalCaseValue, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface Props {
@@ -42,15 +43,23 @@ export function VerifyManual({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { programCode, businessAreaSlug } = useBaseUrl();
-  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
-    queryKey: ['verificationStatusChoices'],
-    queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
-  });
+  const {
+    data: verificationStatusChoices,
+    isLoading: isStatusChoicesLoading,
+    isError: isStatusChoicesError,
+    error: statusChoicesError,
+  } = useVerificationStatusChoices();
+  useEffect(() => {
+    if (isStatusChoicesError) {
+      showApiErrorMessages(statusChoicesError, showMessage);
+    }
+  }, [isStatusChoicesError, statusChoicesError, showMessage]);
   // Manual verification only allows marking a payment received / not received.
   const statusChoices = (verificationStatusChoices ?? [])
     .filter((choice) => ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value))
     .map((choice) => ({
       ...choice,
+      name: formatNormalCaseValue(choice.name),
       dataCy: `choice-${choice.value.toLowerCase().replace(/_/g, '-')}`,
     }));
   const paymentQueryKey = [
@@ -135,13 +144,17 @@ export function VerifyManual({
               <DialogContainer>
                 <Grid container>
                   <Grid size={{ xs: 12 }}>
-                    <Field
-                      name="status"
-                      label="Status"
-                      style={{ flexDirection: 'row' }}
-                      choices={statusChoices}
-                      component={FormikRadioGroup}
-                    />
+                    {isStatusChoicesLoading ? (
+                      <LoadingComponent />
+                    ) : (
+                      <Field
+                        name="status"
+                        label="Status"
+                        style={{ flexDirection: 'row' }}
+                        choices={statusChoices}
+                        component={FormikRadioGroup}
+                      />
+                    )}
                   </Grid>
                   <Grid size={{ xs: 6 }}>
                     {values.status === 'RECEIVED' && (

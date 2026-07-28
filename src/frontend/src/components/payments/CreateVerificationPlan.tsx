@@ -40,10 +40,10 @@ import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { AreaList } from '@restgenerated/models/AreaList';
-import { Choice } from '@restgenerated/models/Choice';
 import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { useSexChoices } from '@hooks/useSexChoices';
+import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -167,14 +167,7 @@ export const CreateVerificationPlan = ({
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const queryClient = useQueryClient();
   const sexChoices = useSexChoices();
-  const { data: verificationChannelChoices } = useQuery<Array<Choice>>({
-    queryKey: ['verificationChannelChoices'],
-    queryFn: () => RestService.restChoicesPaymentVerificationChannelList(),
-  });
-  const channelChoices = (verificationChannelChoices ?? []).map((choice) => ({
-    ...choice,
-    dataCy: `radio-${choice.value.toLowerCase()}`,
-  }));
+  const channelChoices = useVerificationChannelChoices();
 
   const createVerificationPlanMutation = useMutation({
     mutationFn: (data: PaymentVerificationPlanCreate) =>
@@ -462,23 +455,7 @@ export const CreateVerificationPlan = ({
                           label={t('Verification Channel')}
                           style={{ flexDirection: 'row' }}
                           data-cy="checkbox-verification-channel"
-                          choices={[
-                            {
-                              value: 'RAPIDPRO',
-                              name: 'RAPIDPRO',
-                              dataCy: 'radio-rapidpro',
-                            },
-                            {
-                              value: 'XLSX',
-                              name: 'XLSX',
-                              dataCy: 'radio-xlsx',
-                            },
-                            {
-                              value: 'MANUAL',
-                              name: 'MANUAL',
-                              dataCy: 'radio-manual',
-                            },
-                          ]}
+                          choices={channelChoices}
                           component={FormikRadioGroup}
                           alignItems="center"
                         />
