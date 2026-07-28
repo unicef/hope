@@ -120,8 +120,8 @@ def usdc_record(registration: Any, submission_timestamp: datetime.datetime) -> R
         timestamp=submission_timestamp,
         source_id=1,
         fields={
-            "household": [{"consent_h_c": True}],
-            "individuals": [
+            "consent": [{"consent_h_c": ["1"]}],
+            "individual_details": [
                 {
                     "given_name_i_c": "Olena",
                     "middle_name_i_c": "Ivanivna",
@@ -129,8 +129,6 @@ def usdc_record(registration: Any, submission_timestamp: datetime.datetime) -> R
                     "birth_date": "1990-05-12",
                     "gender_i_c": "female",
                     "phone_no_i_c": "0501112233",
-                    "relationship_i_c": "head",
-                    "role_i_c": "y",
                     "tax_id_no_i_c": "1234567890",
                     "wallet_address_i_c": "0xABCDEF0123456789",
                     "wallet_name_i_c": "MetaMask",
@@ -163,82 +161,8 @@ def test_creates_household_in_ukraine_for_regular_programme(
     assert household.country.iso_code2 == "UA"
     assert household.country_origin.iso_code2 == "UA"
     assert household.consent is True
+    assert household.size == 1
     assert household.first_registration_date == submission_timestamp
-
-
-def test_consent_read_from_form_when_declined(
-    registration: Any,
-    user: Any,
-    ukraine_country: Any,
-    tax_id_document_type: Any,
-    digital_wallet_delivery_mechanism: DeliveryMechanism,
-    submission_timestamp: datetime.datetime,
-) -> None:
-    record = RecordFactory(
-        registration=registration.source_id,
-        timestamp=submission_timestamp,
-        source_id=2,
-        fields={
-            "household": [{"consent_h_c": "n"}],
-            "individuals": [
-                {
-                    "given_name_i_c": "Petro",
-                    "family_name_i_c": "Bondarenko",
-                    "birth_date": "1985-03-01",
-                    "gender_i_c": "male",
-                    "relationship_i_c": "head",
-                    "role_i_c": "y",
-                    "tax_id_no_i_c": "9876543210",
-                    "wallet_address_i_c": "0x0011223344556677",
-                    "wallet_name_i_c": "Trust",
-                }
-            ],
-        },
-        files=json.dumps({}).encode(),
-    )
-    service = UkraineUSDCRegistrationService(registration)
-    rdi = service.create_rdi(user, "usdc rdi")
-
-    service.process_records(rdi.id, [record.id])
-
-    household = PendingHousehold.objects.get(registration_data_import=rdi)
-    assert household.consent is False
-
-
-def test_consent_defaults_to_true_when_not_in_form(
-    registration: Any,
-    user: Any,
-    ukraine_country: Any,
-    tax_id_document_type: Any,
-    submission_timestamp: datetime.datetime,
-) -> None:
-    record = RecordFactory(
-        registration=registration.source_id,
-        timestamp=submission_timestamp,
-        source_id=7,
-        fields={
-            "household": [{}],
-            "individuals": [
-                {
-                    "given_name_i_c": "Ivan",
-                    "family_name_i_c": "Kovalenko",
-                    "birth_date": "1970-07-07",
-                    "gender_i_c": "male",
-                    "relationship_i_c": "head",
-                    "role_i_c": "y",
-                    "tax_id_no_i_c": "5555555555",
-                }
-            ],
-        },
-        files=json.dumps({}).encode(),
-    )
-    service = UkraineUSDCRegistrationService(registration)
-    rdi = service.create_rdi(user, "usdc rdi")
-
-    service.process_records(rdi.id, [record.id])
-
-    household = PendingHousehold.objects.get(registration_data_import=rdi)
-    assert household.consent is True
 
 
 def test_individual_full_name_concatenated_and_birth_date_not_estimated(
@@ -258,6 +182,23 @@ def test_individual_full_name_concatenated_and_birth_date_not_estimated(
     assert individual.full_name == "Olena Ivanivna Shevchenko"
     assert str(individual.birth_date) == "1990-05-12"
     assert individual.estimated_birth_date is False
+
+
+def test_ukrainian_phone_number_normalized(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.phone_no == "+380501112233"
 
 
 def test_wallet_stored_on_account(
@@ -338,13 +279,33 @@ def test_wallet_account_created_for_collector(
     assert account.data == {"wallet_address": "0xABCDEF0123456789", "wallet_name": "MetaMask"}
 
 
-def test_wallet_accounts_created_for_each_individual_with_wallet(
+def test_single_individual_is_head_and_primary_collector(
     registration: Any,
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
-    generic_crypto_fi: FinancialInstitution,
+    usdc_record: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    household = PendingHousehold.objects.get(registration_data_import=rdi)
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert household.head_of_household == individual
+    assert PendingIndividualRoleInHousehold.objects.filter(
+        household=household, individual=individual, role=ROLE_PRIMARY
+    ).exists()
+
+
+def test_rejects_record_with_more_than_one_individual(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
     submission_timestamp: datetime.datetime,
 ) -> None:
     record = RecordFactory(
@@ -352,15 +313,13 @@ def test_wallet_accounts_created_for_each_individual_with_wallet(
         timestamp=submission_timestamp,
         source_id=4,
         fields={
-            "household": [{"consent_h_c": True}],
-            "individuals": [
+            "consent": [{"consent_h_c": ["1"]}],
+            "individual_details": [
                 {
                     "given_name_i_c": "Olena",
                     "family_name_i_c": "Shevchenko",
                     "birth_date": "1990-05-12",
                     "gender_i_c": "female",
-                    "relationship_i_c": "head",
-                    "role_i_c": "y",
                     "wallet_address_i_c": "0xAAA1",
                     "wallet_name_i_c": "MetaMask",
                 },
@@ -369,8 +328,6 @@ def test_wallet_accounts_created_for_each_individual_with_wallet(
                     "family_name_i_c": "Shevchenko",
                     "birth_date": "2010-08-08",
                     "gender_i_c": "male",
-                    "relationship_i_c": "son_daughter",
-                    "role_i_c": "n",
                     "wallet_address_i_c": "0xBBB2",
                     "wallet_name_i_c": "Trust",
                 },
@@ -383,9 +340,48 @@ def test_wallet_accounts_created_for_each_individual_with_wallet(
 
     service.process_records(rdi.id, [record.id])
 
-    accounts = PendingAccount.objects.filter(individual__registration_data_import=rdi)
-    assert accounts.count() == 2
-    assert set(accounts.values_list("number", flat=True)) == {"0xAAA1", "0xBBB2"}
+    record.refresh_from_db()
+    assert record.status == Record.STATUS_ERROR
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
+
+
+def test_invalid_individual_rejects_record(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    submission_timestamp: datetime.datetime,
+) -> None:
+    record = RecordFactory(
+        registration=registration.source_id,
+        timestamp=submission_timestamp,
+        source_id=8,
+        fields={
+            "consent": [{"consent_h_c": ["1"]}],
+            "individual_details": [
+                {
+                    "given_name_i_c": "Olena",
+                    "family_name_i_c": "Shevchenko",
+                    "birth_date": "1990-99-99",
+                    "gender_i_c": "female",
+                    "tax_id_no_i_c": "1234567890",
+                    "wallet_address_i_c": "0xABCDEF0123456789",
+                    "wallet_name_i_c": "MetaMask",
+                }
+            ],
+        },
+        files=json.dumps({}).encode(),
+    )
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [record.id])
+
+    record.refresh_from_db()
+    assert record.status == Record.STATUS_ERROR
+    assert "individual nr 1" in record.error_message
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
 
 
 def test_import_errors_when_delivery_mechanism_not_configured(
@@ -419,15 +415,13 @@ def test_no_wallet_account_when_address_missing(
         timestamp=submission_timestamp,
         source_id=6,
         fields={
-            "household": [{"consent_h_c": True}],
-            "individuals": [
+            "consent": [{"consent_h_c": ["1"]}],
+            "individual_details": [
                 {
                     "given_name_i_c": "Ivan",
                     "family_name_i_c": "Kovalenko",
                     "birth_date": "1970-07-07",
                     "gender_i_c": "male",
-                    "relationship_i_c": "head",
-                    "role_i_c": "y",
                     "wallet_name_i_c": "Trust",
                 }
             ],
@@ -441,24 +435,3 @@ def test_no_wallet_account_when_address_missing(
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
     assert not PendingAccount.objects.filter(individual=individual).exists()
-
-
-def test_role_creates_primary_collector(
-    registration: Any,
-    user: Any,
-    ukraine_country: Any,
-    tax_id_document_type: Any,
-    digital_wallet_delivery_mechanism: DeliveryMechanism,
-    usdc_record: Record,
-) -> None:
-    service = UkraineUSDCRegistrationService(registration)
-    rdi = service.create_rdi(user, "usdc rdi")
-
-    service.process_records(rdi.id, [usdc_record.id])
-
-    household = PendingHousehold.objects.get(registration_data_import=rdi)
-    individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    assert household.head_of_household == individual
-    assert PendingIndividualRoleInHousehold.objects.filter(
-        household=household, individual=individual, role=ROLE_PRIMARY
-    ).exists()

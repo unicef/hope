@@ -28,9 +28,6 @@ from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-from hope.contrib.aurora.services.generic_registration_service import (
-    GenericRegistrationService,
-)
 from hope.models import (
     AccountType,
     Area,
@@ -347,8 +344,6 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         "birth_date": "birth_date",
         "sex": "gender_i_c",
         "phone_no": "phone_no_i_c",
-        "relationship": "relationship_i_c",
-        "role": "role_i_c",
     }
 
     DOCUMENT_MAPPING_KEY_DICT = {
@@ -360,17 +355,53 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
 
     INDIVIDUAL_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
 
-    def _prepare_household_data(
+    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
+        record_data_dict = record.get_data()
+        individuals_array = record_data_dict.get("individual_details", [])
+        if len(individuals_array) != 1:
+            raise ValidationError("USDC registration expects exactly one individual per household")
+
+        individual_dict = individuals_array[0]
+
+        household = self._build_household(record, registration_data_import)
+        individual = self._build_head_of_household(individual_dict, household, record, registration_data_import)
+
+        PendingDocument.objects.bulk_create(self._prepare_documents(individual_dict, individual))
+        PendingAccount.objects.bulk_create(self._prepare_accounts(individual_dict, individual))
+
+    def _build_household(self, record: Any, registration_data_import: RegistrationDataImport) -> PendingHousehold:
+        household_data = self._prepare_household_data({}, record, registration_data_import)
+        household_data["size"] = 1
+        household = self._create_object_and_validate(household_data, PendingHousehold)
+        household.detail_id = record.source_id
+        household.save(update_fields=("detail_id",))
+        return household
+
+    def _build_head_of_household(
         self,
-        household_dict: dict,
+        individual_dict: dict,
+        household: PendingHousehold,
         record: Any,
         registration_data_import: RegistrationDataImport,
-    ) -> dict:
-        household_data = super()._prepare_household_data(household_dict, record, registration_data_import)
-        consent = household_dict.get("consent_h_c")
-        if consent is not None:
-            household_data["consent"] = GenericRegistrationService.get_boolean(consent)
-        return household_data
+    ) -> PendingIndividual:
+        try:
+            individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
+            individual_data["relationship"] = HEAD
+            phone_no = individual_data.pop("phone_no", "")
+
+            individual: PendingIndividual = self._create_object_and_validate(
+                individual_data, PendingIndividual, IndividualForm
+            )
+            individual.phone_no = phone_no
+            individual.detail_id = record.source_id
+            individual.save()
+        except ValidationError as e:
+            raise ValidationError({"individual nr 1": [str(e)]}) from e
+
+        household.head_of_household = individual
+        household.save(update_fields=("head_of_household",))
+        PendingIndividualRoleInHousehold.objects.create(individual=individual, household=household, role=ROLE_PRIMARY)
+        return individual
 
     def _prepare_individual_data(
         self,
