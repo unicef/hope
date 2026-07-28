@@ -112,7 +112,7 @@ def test_upload_file_post_creates_storage_file_and_redirects(
     assert storage_file.created_by == user_with_upload_permission
     assert storage_file.business_area == business_area
     messages = [str(message) for message in get_messages(response.wsgi_request)]
-    assert messages == [f"File {storage_file.file.name} has been successfully uploaded."]
+    assert messages == [f"File {storage_file.file.name.rsplit('/', 1)[-1]} has been successfully uploaded."]
 
 
 def test_upload_file_post_with_too_large_file_shows_error(

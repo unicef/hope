@@ -12,6 +12,7 @@ from django.views.generic import View
 from hope.apps.core.forms import StorageFileForm
 from hope.apps.core.permissions_views_mixins import UploadFilePermissionMixin
 from hope.models import StorageFile
+from hope.models.utils import upload_basename
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class UploadFile(UploadFilePermissionMixin, View):
                 business_area_id=request.POST["business_area"],
             )
             new_file.save()
-            messages.success(request, f"File {new_file.file.name} has been successfully uploaded.")
+            messages.success(request, f"File {upload_basename(new_file.file.name)} has been successfully uploaded.")
             return HttpResponseRedirect(reverse("upload-file"))
         messages.error(request, self.format_form_error(form))
         return render(request, self.template_name, {"form": StorageFileForm(user=user)})

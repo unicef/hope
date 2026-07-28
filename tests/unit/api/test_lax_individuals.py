@@ -453,8 +453,9 @@ def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program,
 
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
     assert individual.photo is not None
-    assert individual.photo.name.startswith(lax_program.code)
-    assert individual.photo.name.endswith(".png")
+    stored_name = individual.photo.name
+    assert stored_name.split("_", 1)[-1].startswith(lax_program.code)
+    assert stored_name.endswith(".png")
 
 
 def test_create_individual_with_disability_certificate_picture(lax_api_client, lax_push_url, lax_program, base64_image):
@@ -479,8 +480,10 @@ def test_create_individual_with_disability_certificate_picture(lax_api_client, l
 
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
     assert individual.disability_certificate_picture is not None
-    assert individual.disability_certificate_picture.name.startswith(lax_program.code)
-    assert individual.disability_certificate_picture.name.endswith(".png")
+    stored_name = individual.disability_certificate_picture.name
+    assert stored_name.startswith("individual_disability_certificate/")
+    assert stored_name.rsplit("/", 1)[-1].startswith(lax_program.code)
+    assert stored_name.endswith(".png")
 
 
 def test_create_individual_with_document_image(
@@ -516,8 +519,10 @@ def test_create_individual_with_document_image(
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
     document = PendingDocument.objects.get(individual=individual)
     assert document.photo is not None
-    assert document.photo.name.startswith(lax_program.code)
-    assert document.photo.name.endswith(".png")
+    stored_name = document.photo.name
+    assert stored_name.startswith("document_photo/")
+    assert stored_name.rsplit("/", 1)[-1].startswith(lax_program.code)
+    assert stored_name.endswith(".png")
 
 
 def test_create_individual_with_non_default_document_type_is_accepted(

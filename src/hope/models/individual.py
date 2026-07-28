@@ -60,6 +60,8 @@ from hope.models.utils import (
     SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+    UniqueUploadPath,
+    unique_upload_name,
 )
 
 
@@ -183,7 +185,7 @@ class Individual(
     )
 
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
-    photo = models.ImageField(blank=True, help_text="Photo")
+    photo = models.ImageField(upload_to=unique_upload_name, max_length=255, blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(2)],
@@ -250,7 +252,11 @@ class Individual(
         help_text="Observed disability status",
     )
     disability_certificate_picture = models.ImageField(
-        blank=True, null=True, help_text="Disability certificate picture"
+        upload_to=UniqueUploadPath("individual_disability_certificate"),
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Disability certificate picture",
     )
     seeing_disability = models.CharField(
         max_length=50,

@@ -592,7 +592,8 @@ def test_create_documents(countries: dict[str, object]) -> None:
 
     document = PendingDocument.objects.first()
     photo = document.photo.name
-    assert photo.startswith("image")
+    assert photo.startswith("document_photo/")
+    assert photo.rsplit("/", 1)[-1].startswith("image")
     assert photo.endswith(".png")
 
 

@@ -950,7 +950,7 @@ def test_download_periodic_data_update_template(
     pdu_template1.refresh_from_db()
     assert pdu_template1.status == PDUXlsxTemplate.Status.EXPORTED
     assert isinstance(response, FileResponse) is True
-    assert f'filename="{file.file.name}"' in response["Content-Disposition"]
+    assert f'filename="{file.file.name.rsplit("/", 1)[-1]}"' in response["Content-Disposition"]
     assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert response.getvalue() == b"Test content"
 

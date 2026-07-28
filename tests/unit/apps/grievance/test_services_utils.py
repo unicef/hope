@@ -1,4 +1,5 @@
 from io import BytesIO
+from pathlib import Path
 import re
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -8,6 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test.utils import override_settings
+from freezegun import freeze_time
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
@@ -105,6 +107,29 @@ def adjudication_areas() -> dict[str, Any]:
     doshi = AreaFactory(name="Doshi", area_type=area_type_level_2, p_code="area2", parent=ghazni)
     area_other = AreaFactory(name="Other", area_type=area_type_level_2, p_code="area3")
     return {"doshi": doshi, "area_other": area_other}
+
+
+@pytest.fixture
+def media_root(settings: Any, tmp_path: Path) -> Path:
+    settings.MEDIA_ROOT = str(tmp_path)
+    return tmp_path
+
+
+@pytest.fixture
+def document() -> Document:
+    return DocumentFactory()
+
+
+@pytest.fixture
+def photo_upload() -> InMemoryUploadedFile:
+    return InMemoryUploadedFile(
+        file=BytesIO(b"123"),
+        field_name="photo",
+        name="test123.jpg",
+        content_type="image/jpeg",
+        size=3,
+        charset=None,
+    )
 
 
 def test_convert_to_empty_string_if_null() -> None:
@@ -659,6 +684,25 @@ def test_handle_photo_saves_and_return() -> None:
     result = handle_photo(file, photoraw=None)
     assert result is not None
     assert result.endswith(".jpg")
+
+
+def test_handle_photo_saves_into_the_document_photo_folder(
+    media_root: Path, photo_upload: InMemoryUploadedFile
+) -> None:
+    with freeze_time("2026-07-28"):
+        saved_name = handle_photo(photo_upload, photoraw=None)
+
+    assert saved_name.startswith("document_photo/2026/07/")
+    assert saved_name.endswith("/test123.jpg")
+
+
+def test_document_photo_field_saves_into_the_document_photo_folder(media_root: Path, document: Document) -> None:
+    with freeze_time("2026-07-28"):
+        document.photo.save("passport.jpg", ContentFile(b"123"), save=False)
+
+    saved_name = document.photo.name
+    assert saved_name.startswith("document_photo/2026/07/")
+    assert saved_name.endswith("/passport.jpg")
 
 
 def test_set_status_based_on_assigned_to(user: Any) -> None:

@@ -39,6 +39,7 @@ from hope.models import (
     WesternUnionInvoicePayment,
     WesternUnionPaymentPlanReport,
 )
+from hope.models.utils import upload_basename
 
 logger = logging.getLogger(__name__)
 
@@ -771,7 +772,7 @@ class WesternUnionReportsService:
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Payment Plan: {payment_plan_link}",
-                "title": f"Payment Plan {report.report_file.file.name} Western Union report",
+                "title": f"Payment Plan {upload_basename(report.report_file.file.name)} Western Union report",
                 "link": download_link,
             }
             user.email_user(

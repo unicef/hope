@@ -8,7 +8,7 @@ from hope.models.account_type import AccountType
 from hope.models.async_job import AsyncJob
 from hope.models.document_type import DocumentType
 from hope.models.program import Program
-from hope.models.utils import TimeStampedModel
+from hope.models.utils import TimeStampedModel, UniqueUploadPath
 
 
 class UniversalUpdate(
@@ -45,12 +45,16 @@ class UniversalUpdate(
         help_text="Selected Account Types of which Wallets data can be updated",
     )
     template_file = models.FileField(
+        upload_to=UniqueUploadPath("universal_update"),
+        max_length=255,
         blank=True,
         null=True,
         help_text="Generated Template XLSX File, contains columns for data to be updated. "
         "Contains also rows for unicef_ids to be updated",
     )
     update_file = models.FileField(
+        upload_to=UniqueUploadPath("universal_update"),
+        max_length=255,
         blank=True,
         null=True,
         help_text="Uploaded File, contains data to be updated. After clicking a button to update, data will be updated",
@@ -58,6 +62,8 @@ class UniversalUpdate(
 
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     backup_snapshot = models.FileField(
+        upload_to=UniqueUploadPath("universal_update"),
+        max_length=255,
         blank=True,
         null=True,
         help_text="Backup Snapshot File, contains data before update. File updated on each start of update process.",

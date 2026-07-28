@@ -239,4 +239,4 @@ def test_get_document_success(
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == f"attachment; filename={document.file.name}"
+    assert response["Content-Disposition"] == f"attachment; filename={document.file.name.rsplit('/', 1)[-1]}"

@@ -1,6 +1,7 @@
 import hashlib
 import logging
 from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
+from uuid import uuid4
 
 from concurrency.fields import IntegerVersionField
 from django import forms
@@ -10,6 +11,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 from model_utils.managers import SoftDeletableManagerMixin
 from model_utils.models import UUIDModel
@@ -23,6 +25,42 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+@deconstructible
+class UniqueUploadPath:
+    """Give every uploaded file its own folder.
+
+    File names come straight from user uploads, so two unrelated records easily carry the same
+    name, and the media storage is configured to overwrite on name collision. The uuid folder
+    makes the full path unique, so an upload can no longer replace another record's file.
+    """
+
+    def __init__(self, prefix: str) -> None:
+        self.prefix = prefix
+
+    def __call__(self, instance: models.Model, filename: str) -> str:
+        return f"{self.prefix}/{timezone.now():%Y/%m}/{uuid4().hex}/{filename}"
+
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, UniqueUploadPath) and self.prefix == other.prefix
+
+    def __hash__(self) -> int:
+        return hash((self.__class__, self.prefix))
+
+
+def unique_upload_name(instance: models.Model, filename: str) -> str:
+    """Prefix the file name with a uuid, keeping the path flat.
+
+    Same purpose as UniqueUploadPath, for files whose stored name is handed to an external
+    service: the name stays a single path segment.
+    """
+    return f"{uuid4().hex}_{filename}"
+
+
+def upload_basename(name: str) -> str:
+    """Drop the generated upload path, leaving the name only."""
+    return name.rsplit("/", 1)[-1]
 
 
 class BulkSignalsManagerMixin:

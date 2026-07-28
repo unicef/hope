@@ -448,7 +448,8 @@ def test_handle_documents_and_identities(
 
     photo = PendingDocument.objects.first().photo
     assert isinstance(photo, ImageFieldFile)
-    assert photo.name.startswith("signature-14_59_24")
+    assert photo.name.startswith("document_photo/")
+    assert photo.name.rsplit("/", 1)[-1].startswith("signature-14_59_24")
 
     birth_certificate = PendingDocument.objects.get(document_number=123123123).type.key
     national_passport = PendingDocument.objects.get(document_number=444111123).type.key

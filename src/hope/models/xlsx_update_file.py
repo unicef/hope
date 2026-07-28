@@ -2,11 +2,11 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import TimeStampedUUIDModel, UniqueUploadPath
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
-    file = models.FileField()
+    file = models.FileField(upload_to=UniqueUploadPath("xlsx_update"), max_length=255)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True, blank=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True, blank=True)

@@ -109,5 +109,7 @@ def test_export_sample_stores_xlsx_file(survey: Survey, user: User, recipient_ho
     survey.refresh_from_db()
     assert survey.sample_file
     assert survey.sample_file_generated_at is not None
-    assert survey.sample_file.name.startswith(f"survey_sample_{survey.unicef_id}")
-    assert survey.sample_file.name.endswith(".xlsx")
+    stored_name = survey.sample_file.name
+    assert stored_name.startswith("survey_sample/")
+    assert stored_name.rsplit("/", 1)[-1].startswith(f"survey_sample_{survey.unicef_id}")
+    assert stored_name.endswith(".xlsx")

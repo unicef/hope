@@ -428,7 +428,10 @@ def generate_filename() -> str:
 
 def handle_photo(photo: InMemoryUploadedFile | str | None, photoraw: str | None) -> str | None:
     if isinstance(photo, InMemoryUploadedFile):
-        return default_storage.save(f"{generate_filename()}.jpg", photo)
+        # the name is stored on Document.photo later on, so build the path the field would
+        field = Document._meta.get_field("photo")
+        name = field.generate_filename(None, f"{generate_filename()}.jpg")
+        return default_storage.save(name, photo, max_length=field.max_length)
     if isinstance(photo, str):
         return photoraw
     return None

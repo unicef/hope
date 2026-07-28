@@ -173,6 +173,7 @@ from hope.models import (
     log_create,
 )
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
+from hope.models.utils import upload_basename
 
 if TYPE_CHECKING:
     from hope.models import User
@@ -2360,7 +2361,7 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
+        response["Content-Disposition"] = f"attachment; filename={upload_basename(file.name)}"
         return response
 
 

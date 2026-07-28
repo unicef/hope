@@ -416,7 +416,7 @@ def test_create_individual_with_photo_remove_prefix(rdi, base64_photo) -> None:
         rdi=rdi,
     )
 
-    assert individual.photo.name.startswith(rdi.program.code)
+    assert individual.photo.name.split("_", 1)[-1].startswith(rdi.program.code)
     assert individual.photo.name.endswith(".png")
     photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
     assert photo_saved.startswith(prefix) is False

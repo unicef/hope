@@ -29,6 +29,8 @@ from hope.models.utils import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+    UniqueUploadPath,
+    upload_basename,
 )
 
 if TYPE_CHECKING:
@@ -1168,13 +1170,13 @@ class GrievanceDocument(UUIDModel):
         on_delete=models.SET_NULL,
     )
     created_by = models.ForeignKey(User, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    file = models.FileField(upload_to="", blank=True, null=True)
+    file = models.FileField(upload_to=UniqueUploadPath("grievance_document"), max_length=255, blank=True, null=True)
     content_type = models.CharField(max_length=100, null=False)
     file_size = models.IntegerField(null=True, blank=True)
 
     @property
     def file_name(self) -> str:
-        return self.file.name or ""
+        return upload_basename(self.file.name) if self.file.name else ""
 
     @property
     def file_path(self) -> str:

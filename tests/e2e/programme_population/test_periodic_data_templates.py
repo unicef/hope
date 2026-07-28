@@ -162,7 +162,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         assert (
             page_individuals.check_file_exists(
-                os.path.join(download_path, periodic_data_update_template.file.file.name)
+                os.path.join(download_path, periodic_data_update_template.file.file.name.rsplit("/", 1)[-1])
             )
             is True
         )
@@ -310,7 +310,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         assert (
             page_individuals.check_file_exists(
-                os.path.join(download_path, periodic_data_update_template.file.file.name)
+                os.path.join(download_path, periodic_data_update_template.file.file.name.rsplit("/", 1)[-1])
             )
             is True
         )

@@ -65,12 +65,25 @@ from hope.models import (
     log_create,
 )
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
+from hope.models.utils import upload_basename
 
 logger = logging.getLogger(__name__)
 
 
+class UploadBasenameFileField(serializers.FileField):
+    """Serialize the stored name without its upload path.
+
+    The frontend renders this value as the file's label and passes it to the download
+    anchor, so it has to be the name the uploader chose, not the storage key.
+    """
+
+    def to_representation(self, value: Any) -> Any:
+        name = super().to_representation(value)
+        return upload_basename(name) if name else name
+
+
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(use_url=False)
+    file = UploadBasenameFileField(use_url=False)
 
     class Meta:
         model = PaymentPlanSupportingDocument

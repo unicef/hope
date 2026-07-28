@@ -64,6 +64,7 @@ from hope.models import (
     RoleAssignment,
     User,
 )
+from hope.models.utils import upload_basename
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,7 @@ class PDUXlsxTemplateViewSet(
         return FileResponse(
             pdu_template.file.file.open(),
             as_attachment=True,
-            filename=pdu_template.file.file.name,
+            filename=upload_basename(pdu_template.file.file.name),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 

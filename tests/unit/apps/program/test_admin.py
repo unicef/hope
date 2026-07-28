@@ -444,7 +444,7 @@ def test_bulk_upload_individuals_photos_action_updates_photos(
 
     individual.refresh_from_db()
     assert updated == 1
-    assert individual.photo.name.startswith("IND-123")
+    assert individual.photo.name.split("_", 1)[-1].startswith("IND-123")
     assert individual.photo.name.lower().endswith(".jpg")
     assert job.errors.get("missing_individuals") == ["IND-999.jpg"]
     job.save.assert_called_with(update_fields=["errors"])
