@@ -89,9 +89,9 @@ def test_populate_all_indexes_no_active_programs(mock_populate_program: MagicMoc
 
 
 @pytest.mark.django_db
-@patch("hope.apps.household.services.index_management.ensure_program_indexes")
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_rebuild_search_index_calls_per_program_and_global(mock_ensure_program: MagicMock) -> None:
+def test_rebuild_search_index_calls_per_program_and_global(mock_rebuild_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     with override_config(IS_ELASTICSEARCH_ENABLED=False):
         program_1: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
@@ -100,27 +100,27 @@ def test_rebuild_search_index_calls_per_program_and_global(mock_ensure_program: 
 
     rebuild_search_index()
 
-    mock_ensure_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
-    assert mock_ensure_program.call_count == 2
+    mock_rebuild_program.assert_has_calls([call(str(program_1.id)), call(str(program_2.id))], any_order=True)
+    assert mock_rebuild_program.call_count == 2
 
 
 @pytest.mark.django_db
-@patch("hope.apps.household.services.index_management.ensure_program_indexes")
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_rebuild_search_index_no_active_programs(mock_ensure_program: MagicMock) -> None:
+def test_rebuild_search_index_no_active_programs(mock_rebuild_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     with override_config(IS_ELASTICSEARCH_ENABLED=False):
         ProgramFactory(business_area=ba, status=Program.DRAFT)
 
     rebuild_search_index()
 
-    mock_ensure_program.assert_not_called()
+    mock_rebuild_program.assert_not_called()
 
 
 @pytest.mark.django_db
-@patch("hope.apps.household.services.index_management.ensure_program_indexes")
+@patch("hope.apps.household.services.index_management.rebuild_program_indexes")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_rebuild_search_index_custom_options(mock_ensure_program: MagicMock) -> None:
+def test_rebuild_search_index_custom_options(mock_rebuild_program: MagicMock) -> None:
     ba: BusinessArea = BusinessAreaFactory()
     with override_config(IS_ELASTICSEARCH_ENABLED=False):
         ProgramFactory(business_area=ba, status=Program.ACTIVE)
@@ -128,7 +128,7 @@ def test_rebuild_search_index_custom_options(mock_ensure_program: MagicMock) -> 
     custom_options: dict = {"parallel": True, "quiet": False}
     rebuild_search_index(options=custom_options)
 
-    mock_ensure_program.assert_called_once()
+    mock_rebuild_program.assert_called_once()
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)

@@ -56,17 +56,18 @@ def ensure_index_ready(index_name: str) -> None:
 
 
 def rebuild_search_index(models: None = None, options: dict | None = None) -> None:
-    # Non-destructive on purpose: creates missing indexes and upsert-populates, but never deletes
-    # a live index (this runs from console/bulk paths). A true from-scratch rebuild is the
-    # per-program admin "Rebuild Index" button.
-    from hope.apps.household.services.index_management import ensure_program_indexes
+    # DESTRUCTIVE (delete -> create -> populate) on purpose, like the per-program admin
+    # "Rebuild Index" button: it must also recover from a junk index auto-created by a doc
+    # write that raced index creation (dynamic mapping, no analyzers). Explicit console/dev
+    # entrypoints only - AUTOMATIC paths (signals) use ensure_program_indexes instead.
+    from hope.apps.household.services.index_management import rebuild_program_indexes
     from hope.models import Program
 
     if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
 
     for program in Program.objects.filter(status=Program.ACTIVE):
-        ensure_program_indexes(str(program.id))
+        rebuild_program_indexes(str(program.id))
 
 
 def populate_all_indexes() -> None:
