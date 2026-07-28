@@ -58,7 +58,7 @@ def repoint_and_drop_stale_periodic_tasks(apps: Apps, schema_editor: BaseDatabas
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0030_migration"),
+        ("core", "0031_migration"),
         ("django_celery_beat", "0019_alter_periodictasks_options"),
     ]
 
