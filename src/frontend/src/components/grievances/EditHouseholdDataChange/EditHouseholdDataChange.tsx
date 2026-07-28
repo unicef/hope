@@ -308,8 +308,13 @@ function EditHouseholdDataChange({
                             fullHousehold.rolesInHousehold.find(
                               (r) => r.individual.id === defaultIndividual,
                             );
-                          // Only add if newRole is not equal to current role
-                          if (!currentRoleObj || '' !== currentRoleObj.role) {
+                          // Only add if newRole is not equal to current role.
+                          // `role` is a RoleEnum; compare as string against the
+                          // empty-string sentinel used for a freshly-added role.
+                          if (
+                            !currentRoleObj ||
+                            '' !== (currentRoleObj.role as string)
+                          ) {
                             setFieldValue('roles', [
                               ...(values.roles || []),
                               {

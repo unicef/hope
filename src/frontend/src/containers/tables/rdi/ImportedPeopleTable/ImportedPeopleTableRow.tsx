@@ -128,12 +128,9 @@ export function ImportedPeopleTableRow({
             individual={individual}
           />
         ) : (
-          // FIXME: this passes *Results arrays where a status string is expected
-          // (the batch branch above passes *Status). Preserved as-is to avoid a
-          // behavior change; the `as any` is load-bearing for that mismatch.
           renderDeduplicationStatus(
-            individual.deduplicationGoldenRecordResults as any,
-            individual.biometricDeduplicationGoldenRecordResults as any,
+            individual.deduplicationGoldenRecordStatus,
+            individual.biometricDeduplicationGoldenRecordStatus,
             deduplicationGoldenDict,
           )
         )}

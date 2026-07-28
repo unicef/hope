@@ -111,7 +111,7 @@ const AddFilterTargetingCriteriaDisplay = ({
 
   useEffect(() => {
     if (loading) return;
-    const allDataChoicesDictTmp = allCoreFieldsAttributesData?.results?.reduce(
+    const allDataChoicesDictTmp = allCoreFieldsAttributesData?.reduce(
       (acc, item) => {
         acc[item.name] = item.choices;
         return acc;

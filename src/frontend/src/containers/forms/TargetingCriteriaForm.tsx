@@ -255,8 +255,6 @@ export const TargetingCriteriaForm = ({
   const filteredIndividualData = useMemo(
     () => ({
       allFieldsAttributes: data
-        // @ts-expect-error codegen types this endpoint as PaginatedFieldAttributeList,
-        // but it returns a bare FieldAttribute[] at runtime.
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     }),
@@ -265,8 +263,6 @@ export const TargetingCriteriaForm = ({
 
   const filteredHouseholdData = useMemo(
     () => ({
-      // @ts-expect-error codegen types this endpoint as PaginatedFieldAttributeList,
-      // but it returns a bare FieldAttribute[] at runtime.
       allFieldsAttributes: data?.filter(associatedWith('Household')),
     }),
     [data],
@@ -274,8 +270,6 @@ export const TargetingCriteriaForm = ({
 
   const allDataChoicesDictTmp = useMemo(
     () =>
-      // @ts-expect-error codegen types this endpoint as PaginatedFieldAttributeList,
-      // but it returns a bare FieldAttribute[] at runtime.
       data?.reduce((acc, item) => {
         acc[item.name] = item.choices;
         return acc;

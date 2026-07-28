@@ -354,6 +354,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
+    @extend_schema_field(IndividualRoleInHouseholdForHouseholdSerializer(many=True))
     def get_roles_in_household(self, obj: Household) -> dict:
         return IndividualRoleInHouseholdForHouseholdSerializer(
             obj.individuals_and_roles(manager="all_merge_status_objects"), many=True

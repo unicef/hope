@@ -29,8 +29,8 @@ export function FlexFieldTab(): ReactElement {
   const [selectedOption, setSelectedOption] = useState('All');
   const [selectedFieldType, setSelectedFieldType] = useState('All');
   useEffect(() => {
-    if (data?.results && !selectOptions.length) {
-      const options = data.results.map((el) => el.associatedWith);
+    if (data && !selectOptions.length) {
+      const options = data.map((el) => el.associatedWith);
       const filteredOptions = options.filter(
         (item, index) => options.indexOf(item) === index,
       );
@@ -100,7 +100,7 @@ export function FlexFieldTab(): ReactElement {
         selectedOption={selectedOption}
         searchValue={searchValue}
         selectedFieldType={selectedFieldType}
-        fields={data.results}
+        fields={data}
       />
     </Box>
   );
