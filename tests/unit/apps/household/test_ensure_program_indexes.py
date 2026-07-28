@@ -34,6 +34,16 @@ def draft_program() -> Program:
 def es_no_indexes() -> MagicMock:
     es = MagicMock()
     es.indices.exists.return_value = False
+    es.indices.get.return_value = {}
+    return es
+
+
+@pytest.fixture
+def es_with_lingering_old_version() -> MagicMock:
+    """Alias gone (its index just deleted) but an unaliased _v1 lingers, e.g. a sanity-window leftover."""
+    es = MagicMock()
+    es.indices.exists.return_value = False
+    es.indices.get.side_effect = lambda **kw: {kw["index"].replace("_v*", "_v1"): {}}
     return es
 
 
@@ -51,6 +61,20 @@ def test_ensure_creates_versioned_indexes_when_missing(program: Program, es_no_i
     assert ok, msg
     created = [kw for _, kw in es_no_indexes.indices.create.call_args_list]
     assert all(kw["index"].endswith("_v1") and kw["aliases"] for kw in created)
+    assert len(created) == 2
+
+
+def test_create_skips_lingering_version_and_takes_next(
+    program: Program, es_with_lingering_old_version: MagicMock
+) -> None:
+    from hope.apps.household.services.index_management import create_program_indexes
+
+    with patch(GET_CONN, return_value=es_with_lingering_old_version):
+        ok, msg = create_program_indexes(str(program.id))
+
+    assert ok, msg
+    created = [kw for _, kw in es_with_lingering_old_version.indices.create.call_args_list]
+    assert all(kw["index"].endswith("_v2") for kw in created)
     assert len(created) == 2
 
 

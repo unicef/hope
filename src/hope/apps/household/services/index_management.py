@@ -4,6 +4,7 @@ Simple utilities for managing per-program Elasticsearch indexes.
 """
 
 import logging
+import re
 
 from constance import config
 from elasticsearch import Elasticsearch
@@ -28,19 +29,25 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
 
 
 def create_versioned_index(es: Elasticsearch, doc_class: type) -> None:
-    """Create ``<name>_v1`` with the alias attached in the same call.
+    """Create ``<name>_vN`` (next unused version) with the alias attached in the same call.
 
     Blue-green convention: the app addresses the suffix-less name, which is an ALIAS onto the
     physical ``_vN``. Creating both in one call means the index is born on the alias scheme —
-    there is never a bare physical index squatting on the logical name.
+    there is never a bare physical index squatting on the logical name. The version is
+    ``max(existing) + 1`` rather than a hardcoded ``_v1`` so a rebuild during a blue-green
+    sanity window (old ``_vN`` still lingering unaliased) cannot collide and strand the
+    program without an index.
     """
     index = doc_class._index
+    name = index._name
+    existing = es.indices.get(index=f"{name}_v*", ignore_unavailable=True)
+    versions = [int(m.group(1)) for i in existing for m in [re.match(rf"^{re.escape(name)}_v(\d+)$", i)] if m]
     body = index.to_dict()
     es.indices.create(
-        index=f"{index._name}_v1",
+        index=f"{name}_v{max(versions, default=0) + 1}",
         settings=body.get("settings"),
         mappings=body.get("mappings"),
-        aliases={index._name: {}},
+        aliases={name: {}},
     )
 
 

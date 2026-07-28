@@ -44,6 +44,7 @@ def _make_es(*, alias_exists: bool = False, index_exists: bool = True, target_ex
     """Mock ES for one uniform pre-bootstrap state across all index names."""
     es = MagicMock()
     es.indices.exists_alias.return_value = alias_exists
+    es.indices.get.return_value = {}
     es.indices.exists.side_effect = lambda **kw: target_exists if kw["index"].endswith("_v1") else index_exists
     es.cluster.health.return_value = {"status": "green"}
     es.count.return_value = {"count": 5}
