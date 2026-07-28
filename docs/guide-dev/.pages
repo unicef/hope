@@ -5,6 +5,7 @@ nav:
   - testing.md
   - linting.md
   - stack.md
+  - population-recalculation.md
   - contributing.md
 
 collapse: true
