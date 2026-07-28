@@ -159,6 +159,10 @@ class PaymentPlan(
         def get_choices() -> list[tuple[str, str]]:
             return PaymentPlan.Status.choices
 
+    # A child plan may be spun off a plan that is released but not yet closed: from Accepted, while
+    # money is still moving, and from Finished, once it is all reconciled.
+    CHILD_PLAN_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)
+
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
@@ -841,26 +845,24 @@ class PaymentPlan(
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
     def eligible_payments_for_top_up(self) -> "QuerySet":
-        """Select successful + pending payments eligible for top-up.
+        """Select payments eligible for top-up, whatever their delivery status.
 
-        Must be called on the source (Standard) Payment Plan. Excludes withdrawn
-        households and beneficiaries that already appear in another TopUp under
-        the same source plan (slide 10 "Not Allowed #1": one top-up per
-        beneficiary per cycle).
+        Must be called on the source (Standard) Payment Plan. Payment status is
+        deliberately not filtered: a beneficiary may be topped up whether their
+        original payment was delivered, is still pending, or failed.
+
+        Excludes withdrawn households and beneficiaries that already appear in
+        another TopUp under the same source plan (slide 10 "Not Allowed #1": one
+        top-up per beneficiary per cycle). Membership alone blocks: beneficiaries
+        left at zero in the amount file are never copied into the TopUp, so they
+        stay available for a later one.
         """
         top_up_households = Payment.objects.filter(
             parent__plan_type=PaymentPlan.PlanType.TOP_UP,
             parent__source_payment_plan=self,
-            excluded=False,
             household_id=OuterRef("household_id"),
         )
-        return (
-            self.eligible_payments.filter(
-                status__in=Payment.DELIVERED_STATUSES + Payment.PENDING_STATUSES,
-            )
-            .exclude(household__withdrawn=True)
-            .exclude(Exists(top_up_households))
-        )
+        return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(top_up_households))
 
     def eligible_payments_for_top_up_amendment(self) -> "QuerySet":
         """Select reconciled (delivered) payments of a TopUp plan eligible for an amendment.

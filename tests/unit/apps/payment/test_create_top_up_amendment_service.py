@@ -67,6 +67,7 @@ def top_up_pp(
         program_cycle=cycle,
         created_by=user,
         plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.ACCEPTED,
         source_payment_plan=regular_pp,
         name="Test Plan Top Up",
         payment_plan_purposes=[purpose],
@@ -158,7 +159,12 @@ def test_create_top_up_amendment_arrange_query_budget_act_create_assert_within_l
 def test_create_top_up_amendment_arrange_non_top_up_origin_act_create_assert_raises(
     user: User, business_area: Any, cycle: ProgramCycle, plan_type: str
 ) -> None:
-    source_pp = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, plan_type=plan_type)
+    source_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=plan_type,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
     start = source_pp.dispersion_start_date + timedelta(days=1)
     end = source_pp.dispersion_end_date + timedelta(days=1)
 

@@ -35,6 +35,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         business_area=business_area,
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.ACCEPTED,
         currency=currency,
     )
     top_up_pp = PaymentPlanFactory(
@@ -42,6 +43,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         business_area=business_area,
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.ACCEPTED,
         source_payment_plan=regular_pp,
         currency=currency,
     )

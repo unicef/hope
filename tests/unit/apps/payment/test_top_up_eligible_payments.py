@@ -75,14 +75,15 @@ def test_eligible_payments_for_top_up_arrange_eligible_status_act_query_assert_i
         Payment.STATUS_NOT_DISTRIBUTED,
     ],
 )
-def test_eligible_payments_for_top_up_arrange_failed_status_act_query_assert_excluded(
+def test_eligible_payments_for_top_up_arrange_failed_status_act_query_assert_included(
     regular_pp: PaymentPlan, status: str
 ) -> None:
+    """A failed payment can still be topped up — payment status does not gate Top-Up eligibility."""
     payment = PaymentFactory(parent=regular_pp, status=status)
 
     result = list(regular_pp.eligible_payments_for_top_up())
 
-    assert payment not in result
+    assert payment in result
 
 
 def test_eligible_payments_for_top_up_arrange_withdrawn_household_act_query_assert_excluded(

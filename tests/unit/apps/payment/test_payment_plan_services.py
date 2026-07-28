@@ -629,11 +629,11 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
 
 
 @pytest.mark.parametrize(
-    ("plan_type", "method_name"),
+    ("plan_type", "method_name", "expected_kwargs"),
     [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up"),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up"),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment"),
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up", {}),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up", {"fixed_amount": None, "amounts": None}),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment", {}),
     ],
 )
 def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
@@ -642,6 +642,7 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
+    expected_kwargs: dict,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -666,7 +667,7 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
         )
 
     assert result == expected_child_plan
-    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date)
+    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date, **expected_kwargs)
 
 
 def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
@@ -692,11 +693,11 @@ def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validati
 
 
 @pytest.mark.parametrize(
-    ("plan_type", "method_name"),
+    ("plan_type", "method_name", "expected_kwargs"),
     [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments"),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments"),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments"),
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments", {}),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments", {"amounts": None, "fixed_amount": None}),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments", {}),
     ],
 )
 def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
@@ -705,6 +706,7 @@ def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_e
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
+    expected_kwargs: dict,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -716,7 +718,7 @@ def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_e
     with mock.patch.object(PaymentPlanService, method_name) as service_method:
         PaymentPlanService(payment_plan).create_child_plan_payments()
 
-    service_method.assert_called_once_with()
+    service_method.assert_called_once_with(**expected_kwargs)
 
 
 def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(

@@ -17,6 +17,7 @@ from extras.test_utils.factories import (
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
@@ -284,3 +285,90 @@ def fi_instruction(
         dispersion_start_date=datetime.date(2027, 1, 1),
         dispersion_end_date=datetime.date(2027, 12, 31),
     )
+
+
+@pytest.fixture
+def top_up_program(business_area: BusinessArea) -> Program:
+    return ProgramFactory(name="Top-Up E2E Program", status=Program.ACTIVE, business_area=business_area)
+
+
+@pytest.fixture
+def top_up_source_plan(top_up_program: Program) -> PaymentPlan:
+    """FINISHED Standard plan with three delivered payments, all still available to top up."""
+    currency = CurrencyFactory(code="USD")
+    delivery_mechanism = DeliveryMechanismFactory()
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.add(delivery_mechanism)
+    cycle = ProgramCycleFactory(program=top_up_program)
+    purpose = PaymentPlanPurposeFactory()
+    top_up_program.payment_plan_purposes.add(purpose)
+    plan = PaymentPlanFactory(
+        name="Top-Up Source Plan",
+        business_area=top_up_program.business_area,
+        program_cycle=cycle,
+        payment_plan_group=cycle.payment_plan_groups.first(),
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.FINISHED,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        payment_plan_purposes=[purpose],
+    )
+    for _ in range(3):
+        household = HouseholdFactory(business_area=top_up_program.business_area, program=top_up_program)
+        payment = PaymentFactory(
+            parent=plan,
+            household=household,
+            collector=household.head_of_household,
+            head_of_household=household.head_of_household,
+            program=top_up_program,
+            currency=currency,
+            delivery_type=delivery_mechanism,
+            financial_service_provider=fsp,
+            entitlement_quantity=Decimal("100.00"),
+            entitlement_quantity_usd=Decimal("100.00"),
+            delivered_quantity=Decimal("100.00"),
+            status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+        )
+        # The amount template is rendered from snapshots, which a released plan always carries.
+        PaymentHouseholdSnapshotFactory(
+            payment=payment,
+            snapshot_data={
+                "unicef_id": household.unicef_id,
+                "size": household.size,
+                "primary_collector": {
+                    "unicef_id": household.head_of_household.unicef_id,
+                    "full_name": household.head_of_household.full_name,
+                },
+                "alternate_collector": {},
+            },
+        )
+    return plan
+
+
+@pytest.fixture
+def top_up_exhausted_plan(top_up_source_plan: PaymentPlan) -> PaymentPlan:
+    """Source plan whose every beneficiary already sits in a Top-Up, so none is left to fund."""
+    top_up = PaymentPlanFactory(
+        name="Top-Up Source Plan Top Up",
+        business_area=top_up_source_plan.business_area,
+        program_cycle=top_up_source_plan.program_cycle,
+        payment_plan_group=top_up_source_plan.payment_plan_group,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.OPEN,
+        source_payment_plan=top_up_source_plan,
+        currency=top_up_source_plan.currency,
+    )
+    for source_payment in top_up_source_plan.payment_items.all():
+        PaymentFactory(
+            parent=top_up,
+            source_payment=source_payment,
+            household=source_payment.household,
+            collector=source_payment.collector,
+            head_of_household=source_payment.head_of_household,
+            program=top_up_source_plan.program_cycle.program,
+            currency=top_up_source_plan.currency,
+            entitlement_quantity=Decimal("10.00"),
+            status=Payment.STATUS_PENDING,
+        )
+    return top_up_source_plan

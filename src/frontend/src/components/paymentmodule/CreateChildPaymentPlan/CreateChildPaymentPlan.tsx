@@ -3,6 +3,7 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DividerLine } from '@core/DividerLine';
 import { FieldBorder } from '@core/FieldBorder';
+import { DropzoneField } from '@core/DropzoneField';
 import { GreyText } from '@core/GreyText';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
@@ -23,6 +24,7 @@ import {
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation } from '@tanstack/react-query';
 import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
 import { format } from 'date-fns';
@@ -62,6 +64,7 @@ export function CreateChildPaymentPlan({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isFollowUp = variant === 'followup';
+  const isTopUp = variant === 'topup';
   const labels = {
     followup: {
       button: t('Create Follow-up PP'),
@@ -83,6 +86,8 @@ export function CreateChildPaymentPlan({
       mutationFn: (requestBody: {
         dispersionStartDate: string;
         dispersionEndDate: string;
+        fixedAmount?: string;
+        file?: File;
       }) => {
         const params = {
           businessAreaSlug: businessArea,
@@ -101,7 +106,13 @@ export function CreateChildPaymentPlan({
           );
         }
         return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate(
-          params,
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlan.id,
+            programCode: programId,
+            // @ts-ignore - the generated model types `file` as string, a File is what the API takes
+            formData: requestBody,
+          },
         );
       },
     });
@@ -129,10 +140,15 @@ export function CreateChildPaymentPlan({
       ),
   });
 
-  type FormValues = Yup.InferType<typeof validationSchema>;
+  type FormValues = Yup.InferType<typeof validationSchema> & {
+    fixedAmount?: string;
+    file?: File | null;
+  };
   const initialValues: FormValues = {
     dispersionStartDate: null,
     dispersionEndDate: null,
+    fixedAmount: '',
+    file: null,
   };
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
@@ -147,6 +163,12 @@ export function CreateChildPaymentPlan({
       const res = await createChildPaymentPlan({
         dispersionStartDate,
         dispersionEndDate,
+        ...(isTopUp && values.file
+          ? { file: values.file }
+          : {}),
+        ...(isTopUp && !values.file && values.fixedAmount
+          ? { fixedAmount: values.fixedAmount }
+          : {}),
       });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
@@ -164,7 +186,7 @@ export function CreateChildPaymentPlan({
       validateOnChange
       validateOnBlur
     >
-      {({ submitForm, values }) => (
+      {({ submitForm, values, setFieldValue }) => (
         <Form>
           <Box
             sx={{
@@ -266,6 +288,56 @@ export function CreateChildPaymentPlan({
                           >
                             {paymentPlan.totalWithdrawnHouseholdsCount}
                           </LabelizedField>
+                        </Grid>
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <DividerLine />
+                      </Grid>
+                    </>
+                  )}
+                  {isTopUp && (
+                    <>
+                      <Box sx={{ mb: 3 }}>
+                        <Typography>
+                          {t('Configure Top-Up Amount')}
+                        </Typography>
+                        <GreyText>
+                          {t(
+                            'Set one amount for everyone, or upload a template with an amount per beneficiary. Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',
+                          )}
+                        </GreyText>
+                      </Box>
+                      <Grid container spacing={3} alignItems="center">
+                        <Grid size={{ xs: 6 }}>
+                          <Field
+                            name="fixedAmount"
+                            label={t('Fixed')}
+                            type="number"
+                            component={FormikTextField}
+                            fullWidth
+                            disabled={loadingCreate || Boolean(values.file)}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Button
+                            color="primary"
+                            variant="contained"
+                            component="a"
+                            download
+                            href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlan.id}/top-up-amount-template/`}
+                            data-cy="button-download-top-up-template"
+                          >
+                            {t('Download template')}
+                          </Button>
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                          <DropzoneField
+                            dontShowFilename={false}
+                            loading={loadingCreate}
+                            onChange={(files) => {
+                              setFieldValue('file', files[0] ?? null);
+                            }}
+                          />
                         </Grid>
                       </Grid>
                       <Grid size={{ xs: 12 }}>

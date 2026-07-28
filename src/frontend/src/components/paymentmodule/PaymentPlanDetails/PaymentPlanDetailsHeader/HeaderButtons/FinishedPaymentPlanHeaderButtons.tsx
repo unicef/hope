@@ -91,6 +91,27 @@ export function FinishedPaymentPlanHeaderButtons({
             />
           </Box>
         )}
+        {paymentPlan.canCreateTopUp && (
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <CreateChildPaymentPlan paymentPlan={paymentPlan} variant="topup" />
+          </Box>
+        )}
+        {paymentPlan.canCreateTopUpAmendment && (
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <CreateChildPaymentPlan
+              paymentPlan={paymentPlan}
+              variant="amendment"
+            />
+          </Box>
+        )}
         <Box
           sx={{
             p: 2,
