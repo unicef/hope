@@ -62,6 +62,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         payment_plan: PaymentPlan,
         fsp_xlsx_template_id: str | None = None,
         shared_lookups: dict | None = None,
+        fsp_extra_fields_headers: list[str] | None = None,
     ):
         self.batch_size = 2000
         self.payment_plan = payment_plan
@@ -75,16 +76,28 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         self.allow_export_fsp_auth_code = self.payment_plan.is_payment_gateway_and_all_sent_to_fsp
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
         self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = None
-        self.account_fields_headers = self.get_account_fields_headers()
+        self.account_fields_headers = self.get_account_fields_headers(self.payment_plan)
         self.header_list = []
         self.template_columns = []
         self.core_fields = []
         self.flex_fields = []
         self.document_fields = []
+        self.fsp_extra_fields_headers = (
+            fsp_extra_fields_headers
+            if fsp_extra_fields_headers is not None
+            else self.get_fsp_extra_fields_headers(self.payment_plan.eligible_payments.only("extras"))
+        )
         self.core_fields_attributes = shared_lookups["core_fields_attributes"]
         self.admin_areas_dict = shared_lookups["admin_areas_dict"]
         self.countries_dict = shared_lookups["countries_dict"]
         self.all_document_types = shared_lookups["all_document_types"]
+
+    @staticmethod
+    def get_fsp_extra_fields_headers(payments: QuerySet[Payment]) -> list[str]:
+        headers: set[str] = set()
+        for payment in payments.iterator(chunk_size=2000):
+            headers.update(payment.fsp_extra_fields)
+        return sorted(headers)
 
     @staticmethod
     def generate_token_and_order_numbers(
@@ -147,11 +160,12 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         if to_update:
             Payment.objects.bulk_update(to_update, ["order_number", "token_number"])
 
-    def get_account_fields_headers(self) -> list[str]:
+    @staticmethod
+    def get_account_fields_headers(payment_plan: PaymentPlan) -> list[str]:
         # Iterate over eligible payments to find the first with valid account_data.
         # Use values_list to avoid Payment instances with deferred fields (N+1 on parent_id).
         snapshot_data_qs = (
-            self.payment_plan.eligible_payments.filter(
+            payment_plan.eligible_payments.filter(
                 Q(household_snapshot__snapshot_data__primary_collector__has_key="account_data")
                 | Q(household_snapshot__snapshot_data__alternate_collector__has_key="account_data")
             )
@@ -174,6 +188,24 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
                     headers.append("number")
                 return headers
         return []
+
+    @classmethod
+    def get_system_controlled_headers(
+        cls,
+        payment_plan: PaymentPlan,
+    ) -> frozenset[str]:
+        headers = set(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
+        template_fields = FinancialServiceProviderXlsxTemplate.objects.values_list(
+            "core_fields",
+            "flex_fields",
+            "document_types",
+        )
+        for core_fields, flex_fields, document_types in template_fields.iterator():
+            headers.update(core_fields or ())
+            headers.update(flex_fields or ())
+            headers.update(document_types or ())
+        headers.update(cls.get_account_fields_headers(payment_plan))
+        return frozenset(headers)
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
         wb = openpyxl.Workbook()
@@ -264,6 +296,11 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         if add_accounts_fields:
             column_list.extend(self.account_fields_headers)
 
+        self.fsp_extra_fields_headers = [
+            header for header in self.fsp_extra_fields_headers if header not in column_list
+        ]
+        column_list.extend(self.fsp_extra_fields_headers)
+
         self.header_list = column_list
         return self.header_list
 
@@ -300,6 +337,8 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
             for account_key in self.account_fields_headers
         ]
         payment_row.extend(accounts_row)
+
+        payment_row.extend(payment.fsp_extra_fields.get(header, "") for header in self.fsp_extra_fields_headers)
 
         return list(map(self.right_format_for_xlsx, payment_row))
 

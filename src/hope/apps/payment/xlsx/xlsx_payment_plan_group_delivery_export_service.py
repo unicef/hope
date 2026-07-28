@@ -204,6 +204,9 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         self.skipped_reasons = []
 
         shared_lookups = XlsxPaymentPlanDeliveryExportService.build_shared_lookups()
+        group_fsp_extra_fields_headers = XlsxPaymentPlanDeliveryExportService.get_fsp_extra_fields_headers(
+            Payment.objects.filter(parent__in=self.payment_plans).eligible().only("extras")
+        )
 
         for payment_plan in self.payment_plans:
             template = self._resolve_template(payment_plan)
@@ -212,7 +215,11 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 logger.warning(f"Skipping {reason}")
                 self.skipped_reasons.append(reason)
                 continue
-            per_fsp_service = XlsxPaymentPlanDeliveryExportService(payment_plan, shared_lookups=shared_lookups)
+            per_fsp_service = XlsxPaymentPlanDeliveryExportService(
+                payment_plan,
+                shared_lookups=shared_lookups,
+                fsp_extra_fields_headers=group_fsp_extra_fields_headers,
+            )
             per_fsp_service.prepare_headers(cast("FinancialServiceProviderXlsxTemplate", template))
             if not header:
                 header = per_fsp_service.header_list

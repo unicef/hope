@@ -7,6 +7,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -296,7 +297,10 @@ class SignatureMixin(models.Model):
     def _normalize(self, name: str, value: Any) -> Any:
         if "." in name:
             return value
-        field = self.__class__._meta.get_field(name)
+        try:
+            field = self.__class__._meta.get_field(name)
+        except FieldDoesNotExist:
+            return value
         if isinstance(field, models.DecimalField) and value is not None:
             return f"{{:.{field.decimal_places}f}}".format(value)
         return value
