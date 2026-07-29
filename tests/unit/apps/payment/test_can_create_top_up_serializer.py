@@ -123,6 +123,20 @@ def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_as
     assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is True
 
 
+def test_can_create_top_up_amendment_arrange_top_up_without_eligible_payment_act_get_assert_false(
+    business_area: Any, cycle: ProgramCycle
+) -> None:
+    top_up_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS, excluded=True)
+
+    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is False
+
+
 @pytest.mark.parametrize(
     "plan_type",
     [
