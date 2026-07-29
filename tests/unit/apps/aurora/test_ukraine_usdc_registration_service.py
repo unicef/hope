@@ -2,12 +2,17 @@ import datetime
 import json
 from typing import Any
 
+from django.core.files.storage import default_storage
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.aurora import OrganizationFactory, ProjectFactory, RecordFactory, RegistrationFactory
-from extras.test_utils.factories.core import BusinessAreaFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.core import (
+    BusinessAreaFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeFactory,
+)
 from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import (
@@ -16,7 +21,7 @@ from extras.test_utils.factories.payment import (
     FinancialInstitutionFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, resolve_flex_fields_choices_to_string
 from hope.apps.household.const import IDENTIFICATION_TYPE_TAX_ID, ROLE_PRIMARY
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.ukraine_flex_registration_service import UkraineUSDCRegistrationService
@@ -24,6 +29,7 @@ from hope.models import (
     DataCollectingType,
     DeliveryMechanism,
     FinancialInstitution,
+    FlexibleAttribute,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -219,7 +225,7 @@ def test_wallet_stored_on_account(
     assert account.data == {"wallet_address": "0xABCDEF0123456789", "wallet_name": "MetaMask"}
 
 
-def test_wallet_images_stored_as_flex_fields(
+def test_wallet_images_stored_as_saved_files(
     registration: Any,
     user: Any,
     ukraine_country: Any,
@@ -233,8 +239,33 @@ def test_wallet_images_stored_as_flex_fields(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    assert individual.flex_fields["wallet_num_image_i_f"] == "d2FsbGV0X251bV9pbWFnZQ=="
-    assert individual.flex_fields["id_wallet_image_i_f"] == "aWRfd2FsbGV0X2ltYWdl"
+    num_image_path = individual.flex_fields["wallet_num_image_i_f"]
+    id_image_path = individual.flex_fields["id_wallet_image_i_f"]
+    assert num_image_path.endswith(".jpg")
+    assert default_storage.exists(num_image_path)
+    assert default_storage.exists(id_image_path)
+
+
+def test_individual_detail_flex_image_resolves_to_url(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    FlexibleAttributeFactory(name="wallet_num_image_i_f", type=FlexibleAttribute.IMAGE)
+    FlexibleAttributeFactory(name="id_wallet_image_i_f", type=FlexibleAttribute.IMAGE)
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    resolved = resolve_flex_fields_choices_to_string(individual)
+
+    assert resolved["wallet_num_image_i_f"].endswith(".jpg")
+    assert resolved["id_wallet_image_i_f"].endswith(".jpg")
 
 
 def test_creates_only_tax_id_document(

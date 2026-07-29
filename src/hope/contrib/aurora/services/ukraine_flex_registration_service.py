@@ -3,6 +3,7 @@ from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 from django.forms import modelform_factory
 
 from hope.apps.core.utils import (
@@ -353,7 +354,8 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         ),
     }
 
-    INDIVIDUAL_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
+    INDIVIDUAL_FLEX_FIELDS: list[str] = []
+    INDIVIDUAL_IMAGE_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         record_data_dict = record.get_data()
@@ -411,7 +413,12 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
     ) -> dict:
         individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
         individual_data["estimated_birth_date"] = False
-        if flex_fields := build_flex_arg_dict_from_list_if_exists(individual_dict, self.INDIVIDUAL_FLEX_FIELDS):
+        flex_fields = build_flex_arg_dict_from_list_if_exists(individual_dict, self.INDIVIDUAL_FLEX_FIELDS)
+        for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
+            if image_base64 := individual_dict.get(field_name):
+                image = self._prepare_picture_from_base64(image_base64, f"{field_name}_{uuid.uuid4()}")
+                flex_fields[field_name] = default_storage.save(image.name, image)
+        if flex_fields:
             individual_data["flex_fields"] = flex_fields
         return individual_data
 
