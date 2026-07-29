@@ -660,11 +660,12 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
 
 
 class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
-    """Top-Up creation: dispersion dates plus the amount, given one of two ways.
+    """Top-Up and Top-Up Amendment creation: dispersion dates plus the amount, given one of two ways.
 
     ``fixed_amount`` tops every eligible beneficiary up by the same value. ``file`` is the filled-in
     amount template and decides both the amounts and who is in — beneficiaries left empty or at zero
-    are not part of the Top-Up and stay eligible for a later one. Exactly one of the two is required.
+    are not part of the child plan and stay eligible for a later one. Exactly one of the two is
+    required.
     """
 
     fixed_amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, min_value=Decimal("0.01"))

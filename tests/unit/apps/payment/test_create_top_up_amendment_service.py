@@ -109,13 +109,14 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_create_assert_inh
 
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_copies_only_delivered(
+def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_copies_every_status(
     get_exchange_rate_mock: Any,
     user: User,
     top_up_pp: PaymentPlan,
     top_up_payments: dict[str, Payment],
     django_capture_on_commit_callbacks: Any,
 ) -> None:
+    """Delivered and pending alike are copied: payment status does not gate an amendment."""
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
     amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
@@ -124,9 +125,11 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_c
         prepare_child_payment_plan_async_task(amendment_pp)
 
     amendment_pp.refresh_from_db()
-    assert amendment_pp.payment_items.count() == 1
+    assert set(amendment_pp.payment_items.values_list("source_payment_id", flat=True)) == {
+        top_up_payments["delivered"].id,
+        top_up_payments["pending"].id,
+    }
     copied = amendment_pp.payment_items.first()
-    assert copied.source_payment == top_up_payments["delivered"]
     assert copied.entitlement_quantity is None
     assert copied.entitlement_quantity_usd is None
     assert copied.is_follow_up is False
@@ -177,7 +180,10 @@ def test_create_top_up_amendment_arrange_non_top_up_origin_act_create_assert_rai
 def test_create_top_up_amendment_arrange_no_eligible_payments_act_create_assert_raises(
     user: User, top_up_pp: PaymentPlan
 ) -> None:
-    PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
+    """A Top-Up with a withdrawn beneficiary and nothing else has nobody left to amend."""
+    payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
+    payment.household.withdrawn = True
+    payment.household.save()
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
 

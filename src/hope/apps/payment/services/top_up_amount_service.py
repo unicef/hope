@@ -16,18 +16,18 @@ if TYPE_CHECKING:
 
 
 class TopUpAmountTemplateService(XlsxPaymentPlanExportService):
-    """Blank amount template for a Top-Up, listing the source plan's top-up-eligible payments.
+    """Blank amount template listing the payments eligible for this plan's child plan.
 
-    Same sheet shape as the entitlement export operators already know, with two differences:
-    the row set is ``eligible_payments_for_top_up()`` rather than every eligible payment, and the
-    entitlement columns ship empty. Empty is deliberate — prefilling the source amount invites the
-    operator to submit it unchanged, which would silently repeat the original payment instead of
-    topping it up.
+    Used for both a Top-Up and a Top-Up Amendment. Same sheet shape as the entitlement export
+    operators already know, with two differences: the row set is ``eligible_payments_for_child_plan()``
+    rather than every eligible payment, and the entitlement columns ship empty. Empty is deliberate —
+    prefilling the source amount invites the operator to submit it unchanged, which would silently
+    repeat the original payment instead of topping it up.
     """
 
     def _add_payment_list(self) -> None:
         qs = (
-            self.payment_plan.eligible_payments_for_top_up()
+            self.payment_plan.eligible_payments_for_child_plan()
             .select_related("household_snapshot", "currency", "delivery_type", "financial_service_provider")
             .order_by("unicef_id")
         )
@@ -85,7 +85,7 @@ def parse_top_up_amount_file(source_payment_plan: "PaymentPlan", file: IO[bytes]
 
     payment_id_index = headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID)
     amount_index = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY)
-    eligible_ids = set(source_payment_plan.eligible_payments_for_top_up().values_list("unicef_id", flat=True))
+    eligible_ids = set(source_payment_plan.eligible_payments_for_child_plan().values_list("unicef_id", flat=True))
 
     amounts: dict[str, Decimal] = {}
     for row in worksheet.iter_rows(min_row=2):

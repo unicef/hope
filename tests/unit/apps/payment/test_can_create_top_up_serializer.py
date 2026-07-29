@@ -108,9 +108,10 @@ def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_g
     assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is True
 
 
-def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_assert_false(
+def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_assert_true(
     business_area: Any, cycle: ProgramCycle
 ) -> None:
+    """A Top-Up still awaiting delivery can already be amended: status does not gate it."""
     top_up_pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -119,7 +120,7 @@ def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_as
     )
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is False
+    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is True
 
 
 @pytest.mark.parametrize(

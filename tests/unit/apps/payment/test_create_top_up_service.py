@@ -89,7 +89,10 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
     assert top_up_pp.source_payment_plan == regular_pp
     assert top_up_pp.created_by == user
     assert top_up_pp.payment_plan_group == regular_pp.payment_plan_group
+    assert top_up_pp.program_cycle == regular_pp.program_cycle
     assert top_up_pp.currency == regular_pp.currency
+    assert top_up_pp.financial_service_provider == regular_pp.financial_service_provider
+    assert top_up_pp.delivery_mechanism == regular_pp.delivery_mechanism
     assert top_up_pp.dispersion_start_date == start
     assert top_up_pp.dispersion_end_date == end
     assert list(top_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]

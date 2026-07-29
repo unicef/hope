@@ -633,7 +633,7 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
     [
         (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up", {}),
         (PaymentPlan.PlanType.TOP_UP, "create_top_up", {"fixed_amount": None, "amounts": None}),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment", {}),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment", {"fixed_amount": None, "amounts": None}),
     ],
 )
 def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
@@ -696,8 +696,12 @@ def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validati
     ("plan_type", "method_name", "expected_kwargs"),
     [
         (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments", {}),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments", {"amounts": None, "fixed_amount": None}),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments", {}),
+        (PaymentPlan.PlanType.TOP_UP, "create_funded_child_payments", {"amounts": None, "fixed_amount": None}),
+        (
+            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+            "create_funded_child_payments",
+            {"amounts": None, "fixed_amount": None},
+        ),
     ],
 )
 def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(

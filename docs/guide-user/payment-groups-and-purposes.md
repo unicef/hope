@@ -187,8 +187,10 @@ A Top-Up Plan automatically inherits the **same Purposes** as its source plan. U
 
 ### Top-Up Amendments
 
-A **Top-Up Amendment** (`plan_type = TOP_UP_AMENDMENT`) is a secondary correction layer on top of a Top-Up Plan. It is created from a Top-Up Plan (not from a Standard plan) and covers households within that Top-Up that still have outstanding payment amounts after partial delivery.
+A **Top-Up Amendment** (`plan_type = TOP_UP_AMENDMENT`) is a secondary correction layer on top of a Top-Up Plan. It is created from a Top-Up Plan (not from a Standard plan) and adjusts the amounts of households within that Top-Up.
 
-The **"Create Top-Up Amendment"** button appears on a Top-Up Payment Plan in **Accepted** or **Finished** status when at least one of its payments has been delivered and is not yet covered by another Amendment.
+The **"Create Top-Up Amendment"** button appears on a Top-Up Payment Plan in **Accepted** or **Finished** status when at least one of its payments is on a non-withdrawn household and is not yet covered by another Amendment. As with a Top-Up, the payment's delivery status does not matter — delivered, pending and failed payments can all be amended.
+
+The creation dialog is the same one used for a Top-Up: the amount is set either as a **Fixed** value for everyone, or per beneficiary by downloading the amount template and uploading it filled in. Beneficiaries left empty or at zero in the file are not part of the Amendment and stay available for a later one.
 
 ![Top-Up Amendment](./_screenshots/groups-and-purposes/top-up-amendment.png)

@@ -865,12 +865,12 @@ class PaymentPlan(
         return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(top_up_households))
 
     def eligible_payments_for_top_up_amendment(self) -> "QuerySet":
-        """Select reconciled (delivered) payments of a TopUp plan eligible for an amendment.
+        """Select payments of a TopUp plan eligible for an amendment, whatever their status.
 
-        Must be called on the source TopUp Payment Plan. Excludes withdrawn
-        households and beneficiaries already covered by another Amendment under
-        the same TopUp (one amendment per beneficiary). Unlike top-up eligibility,
-        only delivered/reconciled payments qualify — pending payments do not.
+        Must be called on the source TopUp Payment Plan. Mirrors top-up eligibility: payment
+        status does not gate an amendment either, so a beneficiary can be adjusted whether the
+        TopUp payment was delivered, is still pending, or failed. Excludes withdrawn households
+        and beneficiaries already covered by another Amendment under the same TopUp.
         """
         amended_households = Payment.objects.filter(
             parent__plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
@@ -878,11 +878,17 @@ class PaymentPlan(
             excluded=False,
             household_id=OuterRef("household_id"),
         )
-        return (
-            self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES)
-            .exclude(household__withdrawn=True)
-            .exclude(Exists(amended_households))
-        )
+        return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(amended_households))
+
+    def eligible_payments_for_child_plan(self) -> "QuerySet":
+        """Payments eligible for the child plan this plan can spawn.
+
+        A Standard plan spawns a TopUp, a TopUp spawns an Amendment; both are funded the same
+        way, so the amount template and its parser only need to know which pool to work from.
+        """
+        if self.plan_type == PaymentPlan.PlanType.TOP_UP:
+            return self.eligible_payments_for_top_up_amendment()
+        return self.eligible_payments_for_top_up()
 
     def _get_last_approval_process_data(self) -> ModifiedData:
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()

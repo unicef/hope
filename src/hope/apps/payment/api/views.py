@@ -766,7 +766,7 @@ class PaymentPlanViewSet(
         "create": PaymentPlanCreateUpdateSerializer,
         "create_follow_up": PaymentPlanCreateFollowUpSerializer,
         "create_top_up": PaymentPlanCreateTopUpSerializer,
-        "create_top_up_amendment": PaymentPlanCreateFollowUpSerializer,
+        "create_top_up_amendment": PaymentPlanCreateTopUpSerializer,
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
@@ -911,13 +911,15 @@ class PaymentPlanViewSet(
     @extend_schema(responses={(200, XLSX_CONTENT_TYPE): OpenApiTypes.BINARY})
     @action(detail=True, methods=["get"], url_path="top-up-amount-template")
     def top_up_amount_template(self, request: Request, *args: Any, **kwargs: Any) -> HttpResponse:
-        """Blank per-beneficiary amount template for a Top-Up of this plan.
+        """Blank per-beneficiary amount template for the child plan this plan can spawn.
 
-        Served straight back rather than through the async FileTemp route the entitlement export
-        uses: the sheet is built from rows that already exist, so there is nothing to wait for.
+        A Standard plan gets the Top-Up template, a Top-Up gets the Amendment one; the sheet is
+        identical either way, only the row set differs. Served straight back rather than through
+        the async FileTemp route the entitlement export uses: the sheet is built from rows that
+        already exist, so there is nothing to wait for.
         """
         payment_plan = self.get_object()
-        if not payment_plan.eligible_payments_for_top_up().exists():
+        if not payment_plan.eligible_payments_for_child_plan().exists():
             raise ValidationError("Cannot create a top-up for a payment plan with no eligible payments")
 
         workbook = TopUpAmountTemplateService(payment_plan).generate_workbook()
@@ -929,10 +931,15 @@ class PaymentPlanViewSet(
         return response
 
     @extend_schema(
-        request=PaymentPlanCreateFollowUpSerializer,
+        request=PaymentPlanCreateTopUpSerializer,
         responses={201: PaymentPlanDetailSerializer},
     )
-    @action(detail=True, methods=["post"], url_path="create-top-up-amendment")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="create-top-up-amendment",
+        parser_classes=[MultiPartParser, JSONParser],
+    )
     @transaction.atomic
     def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)

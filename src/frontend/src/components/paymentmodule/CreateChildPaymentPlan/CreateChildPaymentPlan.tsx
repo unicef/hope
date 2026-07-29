@@ -21,6 +21,7 @@ import {
   Grid,
   Typography,
 } from '@mui/material';
+import { PaymentPlanCreateTopUp } from '@restgenerated/models/PaymentPlanCreateTopUp';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
@@ -30,12 +31,13 @@ import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
 import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useProgramContext } from '../../../programContext';
+import { countTopUpAmountRows } from './countTopUpAmountRows';
 
 type Variant = 'followup' | 'topup' | 'amendment';
 
@@ -57,6 +59,8 @@ export function CreateChildPaymentPlan({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [fundedRows, setFundedRows] = useState<number | null>(null);
+  const selectedFile = useRef<File | null>(null);
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { isActiveProgram, selectedProgram } = useProgramContext();
@@ -64,7 +68,9 @@ export function CreateChildPaymentPlan({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isFollowUp = variant === 'followup';
-  const isTopUp = variant === 'topup';
+  // A Top-Up and its Amendment are funded identically at creation; only the source plan
+  // differs, so they share the whole amount section.
+  const isTopUp = variant === 'topup' || variant === 'amendment';
   const labels = {
     followup: {
       button: t('Create Follow-up PP'),
@@ -100,19 +106,21 @@ export function CreateChildPaymentPlan({
             params,
           );
         }
+        // Top-Up and Amendment both accept an amount file, so both go out as multipart.
+        const multipartParams = {
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programCode: programId,
+          // drf-spectacular types the multipart `file` as a string; the API takes a File.
+          formData: requestBody as unknown as PaymentPlanCreateTopUp,
+        };
         if (variant === 'amendment') {
           return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpAmendmentCreate(
-            params,
+            multipartParams,
           );
         }
         return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate(
-          {
-            businessAreaSlug: businessArea,
-            id: paymentPlan.id,
-            programCode: programId,
-            // @ts-ignore - the generated model types `file` as string, a File is what the API takes
-            formData: requestBody,
-          },
+          multipartParams,
         );
       },
     });
@@ -141,6 +149,15 @@ export function CreateChildPaymentPlan({
               )
             : schema,
       ),
+    // A Top-Up has to be funded one way or the other. Picking a file clears the fixed amount,
+    // so "both at once" cannot arise here — only "neither" needs catching, and catching it
+    // client-side keeps the error under the field instead of in a snackbar from the server.
+    fixedAmount: Yup.string().when('file', ([file]: any[], schema: Yup.StringSchema) =>
+      isTopUp && !file
+        ? schema.required(t('Enter a fixed amount or upload an amount file'))
+        : schema,
+    ),
+    file: Yup.mixed().nullable(),
   });
 
   type FormValues = Yup.InferType<typeof validationSchema> & {
@@ -189,7 +206,7 @@ export function CreateChildPaymentPlan({
       validateOnChange
       validateOnBlur
     >
-      {({ submitForm, values, setFieldValue }) => (
+      {({ submitForm, values, setValues }) => (
         <Form>
           <Box
             sx={{
@@ -338,9 +355,48 @@ export function CreateChildPaymentPlan({
                             dontShowFilename={false}
                             loading={loadingCreate}
                             onChange={(files) => {
-                              setFieldValue('file', files[0] ?? null);
+                              const file = files[0] ?? null;
+                              // One setValues rather than two setFieldValue calls: Formik
+                              // validates on each of them against the state it had when the
+                              // call was made, so the second ran before `file` had landed and
+                              // flagged the amount as missing while the file sat right there.
+                              // Setting both at once leaves nothing to race.
+                              // The updater form is required, not stylistic: DropzoneField
+                              // memoises its onDrop with an empty dependency list, so this
+                              // closure keeps the values from the first render and spreading
+                              // them would wipe the dispersion dates typed since.
+                              void setValues((previous) => ({
+                                ...previous,
+                                file,
+                                // The file wins on submit, so drop whatever was typed above
+                                // rather than leaving a value that silently does nothing.
+                                ...(file ? { fixedAmount: '' } : {}),
+                              }));
+                              selectedFile.current = file;
+                              setFundedRows(null);
+                              if (!file) return;
+                              void countTopUpAmountRows(file)
+                                .then((count) => {
+                                  // Drop a result that lost the race to a newer pick.
+                                  if (selectedFile.current === file)
+                                    setFundedRows(count);
+                                })
+                                // Never let a preview failure become an unhandled rejection;
+                                // the file still uploads and the server validates it.
+                                .catch(() => setFundedRows(null));
                             }}
                           />
+                          {fundedRows !== null && (
+                            <Box sx={{ mt: 1 }}>
+                              <Typography data-cy="top-up-funded-rows">
+                                {t('New Top-Up will be created for')}{' '}
+                                {fundedRows}{' '}
+                                {fundedRows === 1
+                                  ? t('payment')
+                                  : t('payments')}
+                              </Typography>
+                            </Box>
+                          )}
                           <GreyText>
                             {t(
                               'Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',

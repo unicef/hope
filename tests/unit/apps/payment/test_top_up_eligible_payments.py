@@ -124,14 +124,15 @@ def test_eligible_payments_for_top_up_amendment_arrange_delivered_payment_act_qu
     "status",
     [Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG, Payment.STATUS_SENT_TO_FSP],
 )
-def test_eligible_payments_for_top_up_amendment_arrange_pending_payment_act_query_assert_excluded(
+def test_eligible_payments_for_top_up_amendment_arrange_pending_payment_act_query_assert_included(
     top_up_pp: PaymentPlan, status: str
 ) -> None:
+    """Payment status does not gate an amendment, exactly as it does not gate a top-up."""
     payment = PaymentFactory(parent=top_up_pp, status=status)
 
     result = list(top_up_pp.eligible_payments_for_top_up_amendment())
 
-    assert payment not in result
+    assert payment in result
 
 
 def test_eligible_payments_for_top_up_amendment_arrange_withdrawn_household_act_query_assert_excluded(
