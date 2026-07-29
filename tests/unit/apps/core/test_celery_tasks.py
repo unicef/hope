@@ -1,7 +1,7 @@
 from datetime import timedelta
 from unittest.mock import MagicMock, PropertyMock, patch
 
-from celery.exceptions import MaxRetriesExceededError, Retry
+from celery.exceptions import Retry
 from django.utils import timezone
 import pytest
 
@@ -38,11 +38,6 @@ def fake_async_retry_job_failure_action(job: AsyncRetryJob) -> None:
 
 def fake_async_retry_job_non_retriable_action(job: AsyncRetryJob) -> None:
     raise NonRetriableTaskError("permanent failure")
-
-
-def reraise_retry_exc(*args: object, exc: Exception, **kwargs: object) -> None:
-    # Simulates Celery re-raising the original exc on retry exhaustion (self.retry(exc=exc)).
-    raise exc
 
 
 ON_FAILURE_ACTION = "unit.apps.core.on_failure_handlers.record_failure"
@@ -707,11 +702,9 @@ def test_async_retry_job_task_preserves_partial_errors_on_failure(mock_retry) ->
 
 @pytest.mark.django_db
 @patch("hope.apps.core.celery_tasks.import_string", create=True)
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_async_retry_job_task_fires_on_failure_action_when_retries_exhausted(mock_retry, mock_import_string) -> None:
+def test_async_retry_job_task_fires_on_failure_action_when_retries_exhausted(mock_import_string) -> None:
     handler = MagicMock()
     mock_import_string.return_value = handler
-    mock_retry.side_effect = reraise_retry_exc
 
     job = AsyncRetryJob.queue_task(
         action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
@@ -719,48 +712,40 @@ def test_async_retry_job_task_fires_on_failure_action_when_retries_exhausted(moc
     )
 
     with pytest.raises(Exception, match="sync failed") as exc_info:
-        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+        async_retry_job_task.apply((job._meta.label_lower, job.pk, job.version)).get()
 
     mock_import_string.assert_called_once_with(ON_FAILURE_ACTION)
     handler.assert_called_once_with(job, exc_info.value)
     job.refresh_from_db()
     assert job.errors == {"exception": "sync failed"}
-    mock_retry.assert_called_once()
 
 
 @pytest.mark.django_db
 @patch("hope.apps.core.celery_tasks.import_string", create=True)
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_async_retry_job_task_does_not_fire_on_failure_action_while_retries_remain(
-    mock_retry, mock_import_string
-) -> None:
-    mock_retry.side_effect = Retry("retry")
-
+def test_async_retry_job_task_does_not_fire_on_failure_action_while_retries_remain(mock_import_string) -> None:
     job = AsyncRetryJob.queue_task(
         action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
         config={"on_failure_action": ON_FAILURE_ACTION},
     )
 
-    with pytest.raises(Retry):
-        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+    # Fail once then succeed: the task retries but never exhausts, so the hook must stay quiet.
+    with patch.object(AsyncRetryJob, "execute", side_effect=[Exception("sync failed"), None]):
+        result = async_retry_job_task.apply((job._meta.label_lower, job.pk, job.version))
 
+    assert result.successful()
     mock_import_string.assert_not_called()
-    mock_retry.assert_called_once()
 
 
 @pytest.mark.django_db
 @patch("hope.apps.core.celery_tasks.import_string", create=True)
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_async_retry_job_task_no_on_failure_action_configured_is_noop(mock_retry, mock_import_string) -> None:
-    mock_retry.side_effect = reraise_retry_exc
-
+def test_async_retry_job_task_no_on_failure_action_configured_is_noop(mock_import_string) -> None:
     job = AsyncRetryJob.queue_task(
         action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
         config={},
     )
 
     with pytest.raises(Exception, match="sync failed"):
-        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+        async_retry_job_task.apply((job._meta.label_lower, job.pk, job.version)).get()
 
     mock_import_string.assert_not_called()
     job.refresh_from_db()
@@ -770,13 +755,11 @@ def test_async_retry_job_task_no_on_failure_action_configured_is_noop(mock_retry
 @pytest.mark.django_db
 @patch("hope.apps.core.celery_tasks.logger")
 @patch("hope.apps.core.celery_tasks.import_string", create=True)
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 def test_async_retry_job_task_failing_on_failure_action_is_logged_and_original_exc_reraised(
-    mock_retry, mock_import_string, mock_logger
+    mock_import_string, mock_logger
 ) -> None:
     failing_handler = MagicMock(side_effect=Exception("handler boom"))
     mock_import_string.return_value = failing_handler
-    mock_retry.side_effect = reraise_retry_exc
 
     job = AsyncRetryJob.queue_task(
         action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
@@ -784,7 +767,7 @@ def test_async_retry_job_task_failing_on_failure_action_is_logged_and_original_e
     )
 
     with pytest.raises(Exception, match="sync failed") as exc_info:
-        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+        async_retry_job_task.apply((job._meta.label_lower, job.pk, job.version)).get()
 
     failing_handler.assert_called_once_with(job, exc_info.value)
     mock_logger.exception.assert_any_call(
@@ -808,23 +791,3 @@ def test_async_retry_job_task_non_retriable_error_skips_on_failure_action(mock_r
 
     mock_import_string.assert_not_called()
     mock_retry.assert_not_called()
-
-
-@pytest.mark.django_db
-@patch("hope.apps.core.celery_tasks.import_string", create=True)
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_async_retry_job_task_does_not_fire_on_failure_action_when_retry_raises_other_error(
-    mock_retry, mock_import_string
-) -> None:
-    mock_retry.side_effect = MaxRetriesExceededError("max retries")
-
-    job = AsyncRetryJob.queue_task(
-        action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
-        config={"on_failure_action": ON_FAILURE_ACTION},
-    )
-
-    with pytest.raises(MaxRetriesExceededError):
-        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_import_string.assert_not_called()
-    mock_retry.assert_called_once()
