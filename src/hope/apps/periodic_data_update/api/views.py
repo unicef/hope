@@ -1,6 +1,6 @@
 from functools import partial
 import logging
-from typing import Any
+from typing import Any, cast
 
 from constance import config
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -319,7 +319,7 @@ class PDUOnlineEditViewSet(
         )
         action = PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL
         action_date_formatted = f"{action_date:%-d %B %Y}"
-        notification = PDUOnlineEditNotification(instance, action, request.user, action_date_formatted)
+        notification = PDUOnlineEditNotification(instance, action, cast("User", request.user), action_date_formatted)
         transaction.on_commit(
             partial(
                 pdu_online_edit_sent_for_approval.send_robust,
@@ -401,7 +401,7 @@ class PDUOnlineEditViewSet(
         )
         action = PDUOnlineEditNotification.ACTION_SEND_BACK
         action_date_formatted = f"{action_date:%-d %B %Y}"
-        notification = PDUOnlineEditNotification(instance, action, request.user, action_date_formatted)
+        notification = PDUOnlineEditNotification(instance, action, cast("User", request.user), action_date_formatted)
         transaction.on_commit(
             partial(
                 pdu_online_edit_sent_back.send_robust,
@@ -448,7 +448,9 @@ class PDUOnlineEditViewSet(
             )
             action = PDUOnlineEditNotification.ACTION_APPROVE
             action_date_formatted = f"{action_date:%-d %B %Y}"
-            notification = PDUOnlineEditNotification(pdu_edit, action, request.user, action_date_formatted)
+            notification = PDUOnlineEditNotification(
+                pdu_edit, action, cast("User", request.user), action_date_formatted
+            )
             transaction.on_commit(
                 partial(
                     pdu_online_edit_approved.send_robust,

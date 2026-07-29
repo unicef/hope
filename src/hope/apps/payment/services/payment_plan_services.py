@@ -183,7 +183,7 @@ class PaymentPlanService:
         notification = PaymentNotification(
             self.payment_plan,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value,
-            self.user,
+            cast("User", self.user),
             action_date_formatted,
         )
         send_payment_notification_emails_async_task(
@@ -472,7 +472,7 @@ class PaymentPlanService:
                 notification = PaymentNotification(
                     self.payment_plan,
                     notification_action.value,
-                    self.user,
+                    cast("User", self.user),
                     action_date_formatted,
                 )
                 send_payment_notification_emails_async_task(

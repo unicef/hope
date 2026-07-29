@@ -6,6 +6,7 @@ from unittest.mock import patch
 import uuid
 
 from aniso8601 import parse_date
+from constance import config
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
@@ -1987,7 +1988,7 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
     assert isinstance(mock_event.call_args.kwargs["payload"].recipients, list)
     assert mock_event.call_args.kwargs["payload"].context["payment_plan_id"] == locked_payment_plan.unicef_id
     assert mock_event.call_args.kwargs["correlation_id"] == f"payment-plan:{locked_payment_plan.id}:APPROVE"
-    assert mock_event.call_args.kwargs["send_notification"] is True
+    assert mock_event.call_args.kwargs["send_notification"] == config.SEND_PAYMENT_PLANS_NOTIFICATION
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
