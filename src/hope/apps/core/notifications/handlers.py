@@ -103,8 +103,11 @@ def _handle_event(
     try:
         business_area = kwargs.get("business_area")
         serialized_payload = _json_safe_context(asdict(payload))
-        serialized_payload["send_notification"] = kwargs.get("send_notification", True) and (
-            business_area is None or business_area.enable_email_notification
+        # This mirrors HOPE's email-delivery gates without suppressing the Bitcaster event.
+        serialized_payload["send_notification"] = kwargs.get("send_notification", True) and getattr(
+            business_area,
+            "enable_email_notification",
+            True,
         )
         correlation_id = kwargs.get("correlation_id") or _build_email_correlation_id(event_name, payload)
         send_bitcaster_event_task.delay(event_name, serialized_payload, correlation_id)
