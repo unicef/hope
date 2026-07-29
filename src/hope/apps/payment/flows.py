@@ -186,6 +186,7 @@ class PaymentPlanFlow:
             lambda obj: (
                 obj.payment_plan.status
                 in [
+                    obj.payment_plan.Status.LOCKED_FSP,
                     obj.payment_plan.Status.LOCKED,
                     obj.payment_plan.Status.ACCEPTED,
                     obj.payment_plan.Status.FINISHED,
