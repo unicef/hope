@@ -466,3 +466,39 @@ def test_no_wallet_account_when_address_missing(
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
     assert not PendingAccount.objects.filter(individual=individual).exists()
+
+
+def test_head_of_household_phone_number_marked_valid(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.phone_no_valid is True
+
+
+def test_head_of_household_phone_number_marked_invalid(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    usdc_record.fields["individual_details"][0]["phone_no_i_c"] = "123"
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.phone_no_valid is False
