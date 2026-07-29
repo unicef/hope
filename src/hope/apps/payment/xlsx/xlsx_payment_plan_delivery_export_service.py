@@ -77,6 +77,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         self.fsp_xlsx_template_id = fsp_xlsx_template_id
         self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = None
         self.account_fields_headers = self.get_account_fields_headers(self.payment_plan)
+        self.add_accounts_fields = False
         self.header_list = []
         self.template_columns = []
         self.core_fields = []
@@ -262,7 +263,6 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
 
     def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> list[str]:
         # get headers
-        add_accounts_fields = False
         column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
         if fsp_xlsx_template and fsp_xlsx_template.columns:
             template_column_list = fsp_xlsx_template.columns
@@ -276,9 +276,9 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         if not self.allow_export_fsp_auth_code and "fsp_auth_code" in column_list:
             column_list.remove("fsp_auth_code")
 
-        if "account_data" in column_list:
+        self.add_accounts_fields = "account_data" in column_list
+        if self.add_accounts_fields:
             column_list.remove("account_data")
-            add_accounts_fields = True
 
         column_list = self._remove_column_for_people(column_list)
         self.template_columns = column_list.copy()
@@ -293,7 +293,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         column_list.extend(self.document_fields)
 
         # add headers for Account from FSP in PaymentPlan
-        if add_accounts_fields:
+        if self.add_accounts_fields:
             column_list.extend(self.account_fields_headers)
 
         self.fsp_extra_fields_headers = [
@@ -332,11 +332,12 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         ]
         payment_row.extend(documents_row)
 
-        accounts_row = [
-            FinancialServiceProviderXlsxTemplate.get_account_value_from_payment(payment, account_key)
-            for account_key in self.account_fields_headers
-        ]
-        payment_row.extend(accounts_row)
+        if self.add_accounts_fields:
+            accounts_row = [
+                FinancialServiceProviderXlsxTemplate.get_account_value_from_payment(payment, account_key)
+                for account_key in self.account_fields_headers
+            ]
+            payment_row.extend(accounts_row)
 
         payment_row.extend(payment.fsp_extra_fields.get(header, "") for header in self.fsp_extra_fields_headers)
 
