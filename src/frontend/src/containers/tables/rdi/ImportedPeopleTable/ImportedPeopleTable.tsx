@@ -60,23 +60,24 @@ export function ImportedPeopleTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasProgramsIndividualsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedIndividualListList>({
+      queryKey: [
+        'businessAreasProgramsIndividualsList',
+        queryVariables,
+        businessArea,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
         ),
-      ),
-    placeholderData: keepPreviousData,
-  });
+      placeholderData: keepPreviousData,
+    });
 
   const { data: countData } = useQuery({
     queryKey: [
@@ -136,6 +137,7 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
+          isFetching={isFetching}
           rowsPerPageOptions={rowsPerPageOptions}
           isOnPaper={isOnPaper}
           itemsCount={itemsCount}
@@ -161,6 +163,7 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
+          isFetching={isFetching}
           itemsCount={itemsCount}
           page={page}
           setPage={setPage}

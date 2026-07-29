@@ -82,7 +82,7 @@ function LookUpRegistrationDataImportTableCommunication({
 
   const [page, setPage] = useState(0);
 
-  const { data, isLoading, error } =
+  const { data, isLoading, isFetching, error } =
     useQuery<PaginatedRegistrationDataImportListList>({
       queryKey: [
         'businessAreasProgramsRegistrationDataImportsList',
@@ -145,6 +145,7 @@ function LookUpRegistrationDataImportTableCommunication({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={itemsCount}

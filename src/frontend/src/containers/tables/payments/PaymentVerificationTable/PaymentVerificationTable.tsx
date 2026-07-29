@@ -72,6 +72,7 @@ function PaymentVerificationTable({
   const {
     data: paymentPlansData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentVerificationPlanListList>({
     queryKey: [
@@ -100,6 +101,7 @@ function PaymentVerificationTable({
       headCells={headCells}
       data={paymentPlansData}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

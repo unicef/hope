@@ -96,23 +96,24 @@ export const PeopleListTable = ({
 
   const itemsCount = usePersistedCount(page, countData);
 
-  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasProgramsIndividualsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedIndividualListList>({
+      queryKey: [
+        'businessAreasProgramsIndividualsList',
+        queryVariables,
+        businessArea,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
         ),
-      ),
-    placeholderData: keepPreviousData,
-  });
+      placeholderData: keepPreviousData,
+    });
 
   return (
     <TableWrapper>
@@ -125,6 +126,7 @@ export const PeopleListTable = ({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         allowSort={false}
         filterOrderBy={filter.orderBy}
         itemsCount={itemsCount}

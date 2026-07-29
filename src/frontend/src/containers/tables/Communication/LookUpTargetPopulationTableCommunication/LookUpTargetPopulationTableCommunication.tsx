@@ -81,6 +81,7 @@ const LookUpTargetPopulationTableCommunication = ({
   const {
     data: paymentPlansData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
     queryKey: [
@@ -115,6 +116,7 @@ const LookUpTargetPopulationTableCommunication = ({
         defaultOrderDirection="desc"
         data={paymentPlansData}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

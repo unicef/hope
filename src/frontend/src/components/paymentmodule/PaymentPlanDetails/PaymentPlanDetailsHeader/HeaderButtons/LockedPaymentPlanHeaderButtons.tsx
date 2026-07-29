@@ -45,6 +45,12 @@ export function LockedPaymentPlanHeaderButtons({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         exact: false,
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

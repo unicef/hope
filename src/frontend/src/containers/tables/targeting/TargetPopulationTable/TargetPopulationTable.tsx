@@ -100,6 +100,7 @@ export function TargetPopulationTable({
   const {
     data: targetPopulationsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
     queryKey: [
@@ -155,6 +156,7 @@ export function TargetPopulationTable({
         setQueryVariables={setQueryVariables}
         data={targetPopulationsData}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         renderRow={(row: TargetPopulationList) => {
           const idx = results.indexOf(row);
@@ -165,7 +167,10 @@ export function TargetPopulationTable({
           return (
             <>
               {isNewGroup && (
-                <GroupHeaderRow name={row.paymentPlanGroup?.name} id={row.paymentPlanGroup?.id} />
+                <GroupHeaderRow
+                  name={row.paymentPlanGroup?.name}
+                  id={row.paymentPlanGroup?.id}
+                />
               )}
               <TargetPopulationTableRow
                 radioChangeHandler={enableRadioButton && handleRadioChange}

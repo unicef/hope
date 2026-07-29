@@ -45,6 +45,12 @@ export function FinishedPaymentPlanHeaderButtons({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);
@@ -65,6 +71,15 @@ export function FinishedPaymentPlanHeaderButtons({
       ),
     onSuccess: () => {
       showMessage(t('Sending to Payment Gateway started'));
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

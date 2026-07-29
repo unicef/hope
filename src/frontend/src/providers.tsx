@@ -20,17 +20,21 @@ interface ProvidersProps {
   children: ReactNode[];
 }
 
-// After ANY successful mutation, invalidate active queries so the UI reflects the write
-// immediately (create/edit/status-change etc.). Static reference data (choices, geo areas,
-// permissions) is exempt so it keeps its long staleTime. Individual mutations may still add
-// their own targeted invalidation; this is the safety net for the app's drifted query keys.
-// The onSuccess closure references `queryClient` lazily — it only runs on a mutation success,
-// long after the binding is initialised — so the self-reference is safe.
+// After ANY successful mutation, mark active non-static queries stale so the UI reflects the
+// write on the next mount/access (create/edit/status-change etc.). This uses
+// `refetchType: 'none'` so it does NOT actively refetch: mutations that need an immediate
+// on-screen refresh add their own targeted invalidation (default active refetch), and this net
+// only guarantees eventual freshness for the app's drifted query keys. Not refetching here also
+// avoids re-firing a query for a resource a mutation just deleted before its own onSuccess
+// navigates away. Static reference data (choices, geo areas, permissions) is exempt so it keeps
+// its long staleTime. The onSuccess closure references `queryClient` lazily — it only runs on a
+// mutation success, long after the binding is initialised — so the self-reference is safe.
 const queryClient: QueryClient = new QueryClient({
   mutationCache: new MutationCache({
     onSuccess: () => {
       queryClient.invalidateQueries({
         predicate: (query) => !isStaticReferenceQuery(query.queryKey),
+        refetchType: 'none',
       });
     },
   }),

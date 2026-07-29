@@ -40,7 +40,8 @@ function FeedbackTable({
       createdAtBefore: dateToIsoString(filter.createdAtBefore, 'startOfDay'),
       createdAtAfter: dateToIsoString(filter.createdAtAfter, 'endOfDay'),
       program: isAllPrograms ? filter.program : null,
-      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
+      isActiveProgram:
+        filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       businessAreaSlug: businessArea,
       programCode: isAllPrograms ? null : programId,
     }),
@@ -72,6 +73,7 @@ function FeedbackTable({
     data: selectedProgramFeedbacksData,
     error: errorSelectedProgram,
     isLoading: isLoadingSelectedProgram,
+    isFetching: isFetchingSelectedProgram,
   } = useQuery<PaginatedFeedbackListList>({
     queryKey: [
       'businessAreasProgramsFeedbacksList',
@@ -114,6 +116,7 @@ function FeedbackTable({
     data: allProgramsFeedbacksData,
     error: errorAllPrograms,
     isLoading: isLoadingAllPrograms,
+    isFetching: isFetchingAllPrograms,
   } = useQuery<PaginatedFeedbackListList>({
     queryKey: ['businessAreasFeedbacksList', queryVariables, businessArea],
     queryFn: () => {
@@ -188,6 +191,9 @@ function FeedbackTable({
         error={isAllPrograms ? errorAllPrograms : errorSelectedProgram}
         isLoading={
           isAllPrograms ? isLoadingAllPrograms : isLoadingSelectedProgram
+        }
+        isFetching={
+          isAllPrograms ? isFetchingAllPrograms : isFetchingSelectedProgram
         }
         itemsCount={itemsCount}
         page={page}

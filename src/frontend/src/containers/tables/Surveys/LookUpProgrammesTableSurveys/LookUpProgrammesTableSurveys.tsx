@@ -84,6 +84,7 @@ export function LookUpProgrammesTableSurveys({
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
+    isFetching: isFetchingPrograms,
     error: errorPrograms,
   } = useQuery<PaginatedProgramListList>({
     queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
@@ -134,6 +135,7 @@ export function LookUpProgrammesTableSurveys({
           defaultOrderBy="startDate"
           data={dataPrograms}
           isLoading={isLoadingPrograms}
+          isFetching={isFetchingPrograms}
           error={errorPrograms}
           itemsCount={itemsCount}
           page={page}

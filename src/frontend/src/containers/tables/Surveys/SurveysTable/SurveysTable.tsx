@@ -64,6 +64,7 @@ function SurveysTable({
   const {
     data: dataSurveys,
     isLoading: isLoadingSurveys,
+    isFetching: isFetchingSurveys,
     error: errorSurveys,
   } = useQuery<PaginatedSurveyList>({
     queryKey: ['businessAreasProgramsSurveysList', queryVariables],
@@ -104,7 +105,6 @@ function SurveysTable({
 
   const itemsCount = usePersistedCount(page, dataSurveysCount);
 
-
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -112,6 +112,7 @@ function SurveysTable({
         title={t('Surveys List')}
         data={dataSurveys}
         isLoading={isLoadingSurveys}
+        isFetching={isFetchingSurveys}
         error={errorSurveys}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

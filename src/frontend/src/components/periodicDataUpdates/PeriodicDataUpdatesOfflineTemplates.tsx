@@ -156,6 +156,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   const {
     data: templatesData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPDUXlsxTemplateListList>({
     queryKey: [
@@ -280,6 +281,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
         headCells={templatesHeadCells}
         data={templatesData ?? {}}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

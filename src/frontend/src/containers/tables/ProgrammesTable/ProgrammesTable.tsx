@@ -72,6 +72,7 @@ function ProgrammesTable({
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
+    isFetching: isFetchingPrograms,
     error: errorPrograms,
   } = useQuery<PaginatedProgramListList>({
     queryKey: [
@@ -111,6 +112,7 @@ function ProgrammesTable({
           setQueryVariables={setQueryVariables}
           data={dataPrograms}
           isLoading={isLoadingPrograms}
+          isFetching={isFetchingPrograms}
           error={errorPrograms}
           itemsCount={itemsCount}
           renderRow={(row: ProgramList) => (

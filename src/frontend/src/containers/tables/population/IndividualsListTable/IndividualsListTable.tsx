@@ -113,23 +113,24 @@ export function IndividualsListTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasProgramsIndividualsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedIndividualListList>({
+      queryKey: [
+        'businessAreasProgramsIndividualsList',
+        queryVariables,
+        businessArea,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
         ),
-      ),
-    placeholderData: keepPreviousData,
-  });
+      placeholderData: keepPreviousData,
+    });
 
   const { data: countData } = useQuery<CountResponse>({
     // Count should depend only on filters (not pagination). Keep fetching only on page 0.
@@ -187,6 +188,7 @@ export function IndividualsListTable({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         allowSort={false}
         filterOrderBy={filter.orderBy}
         itemsCount={itemsCount}

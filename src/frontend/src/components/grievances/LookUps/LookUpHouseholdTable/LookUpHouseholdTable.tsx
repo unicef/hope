@@ -107,6 +107,7 @@ export function LookUpHouseholdTable({
   const {
     data: dataHouseholdsProgram,
     isLoading: isLoadingHouseholdsProgram,
+    isFetching: isFetchingHouseholdsProgram,
     error: errorHouseholdsProgram,
   } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
@@ -146,6 +147,7 @@ export function LookUpHouseholdTable({
   const {
     data: dataHouseholdsAllPrograms,
     isLoading: isLoadingHouseholdsAllPrograms,
+    isFetching: isFetchingHouseholdsAllPrograms,
     error: errorHouseholdsAllPrograms,
   } = useQuery<PaginatedHouseholdListList>({
     queryKey: ['businessAreasHouseholdsList', queryVariables, businessArea],
@@ -299,6 +301,11 @@ export function LookUpHouseholdTable({
         isAllPrograms
           ? isLoadingHouseholdsAllPrograms
           : isLoadingHouseholdsProgram
+      }
+      isFetching={
+        isAllPrograms
+          ? isFetchingHouseholdsAllPrograms
+          : isFetchingHouseholdsProgram
       }
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

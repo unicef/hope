@@ -41,6 +41,7 @@ function PaymentsHouseholdTable({
   const {
     data: paymentsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
@@ -111,6 +112,7 @@ function PaymentsHouseholdTable({
       data={paymentsData}
       error={error}
       isLoading={isLoading}
+      isFetching={isFetching}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       page={page}

@@ -72,6 +72,7 @@ export function VerificationsTable({
   const {
     data: paymentsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
@@ -122,6 +123,7 @@ export function VerificationsTable({
       title={t('Verification Records')}
       headCells={adjustedHeadCells}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

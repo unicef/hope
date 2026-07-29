@@ -66,6 +66,7 @@ function PaymentPlansTable({
   const {
     data: paymentPlansData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
     queryKey: [
@@ -121,7 +122,10 @@ function PaymentPlansTable({
     const rows = paymentPlansData?.results ?? [];
     rows.forEach((row, idx) => {
       const prev = rows[idx - 1];
-      if (idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id) {
+      if (
+        idx === 0 ||
+        prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id
+      ) {
         ids.add(row.id);
       }
     });
@@ -135,6 +139,7 @@ function PaymentPlansTable({
       headCells={adjustedHeadCells as any}
       data={paymentPlansData}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

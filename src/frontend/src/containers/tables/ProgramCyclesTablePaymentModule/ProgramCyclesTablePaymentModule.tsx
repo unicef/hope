@@ -62,7 +62,7 @@ export const ProgramCyclesTablePaymentModule = ({
     queryVariables && typeof queryVariables.limit === 'number'
       ? queryVariables.limit
       : 5;
-  const { data, refetch, error, isLoading } =
+  const { data, refetch, error, isLoading, isFetching } =
     useQuery<PaginatedProgramCycleListList>({
       queryKey: [
         'programCycles',
@@ -261,6 +261,7 @@ export const ProgramCyclesTablePaymentModule = ({
       data={data}
       error={error}
       isLoading={isLoading}
+      isFetching={isFetching}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       page={page}

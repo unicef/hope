@@ -47,6 +47,7 @@ export function TargetPopulationHouseholdTable({
   const {
     data: householdsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPendingPaymentList>({
     queryKey: [
@@ -119,6 +120,7 @@ export function TargetPopulationHouseholdTable({
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         isLoading={isLoading}
+        isFetching={isFetching}
         data={householdsData}
         error={error}
         queryVariables={queryVariables}

@@ -111,23 +111,24 @@ export const HouseholdTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedHouseholdListList>({
+      queryKey: [
+        'businessAreasProgramsHouseholdsList',
+        queryVariables,
+        programId,
+        businessArea,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsHouseholdsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
         ),
-      ),
-    placeholderData: keepPreviousData,
-  });
+      placeholderData: keepPreviousData,
+    });
 
   const { data: countData } = useQuery<CountResponse>({
     queryKey: [
@@ -255,6 +256,7 @@ export const HouseholdTable = ({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={itemsCount}

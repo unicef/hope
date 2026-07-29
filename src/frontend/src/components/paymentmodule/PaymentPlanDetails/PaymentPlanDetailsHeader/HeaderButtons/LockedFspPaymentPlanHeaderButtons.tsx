@@ -43,6 +43,12 @@ export function LockedFspPaymentPlanHeaderButtons({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         exact: false,
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);
@@ -64,6 +70,12 @@ export function LockedFspPaymentPlanHeaderButtons({
         await queryClient.invalidateQueries({
           queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
           exact: false,
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasProgramsPaymentPlansList'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasPaymentPlans'],
         });
       },
       onError: (error: any) => {

@@ -93,6 +93,7 @@ const PaymentsTable = ({
   const {
     data: paymentsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
@@ -206,6 +207,7 @@ const PaymentsTable = ({
               defaultOrderBy="createdAt"
               defaultOrderDirection="desc"
               isLoading={isLoading}
+              isFetching={isFetching}
               error={error}
               queryVariables={queryVariables}
               setQueryVariables={setQueryVariables}

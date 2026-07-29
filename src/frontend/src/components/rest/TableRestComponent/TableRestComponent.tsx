@@ -12,6 +12,7 @@ import {
   TableCell as MuiTableCell,
   TableContainer as MuiTableContainer,
   TableRow as MuiTableRow,
+  LinearProgress,
   Skeleton,
   TablePagination,
 } from '@mui/material';
@@ -165,6 +166,7 @@ interface TableRestComponentProps<T extends { [key: string]: any }> {
   order: Order;
   title?: string;
   loading?: boolean;
+  isFetching?: boolean;
   allowSort?: boolean;
   isOnPaper?: boolean;
   actions?: Array<ReactElement>;
@@ -190,6 +192,7 @@ export function TableRestComponent<T>({
   orderBy,
   onSelectAllClick,
   loading: loadingProp = false,
+  isFetching = false,
   allowSort = true,
   isOnPaper = true,
   actions = [],
@@ -260,9 +263,28 @@ export function TableRestComponent<T>({
     body = <>{data.map((row) => renderRow(row))}</>;
   }
 
+  // A background refetch while previous rows stay visible (keepPreviousData) — show a
+  // thin progress bar over the existing rows. `position: relative` is only applied when the
+  // bar is present so tables render identically (and snapshots stay stable) when idle.
+  const showFetchingProgress = isFetching && !loadingProp;
+
   const table = (
     <>
-      <StyledTableContainer>
+      <StyledTableContainer
+        sx={showFetchingProgress ? { position: 'relative' } : undefined}
+      >
+        {showFetchingProgress && (
+          <LinearProgress
+            data-cy="table-fetching-progress"
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1,
+            }}
+          />
+        )}
         <StyledBox>
           {title ? <EnhancedTableToolbar title={title} /> : null}
           <StyledBox

@@ -95,7 +95,8 @@ export function LookUpIndividualTable({
       householdId,
       excludedId: excludedId || ticket?.individual?.id || null,
       programId: isAllPrograms ? filter.program : programId,
-      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
+      isActiveProgram:
+        filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       withdrawn: false,
       rdiMergeStatus: RdiMergeStatusEnum.MERGED,
     }),
@@ -134,6 +135,7 @@ export function LookUpIndividualTable({
   const {
     data: selectedProgramIndividualsData,
     isLoading: isLoadingSelectedProgram,
+    isFetching: isFetchingSelectedProgram,
     error: errorSelectedProgram,
   } = useQuery<PaginatedIndividualListList>({
     queryKey: [
@@ -176,6 +178,7 @@ export function LookUpIndividualTable({
   const {
     data: allProgramsIndividualsData,
     isLoading: isLoadingAllPrograms,
+    isFetching: isFetchingAllPrograms,
     error: errorAllPrograms,
   } = useQuery<PaginatedIndividualListList>({
     queryKey: ['businessAreasIndividualsList', queryVariables, businessArea],
@@ -256,6 +259,9 @@ export function LookUpIndividualTable({
       error={isAllPrograms ? errorAllPrograms : errorSelectedProgram}
       isLoading={
         isAllPrograms ? isLoadingAllPrograms : isLoadingSelectedProgram
+      }
+      isFetching={
+        isAllPrograms ? isFetchingAllPrograms : isFetchingSelectedProgram
       }
       itemsCount={itemsCount}
       renderRow={(row: IndividualList) => (

@@ -101,23 +101,24 @@ function LookUpHouseholdTableCommunication({
 
   const [page, setPage] = useState(0);
 
-  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedHouseholdListList>({
+      queryKey: [
+        'businessAreasProgramsHouseholdsList',
+        queryVariables,
+        businessArea,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsHouseholdsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
         ),
-      ),
-    placeholderData: keepPreviousData,
-  });
+      placeholderData: keepPreviousData,
+    });
 
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
@@ -205,6 +206,7 @@ function LookUpHouseholdTableCommunication({
       setQueryVariables={setQueryVariables}
       data={data}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       page={page}
       setPage={setPage}

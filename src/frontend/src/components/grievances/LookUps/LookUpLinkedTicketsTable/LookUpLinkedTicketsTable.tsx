@@ -71,8 +71,8 @@ export function LookUpLinkedTicketsTable({
 
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
 
-  const { data, isLoading, error } = useQuery<PaginatedGrievanceTicketListList>(
-    {
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedGrievanceTicketListList>({
       queryKey: [
         programId
           ? 'businessAreasProgramsGrievanceTicketsList'
@@ -102,8 +102,7 @@ export function LookUpLinkedTicketsTable({
       },
       placeholderData: keepPreviousData,
       enabled: !choicesLoading && !!choicesData,
-    },
-  );
+    });
 
   const { data: countData } = useQuery<CountResponse>({
     queryKey: [
@@ -193,6 +192,7 @@ export function LookUpLinkedTicketsTable({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={countData?.count}

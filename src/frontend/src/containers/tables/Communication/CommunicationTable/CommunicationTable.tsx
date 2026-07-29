@@ -54,23 +54,24 @@ function CommunicationTable({
 
   const [page, setPage] = useState(0);
 
-  const { data, isLoading, error } = useQuery<PaginatedMessageListList>({
-    queryKey: [
-      'businessAreasProgramsMessagesList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsMessagesList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedMessageListList>({
+      queryKey: [
+        'businessAreasProgramsMessagesList',
+        queryVariables,
+        programId,
+        businessArea,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsMessagesList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
         ),
-      ),
-    placeholderData: keepPreviousData,
-  });
+      placeholderData: keepPreviousData,
+    });
 
   const { data: countData } = useQuery<CountResponse>({
     queryKey: [
@@ -107,6 +108,7 @@ function CommunicationTable({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={itemsCount}

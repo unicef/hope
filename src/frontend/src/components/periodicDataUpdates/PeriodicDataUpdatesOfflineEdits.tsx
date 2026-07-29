@@ -85,6 +85,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
   const {
     data: updatesData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPDUXlsxUploadListList>({
     queryKey: [
@@ -179,6 +180,7 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         headCells={updatesHeadCells}
         data={updatesData ?? {}}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

@@ -50,6 +50,7 @@ export function LookUpPaymentRecordTable({
   const {
     data: paymentsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
@@ -175,6 +176,7 @@ export function LookUpPaymentRecordTable({
         headCells={headCells}
         data={paymentsData}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
@@ -206,6 +208,7 @@ export function LookUpPaymentRecordTable({
       numSelected={numSelected}
       data={paymentsData}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

@@ -136,6 +136,7 @@ function RegistrationDataImportTable({
   const {
     data: listData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedRegistrationDataImportListList>({
     queryKey: [
@@ -199,6 +200,7 @@ function RegistrationDataImportTable({
         setQueryVariables={setQueryVariables}
         data={listData}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         page={page}
         setPage={setPage}

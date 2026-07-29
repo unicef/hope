@@ -83,6 +83,7 @@ export function LookUpTargetPopulationTableSurveys({
   const {
     data: paymentPlansData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
     queryKey: [
@@ -137,6 +138,7 @@ export function LookUpTargetPopulationTableSurveys({
         defaultOrderDirection="desc"
         data={paymentPlansData}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

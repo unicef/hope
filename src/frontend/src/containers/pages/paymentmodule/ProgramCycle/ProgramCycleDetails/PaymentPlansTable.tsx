@@ -77,6 +77,7 @@ export const PaymentPlansTable = ({
   const {
     data: dataPaymentPlans,
     isLoading: isLoadingPaymentPlans,
+    isFetching: isFetchingPaymentPlans,
     error: errorPaymentPlans,
   } = useQuery<PaginatedPaymentPlanListList>({
     queryKey: [
@@ -140,6 +141,7 @@ export const PaymentPlansTable = ({
       data={dataPaymentPlans}
       error={errorPaymentPlans}
       isLoading={isLoadingPaymentPlans}
+      isFetching={isFetchingPaymentPlans}
       setQueryVariables={setQueryVariables}
       itemsCount={itemsCount}
       page={page}
@@ -152,7 +154,10 @@ export const PaymentPlansTable = ({
         return (
           <>
             {isNewGroup && (
-              <GroupHeaderRow name={row.paymentPlanGroup?.name} id={row.paymentPlanGroup?.id} />
+              <GroupHeaderRow
+                name={row.paymentPlanGroup?.name}
+                id={row.paymentPlanGroup?.id}
+              />
             )}
             <PaymentPlanTableRow
               key={row.id}

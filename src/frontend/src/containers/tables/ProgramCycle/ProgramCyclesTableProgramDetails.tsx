@@ -46,7 +46,7 @@ const ProgramCyclesTableProgramDetails = ({
   }, [page]);
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading, isFetching } = useQuery({
     queryKey: ['programCycles', businessAreaSlug, program.code, queryVariables],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesList(
@@ -175,6 +175,7 @@ const ProgramCyclesTableProgramDetails = ({
       data={data}
       error={error}
       isLoading={isLoading}
+      isFetching={isFetching}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       actions={actions}

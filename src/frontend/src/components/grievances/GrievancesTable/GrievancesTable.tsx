@@ -166,6 +166,7 @@ export const GrievancesTable = ({
   const {
     data: allProgramsGrievanceTicketsData,
     isLoading: isLoadingAll,
+    isFetching: isFetchingAll,
     error: errorAll,
   } = useQuery<PaginatedGrievanceTicketListList>({
     queryKey: [
@@ -210,6 +211,7 @@ export const GrievancesTable = ({
   const {
     data: selectedProgramGrievanceTicketsData,
     isLoading: isLoadingSelected,
+    isFetching: isFetchingSelected,
     error: errorSelected,
   } = useQuery<PaginatedGrievanceTicketListList>({
     queryKey: [
@@ -440,6 +442,7 @@ export const GrievancesTable = ({
           }
           error={isAllPrograms ? errorAll : errorSelected}
           isLoading={isAllPrograms ? isLoadingAll : isLoadingSelected}
+          isFetching={isAllPrograms ? isFetchingAll : isFetchingSelected}
           queryVariables={queryVariables}
           setQueryVariables={setQueryVariables}
           defaultOrderBy="created_at"
