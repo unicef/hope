@@ -1,5 +1,7 @@
-from datetime import date
+from datetime import date, datetime, time
+from decimal import Decimal
 from io import BytesIO
+from uuid import UUID
 
 import openpyxl
 import pytest
@@ -151,6 +153,47 @@ def account_system_header_import_file(payments):
 
 
 @pytest.fixture
+def invalid_headers_import_file(payments, request):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(request.param)
+    worksheet.append([payments[0].unicef_id, "value", "value"])
+    stream = BytesIO()
+    workbook.save(stream)
+    stream.seek(0)
+    return stream
+
+
+@pytest.fixture
+def row_validation_import_file(payments):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "new_field"])
+    worksheet.append([None, None])
+    worksheet.append([None, "missing-payment-id"])
+    worksheet.append(["UNKNOWN-PAYMENT", "unknown-payment"])
+    worksheet.append([payments[0].unicef_id, "new-value"])
+    worksheet.append([payments[0].unicef_id, "duplicate-payment"])
+    stream = BytesIO()
+    workbook.save(stream)
+    stream.seek(0)
+    return stream
+
+
+@pytest.fixture
+def no_change_import_file(payments):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "other"])
+    worksheet.append([payments[0].unicef_id, None])
+    worksheet.append([payments[1].unicef_id, "second-payment"])
+    stream = BytesIO()
+    workbook.save(stream)
+    stream.seek(0)
+    return stream
+
+
+@pytest.fixture
 def migration_payments(payment_plan):
     flat_payment = PaymentFactory(
         parent=payment_plan,
@@ -236,7 +279,7 @@ def test_fsp_extra_fields_import_merges_non_empty_values(
     service.open_workbook()
     service.validate()
 
-    updated_count = service.import_payment_list()
+    updated_count = service.import_payment_list(str(payment_plan.created_by_id))
 
     payments[0].refresh_from_db()
     payments[1].refresh_from_db()
@@ -270,6 +313,112 @@ def test_fsp_extra_fields_import_allows_payment_gateway_payload_header(
     assert service.errors == []
     assert updated_count == 1
     assert payments[0].fsp_extra_fields["amount"] == 10
+
+
+@pytest.mark.parametrize(
+    ("invalid_headers_import_file", "expected_message"),
+    [
+        (
+            ["payment_id", None, 123],
+            "All XLSX columns must have a non-empty text header",
+        ),
+        (
+            ["payment_id", "reference", "reference"],
+            "Duplicate headers are not allowed: ['reference']",
+        ),
+    ],
+    indirect=["invalid_headers_import_file"],
+)
+def test_fsp_extra_fields_import_rejects_invalid_headers(
+    payment_plan,
+    invalid_headers_import_file,
+    expected_message,
+):
+    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, invalid_headers_import_file)
+    service.open_workbook()
+
+    service.validate()
+
+    assert len(service.errors) == 1
+    assert service.errors[0].message == expected_message
+
+
+def test_fsp_extra_fields_import_validates_blank_missing_unknown_and_duplicate_rows(
+    payment_plan,
+    row_validation_import_file,
+):
+    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, row_validation_import_file)
+    service.open_workbook()
+
+    service.validate()
+
+    assert service.is_updated is True
+    assert len(service.errors) == 3
+    assert service.errors[0].coordinates == "A3"
+    assert service.errors[0].message == "Payment id is required"
+    assert service.errors[1].coordinates == "A4"
+    assert service.errors[1].message == "This payment id UNKNOWN-PAYMENT is not in Payment Plan Payment List"
+    assert service.errors[2].coordinates == "A6"
+    assert service.errors[2].message == "Payment id PAYMENT-001 appears multiple times in the import file"
+
+
+def test_fsp_extra_fields_import_skips_blank_invalid_and_duplicate_rows(
+    payment_plan,
+    payments,
+    row_validation_import_file,
+):
+    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, row_validation_import_file)
+    service.open_workbook()
+
+    updated_count = service.import_payment_list()
+
+    payments[0].refresh_from_db(fields=["extras"])
+    payments[1].refresh_from_db(fields=["extras"])
+    assert updated_count == 1
+    assert payments[0].fsp_extra_fields["new_field"] == "new-value"
+    assert "new_field" not in payments[1].fsp_extra_fields
+
+
+def test_fsp_extra_fields_import_reports_and_skips_rows_without_changes(
+    payment_plan,
+    payments,
+    no_change_import_file,
+):
+    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, no_change_import_file)
+    service.open_workbook()
+
+    service.validate()
+    updated_count = service.import_payment_list()
+
+    payments[0].refresh_from_db(fields=["extras"])
+    payments[1].refresh_from_db(fields=["extras"])
+    assert len(service.errors) == 1
+    assert service.errors[0].message == "There aren't any updates in imported file, please add changes and try again"
+    assert updated_count == 0
+    assert payments[0].fsp_extra_fields == {
+        "empty_field": "keep-empty",
+        "keep": "keep-existing",
+        "reference": "old-reference",
+    }
+    assert payments[1].fsp_extra_fields == {"other": "second-payment"}
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (Decimal("12.50"), 12.5),
+        (datetime(2026, 7, 29, 10, 30, 45), "2026-07-29T10:30:45"),
+        (date(2026, 7, 29), "2026-07-29"),
+        (time(10, 30, 45), "10:30:45"),
+        (123, 123),
+        (12.5, 12.5),
+        (True, True),
+        ("reference", "reference"),
+        (UUID("12345678-1234-5678-1234-567812345678"), "12345678-1234-5678-1234-567812345678"),
+    ],
+)
+def test_fsp_extra_fields_import_normalizes_json_values(value, expected):
+    assert XlsxPaymentPlanFspExtraFieldsImportService._normalize_value(value) == expected
 
 
 @pytest.mark.parametrize(
