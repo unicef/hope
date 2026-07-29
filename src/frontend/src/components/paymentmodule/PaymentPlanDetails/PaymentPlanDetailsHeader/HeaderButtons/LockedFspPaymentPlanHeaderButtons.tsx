@@ -10,7 +10,6 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
-import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATES } from '@utils/constants';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -30,11 +29,6 @@ export function LockedFspPaymentPlanHeaderButtons({
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
-  const backgroundActionInProgress =
-    paymentPlan.backgroundActionStatus != null &&
-    !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATES.includes(
-      paymentPlan.backgroundActionStatus,
-    );
 
   const { mutateAsync: unlock, isPending: loadingUnlock } = useMutation({
     mutationFn: () =>
@@ -95,7 +89,7 @@ export function LockedFspPaymentPlanHeaderButtons({
             variant="outlined"
             color="primary"
             onClick={() => unlock()}
-            disabled={!isActiveProgram || backgroundActionInProgress}
+            disabled={!isActiveProgram}
             data-cy="button-unlock-fsp"
           >
             {t('Unlock FSP')}
@@ -114,7 +108,7 @@ export function LockedFspPaymentPlanHeaderButtons({
             color="primary"
             onClick={() => sendForApproval()}
             data-cy="button-send-for-approval"
-            disabled={!isActiveProgram || backgroundActionInProgress}
+            disabled={!isActiveProgram}
           >
             {t('Send For Approval')}
           </LoadingButton>

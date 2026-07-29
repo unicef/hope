@@ -152,6 +152,7 @@ def fsp_extra_fields_actions_context(
         program=payment_plan.program,
         unicef_id="PAYMENT-FSP-EXTRA-FIELDS",
     )
+    payment.save(update_fields=["unicef_id"])
     create_user_role_with_permissions(
         context["user"],
         [Permissions.PM_VIEW_LIST, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],

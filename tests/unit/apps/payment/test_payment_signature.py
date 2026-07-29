@@ -59,6 +59,7 @@ def calculate_hash_manually(payment: Payment) -> str:
     sha1.update(str(payment.delivered_quantity_usd).encode("utf-8"))
     sha1.update(str(payment.delivery_date).encode("utf-8"))
     sha1.update(str(payment.transaction_reference_id).encode("utf-8"))
+    sha1.update(str(payment.fsp_extra_fields).encode("utf-8"))
     return sha1.hexdigest()
 
 

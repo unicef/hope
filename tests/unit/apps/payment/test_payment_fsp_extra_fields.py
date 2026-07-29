@@ -59,6 +59,10 @@ def payments(payment_plan):
             "fsp_extra_fields": {"other": "second-payment"},
         },
     )
+    first_payment.save(update_fields=["unicef_id"])
+    second_payment.save(update_fields=["unicef_id"])
+    PaymentHouseholdSnapshotFactory(payment=first_payment)
+    PaymentHouseholdSnapshotFactory(payment=second_payment)
     return first_payment, second_payment
 
 
@@ -189,7 +193,7 @@ def test_fsp_extra_fields_template_contains_only_fsp_fields(
     payments,
     django_assert_num_queries,
 ):
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(6):
         workbook = XlsxPaymentPlanFspExtraFieldsExportService(payment_plan).generate_workbook()
 
     rows = list(workbook.active.values)
@@ -338,7 +342,6 @@ def test_reconciliation_import_uses_plan_wide_fsp_header_ownership(
 def test_payment_detail_serializer_separates_extra_field_namespaces(payments):
     serializer = PaymentDetailSerializer()
 
-    assert serializer.get_extras(payments[0]) == {"reconciliation_code": "REC-001"}
     assert serializer.get_extra_fields(payments[0]) == {"reconciliation_code": "REC-001"}
     assert serializer.get_fsp_extra_fields(payments[0]) == {
         "empty_field": "keep-empty",

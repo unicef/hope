@@ -43,15 +43,6 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
     'Custom Exchange Rate Error',
 };
 
-export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATES: string[] = [
-  PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-  PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-  PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
-  PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-  PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR,
-  PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-];
-
 export const GRIEVANCE_TICKET_STATES = {
   NEW: 1,
   ASSIGNED: 2,
