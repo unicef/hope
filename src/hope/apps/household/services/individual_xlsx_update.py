@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from xlwt import Row
@@ -121,10 +121,10 @@ class IndividualXlsxUpdate:
 
         return queryset
 
-    def _row_report_data(self, row: Row) -> Any:
+    def _row_report_data(self, row: Row) -> object:
         return row[0].row
 
-    def _get_matching_report_for_single_row(self, row: Row) -> Any:
+    def _get_matching_report_for_single_row(self, row: Row) -> object:
         # TODO: refactor the output of this function
         q_object = Q()
         for match_col in self.xlsx_match_columns:

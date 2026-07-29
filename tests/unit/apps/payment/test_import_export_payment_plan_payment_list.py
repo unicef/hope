@@ -2,7 +2,6 @@ from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any
 from unittest import mock
 from unittest.mock import patch
 import zipfile
@@ -686,7 +685,7 @@ def test_flex_fields_admin_visibility(client, business_area, flex_decimal_attrib
         "admin:payment_financialserviceproviderxlsxtemplate_change",
         args=[instance.pk],
     )
-    response: Any = client.get(url)
+    response: object = client.get(url)
     assert response.status_code == 200
     assert "flex_fields" in response.context["adminform"].form.fields
     assert flex_decimal_attribute.name in (

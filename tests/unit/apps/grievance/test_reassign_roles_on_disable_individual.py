@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -19,7 +17,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def base_context() -> dict[str, Any]:
+def base_context() -> dict[str, object]:
     business_area = BusinessAreaFactory(slug="afghanistan")
     program = ProgramFactory(name="Test program ONE", business_area=business_area)
     user = UserFactory()
@@ -68,7 +66,7 @@ def base_context() -> dict[str, Any]:
     }
 
 
-def test_reassign_role_to_another_individual(base_context: dict[str, Any]) -> None:
+def test_reassign_role_to_another_individual(base_context: dict[str, object]) -> None:
     household = base_context["household"]
     program = base_context["program"]
     business_area = base_context["business_area"]
@@ -107,7 +105,7 @@ def test_reassign_role_to_another_individual(base_context: dict[str, Any]) -> No
     assert role == ROLE_PRIMARY
 
 
-def test_reassign_alternate_role_to_primary_collector(base_context: dict[str, Any]) -> None:
+def test_reassign_alternate_role_to_primary_collector(base_context: dict[str, object]) -> None:
     household = base_context["household"]
     role_reassign_data = {
         str(base_context["alternate_role"].id): {
@@ -126,7 +124,7 @@ def test_reassign_alternate_role_to_primary_collector(base_context: dict[str, An
         )
 
 
-def test_reassign_alternate_role(base_context: dict[str, Any]) -> None:
+def test_reassign_alternate_role(base_context: dict[str, object]) -> None:
     household = base_context["household"]
     program = base_context["program"]
     business_area = base_context["business_area"]
@@ -154,7 +152,7 @@ def test_reassign_alternate_role(base_context: dict[str, Any]) -> None:
     assert role == ROLE_ALTERNATE
 
 
-def test_reassign_primary_role_to_current_alternate_collector(base_context: dict[str, Any]) -> None:
+def test_reassign_primary_role_to_current_alternate_collector(base_context: dict[str, object]) -> None:
     household = base_context["household"]
     household.head_of_household = base_context["no_role_individual"]
     household.save(update_fields=["head_of_household"])
@@ -185,7 +183,7 @@ def test_reassign_primary_role_to_current_alternate_collector(base_context: dict
 
 
 def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     program = base_context["program"]
     business_area = base_context["business_area"]

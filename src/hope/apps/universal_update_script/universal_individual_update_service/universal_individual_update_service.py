@@ -1,6 +1,5 @@
 from io import BytesIO
 import logging
-from typing import Any
 
 from django.db import transaction
 import openpyxl
@@ -92,14 +91,14 @@ class UniversalIndividualUpdateService:
         logger.info(text)
 
     def validate_household_fields(
-        self, row: tuple[Any, ...], headers: list[str], household: Any, row_index: int
+        self, row: tuple[object, ...], headers: list[str], household: object, row_index: int
     ) -> list[str]:
         if self.household_fields is None:
             return []  # pragma: no cover
         errors = []
         for field, (name, validator, _handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            kwargs: dict[str, Any] = {}
+            kwargs: dict[str, object] = {}
             if name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
                 kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
             error = validator(value, name, Household, self.business_area, self.program, **kwargs)
@@ -107,7 +106,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_individual_fields(self, row: tuple[Any, ...], headers: list[str], row_index: int) -> list[str]:
+    def validate_individual_fields(self, row: tuple[object, ...], headers: list[str], row_index: int) -> list[str]:
         errors = []
         for field, (name, validator, _handler) in self.individual_fields.items():
             value = row[headers.index(field)]
@@ -116,7 +115,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_individual_flex_fields(self, row: tuple[Any, ...], headers: list[str], row_index: int) -> list[str]:
+    def validate_individual_flex_fields(self, row: tuple[object, ...], headers: list[str], row_index: int) -> list[str]:
         errors = []
         for field, (name, validator, _handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
@@ -125,7 +124,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_household_flex_fields(self, row: tuple[Any, ...], headers: list[str], row_index: int) -> list[str]:
+    def validate_household_flex_fields(self, row: tuple[object, ...], headers: list[str], row_index: int) -> list[str]:
         errors = []
         for field, (name, validator, _handler) in self.household_flex_fields.items():
             value = row[headers.index(field)]
@@ -136,7 +135,7 @@ class UniversalIndividualUpdateService:
 
     def validate_documents(
         self,
-        row: tuple[Any, ...],
+        row: tuple[object, ...],
         headers: list[str],
         individual: Individual,
         row_index: int,
@@ -163,7 +162,7 @@ class UniversalIndividualUpdateService:
 
     def validate_accounts(
         self,
-        row: tuple[Any, ...],
+        row: tuple[object, ...],
         headers: list[str],
         individual: Individual,
         row_index: int,
@@ -232,10 +231,10 @@ class UniversalIndividualUpdateService:
             errors.extend(self.validate_accounts(row, headers, individual, row_index))
         return errors
 
-    def handle_household_update(self, row: tuple[Any, ...], headers: list[str], household: Any) -> None:
+    def handle_household_update(self, row: tuple[object, ...], headers: list[str], household: object) -> None:
         for field, (_name, _validator, handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            kwargs: dict[str, Any] = {}
+            kwargs: dict[str, object] = {}
             if _name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
                 kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
             handled_value = handler(value, field, household, self.business_area, self.program, **kwargs)
@@ -243,7 +242,7 @@ class UniversalIndividualUpdateService:
                 continue
             setattr(household, _name, handled_value)
 
-    def handle_individual_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
+    def handle_individual_update(self, row: tuple[object, ...], headers: list[str], individual: Individual) -> None:
         for field, (_name, _validator, handler) in self.individual_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, individual, self.business_area, self.program)
@@ -251,7 +250,9 @@ class UniversalIndividualUpdateService:
                 continue
             setattr(individual, _name, handled_value)
 
-    def handle_individual_flex_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
+    def handle_individual_flex_update(
+        self, row: tuple[object, ...], headers: list[str], individual: Individual
+    ) -> None:
         for field, (name, _validator, handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, individual, self.business_area, self.program)
@@ -259,7 +260,7 @@ class UniversalIndividualUpdateService:
                 continue
             individual.flex_fields[name] = handled_value
 
-    def handle_household_flex_update(self, row: tuple[Any, ...], headers: list[str], household: Household) -> None:
+    def handle_household_flex_update(self, row: tuple[object, ...], headers: list[str], household: Household) -> None:
         for field, (name, _validator, handler) in self.household_flex_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, household, self.business_area, self.program)
@@ -268,7 +269,7 @@ class UniversalIndividualUpdateService:
             household.flex_fields[name] = handled_value
 
     def handle_documents_update(
-        self, row: tuple[Any, ...], headers: list[str], individual: Individual
+        self, row: tuple[object, ...], headers: list[str], individual: Individual
     ) -> tuple[list, list]:
         documents_to_update = []
         documents_to_create = []
@@ -310,7 +311,7 @@ class UniversalIndividualUpdateService:
         prefix_len = len(prefix)
         return [(x, x[prefix_len:]) for x in headers if x.startswith(prefix) and x not in columns_to_ignore]
 
-    def handle_account_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
+    def handle_account_update(self, row: tuple[object, ...], headers: list[str], individual: Individual) -> None:
         individual_accounts = individual.accounts.all()
         for account_type, account_columns_mapping in self.account_data_fields.items():
             account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
@@ -417,7 +418,7 @@ class UniversalIndividualUpdateService:
 
     def batch_update(
         self,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         document_fields_to_update: list = kwargs.get("document_fields_to_update", [])
         documents_to_create: list = kwargs.get("documents_to_create", [])
@@ -466,11 +467,11 @@ class UniversalIndividualUpdateService:
         if household_ids:
             recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
 
-    def get_excel_value(self, value: Any) -> Any:
+    def get_excel_value(self, value: object) -> object:
         return get_generator_handler(value)(value)
 
-    def _get_household_row_values(self, household: Any) -> list[Any]:
-        values: list[Any] = []
+    def _get_household_row_values(self, household: object) -> list[object]:
+        values: list[object] = []
         for field_data in self.household_fields.values():
             value = getattr(household, field_data[0])
             values.append(self.get_excel_value(value))
@@ -479,7 +480,7 @@ class UniversalIndividualUpdateService:
                 values.append(self.get_excel_value(admin_p_code))
         return values
 
-    def get_individual_row(self, individual: Individual) -> list[Any]:
+    def get_individual_row(self, individual: Individual) -> list[object]:
         row = [individual.unicef_id]
         household = individual.household
         row += [

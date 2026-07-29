@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.management import BaseCommand
 from django.db.models import OuterRef, Subquery, Value
 from django.db.models.functions import Coalesce
@@ -42,5 +40,5 @@ def update_household_unicef_id() -> int:
 class Command(BaseCommand):
     help = "Update household unicef id"
 
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(self, *args: object, **options: object) -> None:
         update_household_unicef_id()

@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -30,7 +30,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -45,7 +45,7 @@ def admin_area() -> Area:
 
 
 @pytest.fixture
-def household_context(business_area: BusinessArea, program: Program) -> dict[str, Any]:
+def household_context(business_area: BusinessArea, program: Program) -> dict[str, object]:
     household = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -75,8 +75,8 @@ def list_url(business_area: BusinessArea) -> str:
 
 
 @pytest.fixture
-def referral_input_builder(user: User, admin_area: Area) -> Callable[..., dict[str, Any]]:
-    def _build(extras: dict[str, Any] | None = None) -> dict[str, Any]:
+def referral_input_builder(user: User, admin_area: Area) -> Callable[..., dict[str, object]]:
+    def _build(extras: dict[str, object] | None = None) -> dict[str, object]:
         input_data = {
             "description": "Test Feedback",
             "assigned_to": str(user.id),
@@ -94,12 +94,12 @@ def referral_input_builder(user: User, admin_area: Area) -> Callable[..., dict[s
 
 
 def test_create_referral_ticket_without_extras(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    referral_input_builder: Callable[..., dict[str, Any]],
+    referral_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -110,13 +110,13 @@ def test_create_referral_ticket_without_extras(
 
 
 def test_create_referral_ticket_with_household_extras(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household_context: dict[str, Any],
-    referral_input_builder: Callable[..., dict[str, Any]],
+    household_context: dict[str, object],
+    referral_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -130,13 +130,13 @@ def test_create_referral_ticket_with_household_extras(
 
 
 def test_create_referral_ticket_with_individual_extras(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household_context: dict[str, Any],
-    referral_input_builder: Callable[..., dict[str, Any]],
+    household_context: dict[str, object],
+    referral_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -150,13 +150,13 @@ def test_create_referral_ticket_with_individual_extras(
 
 
 def test_create_referral_ticket_with_household_and_individual_extras(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household_context: dict[str, Any],
-    referral_input_builder: Callable[..., dict[str, Any]],
+    household_context: dict[str, object],
+    referral_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)

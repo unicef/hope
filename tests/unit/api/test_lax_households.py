@@ -1,6 +1,5 @@
 import os
 import tempfile
-from typing import Any
 from unittest.mock import patch
 
 from django.core.files.storage import default_storage
@@ -532,7 +531,7 @@ def test_consent_sign_cleanup_on_failure(
     with tempfile.TemporaryDirectory() as media_root:
         with override_settings(MEDIA_ROOT=media_root):
 
-            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
+            def fail_after_files_exist(*args: object, **kwargs: object) -> None:
                 pre_cleanup_files = []
                 for root, _, files in os.walk(media_root):
                     pre_cleanup_files.extend(os.path.join(root, f) for f in files)
@@ -614,7 +613,7 @@ def test_household_image_flex_field_cleanup_on_failure(
     with tempfile.TemporaryDirectory() as media_root:
         with override_settings(MEDIA_ROOT=media_root):
 
-            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
+            def fail_after_files_exist(*args: object, **kwargs: object) -> None:
                 pre_cleanup_files = []
                 for root, _, files in os.walk(media_root):
                     pre_cleanup_files.extend(os.path.join(root, f) for f in files)

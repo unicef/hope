@@ -1,6 +1,6 @@
 """Tests for PDU online edit bulk merge functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -26,7 +26,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
@@ -36,27 +36,27 @@ def program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner(db: Any) -> Any:
+def partner(db: object) -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> User:
+def user(partner: object) -> User:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 @pytest.fixture
-def rdi(afghanistan: BusinessArea) -> Any:
+def rdi(afghanistan: BusinessArea) -> object:
     return RegistrationDataImportFactory(business_area=afghanistan)
 
 
 @pytest.fixture
-def household_and_individuals(afghanistan: BusinessArea, program: Program, rdi: Any) -> tuple:
+def household_and_individuals(afghanistan: BusinessArea, program: Program, rdi: object) -> tuple:
     individual1 = IndividualFactory(
         business_area=afghanistan,
         program=program,
@@ -88,7 +88,7 @@ def household_and_individuals(afghanistan: BusinessArea, program: Program, rdi: 
 
 
 @pytest.fixture
-def household(household_and_individuals: tuple) -> Any:
+def household(household_and_individuals: tuple) -> object:
     return household_and_individuals[0]
 
 
@@ -98,17 +98,17 @@ def individuals(household_and_individuals: tuple) -> list:
 
 
 @pytest.fixture
-def individual1(individuals: list) -> Any:
+def individual1(individuals: list) -> object:
     return individuals[0]
 
 
 @pytest.fixture
-def individual2(individuals: list) -> Any:
+def individual2(individuals: list) -> object:
     return individuals[1]
 
 
 @pytest.fixture
-def string_attribute(program: Program) -> Any:
+def string_attribute(program: Program) -> object:
     return FlexibleAttributeForPDUFactory(
         program=program,
         label="String Attribute",
@@ -121,7 +121,7 @@ def string_attribute(program: Program) -> Any:
 
 
 @pytest.fixture
-def decimal_attribute(program: Program) -> Any:
+def decimal_attribute(program: Program) -> object:
     return FlexibleAttributeForPDUFactory(
         program=program,
         label="Decimal Attribute",
@@ -134,7 +134,7 @@ def decimal_attribute(program: Program) -> Any:
 
 
 @pytest.fixture
-def boolean_attribute(program: Program) -> Any:
+def boolean_attribute(program: Program) -> object:
     return FlexibleAttributeForPDUFactory(
         program=program,
         label="Boolean Attribute",
@@ -147,7 +147,7 @@ def boolean_attribute(program: Program) -> Any:
 
 
 @pytest.fixture
-def date_attribute(program: Program) -> Any:
+def date_attribute(program: Program) -> object:
     return FlexibleAttributeForPDUFactory(
         program=program,
         label="Date Attribute",
@@ -161,13 +161,13 @@ def date_attribute(program: Program) -> Any:
 
 @pytest.fixture
 def setup_individuals_with_pdu(
-    individual1: Any,
-    individual2: Any,
+    individual1: object,
+    individual2: object,
     program: Program,
-    string_attribute: Any,
-    decimal_attribute: Any,
-    boolean_attribute: Any,
-    date_attribute: Any,
+    string_attribute: object,
+    decimal_attribute: object,
+    boolean_attribute: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual1.flex_fields)
     populate_pdu_with_null_values(program, individual2.flex_fields)
@@ -180,9 +180,9 @@ def pdu_edit_approved_1(
     afghanistan: BusinessArea,
     program: Program,
     user: User,
-    individual1: Any,
-    string_attribute: Any,
-    decimal_attribute: Any,
+    individual1: object,
+    string_attribute: object,
+    decimal_attribute: object,
     setup_individuals_with_pdu: None,
 ) -> PDUOnlineEdit:
     return PDUOnlineEditFactory(
@@ -220,9 +220,9 @@ def pdu_edit_approved_2(
     afghanistan: BusinessArea,
     program: Program,
     user: User,
-    individual2: Any,
-    boolean_attribute: Any,
-    date_attribute: Any,
+    individual2: object,
+    boolean_attribute: object,
+    date_attribute: object,
     setup_individuals_with_pdu: None,
 ) -> PDUOnlineEdit:
     return PDUOnlineEditFactory(
@@ -259,9 +259,9 @@ def pdu_edit_approved_2(
 def pdu_edit_approved_not_authorized(
     afghanistan: BusinessArea,
     program: Program,
-    individual2: Any,
-    boolean_attribute: Any,
-    date_attribute: Any,
+    individual2: object,
+    boolean_attribute: object,
+    date_attribute: object,
     setup_individuals_with_pdu: None,
 ) -> PDUOnlineEdit:
     return PDUOnlineEditFactory(
@@ -352,7 +352,7 @@ def url_bulk_merge(afghanistan: BusinessArea, program: Program) -> str:
 def test_bulk_merge_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -369,14 +369,14 @@ def test_bulk_merge_permissions(
 
 
 def test_bulk_merge_check_authorized_user_single_edit(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_not_authorized: PDUOnlineEdit,
-    individual1: Any,
-    string_attribute: Any,
-    decimal_attribute: Any,
+    individual1: object,
+    string_attribute: object,
+    decimal_attribute: object,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -416,18 +416,18 @@ def test_bulk_merge_check_authorized_user_single_edit(
 
 
 def test_bulk_merge_check_authorized_user_mixed(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_not_authorized: PDUOnlineEdit,
     pdu_edit_approved_1: PDUOnlineEdit,
-    individual1: Any,
-    individual2: Any,
-    string_attribute: Any,
-    decimal_attribute: Any,
-    boolean_attribute: Any,
-    date_attribute: Any,
+    individual1: object,
+    individual2: object,
+    string_attribute: object,
+    decimal_attribute: object,
+    boolean_attribute: object,
+    date_attribute: object,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -476,7 +476,7 @@ def test_bulk_merge_check_authorized_user_mixed(
 
 
 def test_bulk_merge_success(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -484,7 +484,7 @@ def test_bulk_merge_success(
     pdu_edit_approved_2: PDUOnlineEdit,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -510,14 +510,14 @@ def test_bulk_merge_success(
 
 
 def test_bulk_merge_single_edit(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_1: PDUOnlineEdit,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -539,15 +539,15 @@ def test_bulk_merge_single_edit(
 
 
 def test_bulk_merge_invalid_status(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_1: PDUOnlineEdit,
     pdu_edit_ready: PDUOnlineEdit,
-    individual1: Any,
-    string_attribute: Any,
-    decimal_attribute: Any,
+    individual1: object,
+    string_attribute: object,
+    decimal_attribute: object,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -586,7 +586,7 @@ def test_bulk_merge_invalid_status(
 
 
 def test_bulk_merge_mixed_statuses(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -621,7 +621,7 @@ def test_bulk_merge_mixed_statuses(
 
 
 def test_bulk_merge_empty_ids(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -642,7 +642,7 @@ def test_bulk_merge_empty_ids(
 
 
 def test_bulk_merge_non_existent_ids(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -666,14 +666,14 @@ def test_bulk_merge_non_existent_ids(
 
 
 def test_bulk_merge_preserves_other_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_1: PDUOnlineEdit,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -711,17 +711,17 @@ def test_bulk_merge_preserves_other_fields(
 
 
 def test_bulk_merge_updates_individual_data_string_and_decimal(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_1: PDUOnlineEdit,
-    individual1: Any,
-    string_attribute: Any,
-    decimal_attribute: Any,
+    individual1: object,
+    string_attribute: object,
+    decimal_attribute: object,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -753,17 +753,17 @@ def test_bulk_merge_updates_individual_data_string_and_decimal(
 
 
 def test_bulk_merge_updates_individual_data_boolean_and_date(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_2: PDUOnlineEdit,
-    individual2: Any,
-    boolean_attribute: Any,
-    date_attribute: Any,
+    individual2: object,
+    boolean_attribute: object,
+    date_attribute: object,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -795,21 +795,21 @@ def test_bulk_merge_updates_individual_data_boolean_and_date(
 
 
 def test_bulk_merge_multiple_edits_updates_multiple_individuals(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_edit_approved_1: PDUOnlineEdit,
     pdu_edit_approved_2: PDUOnlineEdit,
-    individual1: Any,
-    individual2: Any,
-    string_attribute: Any,
-    boolean_attribute: Any,
-    decimal_attribute: Any,
-    date_attribute: Any,
+    individual1: object,
+    individual2: object,
+    string_attribute: object,
+    boolean_attribute: object,
+    decimal_attribute: object,
+    date_attribute: object,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -847,16 +847,16 @@ def test_bulk_merge_multiple_edits_updates_multiple_individuals(
 
 
 def test_bulk_merge_with_non_editable_fields_skips_update(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    individual1: Any,
-    string_attribute: Any,
+    individual1: object,
+    string_attribute: object,
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -907,17 +907,17 @@ def test_bulk_merge_with_non_editable_fields_skips_update(
 
 
 def test_bulk_merge_with_existing_data_prevents_overwrite(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    individual1: Any,
-    string_attribute: Any,
-    decimal_attribute: Any,
+    individual1: object,
+    string_attribute: object,
+    decimal_attribute: object,
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     # Merge fails when trying to overwrite existing data.
     create_user_role_with_permissions(
@@ -987,16 +987,16 @@ def test_bulk_merge_with_existing_data_prevents_overwrite(
 
 
 def test_bulk_merge_validate_value_string_invalid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    individual1: Any,
-    string_attribute: Any,
+    individual1: object,
+    string_attribute: object,
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1036,16 +1036,16 @@ def test_bulk_merge_validate_value_string_invalid(
 
 
 def test_bulk_merge_validate_value_bool_invalid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    individual1: Any,
-    boolean_attribute: Any,
+    individual1: object,
+    boolean_attribute: object,
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1085,16 +1085,16 @@ def test_bulk_merge_validate_value_bool_invalid(
 
 
 def test_bulk_merge_validate_value_decimal_invalid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    individual1: Any,
-    decimal_attribute: Any,
+    individual1: object,
+    decimal_attribute: object,
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1134,16 +1134,16 @@ def test_bulk_merge_validate_value_decimal_invalid(
 
 
 def test_bulk_merge_validate_value_date_invalid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    individual1: Any,
-    date_attribute: Any,
+    individual1: object,
+    date_attribute: object,
     setup_individuals_with_pdu: None,
     url_bulk_merge: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,

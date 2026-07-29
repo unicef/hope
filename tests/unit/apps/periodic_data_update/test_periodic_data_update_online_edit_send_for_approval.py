@@ -1,6 +1,6 @@
 """Tests for PDU online edit send for approval functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -40,7 +40,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -109,7 +109,7 @@ def get_send_for_approval_url(afghanistan: BusinessArea, program: Program, pdu_e
 def test_send_for_approval_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -129,7 +129,7 @@ def test_send_for_approval_permissions(
 
 
 def test_send_for_approval_success(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -156,7 +156,7 @@ def test_send_for_approval_success(
 
 
 def test_send_for_approval_not_authorized_user(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -183,7 +183,7 @@ def test_send_for_approval_not_authorized_user(
 
 
 def test_send_for_approval_invalid_status_ready(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -210,7 +210,7 @@ def test_send_for_approval_invalid_status_ready(
 
 
 def test_send_for_approval_invalid_status_approved(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -237,7 +237,7 @@ def test_send_for_approval_invalid_status_approved(
 
 
 def test_send_for_approval_clears_sent_back_comment(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -278,7 +278,7 @@ def test_send_for_approval_clears_sent_back_comment(
 
 
 def test_send_for_approval_preserves_other_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

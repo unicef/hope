@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -9,7 +8,7 @@ from hope.apps.household.const import DISABLED, NOT_DISABLED
 from hope.models import BusinessArea, Individual
 
 
-def _map_disability_value(value: Any) -> str | None:
+def _map_disability_value(value: object) -> str | None:
     if value is True:
         return DISABLED
     if value is False:
@@ -17,7 +16,7 @@ def _map_disability_value(value: Any) -> str | None:
     return None
 
 
-def _fix_disability_fields_for_ba(ba: BusinessArea, **kwargs: Any) -> None:
+def _fix_disability_fields_for_ba(ba: BusinessArea, **kwargs: object) -> None:
     logging.info(f"Fixing disability fields for {ba}")
     tickets = GrievanceTicket.objects.filter(
         business_area=ba,
@@ -56,7 +55,7 @@ def _fix_disability_fields_for_ba(ba: BusinessArea, **kwargs: Any) -> None:
 # there's this business_area filter
 # additional kwargs go to GrievanceTicket filter
 @transaction.atomic
-def fix_disability_fields(business_area: BusinessArea | None = None, **kwargs: Any) -> None:
+def fix_disability_fields(business_area: BusinessArea | None = None, **kwargs: object) -> None:
     if business_area:
         return _fix_disability_fields_for_ba(business_area, **kwargs)
 
@@ -71,5 +70,5 @@ def fix_disability_fields(business_area: BusinessArea | None = None, **kwargs: A
 class Command(BaseCommand):
     help = "Go through all grievance tickets, look for wrongly formatted data and fix it"
 
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(self, *args: object, **options: object) -> None:
         fix_disability_fields()  # PR #1608

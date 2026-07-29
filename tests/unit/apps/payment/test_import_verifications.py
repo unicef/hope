@@ -2,7 +2,6 @@ from decimal import Decimal
 import io
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any
 from unittest.mock import patch
 import uuid
 
@@ -378,7 +377,7 @@ def test_import_valid_status_changed_received_yes_full(verification_setup):
     "hope.apps.payment.xlsx.xlsx_verification_import_service.XlsxVerificationImportService._check_version",
     return_value=None,
 )
-def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str):
+def test_validation_of_unordered_columns(mock_check_version: object, file_name: str):
     program = ProgramFactory()
     program_cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, business_area=program.business_area)

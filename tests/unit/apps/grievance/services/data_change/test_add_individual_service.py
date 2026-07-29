@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Any
 
 from django.core.exceptions import ValidationError
 import pytest
@@ -33,7 +32,7 @@ def program() -> Program:
 
 
 @pytest.fixture
-def add_individual_context(program: Program) -> dict[str, Any]:
+def add_individual_context(program: Program) -> dict[str, object]:
     household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
     ticket_details = TicketAddIndividualDetailsFactory(
         household=household,
@@ -61,7 +60,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def unapproved_add_individual_context(program: Program) -> dict[str, Any]:
+def unapproved_add_individual_context(program: Program) -> dict[str, object]:
     household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
     ticket_details = TicketAddIndividualDetailsFactory(
         household=household,
@@ -84,7 +83,7 @@ def unapproved_add_individual_context(program: Program) -> dict[str, Any]:
 
 
 @pytest.fixture
-def head_add_individual_context(program: Program) -> dict[str, Any]:
+def head_add_individual_context(program: Program) -> dict[str, object]:
     household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
     ticket_details = TicketAddIndividualDetailsFactory(
         household=household,
@@ -113,7 +112,7 @@ def head_add_individual_context(program: Program) -> dict[str, Any]:
 
 
 @pytest.fixture
-def kab_add_individual_context() -> dict[str, Any]:
+def kab_add_individual_context() -> dict[str, object]:
     program = ProgramFactory()
     dct = program.data_collecting_type
     dct.recalculate_composition = False
@@ -141,7 +140,7 @@ def kab_add_individual_context() -> dict[str, Any]:
 
 
 def test_add_individual_populates_kab_for_non_recalculating_dct(
-    kab_add_individual_context: dict[str, Any],
+    kab_add_individual_context: dict[str, object],
 ) -> None:
     # recalculate_composition=False but collects_individual_data=True -> KAB counts individuals.
     household = kab_add_individual_context["household"]
@@ -154,7 +153,7 @@ def test_add_individual_populates_kab_for_non_recalculating_dct(
     assert household.kab_size is not None
 
 
-def test_increase_household_size_on_close_ticket(add_individual_context: dict[str, Any]) -> None:
+def test_increase_household_size_on_close_ticket(add_individual_context: dict[str, object]) -> None:
     household = add_individual_context["household"]
     ticket = add_individual_context["ticket"]
     household.size = 3
@@ -167,7 +166,7 @@ def test_increase_household_size_on_close_ticket(add_individual_context: dict[st
     assert household.size == 4
 
 
-def test_increase_household_size_when_size_is_none_on_close_ticket(add_individual_context: dict[str, Any]) -> None:
+def test_increase_household_size_when_size_is_none_on_close_ticket(add_individual_context: dict[str, object]) -> None:
     household = add_individual_context["household"]
     ticket = add_individual_context["ticket"]
     household.size = None
@@ -182,7 +181,7 @@ def test_increase_household_size_when_size_is_none_on_close_ticket(add_individua
 
 
 def test_add_individual_with_document_that_already_exists(
-    add_individual_context: dict[str, Any],
+    add_individual_context: dict[str, object],
     program: Program,
 ) -> None:
     household = add_individual_context["household"]
@@ -215,7 +214,7 @@ def test_add_individual_with_document_that_already_exists(
 
 
 def test_add_individual_with_document_that_exists_in_pending_status(
-    add_individual_context: dict[str, Any],
+    add_individual_context: dict[str, object],
     program: Program,
 ) -> None:
     household = add_individual_context["household"]
@@ -251,7 +250,7 @@ def test_add_individual_with_document_that_exists_in_pending_status(
 
 
 def test_add_individual_as_head_reassigns_existing_relationships_on_close_ticket(
-    add_individual_context: dict[str, Any],
+    add_individual_context: dict[str, object],
 ) -> None:
     household = add_individual_context["household"]
     ticket = add_individual_context["ticket"]
@@ -270,7 +269,7 @@ def test_add_individual_as_head_reassigns_existing_relationships_on_close_ticket
     assert previous_head.relationship == RELATIONSHIP_UNKNOWN
 
 
-def test_handle_add_identity(add_individual_context: dict[str, Any], program: Program) -> None:
+def test_handle_add_identity(add_individual_context: dict[str, object], program: Program) -> None:
     household = add_individual_context["household"]
     poland = CountryFactory(iso_code3="PLN")
     individual = IndividualFactory(program=program, household=household, business_area=program.business_area)
@@ -288,7 +287,7 @@ def test_handle_add_identity(add_individual_context: dict[str, Any], program: Pr
 
 
 def test_close_without_approval_creates_no_individual(
-    unapproved_add_individual_context: dict[str, Any], user: User
+    unapproved_add_individual_context: dict[str, object], user: User
 ) -> None:
     ticket = unapproved_add_individual_context["ticket"]
     individuals_before = Individual.objects.count()
@@ -300,7 +299,7 @@ def test_close_without_approval_creates_no_individual(
 
 
 def test_close_with_head_relationship_replaces_head_of_household(
-    head_add_individual_context: dict[str, Any], user: User
+    head_add_individual_context: dict[str, object], user: User
 ) -> None:
     household = head_add_individual_context["household"]
     previous_head = head_add_individual_context["previous_head"]

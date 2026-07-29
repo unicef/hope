@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 import pytest
@@ -21,12 +19,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def country_origin() -> Any:
+def country_origin() -> object:
     return CountryFactory(
         name="Ukraine",
         short_name="Ukraine",
@@ -37,17 +35,17 @@ def country_origin() -> Any:
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area, cycle=False)
 
 
 @pytest.fixture
-def program_cycle(program: Any) -> Any:
+def program_cycle(program: object) -> object:
     return ProgramCycleFactory(program=program, title="Cycle Token")
 
 
 @pytest.fixture
-def payment_plan(business_area: Any, program_cycle: Any) -> PaymentPlan:
+def payment_plan(business_area: object, program_cycle: object) -> PaymentPlan:
     return PaymentPlanFactory(
         program_cycle=program_cycle,
         status=PaymentPlan.Status.ACCEPTED,
@@ -56,7 +54,7 @@ def payment_plan(business_area: Any, program_cycle: Any) -> PaymentPlan:
 
 
 @pytest.fixture
-def households(program: Any, business_area: Any, country_origin: Any) -> list[Any]:
+def households(program: object, business_area: object, country_origin: object) -> list[object]:
     return [
         HouseholdFactory(
             size=1,
@@ -76,7 +74,7 @@ def households(program: Any, business_area: Any, country_origin: Any) -> list[An
 
 
 @pytest.fixture
-def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> list[Any]:
+def payments(payment_plan: PaymentPlan, program: object, households: list[object]) -> list[object]:
     return [
         PaymentFactory(
             parent=payment_plan,
@@ -88,7 +86,7 @@ def payments(payment_plan: PaymentPlan, program: Any, households: list[Any]) -> 
 
 
 def test_generate_token_and_order_numbers_for_payments(
-    payment_plan: PaymentPlan, program: Any, payments: list[Payment]
+    payment_plan: PaymentPlan, program: object, payments: list[Payment]
 ) -> None:
     service = XlsxPaymentPlanDeliveryExportService(payment_plan, None)
     service.generate_token_and_order_numbers(payment_plan.eligible_payments.all(), program)

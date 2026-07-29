@@ -1,6 +1,5 @@
 """Tests for BaseRestPermission class."""
 
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -30,7 +29,7 @@ class DummyRequest:
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory()
 
 

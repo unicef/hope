@@ -1,6 +1,6 @@
 """Tests for user filtering API views."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -24,12 +24,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(code="0060", name="Afghanistan", slug="afghanistan", active=True)
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -39,7 +39,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def role_with_user_management_permissions(db: Any) -> Role:
+def role_with_user_management_permissions(db: object) -> Role:
     return RoleFactory(
         name="Role For User",
         permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value],
@@ -57,12 +57,12 @@ def program2(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def role1(db: Any) -> Role:
+def role1(db: object) -> Role:
     return RoleFactory(name="TestRole1", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value])
 
 
 @pytest.fixture
-def role2(db: Any) -> Role:
+def role2(db: object) -> Role:
     return RoleFactory(name="TestRole2", permissions=[Permissions.PROGRAMME_REMOVE.value])
 
 
@@ -155,13 +155,13 @@ def list_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user_with_management_permissions: User) -> Any:
+def authenticated_client(api_client: Callable, user_with_management_permissions: User) -> object:
     return api_client(user_with_management_permissions)
 
 
 def test_filter_by_program_returns_users_with_access_to_program(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     program1: Program,
     program2: Program,
     list_url: str,
@@ -198,7 +198,7 @@ def test_filter_by_program_returns_users_with_access_to_program(
 
 def test_filter_by_status(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     list_url: str,
     all_users: dict,
 ) -> None:
@@ -220,7 +220,7 @@ def test_filter_by_status(
 
 def test_filter_by_partner(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     partner_with_role_1: Partner,
     list_url: str,
     all_users: dict,
@@ -234,7 +234,7 @@ def test_filter_by_partner(
 
 def test_filter_by_role_returns_users_with_role(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     role1: Role,
     list_url: str,
     all_users: dict,
@@ -251,7 +251,7 @@ def test_filter_by_role_returns_users_with_role(
 
 def test_filter_by_is_ticket_creator(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     list_url: str,
     all_users: dict,
 ) -> None:
@@ -267,7 +267,7 @@ def test_filter_by_is_ticket_creator(
 
 def test_filter_by_is_survey_creator_false(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     list_url: str,
     all_users: dict,
 ) -> None:
@@ -294,7 +294,7 @@ def test_filter_by_is_survey_creator_false(
 
 def test_filter_by_is_message_creator(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     list_url: str,
     all_users: dict,
 ) -> None:
@@ -310,7 +310,7 @@ def test_filter_by_is_message_creator(
 
 def test_filter_by_is_feedback_creator(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     list_url: str,
     all_users: dict,
 ) -> None:
@@ -327,7 +327,7 @@ def test_filter_by_is_feedback_creator(
 
 def test_search_by_name(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     list_url: str,
     all_users: dict,
 ) -> None:
@@ -340,7 +340,7 @@ def test_search_by_name(
 
 def test_search_by_email(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     list_url: str,
     all_users: dict,
 ) -> None:

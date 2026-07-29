@@ -1,7 +1,7 @@
 from decimal import Decimal
 import json
 import logging
-from typing import Any, cast
+from typing import cast
 
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
@@ -76,7 +76,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         model = PaymentPlanSupportingDocument
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: object) -> object:
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
             raise serializers.ValidationError("File size must be ≤ 10MB.")
 
@@ -101,7 +101,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return data
 
     @transaction.atomic
-    def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
+    def create(self, validated_data: dict[str, object]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
 
 
@@ -149,7 +149,7 @@ class SplitPaymentPlanSerializer(serializers.Serializer):
 class PaymentPlanImportFileSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False)
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: object) -> object:
         allowed_extensions = ["xlsx"]
         extension = file.name.split(".")[-1].lower()
         if extension not in allowed_extensions:
@@ -399,14 +399,14 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> Any:
+    def get_follow_ups(self, obj: PaymentPlan) -> object:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+        return cast("list[object]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> Any:
+    def get_top_ups(self, obj: PaymentPlan) -> object:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+        return cast("list[object]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
 
 class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
@@ -455,14 +455,14 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_follow_ups(self, obj: PaymentPlan) -> Any:
+    def get_follow_ups(self, obj: PaymentPlan) -> object:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.FOLLOW_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+        return cast("list[object]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
     @extend_schema_field(FollowUpPaymentPlanSerializer(many=True))
-    def get_top_ups(self, obj: PaymentPlan) -> Any:
+    def get_top_ups(self, obj: PaymentPlan) -> object:
         plans = [p for p in obj.child_plans.all() if p.plan_type == PaymentPlan.PlanType.TOP_UP]
-        return cast("list[Any]", FollowUpPaymentPlanSerializer(plans, many=True).data)
+        return cast("list[object]", FollowUpPaymentPlanSerializer(plans, many=True).data)
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
@@ -547,7 +547,7 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
                 return "IN_APPROVAL"
         return None
 
-    def get_actions(self, obj: ApprovalProcess) -> dict[str, Any]:
+    def get_actions(self, obj: ApprovalProcess) -> dict[str, object]:
         actions_data = {
             "approval": obj.approvals.filter(type=Approval.APPROVAL),
             "authorization": obj.approvals.filter(type=Approval.AUTHORIZATION),
@@ -645,7 +645,7 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
 
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
         dispersion_start_date = attrs["dispersion_start_date"]
         dispersion_end_date = attrs["dispersion_end_date"]
         if dispersion_end_date < dispersion_start_date:
@@ -663,7 +663,7 @@ class FollowUpInstructionCreateSerializer(serializers.Serializer):
     dispersion_end_date = serializers.DateField()
     payment_plan_group_ids = serializers.ListField(child=serializers.UUIDField(), allow_empty=False)
 
-    def validate_payment_plan_group_ids(self, value: list[Any]) -> list[Any]:
+    def validate_payment_plan_group_ids(self, value: list[object]) -> list[object]:
         if len(value) != len(set(value)):
             raise serializers.ValidationError("Duplicate Payment Plan Group IDs are not allowed.")
         return value
@@ -805,7 +805,7 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
         )
 
     @staticmethod
-    def _payments_summary(obj: FollowUpInstruction) -> dict[str, Any]:
+    def _payments_summary(obj: FollowUpInstruction) -> dict[str, object]:
         if not hasattr(obj, "_payments_summary_cache"):
             obj._payments_summary_cache = obj.payments_summary()
         return obj._payments_summary_cache
@@ -1038,7 +1038,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "number_of_payments": summary["total_count"],
         }
 
-    def get_excluded_households(self, obj: PaymentPlan) -> dict[str, Any]:
+    def get_excluded_households(self, obj: PaymentPlan) -> dict[str, object]:
         qs = (
             Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if not obj.is_social_worker_program
@@ -1046,7 +1046,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return HouseholdSmallSerializer(qs, many=True).data
 
-    def get_excluded_individuals(self, obj: PaymentPlan) -> dict[str, Any]:
+    def get_excluded_individuals(self, obj: PaymentPlan) -> dict[str, object]:
         qs = (
             Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if obj.is_social_worker_program
@@ -1110,16 +1110,16 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["error_count"]
 
-    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, object]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
-    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
+    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, object]:
         return VolumeByDeliveryMechanismSerializer([obj], many=True).data
 
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
-    def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
+    def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, object] | None:
         available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj, office=obj.business_area)
 
         group = (
@@ -1145,7 +1145,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             }
         ).data
 
-    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, object]]:
         available_items_qs = FundsCommitmentItem.objects.filter(
             Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
         )
@@ -1271,7 +1271,7 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
 class PaymentChoicesSerializer(serializers.Serializer):
     status_choices = serializers.SerializerMethodField()
 
-    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
+    def get_status_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
         return [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
 
 
@@ -1388,16 +1388,16 @@ class PaymentListSerializer(serializers.ModelSerializer):
             return None
         return collector_data.get(field_name)
 
-    def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
+    def get_snapshot_collector_full_name(self, obj: Payment) -> object:
         return PaymentListSerializer.get_collector_field(
             obj,
             "full_name",
         )
 
-    def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
+    def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> object:
         return PaymentListSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
 
-    def get_snapshot_alternate_collector_id(self, obj: Payment) -> Any:
+    def get_snapshot_alternate_collector_id(self, obj: Payment) -> object:
         return PaymentListSerializer.get_collector_field(obj, "id", ROLE_ALTERNATE)
 
     def get_fsp_name(self, obj: Payment) -> str:
@@ -1415,7 +1415,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.fsp_auth_code or ""
 
     @extend_schema_field(PaymentVerificationDetailsSerializer)
-    def get_verification(self, obj: Payment) -> dict[str, Any]:
+    def get_verification(self, obj: Payment) -> dict[str, object]:
         # TODO: only one Verification per Payment?
         return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
 
@@ -1428,33 +1428,33 @@ class PaymentListSerializer(serializers.ModelSerializer):
     def get_payment_plan_soft_conflicted(self, obj: Payment) -> bool:
         return obj.parent.status == PaymentPlan.Status.OPEN and getattr(obj, "payment_plan_soft_conflicted", False)
 
-    def get_payment_plan_hard_conflicted_data(self, obj: Payment) -> list[Any]:
+    def get_payment_plan_hard_conflicted_data(self, obj: Payment) -> list[object]:
         if obj.parent.status != PaymentPlan.Status.OPEN:
             return []
         conflicts_data = getattr(obj, "payment_plan_hard_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
-    def get_payment_plan_soft_conflicted_data(self, obj: Payment) -> list[Any]:
+    def get_payment_plan_soft_conflicted_data(self, obj: Payment) -> list[object]:
         if obj.parent.status != PaymentPlan.Status.OPEN:
             return []
         conflicts_data = getattr(obj, "payment_plan_soft_conflicted_data", [])
         return [json.loads(conflict) for conflict in conflicts_data]
 
-    def _safe_get(self, obj: Payment, path: str, default: Any = None) -> Any:
-        cur: Any = obj
+    def _safe_get(self, obj: Payment, path: str, default: object = None) -> object:
+        cur: object = obj
         for attr in path.split("."):
             if cur is None:
                 return default
             cur = getattr(cur, attr, None)
         return cur
 
-    def get_hoh_id(self, obj: Payment) -> Any:
+    def get_hoh_id(self, obj: Payment) -> object:
         return self._safe_get(obj, "head_of_household.id")
 
-    def get_hoh_unicef_id(self, obj: Payment) -> Any:
+    def get_hoh_unicef_id(self, obj: Payment) -> object:
         return self._safe_get(obj, "head_of_household.unicef_id")
 
-    def get_hoh_full_name(self, obj: Payment) -> Any:
+    def get_hoh_full_name(self, obj: Payment) -> object:
         return self._safe_get(obj, "head_of_household.full_name")
 
     def get_hoh_phone_no(self, obj: Payment) -> str:
@@ -1573,7 +1573,7 @@ class VerificationListSerializer(serializers.ModelSerializer):
             return collector_data.get(field_name)
         return None
 
-    def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
+    def get_snapshot_collector_full_name(self, obj: Payment) -> object:
         return PaymentListSerializer.get_collector_field(obj, "full_name")
 
 
@@ -1619,7 +1619,7 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False)
     version = serializers.IntegerField(required=False)
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: object) -> object:
         allowed_extensions = ["xlsx"]
         extension = file.name.split(".")[-1].lower()
         if extension not in allowed_extensions:
@@ -1651,7 +1651,7 @@ class PendingPaymentSerializer(serializers.ModelSerializer):
             "vulnerability_score",
         )
 
-    def get_head_of_household(self, obj: Payment) -> Any:
+    def get_head_of_household(self, obj: Payment) -> object:
         return IndividualIdNameSerializer(obj.head_of_household).data if obj.head_of_household else None
 
 
@@ -1795,7 +1795,7 @@ class ApplyCustomExchangeRateSerializer(serializers.Serializer):
     custom_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
     version = serializers.IntegerField(required=False)
 
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
         if attrs.get("custom_exchange_rate") is None and attrs.get("unore_exchange_rate") is None:
             raise serializers.ValidationError(
                 {

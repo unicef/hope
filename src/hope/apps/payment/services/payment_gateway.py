@@ -2,7 +2,7 @@ from _decimal import Decimal
 import dataclasses
 from enum import Enum
 import logging
-from typing import Any, cast
+from typing import cast
 
 from django.db import transaction
 from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 class FlexibleArgumentsDataclassMixin:
     @classmethod
-    def create_from_dict(cls, _dict: dict) -> Any:
+    def create_from_dict(cls, _dict: dict) -> object:
         class_fields = {f.name for f in dataclasses.fields(cls)}  # type: ignore[arg-type]
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
@@ -76,7 +76,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         payment_country = business_area.payment_countries.first()
         return payment_country.iso_code3 if payment_country else ""
 
-    def get_payload(self, obj: Any) -> dict:
+    def get_payload(self, obj: object) -> dict:
         business_area = obj.payment_plan.business_area
         payment_country = business_area.payment_countries.first()
         payload = {
@@ -92,7 +92,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
             payload["destination_country_iso_code2"] = payment_country.iso_code2
         return payload
 
-    def get_external_code(self, obj: Any) -> str:
+    def get_external_code(self, obj: object) -> str:
         return f"{obj.payment_plan.unicef_id}-{obj.order}"  # pragma: no cover
 
     class Meta:

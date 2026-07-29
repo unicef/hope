@@ -1,7 +1,7 @@
 """Tests for registration data upload views."""
 
 from contextlib import contextmanager
-from typing import Any, Callable, Generator
+from typing import Callable, Generator
 from unittest.mock import Mock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -47,12 +47,12 @@ def capture_on_commit_callbacks(
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def unicef_partner(db: Any) -> Partner:
+def unicef_partner(db: object) -> Partner:
     return PartnerFactory(name="UNICEF")
 
 
@@ -79,7 +79,7 @@ def user(unicef_hq: Partner, business_area: BusinessArea) -> User:
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="Test Partner")
 
 

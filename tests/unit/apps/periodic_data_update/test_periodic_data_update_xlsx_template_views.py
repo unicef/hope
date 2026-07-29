@@ -1,7 +1,7 @@
 """Tests for PDU xlsx template views."""
 
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
@@ -31,12 +31,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -46,7 +46,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -81,7 +81,7 @@ def pdu_template_program2(program2: Program) -> PDUXlsxTemplate:
 
 
 @pytest.fixture
-def pdu_field_vaccination(program1: Program) -> Any:
+def pdu_field_vaccination(program1: Program) -> object:
     pdu_data_vaccination = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=5,
@@ -101,7 +101,7 @@ def pdu_field_vaccination(program1: Program) -> Any:
 
 
 @pytest.fixture
-def pdu_field_health(program1: Program) -> Any:
+def pdu_field_health(program1: Program) -> object:
     pdu_data_health = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=5,
@@ -279,7 +279,7 @@ def test_list_periodic_data_update_templates_permission(
     partner_permissions: list,
     access_to_program: bool,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
@@ -304,7 +304,7 @@ def test_list_periodic_data_update_templates_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_list_periodic_data_update_templates(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -374,7 +374,7 @@ def test_list_periodic_data_update_templates(
 
 @freezegun.freeze_time("2022-01-01")
 def test_count_periodic_data_update_templates(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -434,7 +434,7 @@ def test_detail_periodic_data_update_template_permission(
     partner_permissions: list,
     access_to_program: bool,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
@@ -461,7 +461,7 @@ def test_detail_periodic_data_update_template_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_detail_periodic_data_update_templates(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program2: Program,
@@ -490,7 +490,7 @@ def test_detail_periodic_data_update_templates(
 @freezegun.freeze_time("2022-01-01")
 @pytest.mark.skip("Caching is disabled for now")
 def test_list_periodic_data_update_templates_caching(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -555,13 +555,13 @@ def test_create_periodic_data_update_template_permission(
     partner_permissions: list,
     access_to_program: bool,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
     program1: Program,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     url_create_pdu_template_program1: str,
     url_create_pdu_template_program2: str,
     create_user_role_with_permissions: Callable,
@@ -599,15 +599,15 @@ def test_create_periodic_data_update_template_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_create_periodic_data_update_template(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     url_create_pdu_template_program1: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -663,11 +663,11 @@ def test_create_periodic_data_update_template(
 
 @freezegun.freeze_time("2022-01-01")
 def test_create_periodic_data_update_template_duplicate_field(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
-    pdu_field_vaccination: Any,
+    pdu_field_vaccination: object,
     url_create_pdu_template_program1: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -728,7 +728,7 @@ def test_export_periodic_data_update_template_permission(
     partner_permissions: list,
     access_to_program: bool,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
@@ -759,14 +759,14 @@ def test_export_periodic_data_update_template_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_export_periodic_data_update_template(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
     pdu_template1: PDUXlsxTemplate,
     url_export_pdu_template_program1: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -790,7 +790,7 @@ def test_export_periodic_data_update_template(
 
 @freezegun.freeze_time("2022-01-01")
 def test_export_periodic_data_update_template_already_exporting(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -818,7 +818,7 @@ def test_export_periodic_data_update_template_already_exporting(
 
 @freezegun.freeze_time("2022-01-01")
 def test_export_periodic_data_update_template_already_exported(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -879,7 +879,7 @@ def test_download_periodic_data_update_template_permission(
     partner_permissions: list,
     access_to_program: bool,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
@@ -919,7 +919,7 @@ def test_download_periodic_data_update_template_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_download_periodic_data_update_template(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -957,7 +957,7 @@ def test_download_periodic_data_update_template(
 
 @freezegun.freeze_time("2022-01-01")
 def test_download_periodic_data_update_template_not_exported(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -984,7 +984,7 @@ def test_download_periodic_data_update_template_not_exported(
 
 @freezegun.freeze_time("2022-01-01")
 def test_download_periodic_data_update_template_no_records(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,
@@ -1012,7 +1012,7 @@ def test_download_periodic_data_update_template_no_records(
 
 @freezegun.freeze_time("2022-01-01")
 def test_download_periodic_data_update_template_no_file(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program1: Program,

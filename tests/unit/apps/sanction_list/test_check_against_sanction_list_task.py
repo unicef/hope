@@ -2,7 +2,6 @@ import base64
 import datetime
 import io
 import json
-from typing import Any
 from unittest.mock import patch
 
 from constance.test import override_config
@@ -40,7 +39,7 @@ def _build_xlsx(rows: list[tuple]) -> bytes:
     return buffer.getvalue()
 
 
-def _attachment_rows(mailjet_mock: Any) -> list[tuple]:
+def _attachment_rows(mailjet_mock: object) -> list[tuple]:
     attachment_b64 = mailjet_mock.return_value.attach_file.call_args.kwargs["attachment"]
     attachment_wb = load_workbook(io.BytesIO(base64.b64decode(attachment_b64)))
     return list(attachment_wb.active.iter_rows(values_only=True))
@@ -72,7 +71,7 @@ def john_doe(sanction_list: SanctionList) -> SanctionListIndividual:
 
 
 @pytest.fixture
-def make_uploaded_file(sanction_list: SanctionList) -> Any:
+def make_uploaded_file(sanction_list: SanctionList) -> object:
     def _make(rows: list[tuple]) -> UploadedXLSXFile:
         uploaded = UploadedXLSXFile.objects.create(
             file=SimpleUploadedFile("check.xlsx", _build_xlsx(rows)),
@@ -90,8 +89,8 @@ def make_uploaded_file(sanction_list: SanctionList) -> Any:
 @override_config(ENABLE_MAILJET=True)
 @freeze_time("2024-01-10 01:01:01")
 def test_sanction_list_email(
-    mocked_load_workbook: Any,
-    mocked_requests_post: Any,
+    mocked_load_workbook: object,
+    mocked_requests_post: object,
     uploaded_file,
 ) -> None:
     class MockLoadWorkbook:
@@ -227,10 +226,10 @@ def test_join_names_and_birthday_db():
 
 
 def test_execute_matches_two_name_row_with_date_cell(
-    make_uploaded_file: Any,
+    make_uploaded_file: object,
     john_doe: SanctionListIndividual,
-    mocker: Any,
-    django_assert_num_queries: Any,
+    mocker: object,
+    django_assert_num_queries: object,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
     uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
@@ -250,9 +249,9 @@ def test_execute_matches_two_name_row_with_date_cell(
 
 
 def test_execute_matches_single_name_row_by_first_name(
-    make_uploaded_file: Any,
+    make_uploaded_file: object,
     john_doe: SanctionListIndividual,
-    mocker: Any,
+    mocker: object,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
     uploaded = make_uploaded_file([("john", None, None, None, None)])
@@ -266,9 +265,9 @@ def test_execute_matches_single_name_row_by_first_name(
 
 
 def test_execute_parses_date_of_birth_given_as_string(
-    make_uploaded_file: Any,
+    make_uploaded_file: object,
     john_doe: SanctionListIndividual,
-    mocker: Any,
+    mocker: object,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
     uploaded = make_uploaded_file([("john", "doe", None, None, "1980-01-01")])
@@ -282,9 +281,9 @@ def test_execute_parses_date_of_birth_given_as_string(
 
 
 def test_execute_ignores_unparseable_date_of_birth(
-    make_uploaded_file: Any,
+    make_uploaded_file: object,
     john_doe: SanctionListIndividual,
-    mocker: Any,
+    mocker: object,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
     uploaded = make_uploaded_file([("john", "doe", None, None, "not-a-date")])
@@ -297,9 +296,9 @@ def test_execute_ignores_unparseable_date_of_birth(
 
 
 def test_execute_skips_empty_rows_and_rows_without_names(
-    make_uploaded_file: Any,
+    make_uploaded_file: object,
     john_doe: SanctionListIndividual,
-    mocker: Any,
+    mocker: object,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
     uploaded = make_uploaded_file(
@@ -319,9 +318,9 @@ def test_execute_skips_empty_rows_and_rows_without_names(
 
 
 def test_execute_does_not_match_unrelated_names(
-    make_uploaded_file: Any,
+    make_uploaded_file: object,
     john_doe: SanctionListIndividual,
-    mocker: Any,
+    mocker: object,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
     uploaded = make_uploaded_file([("jane", "smith", None, None, None)])

@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
@@ -152,9 +150,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
 
     def update_and_log(
         self,
-        logged_changes: dict[str, Any],
+        logged_changes: dict[str, object],
         user_id: str | None,
-        extra_update: dict[str, Any] | None = None,
+        extra_update: dict[str, object] | None = None,
     ) -> int:
         """Apply a bulk ``.update()`` and activity-log only the mapped fields, per payment.
 
@@ -174,7 +172,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
 
         # Build the column list to snapshot; FK fields are compared by their *_id attname.
         column_for_field: dict[str, str] = {}
-        new_compare: dict[str, Any] = {}
+        new_compare: dict[str, object] = {}
         new_repr: dict[str, str | None] = {}
         for field, value in logged_changes.items():
             if isinstance(value, Model):
@@ -196,9 +194,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         user = User.objects.filter(pk=user_id).first() if user_id else None
         content_type = ContentType.objects.get_for_model(Payment)
         logs: list[LogEntry] = []
-        program_ids: list[Any] = []
+        program_ids: list[object] = []
         for row in rows:
-            changes: dict[str, Any] = {}
+            changes: dict[str, object] = {}
             for field, column in column_for_field.items():
                 old_value = row[column]
                 if old_value == new_compare[field]:

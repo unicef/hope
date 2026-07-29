@@ -1,7 +1,7 @@
 from datetime import datetime
 import decimal
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.urls import reverse
 import openpyxl
@@ -85,7 +85,7 @@ class XlsxExportBaseService:
             "title": "Payment Plan Payment List files generated",
         }
 
-    def right_format_for_xlsx(self, value: Any) -> Any:
+    def right_format_for_xlsx(self, value: object) -> object:
         # this function will return something that excel will accept
         if value is None:
             return ""

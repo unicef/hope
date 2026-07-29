@@ -1,5 +1,4 @@
 import datetime
-from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -58,7 +57,7 @@ class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("created_by",)
 
-    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, data: dict[str, object]) -> dict[str, object]:
         rounds_data = data.get("rounds_data", [])
         # Check for duplicate field names
         field_names = [item["field"] for item in rounds_data]
@@ -259,7 +258,7 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("created_by",)
 
-    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, data: dict[str, object]) -> dict[str, object]:
         rounds_data = data.get("rounds_data", [])
         # Check for duplicate field names
         field_names = [item["field"] for item in rounds_data]
@@ -267,7 +266,7 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 
-    def create(self, validated_data: dict[str, Any]) -> PDUOnlineEdit:
+    def create(self, validated_data: dict[str, object]) -> PDUOnlineEdit:
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)
@@ -292,7 +291,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
     individual_uuid = serializers.UUIDField()
     pdu_fields = serializers.DictField(child=serializers.DictField())
 
-    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, data: dict[str, object]) -> dict[str, object]:
         individual_uuid = str(data.get("individual_uuid"))
         pdu_fields_update = data.get("pdu_fields", {})
 
@@ -319,7 +318,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
         return data
 
-    def _validate_field_value_type(self, field_name: str, subtype: str, field_value: Any) -> None:
+    def _validate_field_value_type(self, field_name: str, subtype: str, field_value: object) -> None:
         if subtype == PeriodicFieldData.BOOL and not isinstance(field_value, bool):
             raise serializers.ValidationError(
                 f"Field '{field_name}' expects a boolean value, got {type(field_value).__name__}"
@@ -336,7 +335,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
             self._validate_pdu_date_type(field_name, field_value)
 
     def _check_field_editability(
-        self, field_name: str, field_data: dict[str, Any], existing_pdu_fields: dict[str, Any]
+        self, field_name: str, field_data: dict[str, object], existing_pdu_fields: dict[str, object]
     ) -> bool:
         """Check field structure, existence, and editability. Returns True if the value needs type-checking."""
         if not isinstance(field_data, dict):
@@ -360,13 +359,13 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
         return field_value is not None
 
-    def _validate_all_fields(self, individual_data: dict[str, Any], pdu_fields_update: dict[str, Any]) -> None:
+    def _validate_all_fields(self, individual_data: dict[str, object], pdu_fields_update: dict[str, object]) -> None:
         existing_pdu_fields = individual_data.get("pdu_fields", {})
         for field_name, field_data in pdu_fields_update.items():
             if self._check_field_editability(field_name, field_data, existing_pdu_fields):
                 self._validate_field_value_type(field_name, field_data.get("subtype"), field_data.get("value"))
 
-    def _validate_pdu_date_type(self, field_name: str, field_value: bool | int | float | str | Any) -> None:
+    def _validate_pdu_date_type(self, field_name: str, field_value: bool | int | float | str | object) -> None:
         if not isinstance(field_value, str):
             raise serializers.ValidationError(
                 f"Field '{field_name}' expects a string value for date, got {type(field_value).__name__}"

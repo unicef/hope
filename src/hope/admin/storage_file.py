@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from django.contrib import admin
@@ -24,13 +23,13 @@ class StorageFileAdmin(AutocompleteForeignKeyMixin, ExtraButtonsMixin, admin.Mod
     readonly_fields = ("file_name", "file_size", "created_by", "created_at", "business_area")
     search_fields = ("file_name",)
 
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_view_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_view_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_download_storage_files()
 
     def has_add_permission(self, request: HttpRequest) -> bool:

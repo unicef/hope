@@ -1,6 +1,6 @@
 from collections import defaultdict
 import logging
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from django.core.exceptions import ValidationError
 
@@ -45,7 +45,7 @@ class BaseValidator:
     """
 
     @classmethod
-    def validate(cls, excluded_validators: Any | None = None, *args: Any, **kwargs: Any) -> None:
+    def validate(cls, excluded_validators: object | None = None, *args: object, **kwargs: object) -> None:
         if not excluded_validators:
             excluded_validators = []
 
@@ -146,7 +146,7 @@ class KoboTemplateValidator:
 
     @classmethod
     def _map_columns_numbers(cls, first_row: Iterable) -> dict[str, int]:
-        columns_names_and_numbers_mapping: dict[str, Any] = {
+        columns_names_and_numbers_mapping: dict[str, object] = {
             "type": None,
             "name": None,
             "required": None,
@@ -226,7 +226,7 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_field_type(cls, core_field: Any, core_field_from_file: dict, field_type: str) -> dict | None:
+    def _check_field_type(cls, core_field: object, core_field_from_file: dict, field_type: str) -> dict | None:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
                 "field": core_field,
@@ -235,7 +235,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_is_field_required(cls, core_field: Any, core_field_from_file: dict) -> dict | None:
+    def _check_is_field_required(cls, core_field: object, core_field_from_file: dict) -> dict | None:
         field_from_file_required = str(core_field_from_file["required"])
 
         if core_field in cls.EXPECTED_REQUIRED_FIELDS and field_from_file_required.lower() != "true":
@@ -246,7 +246,7 @@ class KoboTemplateValidator:
         return None
 
     @classmethod
-    def _check_field_choices(cls, core_field: Any, core_field_from_file: Any, field_choices: list) -> list | None:
+    def _check_field_choices(cls, core_field: object, core_field_from_file: object, field_choices: list) -> list | None:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return None
 

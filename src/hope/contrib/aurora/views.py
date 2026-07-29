@@ -1,5 +1,3 @@
-from typing import Any
-
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 from django.conf import settings
 from django.contrib import messages
@@ -28,10 +26,10 @@ from hope.contrib.aurora.utils import fetch_metadata
 
 
 class FetchDataView(ProcessFormView):
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseRedirectToReferrer:
+    def get(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseRedirectToReferrer:
         return HttpResponseRedirectToReferrer(request)
 
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseRedirectToReferrer:
+    def post(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseRedirectToReferrer:
         if "_fetch" in request.POST:
             aurora_token = request.user.custom_fields.get("aurora_token")
             try:
@@ -50,7 +48,7 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
     ]
     raise_exception = False
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+    def get_context_data(self, **kwargs: object) -> dict[str, object]:
         kwargs["registration"] = self.registration
         kwargs["drf_page_size"] = settings.REST_FRAMEWORK["PAGE_SIZE"]
         return super().get_context_data(**kwargs)
@@ -79,7 +77,7 @@ class OrganizationListView(HOPEAPIView, ListAPIView):
     serializer_class = OrganizationSerializer
 
     @cached_response(key_func=AuroraKeyConstructor())
-    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def get(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().get(request, *args, **kwargs)
 
 
@@ -90,7 +88,7 @@ class ProjectListView(HOPEAPIView, ListAPIView):
     filterset_class = ProjectFilter
 
     @cached_response(key_func=AuroraKeyConstructor())
-    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def get(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().get(request, *args, **kwargs)
 
 
@@ -101,5 +99,5 @@ class RegistrationListView(HOPEAPIView, ListAPIView):
     filterset_class = RegistrationFilter
 
     @cached_response(key_func=AuroraKeyConstructor())
-    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def get(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().get(request, *args, **kwargs)

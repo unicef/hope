@@ -1,7 +1,6 @@
 from collections import defaultdict
 from functools import reduce
 import logging
-from typing import Any
 
 from hope.apps.core.utils import get_combined_attributes, serialize_flex_attributes
 from hope.apps.registration_data.value_caster import (
@@ -26,7 +25,7 @@ class RdiBaseCreateTask:
         self.FLEX_FIELDS = serialize_flex_attributes()
         self.accounts = defaultdict(dict)
 
-    def _cast_value(self, value: Any, header: str) -> Any:
+    def _cast_value(self, value: object, header: str) -> object:
         if isinstance(value, str):
             value = value.strip()
 
@@ -51,7 +50,7 @@ class RdiBaseCreateTask:
 
     def _handle_account_fields(
         self,
-        value: Any,
+        value: object,
         header: str,
         row_num: int,
         individual: PendingIndividual,

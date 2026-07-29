@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -16,18 +14,18 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def cycle(business_area: Any) -> ProgramCycle:
+def cycle(business_area: object) -> ProgramCycle:
     program = ProgramFactory(business_area=business_area)
     return ProgramCycleFactory(program=program)
 
 
 def test_can_create_top_up_arrange_regular_with_eligible_payment_act_get_assert_true(
-    business_area: Any, cycle: ProgramCycle
+    business_area: object, cycle: ProgramCycle
 ) -> None:
     regular_pp = PaymentPlanFactory(
         business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.REGULAR
@@ -38,7 +36,7 @@ def test_can_create_top_up_arrange_regular_with_eligible_payment_act_get_assert_
 
 
 def test_can_create_top_up_arrange_regular_without_eligible_payment_act_get_assert_false(
-    business_area: Any, cycle: ProgramCycle
+    business_area: object, cycle: ProgramCycle
 ) -> None:
     regular_pp = PaymentPlanFactory(
         business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.REGULAR
@@ -57,7 +55,7 @@ def test_can_create_top_up_arrange_regular_without_eligible_payment_act_get_asse
     ],
 )
 def test_can_create_top_up_arrange_non_regular_plan_act_get_assert_false(
-    business_area: Any, cycle: ProgramCycle, plan_type: str
+    business_area: object, cycle: ProgramCycle, plan_type: str
 ) -> None:
     plan = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, plan_type=plan_type)
     PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
@@ -66,7 +64,7 @@ def test_can_create_top_up_arrange_non_regular_plan_act_get_assert_false(
 
 
 def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_get_assert_true(
-    business_area: Any, cycle: ProgramCycle
+    business_area: object, cycle: ProgramCycle
 ) -> None:
     top_up_pp = PaymentPlanFactory(
         business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP
@@ -77,7 +75,7 @@ def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_g
 
 
 def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_assert_false(
-    business_area: Any, cycle: ProgramCycle
+    business_area: object, cycle: ProgramCycle
 ) -> None:
     top_up_pp = PaymentPlanFactory(
         business_area=business_area, program_cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP
@@ -96,7 +94,7 @@ def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_as
     ],
 )
 def test_can_create_top_up_amendment_arrange_non_top_up_plan_act_get_assert_false(
-    business_area: Any, cycle: ProgramCycle, plan_type: str
+    business_area: object, cycle: ProgramCycle, plan_type: str
 ) -> None:
     plan = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, plan_type=plan_type)
     PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)

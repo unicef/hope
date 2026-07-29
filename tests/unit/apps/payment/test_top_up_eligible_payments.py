@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -15,18 +13,18 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def cycle(business_area: Any) -> ProgramCycle:
+def cycle(business_area: object) -> ProgramCycle:
     program = ProgramFactory(business_area=business_area)
     return ProgramCycleFactory(program=program)
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+def regular_pp(business_area: object, cycle: ProgramCycle) -> PaymentPlan:
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -35,7 +33,7 @@ def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
 
 
 @pytest.fixture
-def top_up_pp(business_area: Any, cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlan:
+def top_up_pp(business_area: object, cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlan:
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -56,7 +54,7 @@ def top_up_pp(business_area: Any, cycle: ProgramCycle, regular_pp: PaymentPlan) 
     ],
 )
 def test_eligible_payments_for_top_up_arrange_eligible_status_act_query_assert_included(
-    regular_pp: PaymentPlan, status: str, django_assert_num_queries: Any
+    regular_pp: PaymentPlan, status: str, django_assert_num_queries: object
 ) -> None:
     payment = PaymentFactory(parent=regular_pp, status=status)
 
@@ -109,7 +107,7 @@ def test_eligible_payments_for_top_up_arrange_already_topped_up_act_query_assert
 
 
 def test_eligible_payments_for_top_up_amendment_arrange_delivered_payment_act_query_assert_included(
-    top_up_pp: PaymentPlan, django_assert_num_queries: Any
+    top_up_pp: PaymentPlan, django_assert_num_queries: object
 ) -> None:
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
@@ -146,7 +144,7 @@ def test_eligible_payments_for_top_up_amendment_arrange_withdrawn_household_act_
 
 
 def test_eligible_payments_for_top_up_amendment_arrange_already_amended_act_query_assert_excluded(
-    business_area: Any, cycle: ProgramCycle, top_up_pp: PaymentPlan
+    business_area: object, cycle: ProgramCycle, top_up_pp: PaymentPlan
 ) -> None:
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     amendment_pp = PaymentPlanFactory(

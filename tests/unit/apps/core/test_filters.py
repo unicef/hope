@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.forms import IntegerField
@@ -55,7 +54,7 @@ def test_filter_age_with_min_and_max_returns_only_individuals_in_range(
     individual_age_5: Individual,
     individual_age_20: Individual,
     individual_age_40: Individual,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     filtered = filter_age("birth_date", Individual.objects.all(), min_age=18, max_age=30)
 
@@ -70,7 +69,7 @@ def test_filter_age_with_only_min_returns_individuals_at_least_that_old(
     individual_age_5: Individual,
     individual_age_20: Individual,
     individual_age_40: Individual,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     filtered = filter_age("birth_date", Individual.objects.all(), min_age=18, max_age=None)
 
@@ -85,7 +84,7 @@ def test_filter_age_with_only_max_returns_individuals_younger_than_that(
     individual_age_5: Individual,
     individual_age_20: Individual,
     individual_age_40: Individual,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     filtered = filter_age("birth_date", Individual.objects.all(), min_age=None, max_age=18)
 

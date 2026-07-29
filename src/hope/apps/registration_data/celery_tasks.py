@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.core.cache import cache
 from django.db import transaction
@@ -45,7 +45,7 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
 
 
 @contextmanager
-def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> Any:
+def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> object:
     now = timezone.now()
     acquired = False
     try:

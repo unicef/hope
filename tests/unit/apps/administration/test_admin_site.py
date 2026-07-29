@@ -1,5 +1,3 @@
-from typing import Any
-
 from constance.test import override_config
 from django.contrib.messages import get_messages
 from django.test import Client
@@ -107,7 +105,7 @@ def test_get_bookmarks_blank_entries_are_skipped() -> None:
 
 
 @override_config(QUICK_LINKS="Kobo,https://kobo.example.org")
-def test_get_bookmarks_skips_entry_on_value_error(mocker: Any) -> None:
+def test_get_bookmarks_skips_entry_on_value_error(mocker: object) -> None:
     mocker.patch(
         "hope.apps.administration.admin_site.format_html",
         side_effect=ValueError("error"),
@@ -152,7 +150,7 @@ def test_clear_cache_view_superuser_lists_keys_starting_with_letter(
 def test_clear_cache_view_superuser_post_deletes_keys_with_selected_prefix(
     superuser_client: Client,
     redis_like_cache: FakeRedisCache,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     with django_assert_num_queries(1):
         response = superuser_client.post(reverse("admin:clear_cache"), {"resolve_chart_payment": "on"})

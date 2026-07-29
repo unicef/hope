@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.utils import timezone
 
 from hope.apps.grievance.models import GrievanceTicket
@@ -9,7 +7,7 @@ from hope.models import PaymentVerification
 
 
 def update_payment_verification_service(
-    grievance_ticket: GrievanceTicket, *args: Any, **kwargs: Any
+    grievance_ticket: GrievanceTicket, *args: object, **kwargs: object
 ) -> list[GrievanceTicket]:
     payment_verification_details = grievance_ticket.payment_verification_ticket_details
     payment_verification = payment_verification_details.payment_verification

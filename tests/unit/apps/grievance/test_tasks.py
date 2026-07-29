@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Any
 from unittest.mock import Mock, patch
 
 from django.db import Error
@@ -28,7 +27,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def task_context() -> dict[str, Any]:
+def task_context() -> dict[str, object]:
     business_area = BusinessAreaFactory(slug="afghanistan")
     program = ProgramFactory(
         name="Test program ONE",
@@ -67,12 +66,12 @@ def create_async_job(action: str, config: dict) -> AsyncJob:
 @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
 @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
 def test_execute_postponed_deduplication(
-    sanction_execute_mock: Any,
-    create_needs_adjudication_tickets_mock: Any,
-    deduplicate_individuals_mock: Any,
-    deduplicate_mock: Any,
-    populate_index_mock: Any,
-    task_context: dict[str, Any],
+    sanction_execute_mock: object,
+    create_needs_adjudication_tickets_mock: object,
+    deduplicate_individuals_mock: object,
+    deduplicate_mock: object,
+    populate_index_mock: object,
+    task_context: dict[str, object],
 ) -> None:
     business_area = task_context["business_area"]
     individual = task_context["individual"]
@@ -99,12 +98,12 @@ def test_execute_postponed_deduplication(
 @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
 @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
 def test_execute_non_postponed_without_screening(
-    sanction_execute_mock: Any,
-    create_needs_adjudication_tickets_mock: Any,
-    deduplicate_individuals_mock: Any,
-    deduplicate_mock: Any,
-    populate_index_mock: Any,
-    task_context: dict[str, Any],
+    sanction_execute_mock: object,
+    create_needs_adjudication_tickets_mock: object,
+    deduplicate_individuals_mock: object,
+    deduplicate_mock: object,
+    populate_index_mock: object,
+    task_context: dict[str, object],
 ) -> None:
     business_area = task_context["business_area"]
     individual = task_context["individual"]
@@ -131,12 +130,12 @@ def test_execute_non_postponed_without_screening(
 @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
 @patch("hope.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
 def test_execute_non_postponed_with_screening(
-    sanction_execute_mock: Any,
-    create_needs_adjudication_tickets_mock: Any,
-    deduplicate_individuals_mock: Any,
-    deduplicate_mock: Any,
-    populate_index_mock: Any,
-    task_context: dict[str, Any],
+    sanction_execute_mock: object,
+    create_needs_adjudication_tickets_mock: object,
+    deduplicate_individuals_mock: object,
+    deduplicate_mock: object,
+    populate_index_mock: object,
+    task_context: dict[str, object],
 ) -> None:
     business_area = task_context["business_area"]
     individual = task_context["individual"]
@@ -161,7 +160,7 @@ def test_execute_non_postponed_with_screening(
 
 @patch.object(AsyncJob, "queue")
 def test_deduplicate_and_check_sanctions_single_individual_task_schedules_async_job(
-    mock_queue: Mock, task_context: dict[str, Any], django_capture_on_commit_callbacks
+    mock_queue: Mock, task_context: dict[str, object], django_capture_on_commit_callbacks
 ) -> None:
     individual = task_context["individual"]
 
@@ -191,7 +190,7 @@ def test_deduplicate_and_check_sanctions_single_individual_task_schedules_async_
     "hope.apps.grievance.tasks.deduplicate_and_check_sanctions.deduplicate_and_check_against_sanctions_list_task_single_individual"
 )
 def test_deduplicate_and_check_sanctions_single_individual_action_success(
-    mock_task: Mock, mock_set_sentry_tag: Mock, task_context: dict[str, Any]
+    mock_task: Mock, mock_set_sentry_tag: Mock, task_context: dict[str, object]
 ) -> None:
     individual = task_context["individual"]
     job = create_async_job(
@@ -210,7 +209,7 @@ def test_deduplicate_and_check_sanctions_single_individual_action_success(
     side_effect=Error("db failed"),
 )
 def test_deduplicate_and_check_sanctions_single_individual_action_failure_reraises_error(
-    mock_task: Mock, task_context: dict[str, Any]
+    mock_task: Mock, task_context: dict[str, object]
 ) -> None:
     individual = task_context["individual"]
     job = create_async_job(
@@ -288,7 +287,7 @@ def test_celery_task_returns_when_individual_not_found() -> None:
 )
 def test_celery_task_calls_inner_function_with_individual(
     inner_fn_mock: Mock,
-    task_context: dict[str, Any],
+    task_context: dict[str, object],
 ) -> None:
     individual = task_context["individual"]
     job = create_async_job(
@@ -312,7 +311,7 @@ def _make_ticket(
     status: int = GrievanceTicket.STATUS_NEW,
     enable_email: bool = True,
     created_days_ago: int = 2,
-    last_notification_sent: Any = None,
+    last_notification_sent: object | None = None,
 ) -> GrievanceTicket:
     business_area = BusinessAreaFactory(enable_email_notification=enable_email)
     # Map categories to valid issue types

@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -38,7 +38,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -74,7 +74,7 @@ def grievance_context(
     program: Program,
     admin_area: Area,
     user: User,
-) -> dict[str, Any]:
+) -> dict[str, object]:
     household = HouseholdFactory(
         business_area=afghanistan,
         program=program,
@@ -126,7 +126,7 @@ def grievance_context(
 
 
 @pytest.fixture
-def close_ticket_url(afghanistan: BusinessArea, grievance_context: dict[str, Any]) -> str:
+def close_ticket_url(afghanistan: BusinessArea, grievance_context: dict[str, object]) -> str:
     grievance_ticket = grievance_context["grievance_ticket"]
     return reverse(
         "api:grievance-tickets:grievance-tickets-global-status-change",
@@ -138,12 +138,12 @@ def close_ticket_url(afghanistan: BusinessArea, grievance_context: dict[str, Any
 
 
 def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     close_ticket_url: str,
 ) -> None:
     create_user_role_with_permissions(
@@ -183,12 +183,12 @@ def test_close_update_individual_should_throw_error_when_there_is_one_head_of_ho
 
 
 def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     close_ticket_url: str,
 ) -> None:
     create_user_role_with_permissions(

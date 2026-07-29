@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
@@ -30,7 +29,7 @@ class TargetingCriteriaQueryingBase:
     def get_individual_queryset(self) -> QuerySet:
         return Individual.objects.all()
 
-    def get_rules(self) -> Any:
+    def get_rules(self) -> object:
         return self.rules.all()
 
     def get_criteria_string(self) -> str:
@@ -88,18 +87,18 @@ class TargetingCriteriaRuleQueryingBase:
 
     def __init__(
         self,
-        filters: Any | None = None,
-        individuals_filters_blocks: Any | None = None,
+        filters: object | None = None,
+        individuals_filters_blocks: object | None = None,
     ) -> None:
         if filters is not None:
             self.filters = filters
         if individuals_filters_blocks is not None:
             self.individuals_filters_blocks = individuals_filters_blocks
 
-    def get_filters(self) -> Any:
+    def get_filters(self) -> object:
         return self.filters
 
-    def get_individuals_filters_blocks(self) -> Any:
+    def get_individuals_filters_blocks(self) -> object:
         return self.individuals_filters_blocks
 
     def get_criteria_string(self) -> str:
@@ -130,7 +129,7 @@ class TargetingCriteriaRuleQueryingBase:
 class TargetingIndividualRuleFilterBlockBase:
     def __init__(
         self,
-        individual_block_filters: Any | None = None,
+        individual_block_filters: object | None = None,
         target_only_hoh: list[Household] | None = None,
     ) -> None:
         if individual_block_filters is not None:
@@ -138,7 +137,7 @@ class TargetingIndividualRuleFilterBlockBase:
         if target_only_hoh is not None:
             self.target_only_hoh = target_only_hoh
 
-    def get_individual_block_filters(self) -> Any:
+    def get_individual_block_filters(self) -> object:
         return self.individual_block_filters
 
     def get_criteria_string(self) -> str:
@@ -263,7 +262,7 @@ class TargetingCriteriaFilterBase:
     def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def prepare_arguments(self, arguments: list, field_attr: Any) -> list:
+    def prepare_arguments(self, arguments: list, field_attr: object) -> list:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
@@ -281,7 +280,7 @@ class TargetingCriteriaFilterBase:
     def get_query_for_lookup(
         self,
         lookup: str,
-        field_attr: Any,
+        field_attr: object,
     ) -> Q:
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)

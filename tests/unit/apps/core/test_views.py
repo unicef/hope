@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -27,7 +25,7 @@ def user() -> User:
 
 @pytest.fixture
 def user_with_upload_permission(
-    user: User, business_area: BusinessArea, create_user_role_with_permissions: Any
+    user: User, business_area: BusinessArea, create_user_role_with_permissions: object
 ) -> User:
     create_user_role_with_permissions(
         user, [Permissions.UPLOAD_STORAGE_FILE], business_area, whole_business_area_access=True
@@ -83,7 +81,7 @@ def test_upload_file_get_returns_403_without_permission(client: Client, user: Us
     assert response.status_code == 403
 
 
-def test_upload_file_get_renders_upload_form(logged_in_client: Client, django_assert_num_queries: Any) -> None:
+def test_upload_file_get_renders_upload_form(logged_in_client: Client, django_assert_num_queries: object) -> None:
     with django_assert_num_queries(8):
         response = logged_in_client.get(reverse("upload-file"))
 
@@ -96,7 +94,7 @@ def test_upload_file_post_creates_storage_file_and_redirects(
     logged_in_client: Client,
     user_with_upload_permission: User,
     business_area: BusinessArea,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     data = {
         "business_area": business_area.pk,
@@ -116,7 +114,7 @@ def test_upload_file_post_creates_storage_file_and_redirects(
 
 
 def test_upload_file_post_with_too_large_file_shows_error(
-    logged_in_client: Client, business_area: BusinessArea, settings: Any
+    logged_in_client: Client, business_area: BusinessArea, settings: object
 ) -> None:
     settings.MAX_STORAGE_FILE_SIZE = 0
     data = {

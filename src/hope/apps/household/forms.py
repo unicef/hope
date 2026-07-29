@@ -1,5 +1,3 @@
-from typing import Any
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db import Error
@@ -23,7 +21,9 @@ from hope.models import (
 )
 
 
-def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:
+def get_households_from_text(
+    program: Program, text: object, target_field: object, separator: object
+) -> QuerySet | list:
     """Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area."""
     if separator in ["space", "tab"]:
         list_of_households = list(map(str.strip, text.split(" ")))
@@ -99,7 +99,7 @@ class UpdateByXlsxStage1Form(forms.Form):
 class UpdateByXlsxStage2Form(forms.Form):
     xlsx_update_file = forms.ModelChoiceField(queryset=XlsxUpdateFile.objects.all(), widget=forms.HiddenInput())
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.xlsx_columns = kwargs.pop("xlsx_columns", [])
         super().__init__(*args, **kwargs)
         self.fields["xlsx_match_columns"] = forms.MultipleChoiceField(
@@ -158,7 +158,7 @@ class CreateTargetPopulationTextForm(forms.Form):
         help_text=_("List of either UUID4 or UNICEF IDs separated the separator"),
     )
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.program = kwargs.pop("program")
         if not self.program:
             raise forms.ValidationError("Missing programme")
@@ -197,7 +197,7 @@ class CreateTargetPopulationTextForm(forms.Form):
 class MassEnrollForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput, required=False)
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.business_area_id = kwargs.pop("business_area_id")
         self.households = kwargs.pop("households")
         super().__init__(*args, **kwargs)
@@ -206,7 +206,7 @@ class MassEnrollForm(forms.Form):
             label="Select a program to enroll households to",
         )
 
-    def clean(self) -> dict[str, Any] | None:
+    def clean(self) -> dict[str, object] | None:
         cleaned_data = super().clean()
         if "apply" in self.data:
             program_for_enroll = cleaned_data.get("program_for_enroll")
@@ -245,7 +245,7 @@ class IndividualForm(forms.ModelForm):
         model = Individual
         fields = []  # dynamically set in __init__
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         data = kwargs.get("data")
         self.Meta.fields = list(data.keys()) if data else "__all__"  # type: ignore
 
@@ -266,7 +266,7 @@ class DocumentForm(forms.ModelForm):
         model = PendingDocument
         fields = []  # dynamically set in __init__
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         data = kwargs.get("data")
         self.Meta.fields = list(data.keys()) if data else "__all__"  # type: ignore
         super().__init__(*args, **kwargs)
@@ -290,7 +290,7 @@ class WithdrawHouseholdsForm(forms.Form):
     household_list = forms.CharField(widget=forms.Textarea, required=True, label="Household IDs")
     tag = forms.CharField(required=True, label="Tag")
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         business_area = kwargs.pop("business_area", None)
         super().__init__(*args, **kwargs)
         if business_area:

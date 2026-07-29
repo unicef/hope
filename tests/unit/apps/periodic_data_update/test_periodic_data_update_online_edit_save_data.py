@@ -1,6 +1,6 @@
 """Tests for PDU online edit save data."""
 
-from typing import Any, Callable
+from typing import Callable
 
 from freezegun import freeze_time
 import pytest
@@ -21,7 +21,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
@@ -31,17 +31,17 @@ def program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner(db: Any) -> Any:
+def partner(db: object) -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> User:
+def user(partner: object) -> User:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -172,7 +172,7 @@ def get_save_data_url(afghanistan: BusinessArea, program: Program, pdu_edit_id: 
     )
 
 
-def create_request_data(pdu_fields: dict, field_name: str, new_value: Any) -> dict:
+def create_request_data(pdu_fields: dict, field_name: str, new_value: object) -> dict:
     updated_fields = pdu_fields.copy()
     updated_fields[field_name] = {**updated_fields[field_name], "value": new_value}
     return updated_fields
@@ -189,13 +189,13 @@ def create_request_data(pdu_fields: dict, field_name: str, new_value: Any) -> di
 def test_save_data_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -217,13 +217,13 @@ def test_save_data_permissions(
 
 @freeze_time("2024-01-20")
 def test_save_data_success_decimal_field(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -258,13 +258,13 @@ def test_save_data_success_decimal_field(
 
 
 def test_save_data_success_string_field(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -295,13 +295,13 @@ def test_save_data_success_string_field(
 
 
 def test_save_data_success_boolean_field(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -328,13 +328,13 @@ def test_save_data_success_boolean_field(
 
 
 def test_save_data_success_date_field(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -361,13 +361,13 @@ def test_save_data_success_date_field(
 
 
 def test_save_data_no_value_change(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -394,13 +394,13 @@ def test_save_data_no_value_change(
 
 
 def test_save_data_not_authorized_user(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -425,13 +425,13 @@ def test_save_data_not_authorized_user(
 
 
 def test_save_data_invalid_status(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -457,13 +457,13 @@ def test_save_data_invalid_status(
 
 
 def test_serializer_validation_missing_individual_uuid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -484,13 +484,13 @@ def test_serializer_validation_missing_individual_uuid(
 
 
 def test_serializer_validation_invalid_individual_uuid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -512,13 +512,13 @@ def test_serializer_validation_invalid_individual_uuid(
 
 
 def test_serializer_validation_individual_not_found_in_edit_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -544,12 +544,12 @@ def test_serializer_validation_individual_not_found_in_edit_data(
 
 
 def test_serializer_validation_pdu_fields_not_dict(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -569,12 +569,12 @@ def test_serializer_validation_pdu_fields_not_dict(
 
 
 def test_serializer_validation_field_data_not_dict(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -596,12 +596,12 @@ def test_serializer_validation_field_data_not_dict(
 
 
 def test_serializer_validation_missing_required_keys(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -625,12 +625,12 @@ def test_serializer_validation_missing_required_keys(
 
 
 def test_serializer_validation_field_not_in_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -660,13 +660,13 @@ def test_serializer_validation_field_not_in_fields(
 
 
 def test_serializer_validation_non_editable_field_modification(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -690,13 +690,13 @@ def test_serializer_validation_non_editable_field_modification(
 
 
 def test_serializer_validation_invalid_boolean_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -718,13 +718,13 @@ def test_serializer_validation_invalid_boolean_type(
 
 
 def test_serializer_validation_invalid_decimal_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -746,13 +746,13 @@ def test_serializer_validation_invalid_decimal_type(
 
 
 def test_serializer_validation_invalid_string_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -774,13 +774,13 @@ def test_serializer_validation_invalid_string_type(
 
 
 def test_serializer_validation_invalid_date_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -802,13 +802,13 @@ def test_serializer_validation_invalid_date_type(
 
 
 def test_serializer_validation_invalid_date_format(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -831,13 +831,13 @@ def test_serializer_validation_invalid_date_format(
 
 @freeze_time("2024-02-05 14:15:30")
 def test_save_data_multiple_field_types_in_one_request(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
     pdu_online_edit: PDUOnlineEdit,
     initial_request_pdu_fields_data: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,

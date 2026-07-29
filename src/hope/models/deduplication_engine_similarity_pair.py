@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
 from django.db import models, transaction
 from django.db.models import QuerySet
@@ -147,7 +147,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
             ).values_list(id_field_name, "id")
         }
 
-    def serialize_for_ticket(self) -> dict[str, Any]:
+    def serialize_for_ticket(self) -> dict[str, object]:
         results = {
             "similarity_score": float(self.similarity_score),
             "status_code": self.get_status_code_display(),

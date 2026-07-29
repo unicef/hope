@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -51,8 +51,8 @@ pytestmark = pytest.mark.django_db
 
 
 def _create_household_with_individuals(
-    program: Program, business_area: BusinessArea, count: int = 2, **hh_kwargs: Any
-) -> tuple[Any, list[Individual]]:
+    program: Program, business_area: BusinessArea, count: int = 2, **hh_kwargs: object
+) -> tuple[object, list[Individual]]:
     hh = HouseholdFactory(program=program, business_area=business_area, **hh_kwargs)
     individuals = [hh.head_of_household]
     individuals.extend(
@@ -73,17 +73,17 @@ def afghanistan() -> BusinessArea:
 
 
 @pytest.fixture
-def partner() -> Any:
+def partner() -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> Any:
+def user(partner: object) -> object:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def client(api_client: Callable, user: Any) -> Any:
+def client(api_client: Callable, user: object) -> object:
     return api_client(user)
 
 
@@ -96,8 +96,8 @@ def documents() -> None:
 
 def test_get_choices(
     documents: None,
-    client: Any,
-    user: Any,
+    client: object,
+    user: object,
     afghanistan: BusinessArea,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -137,7 +137,7 @@ def test_get_choices(
 
 
 @pytest.fixture
-def global_context(client: Any, user: Any, partner: Any, afghanistan: BusinessArea) -> dict[str, Any]:
+def global_context(client: object, user: object, partner: object, afghanistan: BusinessArea) -> dict[str, object]:
     ukraine = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="4410")
 
     program_afghanistan1 = ProgramFactory(
@@ -340,7 +340,7 @@ def test_individual_global_list_area_limits(
 
 
 @pytest.fixture
-def office_search_context(client: Any, user: Any, afghanistan: BusinessArea) -> dict[str, Any]:
+def office_search_context(client: object, user: object, afghanistan: BusinessArea) -> dict[str, object]:
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
     hh1, individuals1 = _create_household_with_individuals(program, afghanistan)

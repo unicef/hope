@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -33,7 +33,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -48,7 +48,7 @@ def admin_area() -> Area:
 
 
 @pytest.fixture
-def sensitive_context(business_area: BusinessArea, program: Program, user: User) -> dict[str, Any]:
+def sensitive_context(business_area: BusinessArea, program: Program, user: User) -> dict[str, object]:
     household1 = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -119,13 +119,13 @@ def list_url(business_area: BusinessArea) -> str:
 
 
 @pytest.fixture
-def sensitive_input_builder(user: User, admin_area: Area) -> Callable[..., dict[str, Any]]:
+def sensitive_input_builder(user: User, admin_area: Area) -> Callable[..., dict[str, object]]:
     def _build(
         *,
         issue_type: int | None = GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
         extras_key: str = "sensitive_grievance_ticket_extras",
-        extras: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+        extras: dict[str, object] | None = None,
+    ) -> dict[str, object]:
         input_data = {
             "description": "Test Feedback",
             "assigned_to": str(user.id),
@@ -144,13 +144,13 @@ def sensitive_input_builder(user: User, admin_area: Area) -> Callable[..., dict[
 
 
 def test_create_sensitive_ticket(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_context: dict[str, Any],
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_context: dict[str, object],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -166,13 +166,13 @@ def test_create_sensitive_ticket(
 
 
 def test_create_sensitive_ticket_wrong_extras(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_context: dict[str, Any],
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_context: dict[str, object],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -189,13 +189,13 @@ def test_create_sensitive_ticket_wrong_extras(
 
 
 def test_create_sensitive_ticket_without_issue_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_context: dict[str, Any],
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_context: dict[str, object],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -213,13 +213,13 @@ def test_create_sensitive_ticket_without_issue_type(
 
 
 def test_create_sensitive_ticket_with_two_payment_records(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_context: dict[str, Any],
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_context: dict[str, object],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -237,13 +237,13 @@ def test_create_sensitive_ticket_with_two_payment_records(
 
 
 def test_create_sensitive_ticket_without_payment_record(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_context: dict[str, Any],
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_context: dict[str, object],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -259,13 +259,13 @@ def test_create_sensitive_ticket_without_payment_record(
 
 
 def test_create_sensitive_ticket_without_household(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_context: dict[str, Any],
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_context: dict[str, object],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -278,13 +278,13 @@ def test_create_sensitive_ticket_without_household(
 
 
 def test_create_sensitive_ticket_without_individual(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_context: dict[str, Any],
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_context: dict[str, object],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
@@ -297,12 +297,12 @@ def test_create_sensitive_ticket_without_individual(
 
 
 def test_create_sensitive_ticket_without_extras(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    sensitive_input_builder: Callable[..., dict[str, Any]],
+    sensitive_input_builder: Callable[..., dict[str, object]],
     list_url: str,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)

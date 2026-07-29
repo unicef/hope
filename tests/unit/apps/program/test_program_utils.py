@@ -2,7 +2,6 @@
 
 import hashlib
 import json
-from typing import Any
 from unittest.mock import patch
 
 from constance.test import override_config
@@ -50,12 +49,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory()
 
 
@@ -376,7 +375,9 @@ def test_enroll_household_with_head_of_household_already_copied(enrollment_test_
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.xdist_group(name="elasticsearch")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_enroll_households_to_program_task(enrollment_test_data: dict, django_capture_on_commit_callbacks: Any) -> None:
+def test_enroll_households_to_program_task(
+    enrollment_test_data: dict, django_capture_on_commit_callbacks: object
+) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
     with django_capture_on_commit_callbacks(execute=True):
@@ -394,7 +395,7 @@ def test_enroll_households_to_program_task(enrollment_test_data: dict, django_ca
 @pytest.mark.xdist_group(name="elasticsearch")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_enroll_households_to_program_task_already_running(
-    enrollment_test_data: dict, django_capture_on_commit_callbacks: Any
+    enrollment_test_data: dict, django_capture_on_commit_callbacks: object
 ) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
@@ -432,7 +433,7 @@ def test_enroll_households_to_program_task_already_running(
 
 
 @patch("hope.apps.program.utils.randbelow")
-def test_generate_rdi_unique_name_when_conflicts(mock_randbelow: Any, program1: Program) -> None:
+def test_generate_rdi_unique_name_when_conflicts(mock_randbelow: object, program1: Program) -> None:
     mock_randbelow.side_effect = [1111, 5555]
     RegistrationDataImportFactory(
         business_area=program1.business_area,
@@ -444,7 +445,7 @@ def test_generate_rdi_unique_name_when_conflicts(mock_randbelow: Any, program1: 
 
 
 @patch("hope.apps.program.utils.randbelow")
-def test_generate_rdi_unique_name_no_conflicts(mock_randbelow: Any, program1: Program) -> None:
+def test_generate_rdi_unique_name_no_conflicts(mock_randbelow: object, program1: Program) -> None:
     mock_randbelow.return_value = 3333
     result = generate_rdi_unique_name(program1)
     expected_name = "RDI for enroll households to Programme: Program 1"

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Sequence
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q, QuerySet
@@ -198,7 +198,7 @@ def create_grievance_ticket_with_details(
     possible_duplicate: Individual | None,
     business_area: BusinessArea,
     issue_type: int,
-    **kwargs: Any,
+    **kwargs: object,
 ) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
     """Create GRV ticket with details.
 

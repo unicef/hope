@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 import pytest
 from rest_framework.test import APIClient
@@ -11,27 +11,27 @@ class ReauthenticateAPIClient(APIClient):
     def reauthenticate_user(self) -> None:
         self.force_authenticate(user=User.objects.get(id=self.handler._force_user.id))
 
-    def get(self, *args: Any, **kwargs: Any) -> Any:
+    def get(self, *args: object, **kwargs: object) -> object:
         self.reauthenticate_user()
         return super().get(*args, **kwargs)
 
-    def post(self, *args: Any, **kwargs: Any) -> Any:
+    def post(self, *args: object, **kwargs: object) -> object:
         self.reauthenticate_user()
         return super().post(*args, **kwargs)
 
-    def put(self, *args: Any, **kwargs: Any) -> Any:
+    def put(self, *args: object, **kwargs: object) -> object:
         self.reauthenticate_user()
         return super().put(*args, **kwargs)
 
-    def patch(self, *args: Any, **kwargs: Any) -> Any:
+    def patch(self, *args: object, **kwargs: object) -> object:
         self.reauthenticate_user()
         return super().patch(*args, **kwargs)
 
-    def delete(self, *args: Any, **kwargs: Any) -> Any:
+    def delete(self, *args: object, **kwargs: object) -> object:
         self.reauthenticate_user()
         return super().delete(*args, **kwargs)
 
-    def options(self, *args: Any, **kwargs: Any) -> Any:
+    def options(self, *args: object, **kwargs: object) -> object:
         self.reauthenticate_user()
         return super().options(*args, **kwargs)
 

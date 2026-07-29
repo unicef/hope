@@ -1,7 +1,7 @@
 """Tests for grievance ticket creation functionality."""
 
 from datetime import date
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 import pytest
@@ -153,7 +153,7 @@ def list_url(afghanistan: BusinessArea) -> str:
     ],
 )
 def test_create_grievance_ticket_add_individual(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -240,7 +240,7 @@ def test_create_grievance_ticket_add_individual(
 
 
 def test_create_grievance_ticket_update_household(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -284,7 +284,7 @@ def test_create_grievance_ticket_update_household(
 
 
 def test_create_grievance_ticket_update_individual(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -334,7 +334,7 @@ def test_create_grievance_ticket_update_individual(
 
 
 def test_create_grievance_ticket_update_individual_with_document(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -379,7 +379,7 @@ def test_create_grievance_ticket_update_individual_with_document(
 
 
 def test_create_grievance_ticket_delete_individual(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -418,7 +418,7 @@ def test_create_grievance_ticket_delete_individual(
 
 
 def test_create_grievance_ticket_delete_household(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -457,7 +457,7 @@ def test_create_grievance_ticket_delete_household(
 
 
 def test_create_grievance_ticket_complaint(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -507,7 +507,7 @@ def test_create_grievance_ticket_complaint(
 
 
 def test_create_grievance_ticket_validation_errors(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -536,7 +536,7 @@ def test_create_grievance_ticket_validation_errors(
 
 
 def test_create_grievance_ticket_duplicate_roles_not_allowed(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -607,7 +607,7 @@ def test_create_grievance_ticket_duplicate_roles_not_allowed(
 
 
 def test_create_grievance_ticket_update_individual_with_photo(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -656,7 +656,7 @@ def test_create_grievance_ticket_update_individual_with_photo(
 
 
 def test_create_grievance_ticket_update_individual_clear_photo(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -701,7 +701,7 @@ def test_create_grievance_ticket_update_individual_clear_photo(
 
 
 def test_create_grievance_ticket_update_individual_photo_previous_value(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -751,7 +751,7 @@ def test_create_grievance_ticket_update_individual_photo_previous_value(
 
 
 def test_create_grievance_ticket_add_individual_with_photo(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,

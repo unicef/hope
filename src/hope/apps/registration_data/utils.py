@@ -2,7 +2,6 @@ import hashlib
 import json
 import re
 import sys
-from typing import Any
 
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
@@ -12,7 +11,7 @@ from hope.apps.household.const import ROLE_PRIMARY
 from hope.models import Household, Individual, IndividualRoleInHousehold, Program
 
 
-def post_process_dedupe_results(record: Any) -> None:
+def post_process_dedupe_results(record: object) -> None:
     max_score = 0
     min_score = sys.maxsize
     for field in [
@@ -153,7 +152,7 @@ def get_rdi_program_population(
     return households, individuals
 
 
-def collectors_str_ids_to_list(values: Any) -> None | list[str]:
+def collectors_str_ids_to_list(values: object) -> None | list[str]:
     if values is None:
         return None
 

@@ -1,6 +1,6 @@
 """Tests for grievance update referral ticket functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -106,7 +106,7 @@ def detail_url(afghanistan: BusinessArea, referral_ticket) -> str:
 
 
 def test_update_referral_ticket_without_extras(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     admin_area: AreaFactory,
     afghanistan: BusinessArea,
@@ -144,7 +144,7 @@ def test_update_referral_ticket_without_extras(
 
 
 def test_update_referral_ticket_with_household_extras(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     admin_area: AreaFactory,
     afghanistan: BusinessArea,
@@ -177,7 +177,7 @@ def test_update_referral_ticket_with_household_extras(
 
 
 def test_update_referral_ticket_with_individual_extras(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     admin_area: AreaFactory,
     afghanistan: BusinessArea,
@@ -210,7 +210,7 @@ def test_update_referral_ticket_with_individual_extras(
 
 
 def test_update_referral_ticket_with_household_and_individual_extras(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     admin_area: AreaFactory,
     afghanistan: BusinessArea,

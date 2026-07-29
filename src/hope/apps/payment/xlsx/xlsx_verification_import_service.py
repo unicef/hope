@@ -1,6 +1,5 @@
 from decimal import Decimal
 import io
-from typing import Any
 
 import openpyxl
 from openpyxl.utils import get_column_letter
@@ -78,7 +77,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             self._import_row(row)
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
-    def _get_sheet_by_name(self, sheet_name: str) -> openpyxl.Workbook | Any:
+    def _get_sheet_by_name(self, sheet_name: str) -> openpyxl.Workbook | object:
         try:
             ws = self.wb[sheet_name]
         except KeyError:

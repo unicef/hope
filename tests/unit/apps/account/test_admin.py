@@ -1,6 +1,5 @@
 """Tests for account admin forms and interfaces."""
 
-from typing import Any
 from unittest.mock import MagicMock
 
 from django.contrib.admin.sites import AdminSite
@@ -28,7 +27,7 @@ from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssi
 pytestmark = pytest.mark.django_db
 
 
-def get_mock_request(request_factory: RequestFactory, object_id: Any = None, user: Any = None) -> Any:
+def get_mock_request(request_factory: RequestFactory, object_id: object = None, user: object = None) -> object:
     request = request_factory.get("/")
     request.resolver_match = MagicMock()
     request.resolver_match.kwargs = {"object_id": str(object_id) if object_id else None}
@@ -39,7 +38,7 @@ def get_mock_request(request_factory: RequestFactory, object_id: Any = None, use
 
 
 @pytest.fixture
-def business_area_afg(db: Any) -> BusinessArea:
+def business_area_afg(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -48,7 +47,7 @@ def business_area_afg(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def business_area_ukr(db: Any) -> BusinessArea:
+def business_area_ukr(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="ukraine",
         code="4410",
@@ -57,12 +56,12 @@ def business_area_ukr(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def role_1(db: Any) -> Role:
+def role_1(db: object) -> Role:
     return RoleFactory(name="Role 1")
 
 
 @pytest.fixture
-def unicef_parent(db: Any) -> Partner:
+def unicef_parent(db: object) -> Partner:
     return PartnerFactory(name="UNICEF")
 
 
@@ -72,48 +71,48 @@ def unicef_subpartner(unicef_parent: Partner) -> Partner:
 
 
 @pytest.fixture
-def role_available_for_partner(db: Any) -> Role:
+def role_available_for_partner(db: object) -> Role:
     return RoleFactory(is_available_for_partner=True)
 
 
 @pytest.fixture
-def role_not_available_for_partner(db: Any) -> Role:
+def role_not_available_for_partner(db: object) -> Role:
     return RoleFactory(is_available_for_partner=False)
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="Partner")
 
 
 @pytest.fixture
-def parent_partner(db: Any) -> Partner:
+def parent_partner(db: object) -> Partner:
     """Normal parent partner."""
     return PartnerFactory(name="Parent Partner")
 
 
 @pytest.fixture
-def role_2(db: Any) -> Role:
+def role_2(db: object) -> Role:
     return RoleFactory(name="Role_2")
 
 
 @pytest.fixture
-def role_3(db: Any) -> Role:
+def role_3(db: object) -> Role:
     return RoleFactory(name="Role_3")
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def superuser(db: Any) -> User:
+def superuser(db: object) -> User:
     return UserFactory(is_superuser=True, is_staff=True)
 
 
 @pytest.fixture
-def staff_user(db: Any) -> User:
+def staff_user(db: object) -> User:
     return UserFactory(is_staff=True)
 
 

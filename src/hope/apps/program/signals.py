@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.db import transaction
+from django.db.models import Model
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
@@ -21,14 +20,14 @@ def adjust_program_size(program: Program) -> None:
 
 
 @receiver(pre_save, sender=Program)
-def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> None:
+def track_old_partner_access(sender: type[Model], instance: Program, **kwargs: object) -> None:
     old_partner_access = getattr(Program.objects.filter(pk=instance.pk).first(), "partner_access", None)
 
     instance.old_partner_access = old_partner_access
 
 
 @receiver(post_save, sender=Program)
-def handle_partner_access_change(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
+def handle_partner_access_change(sender: type[Model], instance: Program, created: bool, **kwargs: object) -> None:
     old_partner_access = instance.old_partner_access
     new_partner_access = instance.partner_access
 
@@ -41,12 +40,12 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
 
 
 @receiver([post_save, post_delete], sender=BeneficiaryGroup)
-def increment_beneficiary_group_version_cache(sender: Any, instance: BeneficiaryGroup, **kwargs: dict) -> None:
+def increment_beneficiary_group_version_cache(sender: type[Model], instance: BeneficiaryGroup, **kwargs: dict) -> None:
     transaction.on_commit(lambda: increment_cache_key("beneficiary_group_list"))
 
 
 @receiver([post_save, post_delete], sender=Program)
-def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dict) -> None:
+def increase_program_version_cache(sender: type[Model], instance: Program, **kwargs: dict) -> None:
     business_area_slug = instance.business_area.slug
 
     def _increment() -> None:

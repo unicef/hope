@@ -14,8 +14,8 @@ and the already-``conflicted`` flag.
 """
 
 import json
-from typing import Any
 
+from django.http import HttpRequest
 import pytest
 
 from extras.test_utils.factories.core import PaymentPlanPurposeFactory
@@ -39,7 +39,7 @@ DIFFERENT_TYPE_PAIRS = [(q, c) for q in ALL_PLAN_TYPES for c in ALL_PLAN_TYPES i
 # A scenario builds a queried plan and a single candidate "conflicting" plan, each
 # with one payment. Every knob below has a default that produces a soft conflict;
 # each test overrides only the knobs it exercises plus the expected flags.
-DEFAULT_SCENARIO: dict[str, Any] = {
+DEFAULT_SCENARIO: dict[str, object] = {
     "queried_type": PlanType.TOP_UP,
     "queried_status": Status.OPEN,
     "conflicting_type": PlanType.TOP_UP,
@@ -56,8 +56,8 @@ DEFAULT_SCENARIO: dict[str, Any] = {
 
 
 @pytest.fixture
-def conflict_scenario(request: Any, db: Any) -> tuple[PaymentPlan, Any, bool, bool]:
-    spec: dict[str, Any] = {**DEFAULT_SCENARIO, **request.param}
+def conflict_scenario(request: HttpRequest, db: object) -> tuple[PaymentPlan, object, bool, bool]:
+    spec: dict[str, object] = {**DEFAULT_SCENARIO, **request.param}
 
     purpose = PaymentPlanPurposeFactory()
     other_purpose = PaymentPlanPurposeFactory()
@@ -83,7 +83,7 @@ def conflict_scenario(request: Any, db: Any) -> tuple[PaymentPlan, Any, bool, bo
     )
 
     queried_payment = PaymentFactory(parent=queried_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    conflicting_kwargs: dict[str, Any] = {
+    conflicting_kwargs: dict[str, object] = {
         "parent": conflicting_plan,
         "status": spec["conflicting_payment_status"],
         "conflicted": spec["conflicting_payment_conflicted"],
@@ -114,7 +114,7 @@ def conflict_scenario(request: Any, db: Any) -> tuple[PaymentPlan, Any, bool, bo
     indirect=True,
 )
 def test_conflict_detected_between_plans_of_the_same_type(
-    conflict_scenario: tuple[PaymentPlan, Any, bool, bool], django_assert_num_queries: Any
+    conflict_scenario: tuple[PaymentPlan, object, bool, bool], django_assert_num_queries: object
 ) -> None:
     plan, payment_id, expect_soft, expect_hard = conflict_scenario
 
@@ -137,7 +137,7 @@ def test_conflict_detected_between_plans_of_the_same_type(
     indirect=True,
 )
 def test_hard_conflict_detected_for_every_hard_conflict_status(
-    conflict_scenario: tuple[PaymentPlan, Any, bool, bool], django_assert_num_queries: Any
+    conflict_scenario: tuple[PaymentPlan, object, bool, bool], django_assert_num_queries: object
 ) -> None:
     plan, payment_id, expect_soft, expect_hard = conflict_scenario
 
@@ -173,7 +173,7 @@ def test_hard_conflict_detected_for_every_hard_conflict_status(
     indirect=True,
 )
 def test_no_conflict_between_plans_of_different_types(
-    conflict_scenario: tuple[PaymentPlan, Any, bool, bool], django_assert_num_queries: Any
+    conflict_scenario: tuple[PaymentPlan, object, bool, bool], django_assert_num_queries: object
 ) -> None:
     plan, payment_id, expect_soft, expect_hard = conflict_scenario
 
@@ -231,7 +231,7 @@ def test_no_conflict_between_plans_of_different_types(
     indirect=True,
 )
 def test_no_conflict_when_scope_or_payment_state_excludes_candidate(
-    conflict_scenario: tuple[PaymentPlan, Any, bool, bool], django_assert_num_queries: Any
+    conflict_scenario: tuple[PaymentPlan, object, bool, bool], django_assert_num_queries: object
 ) -> None:
     plan, payment_id, expect_soft, expect_hard = conflict_scenario
 
@@ -259,7 +259,7 @@ def test_no_conflict_when_scope_or_payment_state_excludes_candidate(
     indirect=True,
 )
 def test_conflict_flags_default_false_when_queried_plan_not_open(
-    conflict_scenario: tuple[PaymentPlan, Any, bool, bool], django_assert_num_queries: Any
+    conflict_scenario: tuple[PaymentPlan, object, bool, bool], django_assert_num_queries: object
 ) -> None:
     plan, payment_id, expect_soft, expect_hard = conflict_scenario
 
@@ -271,7 +271,7 @@ def test_conflict_flags_default_false_when_queried_plan_not_open(
 
 
 @pytest.fixture
-def soft_conflict_pair(db: Any) -> tuple[PaymentPlan, Any, PaymentPlan, Payment]:
+def soft_conflict_pair(db: object) -> tuple[PaymentPlan, object, PaymentPlan, Payment]:
     purpose = PaymentPlanPurposeFactory()
     program = ProgramFactory(status="ACTIVE")
     program.payment_plan_purposes.add(purpose)
@@ -295,7 +295,7 @@ def soft_conflict_pair(db: Any) -> tuple[PaymentPlan, Any, PaymentPlan, Payment]
 
 
 def test_soft_conflict_data_payload_describes_the_conflicting_plan(
-    soft_conflict_pair: tuple[PaymentPlan, Any, PaymentPlan, Payment], django_assert_num_queries: Any
+    soft_conflict_pair: tuple[PaymentPlan, object, PaymentPlan, Payment], django_assert_num_queries: object
 ) -> None:
     queried, payment_id, conflicting, conflicting_payment = soft_conflict_pair
 
@@ -313,7 +313,7 @@ def test_soft_conflict_data_payload_describes_the_conflicting_plan(
 
 
 @pytest.fixture
-def hard_conflict_pair(db: Any) -> tuple[PaymentPlan, Any, PaymentPlan, Payment]:
+def hard_conflict_pair(db: object) -> tuple[PaymentPlan, object, PaymentPlan, Payment]:
     purpose = PaymentPlanPurposeFactory()
     program = ProgramFactory(status="ACTIVE")
     program.payment_plan_purposes.add(purpose)
@@ -337,7 +337,7 @@ def hard_conflict_pair(db: Any) -> tuple[PaymentPlan, Any, PaymentPlan, Payment]
 
 
 def test_hard_conflict_data_payload_describes_the_conflicting_plan(
-    hard_conflict_pair: tuple[PaymentPlan, Any, PaymentPlan, Payment], django_assert_num_queries: Any
+    hard_conflict_pair: tuple[PaymentPlan, object, PaymentPlan, Payment], django_assert_num_queries: object
 ) -> None:
     queried, payment_id, conflicting, conflicting_payment = hard_conflict_pair
 
@@ -352,7 +352,7 @@ def test_hard_conflict_data_payload_describes_the_conflicting_plan(
 
 
 @pytest.fixture
-def top_up_with_source_and_sibling(db: Any) -> tuple[PaymentPlan, Any, PaymentPlan]:
+def top_up_with_source_and_sibling(db: object) -> tuple[PaymentPlan, object, PaymentPlan]:
     """A TopUp whose household appears in both its source Standard plan and a
     second, unrelated TopUp — the source is suppressed, the sibling is not."""
     purpose = PaymentPlanPurposeFactory()
@@ -391,7 +391,7 @@ def top_up_with_source_and_sibling(db: Any) -> tuple[PaymentPlan, Any, PaymentPl
 
 
 def test_top_up_conflict_is_selective_source_suppressed_sibling_top_up_kept(
-    top_up_with_source_and_sibling: tuple[PaymentPlan, Any, PaymentPlan], django_assert_num_queries: Any
+    top_up_with_source_and_sibling: tuple[PaymentPlan, object, PaymentPlan], django_assert_num_queries: object
 ) -> None:
     top_up, payment_id, sibling_top_up = top_up_with_source_and_sibling
 
@@ -406,7 +406,7 @@ def test_top_up_conflict_is_selective_source_suppressed_sibling_top_up_kept(
 
 
 def test_can_be_locked_false_when_a_sibling_top_up_hard_conflicts(
-    top_up_with_source_and_sibling: tuple[PaymentPlan, Any, PaymentPlan], django_assert_num_queries: Any
+    top_up_with_source_and_sibling: tuple[PaymentPlan, object, PaymentPlan], django_assert_num_queries: object
 ) -> None:
     top_up, _payment_id, _sibling_top_up = top_up_with_source_and_sibling
 
@@ -417,7 +417,7 @@ def test_can_be_locked_false_when_a_sibling_top_up_hard_conflicts(
 
 
 @pytest.fixture
-def top_up_overlapping_only_its_source(db: Any) -> PaymentPlan:
+def top_up_overlapping_only_its_source(db: object) -> PaymentPlan:
     purpose = PaymentPlanPurposeFactory()
     program = ProgramFactory(status="ACTIVE")
     program.payment_plan_purposes.add(purpose)
@@ -442,7 +442,7 @@ def top_up_overlapping_only_its_source(db: Any) -> PaymentPlan:
 
 
 def test_can_be_locked_true_when_the_only_overlap_is_the_suppressed_source_plan(
-    top_up_overlapping_only_its_source: PaymentPlan, django_assert_num_queries: Any
+    top_up_overlapping_only_its_source: PaymentPlan, django_assert_num_queries: object
 ) -> None:
     top_up = top_up_overlapping_only_its_source
 

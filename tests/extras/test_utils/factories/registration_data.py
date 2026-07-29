@@ -1,7 +1,6 @@
 """Registration data related factories."""
 
 from decimal import Decimal
-from typing import Any
 
 import factory
 from factory.django import DjangoModelFactory
@@ -73,7 +72,7 @@ class DeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
     status_code = DeduplicationEngineSimilarityPair.StatusCode.STATUS_200
 
     @classmethod
-    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> DeduplicationEngineSimilarityPair:
+    def _create(cls, model_class: object, *args: object, **kwargs: object) -> DeduplicationEngineSimilarityPair:
         individual1 = kwargs.get("individual1")
         individual2 = kwargs.get("individual2")
         if individual1 and individual2 and individual1.id > individual2.id:

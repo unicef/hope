@@ -1,6 +1,5 @@
 import os
 import tempfile
-from typing import Any
 from unittest.mock import patch
 
 from django.core.files.storage import default_storage
@@ -48,22 +47,21 @@ from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
 
-
 # ── Shared fixtures ──────────────────────────────────────────────────────
 
 
 @pytest.fixture
-def document_type() -> Any:
+def document_type() -> object:
     return DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE])
 
 
 @pytest.fixture
-def disability_certificate_document_type() -> Any:
+def disability_certificate_document_type() -> object:
     return DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_DISABILITY_CERTIFICATE])
 
 
 @pytest.fixture
-def financial_institution() -> Any:
+def financial_institution() -> object:
     return FinancialInstitutionFactory()
 
 
@@ -77,13 +75,13 @@ def generic_bank() -> FinancialInstitution:
 
 
 @pytest.fixture
-def bank_account_type() -> Any:
+def bank_account_type() -> object:
     account_type, _ = AccountType.objects.get_or_create(key="bank")
     return account_type
 
 
 @pytest.fixture
-def lax_business_area() -> Any:
+def lax_business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
@@ -733,7 +731,7 @@ def test_file_cleanup_on_failure(
     with tempfile.TemporaryDirectory() as media_root:
         with override_settings(MEDIA_ROOT=media_root):
 
-            def fail_after_files_exist(*args: list[Any]) -> None:
+            def fail_after_files_exist(*args: list[object]) -> None:
                 pre_cleanup_files = []
                 for root, _, files in os.walk(media_root):
                     pre_cleanup_files.extend(os.path.join(root, f) for f in files)
@@ -812,7 +810,7 @@ def test_individual_serializer_sex_missing_value(serializer_common_data):
 
 
 @pytest.fixture
-def individual_image_flex_attribute(db: Any) -> FlexibleAttribute:
+def individual_image_flex_attribute(db: object) -> FlexibleAttribute:
     return FlexibleAttributeFactory(
         name="individual_photo_i_f",
         label={"English(EN)": "Individual Photo"},
@@ -859,7 +857,7 @@ def test_image_flex_field_cleanup_on_failure(
     with tempfile.TemporaryDirectory() as media_root:
         with override_settings(MEDIA_ROOT=media_root):
 
-            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
+            def fail_after_files_exist(*args: object, **kwargs: object) -> None:
                 pre_cleanup_files = []
                 for root, _, files in os.walk(media_root):
                     pre_cleanup_files.extend(os.path.join(root, f) for f in files)

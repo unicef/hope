@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -30,7 +30,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -76,7 +76,7 @@ def list_url(afghanistan: BusinessArea) -> str:
     ],
 )
 def test_create_feedback_ticket_not_supported(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     afghanistan: BusinessArea,
     program: Program,

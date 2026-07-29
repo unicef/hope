@@ -1,6 +1,5 @@
 from decimal import Decimal
 from types import SimpleNamespace
-from typing import Any
 from unittest.mock import Mock, patch
 
 import openpyxl
@@ -198,7 +197,7 @@ def _load_exported_workbook(instruction: FollowUpInstruction) -> openpyxl.Workbo
     return openpyxl.load_workbook(instruction.export_file.file, data_only=True)
 
 
-def _rows_by_household(worksheet: Any) -> dict[str, dict[str, Any]]:
+def _rows_by_household(worksheet: object) -> dict[str, dict[str, object]]:
     headers = [cell.value for cell in worksheet[1]]
     household_col = headers.index("household_id") + 1
     rows = {}
@@ -238,16 +237,16 @@ class _MinimalExportService(XlsxFollowUpInstructionBaseExportService):
     def get_source_headers(self) -> list[str]:
         return ["household_id", "entitlement_quantity", "delivered_quantity"]
 
-    def get_payment_row_data(self, payment: Any) -> dict[str, Any]:
+    def get_payment_row_data(self, payment: object) -> dict[str, object]:
         return {}
 
 
-def test_get_representative_payment_plan_raises_when_no_child_plans(instruction: Any) -> None:
+def test_get_representative_payment_plan_raises_when_no_child_plans(instruction: object) -> None:
     with pytest.raises(ValueError, match="Follow Up Instruction has no child Payment Plans."):
         _MinimalExportService(instruction)
 
 
-def test_prepare_headers_removes_household_unicef_id(instruction: Any, child_payment_plans: Any) -> None:
+def test_prepare_headers_removes_household_unicef_id(instruction: object, child_payment_plans: object) -> None:
     class _ServiceWithUnicefId(_MinimalExportService):
         def get_source_headers(self) -> list[str]:
             return ["household_unicef_id", "entitlement_quantity"]
@@ -316,9 +315,9 @@ def test_merge_rows_keeps_existing_non_summable_field_when_already_set() -> None
 
 
 def test_save_xlsx_file_removes_existing_export_file(
-    instruction: Any,
-    child_payment_plans: Any,
-    user: Any,
+    instruction: object,
+    child_payment_plans: object,
+    user: object,
 ) -> None:
     old_file = FileTempFactory()
     instruction.export_file = old_file

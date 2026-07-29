@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.utils import timezone
 import pytest
@@ -13,7 +13,6 @@ from hope.models import SanctionListIndividual, SanctionListIndividualDateOfBirt
 
 if TYPE_CHECKING:
     from hope.models import Program, SanctionList
-
 
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
@@ -29,14 +28,14 @@ def business_area():
 
 
 @pytest.fixture
-def sanction_list(db: Any) -> "SanctionList":
+def sanction_list(db: object) -> "SanctionList":
     from extras.test_utils.factories import SanctionListFactory
 
     return SanctionListFactory(strategy=fqn(UNSanctionList))
 
 
 @pytest.fixture
-def program(db: Any, sanction_list: "SanctionList", business_area) -> "Program":
+def program(db: object, sanction_list: "SanctionList", business_area) -> "Program":
     from extras.test_utils.factories import ProgramFactory
 
     CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004")
@@ -93,7 +92,7 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 
 @pytest.mark.elasticsearch
 def test_invalid_dates_of_birth_are_recorded_in_internal_data(
-    sanction_list: "SanctionList", program: "Program", django_assert_num_queries: Any
+    sanction_list: "SanctionList", program: "Program", django_assert_num_queries: object
 ) -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
 
@@ -117,7 +116,7 @@ def test_invalid_dates_of_birth_are_recorded_in_internal_data(
 
 @pytest.mark.elasticsearch
 def test_bad_dob_does_not_poison_other_individuals(
-    sanction_list: "SanctionList", program: "Program", django_assert_num_queries: Any
+    sanction_list: "SanctionList", program: "Program", django_assert_num_queries: object
 ) -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
 

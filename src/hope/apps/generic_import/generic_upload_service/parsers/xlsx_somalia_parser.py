@@ -1,6 +1,5 @@
 from collections import defaultdict
 import logging
-from typing import Any
 import uuid
 
 import openpyxl
@@ -131,7 +130,7 @@ class XlsxSomaliaParser(BaseParser):
         for _idx, row in enumerate(rows[1:]):
             self._process_individual(row, household_data["id"])
 
-    def _process_individual(self, row: dict, household_id: str) -> dict[str, Any]:
+    def _process_individual(self, row: dict, household_id: str) -> dict[str, object]:
         custom_individual_id = row.get("IndividualID")
         individual_id = uuid.uuid4().hex
         full_name = row.get("IndividualName") or ""
@@ -193,7 +192,7 @@ class XlsxSomaliaParser(BaseParser):
             }
             self._documents.append(document_data)
 
-    def _parse_int(self, value: Any) -> int:
+    def _parse_int(self, value: object) -> int:
         if value is None or value == "":
             return 0
         try:
@@ -201,7 +200,7 @@ class XlsxSomaliaParser(BaseParser):
         except (ValueError, TypeError):
             return 0
 
-    def _parse_float(self, value: Any) -> float:
+    def _parse_float(self, value: object) -> float:
         if value is None or value == "":
             return 0.0
         try:
@@ -209,7 +208,7 @@ class XlsxSomaliaParser(BaseParser):
         except (ValueError, TypeError):
             return 0.0
 
-    def _format_phone(self, phone: Any) -> str:
+    def _format_phone(self, phone: object) -> str:
         if not phone:
             return ""
         phone_str = str(phone).strip()
@@ -234,28 +233,28 @@ class XlsxSomaliaParser(BaseParser):
         return [".xlsx", ".xls"]
 
     @property
-    def households_data(self) -> list[dict[str, Any]]:
+    def households_data(self) -> list[dict[str, object]]:
         return list(self._households.values())
 
     @property
-    def individuals_data(self) -> list[dict[str, Any]]:
+    def individuals_data(self) -> list[dict[str, object]]:
         return self._individuals
 
     @property
-    def individual_roles_in_households_data(self) -> list[dict[str, Any]]:
+    def individual_roles_in_households_data(self) -> list[dict[str, object]]:
         return self._individual_roles
 
     @property
-    def accounts_data(self) -> list[dict[str, Any]]:
+    def accounts_data(self) -> list[dict[str, object]]:
         """Return list of account dictionaries."""
         return self._accounts
 
     @property
-    def documents_data(self) -> list[dict[str, Any]]:
+    def documents_data(self) -> list[dict[str, object]]:
         """Return list of document dictionaries."""
         return self._documents
 
     @property
-    def identities_data(self) -> list[dict[str, Any]]:
+    def identities_data(self) -> list[dict[str, object]]:
         """Return list of identity dictionaries."""
         return self._identities

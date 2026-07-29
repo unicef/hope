@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -135,7 +134,7 @@ def test_complete_cw_rdi_enqueues_arrival_hook_on_commit(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
     rdi_loading_cw: RegistrationDataImport,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading_cw.id)])
 
@@ -155,7 +154,7 @@ def test_complete_non_cw_rdi_does_not_enqueue_arrival_hook(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
     rdi_loading_non_cw: RegistrationDataImport,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     url = reverse("api:rdi-complete", args=[user_business_area.slug, str(rdi_loading_non_cw.id)])
 

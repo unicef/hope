@@ -12,7 +12,6 @@ import logging
 import string
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     Generator,
     Iterable,
@@ -46,14 +45,14 @@ logger = logging.getLogger(__name__)
 
 class CaseInsensitiveTuple(tuple):
     def __contains__(  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
-        self, key: str, *args: Any, **kwargs: Any
+        self, key: str, *args: object, **kwargs: object
     ) -> bool:
         return key.casefold() in (element.casefold() for element in self)
 
 
 def unique_slugify(
     instance: "Model",
-    value: Any,
+    value: object,
     slug_field_name: str = "slug",
     queryset: Optional["QuerySet"] = None,
     slug_separator: str = "-",
@@ -102,7 +101,7 @@ def unique_slugify(
     setattr(instance, slug_field.attname, slug)
 
 
-def _slug_strip(value: Any, separator: str = "-") -> str:
+def _slug_strip(value: object, separator: str = "-") -> str:
     import re
 
     """
@@ -130,7 +129,7 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
     return value
 
 
-def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
+def serialize_flex_attributes() -> dict[str, dict[str, object]]:
     """Flexible Attributes objects to dict mapping.
 
     "individuals": {
@@ -225,20 +224,20 @@ def get_combined_attributes() -> dict:
     }
 
 
-def get_attr_value(name: str, obj: Any, default: Any | None = None) -> Any:
+def get_attr_value(name: str, obj: object, default: object | None = None) -> object:
     if isinstance(obj, MutableMapping | dict):
         return obj.get(name, default)
     return getattr(obj, name, default)
 
 
-def to_choice_object(choices: Iterable) -> list[dict[str, Any]]:
+def to_choice_object(choices: Iterable) -> list[dict[str, object]]:
     return sorted(
         [{"name": name, "value": value} for value, name in choices],
         key=lambda choice: choice["name"],
     )
 
 
-def rename_dict_keys(obj: dict | list | Any, convert_func: Callable) -> Any:
+def rename_dict_keys(obj: dict | list | object, convert_func: Callable) -> object:
     if isinstance(obj, dict):
         return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -249,7 +248,7 @@ def rename_dict_keys(obj: dict | list | Any, convert_func: Callable) -> Any:
 raise_attribute_error = object()
 
 
-def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error) -> Any:
+def nested_getattr(obj: object, attr: object, default: object = raise_attribute_error) -> object:
     # ObjectDoesNotExist: a FK may point at a row deleted earlier in the same transaction
     try:
         return functools.reduce(getattr, attr.split("."), obj)
@@ -260,8 +259,8 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
         raise
 
 
-def nested_dict_get(dictionary: dict[str, Any], path: str) -> Any:
-    result: Any = dictionary
+def nested_dict_get(dictionary: dict[str, object], path: str) -> object:
+    result: object = dictionary
     for key in path.split("."):
         if isinstance(result, dict):
             result = result.get(key, None)
@@ -276,7 +275,7 @@ def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, 
     return {"count": count, "percentage": percentage}
 
 
-def _apply_dict_fields(data: dict[str, Any], instance: Any, dict_fields: dict[str, list[str]]) -> None:
+def _apply_dict_fields(data: dict[str, object], instance: object, dict_fields: dict[str, list[str]]) -> None:
     for main_field_key, nested_fields in dict_fields.items():
         main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
         if main_field == "__NOT_EXIST__":
@@ -302,7 +301,7 @@ def to_dict(
     instance: "Model",
     fields: list | tuple | None = None,
     dict_fields: dict | None = None,
-) -> dict[str, Any]:
+) -> dict[str, object]:
     from django.forms import model_to_dict
 
     if fields is None:
@@ -321,7 +320,7 @@ def to_dict(
     return data
 
 
-def _process_nested_fields(instance_data_dict: dict[str, Any], nested_fields: list[str], obj: Any) -> None:
+def _process_nested_fields(instance_data_dict: dict[str, object], nested_fields: list[str], obj: object) -> None:
     for nested_field in nested_fields:
         attrs_to_get = nested_field.split(".")
         value = None
@@ -347,7 +346,7 @@ def build_flex_arg_dict_from_list_if_exists(data_dict: dict, flex_list: list) ->
 
 
 class CustomOrderingFilter(OrderingFilter):
-    def filter(self, qs: "QuerySet", value: Any) -> "QuerySet":
+    def filter(self, qs: "QuerySet", value: object) -> "QuerySet":
         from django.db.models.functions import Lower
         from django_filters.constants import EMPTY_VALUES
 
@@ -418,7 +417,7 @@ def to_camel_case(snake_str: str) -> str:
     return first + "".join(w.capitalize() for w in rest)
 
 
-def check_concurrency_version_in_mutation(version: int | None, target: Any) -> None:
+def check_concurrency_version_in_mutation(version: int | None, target: object) -> None:
     if version is None:
         return
 
@@ -438,7 +437,7 @@ def rows_iterator(sheet: "Worksheet") -> Generator:
 
 
 def chart_get_filtered_qs(
-    qs: Any,
+    qs: object,
     year: int,
     business_area_slug_filter: dict | None = None,
     additional_filters: dict | None = None,
@@ -476,7 +475,7 @@ def chart_create_filter_query(
     return filter_query
 
 
-def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
+def resolve_flex_fields_choices_to_string(parent: object) -> dict:
     from hope.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
@@ -527,7 +526,7 @@ class SheetImageLoader:
         """Check if there's an image in specified cell."""
         return cell in self._images
 
-    def get(self, cell: str) -> Any:
+    def get(self, cell: str) -> object:
         """Retrieve image data from a cell."""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")
@@ -551,7 +550,7 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
     return excluded_household_ids_array
 
 
-def timezone_datetime(value: Any) -> datetime:
+def timezone_datetime(value: object) -> datetime:
     if not value:
         return value
     datetime_value = value
@@ -611,13 +610,13 @@ def chunks(it: Iterable, size: int) -> Iterator[list]:
 
 
 def send_email_notification_on_commit(
-    service: Any, user: Optional["User"] = None, context_kwargs: dict | None = None
+    service: object, user: Optional["User"] = None, context_kwargs: dict | None = None
 ) -> None:
     transaction.on_commit(lambda: send_email_notification(service, user, context_kwargs))
 
 
 def send_email_notification(
-    service: Any,
+    service: object,
     user: Optional["User"] = None,
     context_kwargs: dict | None = None,
 ) -> None:
@@ -637,7 +636,7 @@ def send_email_notification(
 # https://github.com/saxix/django-adminfilters/blob/676765e3bf25038595a29756014c01e11c5a5d39/src/adminfilters/autocomplete.py#L55
 # not working with .all_objects()
 class AutoCompleteFilterTemp(AutoCompleteFilter):
-    def choices(self, changelist: Any) -> list[Any]:
+    def choices(self, changelist: object) -> list[object]:
         self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
         if self.lookup_val:
             get_kwargs = {self.field.target_field.name: self.lookup_val}
@@ -648,7 +647,7 @@ class AutoCompleteFilterTemp(AutoCompleteFilter):
 
 
 class FlexFieldsEncoder(json.JSONEncoder):
-    def default(self, obj: Any) -> Any:
+    def default(self, obj: object) -> object:
         if isinstance(obj, date):
             return obj.isoformat()
         if isinstance(obj, Decimal):
@@ -663,11 +662,11 @@ class JSONBSet(Func):
 
     def __init__(
         self,
-        expression: Any,
-        path: Any,
-        new_value: Any,
+        expression: object,
+        path: object,
+        new_value: object,
         create_missing: bool = True,
-        **extra: Any,
+        **extra: object,
     ) -> None:
         super().__init__(expression, path, Cast(new_value, JSONField()), Value(create_missing), **extra)
 
@@ -728,14 +727,14 @@ def get_fields_attr_generators(
             )
 
 
-def safe_getattr(obj: Any, attr: str) -> Any:
+def safe_getattr(obj: object, attr: str) -> object:
     if isinstance(obj, dict):
         return obj.get(attr)
     return getattr(obj, attr, None)
 
 
 def sort_by_attr(options: Iterable, attrs: str) -> list:
-    def key_extractor(obj: dict | Any) -> str:
+    def key_extractor(obj: dict | object) -> str:
         for attr in attrs.split("."):
             obj = safe_getattr(obj, attr)
             if obj is None:

@@ -1,7 +1,6 @@
 from datetime import UTC, date, datetime
 from io import BytesIO
 from pathlib import Path
-from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
@@ -52,17 +51,17 @@ def file_reference_id() -> BytesIO:
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(name="Afghanistan")
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def program(business_area: Any) -> Program:
+def program(business_area: object) -> Program:
     return ProgramFactory(
         business_area=business_area,
         status=Program.ACTIVE,
@@ -72,7 +71,7 @@ def program(business_area: Any) -> Program:
 
 
 @pytest.fixture
-def payment_plan_context(business_area: Any, user: Any, program: Program) -> dict[str, Any]:
+def payment_plan_context(business_area: object, user: object, program: Program) -> dict[str, object]:
     cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         dispersion_start_date=date(2020, 8, 10),
@@ -110,7 +109,7 @@ def payment_plan_context(business_area: Any, user: Any, program: Program) -> dic
 
 
 def test_uploading_delivery_date_with_xlsx(
-    payment_plan_context: dict[str, Any],
+    payment_plan_context: dict[str, object],
     file_without_delivery_dates: BytesIO,
 ) -> None:
     payment_1, payment_2, payment_3 = payment_plan_context["payments"]
@@ -143,7 +142,7 @@ def test_uploading_delivery_date_with_xlsx(
 
 
 def test_uploading_xlsx_file_with_existing_dates_throws_error(
-    payment_plan_context: dict[str, Any],
+    payment_plan_context: dict[str, object],
     file_with_existing_delivery_dates: BytesIO,
 ) -> None:
     with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0):
@@ -171,7 +170,7 @@ def test_uploading_xlsx_file_with_existing_dates_throws_error(
 
 
 def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
-    payment_plan_context: dict[str, Any],
+    payment_plan_context: dict[str, object],
     file_one_record: BytesIO,
 ) -> None:
     payment_1, payment_2, payment_3 = payment_plan_context["payments"]
@@ -197,8 +196,8 @@ def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
 
 
 def test_upload_reference_id(
-    business_area: Any,
-    user: Any,
+    business_area: object,
+    user: object,
     program: Program,
     file_reference_id: BytesIO,
 ) -> None:
@@ -250,8 +249,8 @@ def test_upload_reference_id(
 
 
 def test_upload_transaction_status_blockchain_link(
-    business_area: Any,
-    user: Any,
+    business_area: object,
+    user: object,
     program: Program,
     file_reference_id: BytesIO,
 ) -> None:

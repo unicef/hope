@@ -1,5 +1,4 @@
 import os
-from typing import Any
 
 bind = "0.0.0.0:8000"
 backlog = 2048
@@ -26,23 +25,23 @@ accesslog = "-"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 
-def post_fork(server: Any, worker: Any) -> None:
+def post_fork(server: object, worker: object) -> None:
     server.log.info("Worker spawned (pid: %s)", worker.pid)
 
 
-def pre_fork(server: Any, worker: Any) -> None:
+def pre_fork(server: object, worker: object) -> None:
     pass
 
 
-def pre_exec(server: Any) -> None:
+def pre_exec(server: object) -> None:
     server.log.info("Forked child, re-executing.")
 
 
-def when_ready(server: Any) -> None:
+def when_ready(server: object) -> None:
     server.log.info("Server is ready. Spawning workers")
 
 
-def worker_int(worker: Any) -> None:
+def worker_int(worker: object) -> None:
     worker.log.info("Worker received INT or QUIT signal")
 
     # get traceback info
@@ -61,5 +60,5 @@ def worker_int(worker: Any) -> None:
     worker.log.warning("\n".join(code))
 
 
-def worker_abort(worker: Any) -> None:
+def worker_abort(worker: object) -> None:
     worker.log.info("worker received SIGABRT signal")

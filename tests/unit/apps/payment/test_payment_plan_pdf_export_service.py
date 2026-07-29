@@ -1,5 +1,4 @@
 from decimal import Decimal
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -20,19 +19,19 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def delivery_mechanism_cash() -> Any:
+def delivery_mechanism_cash() -> object:
     return DeliveryMechanismFactory(code="cash", name="Cash", payment_gateway_id="dm-cash")
 
 
 @pytest.fixture
-def financial_service_provider(delivery_mechanism_cash: Any) -> Any:
+def financial_service_provider(delivery_mechanism_cash: object) -> object:
     financial_service_provider = FinancialServiceProviderFactory()
     financial_service_provider.delivery_mechanisms.add(delivery_mechanism_cash)
     return financial_service_provider
 
 
 @pytest.fixture
-def program_and_cycle() -> dict[str, Any]:
+def program_and_cycle() -> dict[str, object]:
     program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
     program_cycle = program.cycles.first()
     return {"program": program, "program_cycle": program_cycle}
@@ -40,9 +39,9 @@ def program_and_cycle() -> dict[str, Any]:
 
 @pytest.fixture
 def payment_plan(
-    delivery_mechanism_cash: Any,
-    financial_service_provider: Any,
-    program_and_cycle: dict[str, Any],
+    delivery_mechanism_cash: object,
+    financial_service_provider: object,
+    program_and_cycle: dict[str, object],
 ) -> PaymentPlan:
     program = program_and_cycle["program"]
     program_cycle = program_and_cycle["program_cycle"]
@@ -93,7 +92,7 @@ def payment_plan(
     return payment_plan
 
 
-def test_generate_web_links(payment_plan: PaymentPlan, mocker: Any) -> None:
+def test_generate_web_links(payment_plan: PaymentPlan, mocker: object) -> None:
     expected_download_link = "http://www_link/download-payment-plan-summary-pdf/111"
     mocker.patch(
         "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
@@ -107,7 +106,7 @@ def test_generate_web_links(payment_plan: PaymentPlan, mocker: Any) -> None:
     assert pdf_export_service.payment_plan_link == expected_download_link
 
 
-def test_generate_pdf_summary(payment_plan: PaymentPlan, mocker: Any) -> None:
+def test_generate_pdf_summary(payment_plan: PaymentPlan, mocker: object) -> None:
     mocker.patch(
         "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
         return_value="http://www_link/download-payment-plan-summary-pdf/111",
@@ -133,7 +132,7 @@ def test_generate_pdf_summary(payment_plan: PaymentPlan, mocker: Any) -> None:
 
 def test_generate_pdf_summary_reconciliation(
     payment_plan: PaymentPlan,
-    mocker: Any,
+    mocker: object,
 ) -> None:
     mocker.patch(
         "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",

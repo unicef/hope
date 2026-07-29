@@ -1,6 +1,5 @@
 import datetime
 import json
-from typing import Any
 
 from django.utils import timezone
 import pytest
@@ -24,19 +23,19 @@ pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mock_elasticsearch
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="some-ukraine-slug")
 
 
 @pytest.fixture
-def data_collecting_type(business_area: Any) -> DataCollectingType:
+def data_collecting_type(business_area: object) -> DataCollectingType:
     data_collecting_type = DataCollectingTypeFactory(label="SomeFull", code="some_full")
     data_collecting_type.limit_to.add(business_area)
     return data_collecting_type
 
 
 @pytest.fixture
-def program(business_area: Any, data_collecting_type: DataCollectingType) -> Program:
+def program(business_area: object, data_collecting_type: DataCollectingType) -> Program:
     return ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
@@ -45,32 +44,32 @@ def program(business_area: Any, data_collecting_type: DataCollectingType) -> Pro
 
 
 @pytest.fixture
-def organization(business_area: Any) -> Any:
+def organization(business_area: object) -> object:
     return OrganizationFactory(business_area=business_area, slug=business_area.slug)
 
 
 @pytest.fixture
-def project(organization: Any, program: Program) -> Any:
+def project(organization: object, program: Program) -> object:
     return ProjectFactory(name="fake_project", organization=organization, programme=program)
 
 
 @pytest.fixture
-def registration(project: Any) -> Any:
+def registration(project: object) -> object:
     return RegistrationFactory(name="fake_registration", project=project)
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def ukraine_country() -> Any:
+def ukraine_country() -> object:
     return CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
 
 
 @pytest.fixture
-def ukraine_admin_areas(ukraine_country: Any) -> dict[str, Any]:
+def ukraine_admin_areas(ukraine_country: object) -> dict[str, object]:
     area_type1 = AreaTypeFactory(country=ukraine_country, name="admin1", area_level=1)
     area_type2 = AreaTypeFactory(country=ukraine_country, name="admin2", area_level=2)
     area_type3 = AreaTypeFactory(country=ukraine_country, name="admin3", area_level=3)
@@ -82,7 +81,7 @@ def ukraine_admin_areas(ukraine_country: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def tax_id_document_type() -> Any:
+def tax_id_document_type() -> object:
     return DocumentTypeFactory(
         key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         label=IDENTIFICATION_TYPE_TAX_ID,
@@ -90,7 +89,7 @@ def tax_id_document_type() -> Any:
 
 
 @pytest.fixture
-def ukraine_household() -> list[dict[str, Any]]:
+def ukraine_household() -> list[dict[str, object]]:
     return [
         {
             "residence_status_h_c": "non_host",
@@ -104,7 +103,7 @@ def ukraine_household() -> list[dict[str, Any]]:
 
 
 @pytest.fixture
-def ukraine_individual_payloads() -> dict[str, dict[str, Any]]:
+def ukraine_individual_payloads() -> dict[str, dict[str, object]]:
     return {
         "with_tax_and_disability": {
             "tax_id_no_i_c": "123123123",
@@ -165,7 +164,7 @@ def ukraine_individual_payloads() -> dict[str, dict[str, Any]]:
 
 
 @pytest.fixture
-def ukraine_files() -> dict[str, Any]:
+def ukraine_files() -> dict[str, object]:
     return {
         "individuals": [
             {
@@ -177,10 +176,10 @@ def ukraine_files() -> dict[str, Any]:
 
 @pytest.fixture
 def ukraine_records(
-    registration: Any,
-    ukraine_household: list[dict[str, Any]],
-    ukraine_individual_payloads: dict[str, dict[str, Any]],
-    ukraine_files: dict[str, Any],
+    registration: object,
+    ukraine_household: list[dict[str, object]],
+    ukraine_individual_payloads: dict[str, dict[str, object]],
+    ukraine_files: dict[str, object],
 ) -> dict[str, list[Record]]:
     timestamp = timezone.make_aware(datetime.datetime(2022, 4, 1))
     files_blob = json.dumps(ukraine_files).encode()
@@ -244,9 +243,9 @@ def ukraine_records(
 
 @pytest.fixture
 def registration_2024_record(
-    registration: Any,
-    ukraine_household: list[dict[str, Any]],
-    ukraine_individual_payloads: dict[str, dict[str, Any]],
+    registration: object,
+    ukraine_household: list[dict[str, object]],
+    ukraine_individual_payloads: dict[str, dict[str, object]],
 ) -> Record:
     timestamp = timezone.make_aware(datetime.datetime(2024, 2, 4))
     individual = {
@@ -267,12 +266,12 @@ def registration_2024_record(
 
 
 def test_import_data_to_datahub(
-    registration: Any,
-    user: Any,
+    registration: object,
+    user: object,
     program: Program,
-    ukraine_country: Any,
-    ukraine_admin_areas: dict[str, Any],
-    tax_id_document_type: Any,
+    ukraine_country: object,
+    ukraine_admin_areas: dict[str, object],
+    tax_id_document_type: object,
     ukraine_records: dict[str, list[Record]],
 ) -> None:
     service = UkraineBaseRegistrationService(registration)
@@ -297,11 +296,11 @@ def test_import_data_to_datahub(
 
 
 def test_import_data_to_datahub_retry(
-    registration: Any,
-    user: Any,
-    ukraine_country: Any,
-    ukraine_admin_areas: dict[str, Any],
-    tax_id_document_type: Any,
+    registration: object,
+    user: object,
+    ukraine_country: object,
+    ukraine_admin_areas: dict[str, object],
+    tax_id_document_type: object,
     ukraine_records: dict[str, list[Record]],
 ) -> None:
     service = UkraineBaseRegistrationService(registration)
@@ -321,11 +320,11 @@ def test_import_data_to_datahub_retry(
 
 
 def test_import_document_validation(
-    registration: Any,
-    user: Any,
-    ukraine_country: Any,
-    ukraine_admin_areas: dict[str, Any],
-    tax_id_document_type: Any,
+    registration: object,
+    user: object,
+    ukraine_country: object,
+    ukraine_admin_areas: dict[str, object],
+    tax_id_document_type: object,
     ukraine_records: dict[str, list[Record]],
 ) -> None:
     service = UkraineBaseRegistrationService(registration)
@@ -338,11 +337,11 @@ def test_import_document_validation(
 
 
 def test_registration_2024_import_data_to_datahub(
-    registration: Any,
-    user: Any,
-    ukraine_country: Any,
-    ukraine_admin_areas: dict[str, Any],
-    tax_id_document_type: Any,
+    registration: object,
+    user: object,
+    ukraine_country: object,
+    ukraine_admin_areas: dict[str, object],
+    tax_id_document_type: object,
     registration_2024_record: Record,
 ) -> None:
     service = Registration2024(registration)

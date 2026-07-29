@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
 from django.http import HttpRequest
@@ -155,7 +154,7 @@ MIDDLEWARE = [] + [
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
-TEMPLATES: list[dict[str, Any]] = [
+TEMPLATES: list[dict[str, object]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
@@ -289,7 +288,7 @@ HIJACK_PERMISSION_CHECK = "hope.apps.utils.security.can_hijack"
 
 CACHE_ENABLED = env("CACHE_ENABLED")
 
-CACHES: dict[str, Any]
+CACHES: dict[str, object]
 if CACHE_ENABLED:
     CACHES = {
         "default": {
@@ -378,7 +377,7 @@ def filter_environment(key: str, config: dict, request: HttpRequest) -> bool:
     return key == "ROOT_ACCESS_TOKEN" or key.startswith("DIRENV")
 
 
-def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:
+def masker(key: str, value: object, config: dict, request: HttpRequest) -> object:
     from django_sysinfo.utils import cleanse_setting
 
     from ..apps.utils.security import is_root  # noqa

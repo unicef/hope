@@ -1,9 +1,7 @@
-from typing import Any
-
 from django.db import connections
 
 
-def sql_drop_tables(connection: Any, connection_name: str = "") -> str:
+def sql_drop_tables(connection: object, connection_name: str = "") -> str:
     tables = connection.introspection.table_names(include_views=False)
     if "django_migrations" not in tables:
         tables.append("django_migrations")

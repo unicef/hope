@@ -1,6 +1,5 @@
 from datetime import UTC
 import hashlib
-from typing import Any
 from unittest import mock
 
 from django.conf import settings
@@ -63,17 +62,17 @@ def calculate_hash_manually(payment: Payment) -> str:
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def program(business_area: Any) -> Program:
+def program(business_area: object) -> Program:
     return ProgramFactory(
         status=Program.ACTIVE,
         start_date=timezone.datetime(2000, 9, 10, tzinfo=UTC).date(),
@@ -84,7 +83,7 @@ def program(business_area: Any) -> Program:
 
 
 @pytest.fixture
-def program_cycle(program: Program) -> Any:
+def program_cycle(program: Program) -> object:
     return ProgramCycleFactory(
         program=program,
         start_date=timezone.datetime(2021, 10, 10, tzinfo=UTC).date(),
@@ -94,7 +93,7 @@ def program_cycle(program: Program) -> Any:
 
 
 @pytest.fixture
-def payment_plan(user: Any, business_area: Any, program_cycle: Any) -> PaymentPlan:
+def payment_plan(user: object, business_area: object, program_cycle: object) -> PaymentPlan:
     return PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
         created_by=user,
@@ -139,11 +138,11 @@ def test_bulk_create(payment_plan: PaymentPlan) -> None:
 
 @freeze_time("2020-10-10")
 def test_signature_after_prepare_payment_plan(
-    business_area: Any,
-    user: Any,
+    business_area: object,
+    user: object,
     program: Program,
-    program_cycle: Any,
-    django_capture_on_commit_callbacks: Any,
+    program_cycle: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     DeliveryMechanismFactory(code="cash", name="Cash")
     fsp = FinancialServiceProviderFactory()

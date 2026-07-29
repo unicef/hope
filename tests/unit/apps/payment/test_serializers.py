@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -39,17 +38,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory(first_name="Test", last_name="User")
 
 
 @pytest.fixture
-def pending_payment_context(business_area: Any, user: Any) -> dict[str, Any]:
+def pending_payment_context(business_area: object, user: object) -> dict[str, object]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(created_by=user, program_cycle=ProgramCycleFactory(program=program))
     program = payment_plan.program_cycle.program
@@ -76,7 +75,7 @@ def pending_payment_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
+def payment_list_context(business_area: object, user: object) -> dict[str, object]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(created_by=user, program_cycle=ProgramCycleFactory(program=program))
     program = payment_plan.program_cycle.program
@@ -109,7 +108,7 @@ def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def payment_plan_list_context(business_area: Any, user: Any) -> dict[str, Any]:
+def payment_plan_list_context(business_area: object, user: object) -> dict[str, object]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
@@ -121,7 +120,7 @@ def payment_plan_list_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]:
+def payment_plan_detail_context(business_area: object, user: object) -> dict[str, object]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
@@ -170,7 +169,7 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
 
 
 @pytest.fixture
-def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
+def approval_process_context(business_area: object, user: object) -> dict[str, object]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
@@ -193,7 +192,7 @@ def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def volume_by_delivery_context(business_area: Any, user: Any) -> dict[str, Any]:
+def volume_by_delivery_context(business_area: object, user: object) -> dict[str, object]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
@@ -224,7 +223,7 @@ def volume_by_delivery_context(business_area: Any, user: Any) -> dict[str, Any]:
     return {"payment_plan": payment_plan, "fsp": payment.financial_service_provider}
 
 
-def test_pending_payment_serializer_all_data(pending_payment_context: dict[str, Any]) -> None:
+def test_pending_payment_serializer_all_data(pending_payment_context: dict[str, object]) -> None:
     payment = pending_payment_context["payment"]
     household = pending_payment_context["household"]
     serializer = PendingPaymentSerializer(instance=payment)
@@ -242,7 +241,7 @@ def test_pending_payment_serializer_all_data(pending_payment_context: dict[str, 
     assert data["vulnerability_score"] == "123.012"
 
 
-def test_pending_payment_serializer_hoh_full_name_if_no_hoh(pending_payment_context: dict[str, Any]) -> None:
+def test_pending_payment_serializer_hoh_full_name_if_no_hoh(pending_payment_context: dict[str, object]) -> None:
     payment = pending_payment_context["payment"]
     payment.head_of_household = None
     payment.save(update_fields=["head_of_household"])
@@ -252,7 +251,7 @@ def test_pending_payment_serializer_hoh_full_name_if_no_hoh(pending_payment_cont
     assert data["head_of_household"] is None
 
 
-def test_payment_list_serializer_all_data(payment_list_context: dict[str, Any]) -> None:
+def test_payment_list_serializer_all_data(payment_list_context: dict[str, object]) -> None:
     payment = payment_list_context["payment"]
     household = payment_list_context["household"]
     user = payment_list_context["user"]
@@ -272,7 +271,7 @@ def test_payment_list_serializer_all_data(payment_list_context: dict[str, Any]) 
     assert data["fsp_auth_code"] == ""
 
 
-def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, Any]) -> None:
+def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, object]) -> None:
     payment = payment_list_context["payment"]
     user = payment_list_context["user"]
     business_area = payment_list_context["business_area"]
@@ -289,7 +288,7 @@ def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, A
     assert data["fsp_auth_code"] == "AUTH_123"
 
 
-def test_payment_list_serializer_snapshot_collector_full_name(payment_list_context: dict[str, Any]) -> None:
+def test_payment_list_serializer_snapshot_collector_full_name(payment_list_context: dict[str, object]) -> None:
     payment = payment_list_context["payment"]
     household_data = {
         "primary_collector": {
@@ -313,7 +312,7 @@ def test_payment_list_serializer_snapshot_collector_full_name(payment_list_conte
     assert data["snapshot_collector_full_name"] == "Name_from_Snapshot"
 
 
-def test_payment_list_serializer_snapshot_collector_data_none(payment_list_context: dict[str, Any]) -> None:
+def test_payment_list_serializer_snapshot_collector_data_none(payment_list_context: dict[str, object]) -> None:
     payment = payment_list_context["payment"]
     household_data = {
         "primary_collector": None,
@@ -330,7 +329,7 @@ def test_payment_list_serializer_snapshot_collector_data_none(payment_list_conte
 
 
 def test_payment_list_serializer_snapshot_alt_collector_full_name_and_id(
-    payment_list_context: dict[str, Any],
+    payment_list_context: dict[str, object],
 ) -> None:
     payment = payment_list_context["payment"]
     household_data = {
@@ -356,7 +355,7 @@ def test_payment_list_serializer_snapshot_alt_collector_full_name_and_id(
     assert data["snapshot_alternate_collector_id"] == "uuid_1234"
 
 
-def test_payment_plan_list_serializer_created_by(payment_plan_list_context: dict[str, Any]) -> None:
+def test_payment_plan_list_serializer_created_by(payment_plan_list_context: dict[str, object]) -> None:
     payment_plan = payment_plan_list_context["payment_plan"]
     user = payment_plan_list_context["user"]
 
@@ -365,7 +364,7 @@ def test_payment_plan_list_serializer_created_by(payment_plan_list_context: dict
     assert data["created_by"] == f"{user.first_name} {user.last_name}"
 
 
-def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: dict[str, Any]) -> None:
+def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: dict[str, object]) -> None:
     from flags.models import FlagState
 
     FlagState.objects.get_or_create(
@@ -396,7 +395,7 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
 
 
 def test_payment_plan_detail_serializer_can_send_to_vision_false(
-    payment_plan_detail_context: dict[str, Any],
+    payment_plan_detail_context: dict[str, object],
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
@@ -408,7 +407,7 @@ def test_payment_plan_detail_serializer_can_send_to_vision_false(
 
 
 def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
-    payment_plan_detail_context: dict[str, Any],
+    payment_plan_detail_context: dict[str, object],
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
@@ -428,8 +427,8 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
 
 
 def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavailable(
-    payment_plan_detail_context: dict[str, Any],
-    django_assert_num_queries: Any,
+    payment_plan_detail_context: dict[str, object],
+    django_assert_num_queries: object,
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
@@ -446,8 +445,8 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
 
 
 def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_without_currency(
-    payment_plan_detail_context: dict[str, Any],
-    django_assert_num_queries: Any,
+    payment_plan_detail_context: dict[str, object],
+    django_assert_num_queries: object,
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
@@ -462,8 +461,8 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
 
 
 def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_client(
-    payment_plan_detail_context: dict[str, Any],
-    django_assert_num_queries: Any,
+    payment_plan_detail_context: dict[str, object],
+    django_assert_num_queries: object,
 ) -> None:
     # USE_DUMMY_EXCHANGE_RATES is True in tests, so this exercises the real
     # get_unore_exchange_rate path through the dummy exchange rate client (no method mock).
@@ -482,7 +481,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     assert data["unore_exchange_rate_unavailable"] is False
 
 
-def test_approval_process_serializer_all_fields(approval_process_context: dict[str, Any]) -> None:
+def test_approval_process_serializer_all_fields(approval_process_context: dict[str, object]) -> None:
     approval_process = approval_process_context["approval_process"]
     user = approval_process_context["user"]
     user_name_str = f"{user.first_name} {user.last_name}"
@@ -511,7 +510,7 @@ def test_approval_process_serializer_all_fields(approval_process_context: dict[s
     assert data_with_users["sent_for_finance_release_by"] == user_name_str
 
 
-def test_approval_process_serializer_rejected_on(approval_process_context: dict[str, Any]) -> None:
+def test_approval_process_serializer_rejected_on(approval_process_context: dict[str, object]) -> None:
     approval_process = approval_process_context["approval_process"]
     user = approval_process_context["user"]
     payment_plan = approval_process_context["payment_plan"]
@@ -536,7 +535,9 @@ def test_approval_process_serializer_rejected_on(approval_process_context: dict[
     assert data["rejected_on"] == "IN_REVIEW"
 
 
-def test_volume_by_delivery_mechanism_serializer_get_volume_fields(volume_by_delivery_context: dict[str, Any]) -> None:
+def test_volume_by_delivery_mechanism_serializer_get_volume_fields(
+    volume_by_delivery_context: dict[str, object],
+) -> None:
     payment_plan = volume_by_delivery_context["payment_plan"]
     data = VolumeByDeliveryMechanismSerializer(instance=payment_plan).data
 
@@ -552,7 +553,7 @@ def test_volume_by_delivery_mechanism_serializer_get_volume_fields(volume_by_del
 
 
 def test_payment_list_serializer_snapshot_collector_data_with_collector_type_primary(
-    payment_list_context: dict[str, Any],
+    payment_list_context: dict[str, object],
 ) -> None:
     payment = payment_list_context["payment"]
     household_data = {
@@ -570,7 +571,7 @@ def test_payment_list_serializer_snapshot_collector_data_with_collector_type_pri
 
 
 def test_payment_list_serializer_snapshot_collector_data_with_collector_type_alternate(
-    payment_list_context: dict[str, Any],
+    payment_list_context: dict[str, object],
 ) -> None:
     payment = payment_list_context["payment"]
     household_data = {
@@ -588,7 +589,7 @@ def test_payment_list_serializer_snapshot_collector_data_with_collector_type_alt
 
 
 def test_payment_list_serializer_snapshot_collector_data_with_collector_type_based_on_payment(
-    payment_list_context: dict[str, Any],
+    payment_list_context: dict[str, object],
 ) -> None:
     payment = payment_list_context["payment"]
     household_data = {

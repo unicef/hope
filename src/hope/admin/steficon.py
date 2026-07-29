@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Collection
+from typing import Collection
 from uuid import UUID
 
 from admin_extra_buttons.api import button
@@ -28,9 +28,9 @@ class AutocompleteWidget(forms.Widget):
         self,
         model: type,
         admin_site: str,
-        attrs: Collection[Any] | None = None,
+        attrs: Collection[object] | None = None,
         choices: tuple = (),
-        using: Any | None = None,
+        using: object | None = None,
         pk_field: str = "id",
         business_area: UUID | None = None,
     ) -> None:
@@ -71,7 +71,7 @@ class AutocompleteWidget(forms.Widget):
             url += f"?business_area={self.business_area}"
         return url
 
-    def get_context(self, name: str, value: Any, attrs: dict[str, Any] | None) -> dict:
+    def get_context(self, name: str, value: object, attrs: dict[str, object] | None) -> dict:
         return {
             "widget": {
                 "query_string": f"business_area__exact={self.business_area}" if self.business_area else "",
@@ -142,7 +142,7 @@ class TestRuleMixin:
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
-    def _proccesing_selection(self, context: dict, form: "RuleTestForm", rule: Any, selection: str) -> tuple:
+    def _proccesing_selection(self, context: dict, form: "RuleTestForm", rule: object, selection: str) -> tuple:
         if selection == "optFile":
             data = form.cleaned_data.get("file")
             title = f"Test result for '{rule}' using file"

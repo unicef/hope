@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from django.conf import settings
@@ -81,13 +81,13 @@ class LogEntry(models.Model):
 
 def log_create(
     mapping: dict,
-    business_area_field: Any,
+    business_area_field: object,
     user: "AbstractBaseUser | AnonymousUser | None" = None,
     programs: "UUID | QuerySet[Program] | str | Program | None" = None,
-    **kwargs: Any,
+    **kwargs: object,
 ) -> LogEntry:
-    old_object: Any | None = kwargs.get("old_object")
-    new_object: Any | None = kwargs.get("new_object")
+    old_object: object | None = kwargs.get("old_object")
+    new_object: object | None = kwargs.get("new_object")
     if new_object:
         instance = new_object
     else:

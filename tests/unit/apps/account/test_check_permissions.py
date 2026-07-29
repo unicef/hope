@@ -1,7 +1,5 @@
 """Tests for check_permissions function."""
 
-from typing import Any
-
 from django.contrib.auth.models import AnonymousUser
 import pytest
 
@@ -21,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -35,7 +33,7 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def role(db: Any) -> Role:
+def role(db: object) -> Role:
     return RoleFactory(
         name="POPULATION VIEW INDIVIDUALS DETAILS",
         permissions=["POPULATION_VIEW_INDIVIDUALS_DETAILS"],
@@ -43,17 +41,17 @@ def role(db: Any) -> Role:
 
 
 @pytest.fixture
-def area(db: Any) -> Area:
+def area(db: object) -> Area:
     return AreaFactory(name="POPULATION")
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def role_with_all_permissions(db: Any) -> Role:
+def role_with_all_permissions(db: object) -> Role:
     role, created = Role.objects.get_or_create(
         name="Role with all permissions",
         defaults={"permissions": [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value]},

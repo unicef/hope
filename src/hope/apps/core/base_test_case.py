@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Iterable, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 
 from django.test import TestCase
 
@@ -37,11 +37,11 @@ class BaseTestCase(TestCase):
     def create_partner_role_with_permissions(  # pragma: no cover
         cls,
         partner: "Partner",
-        permissions: Iterable[Any],
+        permissions: Iterable[object],
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> RoleAssignment:
         """Create Partner Role with permissions.
 
@@ -69,11 +69,11 @@ class BaseTestCase(TestCase):
     def create_user_role_with_permissions(  # pragma: no cover
         cls,
         user: "User",
-        permissions: Iterable[Any],
+        permissions: Iterable[object],
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> RoleAssignment:
         """Create User Role with related permissions.
 

@@ -1,6 +1,6 @@
 """Tests for program choices API endpoints."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -19,17 +19,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def ukraine(db: Any) -> BusinessArea:
+def ukraine(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Ukraine", slug="ukraine")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -39,7 +39,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def dct_1(db: Any) -> DataCollectingType:
+def dct_1(db: object) -> DataCollectingType:
     """DCT1: Active, not deprecated, not limited to any business area"""
     return DataCollectingType.objects.create(
         label="DCT 1",
@@ -52,7 +52,7 @@ def dct_1(db: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def dct_2(afghanistan: Any) -> DataCollectingType:
+def dct_2(afghanistan: object) -> DataCollectingType:
     """DCT2: Active, not deprecated, limited to afghanistan"""
     dct = DataCollectingType.objects.create(
         label="DCT 2",
@@ -67,7 +67,7 @@ def dct_2(afghanistan: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def dct_3(ukraine: Any) -> DataCollectingType:
+def dct_3(ukraine: object) -> DataCollectingType:
     """DCT3: Active, not deprecated, limited to ukraine"""
     dct = DataCollectingType.objects.create(
         label="DCT 3",
@@ -82,7 +82,7 @@ def dct_3(ukraine: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def dct_4(db: Any) -> DataCollectingType:
+def dct_4(db: object) -> DataCollectingType:
     """DCT4: Inactive"""
     return DataCollectingType.objects.create(
         label="DCT 4 (Inactive)",
@@ -95,7 +95,7 @@ def dct_4(db: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def dct_5(db: Any) -> DataCollectingType:
+def dct_5(db: object) -> DataCollectingType:
     """DCT5: Deprecated"""
     return DataCollectingType.objects.create(
         label="DCT 5 (Deprecated)",
@@ -108,7 +108,7 @@ def dct_5(db: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def dct_6(db: Any) -> DataCollectingType:
+def dct_6(db: object) -> DataCollectingType:
     """DCT6: code 'unknown'"""
     return DataCollectingType.objects.create(
         label="DCT 6 (Unknown Code)",
@@ -126,12 +126,12 @@ def choices_url() -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_get_choices(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     choices_url: str,

@@ -1,5 +1,5 @@
 from datetime import UTC
-from typing import Any, Callable
+from typing import Callable
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -1264,7 +1264,7 @@ class TestCreateTargeting:
     def test_create_targeting_for_people_with_pdu(
         self,
         sw_program: Program,
-        add_sw_individuals: Any,
+        add_sw_individuals: object,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,

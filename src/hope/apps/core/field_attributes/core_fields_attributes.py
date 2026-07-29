@@ -1,7 +1,7 @@
 import copy
 from functools import reduce
 import logging
-from typing import Any, Iterable
+from typing import Iterable
 
 from hope.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
@@ -2369,17 +2369,17 @@ CORE_FIELDS_ATTRIBUTES = [
 ]
 
 
-def get_core_fields_attributes() -> list[dict[str, Any]]:
+def get_core_fields_attributes() -> list[dict[str, object]]:
     return CORE_FIELDS_ATTRIBUTES
 
 
 class FieldFactory(list):
     def __init__(
         self,
-        fields: Any | None = None,
+        fields: object | None = None,
         scopes: set[Scope] | None = None,
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.scopes: set = scopes or set()
@@ -2496,7 +2496,7 @@ class FieldFactory(list):
     def to_dict_by(self, attr: str) -> dict:
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
-    def to_choices(self) -> list[Any]:
+    def to_choices(self) -> list[object]:
         return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
     def apply_business_area(

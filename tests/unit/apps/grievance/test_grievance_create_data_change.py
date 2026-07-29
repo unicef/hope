@@ -1,6 +1,6 @@
 from datetime import date
 from io import BytesIO
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
@@ -57,7 +57,7 @@ def generated_document_types() -> None:
 
 
 @pytest.fixture
-def countries(generated_document_types: None) -> dict[str, Any]:
+def countries(generated_document_types: None) -> dict[str, object]:
     afghanistan = CountryFactory(
         name="Afghanistan",
         short_name="Afghanistan",
@@ -94,7 +94,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -107,7 +107,7 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def admin_context(countries: dict[str, Any]) -> dict[str, Any]:
+def admin_context(countries: dict[str, object]) -> dict[str, object]:
     area_type = AreaTypeFactory(
         name="Admin type one",
         country=countries["afghanistan"],
@@ -125,9 +125,9 @@ def admin_context(countries: dict[str, Any]) -> dict[str, Any]:
 def grievance_context(
     business_area: BusinessArea,
     program: Program,
-    countries: dict[str, Any],
-    admin_context: dict[str, Any],
-) -> dict[str, Any]:
+    countries: dict[str, object],
+    admin_context: dict[str, object],
+) -> dict[str, object]:
     household = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -210,10 +210,10 @@ def grant_create_permission(
 
 
 def test_grievance_create_individual_data_change(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
     load_test_image: Callable[[], SimpleUploadedFile],
 ) -> None:
@@ -252,10 +252,10 @@ def test_grievance_create_individual_data_change(
 
 
 def test_grievance_update_individual_data_change(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
     load_test_image: Callable[[], SimpleUploadedFile],
 ) -> None:
@@ -308,10 +308,10 @@ def test_grievance_update_individual_data_change(
 
 
 def test_create_payment_channel_for_individual(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
 ) -> None:
     input_data = {
@@ -346,10 +346,10 @@ def test_create_payment_channel_for_individual(
 
 
 def test_grievance_delete_individual_data_change(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
 ) -> None:
     input_data = {
@@ -373,10 +373,10 @@ def test_grievance_delete_individual_data_change(
 
 
 def test_grievance_update_household_data_change(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
 ) -> None:
     household = grievance_context["household"]
@@ -408,10 +408,10 @@ def test_grievance_update_household_data_change(
 
 
 def test_grievance_delete_household_data_change(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
 ) -> None:
     input_data = {
@@ -435,9 +435,9 @@ def test_grievance_delete_household_data_change(
 
 
 def test_grievance_create_household_data_change_with_admin_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
 ) -> None:
     input_data = {
@@ -472,10 +472,10 @@ def account_types() -> dict[str, AccountType]:
 
 
 def test_create_account_bank_requires_financial_institution(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
     account_types: dict[str, AccountType],
 ) -> None:
@@ -509,10 +509,10 @@ def test_create_account_bank_requires_financial_institution(
 
 
 def test_create_account_bank_with_financial_institution(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
     account_types: dict[str, AccountType],
 ) -> None:
@@ -550,9 +550,9 @@ def test_create_account_bank_with_financial_institution(
 
 @pytest.fixture
 def bank_account(
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     account_types: dict[str, AccountType],
-) -> dict[str, Any]:
+) -> dict[str, object]:
     financial_institution = FinancialInstitutionFactory(name="Test Bank")
     account = AccountFactory(
         individual=grievance_context["individual"],
@@ -564,12 +564,12 @@ def bank_account(
 
 
 def test_edit_account_bank_requires_financial_institution(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
-    bank_account: dict[str, Any],
+    bank_account: dict[str, object],
 ) -> None:
     input_data_fail = {
         "description": "Test edit bank account without financial institution",
@@ -600,12 +600,12 @@ def test_edit_account_bank_requires_financial_institution(
 
 
 def test_edit_account_bank_with_financial_institution(
-    authenticated_client: Any,
+    authenticated_client: object,
     grant_create_permission: None,
     user: User,
-    grievance_context: dict[str, Any],
+    grievance_context: dict[str, object],
     list_url: str,
-    bank_account: dict[str, Any],
+    bank_account: dict[str, object],
 ) -> None:
     input_data_success = {
         "description": "Test edit bank account with financial institution",

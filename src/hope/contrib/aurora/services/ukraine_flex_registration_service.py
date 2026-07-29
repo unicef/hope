@@ -1,9 +1,7 @@
 from functools import cached_property
-from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
-from django.core.files.storage import default_storage
 from django.forms import modelform_factory
 
 from hope.apps.core.utils import (
@@ -28,6 +26,9 @@ from hope.apps.household.const import (
 from hope.apps.household.forms import DocumentForm, IndividualForm
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
+)
+from hope.contrib.aurora.services.generic_registration_service import (
+    GenericRegistrationService,
 )
 from hope.models import (
     AccountType,
@@ -94,7 +95,9 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         ),
     }
 
-    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
+    def create_household_for_rdi_household(
+        self, record: object, registration_data_import: RegistrationDataImport
+    ) -> None:
         individuals: list[PendingIndividual] = []
         documents: list[PendingDocument] = []
         accounts: list[PendingAccount] = []
@@ -150,7 +153,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         return []
 
-    def _set_default_head_of_household(self, individuals_array: list[dict[str, Any]]) -> None:
+    def _set_default_head_of_household(self, individuals_array: list[dict[str, object]]) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
@@ -169,7 +172,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def _prepare_household_data(
         self,
         household_dict: dict,
-        record: Any,
+        record: object,
         registration_data_import: RegistrationDataImport,
     ) -> dict:
         household_data = {
@@ -345,6 +348,8 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         "birth_date": "birth_date",
         "sex": "gender_i_c",
         "phone_no": "phone_no_i_c",
+        "relationship": "relationship_i_c",
+        "role": "role_i_c",
     }
 
     DOCUMENT_MAPPING_KEY_DICT = {
@@ -354,57 +359,19 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         ),
     }
 
-    INDIVIDUAL_IMAGE_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
+    INDIVIDUAL_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
 
-    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
-        record_data_dict = record.get_data()
-        individuals_array = record_data_dict.get("individual_details", [])
-        if len(individuals_array) != 1:
-            raise ValidationError("USDC registration expects exactly one individual per household")
-
-        individual_dict = individuals_array[0]
-
-        household = self._build_household(record, registration_data_import)
-        individual = self._build_head_of_household(individual_dict, household, record, registration_data_import)
-
-        PendingDocument.objects.bulk_create(self._prepare_documents(individual_dict, individual))
-        PendingAccount.objects.bulk_create(self._prepare_accounts(individual_dict, individual))
-
-    def _build_household(self, record: Any, registration_data_import: RegistrationDataImport) -> PendingHousehold:
-        household_data = self._prepare_household_data({}, record, registration_data_import)
-        household_data["size"] = 1
-        household = self._create_object_and_validate(household_data, PendingHousehold)
-        household.detail_id = record.source_id
-        household.save(update_fields=("detail_id",))
-        return household
-
-    def _build_head_of_household(
+    def _prepare_household_data(
         self,
-        individual_dict: dict,
-        household: PendingHousehold,
-        record: Any,
+        household_dict: dict,
+        record: object,
         registration_data_import: RegistrationDataImport,
-    ) -> PendingIndividual:
-        try:
-            individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
-            individual_data["relationship"] = HEAD
-            phone_no = individual_data.pop("phone_no", "")
-
-            individual: PendingIndividual = self._create_object_and_validate(
-                individual_data, PendingIndividual, IndividualForm
-            )
-            individual.phone_no = phone_no
-            individual.detail_id = record.source_id
-            if image_flex_fields := self._prepare_wallet_image_flex_fields(individual_dict):
-                individual.flex_fields = image_flex_fields
-            individual.save()
-        except ValidationError as e:
-            raise ValidationError({"individual nr 1": [str(e)]}) from e
-
-        household.head_of_household = individual
-        household.save(update_fields=("head_of_household",))
-        PendingIndividualRoleInHousehold.objects.create(individual=individual, household=household, role=ROLE_PRIMARY)
-        return individual
+    ) -> dict:
+        household_data = super()._prepare_household_data(household_dict, record, registration_data_import)
+        consent = household_dict.get("consent_h_c")
+        if consent is not None:
+            household_data["consent"] = GenericRegistrationService.get_boolean(consent)
+        return household_data
 
     def _prepare_individual_data(
         self,
@@ -414,16 +381,9 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
     ) -> dict:
         individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
         individual_data["estimated_birth_date"] = False
+        if flex_fields := build_flex_arg_dict_from_list_if_exists(individual_dict, self.INDIVIDUAL_FLEX_FIELDS):
+            individual_data["flex_fields"] = flex_fields
         return individual_data
-
-    def _prepare_wallet_image_flex_fields(self, individual_dict: dict) -> dict:
-        # Decode every blob before writing any to storage, and only after the individual has
-        # validated, so a validation failure or a malformed second image leaves no orphan files.
-        images = {}
-        for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
-            if image_base64 := individual_dict.get(field_name):
-                images[field_name] = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
-        return {field_name: default_storage.save(image.name, image) for field_name, image in images.items()}
 
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()

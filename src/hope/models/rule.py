@@ -1,5 +1,5 @@
 from builtins import type as builtin_type
-from typing import Any, Callable, Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from concurrency.fields import AutoIncVersionField
 from django.conf import settings
@@ -44,7 +44,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         (TYPE_TARGETING, "Targeting"),
     )
 
-    def natural_key(self) -> tuple[Any]:
+    def natural_key(self) -> tuple[object, ...]:
         return (self.name,)
 
     LANGUAGES: Sequence[tuple] = [(a.label.lower(), a.label) for a in interpreters]
@@ -97,7 +97,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     def __str__(self) -> str:
         return self.name
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         super().__init__(*args, **kwargs)
         self.__original_security = self.security
 
@@ -114,7 +114,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     def clean_definition(self) -> None:
         self.interpreter.validate()
 
-    def delete(self, using: Any | None = None, keep_parents: bool | None = False) -> tuple[int, dict[str, int]]:
+    def delete(self, using: object | None = None, keep_parents: bool | None = False) -> tuple[int, dict[str, int]]:
         self.enabled = False
         self.save()
         return 1, {self._meta.label: 1}
@@ -135,8 +135,8 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         self,
         force_insert: bool | tuple[builtin_type[models.Model], ...] = False,
         force_update: bool = False,
-        using: Any | None = None,
-        update_fields: Any | None = None,
+        using: object | None = None,
+        update_fields: object | None = None,
     ) -> None:
         with atomic():
             super().save(force_insert, force_update, using, update_fields)
@@ -200,7 +200,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
             return None
 
     @cached_property
-    def interpreter(self) -> Any:
+    def interpreter(self) -> object:
         func: type[Interpreter] = mapping[self.language]
         return func(self.definition)
 
@@ -283,11 +283,11 @@ class RuleCommit(models.Model):
         self.rule.save()
 
     @cached_property
-    def interpreter(self) -> Any:
+    def interpreter(self) -> object:
         func: Callable = mapping[self.language]
         return func(self.definition)
 
-    def execute(self, context: dict) -> Any:
+    def execute(self, context: dict) -> object:
         return self.interpreter.execute(context)
 
     def release(self) -> Optional["RuleCommit"]:

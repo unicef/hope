@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import cast
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
@@ -16,7 +16,7 @@ _FK_FIELDS = {
 
 class FeedbackCrudServices:
     @staticmethod
-    def _has_value(input_data: dict, key: Any) -> bool:
+    def _has_value(input_data: dict, key: object) -> bool:
         return key in input_data and input_data[key] is not None and input_data[key] != ""
 
     @classmethod

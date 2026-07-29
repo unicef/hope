@@ -4,7 +4,7 @@ import contextlib
 from dataclasses import dataclass, field
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -89,7 +89,7 @@ class DocumentTypeKeyField(serializers.CharField):
 
     default_error_messages = {"invalid_choice": '"{input}" is not a valid choice.'}
 
-    def to_internal_value(self, data: Any) -> str:
+    def to_internal_value(self, data: object) -> str:
         value = super().to_internal_value(data)
         valid_keys = {key for key, _ in DocumentType.get_all_doc_types_choices()}
         if value not in valid_keys:
@@ -127,7 +127,7 @@ class AccountLaxSerializer(serializers.ModelSerializer):
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
 
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
         attrs = super().validate(attrs)
         if not attrs.get("financial_institution"):
             account_type = attrs["account_type"]
@@ -223,12 +223,12 @@ class HandleFlexFieldsMixin:
             }
         return self.image_flex_fields_cache[associated_with]
 
-    def get_matching_flex_fields(self, flex_field_candidates: set[Any], associated_with: int) -> set[str]:
+    def get_matching_flex_fields(self, flex_field_candidates: set[object], associated_with: int) -> set[str]:
         registered_flex_fields = self.get_registered_flex_fields(associated_with=associated_with)
         return flex_field_candidates & registered_flex_fields if registered_flex_fields is not None else set()
 
     def handle_flex_fields(
-        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set[Any] | None = None
+        self, associated_with: int, model: type[Model], raw_data: dict, reserved_fields: set[object] | None = None
     ) -> None:
         if raw_data.get("flex_fields"):
             return
@@ -240,7 +240,7 @@ class HandleFlexFieldsMixin:
         flex_fields = self.get_matching_flex_fields(flex_field_candidates, associated_with)
         raw_data["flex_fields"] = {flex_field: raw_data.pop(flex_field) for flex_field in flex_fields}
 
-    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set[Any] | None = None) -> None:
+    def handle_individual_flex_fields(self, raw_data: dict, reserved_fields: set[object] | None = None) -> None:
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             model=PendingIndividual,
@@ -248,7 +248,7 @@ class HandleFlexFieldsMixin:
             reserved_fields=reserved_fields,
         )
 
-    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set[Any] | None = None) -> None:
+    def handle_household_flex_fields(self, raw_data: dict, reserved_fields: set[object] | None = None) -> None:
         self.handle_flex_fields(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
             model=PendingHousehold,
@@ -480,7 +480,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             for individual_raw_data in request.data:
                 total_individuals += 1
                 self.handle_individual_flex_fields(
-                    cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"}
+                    cast("dict[object, object]", individual_raw_data), reserved_fields={"documents", "accounts"}
                 )
                 serializer = IndividualSerializer(
                     data=individual_raw_data,
@@ -634,7 +634,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
             "unicef_id",
         ]
 
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
         facility_name = attrs.get("facility_name")
         admin_area = attrs.get("facility_admin_area")
 
@@ -655,8 +655,8 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
         )[0]
 
     def _validate_and_collect_payloads(
-        self, request_data: Any
-    ) -> tuple[list[dict[str, Any]], list[Any], int, int, list[str], set[str], list[Any], list[str]]:
+        self, request_data: object
+    ) -> tuple[list[dict[str, object]], list[object], int, int, list[str], set[str], list[object], list[str]]:
         valid_payloads = []
         results = []
         total_households = 0
@@ -747,7 +747,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
         )
 
     @staticmethod
-    def _resolve_countries_and_persist(valid_payloads: list[dict[str, Any]], country_codes: set[str]) -> None:
+    def _resolve_countries_and_persist(valid_payloads: list[dict[str, object]], country_codes: set[str]) -> None:
         if country_codes:
             country_map = {c.iso_code2: c for c in Country.objects.filter(iso_code2__in=country_codes)}
             for payload in valid_payloads:
@@ -830,10 +830,10 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
 
     def _process_valid_payloads(
         self,
-        results: list[Any],
+        results: list[object],
         roles_to_create: list[IndividualRoleInHousehold],
         total_accepted: int,
-        valid_payloads: list[dict[str, Any]],
+        valid_payloads: list[dict[str, object]],
     ) -> int:
         for payload in valid_payloads:
             primary = payload["primary"]
@@ -862,7 +862,7 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
             results.append({"pk": payload["instance"].pk})  # noqa
         return total_accepted
 
-    def _process_country_codes(self, country_codes: set[str], data: dict[str, Any]) -> tuple[str | None, str | None]:
+    def _process_country_codes(self, country_codes: set[str], data: dict[str, object]) -> tuple[str | None, str | None]:
         country_code = data.pop("country", None)
         if country_code:
             country_codes.add(country_code)

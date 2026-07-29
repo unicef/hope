@@ -1,6 +1,3 @@
-from typing import Any
-
-
 class BaseParser:
     def parse(self, file_path: str) -> None:
         raise NotImplementedError("Subclasses must implement this method")
@@ -17,25 +14,25 @@ class BaseParser:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
-    def households_data(self) -> list[dict[str, Any]]:
+    def households_data(self) -> list[dict[str, object]]:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
-    def individuals_data(self) -> list[dict[str, Any]]:
+    def individuals_data(self) -> list[dict[str, object]]:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
-    def individual_roles_in_households_data(self) -> list[dict[str, Any]]:
+    def individual_roles_in_households_data(self) -> list[dict[str, object]]:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
-    def accounts_data(self) -> list[dict[str, Any]]:
+    def accounts_data(self) -> list[dict[str, object]]:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
-    def documents_data(self) -> list[dict[str, Any]]:
+    def documents_data(self) -> list[dict[str, object]]:
         raise NotImplementedError("Subclasses must implement this property")
 
     @property
-    def identities_data(self) -> list[dict[str, Any]]:
+    def identities_data(self) -> list[dict[str, object]]:
         raise NotImplementedError("Subclasses must implement this property")

@@ -1,6 +1,5 @@
 """Tests for periodic data update admin."""
 
-from typing import Any
 from unittest.mock import patch
 
 from django.test import Client
@@ -18,12 +17,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def admin_user(db: Any) -> User:
+def admin_user(db: object) -> User:
     user = UserFactory(username="root", email="root@root.com", is_superuser=True, is_staff=True)
     user.set_password("password")
     user.save()
@@ -39,9 +38,9 @@ def admin_client(admin_user: User) -> Client:
 
 @patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service_async_task")
 def test_post_regenerate_export_xlsx_post(
-    mock_delay: Any,
+    mock_delay: object,
     admin_client: Client,
-    business_area: Any,
+    business_area: object,
 ) -> None:
     xlsx_template = PDUXlsxTemplateFactory(
         program__business_area=business_area,
@@ -64,7 +63,7 @@ def test_post_regenerate_export_xlsx_post(
 
 
 @patch("hope.admin.periodic_data_update.export_periodic_data_update_export_template_service_async_task")
-def test_get_regenerate_export_xlsx(mock_delay: Any, admin_client: Client, business_area: Any) -> None:
+def test_get_regenerate_export_xlsx(mock_delay: object, admin_client: Client, business_area: object) -> None:
     xlsx_template = PDUXlsxTemplateFactory(
         program__business_area=business_area,
         business_area=business_area,

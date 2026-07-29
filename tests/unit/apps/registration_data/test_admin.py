@@ -1,6 +1,5 @@
 """Tests for registration data admin functionality."""
 
-from typing import Any
 from unittest.mock import Mock, patch
 import uuid
 
@@ -57,7 +56,7 @@ pytestmark = [
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
@@ -76,13 +75,13 @@ def biometric_program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def admin_user() -> Any:
+def admin_user() -> object:
     User = get_user_model()  # noqa
     return User.objects.create_superuser(username="root", email="root@root.com", password="password")
 
 
 @pytest.fixture
-def admin_client(admin_user: Any) -> Client:
+def admin_client(admin_user: object) -> Client:
     client = Client()
     client.login(username="root", password="password")
     return client
@@ -272,7 +271,7 @@ def test_delete_rdi_in_review(afghanistan: BusinessArea, program: Program) -> No
 
 @pytest.mark.elasticsearch
 def test_delete_rdi_merged(
-    django_app: Any,
+    django_app: object,
     afghanistan: BusinessArea,
     program: Program,
 ) -> None:

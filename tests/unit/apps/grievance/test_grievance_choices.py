@@ -1,7 +1,5 @@
 """Tests for grievance ticket choices endpoints."""
 
-from typing import Any
-
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -33,7 +31,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Any, user: User) -> Any:
+def authenticated_client(api_client: object, user: User) -> object:
     return api_client(user)
 
 
@@ -50,12 +48,12 @@ def document_types() -> None:
 
 
 def test_get_choices_without_permissions(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     choices_url: str,
     document_types: None,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -67,12 +65,12 @@ def test_get_choices_without_permissions(
 
 
 def test_get_choices(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     choices_url: str,
     document_types: None,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,

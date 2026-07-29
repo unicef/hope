@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
@@ -14,7 +13,7 @@ class CustomModelEntry(ModelEntry):
     """Don't update existing tasks."""
 
     @classmethod
-    def from_entry(cls, name: str, app: str | None = None, **entry: Any) -> "CustomModelEntry":
+    def from_entry(cls, name: str, app: str | None = None, **entry: object) -> "CustomModelEntry":
         obj, _ = PeriodicTask._default_manager.get_or_create(
             name=name,
             defaults=cls._unpack_fields(**entry),
@@ -28,11 +27,11 @@ class CustomDatabaseScheduler(DatabaseScheduler):
 
     def apply_async(
         self,
-        entry: Any,
-        producer: Any = None,
+        entry: object,
+        producer: object = None,
         advance: bool = True,
-        **kwargs: Any,
-    ) -> Any:
+        **kwargs: object,
+    ) -> object:
         if self._is_periodic_task_already_in_queue(entry):
             logger.info(
                 "Scheduler: Skipping due task %s (%s) because it is already queued",
@@ -42,7 +41,7 @@ class CustomDatabaseScheduler(DatabaseScheduler):
             return None
         return super().apply_async(entry, producer=producer, advance=advance, **kwargs)
 
-    def _is_periodic_task_already_in_queue(self, entry: Any) -> bool:
+    def _is_periodic_task_already_in_queue(self, entry: object) -> bool:
         periodic_task_name = getattr(entry, "name", None)
         if not periodic_task_name:
             return False
@@ -71,16 +70,16 @@ class CustomDatabaseScheduler(DatabaseScheduler):
 
         return False
 
-    def _get_queue_name(self, entry: Any) -> str:
+    def _get_queue_name(self, entry: object) -> str:
         entry_options = getattr(entry, "options", {}) or {}
         return entry_options.get("queue") or self.app.conf.task_default_queue
 
-    def _get_queue_names_to_scan(self, channel: Any, queue_name: str) -> list[str]:
+    def _get_queue_names_to_scan(self, channel: object, queue_name: str) -> list[str]:
         priority_steps = getattr(channel, "priority_steps", (0,))
         return [channel._q_for_pri(queue_name, priority) for priority in priority_steps]
 
     @staticmethod
-    def _get_periodic_task_name_from_message(raw_message: Any) -> str | None:
+    def _get_periodic_task_name_from_message(raw_message: object) -> str | None:
         try:
             message = redis_loads(raw_message)
         except (TypeError, ValueError):

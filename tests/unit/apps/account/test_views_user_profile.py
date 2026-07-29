@@ -1,7 +1,6 @@
 """Tests for user profile API views."""
 
 import datetime
-from typing import Any
 
 from django.utils import timezone
 import pytest
@@ -55,7 +54,7 @@ def get_program_data(program: Program) -> dict:
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         code="0060",
         name="Afghanistan",
@@ -65,7 +64,7 @@ def afghanistan(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def ukraine(db: Any) -> BusinessArea:
+def ukraine(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         code="1230",
         name="Ukraine",
@@ -120,7 +119,7 @@ def program_u(ukraine: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def role1(db: Any) -> Role:
+def role1(db: object) -> Role:
     return RoleFactory(
         name="TestRole1",
         permissions=[
@@ -131,7 +130,7 @@ def role1(db: Any) -> Role:
 
 
 @pytest.fixture
-def role2(db: Any) -> Role:
+def role2(db: object) -> Role:
     return RoleFactory(
         name="TestRole2",
         permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value],
@@ -139,7 +138,7 @@ def role2(db: Any) -> Role:
 
 
 @pytest.fixture
-def role3(db: Any) -> Role:
+def role3(db: object) -> Role:
     return RoleFactory(
         name="TestRole3",
         permissions=[Permissions.TARGETING_VIEW_LIST.value],
@@ -147,7 +146,7 @@ def role3(db: Any) -> Role:
 
 
 @pytest.fixture
-def role4(db: Any) -> Role:
+def role4(db: object) -> Role:
     return RoleFactory(
         name="TestRole4",
         permissions=[Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE.value],
@@ -155,7 +154,7 @@ def role4(db: Any) -> Role:
 
 
 @pytest.fixture
-def role_p1(db: Any) -> Role:
+def role_p1(db: object) -> Role:
     return RoleFactory(
         name="TestRoleP1",
         permissions=[Permissions.PM_CREATE.value, Permissions.PM_VIEW_LIST.value],
@@ -163,7 +162,7 @@ def role_p1(db: Any) -> Role:
 
 
 @pytest.fixture
-def role_p2(db: Any) -> Role:
+def role_p2(db: object) -> Role:
     return RoleFactory(
         name="TestRoleP2",
         permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value],
@@ -171,7 +170,7 @@ def role_p2(db: Any) -> Role:
 
 
 @pytest.fixture
-def role_p3(db: Any) -> Role:
+def role_p3(db: object) -> Role:
     return RoleFactory(
         name="TestRoleP3",
         permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST.value],
@@ -267,12 +266,12 @@ def user_profile_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Any, user: User):
+def authenticated_client(api_client: object, user: User):
     return api_client(user)
 
 
 def test_user_profile_in_scope_business_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
@@ -403,7 +402,7 @@ def test_user_profile_in_scope_business_area(
 
 
 def test_user_profile_in_scope_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
@@ -540,8 +539,8 @@ def test_cross_area_filter_available_in_scope_business_area(
     afghanistan: BusinessArea,
     user: User,
     user_profile_url: str,
-    api_client: Any,
-    create_user_role_with_permissions: Any,
+    api_client: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     filter_available: bool,
 ):
@@ -571,8 +570,8 @@ def test_cross_area_filter_available_in_scope_program(
     user: User,
     program1: Program,
     user_profile_url: str,
-    api_client: Any,
-    create_user_role_with_permissions: Any,
+    api_client: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     filter_available: bool,
 ):

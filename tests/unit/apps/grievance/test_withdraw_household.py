@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -24,12 +22,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def program(business_area: Any) -> Program:
+def program(business_area: object) -> Program:
     return ProgramFactory(
         business_area=business_area,
         status=Program.ACTIVE,
@@ -38,7 +36,7 @@ def program(business_area: Any) -> Program:
 
 
 @pytest.fixture
-def area_1() -> Any:
+def area_1() -> object:
     country = CountryFactory(
         name="Afghanistan",
         short_name="Afghanistan",
@@ -55,18 +53,18 @@ def area_1() -> Any:
 
 
 @pytest.fixture
-def user_and_client(api_client: Any) -> dict[str, Any]:
+def user_and_client(api_client: object) -> dict[str, object]:
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
     return {"user": user, "client": api_client(user)}
 
 
 def test_withdraw_household_when_withdraw_last_individual_empty(
-    create_user_role_with_permissions: Any,
-    business_area: Any,
+    create_user_role_with_permissions: object,
+    business_area: object,
     program: Program,
-    area_1: Any,
-    user_and_client: dict[str, Any],
+    area_1: object,
+    user_and_client: dict[str, object],
 ) -> None:
     user = user_and_client["user"]
     client = user_and_client["client"]

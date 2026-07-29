@@ -1,6 +1,6 @@
 from enum import auto
 import logging
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Callable
 
 from constance import config
 from django.conf import settings
@@ -29,7 +29,7 @@ class GrievanceNotification:
     ACTION_OVERDUE = auto()
     ACTION_SEND_TO_APPROVAL = auto()
 
-    def __init__(self, grievance_ticket: GrievanceTicket, action: Any, **kwargs: Any) -> None:
+    def __init__(self, grievance_ticket: GrievanceTicket, action: object, **kwargs: object) -> None:
         self.grievance_ticket = grievance_ticket
         self.action = action
         self.extra_data = kwargs
@@ -37,7 +37,7 @@ class GrievanceNotification:
         self.emails = self._prepare_emails()
         self.enable_email_notification = grievance_ticket.business_area.enable_email_notification
 
-    def _prepare_default_context(self, user_recipient: "User") -> dict[str, Any]:
+    def _prepare_default_context(self, user_recipient: "User") -> dict[str, object]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         return {
             "first_name": user_recipient.first_name or getattr(user_recipient, "username", ""),
@@ -48,7 +48,7 @@ class GrievanceNotification:
             "title": "Grievance and feedback notification",
         }
 
-    def _prepare_user_recipients(self) -> Any:
+    def _prepare_user_recipients(self) -> object:
         func: Callable = GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action]
         return func(self)
 
@@ -194,7 +194,7 @@ class GrievanceNotification:
         ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_bodies,
     }
 
-    ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {
+    ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[object, Callable[..., object]] = {
         ACTION_ASSIGNMENT_CHANGED: _prepare_assigned_to_recipient,
         ACTION_SYSTEM_FLAGGING_CREATED: _prepare_universal_category_created_recipients,
         ACTION_DEDUPLICATION_CREATED: _prepare_universal_category_created_recipients,

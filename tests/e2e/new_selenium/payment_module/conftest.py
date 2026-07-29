@@ -1,6 +1,5 @@
 import datetime
 from decimal import Decimal
-from typing import Any
 
 from django.utils import timezone
 import pytest
@@ -61,7 +60,7 @@ def ready_for_closure_payment_plan(business_area: BusinessArea) -> PaymentPlan:
 
 
 @pytest.fixture
-def closed_payment_plan(business_area: BusinessArea, create_super_user: Any) -> PaymentPlan:
+def closed_payment_plan(business_area: BusinessArea, create_super_user: object) -> PaymentPlan:
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     pp = PaymentPlanFactory(
         business_area=business_area,

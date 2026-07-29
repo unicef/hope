@@ -1,5 +1,4 @@
 from collections import Counter
-from typing import Any
 
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -33,16 +32,16 @@ HOUSEHOLD_SIZE = 4
 
 
 @pytest.fixture
-def program_active(afghanistan: Any) -> Program:
+def program_active(afghanistan: object) -> Program:
     return ProgramFactory(business_area=afghanistan, status=Program.ACTIVE, cycle=False)
 
 
 @pytest.fixture
 def authorized_user(
-    afghanistan: Any,
+    afghanistan: object,
     program_active: Program,
-    create_user_role_with_permissions: Any,
-) -> Any:
+    create_user_role_with_permissions: object,
+) -> object:
     user = UserFactory()
     create_user_role_with_permissions(
         user,
@@ -55,8 +54,8 @@ def authorized_user(
 
 @pytest.fixture
 def large_payment_plan(
-    afghanistan: Any,
-    authorized_user: Any,
+    afghanistan: object,
+    authorized_user: object,
     program_active: Program,
 ) -> PaymentPlan:
     cycle = ProgramCycleFactory(program=program_active, title="Perf Test Cycle")
@@ -129,7 +128,7 @@ def large_payment_plan(
 
 @pytest.fixture
 def payee_list_url(
-    afghanistan: Any,
+    afghanistan: object,
     program_active: Program,
     large_payment_plan: PaymentPlan,
 ) -> str:
@@ -153,8 +152,8 @@ def _format_query_counts(queries: list[dict]) -> str:
 
 
 def test_payee_list_query_count(
-    api_client: Any,
-    authorized_user: Any,
+    api_client: object,
+    authorized_user: object,
     payee_list_url: str,
 ) -> None:
     client = api_client(authorized_user)

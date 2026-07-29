@@ -1,6 +1,6 @@
 """Tests for PDU online edit create."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
@@ -35,22 +35,22 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner(db: Any) -> Any:
+def partner(db: object) -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> User:
+def user(partner: object) -> User:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 @pytest.fixture
-def pdu_field_vaccination(program: Program) -> Any:
+def pdu_field_vaccination(program: Program) -> object:
     pdu_data_vaccination = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=5,
@@ -70,7 +70,7 @@ def pdu_field_vaccination(program: Program) -> Any:
 
 
 @pytest.fixture
-def pdu_field_health(program: Program) -> Any:
+def pdu_field_health(program: Program) -> object:
     pdu_data_health = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=5,
@@ -85,8 +85,8 @@ def pdu_field_health(program: Program) -> Any:
 
 @pytest.fixture
 def individual1(
-    business_area: BusinessArea, program: Program, pdu_field_vaccination: Any, pdu_field_health: Any
-) -> Any:
+    business_area: BusinessArea, program: Program, pdu_field_vaccination: object, pdu_field_health: object
+) -> object:
     individual = IndividualFactory(
         household=None,
         business_area=business_area,
@@ -98,7 +98,7 @@ def individual1(
 
 
 @pytest.fixture
-def household1(business_area: BusinessArea, program: Program, individual1: Any) -> Any:
+def household1(business_area: BusinessArea, program: Program, individual1: object) -> object:
     household = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -112,8 +112,8 @@ def household1(business_area: BusinessArea, program: Program, individual1: Any) 
 
 @pytest.fixture
 def individual2(
-    business_area: BusinessArea, program: Program, pdu_field_vaccination: Any, pdu_field_health: Any
-) -> Any:
+    business_area: BusinessArea, program: Program, pdu_field_vaccination: object, pdu_field_health: object
+) -> object:
     individual = IndividualFactory(
         household=None,
         business_area=business_area,
@@ -125,7 +125,7 @@ def individual2(
 
 
 @pytest.fixture
-def household2(business_area: BusinessArea, program: Program, individual2: Any) -> Any:
+def household2(business_area: BusinessArea, program: Program, individual2: object) -> object:
     household = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -145,7 +145,7 @@ def household2(business_area: BusinessArea, program: Program, individual2: Any) 
 
 
 @pytest.fixture
-def base_data(pdu_field_vaccination: Any, pdu_field_health: Any) -> dict:
+def base_data(pdu_field_vaccination: object, pdu_field_health: object) -> dict:
     return {
         "rounds_data": [
             {
@@ -181,19 +181,19 @@ def url_create(business_area: BusinessArea, program: Program) -> str:
 def test_create_pdu_online_edit_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household1: Any,
-    household2: Any,
-    individual1: Any,
-    individual2: Any,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    household1: object,
+    household2: object,
+    individual1: object,
+    individual2: object,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     base_data: dict,
     url_create: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -207,20 +207,20 @@ def test_create_pdu_online_edit_permissions(
 
 
 def test_create_pdu_online_edit_base(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household1: Any,
-    household2: Any,
-    individual1: Any,
-    individual2: Any,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    household1: object,
+    household2: object,
+    individual1: object,
+    individual2: object,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     base_data: dict,
     url_create: str,
-    create_user_role_with_permissions: Any,
-    django_capture_on_commit_callbacks: Any,
+    create_user_role_with_permissions: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -338,20 +338,20 @@ def test_create_pdu_online_edit_base(
 
 
 def test_create_pdu_online_edit_with_name(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household1: Any,
-    household2: Any,
-    individual1: Any,
-    individual2: Any,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    household1: object,
+    household2: object,
+    individual1: object,
+    individual2: object,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     base_data: dict,
     url_create: str,
-    create_user_role_with_permissions: Any,
-    django_capture_on_commit_callbacks: Any,
+    create_user_role_with_permissions: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -376,19 +376,19 @@ def test_create_pdu_online_edit_with_name(
 
 
 def test_create_pdu_online_edit_with_authorized_users(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household1: Any,
-    household2: Any,
-    individual1: Any,
-    individual2: Any,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    household1: object,
+    household2: object,
+    individual1: object,
+    individual2: object,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     base_data: dict,
     url_create: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -444,18 +444,18 @@ def test_create_pdu_online_edit_with_authorized_users(
 
 
 def test_create_pdu_online_edit_duplicate_field(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household1: Any,
-    household2: Any,
-    individual1: Any,
-    individual2: Any,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    household1: object,
+    household2: object,
+    individual1: object,
+    individual2: object,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     url_create: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -488,19 +488,19 @@ def test_create_pdu_online_edit_duplicate_field(
 
 
 def test_create_pdu_online_edit_field_is_editable_flag(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household1: Any,
-    household2: Any,
-    individual1: Any,
-    individual2: Any,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    household1: object,
+    household2: object,
+    individual1: object,
+    individual2: object,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     url_create: str,
-    create_user_role_with_permissions: Any,
-    django_capture_on_commit_callbacks: Any,
+    create_user_role_with_permissions: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -547,19 +547,19 @@ def test_create_pdu_online_edit_field_is_editable_flag(
 
 
 def test_create_pdu_online_edit_with_covered_individual(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
-    household1: Any,
-    household2: Any,
-    individual1: Any,
-    individual2: Any,
-    pdu_field_vaccination: Any,
-    pdu_field_health: Any,
+    household1: object,
+    household2: object,
+    individual1: object,
+    individual2: object,
+    pdu_field_vaccination: object,
+    pdu_field_health: object,
     url_create: str,
-    create_user_role_with_permissions: Any,
-    django_capture_on_commit_callbacks: Any,
+    create_user_role_with_permissions: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,

@@ -1,7 +1,7 @@
 """Tests for grievance ticket filters."""
 
 from datetime import datetime
-from typing import Any, Callable
+from typing import Callable
 
 from django.utils import timezone
 import pytest
@@ -650,19 +650,19 @@ def two_plain_tickets(afghanistan: BusinessArea) -> list:
 
 
 @pytest.fixture
-def finished_program_ticket(afghanistan: BusinessArea, program_afghanistan2: Program) -> Any:
+def finished_program_ticket(afghanistan: BusinessArea, program_afghanistan2: Program) -> object:
     ticket = GrievanceTicketFactory(business_area=afghanistan)
     ticket.programs.add(program_afghanistan2)
     return ticket
 
 
 def _test_filter(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
     filter_name: str,
-    filter_value: Any,
+    filter_value: object,
     expected_count_for_program: int,
     expected_count_for_global: int,
 ) -> None:
@@ -686,7 +686,7 @@ def _test_filter(
     ],
 )
 def test_filter_by_fsp(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -716,7 +716,7 @@ def test_filter_by_fsp(
     ],
 )
 def test_filter_by_preferred_language(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -746,7 +746,7 @@ def test_filter_by_preferred_language(
     ],
 )
 def test_filter_by_grievance_type(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -775,7 +775,7 @@ def test_filter_by_grievance_type(
     ],
 )
 def test_filter_by_grievance_status(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -807,7 +807,7 @@ def test_filter_by_grievance_status(
     ],
 )
 def test_filter_by_document_number_and_document_type(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -844,7 +844,7 @@ def test_filter_by_document_number_and_document_type(
     ],
 )
 def test_filter_by_priority(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -875,7 +875,7 @@ def test_filter_by_priority(
     ],
 )
 def test_filter_by_urgency(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -904,7 +904,7 @@ def test_filter_by_urgency(
     ],
 )
 def test_filter_by_household_unicef_id(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -934,7 +934,7 @@ def test_filter_by_household_unicef_id(
     ],
 )
 def test_filter_by_household_id(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -964,7 +964,7 @@ def test_filter_by_household_id(
     ],
 )
 def test_filter_by_individual_id(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -998,7 +998,7 @@ def test_filter_by_individual_id(
     ],
 )
 def test_filter_by_payment_record_ids(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1024,7 +1024,7 @@ def test_filter_by_payment_record_ids(
     [(8, 2, 2), (3, 1, 2)],
 )
 def test_filter_by_category(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1050,7 +1050,7 @@ def test_filter_by_category(
     [(24, 2, 2), (1, 1, 1)],
 )
 def test_filter_by_issue_type(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1080,7 +1080,7 @@ def test_filter_by_issue_type(
     ],
 )
 def test_filter_by_status(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1109,7 +1109,7 @@ def test_filter_by_status(
     ],
 )
 def test_filter_by_score_min(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1138,7 +1138,7 @@ def test_filter_by_score_min(
     ],
 )
 def test_filter_by_score_max(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1167,7 +1167,7 @@ def test_filter_by_score_max(
     ],
 )
 def test_filter_by_admin1(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1196,7 +1196,7 @@ def test_filter_by_admin1(
     ],
 )
 def test_filter_by_assigned_to(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1225,7 +1225,7 @@ def test_filter_by_assigned_to(
     ],
 )
 def test_filter_by_cash_plan(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1259,7 +1259,7 @@ def test_filter_by_cash_plan(
     ],
 )
 def test_filter_by_created_at(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1289,7 +1289,7 @@ def test_filter_by_created_at(
     ],
 )
 def test_filter_by_program(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_global_url: str,
     tickets: dict,
@@ -1312,7 +1312,7 @@ def test_filter_by_program(
     ],
 )
 def test_filter_by_program_status(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_global_url: str,
     tickets: dict,
@@ -1343,7 +1343,7 @@ def test_filter_by_program_status(
     ],
 )
 def test_filter_by_cross_area(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1419,7 +1419,7 @@ def test_filter_by_cross_area(
     ],
 )
 def test_search(
-    api_client: Any,
+    api_client: object,
     user: User,
     list_url: str,
     list_global_url: str,
@@ -1494,7 +1494,7 @@ def test_filter_grievance_status_with_unknown_value_returns_queryset_unchanged(t
 
 
 def test_filter_is_active_program_false_returns_finished_program_tickets(
-    finished_program_ticket: Any, two_plain_tickets: list
+    finished_program_ticket: object, two_plain_tickets: list
 ) -> None:
     queryset = GrievanceTicket.objects.all()
     filterset = GrievanceTicketFilter(data={}, queryset=queryset)

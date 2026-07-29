@@ -1,6 +1,5 @@
 """Tests for periodic data update models."""
 
-from typing import Any
 from unittest.mock import PropertyMock, patch
 
 from django.core.exceptions import ValidationError
@@ -30,7 +29,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 

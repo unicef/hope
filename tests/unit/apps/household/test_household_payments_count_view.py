@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -18,12 +16,11 @@ from hope.models import PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
-
 URL_NAME = "api:households:households-payments-count"
 
 
 @pytest.fixture
-def payments_count_context(api_client: Any) -> dict[str, Any]:
+def payments_count_context(api_client: object) -> dict[str, object]:
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
@@ -42,7 +39,7 @@ def payments_count_context(api_client: Any) -> dict[str, Any]:
     }
 
 
-def _count_url(ctx: dict[str, Any]) -> str:
+def _count_url(ctx: dict[str, object]) -> str:
     return reverse(
         URL_NAME,
         kwargs={
@@ -53,7 +50,7 @@ def _count_url(ctx: dict[str, Any]) -> str:
     )
 
 
-def _make_payment(ctx: dict[str, Any], pp_status: str, **payment_kwargs: Any) -> None:
+def _make_payment(ctx: dict[str, object], pp_status: str, **payment_kwargs: object) -> None:
     plan = PaymentPlanFactory(
         status=pp_status,
         program_cycle__program=ctx["program"],
@@ -79,8 +76,8 @@ def _make_payment(ctx: dict[str, Any], pp_status: str, **payment_kwargs: Any) ->
 def test_household_payments_count_permissions(
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
-    payments_count_context: dict[str, Any],
+    create_user_role_with_permissions: object,
+    payments_count_context: dict[str, object],
     django_assert_num_queries,
 ) -> None:
     create_user_role_with_permissions(
@@ -95,8 +92,8 @@ def test_household_payments_count_permissions(
 
 
 def test_household_payments_count_empty(
-    create_user_role_with_permissions: Any,
-    payments_count_context: dict[str, Any],
+    create_user_role_with_permissions: object,
+    payments_count_context: dict[str, object],
     django_assert_num_queries,
 ) -> None:
     create_user_role_with_permissions(
@@ -112,8 +109,8 @@ def test_household_payments_count_empty(
 
 
 def test_household_payments_count_includes_only_eligible_and_non_pre_status(
-    create_user_role_with_permissions: Any,
-    payments_count_context: dict[str, Any],
+    create_user_role_with_permissions: object,
+    payments_count_context: dict[str, object],
     django_assert_num_queries,
 ) -> None:
     create_user_role_with_permissions(

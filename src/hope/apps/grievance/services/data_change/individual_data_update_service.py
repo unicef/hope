@@ -1,6 +1,5 @@
 import dataclasses
 from datetime import date, datetime
-from typing import Any
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -103,7 +102,7 @@ class IndividualDataUpdateService(DataChangeService):
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
-        individual_data_with_approve_status: dict[str, Any] = {
+        individual_data_with_approve_status: dict[str, object] = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
         for field, value in individual_data_with_approve_status.items():
@@ -184,7 +183,7 @@ class IndividualDataUpdateService(DataChangeService):
         _handle_photo_field(new_individual_data)
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
-        individual_data_with_approve_status: dict[str, Any] = {
+        individual_data_with_approve_status: dict[str, object] = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_individual_data.items()
         }

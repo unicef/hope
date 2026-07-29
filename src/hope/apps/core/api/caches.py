@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.db.models import Max
+from django.http import HttpRequest
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
@@ -9,10 +8,10 @@ from rest_framework_extensions.key_constructor.constructors import KeyConstructo
 class BusinessAreaListVersionKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:

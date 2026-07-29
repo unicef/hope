@@ -1,6 +1,5 @@
 from io import BytesIO
 import re
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 from constance.test import override_config
@@ -76,22 +75,22 @@ pytestmark = [
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def adjudication_areas() -> dict[str, Any]:
+def adjudication_areas() -> dict[str, object]:
     country = CountryFactory(
         name="Afghanistan",
         short_name="Afghanistan",
@@ -126,7 +125,7 @@ def test_to_phone_number_str() -> None:
 
 
 @patch("hope.models.flexible_attribute.FlexibleAttribute.objects.filter")
-def test_cast_flex_fields(mock_filter: Any) -> None:
+def test_cast_flex_fields(mock_filter: object) -> None:
     mock_filter.side_effect = [
         MagicMock(values_list=MagicMock(return_value=["decimal_field"])),
         MagicMock(values_list=MagicMock(return_value=["integer_field"])),
@@ -181,7 +180,7 @@ def test_verify_flex_fields_with_int() -> None:
     verify_flex_fields({"test_int_i_f": 1233}, "individuals")
 
 
-def test_handle_role(program: Any) -> None:
+def test_handle_role(program: object) -> None:
     household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
     individual = household.head_of_household
 
@@ -201,7 +200,7 @@ def test_handle_role(program: Any) -> None:
     assert role.rdi_merge_status == MergeStatusModel.MERGED
 
 
-def test_handle_add_document(program: Any) -> None:
+def test_handle_add_document(program: object) -> None:
     country = CountryFactory(
         name="Afghanistan",
         short_name="Afghanistan",
@@ -247,9 +246,9 @@ def test_handle_add_document(program: Any) -> None:
 
 
 def test_validate_individual_for_need_adjudication(
-    business_area: Any,
-    program: Any,
-    adjudication_areas: dict[str, Any],
+    business_area: object,
+    program: object,
+    adjudication_areas: dict[str, object],
 ) -> None:
     grievance = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -328,7 +327,7 @@ def test_validate_individual_for_need_adjudication(
     validate_individual_for_need_adjudication(partner_unicef, outsider_individual, ticket_details)
 
 
-def test_validate_all_individuals_before_close_needs_adjudication(program: Any) -> None:
+def test_validate_all_individuals_before_close_needs_adjudication(program: object) -> None:
     household_1 = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
     individual_1 = household_1.head_of_household
 
@@ -359,7 +358,7 @@ def test_validate_all_individuals_before_close_needs_adjudication(program: Any) 
     validate_all_individuals_before_close_needs_adjudication(ticket_details)
 
 
-def test_close_needs_adjudication_ticket_service(user: Any, business_area: Any, program: Any) -> None:
+def test_close_needs_adjudication_ticket_service(user: object, business_area: object, program: object) -> None:
     grievance = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
@@ -400,9 +399,9 @@ def test_close_needs_adjudication_ticket_service(user: Any, business_area: Any, 
 
 
 def test_close_needs_adjudication_ticket_service_individual_without_household(
-    user: Any,
-    business_area: Any,
-    program: Any,
+    user: object,
+    business_area: object,
+    program: object,
 ) -> None:
     grievance = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -438,9 +437,9 @@ def test_close_needs_adjudication_ticket_service_individual_without_household(
 
 
 def test_close_needs_adjudication_ticket_service_when_just_duplicates(
-    user: Any,
-    business_area: Any,
-    program: Any,
+    user: object,
+    business_area: object,
+    program: object,
 ) -> None:
     grievance = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -510,9 +509,9 @@ def test_close_needs_adjudication_ticket_service_when_just_duplicates(
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate")
 def test_close_needs_adjudication_ticket_service_for_biometrics(
     dedup_engine_api_report_false_positive_duplicate_mock: MagicMock,
-    user: Any,
-    business_area: Any,
-    program: Any,
+    user: object,
+    business_area: object,
+    program: object,
 ) -> None:
     rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
     household_1 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
@@ -569,10 +568,10 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
 @patch("hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService")
 def test_close_needs_adjudication_ticket_service_for_biometrics_when_deduplication_engine_fails(
     biometric_dedup_service_mock: MagicMock,
-    mock_logger: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
+    mock_logger: object,
+    user: object,
+    business_area: object,
+    program: object,
 ) -> None:
     rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
     household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
@@ -622,7 +621,7 @@ def test_close_needs_adjudication_ticket_service_for_biometrics_when_deduplicati
     mock_logger.exception.assert_called_once_with("Failed to report false positive duplicate to Deduplication Engine")
 
 
-def test_create_grievance_ticket_with_details_no_possible_duplicates(business_area: Any, program: Any) -> None:
+def test_create_grievance_ticket_with_details_no_possible_duplicates(business_area: object, program: object) -> None:
     household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
     main_individual = household.head_of_household
 
@@ -661,7 +660,7 @@ def test_handle_photo_saves_and_return() -> None:
     assert result.endswith(".jpg")
 
 
-def test_set_status_based_on_assigned_to(user: Any) -> None:
+def test_set_status_based_on_assigned_to(user: object) -> None:
     mixin = GrievanceMutationMixin()
     grievance_ticket_1 = GrievanceTicketFactory(
         created_by=user,
@@ -728,7 +727,7 @@ def test_verify_flex_fields_select_many_invalid_value() -> None:
         verify_flex_fields({"select_many_i_f": ["A", "X"]}, "individuals")
 
 
-def test_handle_edit_document_without_photo_keeps_existing(program: Any) -> None:
+def test_handle_edit_document_without_photo_keeps_existing(program: object) -> None:
     country = CountryFactory(
         name="Austria",
         short_name="Austria",
@@ -761,7 +760,7 @@ def test_handle_edit_document_without_photo_keeps_existing(program: Any) -> None
     assert not result.photo
 
 
-def test_handle_edit_document_swaps_photo_with_photoraw(program: Any) -> None:
+def test_handle_edit_document_swaps_photo_with_photoraw(program: object) -> None:
     country = CountryFactory(
         name="Belgium",
         short_name="Belgium",
@@ -795,7 +794,7 @@ def test_handle_edit_document_swaps_photo_with_photoraw(program: Any) -> None:
     assert result.country.iso_code3 == "BEL"
 
 
-def test_handle_add_identity_duplicate_raises(program: Any) -> None:
+def test_handle_add_identity_duplicate_raises(program: object) -> None:
     country = CountryFactory(
         name="Chile",
         short_name="Chile",
@@ -814,7 +813,7 @@ def test_handle_add_identity_duplicate_raises(program: Any) -> None:
     assert "Identity with number ID-1, partner: UNHCR already exists" in str(error.value)
 
 
-def test_handle_edit_identity_updates_fields(program: Any) -> None:
+def test_handle_edit_identity_updates_fields(program: object) -> None:
     country = CountryFactory(
         name="Denmark",
         short_name="Denmark",
@@ -848,7 +847,7 @@ def test_handle_edit_identity_updates_fields(program: Any) -> None:
     assert result.country.iso_code3 == "DNK"
 
 
-def test_handle_edit_identity_duplicate_raises(program: Any) -> None:
+def test_handle_edit_identity_duplicate_raises(program: object) -> None:
     country = CountryFactory(
         name="Egypt",
         short_name="Egypt",
@@ -875,7 +874,7 @@ def test_handle_edit_identity_duplicate_raises(program: Any) -> None:
     assert "Identity with number TAKEN, partner: DUP_PARTNER already exists" in str(error.value)
 
 
-def test_prepare_previous_documents(program: Any) -> None:
+def test_prepare_previous_documents(program: object) -> None:
     country = CountryFactory(
         name="France",
         short_name="France",
@@ -906,7 +905,7 @@ def test_prepare_previous_documents(program: Any) -> None:
     }
 
 
-def test_prepare_previous_identities(program: Any) -> None:
+def test_prepare_previous_identities(program: object) -> None:
     country = CountryFactory(
         name="Greece",
         short_name="Greece",
@@ -958,7 +957,7 @@ def test_save_images_persists_uploaded_image() -> None:
         size=9,
         charset=None,
     )
-    flex_fields: dict[str, Any] = {"profile_picture_i_f": uploaded}
+    flex_fields: dict[str, object] = {"profile_picture_i_f": uploaded}
 
     save_images(flex_fields, "individuals")
 
@@ -999,7 +998,7 @@ def test_save_images_image_field_with_unsupported_value_type() -> None:
         name="picture_i_f",
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
     )
-    flex_fields: dict[str, Any] = {"picture_i_f": None}
+    flex_fields: dict[str, object] = {"picture_i_f": None}
 
     save_images(flex_fields, "individuals")
 
@@ -1007,7 +1006,7 @@ def test_save_images_image_field_with_unsupported_value_type() -> None:
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=False)
-def test_update_es_returns_early_when_disabled(program: Any, mocker: Any) -> None:
+def test_update_es_returns_early_when_disabled(program: object, mocker: object) -> None:
     individual = IndividualFactory(program=program, business_area=program.business_area)
     mock_individual_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_individual_doc")
     mock_household_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_household_doc")
@@ -1019,7 +1018,7 @@ def test_update_es_returns_early_when_disabled(program: Any, mocker: Any) -> Non
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_update_es_indexes_individual_without_household(program: Any, mocker: Any) -> None:
+def test_update_es_indexes_individual_without_household(program: object, mocker: object) -> None:
     individual = IndividualFactory(program=program, business_area=program.business_area)
     mock_individual_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_individual_doc")
     mock_household_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_household_doc")
@@ -1032,7 +1031,7 @@ def test_update_es_indexes_individual_without_household(program: Any, mocker: An
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_update_es_indexes_individual_and_household(program: Any, mocker: Any) -> None:
+def test_update_es_indexes_individual_and_household(program: object, mocker: object) -> None:
     household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
     individual = household.head_of_household
     mock_individual_doc = mocker.patch("hope.apps.grievance.services.data_change.utils.get_individual_doc")

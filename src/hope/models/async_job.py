@@ -1,5 +1,5 @@
 import logging
-from typing import Any, TypeVar, cast
+from typing import TypeVar, cast
 
 from concurrency.api import concurrency_disable_increment
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -62,7 +62,7 @@ class BaseAsyncJob(AsyncJobModel):
         instance: models.Model,
         *,
         job_name: str | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> AsyncJobT:
         if instance.pk is None:
             raise ValueError("Cannot create an async job for an unsaved instance.")
@@ -85,7 +85,7 @@ class BaseAsyncJob(AsyncJobModel):
         *,
         action: str,
         instance: models.Model | None = None,
-        **payload: Any,
+        **payload: object,
     ) -> AsyncJobT:
         job_name = payload.pop("job_name", None)
         config = payload.pop("config", None) or {}
@@ -116,7 +116,7 @@ class BaseAsyncJob(AsyncJobModel):
         *,
         action: str,
         instance: models.Model,
-        **payload: Any,
+        **payload: object,
     ) -> AsyncJobT | None:
         """Queue a task unless one is already running, clearing stuck queued jobs first.
 
@@ -180,7 +180,7 @@ class BaseAsyncJob(AsyncJobModel):
         self.set_queued(res)
         return cast("str | None", res.id)
 
-    def set_queued(self, result: Any) -> None:
+    def set_queued(self, result: object) -> None:
         previous_async_result_id = cast("str | None", getattr(self, "curr_async_result_id", None))
         with concurrency_disable_increment(self):
             self.last_async_result_id = previous_async_result_id
@@ -189,7 +189,7 @@ class BaseAsyncJob(AsyncJobModel):
             self.save(update_fields=["last_async_result_id", "curr_async_result_id", "datetime_queued"])
             task_queued.send(sender=self.__class__, task=self)
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         if not self.job_name:
             self.job_name = self.default_job_name(self.action)
         super().save(*args, **kwargs)

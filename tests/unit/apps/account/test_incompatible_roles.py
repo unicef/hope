@@ -1,7 +1,5 @@
 """Tests for incompatible roles validation."""
 
-from typing import Any
-
 from django.core.exceptions import ValidationError
 import pytest
 
@@ -17,12 +15,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def role_1(db: Any) -> Role:
+def role_1(db: object) -> Role:
     return RoleFactory(name="Role_1")
 
 
 @pytest.fixture
-def role_2(db: Any) -> Role:
+def role_2(db: object) -> Role:
     return RoleFactory(name="Role_2")
 
 

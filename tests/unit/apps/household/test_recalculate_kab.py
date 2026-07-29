@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Callable
+from typing import Callable
 
 from django.utils import timezone
 import pytest
@@ -43,7 +43,7 @@ def business_area() -> BusinessArea:
 
 @pytest.fixture
 def make_household(business_area: BusinessArea) -> Callable[..., Household]:
-    def _make(recalculate_composition: bool, collects_individual_data: bool, **hh_kwargs: Any) -> Household:
+    def _make(recalculate_composition: bool, collects_individual_data: bool, **hh_kwargs: object) -> Household:
         program = ProgramFactory(business_area=business_area)
         dct = program.data_collecting_type
         dct.recalculate_composition = recalculate_composition
@@ -332,7 +332,7 @@ def test_sex_group_counts_exclude_inactive_and_non_beneficiaries(
 
 def test_async_task_populates_kab_for_non_recalculating_dct(
     household_from_individuals: Callable[..., Household],
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     # Gate removal: previously the action emptied the queryset for recalculate_composition=False
     # DCTs, so nothing ran. Now the household flows to the chunk task and KAB is computed.
@@ -352,7 +352,7 @@ def test_async_task_populates_kab_for_non_recalculating_dct(
 
 def test_chunk_task_query_count_per_household(
     household_from_individuals: Callable[..., Household],
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     household = household_from_individuals(recalculate_composition=False, collects_individual_data=True)
     job = AsyncJob.objects.create(

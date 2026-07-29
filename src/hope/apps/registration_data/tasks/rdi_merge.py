@@ -1,6 +1,5 @@
 import contextlib
 import logging
-from typing import Any
 
 from constance import config
 from django.core.cache import cache
@@ -316,7 +315,9 @@ class RdiMergeTask:
             )
         )
 
-    def _create_kobo_submissions(self, households: QuerySet[Any, Any], obj_hct: RegistrationDataImport) -> list[Any]:
+    def _create_kobo_submissions(
+        self, households: QuerySet[object, object], obj_hct: RegistrationDataImport
+    ) -> list[object]:
         kobo_submissions = []
         for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
             kobo_submission_uuid = household.kobo_submission_uuid

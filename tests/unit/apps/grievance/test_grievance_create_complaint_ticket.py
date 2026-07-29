@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -33,7 +33,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -52,7 +52,7 @@ def admin_area() -> Area:
 
 
 @pytest.fixture
-def complaint_context(afghanistan: BusinessArea, program: Program, user: User) -> dict[str, Any]:
+def complaint_context(afghanistan: BusinessArea, program: Program, user: User) -> dict[str, object]:
     household = HouseholdFactory(
         business_area=afghanistan,
         program=program,
@@ -122,12 +122,12 @@ def list_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
-def complaint_input_builder(user: User, admin_area: Area) -> Callable[..., dict[str, Any]]:
+def complaint_input_builder(user: User, admin_area: Area) -> Callable[..., dict[str, object]]:
     def _build(
         household: str | None = None,
         individual: str | None = None,
         payment_records: list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         return {
             "description": "Test Feedback",
             "assigned_to": str(user.id),
@@ -166,13 +166,13 @@ def complaint_input_builder(user: User, admin_area: Area) -> Callable[..., dict[
     ],
 )
 def test_create_complaint_ticket_variants(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
-    complaint_context: dict[str, Any],
-    complaint_input_builder: Callable[..., dict[str, Any]],
+    complaint_context: dict[str, object],
+    complaint_input_builder: Callable[..., dict[str, object]],
     list_url: str,
     household_key: str | None,
     individual_key: str | None,

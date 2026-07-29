@@ -1,6 +1,5 @@
 from datetime import timedelta
 from decimal import Decimal
-from typing import Any
 from unittest.mock import patch
 import uuid
 
@@ -75,12 +74,12 @@ def fsp(delivery_mechanism):
 
 def _create_source_payment_plan(
     *,
-    cycle: Any,
-    group: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    cycle: object,
+    group: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
     with_failed_payment: bool,
 ) -> PaymentPlan:
     payment_plan = PaymentPlanFactory(
@@ -109,11 +108,11 @@ def _create_source_payment_plan(
 def _create_instruction_child_payment_plan(
     *,
     instruction: FollowUpInstruction,
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
     status: str,
 ) -> PaymentPlan:
     payment_plan = PaymentPlanFactory(
@@ -485,8 +484,8 @@ def test_init_raises_value_error_when_no_program_or_instruction() -> None:
 
 
 def test_get_source_groups_raises_when_group_not_in_program(
-    program: Any,
-    business_area: Any,
+    program: object,
+    business_area: object,
 ) -> None:
     other_program = ProgramFactory(business_area=business_area)
     other_cycle = ProgramCycleFactory(program=other_program)
@@ -497,10 +496,10 @@ def test_get_source_groups_raises_when_group_not_in_program(
 
 
 def test_validate_shared_configuration_raises_for_mixed_fsp(
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
 ) -> None:
     fsp_one = FinancialServiceProviderFactory()
     fsp_two = FinancialServiceProviderFactory()
@@ -524,11 +523,11 @@ def test_validate_shared_configuration_raises_for_mixed_fsp(
 
 
 def test_validate_shared_configuration_raises_for_mixed_delivery_mechanism(
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     second_delivery_mechanism = DeliveryMechanismFactory()
     plan_one = PaymentPlanFactory(
@@ -551,7 +550,7 @@ def test_validate_shared_configuration_raises_for_mixed_delivery_mechanism(
 
 
 def test_require_instruction_raises_when_instruction_is_none(
-    program: Any,
+    program: object,
 ) -> None:
     service = FollowUpInstructionService(program=program)
 
@@ -560,9 +559,9 @@ def test_require_instruction_raises_when_instruction_is_none(
 
 
 def test_validate_child_payment_plans_statuses_raises_when_no_child_plans(
-    user: Any,
-    program: Any,
-    business_area: Any,
+    user: object,
+    program: object,
+    business_area: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -576,13 +575,13 @@ def test_validate_child_payment_plans_statuses_raises_when_no_child_plans(
 
 
 def test_validate_child_payment_plans_statuses_raises_for_wrong_status(
-    user: Any,
-    program: Any,
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    user: object,
+    program: object,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -605,9 +604,9 @@ def test_validate_child_payment_plans_statuses_raises_for_wrong_status(
 
 
 def test_validate_instruction_has_eligible_payments_raises_when_no_payments(
-    user: Any,
-    program: Any,
-    business_area: Any,
+    user: object,
+    program: object,
+    business_area: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -621,11 +620,11 @@ def test_validate_instruction_has_eligible_payments_raises_when_no_payments(
 
 
 def test_validate_delivery_template_exists_raises_when_fsp_is_none(
-    user: Any,
-    program: Any,
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
+    user: object,
+    program: object,
+    cycle: object,
+    business_area: object,
+    currency: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -647,13 +646,13 @@ def test_validate_delivery_template_exists_raises_when_fsp_is_none(
 
 
 def test_validate_delivery_template_exists_raises_when_no_xlsx_template(
-    user: Any,
-    program: Any,
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    user: object,
+    program: object,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -676,9 +675,9 @@ def test_validate_delivery_template_exists_raises_when_no_xlsx_template(
 
 
 def test_validate_no_background_action_in_progress_raises_when_exporting(
-    user: Any,
-    program: Any,
-    business_area: Any,
+    user: object,
+    program: object,
+    business_area: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -693,13 +692,13 @@ def test_validate_no_background_action_in_progress_raises_when_exporting(
 
 
 def test_abort_transitions_child_payment_plans_to_aborted(
-    user: Any,
-    program: Any,
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    user: object,
+    program: object,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -724,13 +723,13 @@ def test_abort_transitions_child_payment_plans_to_aborted(
 
 
 def test_reactivate_abort_transitions_child_payment_plans_to_open(
-    user: Any,
-    program: Any,
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    user: object,
+    program: object,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     instruction = FollowUpInstruction.objects.create(
         business_area=business_area,
@@ -756,14 +755,14 @@ def test_reactivate_abort_transitions_child_payment_plans_to_open(
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 def test_close_transitions_child_payment_plans_to_closed_without_notification(
-    mock_notify: Any,
-    user: Any,
-    program: Any,
-    cycle: Any,
-    business_area: Any,
-    currency: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    mock_notify: object,
+    user: object,
+    program: object,
+    cycle: object,
+    business_area: object,
+    currency: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     instruction = FollowUpInstructionFactory(program=program, created_by=user)
     child_plan = _create_instruction_child_payment_plan(

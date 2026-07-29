@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -51,7 +49,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
-    ASSOCIATED_WITH_CHOICES: Any = (
+    ASSOCIATED_WITH_CHOICES: object = (
         (ASSOCIATED_WITH_HOUSEHOLD, _("Household")),
         (ASSOCIATED_WITH_INDIVIDUAL, _("Individual")),
     )
@@ -110,7 +108,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
         label_contains_english_en_validator(self.label)
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         self.clean()
         super().save(*args, **kwargs)
 
@@ -201,7 +199,7 @@ class PeriodicFieldData(models.Model):
     def __str__(self) -> str:
         return f"Periodic Field Data: {self.pk}"
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         self.full_clean()
         super().save(*args, **kwargs)
 

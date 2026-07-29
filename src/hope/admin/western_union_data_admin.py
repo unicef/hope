@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.contrib import admin
+from django.http import HttpRequest
 
 from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.models import WesternUnionData
@@ -16,7 +15,7 @@ class WesternUnionDataAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     def matched_invoices_list(self, obj: WesternUnionData) -> str:
         return ", ".join(obj.matched_invoices.values_list("name", flat=True))
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
     matched_invoices_list.short_description = "Matched Invoices"

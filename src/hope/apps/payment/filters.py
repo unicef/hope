@@ -1,5 +1,4 @@
 from base64 import b64decode
-from typing import Any
 from uuid import UUID
 
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
@@ -266,7 +265,7 @@ class PaymentPlanFilter(FilterSet):
         return qs
 
     @staticmethod
-    def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+    def filter_by_status(queryset: "QuerySet", model_field: str, value: object) -> "QuerySet":
         # assigned TP statuses
         is_assigned = [
             PaymentPlan.Status.PREPARING,
@@ -286,7 +285,7 @@ class PaymentPlanFilter(FilterSet):
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_max(
-        queryset: "QuerySet", model_field: str, value: Any
+        queryset: "QuerySet", model_field: str, value: object
     ) -> "QuerySet":
         return queryset.annotate(
             household_count_with_phone_number=Count(
@@ -302,7 +301,7 @@ class PaymentPlanFilter(FilterSet):
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_min(
-        queryset: "QuerySet", model_field: str, value: Any
+        queryset: "QuerySet", model_field: str, value: object
     ) -> "QuerySet":
         return queryset.annotate(
             household_count_with_phone_number=Count(
@@ -317,11 +316,11 @@ class PaymentPlanFilter(FilterSet):
         ).filter(household_count_with_phone_number__gte=value)
 
     @staticmethod
-    def filter_status_not(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+    def filter_status_not(queryset: "QuerySet", model_field: str, value: object) -> "QuerySet":
         return queryset.exclude(status=value)
 
     @staticmethod
-    def filter_verification_status(queryset: "QuerySet", model_field: str, verification_status: Any) -> "QuerySet":
+    def filter_verification_status(queryset: "QuerySet", model_field: str, verification_status: object) -> "QuerySet":
         return queryset.filter(payment_verification_summary__status__in=verification_status)
 
     @staticmethod
@@ -329,7 +328,7 @@ class PaymentPlanFilter(FilterSet):
         return queryset.filter(financial_service_provider__name=service_provider_name)
 
     @staticmethod
-    def filter_delivery_types(queryset: "QuerySet", model_field: str, delivery_types: Any) -> "QuerySet":
+    def filter_delivery_types(queryset: "QuerySet", model_field: str, delivery_types: object) -> "QuerySet":
         return queryset.filter(delivery_mechanism__code__in=delivery_types)
 
 

@@ -1,6 +1,6 @@
 import re
 import sys
-from typing import Any, Callable
+from typing import Callable
 
 from django.http import HttpRequest
 import sentry_sdk
@@ -14,7 +14,7 @@ class SentryScopeMiddleware:
         super().__init__()
 
     # Note: must be listed AFTER AuthenticationMiddleware
-    def __call__(self, request: HttpRequest) -> Any:
+    def __call__(self, request: HttpRequest) -> object:
         sys.stderr.isatty = lambda: False  # type: ignore # I guess this is a hack to make Sentry not use colors in the terminal?
         scope = sentry_sdk.get_isolation_scope()
         business_area = request.headers.get("Business-Area")

@@ -2,7 +2,6 @@ from collections import defaultdict
 from io import BytesIO
 import logging
 from os.path import isfile
-from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -72,7 +71,7 @@ class FlexibleAttributeImporter:
         "deviceid",
     )
 
-    def _get_model_fields(self, object_type_to_add: Any) -> list[str] | None:
+    def _get_model_fields(self, object_type_to_add: object) -> list[str] | None:
         return {
             "attribute": self.ATTRIBUTE_MODEL_FIELDS,
             "group": self.GROUP_MODEL_FIELDS,
@@ -85,7 +84,7 @@ class FlexibleAttributeImporter:
         header_name: str,
         row: Row,
         row_number: int,
-        value: Any,
+        value: object,
     ) -> None:
         is_calculate_field = (
             object_type_to_add == "attribute"
@@ -116,7 +115,7 @@ class FlexibleAttributeImporter:
 
     def _assign_field_values(
         self,
-        value: Any,
+        value: object,
         header_name: str,
         object_type_to_add: str,
         row: Row,
@@ -200,7 +199,7 @@ class FlexibleAttributeImporter:
             logger.warning(f"Survey Sheet: Row {row_number}: List Name is required")
             raise ValidationError(f"Survey Sheet: Row {row_number}: List Name is required")
 
-    def _validate_type(self, row_number: int, value: Any) -> None:
+    def _validate_type(self, row_number: int, value: object) -> None:
         if not value:
             logger.warning(f"Survey Sheet: Row {row_number}: Type is required")
             raise ValidationError(f"Survey Sheet: Row {row_number}: Type is required")
@@ -219,7 +218,7 @@ class FlexibleAttributeImporter:
         return label, language
 
     def _validate_object_type_to_add(
-        self, cell_name: str, is_index_field: bool, object_type_to_add: str, row_number: int, value: Any
+        self, cell_name: str, is_index_field: bool, object_type_to_add: str, row_number: int, value: object
     ) -> None:
         if object_type_to_add == "attribute":
             field_suffix = cell_name[-4:]

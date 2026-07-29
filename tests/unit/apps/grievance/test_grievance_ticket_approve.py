@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.files.base import ContentFile
 import pytest
@@ -107,7 +107,7 @@ def area1(area_type: AreaType) -> Area:
 
 
 @pytest.fixture
-def household_one(afghanistan: BusinessArea, program: Program, document_types: None) -> Any:
+def household_one(afghanistan: BusinessArea, program: Program, document_types: None) -> object:
     first_individual = IndividualFactory(
         full_name="Benjamin Butler",
         given_name="Benjamin",
@@ -166,7 +166,7 @@ def household_one(afghanistan: BusinessArea, program: Program, document_types: N
 
 @pytest.fixture
 def add_individual_ticket(
-    afghanistan: BusinessArea, program: Program, area1: Area, household_one: Any
+    afghanistan: BusinessArea, program: Program, area1: Area, household_one: object
 ) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -208,7 +208,7 @@ def individual_data_change_ticket(
     afghanistan: BusinessArea,
     program: Program,
     area1: Area,
-    household_one: Any,
+    household_one: object,
 ) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -278,7 +278,7 @@ def household_data_change_ticket(
     afghanistan: BusinessArea,
     program: Program,
     area1: Area,
-    household_one: Any,
+    household_one: object,
 ) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -324,7 +324,7 @@ def household_data_change_ticket(
     ],
 )
 def test_approve_individual_data_change(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -413,7 +413,7 @@ def test_approve_individual_data_change(
     ],
 )
 def test_approve_household_data_change(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -472,7 +472,7 @@ def test_approve_household_data_change(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_approve_add_individual(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -512,11 +512,11 @@ def test_approve_add_individual(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_approve_delete_household(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    household_one: Any,
+    household_one: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -571,11 +571,11 @@ def test_approve_delete_household(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_approve_delete_household_validation_errors(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    household_one: Any,
+    household_one: object,
     document_types: None,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -673,7 +673,7 @@ def test_approve_delete_household_validation_errors(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_approve_needs_adjudication(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -751,7 +751,7 @@ def test_approve_needs_adjudication(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_approve_needs_adjudication_more(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -843,7 +843,7 @@ def test_approve_needs_adjudication_more(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_approve_needs_adjudication_partner_with_area_limit(
-    api_client: Any,
+    api_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
@@ -933,11 +933,11 @@ def test_approve_needs_adjudication_partner_with_area_limit(
     ],
 )
 def test_approve_payment_details(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    household_one: Any,
+    household_one: object,
     document_types: None,
     permissions: list,
     expected_status: int,

@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 import logging
 import mimetypes
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -176,6 +176,7 @@ from hope.models.payment_plan_purpose import PaymentPlanPurpose
 
 if TYPE_CHECKING:
     from hope.models import User
+from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +251,7 @@ class PaymentVerificationViewSet(
     # @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
     # TODO: Enable cache on verification list, it is not working due to the fact that when summary is invalidated
     # payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(
@@ -258,7 +259,7 @@ class PaymentVerificationViewSet(
         responses=PaymentVerificationSampleSizeSerializer,
     )
     @action(detail=True, methods=["post"], url_path="sample-size")
-    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def sample_size(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -288,7 +289,7 @@ class PaymentVerificationViewSet(
     )
     @action(detail=True, methods=["post"], url_path="create-verification-plan")
     @transaction.atomic
-    def create_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Create Payment Verification Plan."""
         payment_plan = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -319,7 +320,7 @@ class PaymentVerificationViewSet(
         url_path="update-verification-plan/(?P<verification_plan_id>[^/.]+)",
     )
     @transaction.atomic
-    def update_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def update_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         pvp = self.get_verification_plan_object()
         serializer = self.get_serializer(pvp, data=request.data, partial=True)
@@ -356,7 +357,7 @@ class PaymentVerificationViewSet(
     )
     @transaction.atomic
     def activate_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+        self, request: Request, verification_plan_id: str, *args: object, **kwargs: object
     ) -> Response:
         payment_plan = self.get_object()
         try:
@@ -396,7 +397,7 @@ class PaymentVerificationViewSet(
         url_path="finish-verification-plan/(?P<verification_plan_id>[^/.]+)",
     )
     @transaction.atomic
-    def finish_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def finish_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         payment_verification_plan = self.get_verification_plan_object()
         serializer = self.get_serializer(data=request.data)
@@ -431,7 +432,7 @@ class PaymentVerificationViewSet(
         url_path="discard-verification-plan/(?P<verification_plan_id>[^/.]+)",
     )
     @transaction.atomic
-    def discard_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def discard_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         payment_verification_plan = self.get_verification_plan_object()
         serializer = self.get_serializer(data=request.data)
@@ -464,7 +465,7 @@ class PaymentVerificationViewSet(
         url_path="invalid-verification-plan/(?P<verification_plan_id>[^/.]+)",
     )
     @transaction.atomic
-    def invalid_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def invalid_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         payment_verification_plan = self.get_verification_plan_object()
         serializer = self.get_serializer(data=request.data)
@@ -496,7 +497,7 @@ class PaymentVerificationViewSet(
         url_path="delete-verification-plan/(?P<verification_plan_id>[^/.]+)",
     )
     @transaction.atomic
-    def delete_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delete_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         payment_verification_plan = self.get_verification_plan_object()
         serializer = self.get_serializer(data=request.data)
@@ -529,7 +530,7 @@ class PaymentVerificationViewSet(
         url_path="export-xlsx/(?P<verification_plan_id>[^/.]+)",
     )
     @transaction.atomic
-    def export_xlsx_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def export_xlsx_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         payment_verification_plan = self.get_verification_plan_object()
         serializer = self.get_serializer(data=request.data)
@@ -568,7 +569,7 @@ class PaymentVerificationViewSet(
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def import_xlsx_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def import_xlsx_payment_verification_plan(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         payment_verification_plan = self.get_verification_plan_object()
         serializer = self.get_serializer(data=request.data)
@@ -637,7 +638,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
             200: PaymentListSerializer(many=True),
         },
     )
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Return list of verification records."""
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -648,7 +649,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def retrieve(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment = self.get_verification_record()
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -658,7 +659,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
         responses={200: PaymentDetailSerializer},
     )
     @transaction.atomic
-    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def partial_update(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Update verification amount."""
         payment = self.get_verification_record()
         payment_verification = payment.payment_verifications.first()
@@ -829,11 +830,11 @@ class PaymentPlanViewSet(
 
     @etag_decorator(PaymentPlanListKeyConstructor)
     @cached_response(key_func=PaymentPlanListKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     @transaction.atomic
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
         if "target_population_id" not in request.data:
             raise ValidationError("target_population_id is required")
         payment_plan = get_object_or_404(PaymentPlan, id=request.data["target_population_id"])
@@ -887,7 +888,7 @@ class PaymentPlanViewSet(
     )
     @action(detail=True, methods=["post"], url_path="create-follow-up")
     @transaction.atomic
-    def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create_follow_up(self, request: Request, *args: object, **kwargs: object) -> Response:
         return self._create_child_plan_response(request, PaymentPlan.PlanType.FOLLOW_UP)
 
     @extend_schema(
@@ -896,7 +897,7 @@ class PaymentPlanViewSet(
     )
     @action(detail=True, methods=["post"], url_path="create-top-up")
     @transaction.atomic
-    def create_top_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create_top_up(self, request: Request, *args: object, **kwargs: object) -> Response:
         return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP)
 
     @extend_schema(
@@ -905,11 +906,11 @@ class PaymentPlanViewSet(
     )
     @action(detail=True, methods=["post"], url_path="create-top-up-amendment")
     @transaction.atomic
-    def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create_top_up_amendment(self, request: Request, *args: object, **kwargs: object) -> Response:
         return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     @transaction.atomic
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def destroy(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan=payment_plan).delete()
@@ -929,7 +930,7 @@ class PaymentPlanViewSet(
     )
     @action(detail=True, methods=["post"], url_path="exclude-beneficiaries")
     @transaction.atomic
-    def exclude_beneficiaries(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def exclude_beneficiaries(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
 
         if payment_plan.status not in (
@@ -964,7 +965,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def lock(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -982,7 +983,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def unlock(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -1004,7 +1005,7 @@ class PaymentPlanViewSet(
         url_path="lock-fsp",
     )
     @transaction.atomic
-    def lock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def lock_fsp(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -1026,7 +1027,7 @@ class PaymentPlanViewSet(
         url_path="unlock-fsp",
     )
     @transaction.atomic
-    def unlock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def unlock_fsp(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -1048,7 +1049,7 @@ class PaymentPlanViewSet(
     )
     @action(detail=True, methods=["post"], url_path="apply-engine-formula")
     @transaction.atomic
-    def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def apply_engine_formula(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
@@ -1096,7 +1097,7 @@ class PaymentPlanViewSet(
         url_path="entitlement-export-xlsx",
     )
     @transaction.atomic
-    def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def entitlement_export_xlsx(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
@@ -1130,7 +1131,7 @@ class PaymentPlanViewSet(
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def entitlement_import_xlsx(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
@@ -1184,7 +1185,7 @@ class PaymentPlanViewSet(
         url_path="entitlement-flat-amount",
     )
     @transaction.atomic
-    def entitlement_flat_amount(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def entitlement_flat_amount(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             raise ValidationError("Entitlement actions are not available for Follow Up Payment Plans.")
@@ -1227,7 +1228,7 @@ class PaymentPlanViewSet(
         url_path="custom-exchange-rate",
     )
     @transaction.atomic
-    def custom_exchange_rate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def custom_exchange_rate(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         serializer = self.get_serializer(data=request.data)
         if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.IN_REVIEW]:
@@ -1279,7 +1280,7 @@ class PaymentPlanViewSet(
         url_path="send-for-approval",
     )
     @transaction.atomic
-    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_for_approval(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -1301,11 +1302,11 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def reject(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        def _get_reject_permission(status: str) -> Any:
+        def _get_reject_permission(status: str) -> object:
             status_to_perm_map = {
                 PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
                 PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
@@ -1333,7 +1334,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         data = dict(request.data)
@@ -1354,7 +1355,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def authorize(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def authorize(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         data = dict(request.data)
@@ -1375,7 +1376,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"], url_path="mark-as-released")
     @transaction.atomic
-    def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def mark_as_released(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         data = dict(request.data)
@@ -1396,7 +1397,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="send-to-payment-gateway")
     @transaction.atomic
-    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_to_payment_gateway(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
@@ -1417,7 +1418,7 @@ class PaymentPlanViewSet(
         )
 
     @action(detail=True, methods=["post"], url_path="send-to-vision")
-    def send_to_vision(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_to_vision(self, request: Request, *args: object, **kwargs: object) -> Response:
         if not bool(flag_enabled("VISION_INTEGRATION_ACTIVE", request=request)):
             raise PermissionDenied("Send to Vision feature is not enabled")
 
@@ -1438,7 +1439,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def split(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def split(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         splits_sent_to_pg = payment_plan.splits.filter(
             sent_to_payment_gateway=True,
@@ -1467,7 +1468,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="export-pdf-payment-plan-summary")
     @transaction.atomic
-    def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def export_pdf_payment_plan_summary(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         export_pdf_payment_plan_summary_async_task(payment_plan, str(request.user.pk))
         return Response(
@@ -1478,7 +1479,7 @@ class PaymentPlanViewSet(
     @extend_schema(responses={200: FSPXlsxTemplateSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="fsp-xlsx-template-list")
     @transaction.atomic
-    def fsp_xlsx_template_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def fsp_xlsx_template_list(self, request: Request, *args: object, **kwargs: object) -> Response:
         qs = FinancialServiceProviderXlsxTemplate.objects.filter(
             financial_service_providers__allowed_business_areas__slug=self.business_area_slug
         ).order_by("name")
@@ -1499,7 +1500,7 @@ class PaymentPlanViewSet(
     )
     @action(detail=True, methods=["post"], url_path="assign-funds-commitments")
     @transaction.atomic
-    def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def assign_funds_commitments(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         fund_commitment_items_ids = serializer.validated_data["fund_commitment_items_ids"]
@@ -1526,7 +1527,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="ready-for-closure")
     @transaction.atomic
-    def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def ready_for_closure(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).ready_for_closure(user=cast("User", request.user))
@@ -1542,7 +1543,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="send-back-to-finished")
     @transaction.atomic
-    def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_back_to_finished(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).send_back_to_finished(user=cast("User", request.user))
@@ -1558,7 +1559,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def close(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         closure_comment = serializer.validated_data.get("closure_comment")
@@ -1579,7 +1580,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def abort(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         abort_comment = serializer.validated_data.get("abort_comment")
@@ -1599,7 +1600,7 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["get"], url_path="reactivate-abort")
     @transaction.atomic
-    def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def reactivate_abort(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).reactivate_abort()
@@ -1696,7 +1697,7 @@ class FollowUpInstructionViewSet(
         return cast("User", request.user)
 
     @transaction.atomic
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = self._request_user(request)
@@ -1710,7 +1711,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def lock(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
@@ -1721,7 +1722,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def unlock(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
@@ -1732,7 +1733,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"], url_path="lock-fsp")
     @transaction.atomic
-    def lock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def lock_fsp(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
@@ -1743,7 +1744,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"], url_path="unlock-fsp")
     @transaction.atomic
-    def unlock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def unlock_fsp(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
@@ -1754,7 +1755,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"], url_path="send-for-approval")
     @transaction.atomic
-    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_for_approval(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
@@ -1765,7 +1766,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def reject(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
@@ -1779,7 +1780,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
@@ -1793,7 +1794,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def authorize(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def authorize(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
@@ -1807,7 +1808,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["post"], url_path="mark-as-released")
     @transaction.atomic
-    def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def mark_as_released(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
@@ -1821,7 +1822,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"], url_path="delivery-export-xlsx")
     @transaction.atomic
-    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_export_xlsx(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         instruction = FollowUpInstructionService(instruction=instruction).delivery_export_xlsx(
             self._request_user(request)
@@ -1839,7 +1840,7 @@ class FollowUpInstructionViewSet(
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_import_xlsx(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
@@ -1868,14 +1869,14 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def close(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         instruction = FollowUpInstructionService(instruction=instruction).close(self._request_user(request))
         return self._detail_response(instruction)
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def abort(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
@@ -1887,7 +1888,7 @@ class FollowUpInstructionViewSet(
 
     @action(detail=True, methods=["get"], url_path="reactivate-abort")
     @transaction.atomic
-    def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def reactivate_abort(self, request: Request, *args: object, **kwargs: object) -> Response:
         instruction = self.get_object()
         instruction = FollowUpInstructionService(instruction=instruction).reactivate_abort(self._request_user(request))
         return self._detail_response(instruction)
@@ -1941,11 +1942,11 @@ class TargetPopulationViewSet(
 
     @etag_decorator(TargetPopulationListKeyConstructor)
     @cached_response(key_func=TargetPopulationListKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     @transaction.atomic
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def destroy(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan=payment_plan).delete()
@@ -1961,7 +1962,7 @@ class TargetPopulationViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def lock(self, request: Request, *args: object, **kwargs: object) -> Response:
         tp = self.get_object()
         old_tp = copy_model_object(tp)
         payment_plan = PaymentPlanService(tp).execute_update_status_action(
@@ -1979,7 +1980,7 @@ class TargetPopulationViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def unlock(self, request: Request, *args: object, **kwargs: object) -> Response:
         tp = self.get_object()
         old_tp = copy_model_object(tp)
 
@@ -1998,7 +1999,7 @@ class TargetPopulationViewSet(
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def rebuild(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def rebuild(self, request: Request, *args: object, **kwargs: object) -> Response:
         tp = self.get_object()
         old_tp = copy_model_object(tp)
 
@@ -2030,7 +2031,7 @@ class TargetPopulationViewSet(
         filter_backends=[],
     )
     @transaction.atomic
-    def pending_payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def pending_payments(self, request: Request, *args: object, **kwargs: object) -> Response:
         tp = self.get_object()
         queryset = tp.payment_items.select_related("household", "head_of_household", "household__admin2").all()
 
@@ -2056,7 +2057,7 @@ class TargetPopulationViewSet(
         url_path="pending-payments/count",
         filter_backends=[],
     )
-    def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def pending_payments_count(self, request: HttpRequest, *args: object, **kwargs: object) -> Response:
         tp = self.get_object()
         pending_payments_count = tp.payment_items.count()
         return Response({"count": pending_payments_count}, status=status.HTTP_200_OK)
@@ -2067,7 +2068,7 @@ class TargetPopulationViewSet(
         url_path="mark-ready",
     )
     @transaction.atomic
-    def mark_ready(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def mark_ready(self, request: Request, *args: object, **kwargs: object) -> Response:
         tp = self.get_object()
         old_tp = copy_model_object(tp)
 
@@ -2089,7 +2090,7 @@ class TargetPopulationViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def copy(self, request: Request, *args: object, **kwargs: object) -> Response:
         user = request.user
         request.data["target_population_id"] = kwargs.get("pk")
 
@@ -2165,7 +2166,7 @@ class TargetPopulationViewSet(
 
     @action(detail=True, methods=["post"], url_path="apply-engine-formula")
     @transaction.atomic
-    def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def apply_engine_formula(self, request: Request, *args: object, **kwargs: object) -> Response:
         tp = self.get_object()
         serializer = self.get_serializer(
             data=request.data,
@@ -2231,7 +2232,7 @@ class PaymentPlanManagerialViewSet(
     # TODO: e2e failed probably because of cache here
     @etag_decorator(PaymentPlanKeyConstructor)
     @cached_response(key_func=PaymentPlanKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     @action(
@@ -2241,7 +2242,7 @@ class PaymentPlanManagerialViewSet(
         serializer_class=PaymentPlanBulkActionSerializer,
     )
     @transaction.atomic
-    def bulk_action(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def bulk_action(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         action_name = serializer.validated_data["action"]
@@ -2336,12 +2337,12 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
         )
 
     @transaction.atomic
-    def perform_create(self, serializer: Any) -> None:
+    def perform_create(self, serializer: object) -> None:
         document = serializer.save()
         log_payment_plan_supporting_document(document.payment_plan, self.request.user, document.title, created=True)
 
     @transaction.atomic
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def destroy(self, request: Request, *args: object, **kwargs: object) -> Response:
         document = self.get_object()
         payment_plan = document.payment_plan
         title = document.title
@@ -2351,7 +2352,7 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
 
     @action(detail=True, methods=["get"])
     @transaction.atomic
-    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
+    def download(self, request: Request, *args: object, **kwargs: object) -> FileResponse:
         document = self.get_object()
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
@@ -2436,7 +2437,7 @@ class PaymentViewSet(
         url_path="mark-as-failed",
     )
     @transaction.atomic
-    def mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def mark_as_failed(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment = self.get_object()
         mark_as_failed(payment, str(request.user.pk))
         return Response(
@@ -2451,7 +2452,7 @@ class PaymentViewSet(
         url_path="revert-mark-as-failed",
     )
     @transaction.atomic
-    def revert_mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def revert_mark_as_failed(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -2501,7 +2502,7 @@ class PaymentGlobalViewSet(
         )
 
     @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def choices(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         return Response(data=self.get_serializer(instance={}).data)
 
 
@@ -2509,7 +2510,7 @@ class PaymentGlobalViewSet(
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def available_fsps_for_delivery_mechanisms(
-    request: Request, business_area_slug: str, *args: Any, **kwargs: Any
+    request: Request, business_area_slug: str, *args: object, **kwargs: object
 ) -> Response:
     delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True)
 
@@ -2524,7 +2525,7 @@ def available_fsps_for_delivery_mechanisms(
         .distinct()
     )
 
-    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, Any]]:
+    def get_fsps(dm: DeliveryMechanism) -> list[dict[str, object]]:
         result = []
         for fsp in fsps:
             dm_names = {d.name for d in fsp.delivery_mechanisms.all()}
@@ -2591,7 +2592,7 @@ class PaymentPlanGroupViewSet(
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
     @cached_response(key_func=PaymentPlanGroupListKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     def perform_destroy(self, instance: PaymentPlanGroup) -> None:
@@ -2606,7 +2607,7 @@ class PaymentPlanGroupViewSet(
         responses={200: PaymentPlanGroupDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
-    def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_export_xlsx(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan_group = self.get_object()
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
@@ -2669,7 +2670,7 @@ class PaymentPlanGroupViewSet(
         responses={200: PaymentPlanGroupDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="send-xlsx-password")
-    def send_xlsx_password(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_xlsx_password(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan_group = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -2697,7 +2698,7 @@ class PaymentPlanGroupViewSet(
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def delivery_import_xlsx(self, request: Request, *args: object, **kwargs: object) -> Response:
         payment_plan_group = self.get_object()
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
@@ -2747,7 +2748,7 @@ class PaymentPlanGroupViewSet(
         )
 
     @action(detail=True, methods=["post"], url_path="send-to-payment-gateway")
-    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def send_to_payment_gateway(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Queue an async send-to-payment-gateway job for the group's sendable payment plans.
 
         A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
@@ -2793,5 +2794,5 @@ class PaymentPlanPurposeViewSet(
 
     @etag_decorator(PaymentPlanPurposeListKeyConstructor)
     @cached_response(key_func=PaymentPlanPurposeListKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -21,7 +21,7 @@ def strategy(sanction_list: "SanctionList") -> "EUSanctionList":
     return sanction_list.strategy  # type: ignore[return-value]
 
 
-def test_load_file(strategy: "EUSanctionList", always_eager: Any) -> None:
+def test_load_file(strategy: "EUSanctionList", always_eager: object) -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
     CountryFactory(name="Iraq", short_name="Iraq", iso_code2="IQ", iso_code3="IRQ", iso_num="0368")
     CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
@@ -32,7 +32,7 @@ def test_load_file(strategy: "EUSanctionList", always_eager: Any) -> None:
     assert SanctionListIndividualDateOfBirth.objects.count() == 1
 
 
-def test_invalid_birthdate_recorded_in_internal_data(strategy: "EUSanctionList", always_eager: Any) -> None:
+def test_invalid_birthdate_recorded_in_internal_data(strategy: "EUSanctionList", always_eager: object) -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
     CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
 

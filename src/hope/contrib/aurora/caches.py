@@ -1,5 +1,4 @@
-from typing import Any
-
+from django.http import HttpRequest
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import KeyConstructorMixin, get_or_create_cache_key
@@ -11,10 +10,10 @@ class OrganizationListVersionsKeyBit(KeyBitBase):
 
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -32,10 +31,10 @@ class ProjectListVersionsKeyBit(KeyBitBase):
 
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -53,10 +52,10 @@ class RegistrationListVersionsKeyBit(KeyBitBase):
 
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:

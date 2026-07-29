@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from admin_extra_buttons.decorators import button
 from admin_sync.mixins.admin import SyncModelAdmin
@@ -68,11 +67,13 @@ class GroupAdmin(AutocompleteForeignKeyMixin, ImportExportModelAdmin, SyncModelA
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request: HttpRequest, form: Any, formsets: Any, add: bool = False) -> list[dict]:
+    def construct_change_message(
+        self, request: HttpRequest, form: object, formsets: object, add: bool = False
+    ) -> list[dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            changed: dict[str, Any] = change_message[0]["changed"]
+            changed: dict[str, object] = change_message[0]["changed"]
             changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),
@@ -100,13 +101,13 @@ class UserGroupAdmin(HOPEModelAdminBase):
             )
         )
 
-    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def check_publish_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return False
 
-    def _get_data(self, record: Any) -> str:
+    def _get_data(self, record: object) -> str:
         groups = Group.objects.all()
         collector = ForeignKeysCollector("")
         objs = []

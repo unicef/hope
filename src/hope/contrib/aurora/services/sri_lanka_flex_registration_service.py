@@ -1,5 +1,3 @@
-from typing import Any
-
 from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict_if_exists,
@@ -53,7 +51,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     def _prepare_household_data(
         self,
         localization_dict: dict,
-        record: Any,
+        record: object,
         registration_data_import: RegistrationDataImport,
     ) -> dict:
         household_data = {
@@ -86,7 +84,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         self,
         head_of_household_info: dict,
         registration_data_import: RegistrationDataImport | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> dict:
         flex_fields_dict = build_flex_arg_dict_from_list_if_exists(
             head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS
@@ -163,7 +161,9 @@ class SriLankaRegistrationService(BaseRegistrationService):
             country=Country.objects.get(iso_code2="LK"),
         )
 
-    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
+    def create_household_for_rdi_household(
+        self, record: object, registration_data_import: RegistrationDataImport
+    ) -> None:
         record_data_dict = record.get_data()
         localization_dict = record_data_dict.get("localization-info", [])[0]
         head_of_household_dict = record_data_dict.get("caretaker-info", [])[0]

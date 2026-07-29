@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 from rest_framework import serializers
 
@@ -75,15 +75,15 @@ class KoboAssetObjectSerializer(serializers.Serializer):
     xls_link = serializers.CharField()
 
 
-def attr_resolver(attname: str, default_value: Any, obj: Any) -> Any:
+def attr_resolver(attname: str, default_value: object, obj: object) -> object:
     return getattr(obj, attname, default_value)
 
 
-def dict_resolver(attname: str, default_value: Any, obj: Any) -> Any | None:
+def dict_resolver(attname: str, default_value: object, obj: object) -> object | None:
     return obj.get(attname, default_value)
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: Any, obj: Any) -> Any | None:
+def _custom_dict_or_attr_resolver(attname: str, default_value: object, obj: object) -> object | None:
     resolver: Callable | None = attr_resolver
     if isinstance(obj, dict):
         resolver = dict_resolver
@@ -92,7 +92,7 @@ def _custom_dict_or_attr_resolver(attname: str, default_value: Any, obj: Any) ->
     return resolver(attname, default_value, obj)
 
 
-def resolve_label(obj: Any) -> list[dict[str, Any]]:
+def resolve_label(obj: object) -> list[dict[str, object]]:
     return [{"language": k, "label": v} for k, v in obj.items()]
 
 
@@ -102,15 +102,15 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
     value = serializers.SerializerMethodField()
     list_name = serializers.CharField(default=None)
 
-    def get_labels(self, obj: Any) -> Any:
+    def get_labels(self, obj: object) -> object:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
-    def get_value(self, obj: Any) -> str | Any | None:
+    def get_value(self, obj: object) -> str | object | None:
         if isinstance(obj, FlexibleAttributeChoice):
             return obj.name
         return _custom_dict_or_attr_resolver("value", None, obj)
 
-    def get_label_en(self, obj: Any) -> str | None:
+    def get_label_en(self, obj: object) -> str | None:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
         return None
@@ -140,23 +140,23 @@ class FieldAttributeSerializer(serializers.Serializer):
     pdu_data = serializers.SerializerMethodField()
 
     @staticmethod
-    def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, Any] | None:
+    def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, object] | None:
         if isinstance(obj, FlexibleAttribute) and obj.pdu_data:
             return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
 
-    def get_labels(self, obj: Any) -> list[dict[str, Any]]:
+    def get_labels(self, obj: object) -> list[dict[str, object]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
-    def get_label_en(self, obj: Any) -> str | None:
+    def get_label_en(self, obj: object) -> str | None:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
         return None
 
-    def get_is_flex_field(self, obj: Any) -> bool:
+    def get_is_flex_field(self, obj: object) -> bool:
         return isinstance(obj, FlexibleAttribute)
 
-    def get_associated_with(self, obj: Any) -> Any | None:
+    def get_associated_with(self, obj: object) -> object | None:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
         if resolved == 0:
             return "Household"

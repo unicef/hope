@@ -1,7 +1,6 @@
 """Tests for program cycle model and validation."""
 
 from decimal import Decimal
-from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
@@ -23,12 +22,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory.create()
 
 

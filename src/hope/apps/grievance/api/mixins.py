@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -165,11 +163,11 @@ class GrievancePermissionsMixin:
     def _permission_filtering_based_on_program(
         self,
         action: str,
-        assigned_to_filter: dict[str, Any],
-        created_by_filter: dict[str, Any],
+        assigned_to_filter: dict[str, object],
+        created_by_filter: dict[str, object],
         filters: Q,
-        permissions_map: dict[str, Any],
-        **kwargs: Any,
+        permissions_map: dict[str, object],
+        **kwargs: object,
     ) -> Q:
         sensitive_category_filter = kwargs.get("sensitive_category_filter")
         user = kwargs.get("user")

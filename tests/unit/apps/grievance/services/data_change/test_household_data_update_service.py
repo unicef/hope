@@ -1,5 +1,4 @@
 import datetime
-from typing import Any
 
 from django.test import TestCase
 from django.utils import timezone
@@ -37,7 +36,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def role_context(program: Program) -> dict[str, Any]:
+def role_context(program: Program) -> dict[str, object]:
     household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
     individual = IndividualFactory(
         household=household,
@@ -62,7 +61,7 @@ def role_context(program: Program) -> dict[str, Any]:
 
 
 @pytest.fixture
-def household_with_previous_values(program: Program) -> Any:
+def household_with_previous_values(program: Program) -> object:
     return HouseholdFactory(
         program=program,
         business_area=program.business_area,
@@ -74,7 +73,7 @@ def household_with_previous_values(program: Program) -> Any:
 
 
 @pytest.fixture
-def data_change_ticket(program: Program) -> Any:
+def data_change_ticket(program: Program) -> object:
     return GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
@@ -83,7 +82,7 @@ def data_change_ticket(program: Program) -> Any:
 
 
 @pytest.fixture
-def empty_ticket_details(data_change_ticket: Any, household_with_previous_values: Any) -> Any:
+def empty_ticket_details(data_change_ticket: object, household_with_previous_values: object) -> object:
     return TicketHouseholdDataUpdateDetailsFactory(
         ticket=data_change_ticket,
         household=household_with_previous_values,
@@ -92,7 +91,7 @@ def empty_ticket_details(data_change_ticket: Any, household_with_previous_values
 
 
 def test_save_datetime_field_records_previous_value_as_isoformat(
-    household_with_previous_values: Any, data_change_ticket: Any
+    household_with_previous_values: object, data_change_ticket: object
 ) -> None:
     extras = {
         "issue_type": {
@@ -118,7 +117,7 @@ def test_save_datetime_field_records_previous_value_as_isoformat(
 
 
 def test_save_admin_area_title_records_previous_p_code(
-    household_with_previous_values: Any, data_change_ticket: Any
+    household_with_previous_values: object, data_change_ticket: object
 ) -> None:
     extras = {
         "issue_type": {
@@ -140,7 +139,7 @@ def test_save_admin_area_title_records_previous_p_code(
 
 
 def test_update_datetime_field_records_previous_value_as_isoformat(
-    household_with_previous_values: Any, empty_ticket_details: Any
+    household_with_previous_values: object, empty_ticket_details: object
 ) -> None:
     update_extras = {
         "household_data_update_issue_type_extras": {
@@ -164,7 +163,7 @@ def test_update_datetime_field_records_previous_value_as_isoformat(
 
 
 def test_update_country_field_records_previous_value_as_iso_code3(
-    household_with_previous_values: Any, empty_ticket_details: Any
+    household_with_previous_values: object, empty_ticket_details: object
 ) -> None:
     update_extras = {
         "household_data_update_issue_type_extras": {
@@ -184,7 +183,7 @@ def test_update_country_field_records_previous_value_as_iso_code3(
 
 
 def test_update_admin_area_title_strips_p_code_from_label(
-    household_with_previous_values: Any, empty_ticket_details: Any
+    household_with_previous_values: object, empty_ticket_details: object
 ) -> None:
     update_extras = {
         "household_data_update_issue_type_extras": {
@@ -258,7 +257,7 @@ def test_propagate_admin_areas_on_close_ticket() -> None:
     assert household.admin3.p_code == "AF010101"
 
 
-def test_update_roles_new_create_ticket(role_context: dict[str, Any]) -> None:
+def test_update_roles_new_create_ticket(role_context: dict[str, object]) -> None:
     individual = role_context["individual"]
     household = role_context["household"]
     grievance_ticket = role_context["grievance_ticket"]
@@ -294,7 +293,7 @@ def test_update_roles_new_create_ticket(role_context: dict[str, Any]) -> None:
     assert details.household_data == expected_dict
 
 
-def test_update_roles_new_update_ticket_add_new_role(role_context: dict[str, Any]) -> None:
+def test_update_roles_new_update_ticket_add_new_role(role_context: dict[str, object]) -> None:
     individual = role_context["individual"]
     household = role_context["household"]
     grievance_ticket = role_context["grievance_ticket"]
@@ -349,7 +348,7 @@ def test_update_roles_new_update_ticket_add_new_role(role_context: dict[str, Any
     assert details.household_data == expected_dict
 
 
-def test_update_roles_new_update_ticket_update_role(role_context: dict[str, Any]) -> None:
+def test_update_roles_new_update_ticket_update_role(role_context: dict[str, object]) -> None:
     individual = role_context["individual"]
     household = role_context["household"]
     grievance_ticket = role_context["grievance_ticket"]
@@ -414,7 +413,7 @@ def test_update_roles_new_update_ticket_update_role(role_context: dict[str, Any]
     assert details.household_data == expected_dict
 
 
-def test_update_roles_new_approve_ticket(role_context: dict[str, Any]) -> None:
+def test_update_roles_new_approve_ticket(role_context: dict[str, object]) -> None:
     individual = role_context["individual"]
     household = role_context["household"]
     grievance_ticket = role_context["grievance_ticket"]

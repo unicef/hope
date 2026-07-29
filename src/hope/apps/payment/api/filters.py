@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db.models import Q, QuerySet
 import django_filters
 from django_filters import FilterSet, OrderingFilter
@@ -83,7 +81,7 @@ class TargetPopulationFilter(PaymentPlanFilter):
         }
 
     @staticmethod
-    def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+    def filter_by_status(queryset: "QuerySet", model_field: str, value: object) -> "QuerySet":
         # assigned TP statuses
         is_assigned = [
             PaymentPlan.Status.PREPARING.value,

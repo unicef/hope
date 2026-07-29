@@ -1,5 +1,4 @@
 from types import SimpleNamespace
-from typing import Any
 from unittest.mock import patch
 
 from django.contrib.auth.models import AnonymousUser, Group, Permission
@@ -207,7 +206,7 @@ def test_get_all_permissions_caches_result(
 
 
 @patch("hope.apps.core.backends.cache.get")
-def test_cache_get_returns_cached_permissions(mock_cache_get: Any, backend, user, business_area, permission):
+def test_cache_get_returns_cached_permissions(mock_cache_get: object, backend, user, business_area, permission):
     mock_cache_get.return_value = {get_permission_name(permission)}
     permissions = backend.get_all_permissions(user, business_area)
     mock_cache_get.assert_called()

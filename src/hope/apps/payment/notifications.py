@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from constance import config
 from django.conf import settings
@@ -126,7 +125,7 @@ class PaymentNotification:
             except Exception:  # pragma: no cover
                 logger.exception("Failed to send payment plan notification")
 
-    def _prepare_body_variables(self) -> dict[str, Any]:
+    def _prepare_body_variables(self) -> dict[str, object]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         return {
             "first_name": "Payment Plan",

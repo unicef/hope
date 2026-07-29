@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -37,7 +36,7 @@ pytestmark = [
 
 
 @pytest.fixture
-def update_context() -> dict[str, Any]:
+def update_context() -> dict[str, object]:
     business_area = BusinessAreaFactory()
     program = ProgramFactory(business_area=business_area)
     country_afg = CountryFactory(iso_code3="AFG")
@@ -83,7 +82,7 @@ def update_context() -> dict[str, Any]:
     }
 
 
-def test_add_document_of_same_type_not_unique_per_individual_valid(update_context: dict[str, Any]) -> None:
+def test_add_document_of_same_type_not_unique_per_individual_valid(update_context: dict[str, object]) -> None:
     DocumentFactory(
         individual=update_context["individual"],
         type=update_context["document_type_not_unique"],
@@ -116,7 +115,7 @@ def test_add_document_of_same_type_not_unique_per_individual_valid(update_contex
     assert Document.objects.filter(document_number="111111").count() == 1
 
 
-def test_add_document_of_same_type_not_unique_per_individual_pending(update_context: dict[str, Any]) -> None:
+def test_add_document_of_same_type_not_unique_per_individual_pending(update_context: dict[str, object]) -> None:
     DocumentFactory(
         individual=update_context["individual"],
         type=update_context["document_type_not_unique"],
@@ -149,7 +148,7 @@ def test_add_document_of_same_type_not_unique_per_individual_pending(update_cont
     assert Document.objects.filter(document_number="111111").count() == 1
 
 
-def test_add_document_of_same_type_unique_per_individual_valid(update_context: dict[str, Any]) -> None:
+def test_add_document_of_same_type_unique_per_individual_valid(update_context: dict[str, object]) -> None:
     DocumentFactory(
         individual=update_context["individual"],
         type=update_context["document_type_unique"],
@@ -181,7 +180,7 @@ def test_add_document_of_same_type_unique_per_individual_valid(update_context: d
     )
 
 
-def test_save_sets_previous_value_for_phone_and_date(update_context: dict[str, Any]) -> None:
+def test_save_sets_previous_value_for_phone_and_date(update_context: dict[str, object]) -> None:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
@@ -211,7 +210,7 @@ def test_save_sets_previous_value_for_phone_and_date(update_context: dict[str, A
     assert ticket_details.individual_data["birth_date"]["previous_value"] == "2020-01-02"
 
 
-def test_update_sets_previous_value_for_phone_and_date(update_context: dict[str, Any]) -> None:
+def test_update_sets_previous_value_for_phone_and_date(update_context: dict[str, object]) -> None:
     ticket_details = TicketIndividualDataUpdateDetailsFactory(
         individual=update_context["individual"],
         ticket__business_area=update_context["business_area"],
@@ -240,7 +239,7 @@ def test_update_sets_previous_value_for_phone_and_date(update_context: dict[str,
     assert Document.objects.filter(document_number="111111").count() == 0
 
 
-def test_add_document_of_same_type_unique_per_individual_pending(update_context: dict[str, Any]) -> None:
+def test_add_document_of_same_type_unique_per_individual_pending(update_context: dict[str, object]) -> None:
     DocumentFactory(
         individual=update_context["individual"],
         type=update_context["document_type_unique"],
@@ -273,7 +272,7 @@ def test_add_document_of_same_type_unique_per_individual_pending(update_context:
     assert Document.objects.filter(document_number="111111").count() == 1
 
 
-def test_edit_document_of_same_type_unique_per_individual(update_context: dict[str, Any]) -> None:
+def test_edit_document_of_same_type_unique_per_individual(update_context: dict[str, object]) -> None:
     DocumentFactory(
         individual=update_context["individual"],
         type=update_context["document_type_unique"],
@@ -323,7 +322,7 @@ def test_edit_document_of_same_type_unique_per_individual(update_context: dict[s
     assert document_to_edit.type == update_context["document_type_not_unique"]
 
 
-def test_edit_document_unique_per_individual(update_context: dict[str, Any]) -> None:
+def test_edit_document_unique_per_individual(update_context: dict[str, object]) -> None:
     document_to_edit = DocumentFactory(
         individual=update_context["individual"],
         type=update_context["document_type_unique"],
@@ -364,7 +363,7 @@ def test_edit_document_unique_per_individual(update_context: dict[str, Any]) -> 
     assert document_to_edit.document_number == "22222"
 
 
-def test_edit_document_with_data_already_existing_in_same_program(update_context: dict[str, Any]) -> None:
+def test_edit_document_with_data_already_existing_in_same_program(update_context: dict[str, object]) -> None:
     household = HouseholdFactory(
         program=update_context["program"],
         business_area=update_context["business_area"],
@@ -426,7 +425,7 @@ def test_edit_document_with_data_already_existing_in_same_program(update_context
     assert document_to_edit.document_number == "111111"
 
 
-def test_edit_account(update_context: dict[str, Any]) -> None:
+def test_edit_account(update_context: dict[str, object]) -> None:
     fi1 = FinancialInstitutionFactory()
     fi2 = FinancialInstitutionFactory()
     account = AccountFactory(
@@ -543,7 +542,7 @@ def _assert_fields_updated(hh, fields, new_values, extract):
 
 
 def test_update_people_individual_hh_plain_fields(
-    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
+    update_context: dict[str, object], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
     fields = [
         "consent",
@@ -575,7 +574,7 @@ def test_update_people_individual_hh_plain_fields(
 
 
 def test_update_people_individual_hh_country_fields(
-    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
+    update_context: dict[str, object], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
     with django_assert_num_queries(32):
         fields = ["country_origin", "country"]
@@ -587,7 +586,7 @@ def test_update_people_individual_hh_country_fields(
 
 
 def test_update_people_individual_hh_currency_field(
-    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
+    update_context: dict[str, object], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
     with django_assert_num_queries(30):
         fields = ["currency"]
@@ -599,7 +598,7 @@ def test_update_people_individual_hh_currency_field(
 
 
 def test_update_people_individual_hh_admin_area(
-    update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
+    update_context: dict[str, object], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
     hh = update_context["household"]
     ind_data = {
@@ -620,7 +619,7 @@ def test_update_people_individual_hh_admin_area(
     assert hh.admin2.parent == hh.admin1
 
 
-def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
+def test_update_phone_no_data(update_context: dict[str, object]) -> None:
     update_context["ticket"].individual_data_update_ticket_details.individual_data = {
         "phone_no": {"approve_status": True, "previous_value": "+485656565665", "value": "+485544332211"},
         "phone_no_alternative": {
@@ -640,7 +639,7 @@ def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
     assert update_context["individual"].phone_no_alternative == "+485544334455"
 
 
-def test_close_individual_update_without_household(update_context: dict[str, Any]) -> None:
+def test_close_individual_update_without_household(update_context: dict[str, object]) -> None:
     individual_without_household = IndividualFactory(
         business_area=update_context["business_area"],
         program=update_context["program"],
@@ -665,7 +664,7 @@ def test_close_individual_update_without_household(update_context: dict[str, Any
     assert individual_without_household.phone_no == "+485544332211"
 
 
-def test_close_individual_update_invalidates_both_caches(update_context: dict[str, Any]) -> None:
+def test_close_individual_update_invalidates_both_caches(update_context: dict[str, object]) -> None:
     update_context["ticket"].individual_data_update_ticket_details.individual_data = {
         "phone_no": {"approve_status": True, "previous_value": "+48111", "value": "+48222"},
     }
@@ -685,7 +684,7 @@ def test_close_individual_update_invalidates_both_caches(update_context: dict[st
     assert get_individual_list_program_key(program_id) > ind_cache_before
 
 
-def test_close_individual_update_with_hh_fields_invalidates_household_cache(update_context: dict[str, Any]) -> None:
+def test_close_individual_update_with_hh_fields_invalidates_household_cache(update_context: dict[str, object]) -> None:
     update_context["ticket"].individual_data_update_ticket_details.individual_data = {
         "village": {"approve_status": True, "previous_value": "", "value": "New Village"},
     }

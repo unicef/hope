@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
 from django_filters import CharFilter, DateFromToRangeFilter, RangeFilter
@@ -51,7 +49,7 @@ class RegistrationDataImportFilter(UpdatedAtFilter):
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_max(
-        queryset: "QuerySet", model_field: str, value: Any
+        queryset: "QuerySet", model_field: str, value: object
     ) -> "QuerySet":
         return queryset.annotate(
             household_count_with_phone_number=Count(
@@ -63,7 +61,7 @@ class RegistrationDataImportFilter(UpdatedAtFilter):
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_min(
-        queryset: "QuerySet", model_field: str, value: Any
+        queryset: "QuerySet", model_field: str, value: object
     ) -> "QuerySet":
         return queryset.annotate(
             household_count_with_phone_number=Count(

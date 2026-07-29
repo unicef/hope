@@ -1,6 +1,6 @@
 """Tests for periodic data update online edit bulk approve."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -20,7 +20,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
@@ -30,17 +30,17 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner(db: Any) -> Any:
+def partner(db: object) -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> User:
+def user(partner: object) -> User:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -117,14 +117,14 @@ def url_bulk_approve(business_area: BusinessArea, program: Program) -> str:
 def test_bulk_approve_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit_ready_1: PDUOnlineEdit,
     pdu_edit_ready_2: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -139,13 +139,13 @@ def test_bulk_approve_permissions(
 
 
 def test_bulk_approve_check_authorized_user_single_edit(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit_ready_not_authorized: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -171,14 +171,14 @@ def test_bulk_approve_check_authorized_user_single_edit(
 
 
 def test_bulk_approve_check_authorized_user_mixed(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit_ready_not_authorized: PDUOnlineEdit,
     pdu_edit_ready_1: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -205,14 +205,14 @@ def test_bulk_approve_check_authorized_user_mixed(
 
 
 def test_bulk_approve_success(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit_ready_1: PDUOnlineEdit,
     pdu_edit_ready_2: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -242,13 +242,13 @@ def test_bulk_approve_success(
 
 
 def test_bulk_approve_single_edit(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit_ready_1: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -269,14 +269,14 @@ def test_bulk_approve_single_edit(
 
 
 def test_bulk_approve_invalid_status(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit_ready_1: PDUOnlineEdit,
     pdu_edit_new: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -301,7 +301,7 @@ def test_bulk_approve_invalid_status(
 
 
 def test_bulk_approve_mixed_statuses(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
@@ -309,7 +309,7 @@ def test_bulk_approve_mixed_statuses(
     pdu_edit_new: PDUOnlineEdit,
     pdu_edit_approved: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -328,12 +328,12 @@ def test_bulk_approve_mixed_statuses(
 
 
 def test_bulk_approve_empty_ids(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -351,12 +351,12 @@ def test_bulk_approve_empty_ids(
 
 
 def test_bulk_approve_non_existent_ids(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -375,13 +375,13 @@ def test_bulk_approve_non_existent_ids(
 
 
 def test_bulk_approve_preserves_other_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit_ready_1: PDUOnlineEdit,
     url_bulk_approve: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,

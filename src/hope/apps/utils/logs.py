@@ -1,6 +1,6 @@
 from functools import wraps
 import logging
-from typing import Any, Callable, ParamSpec, TypeVar
+from typing import Callable, ParamSpec, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def log_start_and_end[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     return wrapper
 
 
-def safe_log(value: Any) -> str:
+def safe_log(value: object) -> str:
     """Strip CR/LF to prevent log forging (CWE-117).
 
     ``LogForgingFilter`` covers all ``%s`` log args automatically; call this only
@@ -34,7 +34,7 @@ class _SanitizedValue:
 
     __slots__ = ("_value",)
 
-    def __init__(self, value: Any) -> None:
+    def __init__(self, value: object) -> None:
         self._value = value
 
     def __str__(self) -> str:

@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from hope.apps.core.kobo.api import CountryCodeNotProvidedError, KoboAPI
@@ -8,7 +6,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def kobo_settings(settings: Any) -> None:
+def kobo_settings(settings: object) -> None:
     settings.KOBO_MASTER_API_TOKEN = "test-token"
     settings.KOBO_URL = "https://kf.hope.unicef.org"
     settings.KOBO_PROJECT_VIEWS_ID = "pvEsUUfAgYyyV7jpR6i3FvM"

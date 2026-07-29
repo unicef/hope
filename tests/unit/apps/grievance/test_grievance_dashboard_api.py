@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -21,7 +21,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def dashboard_context() -> dict[str, Any]:
+def dashboard_context() -> dict[str, object]:
     business_area = BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="0060")
     user = UserFactory(first_name="Test", last_name="User")
     country = CountryFactory(
@@ -152,13 +152,13 @@ def dashboard_context() -> dict[str, Any]:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, dashboard_context: dict[str, Any]) -> Any:
+def authenticated_client(api_client: Callable, dashboard_context: dict[str, object]) -> object:
     return api_client(dashboard_context["user"])
 
 
 def test_global_dashboard_api_endpoint_with_permission(
-    authenticated_client: Any,
-    dashboard_context: dict[str, Any],
+    authenticated_client: object,
+    dashboard_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -199,8 +199,8 @@ def test_global_dashboard_api_endpoint_with_permission(
 
 
 def test_global_dashboard_api_endpoint_without_permission(
-    authenticated_client: Any,
-    dashboard_context: dict[str, Any],
+    authenticated_client: object,
+    dashboard_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -214,8 +214,8 @@ def test_global_dashboard_api_endpoint_without_permission(
 
 
 def test_dashboard_data_accuracy(
-    authenticated_client: Any,
-    dashboard_context: dict[str, Any],
+    authenticated_client: object,
+    dashboard_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -237,8 +237,8 @@ def test_dashboard_data_accuracy(
 
 
 def test_program_dashboard_api_endpoint_with_permission(
-    authenticated_client: Any,
-    dashboard_context: dict[str, Any],
+    authenticated_client: object,
+    dashboard_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -266,8 +266,8 @@ def test_program_dashboard_api_endpoint_with_permission(
 
 
 def test_program_dashboard_api_endpoint_without_permission(
-    authenticated_client: Any,
-    dashboard_context: dict[str, Any],
+    authenticated_client: object,
+    dashboard_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -281,8 +281,8 @@ def test_program_dashboard_api_endpoint_without_permission(
 
 
 def test_program_dashboard_filters_by_program(
-    authenticated_client: Any,
-    dashboard_context: dict[str, Any],
+    authenticated_client: object,
+    dashboard_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(

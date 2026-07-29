@@ -5,7 +5,7 @@ import importlib
 import logging
 import sys
 import traceback
-from typing import Any
+
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
@@ -29,11 +29,11 @@ class Interpreter:
             logger.warning(e)
             raise ValidationError(str(e))
 
-    def get_result(self) -> Any:
+    def get_result(self) -> object:
         return config.RESULT()
 
 
-def call_rule(rule_id: UUID, context: dict) -> Any:
+def call_rule(rule_id: UUID, context: dict) -> object:
     from hope.models import Rule
 
     rule: Rule = Rule.objects.get(id=rule_id)
@@ -44,10 +44,10 @@ class PythonExec(Interpreter):
     label = "Python"
 
     @cached_property
-    def code(self) -> Any:
+    def code(self) -> object:
         return compile(self.init_string, "<code>", mode="exec")
 
-    def execute(self, context: dict) -> Any:
+    def execute(self, context: dict) -> object:
         gl = {
             "__builtins__": {
                 "__build_class__": __build_class__,

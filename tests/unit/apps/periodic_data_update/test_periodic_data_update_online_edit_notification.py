@@ -1,6 +1,5 @@
 """Tests for PDU online edit notifications."""
 
-from typing import Any
 from unittest import mock
 
 from constance.test import override_config
@@ -23,32 +22,32 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan", enable_email_notification=True)
 
 
 @pytest.fixture
-def partner_empty(db: Any) -> Any:
+def partner_empty(db: object) -> object:
     return PartnerFactory(name="Empty Partner")
 
 
 @pytest.fixture
-def program(afghanistan: BusinessArea) -> Any:
+def program(afghanistan: BusinessArea) -> object:
     return ProgramFactory(business_area=afghanistan)
 
 
 @pytest.fixture
-def program2(afghanistan: BusinessArea) -> Any:
+def program2(afghanistan: BusinessArea) -> object:
     return ProgramFactory(business_area=afghanistan)
 
 
 @pytest.fixture
-def user_pdu_creator(partner_empty: Any) -> User:
+def user_pdu_creator(partner_empty: object) -> User:
     return UserFactory(partner=partner_empty)
 
 
 @pytest.fixture
-def user_action_user(db: Any) -> User:
+def user_action_user(db: object) -> User:
     return UserFactory()
 
 
@@ -62,7 +61,7 @@ def action_permissions_list() -> list:
 
 
 @pytest.fixture
-def pdu_online_edit(afghanistan: BusinessArea, program: Any, user_pdu_creator: User) -> PDUOnlineEdit:
+def pdu_online_edit(afghanistan: BusinessArea, program: object, user_pdu_creator: User) -> PDUOnlineEdit:
     return PDUOnlineEditFactory(
         name="Test PDU Edit",
         business_area=afghanistan,
@@ -75,23 +74,23 @@ def pdu_online_edit(afghanistan: BusinessArea, program: Any, user_pdu_creator: U
 
 
 @pytest.fixture
-def partner_unicef_hq(db: Any) -> Any:
+def partner_unicef_hq(db: object) -> object:
     partner_unicef = PartnerFactory(name="UNICEF")
     return PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
 
 
 @pytest.fixture
-def partner_unicef_in_ba(afghanistan: BusinessArea) -> Any:
+def partner_unicef_in_ba(afghanistan: BusinessArea) -> object:
     return PartnerFactory(name=f"UNICEF Partner for {afghanistan.slug}")
 
 
 @pytest.fixture
 def partner_with_action_permissions(
     afghanistan: BusinessArea,
-    program: Any,
+    program: object,
     action_permissions_list: list,
-    create_partner_role_with_permissions: Any,
-) -> Any:
+    create_partner_role_with_permissions: object,
+) -> object:
     partner = PartnerFactory(name="Partner with action permissions")
     create_partner_role_with_permissions(
         partner=partner,
@@ -106,8 +105,8 @@ def partner_with_action_permissions(
 def partner_with_action_permissions_in_whole_ba(
     afghanistan: BusinessArea,
     action_permissions_list: list,
-    create_partner_role_with_permissions: Any,
-) -> Any:
+    create_partner_role_with_permissions: object,
+) -> object:
     partner = PartnerFactory(name="Partner with action permissions in whole business area")
     create_partner_role_with_permissions(
         partner=partner,
@@ -121,12 +120,12 @@ def partner_with_action_permissions_in_whole_ba(
 @pytest.fixture
 def setup_roles_and_permissions(
     afghanistan: BusinessArea,
-    program: Any,
-    partner_unicef_hq: Any,
+    program: object,
+    partner_unicef_hq: object,
     user_action_user: User,
     action_permissions_list: list,
-    create_partner_role_with_permissions: Any,
-    create_user_role_with_permissions: Any,
+    create_partner_role_with_permissions: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     """Setup roles and permissions for UNICEF HQ partner."""
     # Create role with action permissions for UNICEF HQ partner
@@ -154,14 +153,14 @@ def setup_roles_and_permissions(
 @pytest.fixture
 def authorized_users(
     afghanistan: BusinessArea,
-    program: Any,
-    partner_empty: Any,
-    partner_unicef_hq: Any,
-    partner_unicef_in_ba: Any,
-    partner_with_action_permissions: Any,
-    partner_with_action_permissions_in_whole_ba: Any,
+    program: object,
+    partner_empty: object,
+    partner_unicef_hq: object,
+    partner_unicef_in_ba: object,
+    partner_with_action_permissions: object,
+    partner_with_action_permissions_in_whole_ba: object,
     setup_roles_and_permissions: None,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> dict:
     """Create all authorized users."""
     users = {}
@@ -322,7 +321,7 @@ def test_send_back_action_notification_recipients(
 
 def test_no_authorized_users_no_recipients(
     afghanistan: BusinessArea,
-    program: Any,
+    program: object,
     user_pdu_creator: User,
     user_action_user: User,
     setup_roles_and_permissions: None,
@@ -356,7 +355,7 @@ def test_no_authorized_users_no_recipients(
 )
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
@@ -371,7 +370,7 @@ def test_send_email_notification(
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=False)
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification_disabled_by_config(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:
     afghanistan.enable_email_notification = True
     afghanistan.save()
@@ -389,7 +388,7 @@ def test_send_email_notification_disabled_by_config(
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification_disabled_by_business_area(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:
     afghanistan.enable_email_notification = False
     afghanistan.save()
@@ -408,7 +407,7 @@ def test_send_email_notification_disabled_by_business_area(
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 def test_send_email_notification_subject_test_env(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
@@ -423,7 +422,7 @@ def test_send_email_notification_subject_test_env(
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="")
 def test_send_email_notification_subject_prod_env(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
@@ -442,7 +441,7 @@ def test_send_email_notification_subject_prod_env(
 )
 @override_settings(CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"])
 def test_send_email_notification_catch_all_email(
-    mock_post: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
+    mock_post: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
@@ -464,7 +463,7 @@ def test_send_email_notification_catch_all_email(
     MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=1,
 )
 def test_send_email_notification_without_catch_all_email(
-    mock_post: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
+    mock_post: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
@@ -516,7 +515,7 @@ def send_email_notification_exclude_superuser(
 )
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_email_body_variables_send_for_approval(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,
@@ -539,7 +538,7 @@ def test_email_body_variables_send_for_approval(
 )
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_email_body_variables_approve(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:
     afghanistan.enable_email_notification = True
     afghanistan.save()
@@ -565,7 +564,7 @@ def test_email_body_variables_approve(
 )
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_email_body_variables_send_back(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
+    mock_send: object, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, afghanistan: BusinessArea
 ) -> None:
     afghanistan.enable_email_notification = True
     afghanistan.save()
@@ -585,7 +584,7 @@ def test_email_body_variables_send_back(
 
 
 def test_email_body_variables_content(
-    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, user_pdu_creator: User, program: Any
+    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, user_pdu_creator: User, program: object
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
         pdu_with_authorized_users,

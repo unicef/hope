@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.request import Request
@@ -36,7 +34,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         )
 
     @staticmethod
-    def _append_log(payment_plan: Any, payload: dict, response_data: dict) -> None:
+    def _append_log(payment_plan: object, payload: dict, response_data: dict) -> None:
         vision_data = payment_plan.internal_data.setdefault("vision", {})
         vision_data.setdefault("log", []).append(
             {
@@ -47,7 +45,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             }
         )
 
-    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def post(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = PaymentPlanCallbackRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return self._error_response(serializer)

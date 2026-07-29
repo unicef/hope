@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -23,7 +22,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def base_context() -> dict[str, Any]:
+def base_context() -> dict[str, object]:
     business_area = BusinessAreaFactory(slug="afghanistan")
     program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
     household = HouseholdFactory(
@@ -73,11 +72,11 @@ def base_context() -> dict[str, Any]:
 
 
 @pytest.fixture
-def program_two(base_context: dict[str, Any]):
+def program_two(base_context: dict[str, object]):
     return ProgramFactory(name="Test program TWO", business_area=base_context["business_area"])
 
 
-def test_reassign_roles_on_marking_as_duplicate_individual_service(base_context: dict[str, Any]) -> None:
+def test_reassign_roles_on_marking_as_duplicate_individual_service(base_context: dict[str, object]) -> None:
     duplicated_individuals = Individual.objects.filter(id=base_context["primary_collector_individual"].id)
     role_reassign_data = {
         ROLE_PRIMARY: {
@@ -125,7 +124,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service(base_context:
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
     program_two,
 ) -> None:
     base_context["no_role_individual"].program = program_two
@@ -155,7 +154,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.none()
     role_reassign_data = {
@@ -186,7 +185,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_with
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_new_individual_is_duplicate(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.filter(
         id__in=[
@@ -222,7 +221,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_new_
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_alternate_to_primary(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
     role_reassign_data = {
@@ -263,7 +262,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_primary_to_alternate(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.filter(id__in=[base_context["alternate_collector_individual"].id])
     role_reassign_data = {
@@ -291,7 +290,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_wrong_role(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
     role_reassign_data = {
@@ -318,7 +317,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_wron
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from_wrong_person(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.filter(id__in=[base_context["alternate_collector_individual"].id])
     role_reassign_data = {
@@ -349,7 +348,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_from
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_hoh_not_reassigned(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
     role_reassign_data = {
@@ -375,7 +374,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_hoh_
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_not_reassigned(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     duplicated_individuals = Individual.objects.filter(id__in=[base_context["primary_collector_individual"].id])
     role_reassign_data = {
@@ -400,7 +399,7 @@ def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_prim
 
 
 def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_hh_withdrawn(
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> None:
     base_context["household"].withdrawn = True
     base_context["household"].save(update_fields=["withdrawn"])

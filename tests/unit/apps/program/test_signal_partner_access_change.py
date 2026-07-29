@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -27,17 +25,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def unicef_partner(db: Any) -> Partner:
+def unicef_partner(db: object) -> Partner:
     return PartnerFactory(name="UNICEF")
 
 
 @pytest.fixture
-def role(db: Any) -> Role:
+def role(db: object) -> Role:
     return RoleFactory(name="Role for Partner")
 
 
@@ -72,7 +70,7 @@ def partner_with_role_in_afg_2(business_area: BusinessArea, role: Role) -> Partn
 
 
 @pytest.fixture
-def partner_not_allowed_in_ba(db: Any) -> Partner:
+def partner_not_allowed_in_ba(db: object) -> Partner:
     return PartnerFactory(name="Partner without role in Afg")
 
 
@@ -89,7 +87,7 @@ def area_type_afg(country_afg: Country) -> AreaType:
 
 
 @pytest.fixture
-def country_other(db: Any) -> Country:
+def country_other(db: object) -> Country:
     return CountryFactory(
         name="Other Country",
         short_name="Oth",

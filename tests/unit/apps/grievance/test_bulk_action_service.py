@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -33,7 +31,7 @@ def users() -> dict[str, User]:
 
 
 @pytest.fixture
-def grievance_context(business_area: BusinessArea, users: dict[str, User]) -> dict[str, Any]:
+def grievance_context(business_area: BusinessArea, users: dict[str, User]) -> dict[str, object]:
     user = users["user"]
     user_two = users["user_two"]
     grievance_ticket1 = GrievanceTicketFactory(
@@ -102,7 +100,7 @@ def closed_ticket(business_area: BusinessArea, users: dict[str, User]) -> Grieva
     )
 
 
-def test_bulk_update_assignee(grievance_context: dict[str, Any]) -> None:
+def test_bulk_update_assignee(grievance_context: dict[str, object]) -> None:
     user = grievance_context["users"]["user"]
     user_two = grievance_context["users"]["user_two"]
     business_area = grievance_context["business_area"]
@@ -126,7 +124,7 @@ def test_bulk_update_assignee(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.status == GrievanceTicket.STATUS_ASSIGNED
 
 
-def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:
+def test_bulk_update_priority(grievance_context: dict[str, object]) -> None:
     business_area = grievance_context["business_area"]
     grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
 
@@ -146,7 +144,7 @@ def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.priority == PRIORITY_HIGH
 
 
-def test_bulk_update_urgency(grievance_context: dict[str, Any]) -> None:
+def test_bulk_update_urgency(grievance_context: dict[str, object]) -> None:
     business_area = grievance_context["business_area"]
     grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
 
@@ -166,7 +164,7 @@ def test_bulk_update_urgency(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.urgency == URGENCY_VERY_URGENT
 
 
-def test_bulk_add_note(grievance_context: dict[str, Any]) -> None:
+def test_bulk_add_note(grievance_context: dict[str, object]) -> None:
     user = grievance_context["users"]["user"]
     business_area = grievance_context["business_area"]
     grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]

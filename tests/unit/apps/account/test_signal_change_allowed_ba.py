@@ -1,7 +1,5 @@
 """Tests for signal that changes allowed business areas for partners."""
 
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -17,7 +15,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_afg(db: Any) -> BusinessArea:
+def business_area_afg(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -26,7 +24,7 @@ def business_area_afg(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def business_area_ukr(db: Any) -> BusinessArea:
+def business_area_ukr(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="ukraine",
         code="4410",
@@ -35,12 +33,12 @@ def business_area_ukr(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="Partner")
 
 
 @pytest.fixture
-def role(db: Any) -> Role:
+def role(db: object) -> Role:
     return RoleFactory(name="Role for Partner")
 
 

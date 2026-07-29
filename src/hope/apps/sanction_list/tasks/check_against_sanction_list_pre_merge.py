@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable
+from typing import Iterable
 
 from constance import config
 from django.core.cache import cache
@@ -79,7 +79,7 @@ def _generate_ticket(
     marked_individual: Individual,
     registration_data_import: RegistrationDataImport | None,
     sanction_list_individual: SanctionListIndividual,
-) -> tuple[GrievanceTicket, TicketSystemFlaggingDetails, Any] | None:
+) -> tuple[GrievanceTicket, TicketSystemFlaggingDetails, object] | None:
     GrievanceTicketProgramThrough = GrievanceTicket.programs.through  # noqa
     household = marked_individual.household
     admin_level_2 = getattr(household, "admin2", None)
@@ -114,7 +114,7 @@ def _generate_ticket(
 
 
 def _resolve_individual_hit(
-    individual_hit: Any,
+    individual_hit: object,
     individuals_ids: list[str],
     possible_match_score: float,
     program: Program,

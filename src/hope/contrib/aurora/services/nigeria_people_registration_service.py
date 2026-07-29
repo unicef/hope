@@ -1,6 +1,5 @@
 import copy
 import logging
-from typing import Any
 
 from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -138,13 +137,15 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         return cls._get_account_number(individuals_data[0], mapping)
 
     @staticmethod
-    def _ignore_record(record: Any, reason: str) -> None:
+    def _ignore_record(record: object, reason: str) -> None:
         record.ignored = True
         record.status = record.STATUS_ERROR
         record.error_message = reason
         record.save(update_fields=["ignored", "status", "error_message"])
 
-    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
+    def create_household_for_rdi_household(
+        self, record: object, registration_data_import: RegistrationDataImport
+    ) -> None:
         mapping = self.get_mapping(self.registration.mapping)
         record_data_dict = record.get_data()
         individuals_key = mapping["defaults"].get("individuals_key", "individual-details")

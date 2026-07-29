@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import io
-from typing import Any, Generator
+from typing import Generator
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -31,7 +31,7 @@ def make_attr(filename: str, modified_time: datetime) -> MagicMock:
 
 
 @pytest.fixture(autouse=True)
-def mock_sftp() -> Generator[dict[str, Any], None, None]:
+def mock_sftp() -> Generator[dict[str, object], None, None]:
     mock_transport: MagicMock = MagicMock()
     mock_sftp_client: MagicMock = MagicMock()
 
@@ -169,7 +169,7 @@ def test_get(ftp_client: WesternUnionFTPClient) -> None:
 
 
 def test_download_returns_bytesio(ftp_client: WesternUnionFTPClient) -> None:
-    def fake_getfo(remote: Any, fl: Any) -> None:
+    def fake_getfo(remote: object, fl: object) -> None:
         fl.write(b"hello world")
 
     ftp_client.client.getfo.side_effect = fake_getfo

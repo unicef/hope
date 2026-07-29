@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 from django.db import connection
 from django.test import TestCase
@@ -14,17 +14,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="test-ba")
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def client(api_client: Callable, user: Any) -> Any:
+def client(api_client: Callable, user: object) -> object:
     return api_client(user)
 
 
@@ -43,10 +43,10 @@ def _count_url(ba_slug: str) -> str:
 
 
 def test_list_filters_by_limit_to(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
@@ -68,10 +68,10 @@ def test_list_filters_by_limit_to(
 
 
 def test_count_excludes_purposes_restricted_to_other_ba(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
@@ -97,10 +97,10 @@ def test_count_excludes_purposes_restricted_to_other_ba(
     ],
 )
 def test_list_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -119,10 +119,10 @@ def test_list_permissions(
     ],
 )
 def test_count_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -134,10 +134,10 @@ def test_count_permissions(
 
 
 def test_list_caching(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True
@@ -199,10 +199,10 @@ def test_list_caching(
 
 
 def test_list_purposes_search_by_name(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST], business_area, whole_business_area_access=True

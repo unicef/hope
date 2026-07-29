@@ -2,7 +2,6 @@
 
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
-from typing import Any
 from unittest.mock import patch
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -44,7 +43,7 @@ def create_file_for_template(pdu_template: PDUXlsxTemplate, days_ago: int) -> No
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 

@@ -53,7 +53,6 @@ import importlib
 import logging
 import os
 import time
-from typing import Any
 
 from constance import config
 from django.apps import apps
@@ -217,7 +216,7 @@ class Command(BaseCommand):
                 except Error as e:
                     logger.warning(f"Failed to create user {email}: {e}")
 
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(self, *args: object, **options: object) -> None:
         start_time = timezone.now()
 
         self._wait_for_database()

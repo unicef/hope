@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory
@@ -74,7 +72,7 @@ def test_funds_commitment_serializer() -> None:
         commitment_amount_local=1000.00,
         commitment_amount_usd=1000.00,
     )
-    data: dict[str, Any] = {
+    data: dict[str, object] = {
         "funds_commitment_number": "FC-001",
         "funds_commitment_items": [fci],
     }

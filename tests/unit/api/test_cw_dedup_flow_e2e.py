@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import patch
 import uuid
 
@@ -36,7 +35,7 @@ def mock_deduplication_engine_env_vars(settings) -> None:
 
 
 @pytest.fixture
-def cw_dedup_eager_setup(user_business_area: BusinessArea) -> Any:
+def cw_dedup_eager_setup(user_business_area: BusinessArea) -> object:
     from hope.apps.core.celery import app as celery_app
 
     prev_always_eager = celery_app.conf.task_always_eager
@@ -107,8 +106,8 @@ def _complete_rdi(
     rdi_id: str,
     cw_findings: list[dict],
     country_workspace_id: str,
-    django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
+    django_capture_on_commit_callbacks: object,
+    django_assert_num_queries: object,
     expected_queries: int,
 ) -> None:
     complete_url = reverse("api:rdi-complete", args=[business_area.slug, rdi_id])
@@ -131,7 +130,7 @@ def _complete_rdi(
     mock_approve.assert_called_once_with(country_workspace_id)
 
 
-def _individual_payload(individual_id: str, country_workspace_id: str, document_type_key: str) -> dict[str, Any]:
+def _individual_payload(individual_id: str, country_workspace_id: str, document_type_key: str) -> dict[str, object]:
     return {
         "individual_id": individual_id,
         "full_name": f"Person {individual_id}",
@@ -162,13 +161,13 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
     afghanistan_country: Country,
     birth_certificate_doc_type: DocumentType,
     django_elasticsearch_setup: None,
-    create_program_es_index: Any,
+    create_program_es_index: object,
     country_workspace_id: str,
     cw_individual_ids: dict[str, str],
     cw_findings: list[dict],
-    django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
-    mock_deduplication_engine_env_vars: Any,
+    django_capture_on_commit_callbacks: object,
+    django_assert_num_queries: object,
+    mock_deduplication_engine_env_vars: object,
     cw_dedup_eager_setup: None,
 ) -> None:
     create_program_es_index(program)
@@ -281,7 +280,7 @@ def social_program(business_area: BusinessArea) -> Program:
     )
 
 
-def _person_payload(name: str, country_workspace_id: str, program: Program) -> dict[str, Any]:
+def _person_payload(name: str, country_workspace_id: str, program: Program) -> dict[str, object]:
     return {
         "residence_status": "IDP",
         "village": "village1",
@@ -302,13 +301,13 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
     imported_by_user: User,
     afghanistan_country: Country,
     django_elasticsearch_setup: None,
-    create_program_es_index: Any,
+    create_program_es_index: object,
     country_workspace_id: str,
     cw_individual_ids: dict[str, str],
     cw_findings: list[dict],
-    django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
-    mock_deduplication_engine_env_vars: Any,
+    django_capture_on_commit_callbacks: object,
+    django_assert_num_queries: object,
+    mock_deduplication_engine_env_vars: object,
     cw_dedup_eager_setup: None,
 ) -> None:
     create_program_es_index(social_program)

@@ -1,5 +1,3 @@
-from typing import Any
-
 from rest_framework import serializers
 
 from hope.apps.core.api.serializers import FieldAttributeSerializer
@@ -61,7 +59,7 @@ class TargetingIndividualBlockRuleFilterSerializer(serializers.ModelSerializer):
             "field_attribute",
         )
 
-    def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> Any:
+    def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> object:
         if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 obj.field_name,
@@ -112,7 +110,7 @@ class TargetingCriteriaRuleFilterSerializer(serializers.ModelSerializer):
             "field_attribute",
         )
 
-    def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> Any:
+    def get_field_attribute(self, obj: TargetingCriteriaRuleFilter) -> object:
         if obj.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(obj.field_name, obj.targeting_criteria_rule.payment_plan)
             result = filter_choices(field_attribute, obj.arguments)

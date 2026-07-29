@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -685,7 +685,7 @@ class PaymentPlan(
             if purposes.exclude(programs=self.program_cycle.program).exists():
                 raise ValidationError("All PaymentPlan purposes must be a subset of the program's purposes.")
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         self.clean()
         super().save(*args, **kwargs)
 
@@ -1093,7 +1093,7 @@ class PaymentPlan(
         )
 
     @property
-    def currency_exchange_date(self) -> Any:
+    def currency_exchange_date(self) -> object:
         if (
             self.status
             in [

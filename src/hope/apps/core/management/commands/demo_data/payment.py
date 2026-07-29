@@ -1,6 +1,5 @@
 from datetime import timedelta
 from random import randint
-from typing import Any
 from uuid import UUID
 
 from django.utils import timezone
@@ -88,7 +87,7 @@ def generate_delivery_mechanisms() -> None:
             },
         )
     account_types = {at.key: at for at in AccountType.objects.all()}
-    delivery_mechanisms_data: list[Any] = [
+    delivery_mechanisms_data: list[object] = [
         {
             "code": "cardless_cash_withdrawal",
             "name": "Cardless cash withdrawal",
@@ -452,7 +451,7 @@ def create_payment_verification_plan_with_status(
     business_area: BusinessArea,
     program: Program,
     status: str,
-    **kwargs: Any,
+    **kwargs: object,
 ) -> PaymentVerificationPlan:
     verification_channel = (kwargs.get("verification_channel"),)
     create_failed_payments = kwargs.get("create_failed_payments", False)
@@ -573,7 +572,7 @@ def update_fsps() -> None:
 
 def _create_hh_for_large_pp(
     program: Program,
-    rdi: Any,
+    rdi: object,
     size: int,
 ) -> tuple[Household, list[Individual]]:
     """Create one Household with ``size`` members + primary/alternate collectors, all bound to the given program/rdi.

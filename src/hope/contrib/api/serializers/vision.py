@@ -1,5 +1,3 @@
-from typing import Any
-
 from rest_framework import serializers
 
 from hope.apps.core.utils import to_camel_case
@@ -47,13 +45,13 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     status = serializers.CharField(required=False, allow_blank=True)
     fc_num = serializers.CharField(required=False, allow_blank=True)
 
-    def to_internal_value(self, data: dict) -> dict[str, Any]:
+    def to_internal_value(self, data: dict) -> dict[str, object]:
         field_names: tuple[str, ...] = tuple(self.fields.keys())
         return super().to_internal_value(
             {field_name: data.get(vision_callback_external_field_name(field_name), "") for field_name in field_names}
         )
 
-    def initial_value(self, field_name: str) -> Any:
+    def initial_value(self, field_name: str) -> object:
         return self.initial_data.get(vision_callback_external_field_name(field_name), "")
 
     @property
@@ -77,12 +75,12 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
         return self.validated_data.get("vision_payplan_sno", "")
 
     @property
-    def external_payload(self) -> dict[str, Any]:
+    def external_payload(self) -> dict[str, object]:
         return {
             vision_callback_external_field_name(field_name): value for field_name, value in self.validated_data.items()
         }
 
-    def ack_payload(self, status: str) -> dict[str, Any]:
+    def ack_payload(self, status: str) -> dict[str, object]:
         validated_data = getattr(self, "_validated_data", {})
         return {
             "status": status,
@@ -96,7 +94,7 @@ class PaymentPlanCallbackAckSerializer(serializers.Serializer):
     message_id = serializers.CharField(allow_blank=True)
     payplan_sno = serializers.CharField(allow_blank=True)
 
-    def to_representation(self, instance: Any) -> dict[str, Any]:
+    def to_representation(self, instance: object) -> dict[str, object]:
         data = super().to_representation(instance)
         return {vision_callback_external_field_name(field_name): value for field_name, value in data.items()}
 
@@ -116,6 +114,6 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     def get_creation_date(self, obj: PaymentPlan) -> str:
         return obj.created_at.strftime("%Y%m%d")
 
-    def to_representation(self, instance: Any) -> dict[str, Any]:
+    def to_representation(self, instance: object) -> dict[str, object]:
         data = super().to_representation(instance)
         return {to_camel_case(k): v for k, v in data.items()}

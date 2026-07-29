@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -22,7 +20,7 @@ pytestmark = [
 
 
 @pytest.fixture
-def delete_context() -> dict[str, Any]:
+def delete_context() -> dict[str, object]:
     business_area = BusinessAreaFactory()
     program = ProgramFactory(business_area=business_area)
     user = UserFactory()
@@ -50,7 +48,7 @@ def delete_context() -> dict[str, Any]:
     }
 
 
-def test_close_delete_individual_locks_household_and_withdraws(delete_context: dict[str, Any]) -> None:
+def test_close_delete_individual_locks_household_and_withdraws(delete_context: dict[str, object]) -> None:
     service = IndividualDeleteService(delete_context["ticket"], {})
 
     service.close(delete_context["user"])
@@ -61,7 +59,7 @@ def test_close_delete_individual_locks_household_and_withdraws(delete_context: d
     assert delete_context["household"].withdrawn is True
 
 
-def test_close_delete_individual_without_household(delete_context: dict[str, Any]) -> None:
+def test_close_delete_individual_without_household(delete_context: dict[str, object]) -> None:
     individual_without_household = IndividualFactory(
         business_area=delete_context["business_area"],
         program=delete_context["program"],
@@ -86,7 +84,7 @@ def test_close_delete_individual_without_household(delete_context: dict[str, Any
     assert individual_without_household.withdrawn is True
 
 
-def test_close_delete_individual_not_approved_is_noop(delete_context: dict[str, Any]) -> None:
+def test_close_delete_individual_not_approved_is_noop(delete_context: dict[str, object]) -> None:
     ticket_details = delete_context["ticket"].delete_individual_ticket_details
     ticket_details.approve_status = False
     ticket_details.save()

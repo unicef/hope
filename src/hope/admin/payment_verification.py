@@ -1,5 +1,3 @@
-from typing import Any
-
 from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
@@ -68,5 +66,5 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             )
         )
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False

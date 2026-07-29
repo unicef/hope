@@ -1,7 +1,7 @@
 """Aurora API sync helpers: pull org/project/registration/record data into Django models."""
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
 from constance import config
@@ -23,14 +23,14 @@ def _get_session(auth_token: str) -> requests.Session:
     return session
 
 
-def _get_json(session: requests.Session, url: str) -> Any:
+def _get_json(session: requests.Session, url: str) -> object:
     """GET ``url`` and decode JSON. Raises ``RequestException`` on HTTP error."""
     response = session.get(url)
     response.raise_for_status()
     return response.json()
 
 
-def _iter_results(payload: Any) -> list:
+def _iter_results(payload: object) -> list:
     """Return a list of items from a payload that may be paginated or a bare list.
 
     Aurora endpoints sometimes return ``{"results": [...]}`` and sometimes a
@@ -44,7 +44,7 @@ def _iter_results(payload: Any) -> list:
     return []
 
 
-def _sync_registration(session: requests.Session, data_reg: Any, prj: Project) -> bool:
+def _sync_registration(session: requests.Session, data_reg: object, prj: Project) -> bool:
     """Persist one registration and its metadata. Returns True if processed."""
     if not isinstance(data_reg, dict):
         logger.warning("Skipping non-dict registration payload: %s", data_reg)
@@ -74,7 +74,7 @@ def _sync_registration(session: requests.Session, data_reg: Any, prj: Project) -
     return True
 
 
-def _sync_project(session: requests.Session, data_prj: Any, org: Organization) -> dict | None:
+def _sync_project(session: requests.Session, data_prj: object, org: Organization) -> dict | None:
     """Persist one project and its registrations. Returns the annotated project dict or None."""
     if not isinstance(data_prj, dict):
         logger.warning("Skipping non-dict project payload: %s", data_prj)
@@ -104,7 +104,7 @@ def _sync_project(session: requests.Session, data_prj: Any, org: Organization) -
     return data_prj
 
 
-def _sync_organization(session: requests.Session, data_org: Any) -> dict | None:
+def _sync_organization(session: requests.Session, data_org: object) -> dict | None:
     """Persist one organization and its projects. Returns the annotated org dict or None."""
     if not isinstance(data_org, dict):
         logger.warning("Skipping non-dict organization payload: %s", data_org)
@@ -163,7 +163,7 @@ def get_metadata(auth_token: str) -> dict:
     return _get_json(session, f"{record_url}metadata/?{rnd}")
 
 
-def fetch_records(auth_token: str, overwrite: bool = False, **filters: Any) -> dict:
+def fetch_records(auth_token: str, overwrite: bool = False, **filters: object) -> dict:
     session = _get_session(auth_token)
     schema = _get_json(session, config.AURORA_SERVER)
     record_url = schema.get("record")

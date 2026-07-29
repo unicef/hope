@@ -1,6 +1,6 @@
 """Tests for PDU online edit list view."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -20,7 +20,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
@@ -35,22 +35,22 @@ def other_program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner(db: Any) -> Any:
+def partner(db: object) -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> User:
+def user(partner: object) -> User:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 @pytest.fixture
-def user_other(partner: Any) -> User:
+def user_other(partner: object) -> User:
     return UserFactory(partner=partner, first_name="Charlie")
 
 
@@ -105,14 +105,14 @@ def url_count(business_area: BusinessArea, program: Program) -> str:
 def test_pdu_online_edit_list_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit1: PDUOnlineEdit,
     pdu_edit2: PDUOnlineEdit,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -125,7 +125,7 @@ def test_pdu_online_edit_list_permissions(
 
 
 def test_pdu_online_edit_list(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
@@ -133,7 +133,7 @@ def test_pdu_online_edit_list(
     pdu_edit2: PDUOnlineEdit,
     pdu_edit_other_program: PDUOnlineEdit,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -187,7 +187,7 @@ def test_pdu_online_edit_list(
     ],
 )
 def test_pdu_online_edit_list_filter_by_status(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
@@ -196,7 +196,7 @@ def test_pdu_online_edit_list_filter_by_status(
     url_list: str,
     status_filter: str,
     expected_count: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -217,14 +217,14 @@ def test_pdu_online_edit_list_filter_by_status(
 
 
 def test_pdu_online_edit_list_filter_by_status_multiple_statuses(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit1: PDUOnlineEdit,
     pdu_edit2: PDUOnlineEdit,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -245,12 +245,12 @@ def test_pdu_online_edit_list_filter_by_status_multiple_statuses(
 
 
 def test_pdu_online_edit_list_filter_by_status_invalid_status(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -272,14 +272,14 @@ def test_pdu_online_edit_list_filter_by_status_invalid_status(
 def test_pdu_online_edit_count(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
     pdu_edit1: PDUOnlineEdit,
     pdu_edit2: PDUOnlineEdit,
     url_count: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,

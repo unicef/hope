@@ -1,6 +1,5 @@
 from datetime import UTC, timedelta
 from decimal import Decimal
-from typing import Any
 from unittest import mock
 from unittest.mock import patch
 import uuid
@@ -73,7 +72,7 @@ from hope.models import (
 pytestmark = pytest.mark.django_db
 
 
-def test_update_fsp_returns_false_when_not_open(business_area: Any, cycle: ProgramCycle) -> None:
+def test_update_fsp_returns_false_when_not_open(business_area: object, cycle: ProgramCycle) -> None:
     pp = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
@@ -85,7 +84,7 @@ def test_update_fsp_returns_false_when_not_open(business_area: Any, cycle: Progr
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
@@ -95,7 +94,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def dm_transfer_to_account() -> Any:
+def dm_transfer_to_account() -> object:
     return DeliveryMechanismFactory(
         code="transfer_to_account",
         name="Transfer to Account",
@@ -104,7 +103,7 @@ def dm_transfer_to_account() -> Any:
 
 
 @pytest.fixture
-def dm_transfer_to_digital_wallet() -> Any:
+def dm_transfer_to_digital_wallet() -> object:
     return DeliveryMechanismFactory(
         code="transfer_to_digital_wallet",
         name="Transfer to Digital Wallet",
@@ -114,7 +113,7 @@ def dm_transfer_to_digital_wallet() -> Any:
 
 
 @pytest.fixture
-def fsp(dm_transfer_to_account: Any, dm_transfer_to_digital_wallet: Any) -> FinancialServiceProvider:
+def fsp(dm_transfer_to_account: object, dm_transfer_to_digital_wallet: object) -> FinancialServiceProvider:
     fsp = FinancialServiceProviderFactory(
         name="Test FSP 1",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
@@ -129,7 +128,7 @@ def account_type_bank() -> AccountType:
 
 
 @pytest.fixture
-def program(business_area: Any) -> Program:
+def program(business_area: object) -> Program:
     return ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
 
 
@@ -141,10 +140,10 @@ def cycle(program: Program) -> ProgramCycle:
 @pytest.fixture
 def payment_plan_base(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
     fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
+    dm_transfer_to_account: object,
 ) -> PaymentPlan:
     return PaymentPlanFactory(
         program_cycle=cycle,
@@ -199,7 +198,7 @@ def test_delete_when_its_one_pp_in_cycle(payment_plan_base: PaymentPlan) -> None
     assert payment_plan_base.program_cycle.status == ProgramCycle.DRAFT
 
 
-def test_delete_when_its_two_pp_in_cycle(user: User, business_area: Any) -> None:
+def test_delete_when_its_two_pp_in_cycle(user: User, business_area: object) -> None:
     program = ProgramFactory(status=Program.ACTIVE, business_area=business_area, cycle=False)
     program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
     pp_1 = PaymentPlanFactory(
@@ -226,7 +225,7 @@ def test_delete_when_its_two_pp_in_cycle(user: User, business_area: Any) -> None
 
 
 @freeze_time("2020-10-10")
-def test_create_validation_errors(user: User, business_area: Any) -> None:
+def test_create_validation_errors(user: User, business_area: object) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
@@ -342,14 +341,14 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
 @freeze_time("2020-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
-    business_area: Any,
+    business_area: object,
     fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
+    dm_transfer_to_account: object,
     account_type_bank: AccountType,
-    django_assert_num_queries: Any,
-    django_capture_on_commit_callbacks: Any,
+    django_assert_num_queries: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
@@ -426,7 +425,7 @@ def test_create(
     assert pp.payment_items.count() == 2
 
 
-def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: User, business_area: Any) -> None:
+def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: User, business_area: object) -> None:
     program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
     program_cycle = ProgramCycleFactory(program=program)
     other_cycle = ProgramCycleFactory(program=program)
@@ -447,7 +446,7 @@ def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: 
     assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
 
 
-def test_create_raises_when_payment_plan_group_does_not_exist(user: User, business_area: Any) -> None:
+def test_create_raises_when_payment_plan_group_does_not_exist(user: User, business_area: object) -> None:
     program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
     program_cycle = ProgramCycleFactory(program=program)
 
@@ -468,7 +467,7 @@ def test_create_raises_when_payment_plan_group_does_not_exist(user: User, busine
 
 @freeze_time("2020-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_update_validation_errors(get_exchange_rate_mock: Any, payment_plan_base: PaymentPlan) -> None:
+def test_update_validation_errors(get_exchange_rate_mock: object, payment_plan_base: PaymentPlan) -> None:
     payment_plan_base.status = PaymentPlan.Status.LOCKED
     payment_plan_base.save()
 
@@ -493,12 +492,12 @@ def test_update_validation_errors(get_exchange_rate_mock: Any, payment_plan_base
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_follow_up_pp(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
-    django_assert_num_queries: Any,
-    django_capture_on_commit_callbacks: Any,
+    django_assert_num_queries: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     pp = PaymentPlanFactory(
         total_households_count=1,
@@ -611,7 +610,7 @@ def test_create_follow_up_pp(
     )
 
 
-def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -638,7 +637,7 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
 )
 def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
@@ -670,7 +669,7 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
 
 
 def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
-    user: User, business_area: Any, cycle: ProgramCycle
+    user: User, business_area: object, cycle: ProgramCycle
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -701,7 +700,7 @@ def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validati
 )
 def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
@@ -720,7 +719,7 @@ def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_e
 
 
 def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
-    user: User, business_area: Any, cycle: ProgramCycle
+    user: User, business_area: object, cycle: ProgramCycle
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -735,7 +734,7 @@ def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert
     assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
 
 
-def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_update_follow_up_dates_and_not_currency(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -762,12 +761,12 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 @patch("hope.models.payment_plan_split.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
 def test_split(
-    min_no_of_payments_in_chunk_mock: Any,
-    get_exchange_rate_mock: Any,
+    min_no_of_payments_in_chunk_mock: object,
+    get_exchange_rate_mock: object,
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
@@ -886,12 +885,12 @@ def test_split(
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_send_to_payment_gateway(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
-    dm_transfer_to_account: Any,
-    django_capture_on_commit_callbacks: Any,
+    dm_transfer_to_account: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     pg_fsp = FinancialServiceProviderFactory(
         name="Western Union",
@@ -936,7 +935,7 @@ def test_send_to_payment_gateway(
 
 
 @freeze_time("2020-10-10")
-def test_create_with_program_cycle_validation_error(user: User, business_area: Any) -> None:
+def test_create_with_program_cycle_validation_error(user: User, business_area: object) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
@@ -1009,11 +1008,11 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
 @freeze_time("2022-12-12")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_full_rebuild(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
-    business_area: Any,
-    django_assert_num_queries: Any,
-    django_capture_on_commit_callbacks: Any,
+    business_area: object,
+    django_assert_num_queries: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     program = ProgramFactory(
         status=Program.ACTIVE,
@@ -1123,7 +1122,7 @@ def test_validate_action_not_implemented(payment_plan_base: PaymentPlan, user: U
     assert error.value.detail[0] == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
 
 
-def test_tp_lock_invalid_pp_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_tp_lock_invalid_pp_status(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1136,7 +1135,7 @@ def test_tp_lock_invalid_pp_status(user: User, business_area: Any, cycle: Progra
     assert str(error.value) == 'Status_Tp_Lock :: no transition from "DRAFT"'
 
 
-def test_tp_lock_invalid_build_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_tp_lock_invalid_build_status(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1149,7 +1148,7 @@ def test_tp_lock_invalid_build_status(user: User, business_area: Any, cycle: Pro
     assert error.value.detail[0] == "Can only be locked when Build Status OK"
 
 
-def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_tp_unlock(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1169,7 +1168,7 @@ def test_tp_unlock(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
 
-def test_tp_rebuild(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_tp_rebuild(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1192,10 +1191,10 @@ def test_tp_rebuild(user: User, business_area: Any, cycle: ProgramCycle) -> None
 
 def test_draft_with_invalid_pp_status(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
     fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
+    dm_transfer_to_account: object,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -1216,7 +1215,7 @@ def test_draft_with_invalid_pp_status(
     assert str(error.value) == 'Status_Draft :: no transition from "DRAFT"'
 
 
-def test_lock_if_no_valid_payments(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_lock_if_no_valid_payments(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1228,7 +1227,7 @@ def test_lock_if_no_valid_payments(user: User, business_area: Any, cycle: Progra
     assert error.value.detail[0] == "At least one valid Payment should exist in order to Lock the Payment Plan"
 
 
-def test_update_pp_validation_errors(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_update_pp_validation_errors(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1274,7 +1273,7 @@ def test_update_pp_validation_errors(user: User, business_area: Any, cycle: Prog
 
 
 def test_rebuild_payment_plan_population(
-    user: User, business_area: Any, cycle: ProgramCycle, django_capture_on_commit_callbacks: Any
+    user: User, business_area: object, cycle: ProgramCycle, django_capture_on_commit_callbacks: object
 ) -> None:
     pp = PaymentPlanFactory(
         name="test_data",
@@ -1314,7 +1313,7 @@ def test_rebuild_payment_plan_population_full_rebuild_with_money_stats_queues_bo
     mock_full_rebuild: mock.Mock,
     mock_rebuild_stats: mock.Mock,
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
 ) -> None:
     pp = PaymentPlanFactory(
@@ -1341,7 +1340,7 @@ def test_rebuild_payment_plan_population_full_rebuild_with_steficon_targeting_qu
     mock_full_rebuild: mock.Mock,
     mock_apply_steficon: mock.Mock,
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
 ) -> None:
     pp = PaymentPlanFactory(
@@ -1365,10 +1364,10 @@ def test_rebuild_payment_plan_population_full_rebuild_with_steficon_targeting_qu
 
 def test_lock_fsp_validation(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
     fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
+    dm_transfer_to_account: object,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -1408,7 +1407,7 @@ def test_lock_fsp_validation(
     assert payment.financial_service_provider == fsp
 
 
-def test_unlock_fsp(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_unlock_fsp(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1479,7 +1478,7 @@ def test_update_pp_vulnerability_score(payment_plan_base: PaymentPlan) -> None:
     assert payment_plan_base.vulnerability_score_max == Decimal("77.890")
 
 
-def test_update_pp_exclude_ids(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_update_pp_exclude_ids(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1494,9 +1493,9 @@ def test_update_pp_exclude_ids(user: User, business_area: Any, cycle: ProgramCyc
 
 def test_update_pp_currency(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
-    dm_transfer_to_account: Any,
+    dm_transfer_to_account: object,
     fsp: FinancialServiceProvider,
 ) -> None:
     payment_plan = PaymentPlanFactory(
@@ -1515,9 +1514,9 @@ def test_update_pp_currency(
 
 def test_update_pp_currency_validation(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
-    dm_transfer_to_digital_wallet: Any,
+    dm_transfer_to_digital_wallet: object,
     fsp: FinancialServiceProvider,
 ) -> None:
     payment_plan = PaymentPlanFactory(
@@ -1536,7 +1535,7 @@ def test_update_pp_currency_validation(
     )
 
 
-def test_update_dispersion_end_date(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_update_dispersion_end_date(user: User, business_area: object, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         created_by=user,
@@ -1552,11 +1551,11 @@ def test_update_dispersion_end_date(user: User, business_area: Any, cycle: Progr
 
 def test_update_pp_dm_fsp(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
     fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
-    dm_transfer_to_digital_wallet: Any,
+    dm_transfer_to_account: object,
+    dm_transfer_to_digital_wallet: object,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -1601,7 +1600,7 @@ def test_update_pp_dm_fsp(
     assert payment_plan.financial_service_provider == fsp
 
 
-def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_on_commit_callbacks: Any) -> None:
+def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_on_commit_callbacks: object) -> None:
     payment_plan_base.status = PaymentPlan.Status.LOCKED
     payment_plan_base.save()
     assert FileTemp.objects.all().count() == 0
@@ -1615,11 +1614,11 @@ def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_
 
 def test_create_payments_integrity_error_handling(
     user: User,
-    business_area: Any,
+    business_area: object,
     program: Program,
     cycle: ProgramCycle,
     fsp: FinancialServiceProvider,
-    dm_transfer_to_account: Any,
+    dm_transfer_to_account: object,
 ) -> None:
     household = HouseholdFactory(business_area=business_area, program=program)
     household.size = 1
@@ -1749,7 +1748,7 @@ def test_send_reconciliation_overdue_emails_skips_payment_plans_without_overdue_
         mock_task.assert_not_called()
 
 
-def test_send_reconciliation_overdue_email(business_area: Any) -> None:
+def test_send_reconciliation_overdue_email(business_area: object) -> None:
     partner_unicef = PartnerFactory(name="UNICEF")
     partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
     user = UserFactory(partner=partner_unicef_hq)
@@ -1822,7 +1821,7 @@ def test_get_collector() -> None:
 
 
 @override_settings(ENV="prod")
-def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> None:
+def test_send_reconciliation_overdue_email_recipients(business_area: object) -> None:
     partner_unicef = PartnerFactory(name="UNICEF")
     partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
     role, _ = Role.objects.update_or_create(
@@ -1962,7 +1961,9 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_ready_for_closure_sends_notification(mock_notify, user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_ready_for_closure_sends_notification(
+    mock_notify, user: User, business_area: object, cycle: ProgramCycle
+) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
@@ -1983,7 +1984,7 @@ def test_ready_for_closure_sends_notification(mock_notify, user: User, business_
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 def test_ready_for_closure_suppresses_notification_when_notify_false(
-    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+    mock_notify, user: User, business_area: object, cycle: ProgramCycle
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2000,7 +2001,7 @@ def test_ready_for_closure_suppresses_notification_when_notify_false(
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 def test_send_back_to_finished_sends_notification(
-    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+    mock_notify, user: User, business_area: object, cycle: ProgramCycle
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2035,7 +2036,7 @@ def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_p
     assert len(result) == 1
 
 
-def test_set_program_cycle_same_cycle_returns_early(business_area: Any, cycle: ProgramCycle) -> None:
+def test_set_program_cycle_same_cycle_returns_early(business_area: object, cycle: ProgramCycle) -> None:
     pp = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
@@ -2064,7 +2065,7 @@ def test_execute_update_status_action_raises_when_instruction_managed(
 
 
 def test_copy_target_criteria_copies_individual_block_filters(
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
 ) -> None:
     source_pp = PaymentPlanFactory(program_cycle=cycle, business_area=business_area)
@@ -2082,7 +2083,7 @@ def test_copy_target_criteria_copies_individual_block_filters(
 
 def test_set_group_for_open_pp_returns_early_when_cycle_is_changing(
     user: User,
-    business_area: Any,
+    business_area: object,
     program: Program,
 ) -> None:
     cycle_a = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
@@ -2103,7 +2104,7 @@ def test_set_group_for_open_pp_returns_early_when_cycle_is_changing(
 
 def test_split_removes_existing_export_file_delivery(
     user: User,
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
 ) -> None:
     pp = PaymentPlanFactory(

@@ -1,13 +1,12 @@
 import logging
 import sys
-from typing import Any
 
 from hope.config.env import env
 from hope.config.settings import DEBUG
 
 LOG_LEVEL = env("LOG_LEVEL") if "test" not in sys.argv else "INFO"
 
-LOGGING: dict[str, Any] = {
+LOGGING: dict[str, object] = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {

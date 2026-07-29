@@ -1,6 +1,5 @@
 from decimal import Decimal
 import json
-from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
 
@@ -74,7 +73,7 @@ def mock_payment_gateway_env_vars(settings) -> None:
     settings.PAYMENT_GATEWAY_API_URL = "TEST/"
 
 
-def normalize(data: Any) -> dict:
+def normalize(data: object) -> dict:
     return json.loads(json.dumps(data))
 
 
@@ -284,10 +283,10 @@ def payment_gateway_setup(
     return_value=100.00,
 )
 def test_sync_records_for_split(
-    get_quantity_in_usd_mock: Any,
-    get_records_for_payment_instruction_mock: Any,
-    get_exchange_rate_mock: Any,
-    change_payment_instruction_status_mock: Any,
+    get_quantity_in_usd_mock: object,
+    get_records_for_payment_instruction_mock: object,
+    get_exchange_rate_mock: object,
+    change_payment_instruction_status_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
@@ -376,10 +375,10 @@ def test_sync_records_for_split(
     return_value=100.00,
 )
 def test_sync_records_error_messages(
-    get_quantity_in_usd_mock: Any,
-    get_records_for_payment_instruction_mock: Any,
-    get_exchange_rate_mock: Any,
-    change_payment_instruction_status_mock: Any,
+    get_quantity_in_usd_mock: object,
+    get_records_for_payment_instruction_mock: object,
+    get_exchange_rate_mock: object,
+    change_payment_instruction_status_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
@@ -491,10 +490,10 @@ def test_sync_records_error_messages(
     return_value=100.00,
 )
 def test_sync_payment_plan(
-    get_quantity_in_usd_mock: Any,
-    get_records_for_payment_instruction_mock: Any,
-    get_exchange_rate_mock: Any,
-    change_payment_instruction_status_mock: Any,
+    get_quantity_in_usd_mock: object,
+    get_records_for_payment_instruction_mock: object,
+    get_exchange_rate_mock: object,
+    change_payment_instruction_status_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
@@ -576,10 +575,10 @@ def test_sync_payment_plan(
     return_value=100.00,
 )
 def test_sync_payment_plan_logs_payment_changes_with_user(
-    get_quantity_in_usd_mock: Any,
-    get_records_for_payment_instruction_mock: Any,
-    get_exchange_rate_mock: Any,
-    change_payment_instruction_status_mock: Any,
+    get_quantity_in_usd_mock: object,
+    get_records_for_payment_instruction_mock: object,
+    get_exchange_rate_mock: object,
+    change_payment_instruction_status_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
@@ -652,10 +651,10 @@ def test_sync_payment_plan_logs_payment_changes_with_user(
     return_value=100.00,
 )
 def test_sync_record(
-    get_quantity_in_usd_mock: Any,
-    get_record_mock: Any,
-    get_exchange_rate_mock: Any,
-    change_payment_instruction_status_mock: Any,
+    get_quantity_in_usd_mock: object,
+    get_record_mock: object,
+    get_exchange_rate_mock: object,
+    change_payment_instruction_status_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     payments = payment_gateway_setup["payments"]
@@ -707,7 +706,7 @@ def test_sync_record(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
 def test_sync_record_skips_when_parent_split_is_none(
-    get_record_mock: Any,
+    get_record_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     """When payment.parent_split is None, sync_record should not call update_payment."""
@@ -752,10 +751,10 @@ def test_sync_record_skips_when_parent_split_is_none(
     return_value=100.00,
 )
 def test_sync_record_with_none_entitlement_quantity(
-    get_quantity_in_usd_mock: Any,
-    get_record_mock: Any,
-    get_exchange_rate_mock: Any,
-    change_payment_instruction_status_mock: Any,
+    get_quantity_in_usd_mock: object,
+    get_record_mock: object,
+    get_exchange_rate_mock: object,
+    change_payment_instruction_status_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     """Exercise the `entitlement_quantity or Decimal(0)` fallback branch."""
@@ -823,8 +822,8 @@ def test_get_hope_status(payment_gateway_setup: dict) -> None:
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
 def test_add_records_to_payment_instructions_for_split(
-    change_payment_instruction_status_mock: Any,
-    add_records_to_payment_instruction_mock: Any,
+    change_payment_instruction_status_mock: object,
+    add_records_to_payment_instruction_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
@@ -869,8 +868,8 @@ def test_add_records_to_payment_instructions_for_split(
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
 def test_add_records_to_payment_instructions_for_split_error(
-    change_payment_instruction_status_mock: Any,
-    add_records_to_payment_instruction_mock: Any,
+    change_payment_instruction_status_mock: object,
+    add_records_to_payment_instruction_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     split_1, split_2 = payment_gateway_setup["splits"]
@@ -913,7 +912,7 @@ def test_add_records_to_payment_instructions_for_split_error(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
 def test_api_add_records_to_payment_instruction(
-    post_mock: Any,
+    post_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     payment_plan = payment_gateway_setup["payment_plan"]
@@ -959,7 +958,7 @@ def test_api_add_records_to_payment_instruction(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
 def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
-    post_mock: Any,
+    post_mock: object,
     payment_gateway_setup: dict,
     account_types: dict,
     delivery_mechanisms: dict,
@@ -1034,7 +1033,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
 def test_api_add_records_to_payment_instruction_wallet_integration_bank(
-    post_mock: Any,
+    post_mock: object,
     payment_gateway_setup: dict,
     delivery_mechanisms: dict,
     uba_fsp: FinancialServiceProvider,
@@ -1167,7 +1166,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
 def test_api_add_records_to_payment_instruction_validation_error(
-    post_mock: Any,
+    post_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     payment = payment_gateway_setup["payments"][0]
@@ -1184,7 +1183,7 @@ def test_api_add_records_to_payment_instruction_validation_error(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
 def test_api_add_records_to_payment_instruction_no_snapshot(
-    post_mock: Any,
+    post_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     payment = payment_gateway_setup["payments"][0]
@@ -1210,7 +1209,7 @@ def test_api_add_records_to_payment_instruction_no_snapshot(
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
-def test_api_get_fsps(get_mock: Any) -> None:
+def test_api_get_fsps(get_mock: object) -> None:
     get_mock.return_value = (
         [
             {
@@ -1238,7 +1237,7 @@ def test_api_get_fsps(get_mock: Any) -> None:
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
-def test_api_get_account_types(get_mock: Any) -> None:
+def test_api_get_account_types(get_mock: object) -> None:
     get_mock.return_value = (
         [
             {
@@ -1256,7 +1255,7 @@ def test_api_get_account_types(get_mock: Any) -> None:
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
-def test_api_create_payment_instruction(post_mock: Any) -> None:
+def test_api_create_payment_instruction(post_mock: object) -> None:
     post_mock.return_value = (
         {
             "remote_id": "123",
@@ -1379,7 +1378,7 @@ def test_payment_instruction_payload_uses_destination_country_iso_code2(
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
-def test_api_get_delivery_mechanisms(get_mock: Any) -> None:
+def test_api_get_delivery_mechanisms(get_mock: object) -> None:
     get_mock.return_value = (
         [
             {
@@ -1401,7 +1400,7 @@ def test_api_get_delivery_mechanisms(get_mock: Any) -> None:
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
-def test_api_get_records_for_payment_instruction(get_mock: Any) -> None:
+def test_api_get_records_for_payment_instruction(get_mock: object) -> None:
     get_mock.return_value = (
         [
             {
@@ -1427,7 +1426,7 @@ def test_api_get_records_for_payment_instruction(get_mock: Any) -> None:
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
-def test_api_get_record(get_mock: Any) -> None:
+def test_api_get_record(get_mock: object) -> None:
     get_mock.return_value = (
         [
             {
@@ -1450,7 +1449,7 @@ def test_api_get_record(get_mock: Any) -> None:
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
-def test_api_change_payment_instruction_status(post_mock: Any) -> None:
+def test_api_change_payment_instruction_status(post_mock: object) -> None:
     status = Mock()
     status.value = "bad_status"
     with pytest.raises(PaymentGatewayAPI.PaymentGatewayAPIError, match="Can't set invalid Payment Instruction status:"):
@@ -1469,7 +1468,7 @@ def test_api_change_payment_instruction_status(post_mock: Any) -> None:
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
 def test_sync_delivery_mechanisms(
-    get_delivery_mechanisms_mock: Any,
+    get_delivery_mechanisms_mock: object,
     delivery_mechanisms: dict,
     account_types: dict,
 ) -> None:
@@ -1514,7 +1513,7 @@ def account_types_int_payment_gateway_id():
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
 def test_sync_delivery_mechanisms_links_account_type_when_api_returns_int(
-    get_delivery_mechanisms_mock: Any,
+    get_delivery_mechanisms_mock: object,
     account_types_int_payment_gateway_id: dict,
 ) -> None:
     get_delivery_mechanisms_mock.return_value = [
@@ -1562,7 +1561,7 @@ def test_sync_delivery_mechanisms_links_account_type_when_api_returns_int(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps(
-    get_fsps_mock: Any,
+    get_fsps_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     pg_fsp = payment_gateway_setup["fsp"]
@@ -1649,7 +1648,7 @@ def test_sync_fsps(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
-    get_fsps_mock: Any,
+    get_fsps_mock: object,
     delivery_mechanisms: dict,
 ) -> None:
     existing_fsp = FinancialServiceProviderFactory(
@@ -1696,7 +1695,7 @@ def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps_keeps_existing_delivery_mechanisms_when_configs_are_empty(
-    get_fsps_mock: Any,
+    get_fsps_mock: object,
     pg_fsp: FinancialServiceProvider,
 ) -> None:
     get_fsps_mock.return_value = [
@@ -1724,7 +1723,7 @@ def test_sync_fsps_keeps_existing_delivery_mechanisms_when_configs_are_empty(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps_skips_country_specific_configs_when_building_required_fields(
-    get_fsps_mock: Any,
+    get_fsps_mock: object,
     pg_fsp: FinancialServiceProvider,
     delivery_mechanisms: dict,
 ) -> None:
@@ -1766,7 +1765,7 @@ def test_sync_fsps_skips_country_specific_configs_when_building_required_fields(
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway_id(
-    get_fsps_mock: Any,
+    get_fsps_mock: object,
 ) -> None:
     FinancialServiceProviderFactory(
         name="Existing HOPE FSP",
@@ -1794,7 +1793,7 @@ def test_sync_fsps_raises_when_vendor_number_match_has_different_payment_gateway
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
 def test_sync_fsps_raises_when_vendor_number_is_missing(
-    get_fsps_mock: Any,
+    get_fsps_mock: object,
 ) -> None:
     get_fsps_mock.return_value = [
         FspData(
@@ -1814,7 +1813,7 @@ def test_sync_fsps_raises_when_vendor_number_is_missing(
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
-def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: Any) -> None:
+def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechanisms_mock: object) -> None:
     queue_and_run_retry_task(
         periodic_sync_payment_gateway_delivery_mechanisms_async_task,
         job_model=PeriodicAsyncRetryJob,
@@ -1826,9 +1825,9 @@ def test_periodic_sync_payment_gateway_delivery_mechanisms(sync_delivery_mechani
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
 def test_add_missing_records_to_payment_instructions(
-    get_record_mock: Any,
-    add_records_to_payment_instruction_mock: Any,
-    change_payment_instruction_status_mock: Any,
+    get_record_mock: object,
+    add_records_to_payment_instruction_mock: object,
+    change_payment_instruction_status_mock: object,
     payment_gateway_setup: dict,
 ) -> None:
     payment_plan = payment_gateway_setup["payment_plan"]

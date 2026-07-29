@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import TypeVar
 from uuid import UUID
 
 from admin_extra_buttons.buttons import StandardButton
@@ -12,6 +12,7 @@ from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from django.db.models import Model, OneToOneRel, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -46,7 +47,7 @@ class RdiMergeStatusAdminMixin(admin.ModelAdmin):
 class JSONWidgetMixin:
     json_enabled = False
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.get_internal_type() == "JSONField":
             if is_root(request) or settings.DEBUG or self.json_enabled:
                 kwargs = {"widget": JSONEditor}
@@ -153,7 +154,7 @@ class AutocompleteForeignKeyMixin:
 class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
+    def get_fields(self, request: HttpRequest, obj: object | None = None) -> object:
         return super().get_fields(request, obj)
 
     def get_actions(self, request: HttpRequest) -> dict:
@@ -189,7 +190,7 @@ class BusinessAreaForCollectionsListFilter(admin.SimpleListFilter):
     parameter_name = "business_area__exact"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[Any, str]]:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[object, str]]:
         return list(BusinessArea.objects.all().values_list("id", "name"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -471,9 +472,9 @@ class LinkedObjectsManagerMixin:
             context,
         )
 
-    def get_related(self, user: Model, field: Any, manager: str, max_records: int = 200) -> dict[str, Any]:
+    def get_related(self, user: Model, field: object, manager: str, max_records: int = 200) -> dict[str, object]:
         """Override 'get_related' from 'smart_admin', to take related objects with a custom manager."""
-        info: dict[str, Any] = {
+        info: dict[str, object] = {
             "owner": user,
             "to": field.model._meta.model_name,
             "field_name": field.name,
@@ -506,5 +507,5 @@ class LinkedObjectsManagerMixin:
 
         return info
 
-    def admin_urlbasename(self, value: Any, arg: str) -> str:
+    def admin_urlbasename(self, value: object, arg: str) -> str:
         return "%s_%s_%s" % (value.app_label, value.model_name, arg)

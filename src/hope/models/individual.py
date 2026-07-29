@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.postgres.indexes import GinIndex
@@ -416,7 +416,7 @@ class Individual(
     )
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
-    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
         individual_deleted.send(self.__class__, instance=self)
         return super().delete(*args, **kwargs)
 
@@ -605,7 +605,7 @@ class Individual(
             ("reset_sync_date", "Can reset sync date"),
         )
 
-    def recalculate_data(self, save: bool = True) -> tuple[Any, list[str]]:
+    def recalculate_data(self, save: bool = True) -> tuple[object, list[str]]:
         update_fields = ["disability"]
 
         disability_fields = (
@@ -680,8 +680,8 @@ class Individual(
     def validate_phone_numbers(self) -> None:
         calculate_phone_numbers_validity(self)
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        recalculate_phone_numbers_validity(self)
+    def save(self, *args: object, **kwargs: object) -> None:
+        recalculate_phone_numbers_validity(self, Individual)
         super().save(*args, **kwargs)
 
 
@@ -689,27 +689,27 @@ class PendingIndividual(Individual):
     objects = PendingManager()
 
     @property
-    def households_and_roles(self) -> Any:
+    def households_and_roles(self) -> object:
         return super().households_and_roles(manager="pending_objects")
 
     @households_and_roles.setter
-    def households_and_roles(self, value: Any) -> None:
+    def households_and_roles(self, value: object) -> None:
         pass
 
     @property
-    def documents(self) -> Any:
+    def documents(self) -> object:
         return super().documents(manager="pending_objects")
 
     @documents.setter
-    def documents(self, value: Any) -> None:
+    def documents(self, value: object) -> None:
         pass
 
     @property
-    def identities(self) -> Any:
+    def identities(self) -> object:
         return super().identities(manager="pending_objects")
 
     @identities.setter
-    def identities(self, value: Any) -> None:
+    def identities(self, value: object) -> None:
         pass
 
     @property

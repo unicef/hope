@@ -1,7 +1,7 @@
 import difflib
 from difflib import _mdiff
 import json
-from typing import Any, Sequence
+from typing import Sequence
 
 from django import template
 from pygments import highlight, lexers
@@ -11,7 +11,7 @@ register = template.Library()
 
 
 class HtmlDiff(difflib.HtmlDiff):
-    def _format_line(self, side: Any, flag: Any, linenum: int, text: str) -> str:
+    def _format_line(self, side: object, flag: object, linenum: int, text: str) -> str:
         try:
             line_number: str = f"{linenum}"
             identifier = f' id="{self._prefix[side]}{line_number}"'
@@ -119,12 +119,12 @@ class HtmlDiff(difflib.HtmlDiff):
 
 
 @register.filter(name="getattr")
-def get_attr(d: Any, v: Any) -> Any:
+def get_attr(d: object, v: object) -> object:
     return getattr(d, v)
 
 
 @register.simple_tag
-def define(val: Any = None) -> Any:
+def define(val: object | None = None) -> object:
     return val
 
 
@@ -136,19 +136,19 @@ def pretty_json(json_object: dict) -> str:
 
 
 @register.filter
-def get_item(dictionary: dict, key: Any) -> Any:
+def get_item(dictionary: dict, key: object) -> object:
     return dictionary.get(key)
 
 
 @register.filter
-def pygmentize(code: Any) -> str:
+def pygmentize(code: object) -> str:
     formatter = HtmlFormatter(linenos=True)
     lex = lexers.get_lexer_by_name("python")
     return highlight(code, lex, formatter)
 
 
 @register.filter
-def diff(commit: Any, panels: str = "before,after") -> str:
+def diff(commit: object, panels: str = "before,after") -> str:
     rule = commit.rule
     left_panel, right_panel = [], []
     right_label = "No data"

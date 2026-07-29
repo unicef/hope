@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Generator
+from typing import Generator
 from uuid import UUID
 
 from admin_extra_buttons.decorators import button
@@ -88,13 +88,13 @@ class BaseRDIForm(forms.Form):
     )
     status = forms.ChoiceField(label="Record status", required=True, choices=STATUSES_CHOICES)
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         request = kwargs.pop("request")
         if request and is_root(request):
             self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
-    def clean_filters(self) -> tuple[dict[str, Any], dict[str, Any]]:
+    def clean_filters(self) -> tuple[dict[str, object], dict[str, object]]:
         qs_filter = QueryStringFilter(None, {}, Record, None)
         return qs_filter.get_filters(self.cleaned_data["filters"])
 
@@ -159,7 +159,7 @@ class RecordAdmin(HOPEModelAdminBase):
     )
     change_form_template = "registration_data/admin/record/change_form.html"
 
-    actions: list[Any] = [
+    actions: list[object] = [
         mass_update,
         "extract",
         "async_extract",
@@ -199,7 +199,7 @@ class RecordAdmin(HOPEModelAdminBase):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return is_root(request)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -377,7 +377,7 @@ class RemeberDataForm(forms.Form):
     SYNC_COOKIE = "fetch"
     remember = forms.BooleanField(label="Remember me", required=False)
 
-    def get_signed_cookie(self, request: HttpRequest) -> Any:
+    def get_signed_cookie(self, request: HttpRequest) -> object:
         signer = Signer(key=str(request.user.password))
         return signer.sign_object(self.cleaned_data)
 
@@ -401,5 +401,5 @@ class FetchForm(RemeberDataForm):
     start = forms.IntegerField()
     end = forms.IntegerField()
 
-    def clean(self) -> dict[str, Any] | None:
+    def clean(self) -> dict[str, object] | None:
         return super().clean()

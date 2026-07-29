@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Callable
 from unittest.mock import MagicMock, patch
 
 from django.contrib.admin import ModelAdmin, site
@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 pytestmark = pytest.mark.django_db
 
-
 EXCLUDED_MODELS: list[str] = []
 
 
@@ -30,12 +29,12 @@ def get_model_admins():
 
 
 @pytest.fixture
-def superuser(db: Any) -> "User":
+def superuser(db: object) -> "User":
     return UserFactory(is_superuser=True, is_staff=True)
 
 
 @pytest.fixture
-def business_area(db: Any) -> "BusinessArea":
+def business_area(db: object) -> "BusinessArea":
     return BusinessAreaFactory(
         code="0060",
         name="Afghanistan",

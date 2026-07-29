@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django import forms
 from django.contrib import messages
@@ -62,5 +61,5 @@ class UploadFile(UploadFilePermissionMixin, View):
         return "core/upload_file.html"
 
     @staticmethod
-    def format_form_error(form: forms.Form) -> Any:
+    def format_form_error(form: forms.Form) -> object:
         return form.errors.get_json_data()["__all__"][0]["message"]

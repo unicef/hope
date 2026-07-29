@@ -1,6 +1,5 @@
 import operator
 from pathlib import Path
-from typing import Any
 from unittest import mock
 
 import openpyxl
@@ -30,12 +29,12 @@ FILES_DIR = Path(__file__).resolve().parent / "test_file"
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(name="Afghanistan", long_name="Afghanistan")
 
 
 @pytest.fixture
-def countries(business_area: Any) -> dict[str, Any]:
+def countries(business_area: object) -> dict[str, object]:
     afghanistan = CountryFactory(
         name="Afghanistan",
         short_name="Afghanistan",
@@ -59,7 +58,7 @@ def countries(business_area: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def afghanistan_admin_areas(countries: dict[str, Any]) -> list[Any]:
+def afghanistan_admin_areas(countries: dict[str, object]) -> list[object]:
     area_type = AreaTypeFactory(country=countries["afghanistan"], name="admin", area_level=1)
     return [
         AreaFactory(p_code="AF29", area_type=area_type),
@@ -75,7 +74,7 @@ def afghanistan_admin_areas(countries: dict[str, Any]) -> list[Any]:
 
 
 @pytest.fixture
-def assistance_type_flex_attribute() -> Any:
+def assistance_type_flex_attribute() -> object:
     return FlexibleAttributeFactory(
         name="assistance_type_h_f",
         type=FlexibleAttribute.SELECT_MANY,
@@ -86,22 +85,22 @@ def assistance_type_flex_attribute() -> Any:
 
 @pytest.fixture
 def program(
-    business_area: Any,
-    countries: dict[str, Any],
-    afghanistan_admin_areas: list[Any],
-    assistance_type_flex_attribute: Any,
+    business_area: object,
+    countries: dict[str, object],
+    afghanistan_admin_areas: list[object],
+    assistance_type_flex_attribute: object,
     all_currencies: None,
-) -> Any:
+) -> object:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
 def social_worker_program(
-    business_area: Any,
-    countries: dict[str, Any],
-    afghanistan_admin_areas: list[Any],
+    business_area: object,
+    countries: dict[str, object],
+    afghanistan_admin_areas: list[object],
     all_currencies: None,
-) -> Any:
+) -> object:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
     return ProgramFactory(
@@ -112,8 +111,8 @@ def social_worker_program(
 
 
 @pytest.fixture
-def pdu_attribute_factory(program: Any):
-    def _create(subtype: str) -> Any:
+def pdu_attribute_factory(program: object):
+    def _create(subtype: str) -> object:
         pdu_data = PeriodicFieldDataFactory(subtype=subtype, number_of_rounds=1, rounds_names=["May"])
         return FlexibleAttributeForPDUFactory(
             label="PDU Flex Attribute",
@@ -124,7 +123,7 @@ def pdu_attribute_factory(program: Any):
     return _create
 
 
-def test_string_validator(program: Any, countries: dict[str, Any], afghanistan_admin_areas: list[Any]) -> None:
+def test_string_validator(program: object, countries: dict[str, object], afghanistan_admin_areas: list[object]) -> None:
     validator = UploadXLSXInstanceValidator(program)
     assert validator.string_validator("Marek", "full_name_i_c")
 
@@ -138,7 +137,7 @@ def test_string_validator(program: Any, countries: dict[str, Any], afghanistan_a
         ("1.a1a", "estimated_birth_date_i_c", False),
     ],
 )
-def test_float_validator(program: Any, value: Any, header: str, expected: bool) -> None:
+def test_float_validator(program: object, value: object, header: str, expected: bool) -> None:
     validator = UploadXLSXInstanceValidator(program)
     assert validator.float_validator(value, header) is expected
 
@@ -155,7 +154,7 @@ def test_float_validator(program: Any, value: Any, header: str, expected: bool) 
         ("24.121a, bcd421.222", False),
     ],
 )
-def test_geolocation_validator(program: Any, value: str, expected: bool) -> None:
+def test_geolocation_validator(program: object, value: str, expected: bool) -> None:
     validator = UploadXLSXInstanceValidator(program)
     assert validator.geolocation_validator(value, "hh_geopoint_h_c") is expected
 
@@ -175,7 +174,7 @@ def test_geolocation_validator(program: Any, value: str, expected: bool) -> None
         ("-24", False),
     ],
 )
-def test_date_validator(program: Any, value: str, expected: bool) -> None:
+def test_date_validator(program: object, value: str, expected: bool) -> None:
     validator = UploadXLSXInstanceValidator(program)
     assert validator.date_validator(value, "birth_date_i_c") is expected
 
@@ -195,7 +194,7 @@ def test_date_validator(program: Any, value: str, expected: bool) -> None:
         ("12,242", False),
     ],
 )
-def test_integer_validator(program: Any, value: Any, expected: bool) -> None:
+def test_integer_validator(program: object, value: object, expected: bool) -> None:
     validator = UploadXLSXInstanceValidator(program)
     assert validator.integer_validator(value, "size_h_c") is expected
 
@@ -220,7 +219,7 @@ def test_integer_validator(program: Any, value: Any, expected: bool) -> None:
         (12, False),
     ],
 )
-def test_phone_validator(program: Any, value: Any, expected: bool) -> None:
+def test_phone_validator(program: object, value: object, expected: bool) -> None:
     validator = UploadXLSXInstanceValidator(program)
     assert validator.phone_validator(value, "phone_no_i_c") is expected
 
@@ -242,8 +241,8 @@ def test_phone_validator(program: Any, value: Any, expected: bool) -> None:
     ],
 )
 def test_choice_validator(
-    program: Any,
-    assistance_type_flex_attribute: Any,
+    program: object,
+    assistance_type_flex_attribute: object,
     value: str,
     header: str,
     expected: bool,
@@ -252,21 +251,21 @@ def test_choice_validator(
     assert validator.choice_validator(value, header) is expected
 
 
-def test_import_choice_validator_empty_value_returns_message(program: Any) -> None:
+def test_import_choice_validator_empty_value_returns_message(program: object) -> None:
     validator = KoboProjectImportDataInstanceValidator(program)
     validator.all_fields = {"field_one": {"type": TYPE_SELECT_ONE, "choices": ["A"]}}
 
     assert validator.choice_validator("", "field_one") == "Invalid choice  for field field_one"
 
 
-def test_import_choice_validator_handler_none_returns_none(program: Any) -> None:
+def test_import_choice_validator_handler_none_returns_none(program: object) -> None:
     validator = KoboProjectImportDataInstanceValidator(program)
     validator.all_fields = {"field_one": {"type": "UNKNOWN", "choices": ["A"]}}
 
     assert validator.choice_validator("A", "field_one") is None
 
 
-def test_import_choice_validator_custom_select_one(program: Any) -> None:
+def test_import_choice_validator_custom_select_one(program: object) -> None:
     validator = KoboProjectImportDataInstanceValidator(program)
     validator.all_fields = {
         "field_one": {
@@ -280,7 +279,7 @@ def test_import_choice_validator_custom_select_one(program: Any) -> None:
     assert validator.choice_validator("NO", "field_one") == "Invalid choice NO for field field_one"
 
 
-def test_import_choice_validator_custom_select_many(program: Any) -> None:
+def test_import_choice_validator_custom_select_many(program: object) -> None:
     validator = KoboProjectImportDataInstanceValidator(program)
     validator.all_fields = {
         "field_many": {
@@ -294,7 +293,7 @@ def test_import_choice_validator_custom_select_many(program: Any) -> None:
     assert validator.choice_validator("B", "field_many") == "Invalid choice B for field field_many"
 
 
-def test_import_choice_validator_select_many_invalid_choice(program: Any) -> None:
+def test_import_choice_validator_select_many_invalid_choice(program: object) -> None:
     validator = KoboProjectImportDataInstanceValidator(program)
     validator.all_fields = {
         "field_many": {
@@ -307,7 +306,7 @@ def test_import_choice_validator_select_many_invalid_choice(program: Any) -> Non
 
 
 def test_rows_validator_too_many_head_of_households(
-    program: Any,
+    program: object,
 ) -> None:
     wb = openpyxl.load_workbook(
         FILES_DIR / "error-xlsx.xlsx",
@@ -328,8 +327,8 @@ def test_rows_validator_too_many_head_of_households(
 
 
 def test_rows_validator(
-    program: Any,
-    business_area: Any,
+    program: object,
+    business_area: object,
 ) -> None:
     wb = openpyxl.load_workbook(
         FILES_DIR / "invalid_rows.xlsx",
@@ -603,7 +602,7 @@ def test_rows_validator(
             assert validator.errors == expected_values
 
 
-def test_validate_file_extension(program: Any) -> None:
+def test_validate_file_extension(program: object) -> None:
     file_path = FILES_DIR / "image.png"
     expected_values = [{"row_number": 1, "message": "Only .xlsx files are accepted for import"}]
     with open(file_path, "rb") as file:
@@ -618,7 +617,7 @@ def test_validate_file_extension(program: Any) -> None:
         assert errors[0]["message"] == expected_values[0]["message"]
 
 
-def test_validate_file_content_as_xlsx(program: Any) -> None:
+def test_validate_file_content_as_xlsx(program: object) -> None:
     file_path = FILES_DIR / "not_excel_file.xlsx"
     expected_values = [{"row_number": 1, "message": "Invalid .xlsx file"}]
     with open(file_path, "rb") as file:
@@ -628,7 +627,7 @@ def test_validate_file_content_as_xlsx(program: Any) -> None:
         assert result[0]["message"] == expected_values[0]["message"]
 
 
-def test_validate_file_with_template(program: Any) -> None:
+def test_validate_file_with_template(program: object) -> None:
     invalid_cols_file_path = FILES_DIR / "new_reg_data_import.xlsx"
     with open(invalid_cols_file_path, "rb") as file:
         validator = UploadXLSXInstanceValidator(program)
@@ -639,7 +638,7 @@ def test_validate_file_with_template(program: Any) -> None:
         assert errors == []
 
 
-def test_required_validator(program: Any) -> None:
+def test_required_validator(program: object) -> None:
     with mock.patch(
         "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
         return_value={"test": {"required": True}},
@@ -665,7 +664,7 @@ def test_required_validator(program: Any) -> None:
         assert result
 
 
-def test_image_validator(program: Any) -> None:
+def test_image_validator(program: object) -> None:
     with mock.patch(
         "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
         return_value={"test": {"required": True}},
@@ -682,7 +681,7 @@ def test_image_validator(program: Any) -> None:
         validator.image_loader.image_in.assert_called_once_with("A1")
 
 
-def test_image_validator_returns_true_for_required_value(program: Any) -> None:
+def test_image_validator_returns_true_for_required_value(program: object) -> None:
     with mock.patch(
         "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
         return_value={"test": {"required": True}},
@@ -697,7 +696,7 @@ def test_image_validator_returns_true_for_required_value(program: Any) -> None:
         validator.image_loader.image_in.assert_not_called()
 
 
-def test_image_validator_reraises_and_logs_error(program: Any) -> None:
+def test_image_validator_reraises_and_logs_error(program: object) -> None:
     with mock.patch(
         "hope.apps.registration_data.validators.UploadXLSXInstanceValidator.get_all_fields",
         return_value={"test": {"required": True}},
@@ -714,7 +713,7 @@ def test_image_validator_reraises_and_logs_error(program: Any) -> None:
         logger_warning.assert_called_once()
 
 
-def test_validate_empty_file(program: Any) -> None:
+def test_validate_empty_file(program: object) -> None:
     empty_file_path = FILES_DIR / "empty_rdi.xlsx"
     wb = openpyxl.load_workbook(
         empty_file_path,
@@ -739,7 +738,7 @@ def test_validate_empty_file(program: Any) -> None:
     assert validator.errors == expected_result
 
 
-def test_validate_collector_unique(program: Any) -> None:
+def test_validate_collector_unique(program: object) -> None:
     file_path = FILES_DIR / "test_collectors.xlsx"
 
     expected_result = [
@@ -763,7 +762,7 @@ def test_validate_collector_unique(program: Any) -> None:
     assert result == expected_result
 
 
-def test_validate_incorrect_admin_area(program: Any) -> None:
+def test_validate_incorrect_admin_area(program: object) -> None:
     file_path = FILES_DIR / "invalid_area.xlsx"
 
     expected_result = [
@@ -811,7 +810,7 @@ def test_validate_incorrect_admin_area(program: Any) -> None:
 
 
 def test_validate_people_sheet_invalid(
-    social_worker_program: Any,
+    social_worker_program: object,
 ) -> None:
     file_path = FILES_DIR / "rdi_people_test_invalid.xlsx"
 
@@ -874,7 +873,7 @@ def test_validate_people_sheet_invalid(
 
 
 def test_validate_people_sheet_valid(
-    social_worker_program: Any,
+    social_worker_program: object,
 ) -> None:
     file_path = FILES_DIR / "rdi_people_test.xlsx"
 
@@ -894,8 +893,8 @@ def test_validate_people_sheet_valid(
     ],
 )
 def test_validate_pdu_string_valid(
-    program: Any,
-    pdu_attribute_factory: Any,
+    program: object,
+    pdu_attribute_factory: object,
     subtype: str,
     data_row: list,
 ) -> None:
@@ -922,8 +921,8 @@ def test_validate_pdu_string_valid(
     ],
 )
 def test_validate_pdu_string_value_error(
-    program: Any,
-    pdu_attribute_factory: Any,
+    program: object,
+    pdu_attribute_factory: object,
     subtype: str,
     data_row: list,
 ) -> None:
@@ -948,8 +947,8 @@ def test_validate_pdu_string_value_error(
 
 
 def test_validate_pdu_wrong_collection_date(
-    program: Any,
-    pdu_attribute_factory: Any,
+    program: object,
+    pdu_attribute_factory: object,
 ) -> None:
     data_row = ["Test", "bar"]
     pdu_attribute_factory(PeriodicFieldData.STRING)
@@ -973,8 +972,8 @@ def test_validate_pdu_wrong_collection_date(
 
 
 def test_validate_pdu_empty_row(
-    program: Any,
-    pdu_attribute_factory: Any,
+    program: object,
+    pdu_attribute_factory: object,
 ) -> None:
     data_row = ["Test", "bar"]
     pdu_attribute_factory(PeriodicFieldData.STRING)
@@ -989,7 +988,7 @@ def test_validate_pdu_empty_row(
 
 
 def test_validate_facility_admin_area_header(
-    social_worker_program: Any,
+    social_worker_program: object,
 ) -> None:
     workbook = openpyxl.Workbook()
     sheet = workbook.active

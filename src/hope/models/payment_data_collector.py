@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from hope.models.account import Account
 from hope.models.delivery_mechanism_config import DeliveryMechanismConfig
@@ -20,7 +20,7 @@ class PaymentDataCollector(Account):
         associated_with: str,
         collector: Individual,
         account: Account | None = None,
-    ) -> Any:
+    ) -> object:
         associated_objects = {
             FspNameMapping.SourceModel.INDIVIDUAL.value: collector,
             FspNameMapping.SourceModel.HOUSEHOLD.value: collector.household,
@@ -71,7 +71,7 @@ class PaymentDataCollector(Account):
         account: Account | None,
         output_field: str,
         fsp_name_mapping: FspNameMapping | None,
-    ) -> Any:
+    ) -> object:
         if fsp_name_mapping:
             internal_field = fsp_name_mapping.hope_name
             associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)

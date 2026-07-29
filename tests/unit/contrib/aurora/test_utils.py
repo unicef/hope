@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import MagicMock
 
 from constance.test import override_config
@@ -12,7 +11,7 @@ from hope.contrib.aurora.utils import _iter_results, fetch_metadata, fetch_recor
 pytestmark = pytest.mark.django_db
 
 
-def _mock_responses(*data: Any) -> list:
+def _mock_responses(*data: object) -> list:
     responses = []
     for item in data:
         if isinstance(item, Exception):
@@ -26,14 +25,14 @@ def _mock_responses(*data: Any) -> list:
 
 
 @pytest.fixture
-def mock_aurora_client(mocker: Any) -> Any:
+def mock_aurora_client(mocker: object) -> object:
     session_instance = MagicMock()
     mocker.patch("hope.contrib.aurora.utils.requests.Session", return_value=session_instance)
     return session_instance
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_persists_full_hierarchy(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_persists_full_hierarchy(mock_aurora_client: object) -> None:
     schema = {
         "organization": "https://aurora.test/api/orgs/",
         "record": "https://aurora.test/api/records/",
@@ -82,7 +81,7 @@ def test_fetch_metadata_persists_full_hierarchy(mock_aurora_client: Any) -> None
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_logs_when_no_codec_available(mock_aurora_client: Any, mocker: Any) -> None:
+def test_fetch_metadata_logs_when_no_codec_available(mock_aurora_client: object, mocker: object) -> None:
     schema = {
         "organization": "https://aurora.test/api/orgs/",
         "record": "https://aurora.test/api/records/",
@@ -127,7 +126,7 @@ def test_fetch_metadata_logs_when_no_codec_available(mock_aurora_client: Any, mo
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_get_metadata_returns_record_metadata(mock_aurora_client: Any) -> None:
+def test_get_metadata_returns_record_metadata(mock_aurora_client: object) -> None:
     schema = {"record": "https://aurora.test/api/records/"}
     metadata_dict = {"definition": [1, 2, 3]}
     mock_aurora_client.get.side_effect = _mock_responses(schema, metadata_dict)
@@ -141,7 +140,7 @@ def test_get_metadata_returns_record_metadata(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_records_creates_new_records(mock_aurora_client: Any) -> None:
+def test_fetch_records_creates_new_records(mock_aurora_client: object) -> None:
     schema = {"record": "https://aurora.test/api/records/"}
     page = {
         "results": [
@@ -168,7 +167,7 @@ def test_fetch_records_creates_new_records(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_missing_organization_key_returns_empty(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_missing_organization_key_returns_empty(mock_aurora_client: object) -> None:
     schema = {"record": "https://aurora.test/api/records/"}  # no "organization" key
     mock_aurora_client.get.side_effect = _mock_responses(schema)
 
@@ -179,7 +178,7 @@ def test_fetch_metadata_missing_organization_key_returns_empty(mock_aurora_clien
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_skips_non_dict_org(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_skips_non_dict_org(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {"results": ["not-a-dict"]}
     mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page)
@@ -190,7 +189,7 @@ def test_fetch_metadata_skips_non_dict_org(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_skips_non_dict_org_logs_warning(mock_aurora_client: Any, mocker: Any) -> None:
+def test_fetch_metadata_skips_non_dict_org_logs_warning(mock_aurora_client: object, mocker: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {"results": ["not-a-dict"]}
     mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page)
@@ -202,7 +201,7 @@ def test_fetch_metadata_skips_non_dict_org_logs_warning(mock_aurora_client: Any,
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_propagates_http_error_on_orgs_page(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_propagates_http_error_on_orgs_page(mock_aurora_client: object) -> None:
     import requests as _requests
 
     schema = {"organization": "https://aurora.test/api/orgs/"}
@@ -217,7 +216,7 @@ def test_fetch_metadata_propagates_http_error_on_orgs_page(mock_aurora_client: A
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_records_propagates_http_error_on_record_page(mock_aurora_client: Any) -> None:
+def test_fetch_records_propagates_http_error_on_record_page(mock_aurora_client: object) -> None:
     import requests as _requests
 
     schema = {"record": "https://aurora.test/api/records/"}
@@ -232,7 +231,7 @@ def test_fetch_records_propagates_http_error_on_record_page(mock_aurora_client: 
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_skips_org_missing_id(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_skips_org_missing_id(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {"results": [{"name": "No ID Org", "slug": "no-id"}]}  # missing "id" and "projects"
     mock_aurora_client.get.side_effect = _mock_responses(schema, orgs_page)
@@ -244,7 +243,7 @@ def test_fetch_metadata_skips_org_missing_id(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_projects_fetch_error_returns_empty_projects(mock_aurora_client: Any, mocker: Any) -> None:
+def test_fetch_metadata_projects_fetch_error_returns_empty_projects(mock_aurora_client: object, mocker: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {
         "results": [{"id": 3, "name": "Org C", "slug": "org-c", "projects": "https://aurora.test/api/orgs/3/projects/"}]
@@ -263,7 +262,7 @@ def test_fetch_metadata_projects_fetch_error_returns_empty_projects(mock_aurora_
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_skips_non_dict_project(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_skips_non_dict_project(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {
         "results": [{"id": 4, "name": "Org D", "slug": "org-d", "projects": "https://aurora.test/api/orgs/4/projects/"}]
@@ -277,7 +276,7 @@ def test_fetch_metadata_skips_non_dict_project(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_skips_project_missing_id(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_skips_project_missing_id(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {
         "results": [{"id": 5, "name": "Org E", "slug": "org-e", "projects": "https://aurora.test/api/orgs/5/projects/"}]
@@ -292,7 +291,7 @@ def test_fetch_metadata_skips_project_missing_id(mock_aurora_client: Any) -> Non
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_registrations_fetch_error_returns_empty_registrations(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_registrations_fetch_error_returns_empty_registrations(mock_aurora_client: object) -> None:
     import requests as _requests
 
     schema = {"organization": "https://aurora.test/api/orgs/"}
@@ -315,7 +314,7 @@ def test_fetch_metadata_registrations_fetch_error_returns_empty_registrations(mo
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_skips_non_dict_registration(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_skips_non_dict_registration(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {
         "results": [{"id": 7, "name": "Org G", "slug": "org-g", "projects": "https://aurora.test/api/orgs/7/projects/"}]
@@ -332,7 +331,7 @@ def test_fetch_metadata_skips_non_dict_registration(mock_aurora_client: Any) -> 
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_skips_registration_missing_id(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_skips_registration_missing_id(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {
         "results": [{"id": 8, "name": "Org H", "slug": "org-h", "projects": "https://aurora.test/api/orgs/8/projects/"}]
@@ -350,7 +349,7 @@ def test_fetch_metadata_skips_registration_missing_id(mock_aurora_client: Any) -
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_get_metadata_missing_record_key_returns_empty(mock_aurora_client: Any) -> None:
+def test_get_metadata_missing_record_key_returns_empty(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}  # no "record" key
     mock_aurora_client.get.side_effect = _mock_responses(schema)
 
@@ -360,7 +359,7 @@ def test_get_metadata_missing_record_key_returns_empty(mock_aurora_client: Any) 
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_records_missing_record_key_returns_zeros(mock_aurora_client: Any) -> None:
+def test_fetch_records_missing_record_key_returns_zeros(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}  # no "record" key
     mock_aurora_client.get.side_effect = _mock_responses(schema)
 
@@ -370,7 +369,7 @@ def test_fetch_records_missing_record_key_returns_zeros(mock_aurora_client: Any)
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_records_skips_record_missing_id(mock_aurora_client: Any) -> None:
+def test_fetch_records_skips_record_missing_id(mock_aurora_client: object) -> None:
     schema = {"record": "https://aurora.test/api/records/"}
     page = {"results": [{"registration": 1, "status": "TO_IMPORT"}]}  # no "id"
     mock_aurora_client.get.side_effect = _mock_responses(schema, page)
@@ -383,7 +382,7 @@ def test_fetch_records_skips_record_missing_id(mock_aurora_client: Any) -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_records_skips_existing_records(mock_aurora_client: Any) -> None:
+def test_fetch_records_skips_existing_records(mock_aurora_client: object) -> None:
     existing = RecordFactory(source_id=99)
     schema = {"record": "https://aurora.test/api/records/"}
     page = {
@@ -411,7 +410,7 @@ def test_iter_results_with_non_list_non_dict_returns_empty() -> None:
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_fetch_metadata_registration_without_metadata_url(mock_aurora_client: Any) -> None:
+def test_fetch_metadata_registration_without_metadata_url(mock_aurora_client: object) -> None:
     schema = {"organization": "https://aurora.test/api/orgs/"}
     orgs_page = {
         "results": [{"id": 9, "name": "Org I", "slug": "org-i", "projects": "https://aurora.test/api/orgs/9/projects/"}]

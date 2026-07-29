@@ -1,5 +1,4 @@
-from typing import Any
-
+from django.http import HttpRequest
 from rest_framework.authentication import SessionAuthentication
 
 
@@ -32,5 +31,5 @@ def humanize_errors(errors: dict) -> dict:
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
-    def enforce_csrf(self, request: Any) -> None:
+    def enforce_csrf(self, request: HttpRequest) -> None:
         return

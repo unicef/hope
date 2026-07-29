@@ -1,6 +1,6 @@
 from datetime import timezone as dt_timezone
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -31,15 +31,15 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
 def managerial_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
     client = api_client(user)
@@ -102,8 +102,8 @@ def managerial_context(
     ],
 )
 def test_list_payment_plans_permission(
-    managerial_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    managerial_context: dict[str, object],
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -118,9 +118,9 @@ def test_list_payment_plans_permission(
 
 
 def test_list_payment_plans(
-    managerial_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    create_partner_role_with_permissions: Any,
+    managerial_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    create_partner_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         managerial_context["user"],
@@ -181,8 +181,8 @@ def test_list_payment_plans(
 
 
 def test_list_payment_plans_approval_process_data(
-    managerial_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    managerial_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     approval_process = ApprovalProcessFactory(
         payment_plan=managerial_context["payment_plan1"],
@@ -246,9 +246,9 @@ def test_list_payment_plans_approval_process_data(
 
 
 def test_bulk_action(
-    managerial_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    create_partner_role_with_permissions: Any,
+    managerial_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    create_partner_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         managerial_context["user"],
@@ -291,9 +291,9 @@ def test_bulk_action(
 
 
 def test_bulk_action_raises_for_instruction_managed(
-    managerial_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    create_partner_role_with_permissions: Any,
+    managerial_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    create_partner_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         managerial_context["user"],
@@ -326,9 +326,9 @@ def test_bulk_action_raises_for_instruction_managed(
 
 
 def test_bulk_action_no_approve_permissions(
-    managerial_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    create_partner_role_with_permissions: Any,
+    managerial_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    create_partner_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         managerial_context["user"],
@@ -376,7 +376,7 @@ def test_get_action_permission(action_name: str, result: str | None) -> None:
     assert payment_plan_managerial_viewset._get_action_permission(action_name) == result
 
 
-def _attach_files(payment_plan: PaymentPlan, user: Any) -> None:
+def _attach_files(payment_plan: PaymentPlan, user: object) -> None:
     payment_plan.imported_file = FileTempFactory(created_by=user)
     payment_plan.export_file_entitlement = FileTempFactory(created_by=user)
     payment_plan.export_file_delivery = FileTempFactory(created_by=user)
@@ -384,9 +384,9 @@ def _attach_files(payment_plan: PaymentPlan, user: Any) -> None:
 
 
 def test_bulk_action_copies_payment_plan_files_when_present(
-    managerial_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    create_partner_role_with_permissions: Any,
+    managerial_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    create_partner_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         managerial_context["user"],

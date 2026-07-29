@@ -1,6 +1,6 @@
 """Tests for grievance ticket global list - office search functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -330,7 +330,7 @@ def tickets(
 
 
 def test_search_by_grievance_ticket_unicef_id(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -360,7 +360,7 @@ def test_search_by_grievance_ticket_unicef_id(
 
 
 def test_search_by_household_unicef_id_complaint_ticket(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -393,7 +393,7 @@ def test_search_by_household_unicef_id_complaint_ticket(
 
 
 def test_search_by_household_unicef_id_sensitive_ticket(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -424,7 +424,7 @@ def test_search_by_household_unicef_id_sensitive_ticket(
 
 
 def test_search_by_individual_unicef_id_sensitive_ticket(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -455,7 +455,7 @@ def test_search_by_individual_unicef_id_sensitive_ticket(
 
 
 def test_search_by_delete_individual_ticket_details(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -486,7 +486,7 @@ def test_search_by_delete_individual_ticket_details(
 
 
 def test_search_by_delete_individual_household(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -519,7 +519,7 @@ def test_search_by_delete_individual_household(
 
 
 def test_search_by_payment_verification_household(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -551,7 +551,7 @@ def test_search_by_payment_verification_household(
 
 
 def test_search_by_payment_verification_individual(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -582,7 +582,7 @@ def test_search_by_payment_verification_individual(
 
 
 def test_search_by_household_unicef_id_multiple_tickets(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -619,7 +619,7 @@ def test_search_by_household_unicef_id_multiple_tickets(
 
 
 def test_search_by_individual_unicef_id_multiple_tickets(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -654,7 +654,7 @@ def test_search_by_individual_unicef_id_multiple_tickets(
 
 
 def test_search_by_possible_duplicates_individual(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -686,7 +686,7 @@ def test_search_by_possible_duplicates_individual(
 
 
 def test_search_by_needs_adjudication_household(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -718,7 +718,7 @@ def test_search_by_needs_adjudication_household(
 
 
 def test_search_by_payment_unicef_id(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -750,7 +750,7 @@ def test_search_by_payment_unicef_id(
 
 
 def test_search_by_system_flagging_individual(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -782,7 +782,7 @@ def test_search_by_system_flagging_individual(
 
 
 def test_search_by_system_flagging_household(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -816,7 +816,7 @@ def test_search_by_system_flagging_household(
 
 
 def test_search_by_delete_household_ticket(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -848,7 +848,7 @@ def test_search_by_delete_household_ticket(
 
 
 def test_search_by_phone_number(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -887,7 +887,7 @@ def test_search_by_phone_number(
 
 
 def test_search_by_phone_number_alternative(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -923,7 +923,7 @@ def test_search_by_phone_number_alternative(
 
 
 def test_search_by_individual_name(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -959,7 +959,7 @@ def test_search_by_individual_name(
 
 
 def test_search_with_active_programs_filter(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

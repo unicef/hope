@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.db.models import QuerySet
 from django.db.transaction import atomic, on_commit
@@ -54,7 +54,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     def get_queryset(self) -> QuerySet[RegistrationDataImport]:
         return RegistrationDataImport.objects.filter(business_area=self.selected_business_area)
 
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+    def dispatch(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseBase:
         return super().dispatch(request, *args, **kwargs)
 
     @atomic()
@@ -73,7 +73,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
             number_of_households=0,
         )
 
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -209,11 +209,11 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
         except RegistrationDataImport.DoesNotExist:
             raise Http404
 
-    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def post(self, request: Request, *args: object, **kwargs: object) -> Response:
         return self.update(request, *args, **kwargs)
 
     @atomic()
-    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def update(self, request: Request, *args: object, **kwargs: object) -> Response:
         self.selected_rdi.number_of_households = PendingHousehold.objects.filter(
             registration_data_import=self.selected_rdi
         ).count()

@@ -1,7 +1,5 @@
 """Additional tests for traverse_sibling_tickets covering the non-empty intersection branch."""
 
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -23,42 +21,42 @@ pytestmark = [
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="test-ba-round2")
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def rdi(program: Any, business_area: Any) -> Any:
+def rdi(program: object, business_area: object) -> object:
     return RegistrationDataImportFactory(program=program, business_area=business_area)
 
 
 @pytest.fixture
-def household_golden(program: Any, business_area: Any) -> Any:
+def household_golden(program: object, business_area: object) -> object:
     return HouseholdFactory(program=program, business_area=business_area, create_role=False)
 
 
 @pytest.fixture
-def household_dup(program: Any, business_area: Any) -> Any:
+def household_dup(program: object, business_area: object) -> object:
     return HouseholdFactory(program=program, business_area=business_area, create_role=False)
 
 
 @pytest.fixture
-def individual_golden(household_golden: Any) -> Any:
+def individual_golden(household_golden: object) -> object:
     return household_golden.head_of_household
 
 
 @pytest.fixture
-def individual_dup(household_dup: Any) -> Any:
+def individual_dup(household_dup: object) -> object:
     return household_dup.head_of_household
 
 
 @pytest.fixture
-def main_ticket(business_area: Any, rdi: Any) -> Any:
+def main_ticket(business_area: object, rdi: object) -> object:
     return GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
@@ -70,11 +68,11 @@ def main_ticket(business_area: Any, rdi: Any) -> Any:
 
 @pytest.fixture
 def sibling_ticket_with_details(
-    business_area: Any,
-    rdi: Any,
-    individual_golden: Any,
-    individual_dup: Any,
-) -> Any:
+    business_area: object,
+    rdi: object,
+    individual_golden: object,
+    individual_dup: object,
+) -> object:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
@@ -94,8 +92,8 @@ def sibling_ticket_with_details(
 
 
 def test_traverse_sibling_tickets_early_return_when_no_rdi(
-    main_ticket: Any,
-    individual_golden: Any,
+    main_ticket: object,
+    individual_golden: object,
 ) -> None:
     """When grievance ticket has no rdi, the function returns immediately."""
     main_ticket.registration_data_import = None
@@ -105,9 +103,9 @@ def test_traverse_sibling_tickets_early_return_when_no_rdi(
 
 
 def test_traverse_sibling_tickets_adds_individual_when_intersection_is_non_empty(
-    main_ticket: Any,
-    sibling_ticket_with_details: Any,
-    individual_dup: Any,
+    main_ticket: object,
+    sibling_ticket_with_details: object,
+    individual_dup: object,
 ) -> None:
     """When a selected individual overlaps with a sibling ticket, it is added to selected_individuals."""
     selected = Individual.objects.filter(id=individual_dup.id)
@@ -121,9 +119,9 @@ def test_traverse_sibling_tickets_adds_individual_when_intersection_is_non_empty
 
 
 def test_traverse_sibling_tickets_golden_record_individual_in_intersection(
-    main_ticket: Any,
-    sibling_ticket_with_details: Any,
-    individual_golden: Any,
+    main_ticket: object,
+    sibling_ticket_with_details: object,
+    individual_golden: object,
 ) -> None:
     """When the golden_records_individual is in the selected set, it is added to selected_individuals."""
     selected = Individual.objects.filter(id=individual_golden.id)

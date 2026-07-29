@@ -1,5 +1,4 @@
 import io
-from typing import Any
 from unittest.mock import MagicMock, patch
 import uuid
 
@@ -34,24 +33,24 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(name="Afghanistan")
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     program = ProgramFactory(business_area=business_area)
     program.admin_areas.set([AreaFactory(), AreaFactory(), AreaFactory()])
     return program
 
 
 @pytest.fixture
-def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> dict[str, Any]:
+def rapidpro_verification_setup(business_area: object, user: object, program: object) -> dict[str, object]:
     payment_record_amount = 2
 
     cycle = program.cycles.first()
@@ -157,7 +156,7 @@ def rapidpro_verification_setup(business_area: Any, user: Any, program: Any) -> 
 
 
 @pytest.fixture
-def active_xlsx_verification_plan(business_area: Any, user: Any, program: Any) -> Any:
+def active_xlsx_verification_plan(business_area: object, user: object, program: object) -> object:
     payment_plan = PaymentPlanFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
@@ -172,7 +171,7 @@ def active_xlsx_verification_plan(business_area: Any, user: Any, program: Any) -
 
 
 @pytest.fixture
-def pending_xlsx_verification_plan(business_area: Any, user: Any, program: Any) -> Any:
+def pending_xlsx_verification_plan(business_area: object, user: object, program: object) -> object:
     payment_plan = PaymentPlanFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
@@ -187,7 +186,7 @@ def pending_xlsx_verification_plan(business_area: Any, user: Any, program: Any) 
 
 
 @pytest.fixture
-def active_rapidpro_verification_plan(business_area: Any, user: Any, program: Any) -> Any:
+def active_rapidpro_verification_plan(business_area: object, user: object, program: object) -> object:
     payment_plan = PaymentPlanFactory(
         program_cycle=program.cycles.first(),
         business_area=business_area,
@@ -202,14 +201,14 @@ def active_rapidpro_verification_plan(business_area: Any, user: Any, program: An
 
 
 @pytest.fixture
-def exporting_xlsx_verification_plan(active_xlsx_verification_plan: Any) -> Any:
+def exporting_xlsx_verification_plan(active_xlsx_verification_plan: object) -> object:
     active_xlsx_verification_plan.xlsx_file_exporting = True
     active_xlsx_verification_plan.save()
     return active_xlsx_verification_plan
 
 
 @pytest.fixture
-def xlsx_verification_file(user: Any, active_xlsx_verification_plan: Any) -> Any:
+def xlsx_verification_file(user: object, active_xlsx_verification_plan: object) -> object:
     return FileTempFactory(
         object_id=active_xlsx_verification_plan.pk,
         content_type=ContentType.objects.get_for_model(PaymentVerificationPlan),
@@ -219,7 +218,7 @@ def xlsx_verification_file(user: Any, active_xlsx_verification_plan: Any) -> Any
 
 
 def test_failing_rapid_pro_during_cash_plan_payment_verification(
-    rapidpro_verification_setup: dict[str, Any],
+    rapidpro_verification_setup: dict[str, object],
 ) -> None:
     verification = rapidpro_verification_setup["verification"]
     other_verification = rapidpro_verification_setup["other_verification"]
@@ -229,7 +228,7 @@ def test_failing_rapid_pro_during_cash_plan_payment_verification(
     assert verification.error is None
     assert verification.payment_record_verifications.count() == payment_record_amount
 
-    def create_flow_response() -> dict[str, Any]:
+    def create_flow_response() -> dict[str, object]:
         return {
             "uuid": str(uuid.uuid4()),
         }
@@ -372,7 +371,7 @@ def test_failing_rapid_pro_during_cash_plan_payment_verification(
 
 
 def test_activate_rapidpro_stores_flat_uuid_list(
-    rapidpro_verification_setup: dict[str, Any],
+    rapidpro_verification_setup: dict[str, object],
 ) -> None:
     verification = rapidpro_verification_setup["verification"]
 
@@ -405,7 +404,7 @@ def test_activate_rapidpro_stores_flat_uuid_list(
 
 
 def test_does_payment_record_have_right_hoh_phone_number(
-    rapidpro_verification_setup: dict[str, Any],
+    rapidpro_verification_setup: dict[str, object],
 ) -> None:
     payment_plan = rapidpro_verification_setup["payment_plan"]
     individuals = rapidpro_verification_setup["individuals"]
@@ -440,7 +439,7 @@ def test_does_payment_record_have_right_hoh_phone_number(
 
 
 def test_activate_raises_when_cache_lock_is_taken(
-    rapidpro_verification_setup: dict[str, Any],
+    rapidpro_verification_setup: dict[str, object],
 ) -> None:
     verification = rapidpro_verification_setup["verification"]
     lock_key = f"payment_verification_plan_activate_rapidpro_{verification.id}"
@@ -455,7 +454,7 @@ def test_activate_raises_when_cache_lock_is_taken(
         holder.release()
 
 
-def test_discard_non_active_verification_raises(pending_xlsx_verification_plan: Any) -> None:
+def test_discard_non_active_verification_raises(pending_xlsx_verification_plan: object) -> None:
     service = VerificationPlanStatusChangeServices(pending_xlsx_verification_plan)
 
     with pytest.raises(ValidationError, match="You can discard only ACTIVE verification"):
@@ -463,7 +462,7 @@ def test_discard_non_active_verification_raises(pending_xlsx_verification_plan: 
 
 
 def test_discard_active_xlsx_verification_deletes_export_file(
-    active_xlsx_verification_plan: Any, xlsx_verification_file: Any
+    active_xlsx_verification_plan: object, xlsx_verification_file: object
 ) -> None:
     service = VerificationPlanStatusChangeServices(active_xlsx_verification_plan)
 
@@ -473,49 +472,49 @@ def test_discard_active_xlsx_verification_deletes_export_file(
     assert FileTemp.objects.filter(pk=xlsx_verification_file.pk).count() == 0
 
 
-def test_mark_invalid_non_active_verification_raises(pending_xlsx_verification_plan: Any) -> None:
+def test_mark_invalid_non_active_verification_raises(pending_xlsx_verification_plan: object) -> None:
     service = VerificationPlanStatusChangeServices(pending_xlsx_verification_plan)
 
     with pytest.raises(ValidationError, match="You can mark invalid only ACTIVE verification"):
         service.mark_invalid()
 
 
-def test_mark_invalid_non_xlsx_channel_raises(active_rapidpro_verification_plan: Any) -> None:
+def test_mark_invalid_non_xlsx_channel_raises(active_rapidpro_verification_plan: object) -> None:
     service = VerificationPlanStatusChangeServices(active_rapidpro_verification_plan)
 
     with pytest.raises(ValidationError, match="You can mark invalid only verification when XLSX channel is selected"):
         service.mark_invalid()
 
 
-def test_mark_invalid_without_downloaded_or_imported_file_raises(active_xlsx_verification_plan: Any) -> None:
+def test_mark_invalid_without_downloaded_or_imported_file_raises(active_xlsx_verification_plan: object) -> None:
     service = VerificationPlanStatusChangeServices(active_xlsx_verification_plan)
 
     with pytest.raises(ValidationError, match="You can mark invalid if xlsx file was downloaded or imported"):
         service.mark_invalid()
 
 
-def test_activate_non_pending_verification_raises(active_xlsx_verification_plan: Any) -> None:
+def test_activate_non_pending_verification_raises(active_xlsx_verification_plan: object) -> None:
     service = VerificationPlanStatusChangeServices(active_xlsx_verification_plan)
 
     with pytest.raises(ValidationError, match="You can activate only PENDING/ERROR verifications"):
         service.activate()
 
 
-def test_export_xlsx_non_active_verification_raises(pending_xlsx_verification_plan: Any, user: Any) -> None:
+def test_export_xlsx_non_active_verification_raises(pending_xlsx_verification_plan: object, user: object) -> None:
     service = VerificationPlanStatusChangeServices(pending_xlsx_verification_plan)
 
     with pytest.raises(ValidationError, match="You can only export verification for active CashPlan verification"):
         service.export_xlsx(str(user.pk))
 
 
-def test_export_xlsx_non_xlsx_channel_raises(active_rapidpro_verification_plan: Any, user: Any) -> None:
+def test_export_xlsx_non_xlsx_channel_raises(active_rapidpro_verification_plan: object, user: object) -> None:
     service = VerificationPlanStatusChangeServices(active_rapidpro_verification_plan)
 
     with pytest.raises(ValidationError, match="You can only export verification when XLSX channel is selected"):
         service.export_xlsx(str(user.pk))
 
 
-def test_export_xlsx_while_export_in_progress_raises(exporting_xlsx_verification_plan: Any, user: Any) -> None:
+def test_export_xlsx_while_export_in_progress_raises(exporting_xlsx_verification_plan: object, user: object) -> None:
     service = VerificationPlanStatusChangeServices(exporting_xlsx_verification_plan)
 
     with pytest.raises(ValidationError, match="Exporting xlsx file is already started. Please wait"):
@@ -523,7 +522,7 @@ def test_export_xlsx_while_export_in_progress_raises(exporting_xlsx_verification
 
 
 def test_export_xlsx_with_existing_file_raises(
-    active_xlsx_verification_plan: Any, xlsx_verification_file: Any, user: Any
+    active_xlsx_verification_plan: object, xlsx_verification_file: object, user: object
 ) -> None:
     service = VerificationPlanStatusChangeServices(active_xlsx_verification_plan)
 
@@ -531,14 +530,14 @@ def test_export_xlsx_with_existing_file_raises(
         service.export_xlsx(str(user.pk))
 
 
-def test_import_xlsx_non_active_verification_raises(pending_xlsx_verification_plan: Any) -> None:
+def test_import_xlsx_non_active_verification_raises(pending_xlsx_verification_plan: object) -> None:
     service = VerificationPlanStatusChangeServices(pending_xlsx_verification_plan)
 
     with pytest.raises(ValidationError, match="You can only import verification for active CashPlan verification"):
         service.import_xlsx(io.BytesIO(b""))
 
 
-def test_import_xlsx_non_xlsx_channel_raises(active_rapidpro_verification_plan: Any) -> None:
+def test_import_xlsx_non_xlsx_channel_raises(active_rapidpro_verification_plan: object) -> None:
     service = VerificationPlanStatusChangeServices(active_rapidpro_verification_plan)
 
     with pytest.raises(ValidationError, match="You can only import verification when XLSX channel is selected"):
@@ -546,9 +545,9 @@ def test_import_xlsx_non_xlsx_channel_raises(active_rapidpro_verification_plan: 
 
 
 def test_export_xlsx_validation_if_no_records(
-    business_area: Any,
-    user: Any,
-    program: Any,
+    business_area: object,
+    user: object,
+    program: object,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=program.cycles.first(),

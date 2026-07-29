@@ -1,20 +1,20 @@
 from functools import wraps
-from typing import Any, Callable, TypeVar
+from typing import Callable, TypeVar
 
 from django.conf import settings
 
-F = TypeVar("F", bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., object])
 
 
-def do_nothing_decorator[F: Callable[..., Any]](func: F) -> F:
+def do_nothing_decorator[F: Callable[..., object]](func: F) -> F:
     @wraps(func)
-    def wrapped(*args: Any, **kwargs: Any) -> Any:
+    def wrapped(*args: object, **kwargs: object) -> object:
         return func(*args, **kwargs)
 
     return wrapped  # type: ignore[return-value]
 
 
-def profiling(**silk_kwargs: Any) -> Callable[[F], F]:
+def profiling(**silk_kwargs: object) -> Callable[[F], F]:
     if not settings.PROFILING:
         return do_nothing_decorator
 

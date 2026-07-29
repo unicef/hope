@@ -4,7 +4,7 @@ import datetime
 from decimal import Decimal
 from io import BytesIO
 import logging
-from typing import IO, TYPE_CHECKING, Any, cast
+from typing import IO, TYPE_CHECKING, cast
 
 from django.db.models import Prefetch
 from django.utils import timezone
@@ -47,7 +47,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self.old_payments: dict = {}
         self.payment_verifications_to_save: list[PaymentVerification] = []
         self.payment_plans_to_update: dict[str, PaymentPlan] = {}
-        self.payment_verification_plans_to_update: dict[str, Any] = {}
+        self.payment_verification_plans_to_update: dict[str, object] = {}
         self.is_updated = False
 
         payment_list = (

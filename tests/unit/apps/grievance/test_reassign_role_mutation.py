@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -28,7 +26,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def common_context(api_client: Any) -> dict[str, Any]:
+def common_context(api_client: object) -> dict[str, object]:
     country = CountryFactory(
         name="Afghanistan",
         short_name="Afghanistan",
@@ -61,7 +59,7 @@ def common_context(api_client: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def delete_individual_context(common_context: dict[str, Any]) -> dict[str, Any]:
+def delete_individual_context(common_context: dict[str, object]) -> dict[str, object]:
     program = common_context["program"]
     business_area = common_context["business_area"]
     household = HouseholdFactory(
@@ -98,7 +96,7 @@ def delete_individual_context(common_context: dict[str, Any]) -> dict[str, Any]:
 
 
 @pytest.fixture
-def needs_adjudication_context(common_context: dict[str, Any]) -> dict[str, Any]:
+def needs_adjudication_context(common_context: dict[str, object]) -> dict[str, object]:
     program = common_context["program"]
     business_area = common_context["business_area"]
     household = HouseholdFactory(
@@ -149,8 +147,8 @@ def needs_adjudication_context(common_context: dict[str, Any]) -> dict[str, Any]
 
 
 def test_role_reassignment(
-    create_user_role_with_permissions: Any,
-    delete_individual_context: dict[str, Any],
+    create_user_role_with_permissions: object,
+    delete_individual_context: dict[str, object],
 ) -> None:
     create_user_role_with_permissions(
         delete_individual_context["user"],
@@ -191,8 +189,8 @@ def test_role_reassignment(
 
 
 def test_role_reassignment_new_ticket(
-    create_user_role_with_permissions: Any,
-    needs_adjudication_context: dict[str, Any],
+    create_user_role_with_permissions: object,
+    needs_adjudication_context: dict[str, object],
 ) -> None:
     create_user_role_with_permissions(
         needs_adjudication_context["user"],

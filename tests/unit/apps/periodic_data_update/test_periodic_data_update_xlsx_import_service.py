@@ -4,7 +4,6 @@ import datetime
 from io import BytesIO
 import json
 from tempfile import _TemporaryFileWrapper
-from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -34,7 +33,7 @@ pytestmark = pytest.mark.django_db
 
 
 def add_pdu_data_to_xlsx(
-    periodic_data_update_template: PDUXlsxTemplate, rows: list[list[Any]]
+    periodic_data_update_template: PDUXlsxTemplate, rows: list[list[object]]
 ) -> _TemporaryFileWrapper:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     ws_pdu = wb[PDUXlsxExportTemplateService.PDU_SHEET]
@@ -48,7 +47,7 @@ def add_pdu_data_to_xlsx(
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
@@ -63,7 +62,7 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def household(business_area: BusinessArea, program: Program, rdi: RegistrationDataImport) -> Any:
+def household(business_area: BusinessArea, program: Program, rdi: RegistrationDataImport) -> object:
     individual = IndividualFactory(
         household=None,
         business_area=business_area,
@@ -82,12 +81,12 @@ def household(business_area: BusinessArea, program: Program, rdi: RegistrationDa
 
 
 @pytest.fixture
-def individual(household: Any) -> Any:
+def individual(household: object) -> object:
     return household.head_of_household
 
 
 @pytest.fixture
-def string_attribute(program: Program) -> Any:
+def string_attribute(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.STRING,
         number_of_rounds=1,
@@ -101,7 +100,7 @@ def string_attribute(program: Program) -> Any:
 
 
 @pytest.fixture
-def decimal_attribute(program: Program) -> Any:
+def decimal_attribute(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=1,
@@ -115,7 +114,7 @@ def decimal_attribute(program: Program) -> Any:
 
 
 @pytest.fixture
-def boolean_attribute(program: Program) -> Any:
+def boolean_attribute(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.BOOL,
         number_of_rounds=1,
@@ -129,7 +128,7 @@ def boolean_attribute(program: Program) -> Any:
 
 
 @pytest.fixture
-def date_attribute(program: Program) -> Any:
+def date_attribute(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DATE,
         number_of_rounds=1,
@@ -172,8 +171,8 @@ def prepare_test_data(
 def test_import_data_string(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    string_attribute: Any,
+    individual: object,
+    string_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -207,8 +206,8 @@ def test_import_data_string(
 def test_import_data_decimal(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    decimal_attribute: Any,
+    individual: object,
+    decimal_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -242,8 +241,8 @@ def test_import_data_decimal(
 def test_import_data_boolean(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    boolean_attribute: Any,
+    individual: object,
+    boolean_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -277,8 +276,8 @@ def test_import_data_boolean(
 def test_import_data_boolean_1(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    boolean_attribute: Any,
+    individual: object,
+    boolean_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -312,8 +311,8 @@ def test_import_data_boolean_1(
 def test_import_data_boolean_fail(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    boolean_attribute: Any,
+    individual: object,
+    boolean_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -353,8 +352,8 @@ def test_import_data_boolean_fail(
 def test_import_data_date(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -388,8 +387,8 @@ def test_import_data_date(
 def test_import_data_date_no_collection_date(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -425,8 +424,8 @@ def test_import_data_date_no_collection_date(
 def test_import_data_date_fail_string(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -466,8 +465,8 @@ def test_import_data_date_fail_string(
 def test_import_data_date_fail_int(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -507,8 +506,8 @@ def test_import_data_date_fail_int(
 def test_read_periodic_data_update_non_form_errors(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -547,8 +546,8 @@ def test_read_periodic_data_update_non_form_errors(
 def test_import_data_date_format_correct(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -582,7 +581,7 @@ def test_import_data_date_format_correct(
 def test_read_periodic_data_update_template_object(
     program: Program,
     business_area: BusinessArea,
-    string_attribute: Any,
+    string_attribute: object,
 ) -> None:
     periodic_data_update_template = PDUXlsxTemplate.objects.create(
         program=program,
@@ -655,7 +654,7 @@ def test_read_periodic_data_update_template_object(
 def test_read_flexible_attributes(
     program: Program,
     business_area: BusinessArea,
-    string_attribute: Any,
+    string_attribute: object,
 ) -> None:
     (
         periodic_data_update_template,
@@ -688,8 +687,8 @@ def test_read_flexible_attributes(
 def test_read_row(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -720,8 +719,8 @@ def test_read_row(
 def test_import_cleaned_data(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -799,8 +798,8 @@ def test_import_cleaned_data(
 def test_set_round_value(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -833,7 +832,7 @@ def test_set_round_value(
 def test_get_form_field_for_value(
     program: Program,
     business_area: BusinessArea,
-    date_attribute: Any,
+    date_attribute: object,
 ) -> None:
     flexible_attribute = date_attribute
     pdu_data = flexible_attribute.pdu_data
@@ -866,8 +865,8 @@ def test_get_form_field_for_value(
 def test_import_data_invalid_subtype_fail(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    boolean_attribute: Any,
+    individual: object,
+    boolean_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()
@@ -902,8 +901,8 @@ def test_import_data_invalid_subtype_fail(
 def test_import_data_round_mismatch_validation_error(
     program: Program,
     business_area: BusinessArea,
-    individual: Any,
-    date_attribute: Any,
+    individual: object,
+    date_attribute: object,
 ) -> None:
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.save()

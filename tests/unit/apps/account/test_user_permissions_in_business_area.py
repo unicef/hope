@@ -1,7 +1,5 @@
 """Tests for user role assignments permissions and expiry validation."""
 
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -20,7 +18,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_afg(db: Any) -> BusinessArea:
+def business_area_afg(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -29,7 +27,7 @@ def business_area_afg(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def business_area_ukr(db: Any) -> BusinessArea:
+def business_area_ukr(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="ukraine",
         code="4410",

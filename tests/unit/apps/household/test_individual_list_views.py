@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -89,22 +89,22 @@ def program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner() -> Any:
+def partner() -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> User:
+def user(partner: object) -> User:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def country() -> Any:
+def country() -> object:
     return CountryFactory()
 
 
 @pytest.fixture
-def areas(country: Any) -> tuple[Area, Area]:
+def areas(country: object) -> tuple[Area, Area]:
     admin_type_1 = AreaTypeFactory(country=country, area_level=1)
     admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
     area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
@@ -134,7 +134,7 @@ def _create_household(
 @pytest.fixture
 def list_context(
     api_client: Callable, afghanistan: BusinessArea, program: Program, user: User, areas: tuple
-) -> dict[str, Any]:
+) -> dict[str, object]:
     area1, area2 = areas
     different_program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
@@ -533,8 +533,8 @@ def test_individual_all_flex_fields_attributes(list_context: dict, create_user_r
 
 @pytest.fixture
 def detail_context(
-    api_client: Callable, afghanistan: BusinessArea, program: Program, user: User, country: Any
-) -> dict[str, Any]:
+    api_client: Callable, afghanistan: BusinessArea, program: Program, user: User, country: object
+) -> dict[str, object]:
     client = api_client(user)
 
     admin_type_1 = AreaTypeFactory(country=country, area_level=1)

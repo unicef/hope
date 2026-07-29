@@ -1,6 +1,6 @@
 """Tests for beneficiary group views and models."""
 
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.test import TestCase
@@ -19,22 +19,22 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def beneficiary_group1(db: Any) -> BeneficiaryGroup:
+def beneficiary_group1(db: object) -> BeneficiaryGroup:
     return BeneficiaryGroupFactory(name="Household")
 
 
 @pytest.fixture
-def beneficiary_group2(db: Any) -> BeneficiaryGroup:
+def beneficiary_group2(db: object) -> BeneficiaryGroup:
     return BeneficiaryGroupFactory(name="Social Workers")
 
 
@@ -44,12 +44,12 @@ def list_url() -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_list_beneficiary_group(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     beneficiary_group1: BeneficiaryGroup,
     beneficiary_group2: BeneficiaryGroup,
@@ -81,7 +81,7 @@ def test_list_beneficiary_group(
 
 
 def test_list_beneficiary_group_caching(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     beneficiary_group1: BeneficiaryGroup,
     beneficiary_group2: BeneficiaryGroup,

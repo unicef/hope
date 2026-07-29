@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.conf import settings
+from django.http import HttpRequest
 import jwt
 from rest_framework import authentication, exceptions
 
@@ -25,7 +24,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
     keyword = "Bearer"
     secret_key_setting: str = ""
 
-    def authenticate(self, request: Any) -> tuple[JWTUser, JWTToken] | None:
+    def authenticate(self, request: HttpRequest) -> tuple[JWTUser, JWTToken] | None:
         auth = authentication.get_authorization_header(request).split()
         if not auth or auth[0].lower() != self.keyword.lower().encode():
             return None

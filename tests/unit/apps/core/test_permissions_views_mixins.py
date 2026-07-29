@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
@@ -86,10 +84,10 @@ def test_dispatch_returns_view_response_for_user_with_permissions(user: User) ->
 
 def test_upload_mixin_has_permissions_with_upload_storage_file_permission(
     upload_mixin_with_request: UploadFilePermissionMixin,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user: User,
     business_area: BusinessArea,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.UPLOAD_STORAGE_FILE], business_area, whole_business_area_access=True
@@ -103,7 +101,7 @@ def test_upload_mixin_has_permissions_with_upload_storage_file_permission(
 
 def test_upload_mixin_has_no_permissions_with_unrelated_permission(
     upload_mixin_with_request: UploadFilePermissionMixin,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user: User,
     business_area: BusinessArea,
 ) -> None:

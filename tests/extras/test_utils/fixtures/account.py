@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, List, Optional
+from typing import Callable, Iterable, List, Optional
 
 from django.conf import settings
 import pytest
@@ -47,7 +47,7 @@ def create_partner_role_with_permissions() -> Callable:
 
 @pytest.fixture
 def create_user_role_with_permissions(
-    set_admin_area_limits_in_program: Any,
+    set_admin_area_limits_in_program: object,
 ) -> Callable:
     def _create_user_role_with_permissions(
         user: User,
@@ -77,10 +77,10 @@ def create_user_role_with_permissions(
 
 
 @pytest.fixture
-def partner_unicef(db: Any) -> PartnerFactory:
+def partner_unicef(db: object) -> PartnerFactory:
     return PartnerFactory(name="UNICEF")
 
 
 @pytest.fixture
-def partner_unicef_hq(db: Any) -> PartnerFactory:
+def partner_unicef_hq(db: object) -> PartnerFactory:
     return PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=PartnerFactory(name="UNICEF"))

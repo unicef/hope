@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.core.cache import cache
+from django.http import HttpRequest
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import KeyConstructorMixin, get_or_create_cache_key
@@ -8,11 +7,11 @@ from hope.api.caches import KeyConstructorMixin, get_or_create_cache_key
 COUNTRY_AREAS_VERSION_KEY = "country_areas:{}:version"
 
 
-def get_country_areas_version(country_id: Any) -> Any:
+def get_country_areas_version(country_id: object) -> object:
     return get_or_create_cache_key(COUNTRY_AREAS_VERSION_KEY.format(country_id), 0)
 
 
-def increment_country_areas_version(country_id: Any) -> int:
+def increment_country_areas_version(country_id: object) -> int:
     key = COUNTRY_AREAS_VERSION_KEY.format(country_id)
     try:
         return cache.incr(key)
@@ -23,7 +22,13 @@ def increment_country_areas_version(country_id: Any) -> int:
 
 class CountryAreasKeyBit(KeyBitBase):
     def get_data(  # type: ignore[override]  # noqa: PLR0913 – override of base method signature
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
+        args: tuple,
+        kwargs: dict,
     ) -> dict:
         ba = view_instance.business_area
         sorted_countries_ids = sorted([str(country.id) for country in ba.countries.all()])

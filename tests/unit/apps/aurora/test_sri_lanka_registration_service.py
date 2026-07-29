@@ -1,6 +1,5 @@
 import datetime
 import json
-from typing import Any
 
 from django.utils import timezone
 from freezegun import freeze_time
@@ -30,19 +29,19 @@ pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mock_elasticsearch
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="sri-lanka2")
 
 
 @pytest.fixture
-def data_collecting_type(business_area: Any) -> DataCollectingType:
+def data_collecting_type(business_area: object) -> DataCollectingType:
     data_collecting_type = DataCollectingTypeFactory(label="SizeOnlyXYZ", code="size_onlyXYZ")
     data_collecting_type.limit_to.add(business_area)
     return data_collecting_type
 
 
 @pytest.fixture
-def program(business_area: Any, data_collecting_type: DataCollectingType) -> Program:
+def program(business_area: object, data_collecting_type: DataCollectingType) -> Program:
     return ProgramFactory(
         status=Program.ACTIVE,
         business_area=business_area,
@@ -51,32 +50,32 @@ def program(business_area: Any, data_collecting_type: DataCollectingType) -> Pro
 
 
 @pytest.fixture
-def organization(business_area: Any) -> Any:
+def organization(business_area: object) -> object:
     return OrganizationFactory(business_area=business_area, slug=business_area.slug)
 
 
 @pytest.fixture
-def project(organization: Any, program: Program) -> Any:
+def project(organization: object, program: Program) -> object:
     return ProjectFactory(name="fake_project", organization=organization, programme=program)
 
 
 @pytest.fixture
-def registration(project: Any) -> Any:
+def registration(project: object) -> object:
     return RegistrationFactory(name="fake_registration", project=project)
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def sri_lanka_country() -> Any:
+def sri_lanka_country() -> object:
     return CountryFactory(name="Sri Lanka", short_name="Sri Lanka", iso_code2="LK", iso_code3="LKA", iso_num="0144")
 
 
 @pytest.fixture
-def sri_lanka_admin_areas(sri_lanka_country: Any) -> dict[str, Any]:
+def sri_lanka_admin_areas(sri_lanka_country: object) -> dict[str, object]:
     area_type1 = AreaTypeFactory(country=sri_lanka_country, name="admin1", area_level=1)
     area_type2 = AreaTypeFactory(country=sri_lanka_country, name="admin2", area_level=2)
     area_type3 = AreaTypeFactory(country=sri_lanka_country, name="admin3", area_level=3)
@@ -91,7 +90,7 @@ def sri_lanka_admin_areas(sri_lanka_country: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def national_id_document_type() -> Any:
+def national_id_document_type() -> object:
     return DocumentTypeFactory(
         key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
         label=IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -99,7 +98,7 @@ def national_id_document_type() -> Any:
 
 
 @pytest.fixture
-def sri_lanka_records(registration: Any, sri_lanka_admin_areas: dict[str, Any]) -> list[Record]:
+def sri_lanka_records(registration: object, sri_lanka_admin_areas: dict[str, object]) -> list[Record]:
     children_info = [
         {
             "gender_i_c": "male",
@@ -176,11 +175,11 @@ def sri_lanka_records(registration: Any, sri_lanka_admin_areas: dict[str, Any]) 
 
 @freeze_time("2023-12-12")
 def test_import_data_to_datahub(
-    registration: Any,
-    user: Any,
+    registration: object,
+    user: object,
     program: Program,
-    sri_lanka_country: Any,
-    national_id_document_type: Any,
+    sri_lanka_country: object,
+    national_id_document_type: object,
     sri_lanka_records: list[Record],
 ) -> None:
     service = SriLankaRegistrationService(registration)
@@ -222,10 +221,10 @@ def test_import_data_to_datahub(
 
 
 def test_import_record_twice(
-    registration: Any,
-    user: Any,
-    sri_lanka_country: Any,
-    national_id_document_type: Any,
+    registration: object,
+    user: object,
+    sri_lanka_country: object,
+    national_id_document_type: object,
     sri_lanka_records: list[Record],
 ) -> None:
     service = SriLankaRegistrationService(registration)

@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, UniqueConstraint
@@ -67,6 +65,6 @@ class DataCollectingType(TimeStampedModel):
             if incompatible_dcts.exists():
                 raise ValidationError("Type of DCT cannot be changed if it has compatible DCTs of different type.")
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         self.full_clean()
         super().save(*args, **kwargs)

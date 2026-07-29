@@ -1,7 +1,5 @@
 """Tests for GrievanceTicket model properties covered by mypy fixes."""
 
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -15,17 +13,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def user(business_area: Any) -> Any:
+def user(business_area: object) -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def ticket_grievance_complaint_no_issue_type(business_area: Any, user: Any) -> Any:
+def ticket_grievance_complaint_no_issue_type(business_area: object, user: object) -> object:
     # CATEGORY_GRIEVANCE_COMPLAINT maps to a plain string in TICKET_DETAILS_NAME_MAPPING,
     # so issue_type=None is valid for that category.
     # We use CATEGORY_POSITIVE_FEEDBACK which is a plain string mapping and allows issue_type=None.
@@ -38,7 +36,7 @@ def ticket_grievance_complaint_no_issue_type(business_area: Any, user: Any) -> A
 
 
 @pytest.fixture
-def ticket_data_change_no_issue_type_unsaved(business_area: Any, user: Any) -> Any:
+def ticket_data_change_no_issue_type_unsaved(business_area: object, user: object) -> object:
     # CATEGORY_DATA_CHANGE uses a dict mapping — issue_type=None should cause ticket_details to return None.
     # We build without saving because save() validates issue_type.
     return GrievanceTicket(
@@ -52,7 +50,7 @@ def ticket_data_change_no_issue_type_unsaved(business_area: Any, user: Any) -> A
 
 
 def test_ticket_details_returns_none_when_category_not_in_mapping(
-    ticket_grievance_complaint_no_issue_type: Any,
+    ticket_grievance_complaint_no_issue_type: object,
 ) -> None:
     # CATEGORY_POSITIVE_FEEDBACK maps to a plain string, not a dict, so the attribute
     # "positive_feedback_ticket_details" doesn't exist on this bare ticket — getattr returns None.
@@ -61,7 +59,7 @@ def test_ticket_details_returns_none_when_category_not_in_mapping(
 
 
 def test_ticket_details_returns_none_when_dict_mapping_and_issue_type_is_none(
-    ticket_data_change_no_issue_type_unsaved: Any,
+    ticket_data_change_no_issue_type_unsaved: object,
 ) -> None:
     # When the category uses a dict mapping and issue_type is None, ticket_details must return None.
     result = ticket_data_change_no_issue_type_unsaved.ticket_details
@@ -69,13 +67,13 @@ def test_ticket_details_returns_none_when_dict_mapping_and_issue_type_is_none(
 
 
 def test_get_issue_type_returns_empty_string_when_issue_type_is_none(
-    ticket_grievance_complaint_no_issue_type: Any,
+    ticket_grievance_complaint_no_issue_type: object,
 ) -> None:
     result = ticket_grievance_complaint_no_issue_type.get_issue_type()
     assert result == ""
 
 
-def test_get_issue_type_returns_label_when_issue_type_is_set(business_area: Any, user: Any) -> None:
+def test_get_issue_type_returns_label_when_issue_type_is_set(business_area: object, user: object) -> None:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,

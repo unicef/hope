@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db import models
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
@@ -58,7 +56,7 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     def __str__(self) -> str:
         return self.name
 
-    def natural_key(self) -> tuple[Any, ...]:
+    def natural_key(self) -> tuple[object, ...]:
         return self.area_type, self.p_code
 
     @classmethod
@@ -66,10 +64,10 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         cls,
         admin_level: int | None = None,
         business_area_slug: str | None = None,
-        *args: Any,
-        **kwargs: Any,
-    ) -> list[dict[str, Any]]:
-        params: dict[str, Any] = {}
+        *args: object,
+        **kwargs: object,
+    ) -> list[dict[str, object]]:
+        params: dict[str, object] = {}
         if admin_level:
             params["area_type__area_level"] = admin_level
 

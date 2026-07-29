@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Callable, cast
+from typing import Callable, cast
 
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
@@ -11,18 +11,22 @@ from hope.models.currency import Currency
 
 
 def handle_date_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: object, name: str, household: object, business_area: BusinessArea, program: Program
 ) -> date | None:
     if value is None or value == "":
         return None
     return timezone_datetime(value).date()
 
 
-def handle_simple_field(value: Any, name: str, household: Any, business_area: BusinessArea, program: Program) -> Any:
+def handle_simple_field(
+    value: object, name: str, household: object, business_area: BusinessArea, program: Program
+) -> object:
     return value
 
 
-def handle_boolean_field(value: Any, name: str, household: Any, business_area: BusinessArea, program: Program) -> Any:
+def handle_boolean_field(
+    value: object, name: str, household: object, business_area: BusinessArea, program: Program
+) -> object:
     if value is None or value == "":
         return None
     if isinstance(value, bool):
@@ -31,7 +35,7 @@ def handle_boolean_field(value: Any, name: str, household: Any, business_area: B
 
 
 def handle_integer_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: object, name: str, household: object, business_area: BusinessArea, program: Program
 ) -> int | None:
     if value is None or value == "":
         return None
@@ -39,7 +43,7 @@ def handle_integer_field(
 
 
 def handle_admin_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: object, name: str, household: object, business_area: BusinessArea, program: Program
 ) -> Area | None:
     if value is None or value == "":
         return None
@@ -47,9 +51,9 @@ def handle_admin_field(
 
 
 def validate_admin(
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
@@ -65,12 +69,12 @@ FACILITY_ADMIN_P_CODE_COLUMN = "facility_admin_p_code"
 
 
 def handle_facility_field(  # noqa: PLR0913
-    value: Any,
+    value: object,
     name: str,
-    household: Any,
+    household: object,
     business_area: BusinessArea,
     program: Program,
-    admin_p_code: Any = None,
+    admin_p_code: object | None = None,
 ) -> Facility | None:
     if value is None or value == "":
         return None
@@ -82,12 +86,12 @@ def handle_facility_field(  # noqa: PLR0913
 
 
 def validate_facility(  # noqa: PLR0913
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
-    admin_p_code: Any = None,
+    admin_p_code: object | None = None,
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -106,7 +110,7 @@ def validate_facility(  # noqa: PLR0913
 
 
 def handle_currency_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: object, name: str, household: object, business_area: BusinessArea, program: Program
 ) -> Currency | None:
     if value is None or value == "":
         return None
@@ -114,7 +118,7 @@ def handle_currency_field(
 
 
 def validate_currency(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: object, name: str, model_class: object, business_area: BusinessArea, program: Program
 ) -> str | None:
     if value is None or value == "":
         return None
@@ -124,9 +128,9 @@ def validate_currency(
 
 
 def validate_string(
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
@@ -134,9 +138,9 @@ def validate_string(
 
 
 def validate_date(
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
@@ -150,9 +154,9 @@ def validate_date(
 
 
 def validate_integer(
-    value: Any,
+    value: object,
     name: str,
-    modified_object: Any,
+    modified_object: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
@@ -166,9 +170,9 @@ def validate_integer(
 
 
 def validate_phone_number(
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
@@ -188,9 +192,9 @@ def _get_field_choices_values(model_class: type[Model], field_name: str) -> list
 
 
 def validate_choices(
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
@@ -203,9 +207,9 @@ def validate_choices(
 
 
 def validate_boolean(
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
@@ -219,20 +223,20 @@ def validate_boolean(
 
 
 def validate_flex_field_string(
-    value: Any,
+    value: object,
     name: str,
-    model_class: Any,
+    model_class: object,
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:
     return None
 
 
-def boolean_generator_handler(value: Any) -> Any:
+def boolean_generator_handler(value: object) -> object:
     return "TRUE" if value else "FALSE"
 
 
-def simple_generator_handler(value: Any) -> Any:
+def simple_generator_handler(value: object) -> object:
     return value
 
 
@@ -245,5 +249,5 @@ GENERATOR_TYPE_HANDLER = {
 }
 
 
-def get_generator_handler(value: Any) -> Callable:
+def get_generator_handler(value: object) -> Callable:
     return cast("Callable", GENERATOR_TYPE_HANDLER.get(type(value), simple_generator_handler))

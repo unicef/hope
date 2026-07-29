@@ -1,5 +1,4 @@
 import json
-from typing import Any
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -23,7 +22,6 @@ from hope.apps.account.permissions import Permissions
 from hope.models import FlexibleAttribute, PeriodicFieldData
 
 pytestmark = pytest.mark.django_db
-
 
 # === Fixtures ===
 
@@ -190,8 +188,8 @@ def setup_flexible_attributes(business_area_afghanistan):
 
 
 def test_business_area_list_returns_accessible_areas(
-    authenticated_client: Any,
-    business_area_sudan: Any,
+    authenticated_client: object,
+    business_area_sudan: object,
     setup_business_areas_with_permissions: dict,
 ) -> None:
     areas = setup_business_areas_with_permissions
@@ -212,7 +210,7 @@ def test_business_area_list_returns_accessible_areas(
 
 
 def test_business_area_list_returns_correct_fields_for_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     setup_business_areas_with_permissions: dict,
 ) -> None:
     areas = setup_business_areas_with_permissions
@@ -237,8 +235,8 @@ def test_business_area_list_returns_correct_fields_for_area(
 
 
 def test_business_area_count_returns_correct_number(
-    authenticated_client: Any,
-    business_area_sudan: Any,
+    authenticated_client: object,
+    business_area_sudan: object,
     setup_business_areas_with_permissions: dict,
 ) -> None:
     count_url = reverse("api:core:business-areas-count")
@@ -250,11 +248,11 @@ def test_business_area_count_returns_correct_number(
 
 
 def test_business_area_list_caching_works_correctly(
-    authenticated_client: Any,
-    user_with_partner: Any,
-    business_area_sudan: Any,
+    authenticated_client: object,
+    user_with_partner: object,
+    business_area_sudan: object,
     setup_business_areas_with_permissions: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     areas = setup_business_areas_with_permissions
     list_url = reverse("api:core:business-areas-list")
@@ -316,10 +314,10 @@ def test_business_area_list_caching_works_correctly(
 
 
 def test_business_area_detail_returns_correct_data(
-    api_client: Any,
-    user: Any,
-    business_area_with_kobo_token: Any,
-    create_user_role_with_permissions: Any,
+    api_client: object,
+    user: object,
+    business_area_with_kobo_token: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     afghanistan = business_area_with_kobo_token
     client = api_client(user)
@@ -349,8 +347,8 @@ def test_business_area_detail_returns_correct_data(
 
 
 def test_filter_by_active_true_returns_only_active_areas(
-    authenticated_client: Any,
-    business_area_sudan: Any,
+    authenticated_client: object,
+    business_area_sudan: object,
     setup_business_areas_with_permissions: dict,
 ) -> None:
     areas = setup_business_areas_with_permissions
@@ -371,8 +369,8 @@ def test_filter_by_active_true_returns_only_active_areas(
 
 
 def test_filter_by_active_false_returns_only_inactive_areas(
-    authenticated_client: Any,
-    business_area_sudan: Any,
+    authenticated_client: object,
+    business_area_sudan: object,
     setup_business_areas_with_permissions: dict,
 ) -> None:
     areas = setup_business_areas_with_permissions
@@ -398,12 +396,12 @@ def test_filter_by_active_false_returns_only_inactive_areas(
 @patch("hope.apps.core.kobo.api.KoboAPI.__init__")
 @patch("hope.apps.core.kobo.api.KoboAPI.get_all_projects_data")
 def test_get_kobo_asset_list_returns_projects(
-    mock_get_all_projects_data: Any,
-    mock_kobo_init: Any,
-    api_client: Any,
-    user: Any,
-    business_area_with_kobo_token: Any,
-    create_user_role_with_permissions: Any,
+    mock_get_all_projects_data: object,
+    mock_kobo_init: object,
+    api_client: object,
+    user: object,
+    business_area_with_kobo_token: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     afghanistan = business_area_with_kobo_token
     client = api_client(user)
@@ -454,8 +452,8 @@ def test_get_kobo_asset_list_returns_projects(
 
 
 def test_all_fields_attributes_without_program(
-    api_client: Any,
-    user: Any,
+    api_client: object,
+    user: object,
     setup_flexible_attributes: dict,
 ) -> None:
     business_area = setup_flexible_attributes["business_area"]
@@ -478,8 +476,8 @@ def test_all_fields_attributes_without_program(
 
 
 def test_all_fields_attributes_with_program(
-    api_client: Any,
-    user: Any,
+    api_client: object,
+    user: object,
     setup_flexible_attributes: dict,
 ) -> None:
     business_area = setup_flexible_attributes["business_area"]

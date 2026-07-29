@@ -1,5 +1,4 @@
 import json
-from typing import Any
 
 from django import template
 from django.core import serializers
@@ -19,7 +18,7 @@ json_value_escapes = {
 
 
 # TODO: if passed a dict, it would go into infinite loop
-def _jsonfy(value: Any) -> str | dict:
+def _jsonfy(value: object) -> str | dict:
     ret = None
     try:
         if isinstance(value, Model):
@@ -52,7 +51,7 @@ def pretty_json(context: dict) -> str:
 
 
 @register.filter
-def smart_json(value: Any) -> str:
+def smart_json(value: object) -> str:
     if isinstance(value, Model):
         data = json.loads(serializers.serialize("json", [value]))
     else:
@@ -61,11 +60,11 @@ def smart_json(value: Any) -> str:
 
 
 @register.filter
-def pretty_python(value: Any) -> str:
+def pretty_python(value: object) -> str:
     formatter = HtmlFormatter(style="xcode", linenos="table")
     return highlight(value, PythonLexer(), formatter)
 
 
 @register.filter(name="repr")
-def _repr(value: Any) -> str:
+def _repr(value: object) -> str:
     return repr(value)

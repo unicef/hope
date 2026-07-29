@@ -1,6 +1,6 @@
 """Tests for registration data import detail view."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import freezegun
 import pytest
@@ -70,13 +70,13 @@ def url_detail(afghanistan: BusinessArea, program1: Program, rdi1: RegistrationD
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 @freezegun.freeze_time("2022-01-01")
 def test_get_registration_data_import_detail_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     program1: Program,
@@ -89,7 +89,7 @@ def test_get_registration_data_import_detail_without_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_get_registration_data_import_detail_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     program1: Program,
@@ -140,7 +140,7 @@ def test_get_registration_data_import_detail_with_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_get_registration_data_import_detail_with_deduplication_statistics(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     program1: Program,

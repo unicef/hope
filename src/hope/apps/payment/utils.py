@@ -3,7 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 import hashlib
 import json
 from math import ceil
-from typing import TYPE_CHECKING, Any, no_type_check
+from typing import TYPE_CHECKING, no_type_check
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -71,7 +71,7 @@ def log_payment_plan_change(
 
 
 def _log_payment_plan_event(
-    payment_plan: PaymentPlan, user: "AbstractBaseUser | AnonymousUser | None", changes: dict[str, Any]
+    payment_plan: PaymentPlan, user: "AbstractBaseUser | AnonymousUser | None", changes: dict[str, object]
 ) -> None:
     """Attach a free-form activity-log entry to a PaymentPlan (events the field-diff cannot express)."""
     log = LogEntry.objects.create(
@@ -97,7 +97,7 @@ def log_payment_plan_approval(
     The PaymentPlan status transition is logged separately; this adds a readable entry capturing
     WHO acted at which stage and any comment, which the field-diff log cannot express.
     """
-    changes: dict[str, Any] = {"acceptance_process": {"from": None, "to": approval_type}}
+    changes: dict[str, object] = {"acceptance_process": {"from": None, "to": approval_type}}
     if comment:
         changes["comment"] = {"from": None, "to": comment}
     _log_payment_plan_event(payment_plan, user, changes)
@@ -115,7 +115,7 @@ def log_payment_plan_supporting_document(
     _log_payment_plan_event(payment_plan, user, changes)
 
 
-def _value_repr(value: Any) -> str | None:
+def _value_repr(value: object) -> str | None:
     """Stringify a value the same way create_diff() does (Decimals normalized)."""
     if value is None:
         return None
@@ -124,7 +124,7 @@ def _value_repr(value: Any) -> str | None:
     return str(value)
 
 
-def _persist_payment_logs(logs: list[LogEntry], program_ids: list[Any]) -> None:
+def _persist_payment_logs(logs: list[LogEntry], program_ids: list[object]) -> None:
     """Insert N payment LogEntry rows and their program M2M links in a constant number of queries."""
     if not logs:
         return
@@ -155,7 +155,7 @@ def bulk_log_payment_changes(
     """
     content_type = ContentType.objects.get_for_model(Payment)
     logs: list[LogEntry] = []
-    program_ids: list[Any] = []
+    program_ids: list[object] = []
     for old, new in old_new_pairs:
         changes = create_diff(old, new, Payment.ACTIVITY_LOG_MAPPING)
         if old is not None and not changes:
@@ -313,7 +313,7 @@ def get_payment_delivered_quantity_status_and_value(
     raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
 
-def generate_cache_key(data: dict[str, Any]) -> str:
+def generate_cache_key(data: dict[str, object]) -> str:
     task_params_str = json.dumps(data)
     return hashlib.sha256(task_params_str.encode()).hexdigest()
 

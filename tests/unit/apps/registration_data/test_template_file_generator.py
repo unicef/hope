@@ -1,7 +1,5 @@
 """Tests for template file generator service."""
 
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -19,7 +17,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 

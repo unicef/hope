@@ -1,6 +1,6 @@
 from datetime import timezone as dt_timezone
 import json
-from typing import Any, Optional
+from typing import Optional
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -44,7 +44,6 @@ pytestmark = pytest.mark.usefixtures("use_default_db_for_dashboard")
 
 CURRENT_YEAR = timezone.now().year
 TEST_DATE = timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=dt_timezone.utc)
-
 
 # ============================================================================
 # Local Fixtures
@@ -458,7 +457,7 @@ def afghanistan_with_country(db):
 
 
 @pytest.mark.django_db
-def test_get_fertility_rate_success(afghanistan_with_country, mocker: Any) -> None:
+def test_get_fertility_rate_success(afghanistan_with_country, mocker: object) -> None:
     rate = get_fertility_rate("Afghanistan", 2020)
     assert rate == 5.145
     mock_open = mocker.patch("builtins.open")
@@ -481,7 +480,7 @@ def test_get_fertility_rate_country_not_found() -> None:
 
 
 @pytest.mark.django_db
-def test_get_fertility_rate_no_data(mocker: Any) -> None:
+def test_get_fertility_rate_no_data(mocker: object) -> None:
     mocker.patch("builtins.open", mocker.mock_open(read_data="[]"))
     cache.delete("fertility_data")
     rate = get_fertility_rate("AnyCountry", 2023)
@@ -489,7 +488,7 @@ def test_get_fertility_rate_no_data(mocker: Any) -> None:
 
 
 @pytest.mark.django_db
-def test_load_fertility_data_file_not_found(mocker: Any) -> None:
+def test_load_fertility_data_file_not_found(mocker: object) -> None:
     mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
     mocker.patch("builtins.open", side_effect=FileNotFoundError("File not found"))
     cache.delete("fertility_data")
@@ -500,7 +499,7 @@ def test_load_fertility_data_file_not_found(mocker: Any) -> None:
 
 
 @pytest.mark.django_db
-def test_load_fertility_data_json_decode_error(mocker: Any) -> None:
+def test_load_fertility_data_json_decode_error(mocker: object) -> None:
     mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
     mocker.patch("builtins.open", mocker.mock_open(read_data="invalid json"))
     cache.delete("fertility_data")
@@ -511,7 +510,7 @@ def test_load_fertility_data_json_decode_error(mocker: Any) -> None:
 
 
 @pytest.mark.django_db
-def test_get_fertility_rate_data_exists_but_no_years(mocker: Any) -> None:
+def test_get_fertility_rate_data_exists_but_no_years(mocker: object) -> None:
     """Test fallback when data file exists (dict) but has no year keys."""
     mocker.patch("builtins.open", mocker.mock_open(read_data="{}"))
     cache.delete("fertility_data")

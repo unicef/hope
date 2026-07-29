@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField
@@ -103,7 +101,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     custom_fields = JSONField(default=dict, blank=True)
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
         if self.parent:
             self.parent.is_split = True
@@ -140,13 +138,13 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         return any(c.details for c in self.countries.all())
 
     @classmethod
-    def get_business_areas_as_choices(cls) -> list[dict[str, Any]]:
+    def get_business_areas_as_choices(cls) -> list[dict[str, object]]:
         return [
             {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
             for business_area in cls.objects.all()
         ]
 
-    def get_sys_option(self, key: str, default: None = None) -> Any:
+    def get_sys_option(self, key: str, default: None = None) -> object:
         if "hope" in self.custom_fields:
             return self.custom_fields["hope"].get(key, default)
         return default

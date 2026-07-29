@@ -1,5 +1,4 @@
-from typing import Any
-
+from django.db.models import Model
 from django.db.models.signals import m2m_changed, post_save, pre_delete
 from django.dispatch import Signal, receiver
 
@@ -36,7 +35,7 @@ def increment_grievance_ticket_version_cache_for_ticket_ids(
 @receiver(post_save, sender=GrievanceTicket)
 @receiver(pre_delete, sender=GrievanceTicket)
 def increment_grievance_ticket_version_cache_on_save_delete(
-    sender: Any, instance: GrievanceTicket, **kwargs: dict
+    sender: type[Model], instance: GrievanceTicket, **kwargs: dict
 ) -> None:
     program_codes = set(instance.programs.values_list("code", flat=True))
     if program_codes:
@@ -45,7 +44,7 @@ def increment_grievance_ticket_version_cache_on_save_delete(
 
 @receiver(m2m_changed, sender=GrievanceTicket.programs.through)
 def increment_grievance_ticket_version_cache_on_program_change(
-    sender: Any,
+    sender: type[Model],
     instance: GrievanceTicket,
     action: str,
     reverse: bool,

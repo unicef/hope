@@ -1,6 +1,6 @@
 """Tests for program detail API endpoint."""
 
-from typing import Any, Callable
+from typing import Callable
 from unittest.mock import patch
 
 import pytest
@@ -41,7 +41,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
@@ -64,7 +64,7 @@ def program_2(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -135,7 +135,7 @@ def partner_with_area_limits(
 
 
 @pytest.fixture
-def partner_without_access(db: Any) -> Partner:
+def partner_without_access(db: object) -> Partner:
     return PartnerFactory(name="PartnerWithoutAccess")
 
 
@@ -211,12 +211,12 @@ def payments_count_url(afghanistan: BusinessArea, program: Program, payments) ->
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_program_detail_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -244,7 +244,7 @@ def test_program_detail_with_permission(
 
 
 def test_program_detail_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -262,7 +262,7 @@ def test_program_detail_without_permission(
 
 
 def test_program_detail(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -394,7 +394,7 @@ def test_program_detail(
 
 
 def test_program_detail_purpose_is_used_in_pp_flag(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -421,7 +421,7 @@ def test_program_detail_purpose_is_used_in_pp_flag(
 
 
 def test_program_detail_get_payments_paginated(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -444,7 +444,7 @@ def test_program_detail_get_payments_paginated(
 
 @patch("hope.apps.program.api.views.ProgramViewSet.pagination_class", None)
 def test_program_detail_get_payments_no_pagination(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -467,7 +467,7 @@ def test_program_detail_get_payments_no_pagination(
 
 
 def test_program_get_payments_count(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

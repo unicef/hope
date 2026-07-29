@@ -1,6 +1,6 @@
 """Tests for PDU online edit users available endpoint."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -39,7 +39,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -229,7 +229,7 @@ def url_users_available(afghanistan: BusinessArea, program: Program) -> str:
     ],
 )
 def test_users_available_permissions(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -249,7 +249,7 @@ def test_users_available_permissions(
 
 
 def test_users_available_list(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -345,7 +345,7 @@ def test_users_available_list(
 
 
 def test_users_available_filter_by_save_data_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -378,7 +378,7 @@ def test_users_available_filter_by_save_data_permission(
 
 
 def test_users_available_filter_by_approve_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -412,7 +412,7 @@ def test_users_available_filter_by_approve_permission(
 
 
 def test_users_available_filter_by_merge_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -445,7 +445,7 @@ def test_users_available_filter_by_merge_permission(
 
 
 def test_users_available_filter_by_invalid_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -465,7 +465,7 @@ def test_users_available_filter_by_invalid_permission(
 
 
 def test_users_available_search_by_first_name(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -495,7 +495,7 @@ def test_users_available_search_by_first_name(
 
 
 def test_users_available_search_by_last_name(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -525,7 +525,7 @@ def test_users_available_search_by_last_name(
 
 
 def test_users_available_search_by_email(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -555,7 +555,7 @@ def test_users_available_search_by_email(
 
 
 def test_users_available_search_by_full_name(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -586,7 +586,7 @@ def test_users_available_search_by_full_name(
 
 
 def test_users_available_search_by_full_name_reversed(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -617,7 +617,7 @@ def test_users_available_search_by_full_name_reversed(
 
 
 def test_users_available_search_partial_match(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -647,7 +647,7 @@ def test_users_available_search_partial_match(
 
 
 def test_users_available_search_case_insensitive(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -676,7 +676,7 @@ def test_users_available_search_case_insensitive(
 
 
 def test_users_available_search_no_results(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -704,7 +704,7 @@ def test_users_available_search_no_results(
 
 
 def test_users_available_search_empty_string(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -733,7 +733,7 @@ def test_users_available_search_empty_string(
 
 
 def test_users_available_search_with_permission_filter(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

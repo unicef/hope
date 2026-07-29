@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from typing import Any
 
 from django.core.management import BaseCommand
 from django.db.models import Q
@@ -24,8 +23,8 @@ class Command(BaseCommand):
             help="Should delete all current incompatible roles, but only update Roles.",
         )
 
-    def handle(self, *args: Any, **options: Any) -> None:
-        default_roles_matrix: list[dict[str, Any]] = [
+    def handle(self, *args: object, **options: object) -> None:
+        default_roles_matrix: list[dict[str, object]] = [
             {"name": "Basic User", "permissions": [Permissions.DASHBOARD_VIEW_COUNTRY]},
             {
                 "name": "Advanced Registration Reader",

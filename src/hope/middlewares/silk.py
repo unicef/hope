@@ -1,11 +1,10 @@
-from typing import Any
-
+from django.http import HttpRequest
 from flags.state import flag_enabled
 from silk.middleware import SilkyMiddleware
 
 
 class DynamicSilkyMiddleware(SilkyMiddleware):
-    def __call__(self, request: Any) -> Any:
+    def __call__(self, request: HttpRequest) -> object:
         if flag_enabled("SILK_MIDDLEWARE", request=request):
             self.process_request(request)
             response = self.get_response(request)

@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 import sys
 from time import sleep
-from typing import Any
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
@@ -22,7 +21,7 @@ from hope.models.currency import Currency
 
 
 @pytest.fixture(autouse=True)
-def create_unicef_partner(db: Any) -> None:
+def create_unicef_partner(db: object) -> None:
     from hope.models import Partner
 
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
@@ -30,7 +29,7 @@ def create_unicef_partner(db: Any) -> None:
 
 
 @pytest.fixture(scope="class", autouse=True)
-def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+def create_unicef_partner_session(django_db_setup: object, django_db_blocker: object) -> None:
     with django_db_blocker.unblock():
         from hope.models import Partner
 
@@ -39,14 +38,14 @@ def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) 
 
 
 @pytest.fixture(autouse=True)
-def create_role_with_all_permissions(db: Any) -> None:
+def create_role_with_all_permissions(db: object) -> None:
     from hope.models import Role
 
     return Role.objects.get_or_create(name="Role with all permissions")
 
 
 @pytest.fixture(scope="class", autouse=True)
-def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+def create_role_with_all_permissions_session(django_db_setup: object, django_db_blocker: object) -> None:
     with django_db_blocker.unblock():
         from hope.models import Role
 
@@ -54,22 +53,22 @@ def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blo
 
 
 @pytest.fixture
-def currency_pln(db: Any) -> Currency:
+def currency_pln(db: object) -> Currency:
     return CurrencyFactory(code="PLN", name="Polish Zloty")
 
 
 @pytest.fixture
-def currency_usd(db: Any) -> Currency:
+def currency_usd(db: object) -> Currency:
     return CurrencyFactory(code="USD", name="United States Dollar")
 
 
 @pytest.fixture
-def currency_usdc(db: Any) -> Currency:
+def currency_usdc(db: object) -> Currency:
     return CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True)
 
 
 @pytest.fixture
-def all_currencies(db: Any) -> None:
+def all_currencies(db: object) -> None:
     import importlib
 
     mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
@@ -169,7 +168,7 @@ def pytest_unconfigure(config: Config) -> None:
 
 
 @pytest.fixture
-def mock_elasticsearch(mocker: Any) -> Any:
+def mock_elasticsearch(mocker: object) -> object:
     """Mock ES functions for tests that don't need actual ES.
 
     Use this fixture instead of django_elasticsearch_setup for tests that
@@ -281,7 +280,7 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> None:
+def register_custom_sql_signal(django_db_setup: object, django_db_blocker: object) -> None:
     from django.db import connections
     from django.db.utils import ProgrammingError
 

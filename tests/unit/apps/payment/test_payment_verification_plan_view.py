@@ -1,7 +1,6 @@
 from datetime import timedelta
 from io import BytesIO
 from pathlib import Path
-from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
@@ -39,33 +38,33 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def program_active(business_area: Any) -> Program:
+def program_active(business_area: object) -> Program:
     return ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
 
 
 @pytest.fixture
-def cycle(program_active: Program) -> Any:
+def cycle(program_active: Program) -> object:
     return ProgramCycleFactory(program=program_active, title="Cycle Verification")
 
 
 @pytest.fixture
 def verification_context(
-    api_client: Any,
-    business_area: Any,
-    user: Any,
+    api_client: object,
+    business_area: object,
+    user: object,
     program_active: Program,
-    cycle: Any,
-) -> dict[str, Any]:
+    cycle: object,
+) -> dict[str, object]:
     payment_plan = PaymentPlanFactory(
         name="Payment Plan",
         business_area=business_area,
@@ -186,10 +185,10 @@ def verification_context(
     ],
 )
 def test_get_list(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -215,10 +214,10 @@ def test_get_list(
     ],
 )
 def test_details(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -251,10 +250,10 @@ def test_details(
     ],
 )
 def test_create_pvp(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -293,8 +292,8 @@ def test_create_pvp(
 
 
 def test_create_pvp_validation_error_no_records(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -325,10 +324,10 @@ def test_create_pvp_validation_error_no_records(
     ],
 )
 def test_update_pvp(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -368,10 +367,10 @@ def test_update_pvp(
     ],
 )
 def test_pvp_activate(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -393,8 +392,8 @@ def test_pvp_activate(
 
 
 def test_pvp_activate_returns_404_when_plan_does_not_exist(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -423,8 +422,8 @@ def test_pvp_activate_returns_404_when_plan_does_not_exist(
 
 @pytest.mark.django_db(transaction=True)
 def test_pvp_activate_returns_400_when_row_is_locked(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     """Exception to the project rule of using only the ``db`` fixture.
 
@@ -479,10 +478,10 @@ def test_pvp_activate_returns_400_when_row_is_locked(
     ],
 )
 def test_pvp_finish(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -506,8 +505,8 @@ def test_pvp_finish(
 
 
 def test_pvp_finish_validation_error(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -532,10 +531,10 @@ def test_pvp_finish_validation_error(
     ],
 )
 def test_pvp_discard(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -566,10 +565,10 @@ def test_pvp_discard(
     ],
 )
 def test_pvp_invalid(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -602,10 +601,10 @@ def test_pvp_invalid(
     ],
 )
 def test_pvp_delete(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -633,10 +632,10 @@ def test_pvp_delete(
     ],
 )
 def test_pvp_export_xlsx(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -672,10 +671,10 @@ def test_pvp_export_xlsx(
     ],
 )
 def test_pvp_import_xlsx(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -710,10 +709,10 @@ def test_pvp_import_xlsx(
     ],
 )
 def test_verifications_list(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     url = reverse(
         "api:payments:verification-records-list",
@@ -752,10 +751,10 @@ def test_verifications_list(
     ],
 )
 def test_verification_details(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     url = reverse(
         "api:payments:verification-records-detail",
@@ -799,10 +798,10 @@ def test_verification_details(
     ],
 )
 def test_update_verification(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     url = reverse(
         "api:payments:verification-records-detail",
@@ -841,8 +840,8 @@ def test_update_verification(
 
 
 def test_verifications_list_filter_search(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -866,8 +865,8 @@ def test_verifications_list_filter_search(
 
 
 def test_verifications_list_filter_verification_status(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -896,8 +895,8 @@ def test_verifications_list_filter_verification_status(
 
 
 def test_verifications_list_filter_verification_channel(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -943,8 +942,8 @@ def test_verifications_list_filter_verification_channel(
 
 
 def test_verifications_list_filter_verification_plan_id(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -990,8 +989,8 @@ def test_verifications_list_filter_verification_plan_id(
 
 
 def test_verifications_list_ordering(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -1020,8 +1019,8 @@ def test_verifications_list_ordering(
 
 
 def test_pvp_import_xlsx_returns_400_on_validation_errors(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
@@ -1047,7 +1046,7 @@ def test_pvp_import_xlsx_returns_400_on_validation_errors(
     assert body[0]["message"] == "Bad data"
 
 
-def _activate_manual_pvp(verification_context: dict[str, Any]) -> None:
+def _activate_manual_pvp(verification_context: dict[str, object]) -> None:
     pvp = verification_context["pvp"]
     pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
     pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
@@ -1055,7 +1054,7 @@ def _activate_manual_pvp(verification_context: dict[str, Any]) -> None:
 
 
 @pytest.fixture
-def verification_record_url(verification_context: dict[str, Any]) -> str:
+def verification_record_url(verification_context: dict[str, object]) -> str:
     return reverse(
         "api:payments:verification-records-detail",
         kwargs={
@@ -1068,7 +1067,7 @@ def verification_record_url(verification_context: dict[str, Any]) -> str:
 
 
 @pytest.fixture
-def verify_permissions(verification_context: dict[str, Any], create_user_role_with_permissions: Any) -> None:
+def verify_permissions(verification_context: dict[str, object], create_user_role_with_permissions: object) -> None:
     create_user_role_with_permissions(
         verification_context["user"],
         [Permissions.PAYMENT_VERIFICATION_VERIFY, Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
@@ -1078,7 +1077,7 @@ def verify_permissions(verification_context: dict[str, Any], create_user_role_wi
 
 
 def test_partial_update_rejects_non_manual_channel(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     verification_record_url: str,
     verify_permissions: None,
 ) -> None:
@@ -1094,7 +1093,7 @@ def test_partial_update_rejects_non_manual_channel(
 
 
 def test_partial_update_rejects_inactive_plan(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     verification_record_url: str,
     verify_permissions: None,
 ) -> None:
@@ -1111,7 +1110,7 @@ def test_partial_update_rejects_inactive_plan(
 
 
 def test_partial_update_rejects_when_not_manually_editable(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     verification_record_url: str,
     verify_permissions: None,
 ) -> None:
@@ -1130,7 +1129,7 @@ def test_partial_update_rejects_when_not_manually_editable(
 
 
 def test_partial_update_rejects_received_true_with_zero_amount(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     verification_record_url: str,
     verify_permissions: None,
 ) -> None:
@@ -1145,7 +1144,7 @@ def test_partial_update_rejects_received_true_with_zero_amount(
 
 
 def test_partial_update_rejects_received_false_with_positive_amount(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     verification_record_url: str,
     verify_permissions: None,
 ) -> None:
@@ -1180,7 +1179,7 @@ def patched_verification_update_serializer(monkeypatch: pytest.MonkeyPatch) -> N
 
 @pytest.mark.usefixtures("verify_permissions", "patched_verification_update_serializer")
 def test_partial_update_rejects_received_none_with_zero_amount(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     verification_record_url: str,
 ) -> None:
     _activate_manual_pvp(verification_context)
@@ -1195,7 +1194,7 @@ def test_partial_update_rejects_received_none_with_zero_amount(
 
 @pytest.mark.usefixtures("verify_permissions", "patched_verification_update_serializer")
 def test_partial_update_rejects_received_none_with_positive_amount(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
     verification_record_url: str,
 ) -> None:
     _activate_manual_pvp(verification_context)
@@ -1209,7 +1208,7 @@ def test_partial_update_rejects_received_none_with_positive_amount(
 
 
 def test_record_viewset_get_object_returns_parent_payment_plan(
-    verification_context: dict[str, Any],
+    verification_context: dict[str, object],
 ) -> None:
     viewset = PaymentVerificationRecordViewSet()
     viewset.kwargs = {"payment_verification_pk": str(verification_context["payment_plan"].pk)}
@@ -1224,8 +1223,8 @@ def test_record_viewset_get_object_raises_404_for_unknown_id() -> None:
 
 
 def test_verifications_list_without_pagination_returns_flat_response(
-    verification_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    verification_context: dict[str, object],
+    create_user_role_with_permissions: object,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     create_user_role_with_permissions(

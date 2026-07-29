@@ -2,7 +2,7 @@
 
 import datetime
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -35,7 +35,7 @@ def get_role_data(role: Role) -> dict:
 
 
 @pytest.fixture
-def afghanistan(db: Any):
+def afghanistan(db: object):
     return BusinessAreaFactory(code="0060", name="Afghanistan", slug="afghanistan", active=True)
 
 
@@ -45,7 +45,7 @@ def program(afghanistan):
 
 
 @pytest.fixture
-def partner(db: Any):
+def partner(db: object):
     return PartnerFactory(name="TestPartner")
 
 
@@ -55,7 +55,7 @@ def user(partner):
 
 
 @pytest.fixture
-def role1(db: Any):
+def role1(db: object):
     return RoleFactory(
         name="TestRole1",
         permissions=[
@@ -66,7 +66,7 @@ def role1(db: Any):
 
 
 @pytest.fixture
-def role2(db: Any):
+def role2(db: object):
     return RoleFactory(
         name="TestRole2",
         permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value],
@@ -74,12 +74,12 @@ def role2(db: Any):
 
 
 @pytest.fixture
-def role3(db: Any):
+def role3(db: object):
     return RoleFactory(name="TestRole3", permissions=[Permissions.TARGETING_VIEW_LIST.value])
 
 
 @pytest.fixture
-def role_p1(db: Any):
+def role_p1(db: object):
     return RoleFactory(
         name="TestRoleP1",
         permissions=[Permissions.PM_CREATE.value, Permissions.PM_VIEW_LIST.value],
@@ -87,7 +87,7 @@ def role_p1(db: Any):
 
 
 @pytest.fixture
-def role_p2(db: Any):
+def role_p2(db: object):
     return RoleFactory(
         name="TestRoleP2",
         permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value],
@@ -95,7 +95,7 @@ def role_p2(db: Any):
 
 
 @pytest.fixture
-def role_with_user_management_permissions(db: Any):
+def role_with_user_management_permissions(db: object):
     return RoleFactory(
         name="Role For User",
         permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value],
@@ -284,19 +284,19 @@ def test_program_users_returns_users_with_roles_in_program(
 
 
 def test_program_users_caching(
-    authenticated_client: Any,
-    user: Any,
-    create_user_role_with_permissions: Any,
-    afghanistan: Any,
-    program: Any,
+    authenticated_client: object,
+    user: object,
+    create_user_role_with_permissions: object,
+    afghanistan: object,
+    program: object,
     list_url: str,
-    user1: Any,
-    user2: Any,
-    user3: Any,
-    user5: Any,
-    partner_with_role_2: Any,
-    user4: Any,
-    user_without_role: Any,
+    user1: object,
+    user2: object,
+    user3: object,
+    user5: object,
+    partner_with_role_2: object,
+    user4: object,
+    user_without_role: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,

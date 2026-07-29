@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -37,7 +37,7 @@ def business_area() -> BusinessArea:
 
 @pytest.fixture
 def make_household(business_area: BusinessArea) -> Callable[..., Household]:
-    def _make(collects_individual_data: bool, **hh_kwargs: Any) -> Household:
+    def _make(collects_individual_data: bool, **hh_kwargs: object) -> Household:
         program = ProgramFactory(business_area=business_area)
         dct = program.data_collecting_type
         dct.recalculate_composition = False
@@ -126,7 +126,7 @@ def test_backfill_skips_already_computed_household(household_already_computed: H
 
 
 def test_backfill_compute_query_count_is_constant_per_batch(
-    household_from_individuals: Household, django_assert_num_queries: Any
+    household_from_individuals: Household, django_assert_num_queries: object
 ) -> None:
     # programs list + empty phase-1 fetch + phase-2 pk fetch + grouped aggregate + bulk_update + empty next-batch fetch
     with django_assert_num_queries(6):
@@ -137,7 +137,7 @@ def test_backfill_compute_query_count_is_constant_per_batch(
 
 
 def test_backfill_copy_query_count_is_constant_per_batch(
-    household_present: Household, django_assert_num_queries: Any
+    household_present: Household, django_assert_num_queries: object
 ) -> None:
     # programs list + phase-1 pk fetch + set-based copy UPDATE + empty next-batch fetch
     with django_assert_num_queries(4):

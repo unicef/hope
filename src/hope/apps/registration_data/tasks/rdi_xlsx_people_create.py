@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 import logging
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Callable
 
 from django.db import transaction
 import openpyxl
@@ -64,11 +64,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def _handle_collectors(
         self,
-        value: Any,
+        value: object,
         header: str,
         individual: PendingIndividual,
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         list_of_index_ids = collectors_str_ids_to_list(value)
         if list_of_index_ids is None:
@@ -91,7 +91,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     def _dispatch_people_field(
-        self, header: str, cell: Any, cell_value: Any, current_field: dict[str, Any], obj_to_create: Any
+        self, header: str, cell: object, cell_value: object, current_field: dict[str, object], obj_to_create: object
     ) -> None:
         if header in self.complex_fields[self.sheet_title]:
             fn_complex: Callable = self.complex_fields[self.sheet_title][header]
@@ -123,7 +123,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             if value not in (None, ""):
                 self._process_admin_areas_and_country(cell, current_field, header, obj_to_create, value)
 
-    def _process_people_cell(self, cell: Any, header_cell: Any, obj_to_create: Any) -> None:
+    def _process_people_cell(self, cell: object, header_cell: object, obj_to_create: object) -> None:
         header = header_cell.value
         if header in self._pdu_column_names or header in ("pp_facility_name_h_c", "pp_facility_admin_area_h_c"):
             return
@@ -154,9 +154,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def _create_hh_ind(
         self,
-        obj_to_create: Any,
-        row: Any,
-        first_row: Any,
+        obj_to_create: object,
+        row: object,
+        first_row: object,
     ) -> None:
         registration_data_import = obj_to_create.registration_data_import
 
@@ -190,7 +190,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             obj_to_create.flex_fields[header] = value
 
     def _process_complex_fields_value(
-        self, current_field: dict[Any, Any] | Any, obj_to_create: Any, value: Any
+        self, current_field: dict[object, object] | object, obj_to_create: object, value: object
     ) -> None:
         if value is not None:
             setattr(
@@ -200,7 +200,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             )
 
     def _post_processing(
-        self, obj_to_create: Any, registration_data_import: RegistrationDataImport, sheet_title: str
+        self, obj_to_create: object, registration_data_import: RegistrationDataImport, sheet_title: str
     ) -> None:
         if sheet_title == "households":
             # NON_BENEFICIARY individuals are external collectors only — no household
@@ -237,7 +237,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             self.individuals.append(obj_to_create)
 
     def _process_admin_areas_and_country(
-        self, cell: Any, current_field: dict[Any, Any] | Any, header: str, obj_to_create: Any, value: Any
+        self,
+        cell: object,
+        current_field: dict[object, object] | object,
+        header: str,
+        obj_to_create: object,
+        value: object,
     ) -> None:
         if header in (
             "pp_admin1_i_c",
@@ -275,7 +280,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         elif header == "pp_relationship_i_c":
             self.relationship = cell_value
 
-    def _cell_value_strip(self, cell_value: Any) -> str:
+    def _cell_value_strip(self, cell_value: object) -> str:
         if isinstance(cell_value, str):
             cell_value = cell_value.strip()
         return cell_value

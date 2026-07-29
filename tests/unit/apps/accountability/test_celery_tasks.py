@@ -1,6 +1,5 @@
 """Tests for accountability celery tasks — send_survey_to_users coverage."""
 
-from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -28,12 +27,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(code="0060", slug="afghanistan", name="Afghanistan", active=True)
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(
         name="Test Program",
         business_area=business_area,
@@ -42,12 +41,12 @@ def program(business_area: Any) -> Any:
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def payment_plan(user: Any, business_area: Any, program: Any) -> Any:
+def payment_plan(user: object, business_area: object, program: object) -> object:
     return PaymentPlanFactory(
         status=PaymentPlan.Status.TP_LOCKED,
         created_by=user,
@@ -57,7 +56,7 @@ def payment_plan(user: Any, business_area: Any, program: Any) -> Any:
 
 
 @pytest.fixture
-def survey(program: Any, user: Any) -> Any:
+def survey(program: object, user: object) -> object:
     return SurveyFactory(
         business_area=program.business_area,
         program=program,
@@ -66,7 +65,7 @@ def survey(program: Any, user: Any) -> Any:
 
 
 @pytest.fixture
-def survey_rapid_pro(program: Any, user: Any) -> Any:
+def survey_rapid_pro(program: object, user: object) -> object:
     return SurveyFactory(
         business_area=program.business_area,
         program=program,
@@ -77,12 +76,12 @@ def survey_rapid_pro(program: Any, user: Any) -> Any:
 
 
 @pytest.fixture
-def rdi(program: Any, business_area: Any) -> Any:
+def rdi(program: object, business_area: object) -> object:
     return RegistrationDataImportFactory(program=program, business_area=business_area)
 
 
 @pytest.fixture
-def hoh_valid(program: Any, business_area: Any, rdi: Any) -> Any:
+def hoh_valid(program: object, business_area: object, rdi: object) -> object:
     return IndividualFactory(
         household=None,
         phone_no="+48600123456",
@@ -94,7 +93,7 @@ def hoh_valid(program: Any, business_area: Any, rdi: Any) -> Any:
 
 
 @pytest.fixture
-def household_valid(program: Any, business_area: Any, rdi: Any, hoh_valid: Any) -> Any:
+def household_valid(program: object, business_area: object, rdi: object, hoh_valid: object) -> object:
     return HouseholdFactory(
         program=program,
         head_of_household=hoh_valid,
@@ -104,7 +103,9 @@ def household_valid(program: Any, business_area: Any, rdi: Any, hoh_valid: Any) 
 
 
 @pytest.fixture
-def payment_valid(payment_plan: Any, program: Any, business_area: Any, household_valid: Any, hoh_valid: Any) -> Any:
+def payment_valid(
+    payment_plan: object, program: object, business_area: object, household_valid: object, hoh_valid: object
+) -> object:
     return PaymentFactory(
         parent=payment_plan,
         program=program,
@@ -115,7 +116,7 @@ def payment_valid(payment_plan: Any, program: Any, business_area: Any, household
 
 
 @pytest.fixture
-def survey_manual(program: Any, business_area: Any, user: Any, payment_plan: Any) -> Any:
+def survey_manual(program: object, business_area: object, user: object, payment_plan: object) -> object:
     return SurveyFactory(
         program=program,
         business_area=business_area,
@@ -128,7 +129,9 @@ def survey_manual(program: Any, business_area: Any, user: Any, payment_plan: Any
 
 
 @pytest.fixture
-def survey_sms(program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any) -> Any:
+def survey_sms(
+    program: object, business_area: object, user: object, payment_plan: object, payment_valid: object
+) -> object:
     srv = SurveyFactory(
         program=program,
         business_area=business_area,
@@ -144,8 +147,8 @@ def survey_sms(program: Any, business_area: Any, user: Any, payment_plan: Any, p
 
 @pytest.fixture
 def survey_rapid_pro_with_flow_id(
-    program: Any, business_area: Any, user: Any, payment_plan: Any, payment_valid: Any
-) -> Any:
+    program: object, business_area: object, user: object, payment_plan: object, payment_valid: object
+) -> object:
     srv = SurveyFactory(
         program=program,
         business_area=business_area,
@@ -162,7 +165,7 @@ def survey_rapid_pro_with_flow_id(
 
 
 @pytest.fixture
-def recipient_household(program: Any, business_area: Any) -> Any:
+def recipient_household(program: object, business_area: object) -> object:
     household = HouseholdFactory(business_area=business_area, program=program)
     household.head_of_household.phone_no = "+48123123123"
     household.head_of_household.phone_no_valid = True

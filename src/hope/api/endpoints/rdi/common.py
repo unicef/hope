@@ -1,5 +1,3 @@
-from typing import Any
-
 from rest_framework import serializers
 
 from hope.apps.household.const import NOT_DISABLED
@@ -20,7 +18,7 @@ class DisabilityChoiceField(serializers.ChoiceField):
 
 
 class CountryWorkspaceIdConditionalMixin:
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
         attrs = super().validate(attrs)
         if self.context.get("is_coming_from_cw") and not attrs.get("country_workspace_id"):
             raise serializers.ValidationError(

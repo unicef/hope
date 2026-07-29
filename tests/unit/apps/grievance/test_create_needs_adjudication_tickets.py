@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.files.base import ContentFile
 from django.urls import reverse
@@ -47,7 +47,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -60,7 +60,9 @@ def program_one(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def basic_context(program_one: Program, business_area: BusinessArea, create_program_es_index: Any) -> dict[str, Any]:
+def basic_context(
+    program_one: Program, business_area: BusinessArea, create_program_es_index: object
+) -> dict[str, object]:
     create_program_es_index(program_one)
     household = HouseholdFactory(
         business_area=business_area,
@@ -112,7 +114,7 @@ def basic_context(program_one: Program, business_area: BusinessArea, create_prog
 def biometric_context(
     business_area: BusinessArea,
     user: User,
-) -> dict[str, Any]:
+) -> dict[str, object]:
     business_area.biometric_deduplication_threshold = 44.44
     business_area.save(update_fields=["biometric_deduplication_threshold"])
 
@@ -243,7 +245,7 @@ def biometric_context(
 
 
 def test_create_needs_adjudication_ticket_with_the_same_ind(
-    basic_context: dict[str, Any],
+    basic_context: dict[str, object],
     business_area: BusinessArea,
 ) -> None:
     individuals = basic_context["individuals"]
@@ -311,7 +313,7 @@ def test_create_needs_adjudication_ticket_with_the_same_ind(
     assert GrievanceTicket.objects.count() == 1
 
 
-def test_create_na_tickets_biometrics(biometric_context: dict[str, Any]) -> None:
+def test_create_na_tickets_biometrics(biometric_context: dict[str, object]) -> None:
     pair_1 = biometric_context["pair_1"]
     pair_2 = biometric_context["pair_2"]
     rdi: RegistrationDataImport = biometric_context["rdi"]
@@ -355,7 +357,7 @@ def test_create_na_tickets_biometrics(biometric_context: dict[str, Any]) -> None
     assert TicketNeedsAdjudicationDetails.objects.count() == 2
 
 
-def test_create_na_tickets_biometrics_for_1_ind(biometric_context: dict[str, Any]) -> None:
+def test_create_na_tickets_biometrics_for_1_ind(biometric_context: dict[str, object]) -> None:
     pair_3 = biometric_context["pair_3"]
     ind5 = biometric_context["ind5"]
     rdi: RegistrationDataImport = biometric_context["rdi"]
@@ -381,9 +383,9 @@ def test_create_na_tickets_biometrics_for_1_ind(biometric_context: dict[str, Any
 
 
 def test_ticket_biometric_query_response(
-    authenticated_client: Any,
+    authenticated_client: object,
     create_user_role_with_permissions: Callable,
-    biometric_context: dict[str, Any],
+    biometric_context: dict[str, object],
 ) -> None:
     user = biometric_context["user"]
     business_area = biometric_context["business_area"]

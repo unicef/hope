@@ -1,7 +1,6 @@
 import datetime
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
-from typing import Any
 from unittest.mock import Mock, PropertyMock, patch
 
 from celery.exceptions import Retry
@@ -320,9 +319,9 @@ def payment_plan_group_with_regular_and_follow_up_plans():
     ],
 )
 def test_payment_plan_async_job_factories_attach_jobs_to_payment_plan(
-    task: Any,
+    task: object,
     job_model: type[AsyncJob] | type[AsyncRetryJob],
-    args_builder: Any,
+    args_builder: object,
     expected_job_name: str,
     django_capture_on_commit_callbacks,
 ) -> None:
@@ -1466,7 +1465,7 @@ def test_payment_plan_apply_custom_exchange_rate_action_bulk_updates_in_chunks(
 @patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file")
 def test_send_password_action_sends_passwords_when_plan_found(
     mock_send: Mock,
-    user: Any,
+    user: object,
 ) -> None:
     group = PaymentPlanGroupFactory()
     file_temp = FileTempFactory()
@@ -1491,7 +1490,7 @@ def test_send_password_action_sends_passwords_when_plan_found(
     mock_send.assert_called_once_with(user, file_temp, f"Payment Plan Group {group.unicef_id} Batch 1 Payment List")
 
 
-def test_send_password_action_raises_when_no_exported_plan_found(user: Any) -> None:
+def test_send_password_action_raises_when_no_exported_plan_found(user: object) -> None:
     group = PaymentPlanGroupFactory()
     PaymentPlanFactory(payment_plan_group=group, program_cycle=group.cycle, export_tag=1, export_file_delivery=None)
     job = AsyncRetryJob.objects.create(
@@ -2046,7 +2045,7 @@ def test_import_delivery_group_task_sets_error_status_on_failure(
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
 
 
-def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_plan: Any, user: Any) -> None:
+def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_plan: object, user: object) -> None:
     payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
     payment_plan.save(update_fields=["background_action_status"])
     job = AsyncJob.objects.create(
@@ -2063,7 +2062,7 @@ def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
 def test_send_to_payment_gateway_action_success(
-    mock_payment_gateway_service: Mock, payment_plan: Any, user: Any
+    mock_payment_gateway_service: Mock, payment_plan: object, user: object
 ) -> None:
     payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
     payment_plan.status = PaymentPlan.Status.ACCEPTED
@@ -2084,7 +2083,7 @@ def test_send_to_payment_gateway_action_success(
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService")
 def test_send_to_payment_gateway_action_sets_error_status_on_exception(
-    mock_payment_gateway_service: Mock, payment_plan: Any, user: Any
+    mock_payment_gateway_service: Mock, payment_plan: object, user: object
 ) -> None:
     mock_payment_gateway_service().create_payment_instructions.side_effect = Exception("gateway error")
     payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY

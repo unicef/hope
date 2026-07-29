@@ -2,7 +2,7 @@
 
 from io import BytesIO
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -37,7 +37,7 @@ from hope.models import BusinessArea, Partner, PeriodicFieldData, Program, User
 pytestmark = pytest.mark.django_db
 
 
-def add_pdu_data_to_xlsx(periodic_data_update_template: Any, rows: list[list[Any]]) -> BytesIO:
+def add_pdu_data_to_xlsx(periodic_data_update_template: object, rows: list[list[object]]) -> BytesIO:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     ws_pdu = wb[PDUXlsxExportTemplateService.PDU_SHEET]
     for row_index, row in enumerate(rows):
@@ -50,12 +50,12 @@ def add_pdu_data_to_xlsx(periodic_data_update_template: Any, rows: list[list[Any
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -65,7 +65,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -80,19 +80,19 @@ def program2(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def pdu_upload1_program1(program1: Program, user: User) -> Any:
+def pdu_upload1_program1(program1: Program, user: User) -> object:
     pdu_template1_program1 = PDUXlsxTemplateFactory(program=program1)
     return PDUXlsxUploadFactory(template=pdu_template1_program1, created_by=user)
 
 
 @pytest.fixture
-def pdu_upload2_program1(program1: Program, user: User) -> Any:
+def pdu_upload2_program1(program1: Program, user: User) -> object:
     pdu_template2_program1 = PDUXlsxTemplateFactory(program=program1)
     return PDUXlsxUploadFactory(template=pdu_template2_program1, created_by=user)
 
 
 @pytest.fixture
-def pdu_upload_program2(program2: Program, user: User) -> Any:
+def pdu_upload_program2(program2: Program, user: User) -> object:
     pdu_template_program2 = PDUXlsxTemplateFactory(program=program2)
     return PDUXlsxUploadFactory(template=pdu_template_program2, created_by=user)
 
@@ -164,8 +164,8 @@ def test_list_periodic_data_update_uploads_permission(
     partner: Partner,
     business_area: BusinessArea,
     program1: Program,
-    pdu_upload1_program1: Any,
-    pdu_upload2_program1: Any,
+    pdu_upload1_program1: object,
+    pdu_upload2_program1: object,
     url_list: str,
     create_user_role_with_permissions: Callable,
     create_partner_role_with_permissions: Callable,
@@ -187,9 +187,9 @@ def test_list_periodic_data_update_uploads(
     user: User,
     business_area: BusinessArea,
     program1: Program,
-    pdu_upload1_program1: Any,
-    pdu_upload2_program1: Any,
-    pdu_upload_program2: Any,
+    pdu_upload1_program1: object,
+    pdu_upload2_program1: object,
+    pdu_upload_program2: object,
     url_list: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -239,9 +239,9 @@ def test_list_periodic_data_update_uploads_caching(
     user: User,
     business_area: BusinessArea,
     program1: Program,
-    pdu_upload1_program1: Any,
-    pdu_upload2_program1: Any,
-    pdu_upload_program2: Any,
+    pdu_upload1_program1: object,
+    pdu_upload2_program1: object,
+    pdu_upload_program2: object,
     url_list: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -278,8 +278,8 @@ def test_count_periodic_data_update_uploads(
     user: User,
     business_area: BusinessArea,
     program1: Program,
-    pdu_upload1_program1: Any,
-    pdu_upload2_program1: Any,
+    pdu_upload1_program1: object,
+    pdu_upload2_program1: object,
     url_count: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -389,7 +389,7 @@ def test_upload_periodic_data_update_upload(
     program1: Program,
     url_upload: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         user,

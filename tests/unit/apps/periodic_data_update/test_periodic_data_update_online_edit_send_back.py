@@ -1,6 +1,6 @@
 """Tests for PDU online edit send back functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -40,7 +40,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -109,7 +109,7 @@ def get_send_back_url(afghanistan: BusinessArea, program: Program, pdu_edit_id: 
 def test_send_back_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -130,7 +130,7 @@ def test_send_back_permissions(
 
 
 def test_send_back_success(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -166,7 +166,7 @@ def test_send_back_success(
 
 
 def test_send_back_not_authorized_user(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -196,7 +196,7 @@ def test_send_back_not_authorized_user(
 
 
 def test_send_back_invalid_status_new(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -225,7 +225,7 @@ def test_send_back_invalid_status_new(
 
 
 def test_send_back_invalid_status_approved(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -254,7 +254,7 @@ def test_send_back_invalid_status_approved(
 
 
 def test_send_back_empty_comment(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -284,7 +284,7 @@ def test_send_back_empty_comment(
 
 
 def test_send_back_missing_comment(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -314,7 +314,7 @@ def test_send_back_missing_comment(
 
 
 def test_send_back_null_comment(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -344,7 +344,7 @@ def test_send_back_null_comment(
 
 
 def test_send_back_comment_with_leading_trailing_whitespace(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -378,7 +378,7 @@ def test_send_back_comment_with_leading_trailing_whitespace(
 
 
 def test_send_back_preserves_other_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

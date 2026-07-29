@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Any
 
+from django.http import HttpRequest
 from django.test import override_settings
 import pytest
 from rest_framework import status
@@ -12,10 +12,10 @@ ETAG_VALUE = "etag_value"
 
 
 class DummyKeyConstructor:
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         pass
 
-    def __call__(self, *args: Any, **kwargs: Any) -> str:
+    def __call__(self, *args: object, **kwargs: object) -> str:
         return ETAG_VALUE
 
 
@@ -27,16 +27,16 @@ class DummyRequest:
 
 class DummyView:
     @etag_decorator(DummyKeyConstructor)
-    def default_view(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def default_view(self, request: HttpRequest, *args: object, **kwargs: object) -> Response:
         """A dummy view docstring."""
         return Response()
 
     @etag_decorator(DummyKeyConstructor, compare_etags=False)
-    def no_compare_view(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def no_compare_view(self, request: HttpRequest, *args: object, **kwargs: object) -> Response:
         return Response()
 
     @etag_decorator(DummyKeyConstructor, safe_only=False)
-    def unsafe_view(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def unsafe_view(self, request: HttpRequest, *args: object, **kwargs: object) -> Response:
         return Response()
 
 

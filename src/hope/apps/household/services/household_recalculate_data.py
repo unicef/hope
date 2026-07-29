@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from typing import Any
 
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
@@ -137,7 +136,7 @@ def _recalculate_composition(household: Household, run_from_migration: bool) -> 
     return updated_fields
 
 
-def _composition_count_filters(cutoff: Callable[[int], Any]) -> dict[str, Q]:
+def _composition_count_filters(cutoff: Callable[[int], object]) -> dict[str, Q]:
     """Single source of truth for composition counters.
 
     `cutoff(years)` returns the birth-date boundary "years ago relative to the household's
@@ -193,7 +192,7 @@ def _composition_count_filters(cutoff: Callable[[int], Any]) -> dict[str, Q]:
     }
 
 
-def _composition_counts(cutoff: Callable[[int], Any]) -> dict[str, Count]:
+def _composition_counts(cutoff: Callable[[int], object]) -> dict[str, Count]:
     return {name: Count("id", distinct=True, filter=q) for name, q in _composition_count_filters(cutoff).items()}
 
 

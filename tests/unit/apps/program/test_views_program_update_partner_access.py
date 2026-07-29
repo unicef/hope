@@ -1,6 +1,6 @@
 """Tests for program update partner access API endpoint."""
 
-from typing import Any, Callable
+from typing import Callable
 
 from django.db.models import Q
 import pytest
@@ -125,7 +125,7 @@ def update_partner_access_url(afghanistan: BusinessArea, program: Program) -> st
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -189,7 +189,7 @@ def base_expected_response(
 
 
 def test_update_partner_access_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -224,7 +224,7 @@ def test_update_partner_access_with_permission(
 
 
 def test_update_partner_access_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -245,7 +245,7 @@ def test_update_partner_access_without_permission(
 
 
 def test_update_partner_access(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -419,7 +419,7 @@ def test_update_partner_access(
 
 
 def test_update_partner_access_invalid_all_partners_access_with_partners_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -462,7 +462,7 @@ def test_update_partner_access_invalid_all_partners_access_with_partners_data(
 
 
 def test_update_partner_access_invalid_none_partners_access_with_partners_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -505,7 +505,7 @@ def test_update_partner_access_invalid_none_partners_access_with_partners_data(
 
 
 def test_update_partner_access_invalid_selected_partner_access_without_partner(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -549,7 +549,7 @@ def test_update_partner_access_invalid_selected_partner_access_without_partner(
 
 
 def test_update_partner_access_all_partners_refresh(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

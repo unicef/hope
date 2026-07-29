@@ -1,7 +1,5 @@
 """Tests for partner permissions and user access control."""
 
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -21,27 +19,27 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def role_create(db: Any) -> Role:
+def role_create(db: object) -> Role:
     return RoleFactory(name="Create_program", permissions=["PROGRAMME_CREATE"])
 
 
 @pytest.fixture
-def role_finish(db: Any) -> Role:
+def role_finish(db: object) -> Role:
     return RoleFactory(name="Finish_program", permissions=["PROGRAMME_FINISH"])
 
 
 @pytest.fixture
-def area_1(db: Any) -> Area:
+def area_1(db: object) -> Area:
     return AreaFactory(name="Area 1", p_code="AREA1")
 
 
 @pytest.fixture
-def area_2(db: Any) -> Area:
+def area_2(db: object) -> Area:
     return AreaFactory(name="Area 2", p_code="AREA2")
 
 
@@ -83,13 +81,13 @@ def area_limits(other_partner: Partner, program: Program, area_1: Area):
 
 
 @pytest.fixture
-def unicef_partner(db: Any) -> Partner:
+def unicef_partner(db: object) -> Partner:
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     return unicef
 
 
 @pytest.fixture
-def unicef_hq(unicef_partner: Partner, db: Any) -> Partner:
+def unicef_hq(unicef_partner: Partner, db: object) -> Partner:
     from django.conf import settings
 
     unicef_hq, _ = Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, defaults={"parent": unicef_partner})
@@ -113,7 +111,7 @@ def user_role_assignment(business_area: BusinessArea, other_user: User, role_cre
 
 
 @pytest.fixture
-def role_with_all_permissions(db: Any) -> Role:
+def role_with_all_permissions(db: object) -> Role:
     role, created = Role.objects.get_or_create(
         name="Role with all permissions",
         defaults={"permissions": ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]},

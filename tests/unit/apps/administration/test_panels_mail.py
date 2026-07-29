@@ -1,5 +1,4 @@
 from smtplib import SMTPException
-from typing import Any
 
 from django.conf import settings
 from django.contrib.messages import get_messages
@@ -51,7 +50,7 @@ def test_email_panel_post_sends_email_and_reports_success(superuser_client: Clie
     assert messages == [f"Email sent to {superuser.email}"]
 
 
-def test_email_panel_post_no_success_message_when_send_returns_zero(superuser_client: Client, mocker: Any) -> None:
+def test_email_panel_post_no_success_message_when_send_returns_zero(superuser_client: Client, mocker: object) -> None:
     mocker.patch("django.core.mail.send_mail", return_value=0)
 
     response = superuser_client.post(reverse("admin:console-email"))
@@ -60,7 +59,7 @@ def test_email_panel_post_no_success_message_when_send_returns_zero(superuser_cl
     assert list(get_messages(response.wsgi_request)) == []
 
 
-def test_email_panel_post_reports_thread_error_when_send_raises(superuser_client: Client, mocker: Any) -> None:
+def test_email_panel_post_reports_thread_error_when_send_raises(superuser_client: Client, mocker: object) -> None:
     mocker.patch(
         "django.core.mail.send_mail",
         side_effect=RuntimeError("err"),
@@ -73,7 +72,7 @@ def test_email_panel_post_reports_thread_error_when_send_raises(superuser_client
     assert messages == ["RuntimeError: err"]
 
 
-def test_email_panel_post_reports_smtp_exception(superuser_client: Client, mocker: Any) -> None:
+def test_email_panel_post_reports_smtp_exception(superuser_client: Client, mocker: object) -> None:
     mocker.patch(
         "django.core.mail.get_connection",
         side_effect=SMTPException("no smtp"),

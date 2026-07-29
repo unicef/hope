@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable, cast
+from typing import Iterable, cast
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -48,7 +48,7 @@ class DataChangeValidator:
             log_and_raise(error)
 
 
-def validate_file(file: Any) -> None:
+def validate_file(file: object) -> None:
     if file.content_type in settings.GRIEVANCE_UPLOAD_CONTENT_TYPES:
         file_size_MB = round(file.size / (1024 * 1024), 2)  # noqa
         if file.size > settings.GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE:

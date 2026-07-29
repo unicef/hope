@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
@@ -116,11 +115,11 @@ class RegistrationDataImportViewSet(
 
     @etag_decorator(RDIKeyConstructor)
     @cached_response(key_func=RDIKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     @action(detail=False, methods=["POST"], url_path="run-deduplication")
-    def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def run_deduplication(self, request: Request, *args: object, **kwargs: object) -> Response:
         if not self.program.biometric_deduplication_enabled:
             raise ValidationError("Biometric deduplication is not enabled for this program")
 
@@ -143,8 +142,8 @@ class RegistrationDataImportViewSet(
         request: Request,
         business_area_slug: str,
         program_code: str,
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> Response:
         program = Program.objects.get(business_area__slug=business_area_slug, code=program_code)
         fetch_biometric_deduplication_results_and_process_async_task(str(program.pk))
@@ -152,7 +151,7 @@ class RegistrationDataImportViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def merge(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def merge(self, request: Request, *args: object, **kwargs: object) -> Response:
         rdi = self.get_object()
         old_rdi = RegistrationDataImport.objects.get(
             id=rdi.id,
@@ -183,7 +182,7 @@ class RegistrationDataImportViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def erase(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def erase(self, request: Request, *args: object, **kwargs: object) -> Response:
         rdi = self.get_object()
         old_rdi = RegistrationDataImport.objects.get(
             id=rdi.id,
@@ -242,7 +241,7 @@ class RegistrationDataImportViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def refuse(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def refuse(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         rdi = self.get_object()
@@ -301,7 +300,7 @@ class RegistrationDataImportViewSet(
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
-    def deduplicate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def deduplicate(self, request: Request, *args: object, **kwargs: object) -> Response:
         rdi = self.get_object()
         old_rdi = RegistrationDataImport.objects.get(
             id=rdi.id,
@@ -335,7 +334,7 @@ class RegistrationDataImportViewSet(
         responses=RegistrationDataImportDetailSerializer,
     )
     @transaction.atomic
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         registration_data_import = serializer.get_object(serializer.validated_data)
@@ -394,7 +393,7 @@ class RegistrationDataImportViewSet(
         pagination_class=None,
         url_path="status-choices",
     )
-    def status_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def status_choices(self, request: Request, *args: object, **kwargs: object) -> Response:
         status_choices = to_choice_object(RegistrationDataImport.STATUS_CHOICE)
 
         return Response(status=200, data=self.get_serializer(status_choices, many=True).data)
@@ -405,7 +404,7 @@ class RegistrationDataImportViewSet(
     )
     @action(detail=False, methods=["post"], url_path="registration-xlsx-import")
     @transaction.atomic
-    def registration_xlsx_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def registration_xlsx_import(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Import registration data from an XLSX file."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -486,7 +485,7 @@ class RegistrationDataImportViewSet(
     )
     @action(detail=False, methods=["post"], url_path="registration-kobo-import")
     @transaction.atomic
-    def registration_kobo_import(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def registration_kobo_import(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Import registration data from KoBo."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

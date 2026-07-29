@@ -1,11 +1,9 @@
-from typing import Any
-
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
 
 def calculate_age_at_registration(
-    created_at: Any,
+    created_at: object,
     birth_date: str,
 ) -> int | None:
     try:

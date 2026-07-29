@@ -1,5 +1,4 @@
 from collections import defaultdict
-from typing import Any
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -21,7 +20,7 @@ class Command(BaseCommand):
         else:
             pass
 
-    def handle(self, *args: Any, **options: Any) -> Any:
+    def handle(self, *args: object, **options: object) -> object:
         actions = ("view", "add", "change", "delete")
         app_model_map = {
             "account": ["incompatibleroles", "partner", "role", "userrole", "user"],

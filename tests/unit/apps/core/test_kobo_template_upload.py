@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any, Callable
+from typing import Callable
 from unittest.mock import patch
 
 from celery.exceptions import Retry
@@ -28,7 +28,7 @@ from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob, XLSXKoboTemplate
 
 
 class MockResponse:
-    def __init__(self, status_code: Any, data: dict) -> None:
+    def __init__(self, status_code: object, data: dict) -> None:
         self.status_code = status_code
         self.data: dict = data
 
@@ -37,7 +37,7 @@ class MockResponse:
 
 
 def _raise_as_func(exception: BaseException) -> Callable:
-    def _raise(*args: Any, **kwargs: Any) -> None:
+    def _raise(*args: object, **kwargs: object) -> None:
         raise exception
 
     return _raise

@@ -2,7 +2,6 @@
 
 from datetime import date, timedelta
 from decimal import Decimal
-from typing import Any
 
 import factory
 from factory.django import DjangoModelFactory
@@ -31,7 +30,7 @@ class ProgramFactory(DjangoModelFactory):
     biometric_deduplication_enabled = False
 
     @factory.post_generation
-    def payment_plan_purposes(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+    def payment_plan_purposes(self, create: bool, extracted: object, **kwargs: object) -> None:
         if not create:
             return
         if extracted is not None:
@@ -40,7 +39,7 @@ class ProgramFactory(DjangoModelFactory):
             self.payment_plan_purposes.add(PaymentPlanPurposeFactory())
 
     @factory.post_generation
-    def cycle(self, create: bool, extracted: Any, **kwargs: Any) -> None:
+    def cycle(self, create: bool, extracted: object, **kwargs: object) -> None:
         if not create or extracted is False:
             return
         ProgramCycleFactory(program=self, **kwargs)

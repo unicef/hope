@@ -1,10 +1,9 @@
 from enum import Enum, auto, unique
-from typing import Any
 
 
 @unique
 class Grant(Enum):
-    def _generate_next_value_(self: str, start: int, count: int, last_values: list[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
+    def _generate_next_value_(self: str, start: int, count: int, last_values: list[object]) -> object:  # type: ignore # FIXME: signature differs from superclass
         return self
 
     API_READ_ONLY = auto()
@@ -19,5 +18,5 @@ class Grant(Enum):
     API_DEDUP_FETCH_FINDINGS = auto()
 
     @classmethod
-    def choices(cls) -> tuple[tuple[Any, Any], ...]:
+    def choices(cls) -> tuple[tuple[object, object], ...]:
         return tuple((i.value, i.value) for i in cls)

@@ -1,6 +1,5 @@
 from datetime import date, timedelta
 import logging
-from typing import Any
 
 from constance import config
 from django.db.models import Exists, OuterRef, Q, QuerySet, Value
@@ -131,7 +130,7 @@ class HouseholdFilter(UpdatedAtFilter):
         )
     )
 
-    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: object, value: str) -> "QuerySet":
         extra_households = Household.extra_rdis.through.objects.filter(registrationdataimport=value).values_list(
             "household_id", flat=True
         )
@@ -155,7 +154,7 @@ class HouseholdFilter(UpdatedAtFilter):
             )
         return qs
 
-    def _search_es(self, qs: QuerySet, value: Any, program: Program) -> QuerySet:
+    def _search_es(self, qs: QuerySet, value: object, program: Program) -> QuerySet:
         search = value.strip()
         split_values_list = search.split(" ")
         inner_query = Q()
@@ -179,7 +178,7 @@ class HouseholdFilter(UpdatedAtFilter):
     def _get_elasticsearch_query_for_households(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         es_filters = [{"term": {"business_area": business_area}}, {"term": {"program_id": str(program.pk)}}]
-        query: dict[str, Any] = {
+        query: dict[str, object] = {
             "size": "100",
             "_source": False,
             "query": {
@@ -200,7 +199,7 @@ class HouseholdFilter(UpdatedAtFilter):
         }
         return query
 
-    def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
+    def search_filter(self, qs: QuerySet[Household], name: str, value: object) -> QuerySet[Household]:
         program_code = self.request.parser_context["kwargs"].get("program_code")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
@@ -396,7 +395,7 @@ class IndividualFilter(UpdatedAtFilter):
             },
         }
 
-    def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
+    def search_filter(self, qs: QuerySet[Individual], name: str, value: object) -> QuerySet[Individual]:
         program_code = self.request.parser_context["kwargs"].get("program_code")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
@@ -451,7 +450,7 @@ class IndividualFilter(UpdatedAtFilter):
 
         return qs.filter(q_obj).distinct()
 
-    def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+    def filter_excluded_id(self, qs: QuerySet, name: str, value: object) -> QuerySet:
         return qs.exclude(id=value)
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
@@ -461,13 +460,13 @@ class IndividualFilter(UpdatedAtFilter):
             return qs.filter(program__status=Program.FINISHED)
         return qs
 
-    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: object, value: str) -> "QuerySet":
         extra_households = Household.extra_rdis.through.objects.filter(registrationdataimport=value).values_list(
             "household_id", flat=True
         )
         return queryset.filter(Q(registration_data_import__pk=value) | Q(household__id__in=extra_households)).distinct()
 
-    def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
+    def filter_duplicates_only(self, queryset: "QuerySet", model_field: object, value: bool) -> "QuerySet":
         if value is True:
             return queryset.filter(
                 Q(deduplication_golden_record_status=DUPLICATE)
@@ -501,7 +500,7 @@ class MergedHouseholdFilter(FilterSet):
         )
     )
 
-    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: object, value: str) -> "QuerySet":
         return queryset.filter(registration_data_import_id=value)
 
 
@@ -531,10 +530,10 @@ class MergedIndividualFilter(FilterSet):
         )
     )
 
-    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: object, value: str) -> "QuerySet":
         return queryset.filter(registration_data_import_id=value)
 
-    def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
+    def filter_duplicates_only(self, queryset: "QuerySet", model_field: object, value: bool) -> "QuerySet":
         if value:
             return queryset.filter(
                 Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
@@ -673,7 +672,7 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
 
         return queryset.none()
 
-    def _add_individual_ids(self, individual_field: str, individual_ids: set, obj: Any) -> None:
+    def _add_individual_ids(self, individual_field: str, individual_ids: set, obj: object) -> None:
         for field in individual_field.split("__"):
             obj = getattr(obj, field, None)
             if obj is None:

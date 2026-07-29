@@ -1,7 +1,7 @@
 from datetime import timezone as dt_timezone
 from decimal import Decimal
 import json
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -121,35 +121,35 @@ def delivery_mechanism_common(db):
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db
-def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
+def test_get_cache_key(cache_name: str, cache_class: object, slug: str) -> None:
     expected_key: str = f"dashboard_data_{slug}"
     assert cache_class.get_cache_key(slug) == expected_key
 
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db
-def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
+def test_get_data_cache_hit(cache_name: str, cache_class: object, slug: str) -> None:
     cache.set(
         f"dashboard_data_{slug}",
         json.dumps({"test": f"{cache_name}_data"}),
         60 * 60 * 24,
     )
-    data: Optional[Dict[str, Any]] = cache_class.get_data(slug)
+    data: Optional[Dict[str, object]] = cache_class.get_data(slug)
     assert data == {"test": f"{cache_name}_data"}
 
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db
-def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> None:
+def test_get_data_cache_miss(cache_name: str, cache_class: object, slug: str) -> None:
     cache.delete(f"dashboard_data_{slug}")
-    data: Optional[Dict[str, Any]] = cache_class.get_data(slug)
+    data: Optional[Dict[str, object]] = cache_class.get_data(slug)
     assert data is None
 
 
 @pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db
-def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
-    data: Dict[str, Any] = {"test": f"{cache_name}_data"}
+def test_store_data(cache_name: str, cache_class: object, slug: str) -> None:
+    data: Dict[str, object] = {"test": f"{cache_name}_data"}
     cache_class.store_data(slug, data)
     cached_data = cache.get(f"dashboard_data_{slug}")
     assert cached_data is not None
@@ -181,7 +181,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
 @pytest.mark.django_db
 def test_refresh_data(
     cache_name: str,
-    cache_class: Any,
+    cache_class: object,
     slug: str,
     expected_optional_fields: set,
     afghanistan: BusinessArea,

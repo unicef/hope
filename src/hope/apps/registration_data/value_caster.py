@@ -1,6 +1,6 @@
 import abc
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Optional
 
 from dateutil.parser import parse
 
@@ -20,50 +20,50 @@ class BaseValueCaster(abc.ABC):
         self._next_caster = next_caster
 
     @abc.abstractmethod
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         pass
 
     @abc.abstractmethod
-    def process(self, field: Any, value: Any) -> Any:
+    def process(self, field: object, value: object) -> object:
         pass
 
-    def cast(self, field: Any, value: Any) -> Any:
+    def cast(self, field: object, value: object) -> object:
         if self.can_process(field):
             return self.process(field, value)
         return self._next_caster.cast(field, value)
 
 
 class StringValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return field["type"] == TYPE_STRING
 
-    def process(self, field: Any, value: Any) -> str:
+    def process(self, field: object, value: object) -> str:
         if isinstance(value, float) and value.is_integer():
             value = int(value)
         return str(value)
 
 
 class IntegerValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return field["type"] == TYPE_INTEGER
 
-    def process(self, field: Any, value: Any) -> int:
+    def process(self, field: object, value: object) -> int:
         return int(value)
 
 
 class DecimalValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return field["type"] == TYPE_DECIMAL
 
-    def process(self, field: Any, value: Any) -> float:
+    def process(self, field: object, value: object) -> float:
         return float(value)
 
 
 class SelectManyValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return field["type"] == TYPE_SELECT_MANY
 
-    def process(self, field: Any, value: Any) -> list:
+    def process(self, field: object, value: object) -> list:
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 
@@ -96,10 +96,10 @@ class SelectManyValueCaster(BaseValueCaster):
 
 
 class SelectOneValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return field["type"] == TYPE_SELECT_ONE
 
-    def process(self, field: Any, value: Any) -> int | str | None:
+    def process(self, field: object, value: object) -> int | str | None:
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 
@@ -128,10 +128,10 @@ class SelectOneValueCaster(BaseValueCaster):
 
 
 class DateValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return field["type"] == TYPE_DATE
 
-    def process(self, field: Any, value: date | datetime | str) -> date | datetime:
+    def process(self, field: object, value: date | datetime | str) -> date | datetime:
         if isinstance(value, date | datetime):
             return value
 
@@ -141,10 +141,10 @@ class DateValueCaster(BaseValueCaster):
 
 
 class BooleanValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return field["type"] == TYPE_BOOL
 
-    def process(self, field: Any, value: bool | str) -> bool | str:
+    def process(self, field: object, value: bool | str) -> bool | str:
         if isinstance(value, str):
             if value.lower() == "false":
                 return False
@@ -158,8 +158,8 @@ class BooleanValueCaster(BaseValueCaster):
 
 
 class DefaultValueCaster(BaseValueCaster):
-    def can_process(self, field: Any) -> bool:
+    def can_process(self, field: object) -> bool:
         return True
 
-    def process(self, field: Any, value: Any) -> Any:
+    def process(self, field: object, value: object) -> object:
         return value

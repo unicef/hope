@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -26,27 +24,27 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def program_active(business_area: Any) -> Program:
+def program_active(business_area: object) -> Program:
     return ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
 
 
 @pytest.fixture
-def cycle(program_active: Program) -> Any:
+def cycle(program_active: Program) -> object:
     return ProgramCycleFactory(program=program_active, title="Cycle Payments")
 
 
 @pytest.fixture
-def fsp_xlsx() -> Any:
+def fsp_xlsx() -> object:
     return FinancialServiceProviderFactory(
         name="Test FSP",
         vision_vendor_number="123",
@@ -56,13 +54,13 @@ def fsp_xlsx() -> Any:
 
 @pytest.fixture
 def payment_context(
-    api_client: Any,
-    business_area: Any,
-    user: Any,
+    api_client: object,
+    business_area: object,
+    user: object,
     program_active: Program,
-    cycle: Any,
-    fsp_xlsx: Any,
-) -> dict[str, Any]:
+    cycle: object,
+    fsp_xlsx: object,
+) -> dict[str, object]:
     payment_plan = PaymentPlanFactory(
         name="Payment Plan",
         business_area=business_area,
@@ -111,10 +109,10 @@ def payment_context(
 
 @pytest.fixture
 def payment_people_context(
-    api_client: Any,
-    business_area: Any,
-    user: Any,
-) -> dict[str, Any]:
+    api_client: object,
+    business_area: object,
+    user: object,
+) -> dict[str, object]:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
     program = ProgramFactory(
@@ -181,10 +179,10 @@ def payment_people_context(
     ],
 )
 def test_get_list(
-    payment_context: dict[str, Any],
+    payment_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],
@@ -204,8 +202,8 @@ def test_get_list(
 
 
 def test_get_list_for_people(
-    payment_people_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_people_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_people_context["user"],
@@ -234,10 +232,10 @@ def test_get_list_for_people(
     ],
 )
 def test_details(
-    payment_context: dict[str, Any],
+    payment_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],
@@ -263,10 +261,10 @@ def test_details(
     ],
 )
 def test_mark_as_failed(
-    payment_context: dict[str, Any],
+    payment_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],
@@ -292,10 +290,10 @@ def test_mark_as_failed(
     ],
 )
 def test_revert_mark_as_failed(
-    payment_context: dict[str, Any],
+    payment_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],
@@ -319,8 +317,8 @@ def test_revert_mark_as_failed(
 
 
 def test_filter_by_household_unicef_id(
-    payment_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],
@@ -340,8 +338,8 @@ def test_filter_by_household_unicef_id(
 
 
 def test_filter_by_collector_full_name(
-    payment_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],
@@ -366,8 +364,8 @@ def test_filter_by_collector_full_name(
 
 
 def test_filter_by_payment_unicef_id(
-    payment_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],
@@ -387,8 +385,8 @@ def test_filter_by_payment_unicef_id(
 
 
 def test_filter_by_individual_unicef_id(
-    payment_people_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_people_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_people_context["user"],
@@ -413,8 +411,8 @@ def test_filter_by_individual_unicef_id(
 
 
 def test_extras_in_payment_detail_api(
-    payment_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_context["user"],

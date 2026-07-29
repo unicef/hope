@@ -2,7 +2,7 @@ import base64
 from contextlib import contextmanager
 import datetime
 import json
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 from unittest.mock import Mock, patch
 
 from django.utils import timezone
@@ -261,10 +261,10 @@ def ukraine_context() -> dict[str, object]:
 @pytest.fixture
 def run_automate_rdi_creation_task() -> Callable[..., list]:
     @contextmanager
-    def unlocked_cache(*_args: Any, **_kwargs: Any) -> Any:
+    def unlocked_cache(*_args: object, **_kwargs: object) -> object:
         yield True
 
-    def _run(*args: Any, **kwargs: Any) -> list:
+    def _run(*args: object, **kwargs: object) -> list:
         registration_id = kwargs.pop("registration_id")
         registration = Registration.objects.get(source_id=registration_id)
         with (
@@ -764,7 +764,7 @@ def test_fresh_extract_records_task_schedules_async_job() -> None:
 
 def test_automate_rdi_creation_task_action_returns_empty_list_when_locked() -> None:
     @contextmanager
-    def locked_cache_false(*_args: Any, **_kwargs: Any) -> Any:
+    def locked_cache_false(*_args: object, **_kwargs: object) -> object:
         yield False
 
     job = AsyncRetryJob.objects.create(
@@ -792,7 +792,7 @@ def test_automate_rdi_creation_task_action_raises_non_retriable_error_without_se
     registration.save(update_fields=["rdi_parser"])
 
     @contextmanager
-    def unlocked_cache(*_args: Any, **_kwargs: Any) -> Any:
+    def unlocked_cache(*_args: object, **_kwargs: object) -> object:
         yield True
 
     job = AsyncRetryJob.objects.create(

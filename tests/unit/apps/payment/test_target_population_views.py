@@ -1,6 +1,6 @@
 from datetime import timedelta, timezone as dt_timezone
 import json
-from typing import Any, Callable
+from typing import Callable
 from unittest.mock import MagicMock, patch
 
 from django.core.cache import cache
@@ -35,15 +35,15 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
 def target_population_list_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
@@ -93,8 +93,8 @@ def target_population_list_context(
 @pytest.fixture
 def target_population_detail_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
@@ -134,9 +134,9 @@ def target_population_detail_context(
 @pytest.fixture
 def target_population_filter_context(
     api_client: Callable,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
-) -> dict[str, Any]:
+    business_area: object,
+    create_user_role_with_permissions: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
@@ -197,8 +197,8 @@ def target_population_filter_context(
 @pytest.fixture
 def target_population_create_update_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
@@ -260,8 +260,8 @@ def target_population_create_update_context(
 @pytest.fixture
 def target_population_actions_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
@@ -306,8 +306,8 @@ def target_population_actions_context(
 @pytest.fixture
 def pending_payments_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
     cycle = ProgramCycleFactory(program=program, title="Cycle Pending")
 
@@ -404,8 +404,8 @@ def pending_payments_context(
 
 
 def test_target_population_list_without_permissions(
-    target_population_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_list_context["user"],
@@ -424,9 +424,9 @@ def test_target_population_list_without_permissions(
     ],
 )
 def test_target_population_list_with_permissions(
-    target_population_list_context: dict[str, Any],
+    target_population_list_context: dict[str, object],
     permissions: list,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_list_context["user"],
@@ -456,8 +456,8 @@ def test_target_population_list_with_permissions(
 
 
 def test_target_population_caching(
-    target_population_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_list_context["user"],
@@ -512,10 +512,10 @@ def test_target_population_caching(
     ],
 )
 def test_target_population_detail_permissions(
-    target_population_detail_context: dict[str, Any],
+    target_population_detail_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_detail_context["user"],
@@ -529,8 +529,8 @@ def test_target_population_detail_permissions(
 
 
 def test_target_population_detail(
-    target_population_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_detail_context["user"],
@@ -570,7 +570,7 @@ def test_target_population_detail(
     }
 
 
-def test_filter_by_status(target_population_filter_context: dict[str, Any]) -> None:
+def test_filter_by_status(target_population_filter_context: dict[str, object]) -> None:
     response = target_population_filter_context["client"].get(
         target_population_filter_context["list_url"],
         {"status": PaymentPlan.Status.TP_LOCKED.value},
@@ -596,7 +596,7 @@ def test_filter_by_status(target_population_filter_context: dict[str, Any]) -> N
 
 
 def test_filter_by_program_cycle(
-    target_population_filter_context: dict[str, Any],
+    target_population_filter_context: dict[str, object],
 ) -> None:
     new_cycle = ProgramCycleFactory(program=target_population_filter_context["program_active"], title="Cycle QWOOL")
 
@@ -618,7 +618,7 @@ def test_filter_by_program_cycle(
     assert response_data[0]["status"] == "STEFICON RUN"
 
 
-def test_filter_by_number_of_hh(target_population_filter_context: dict[str, Any]) -> None:
+def test_filter_by_number_of_hh(target_population_filter_context: dict[str, object]) -> None:
     PaymentPlanFactory(
         name="PP_1",
         business_area=target_population_filter_context["business_area"],
@@ -655,7 +655,7 @@ def test_filter_by_number_of_hh(target_population_filter_context: dict[str, Any]
     assert response_data[0]["name"] == "PP_1"
 
 
-def test_filter_by_created_date(target_population_filter_context: dict[str, Any]) -> None:
+def test_filter_by_created_date(target_population_filter_context: dict[str, object]) -> None:
     tp_1 = PaymentPlanFactory(
         name="TP_Mmmmmmm",
         business_area=target_population_filter_context["business_area"],
@@ -695,8 +695,8 @@ def test_filter_by_created_date(target_population_filter_context: dict[str, Any]
 
 def test_filter_by_group_and_export_tag_returns_only_plans_in_same_batch(
     api_client: Callable,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
+    business_area: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
@@ -754,10 +754,10 @@ def test_filter_by_group_and_export_tag_returns_only_plans_in_same_batch(
     ],
 )
 def test_create_payment_plan_success(
-    target_population_create_update_context: dict[str, Any],
+    target_population_create_update_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -793,8 +793,8 @@ def test_create_payment_plan_success(
 
 
 def test_create_payment_plan_invalid_data(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -826,10 +826,10 @@ def test_create_payment_plan_invalid_data(
     ],
 )
 def test_update_payment_plan_success(
-    target_population_create_update_context: dict[str, Any],
+    target_population_create_update_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -859,8 +859,8 @@ def test_update_payment_plan_success(
 
 
 def test_update_payment_plan_invalid_data(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -883,8 +883,8 @@ def test_update_payment_plan_invalid_data(
 
 
 def test_update_payment_plan_group_success(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -912,8 +912,8 @@ def test_update_payment_plan_group_success(
 
 
 def test_update_payment_plan_group_rejects_group_from_wrong_cycle(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -941,8 +941,8 @@ def test_update_payment_plan_group_rejects_group_from_wrong_cycle(
 
 
 def test_create_tp_rejects_fsp_conflicting_with_group(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -985,8 +985,8 @@ def test_create_tp_rejects_fsp_conflicting_with_group(
 
 
 def test_update_tp_rejects_fsp_conflicting_with_group(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -1023,8 +1023,8 @@ def test_update_tp_rejects_fsp_conflicting_with_group(
 
 
 def test_update_tp_rejects_group_change_with_fsp_conflict(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -1068,10 +1068,10 @@ def test_update_tp_rejects_group_change_with_fsp_conflict(
     ],
 )
 def test_lock(
-    target_population_actions_context: dict[str, Any],
+    target_population_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1095,10 +1095,10 @@ def test_lock(
     ],
 )
 def test_unlock(
-    target_population_actions_context: dict[str, Any],
+    target_population_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1123,10 +1123,10 @@ def test_unlock(
     ],
 )
 def test_rebuild(
-    target_population_actions_context: dict[str, Any],
+    target_population_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1150,10 +1150,10 @@ def test_rebuild(
     ],
 )
 def test_mark_ready(
-    target_population_actions_context: dict[str, Any],
+    target_population_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1182,10 +1182,10 @@ def test_mark_ready(
     ],
 )
 def test_copy_tp(
-    target_population_actions_context: dict[str, Any],
+    target_population_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1218,8 +1218,8 @@ def test_copy_tp(
 
 
 def test_copy_tp_validation_errors(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1275,8 +1275,8 @@ def test_copy_tp_validation_errors(
 
 
 def test_copy_tp_rejects_group_from_wrong_cycle(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1304,8 +1304,8 @@ def test_copy_tp_rejects_group_from_wrong_cycle(
 
 
 def test_copy_tp_requires_at_least_one_purpose(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1330,8 +1330,8 @@ def test_copy_tp_requires_at_least_one_purpose(
 
 
 def test_copy_tp_rejects_purpose_not_in_program(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     unrelated_purpose = PaymentPlanPurposeFactory()
     create_user_role_with_permissions(
@@ -1364,10 +1364,10 @@ def test_copy_tp_rejects_purpose_not_in_program(
     ],
 )
 def test_apply_engine_formula_tp(
-    target_population_actions_context: dict[str, Any],
+    target_population_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1402,8 +1402,8 @@ def test_apply_engine_formula_tp(
 
 
 def test_apply_engine_formula_tp_validation_errors(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1460,10 +1460,10 @@ def test_apply_engine_formula_tp_validation_errors(
     ],
 )
 def test_tp_delete(
-    target_population_actions_context: dict[str, Any],
+    target_population_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1495,9 +1495,9 @@ def test_tp_delete(
 
 
 def test_vulnerability_score_filter_applies_correctly(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    django_capture_on_commit_callbacks: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1630,9 +1630,9 @@ def test_vulnerability_score_filter_applies_correctly(
 
 
 def test_vulnerability_score_filter_set_before_engine_formula(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    django_capture_on_commit_callbacks: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1778,10 +1778,10 @@ def test_vulnerability_score_filter_set_before_engine_formula(
     ],
 )
 def test_pending_payments(
-    pending_payments_context: dict[str, Any],
+    pending_payments_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=pending_payments_context["user"],
@@ -1795,8 +1795,8 @@ def test_pending_payments(
 
 
 def test_pending_payments_count(
-    pending_payments_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    pending_payments_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=pending_payments_context["user"],
@@ -1826,10 +1826,10 @@ def test_pending_payments_count(
     ],
 )
 def test_pending_payments_ordering(
-    pending_payments_context: dict[str, Any],
+    pending_payments_context: dict[str, object],
     ordering_param: str,
     db_field: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=pending_payments_context["user"],
@@ -1858,8 +1858,8 @@ def test_pending_payments_ordering(
 
 
 def test_apply_engine_formula_tp_without_version_skips_concurrency_check(
-    target_population_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_actions_context["user"],
@@ -1886,8 +1886,8 @@ def test_apply_engine_formula_tp_without_version_skips_concurrency_check(
 
 
 def test_pending_payments_without_pagination_returns_flat_response(
-    pending_payments_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    pending_payments_context: dict[str, object],
+    create_user_role_with_permissions: object,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     create_user_role_with_permissions(
@@ -1907,8 +1907,8 @@ def test_pending_payments_without_pagination_returns_flat_response(
 
 
 def test_create_payment_plan_with_purposes(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -1938,8 +1938,8 @@ def test_create_payment_plan_with_purposes(
 
 
 def test_create_payment_plan_requires_at_least_one_purpose(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -1967,8 +1967,8 @@ def test_create_payment_plan_requires_at_least_one_purpose(
 
 
 def test_create_payment_plan_rejects_purpose_not_in_program(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     other_ba = BusinessAreaFactory(slug="other-ba")
     unrelated_purpose = PaymentPlanPurposeFactory()
@@ -1999,8 +1999,8 @@ def test_create_payment_plan_rejects_purpose_not_in_program(
 
 
 def test_edit_purposes_allowed_on_last_plan(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -2023,8 +2023,8 @@ def test_edit_purposes_allowed_on_last_plan(
 
 
 def test_edit_purposes_blocked_on_non_last_plan(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     first_plan = target_population_create_update_context["tp"]
     PaymentPlanFactory(
@@ -2055,8 +2055,8 @@ def test_edit_purposes_blocked_on_non_last_plan(
 
 
 def test_is_purposes_editable_true_for_latest_plan(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         target_population_create_update_context["user"],
@@ -2082,8 +2082,8 @@ def test_is_purposes_editable_true_for_latest_plan(
 
 
 def test_is_purposes_editable_false_for_non_latest_plan(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    target_population_create_update_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     first_plan = target_population_create_update_context["tp"]
     first_plan.payment_plan_purposes.add(target_population_create_update_context["purpose"])

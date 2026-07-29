@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -25,8 +25,8 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def registration_data_import_context(api_client: Any) -> Callable[[], dict[str, Any]]:
-    def _make() -> dict[str, Any]:
+def registration_data_import_context(api_client: object) -> Callable[[], dict[str, object]]:
+    def _make() -> dict[str, object]:
         partner = PartnerFactory(name="TestPartner")
         user = UserFactory(partner=partner)
         client = api_client(user)
@@ -110,9 +110,9 @@ def test_list_registration_data_imports_permission_in_program(
     user_permissions: list,
     partner_permissions: list,
     expected_status: str,
-    registration_data_import_context: Callable[[], dict[str, Any]],
-    create_user_role_with_permissions: Any,
-    create_partner_role_with_permissions: Any,
+    registration_data_import_context: Callable[[], dict[str, object]],
+    create_user_role_with_permissions: object,
+    create_partner_role_with_permissions: object,
 ) -> None:
     with freezegun.freeze_time("2022-01-01"):
         context = registration_data_import_context()
@@ -145,9 +145,9 @@ def test_list_registration_data_imports_permission_in_program(
 def test_list_registration_data_imports_permission_wrong_program(
     user_permissions: list,
     partner_permissions: list,
-    registration_data_import_context: Callable[[], dict[str, Any]],
-    create_user_role_with_permissions: Any,
-    create_partner_role_with_permissions: Any,
+    registration_data_import_context: Callable[[], dict[str, object]],
+    create_user_role_with_permissions: object,
+    create_partner_role_with_permissions: object,
 ) -> None:
     with freezegun.freeze_time("2022-01-01"):
         context = registration_data_import_context()
@@ -169,8 +169,8 @@ def test_list_registration_data_imports_permission_wrong_program(
 
 
 def test_list_registration_data_imports(
-    registration_data_import_context: Callable[[], dict[str, Any]],
-    create_user_role_with_permissions: Any,
+    registration_data_import_context: Callable[[], dict[str, object]],
+    create_user_role_with_permissions: object,
 ) -> None:
     with freezegun.freeze_time("2022-01-01"):
         context = registration_data_import_context()
@@ -250,8 +250,8 @@ def test_list_registration_data_imports(
 
 
 def test_list_registration_data_imports_filter(
-    registration_data_import_context: Callable[[], dict[str, Any]],
-    create_user_role_with_permissions: Any,
+    registration_data_import_context: Callable[[], dict[str, object]],
+    create_user_role_with_permissions: object,
 ) -> None:
     with freezegun.freeze_time("2022-01-01"):
         context = registration_data_import_context()
@@ -272,8 +272,8 @@ def test_list_registration_data_imports_filter(
 
 
 def test_list_registration_data_imports_search_by_name(
-    registration_data_import_context: Callable[[], dict[str, Any]],
-    create_user_role_with_permissions: Any,
+    registration_data_import_context: Callable[[], dict[str, object]],
+    create_user_role_with_permissions: object,
 ) -> None:
     with freezegun.freeze_time("2022-01-01"):
         context = registration_data_import_context()
@@ -294,8 +294,8 @@ def test_list_registration_data_imports_search_by_name(
 
 
 def test_list_registration_data_imports_caching(
-    registration_data_import_context: Callable[[], dict[str, Any]],
-    create_user_role_with_permissions: Any,
+    registration_data_import_context: Callable[[], dict[str, object]],
+    create_user_role_with_permissions: object,
 ) -> None:
     with freezegun.freeze_time("2022-01-01"):
         context = registration_data_import_context()
@@ -345,8 +345,8 @@ def test_list_registration_data_imports_caching(
 
 
 def test_get_registration_data_import_detail(
-    registration_data_import_context: Callable[[], dict[str, Any]],
-    create_user_role_with_permissions: Any,
+    registration_data_import_context: Callable[[], dict[str, object]],
+    create_user_role_with_permissions: object,
 ) -> None:
     with freezegun.freeze_time("2022-01-01"):
         context = registration_data_import_context()

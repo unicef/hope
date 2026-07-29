@@ -1,7 +1,5 @@
 """Tests for PDU online edit generate data service."""
 
-from typing import Any
-
 from freezegun import freeze_time
 import pytest
 
@@ -53,12 +51,12 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def rdi(business_area: BusinessArea) -> Any:
+def rdi(business_area: BusinessArea) -> object:
     return RegistrationDataImportFactory(business_area=business_area)
 
 
 @pytest.fixture
-def individuals(business_area: BusinessArea, program: Program, rdi: Any) -> list[Individual]:
+def individuals(business_area: BusinessArea, program: Program, rdi: object) -> list[Individual]:
     individual1 = IndividualFactory(
         business_area=business_area,
         program=program,
@@ -75,7 +73,7 @@ def individuals(business_area: BusinessArea, program: Program, rdi: Any) -> list
 
 
 @pytest.fixture
-def household(business_area: BusinessArea, program: Program, rdi: Any, individuals: list[Individual]) -> Any:
+def household(business_area: BusinessArea, program: Program, rdi: object, individuals: list[Individual]) -> object:
     household = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -93,7 +91,7 @@ def household(business_area: BusinessArea, program: Program, rdi: Any, individua
 
 
 @pytest.fixture
-def pdu_field_muac(program: Program) -> Any:
+def pdu_field_muac(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=5,
@@ -107,7 +105,7 @@ def pdu_field_muac(program: Program) -> Any:
 
 
 @pytest.fixture
-def pdu_field_month_worked(program: Program) -> Any:
+def pdu_field_month_worked(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.BOOL,
         number_of_rounds=5,
@@ -121,7 +119,7 @@ def pdu_field_month_worked(program: Program) -> Any:
 
 
 @pytest.fixture
-def periodic_data_update_online_edit(business_area: BusinessArea, program: Program) -> Any:
+def periodic_data_update_online_edit(business_area: BusinessArea, program: Program) -> object:
     return PDUOnlineEditFactory(
         program=program,
         business_area=business_area,
@@ -148,10 +146,10 @@ def rounds_data() -> list[dict]:
 
 def test_generate_edit_data(
     program: Program,
-    household: Any,
+    household: object,
     individuals: list[Individual],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
     rounds_data: list[dict],
 ) -> None:
     service = PDUOnlineEditGenerateDataService(
@@ -224,10 +222,10 @@ def test_generate_edit_data(
 
 def test_generate_edit_data_with_one_value_already_set(
     program: Program,
-    household: Any,
+    household: object,
     individuals: list[Individual],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
     rounds_data: list[dict],
 ) -> None:
     individual = individuals[0]
@@ -311,10 +309,10 @@ def test_generate_edit_data_with_one_value_already_set(
 
 def test_generate_edit_data_exclude_individual_with_all_values_set(
     program: Program,
-    household: Any,
+    household: object,
     individuals: list[Individual],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
     rounds_data: list[dict],
 ) -> None:
     individual = individuals[0]
@@ -380,8 +378,8 @@ def test_get_individuals_queryset_registration_data_import_id_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     rdi1 = RegistrationDataImportFactory(business_area=business_area)
     individual = individuals[0]
@@ -402,12 +400,12 @@ def test_get_individuals_queryset_registration_data_import_id_filter(
 def test_get_individuals_queryset_target_population_id_filter(
     program: Program,
     business_area: BusinessArea,
-    rdi: Any,
-    household: Any,
+    rdi: object,
+    household: object,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     ind1 = IndividualFactory(
         business_area=business_area,
@@ -449,8 +447,8 @@ def test_get_individuals_queryset_gender_filter(
     program: Program,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     male = individuals[0]
     female = individuals[1]
@@ -475,8 +473,8 @@ def test_get_individuals_queryset_age_filter(
     program: Program,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual32yo = individuals[0]
     individual29yo = individuals[1]
@@ -500,8 +498,8 @@ def test_get_individuals_queryset_registration_date_filter(
     program: Program,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual2023 = individuals[0]
     individual2020 = individuals[1]
@@ -525,8 +523,8 @@ def test_get_individuals_queryset_registration_date_filter_none(
     program: Program,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual2023 = individuals[0]
     individual2020 = individuals[1]
@@ -566,12 +564,12 @@ def test_get_individuals_queryset_registration_date_filter_none(
 def test_get_individuals_queryset_admin_filter(
     program: Program,
     business_area: BusinessArea,
-    rdi: Any,
-    household: Any,
+    rdi: object,
+    household: object,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
     area_type_level_2 = AreaTypeFactory(name="State2", area_level=2)
@@ -646,8 +644,8 @@ def test_get_individuals_queryset_has_grievance_ticket_referral_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -674,8 +672,8 @@ def test_get_individuals_queryset_has_grievance_ticket_referral_exclude_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     individual_without_ticket = individuals[1]
@@ -703,8 +701,8 @@ def test_get_individuals_queryset_has_grievance_ticket_negative_feedback_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -731,8 +729,8 @@ def test_get_individuals_queryset_has_grievance_ticket_positive_feedback_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -757,11 +755,11 @@ def test_get_individuals_queryset_has_grievance_ticket_positive_feedback_filter(
 def test_get_individuals_queryset_has_grievance_ticket_needs_adjudication_filter(
     program: Program,
     business_area: BusinessArea,
-    rdi: Any,
+    rdi: object,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     ind1 = IndividualFactory(
         business_area=business_area,
@@ -807,8 +805,8 @@ def test_get_individuals_queryset_has_grievance_ticket_system_flagging_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -840,8 +838,8 @@ def test_get_individuals_queryset_has_grievance_ticket_delete_individual_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -868,8 +866,8 @@ def test_get_individuals_queryset_has_grievance_ticket_individual_data_update_fi
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -896,8 +894,8 @@ def test_get_individuals_queryset_has_grievance_ticket_sensitive_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -924,8 +922,8 @@ def test_get_individuals_queryset_has_grievance_ticket_complaint_filter(
     business_area: BusinessArea,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     individual_with_ticket = individuals[0]
     grievance = GrievanceTicketFactory(
@@ -950,12 +948,12 @@ def test_get_individuals_queryset_has_grievance_ticket_complaint_filter(
 def test_get_individuals_queryset_received_assistance_filter(
     program: Program,
     business_area: BusinessArea,
-    rdi: Any,
-    household: Any,
+    rdi: object,
+    household: object,
     individuals: list[Individual],
     rounds_data: list[dict],
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
 ) -> None:
     ind_without_payment1 = IndividualFactory(
         business_area=business_area,

@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -54,23 +54,23 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         return list(dict.fromkeys(headers))
 
     @staticmethod
-    def _is_empty(value: Any) -> bool:
+    def _is_empty(value: object) -> bool:
         return value in (None, "")
 
-    def _as_decimal(self, value: Any) -> Decimal:
+    def _as_decimal(self, value: object) -> Decimal:
         if self._is_empty(value):
             return Decimal(0)
         if isinstance(value, Decimal):
             return value
         return Decimal(str(value))
 
-    def _build_payment_row(self, payment: Payment) -> dict[str, Any]:
+    def _build_payment_row(self, payment: Payment) -> dict[str, object]:
         payment_row = self.get_payment_row_data(payment)
         payment_row.pop("payment_id", None)
         payment_row["household_id"] = payment_row.get("household_id") or payment.household.unicef_id
         return {header: payment_row.get(header, "") for header in self.headers}
 
-    def _merge_rows(self, existing_row: dict[str, Any], payment_row: dict[str, Any]) -> dict[str, Any]:
+    def _merge_rows(self, existing_row: dict[str, object], payment_row: dict[str, object]) -> dict[str, object]:
         merged = dict(existing_row)
         for header in self.headers:
             if header == "household_id":
@@ -87,8 +87,8 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
                 merged[header] = payment_row.get(header)
         return merged
 
-    def _iter_aggregated_rows(self) -> list[dict[str, Any]]:
-        aggregated_rows: dict[str, dict[str, Any]] = {}
+    def _iter_aggregated_rows(self) -> list[dict[str, object]]:
+        aggregated_rows: dict[str, dict[str, object]] = {}
         payments = (
             Payment.objects.filter(parent__follow_up_instruction=self.instruction)
             .eligible()
@@ -152,5 +152,5 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_payment_row_data(self, payment: Payment) -> dict[str, Any]:
+    def get_payment_row_data(self, payment: Payment) -> dict[str, object]:
         raise NotImplementedError

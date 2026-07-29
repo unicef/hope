@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from datetime import date, datetime
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.db.transaction import atomic
 from django.urls import reverse
@@ -53,7 +53,7 @@ class BirthDateValidator:
 
 
 class HouseholdValidator:
-    def __call__(self, value: Any) -> None:  # noqa
+    def __call__(self, value: object) -> None:  # noqa
         head_of_household = None
         alternate_collector = None
         primary_collector = None
@@ -121,7 +121,7 @@ class AccountSerializerUpload(serializers.ModelSerializer):
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
 
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
         attrs = super().validate(attrs)
         if not attrs.get("financial_institution"):
             account_type = attrs["account_type"]
@@ -253,11 +253,11 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
         model = RegistrationDataImport
         fields = ("name", "households", "program")
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.business_area = kwargs.pop("business_area", None)
         super().__init__(*args, **kwargs)
 
-    def validate_households(self, value: Any) -> Any:
+    def validate_households(self, value: object) -> object:
         if not value:
             raise ValidationError("This field is required.")
         return value

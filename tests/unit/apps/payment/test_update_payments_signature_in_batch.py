@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Any
 
 import pytest
 
@@ -18,7 +17,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def payment_plan_context() -> dict[str, Any]:
+def payment_plan_context() -> dict[str, object]:
     business_area = BusinessAreaFactory()
     user = UserFactory()
     program = ProgramFactory(business_area=business_area)
@@ -57,7 +56,7 @@ def payment_plan_context() -> dict[str, Any]:
     }
 
 
-def test_number_of_queries(payment_plan_context: dict[str, Any], django_assert_num_queries: Any) -> None:
+def test_number_of_queries(payment_plan_context: dict[str, object], django_assert_num_queries: object) -> None:
     Payment.objects.all().update(signature_hash="")
     assert Payment.objects.filter(signature_hash="").count() == 3
     assert Payment.objects.exclude(signature_hash="").count() == 0

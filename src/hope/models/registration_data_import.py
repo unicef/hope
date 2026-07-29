@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django.conf import settings
 from django.core.validators import (
@@ -242,7 +241,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return self.screen_beneficiary
 
     @classmethod
-    def get_choices(cls, business_area_slug: str | None = None, program_id: str | None = None) -> list[dict[str, Any]]:
+    def get_choices(
+        cls, business_area_slug: str | None = None, program_id: str | None = None
+    ) -> list[dict[str, object]]:
         query = Q(status=cls.MERGED)
         if business_area_slug:
             query &= Q(business_area__slug=business_area_slug)

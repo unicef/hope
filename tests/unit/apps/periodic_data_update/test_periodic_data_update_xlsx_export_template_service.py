@@ -1,7 +1,5 @@
 """Tests for PDU XLSX export template service."""
 
-from typing import Any
-
 from freezegun import freeze_time
 import openpyxl
 import pytest
@@ -54,12 +52,12 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def rdi(business_area: BusinessArea) -> Any:
+def rdi(business_area: BusinessArea) -> object:
     return RegistrationDataImportFactory(business_area=business_area)
 
 
 @pytest.fixture
-def individuals(business_area: BusinessArea, program: Program, rdi: Any) -> list[Individual]:
+def individuals(business_area: BusinessArea, program: Program, rdi: object) -> list[Individual]:
     individual1 = IndividualFactory(
         business_area=business_area,
         program=program,
@@ -76,7 +74,7 @@ def individuals(business_area: BusinessArea, program: Program, rdi: Any) -> list
 
 
 @pytest.fixture
-def household(business_area: BusinessArea, program: Program, rdi: Any, individuals: list[Individual]) -> Any:
+def household(business_area: BusinessArea, program: Program, rdi: object, individuals: list[Individual]) -> object:
     household = HouseholdFactory(
         business_area=business_area,
         program=program,
@@ -92,7 +90,7 @@ def household(business_area: BusinessArea, program: Program, rdi: Any, individua
 
 
 @pytest.fixture
-def pdu_field_muac(program: Program) -> Any:
+def pdu_field_muac(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=5,
@@ -106,7 +104,7 @@ def pdu_field_muac(program: Program) -> Any:
 
 
 @pytest.fixture
-def pdu_field_month_worked(program: Program) -> Any:
+def pdu_field_month_worked(program: Program) -> object:
     pdu_data = PeriodicFieldDataFactory(
         subtype=PeriodicFieldData.DECIMAL,
         number_of_rounds=5,
@@ -122,9 +120,9 @@ def pdu_field_month_worked(program: Program) -> Any:
 @pytest.fixture
 def periodic_data_update_template(
     program: Program,
-    pdu_field_muac: Any,
-    pdu_field_month_worked: Any,
-) -> Any:
+    pdu_field_muac: object,
+    pdu_field_month_worked: object,
+) -> object:
     return PDUXlsxTemplateFactory(
         program=program,
         rounds_data=[
@@ -145,9 +143,9 @@ def periodic_data_update_template(
 
 
 def test_generate_workbook(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
-    household: Any,
+    household: object,
 ) -> None:
     service = PDUXlsxExportTemplateService(periodic_data_update_template)
     wb = service.generate_workbook()
@@ -160,7 +158,7 @@ def test_generate_workbook(
     assert pdu_sheet.max_row == 3
 
 
-def test_save_xlsx_file(periodic_data_update_template: Any) -> None:
+def test_save_xlsx_file(periodic_data_update_template: object) -> None:
     service = PDUXlsxExportTemplateService(periodic_data_update_template)
     service.generate_workbook()
     service.save_xlsx_file()
@@ -170,7 +168,7 @@ def test_save_xlsx_file(periodic_data_update_template: Any) -> None:
     assert wb.sheetnames == [service.PDU_SHEET, service.META_SHEET]
 
 
-def test_generate_header(periodic_data_update_template: Any) -> None:
+def test_generate_header(periodic_data_update_template: object) -> None:
     service = PDUXlsxExportTemplateService(periodic_data_update_template)
     test_header = [
         "individual__uuid",
@@ -190,7 +188,7 @@ def test_generate_header(periodic_data_update_template: Any) -> None:
 
 
 def test_generate_row_empty_flex_fields_individual(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
 ) -> None:
     service = PDUXlsxExportTemplateService(periodic_data_update_template)
@@ -214,7 +212,7 @@ def test_generate_row_empty_flex_fields_individual(
 
 
 def test_generate_row_half_filled_flex_fields_individual(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
 ) -> None:
     service = PDUXlsxExportTemplateService(periodic_data_update_template)
@@ -247,7 +245,7 @@ def test_generate_row_half_filled_flex_fields_individual(
 
 
 def test_generate_row_fully_filled_flex_fields_individual(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
 ) -> None:
     service = PDUXlsxExportTemplateService(periodic_data_update_template)
@@ -272,7 +270,7 @@ def test_generate_row_fully_filled_flex_fields_individual(
 
 
 def test_get_individuals_queryset_registration_data_import_id_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
     business_area: BusinessArea,
 ) -> None:
@@ -289,12 +287,12 @@ def test_get_individuals_queryset_registration_data_import_id_filter(
 
 
 def test_get_individuals_queryset_target_population_id_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     program: Program,
     business_area: BusinessArea,
-    rdi: Any,
+    rdi: object,
     individuals: list[Individual],
-    household: Any,
+    household: object,
 ) -> None:
     individual_other_1 = IndividualFactory(
         business_area=business_area,
@@ -331,7 +329,7 @@ def test_get_individuals_queryset_target_population_id_filter(
 
 
 def test_get_individuals_queryset_gender_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
 ) -> None:
     male = individuals[0]
@@ -351,7 +349,7 @@ def test_get_individuals_queryset_gender_filter(
 
 @freeze_time("2024-07-12")
 def test_get_individuals_queryset_age_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
 ) -> None:
     individual32yo = individuals[0]
@@ -370,7 +368,7 @@ def test_get_individuals_queryset_age_filter(
 
 
 def test_get_individuals_queryset_registration_date_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     individuals: list[Individual],
 ) -> None:
     individual2023 = individuals[0]
@@ -389,12 +387,12 @@ def test_get_individuals_queryset_registration_date_filter(
 
 
 def test_get_individuals_queryset_admin_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     program: Program,
-    rdi: Any,
+    rdi: object,
     individuals: list[Individual],
-    household: Any,
+    household: object,
 ) -> None:
     area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
     area_type_level_2 = AreaTypeFactory(name="State2", area_level=2)
@@ -459,7 +457,7 @@ def test_get_individuals_queryset_admin_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_referral_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -481,7 +479,7 @@ def test_get_individuals_queryset_has_grievance_ticket_referral_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_referral_exclude_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -504,7 +502,7 @@ def test_get_individuals_queryset_has_grievance_ticket_referral_exclude_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_negative_feedback_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -526,7 +524,7 @@ def test_get_individuals_queryset_has_grievance_ticket_negative_feedback_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_positive_feedback_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -548,10 +546,10 @@ def test_get_individuals_queryset_has_grievance_ticket_positive_feedback_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_needs_adjudication_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     program: Program,
-    rdi: Any,
+    rdi: object,
     individuals: list[Individual],
 ) -> None:
     possible_duplicate = IndividualFactory(
@@ -591,7 +589,7 @@ def test_get_individuals_queryset_has_grievance_ticket_needs_adjudication_filter
 
 
 def test_get_individuals_queryset_has_grievance_ticket_sensitive_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -613,7 +611,7 @@ def test_get_individuals_queryset_has_grievance_ticket_sensitive_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_system_flagging_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -640,7 +638,7 @@ def test_get_individuals_queryset_has_grievance_ticket_system_flagging_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_delete_individual_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -662,7 +660,7 @@ def test_get_individuals_queryset_has_grievance_ticket_delete_individual_filter(
 
 
 def test_get_individuals_queryset_has_grievance_ticket_individual_data_update_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -684,7 +682,7 @@ def test_get_individuals_queryset_has_grievance_ticket_individual_data_update_fi
 
 
 def test_get_individuals_queryset_has_grievance_ticket_complaint_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     individuals: list[Individual],
 ) -> None:
@@ -706,12 +704,12 @@ def test_get_individuals_queryset_has_grievance_ticket_complaint_filter(
 
 
 def test_get_individuals_queryset_received_assistance_filter(
-    periodic_data_update_template: Any,
+    periodic_data_update_template: object,
     business_area: BusinessArea,
     program: Program,
-    rdi: Any,
+    rdi: object,
     individuals: list[Individual],
-    household: Any,
+    household: object,
 ) -> None:
     individual_without_payment_1 = IndividualFactory(
         business_area=business_area,

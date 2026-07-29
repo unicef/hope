@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.test import Client
 from django.urls import reverse
@@ -14,17 +14,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def user(db: Any) -> "User":
+def user(db: object) -> "User":
     return UserFactory()
 
 
 @pytest.fixture
-def changelog_active(db: Any) -> "Changelog":
+def changelog_active(db: object) -> "Changelog":
     return ChangelogFactory(active=True)
 
 
 @pytest.fixture
-def two_active_changelogs(db: Any) -> tuple["Changelog", "Changelog"]:
+def two_active_changelogs(db: object) -> tuple["Changelog", "Changelog"]:
     return ChangelogFactory(active=True), ChangelogFactory(active=True)
 
 

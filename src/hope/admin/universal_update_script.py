@@ -1,4 +1,4 @@
-from typing import Any, Iterator
+from typing import Iterator
 
 from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button
@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import AutocompleteSelect, FilteredSelectMultiple
 from django.contrib.postgres.forms import SimpleArrayField
+from django.db import models
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -49,7 +50,7 @@ class ProgramAutocompleteSelect(AutocompleteSelect):
 class ProgramChoiceField(forms.ModelChoiceField):
     """Programme choice field whose option labels carry the business area."""
 
-    def label_from_instance(self, obj: Any) -> str:
+    def label_from_instance(self, obj: object) -> str:
         return format_program_label(obj)
 
 
@@ -111,7 +112,7 @@ class UniversalUpdateAdminForm(forms.ModelForm):
             "account_types": FilteredSelectMultiple("Account Types", is_stacked=False),
         }
 
-    def __init__(self, *args: list[Any], **kwargs: dict[Any, Any]) -> None:
+    def __init__(self, *args: list[object], **kwargs: dict[object, object]) -> None:
         super().__init__(*args, **kwargs)  # type: ignore
         self.fields["individual_fields"].widget.choices = list(self.get_dynamic_individual_fields_choices())
         self.fields["individual_flex_fields_fields"].widget.choices = list(
@@ -204,14 +205,14 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         ),
     )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "program":
             kwargs["queryset"] = Program.objects.select_related("business_area")
             kwargs["widget"] = ProgramAutocompleteSelect(db_field, self.admin_site)
             kwargs["form_class"] = ProgramChoiceField
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_urls(self) -> list[Any]:
+    def get_urls(self) -> list[object]:
         info = self.model._meta.app_label, self.model._meta.model_name
         custom_urls = [
             path(

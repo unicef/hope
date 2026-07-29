@@ -1,7 +1,7 @@
 import csv
 import json
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import black
 from django import forms
@@ -88,7 +88,7 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # FIXME: 'data' is an internal field
     fields = forms.CharField(widget=HiddenInput)  # type: ignore # FIXME: 'fields' is an internal field
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
             self.fields[fname].widget = HiddenInput()  # type: ignore # FIXME
@@ -111,10 +111,10 @@ class TPModelChoiceField(forms.ModelChoiceField):
         self,
         empty_label: str = "---------",
         required: bool = True,
-        widget: Any | None = None,
-        label: Any | None = None,
-        initial: Any | None = None,
-        **kwargs: Any,
+        widget: object | None = None,
+        label: object | None = None,
+        initial: object | None = None,
+        **kwargs: object,
     ) -> None:
         help_text: str = kwargs.get("help_text", "")
         to_field_name = kwargs.get("to_field_name")
@@ -133,7 +133,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
-    def label_from_instance(self, obj: Any) -> str:
+    def label_from_instance(self, obj: object) -> str:
         if obj and obj.business_area:
             return f"{obj.name} ({obj.business_area.name})"
         if obj.name:

@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django.http import HttpRequest, HttpResponse
 from social_core.exceptions import InvalidEmail
@@ -11,7 +10,9 @@ from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User  # prag
 logger = logging.getLogger(__name__)
 
 
-def social_details(backend: Any, details: dict, response: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+def social_details(
+    backend: object, details: dict, response: HttpRequest, *args: object, **kwargs: object
+) -> HttpResponse:
     logger.debug("social_details response:\n%s", response)
     logger.debug("user_data:\n%s", backend.user_data(None, response=response))
     r = social_auth.social_details(backend, details, response, *args, **kwargs)
@@ -25,12 +26,12 @@ def social_details(backend: Any, details: dict, response: HttpRequest, *args: An
 
 
 def user_details(
-    strategy: Any,
+    strategy: object,
     details: dict,
-    backend: Any,
-    user: Any | None = None,
-    *args: Any,
-    **kwargs: Any,
+    backend: object,
+    user: object | None = None,
+    *args: object,
+    **kwargs: object,
 ) -> None:
     logger.debug("user_details for user %s details:\n%s", user, details)
     # social_core_user.user_details use details dict to override some fields on User instance
@@ -50,12 +51,12 @@ def user_details(
 
 
 def require_email(
-    strategy: Any,
+    strategy: object,
     details: dict,
     user: User | None = None,
     is_new: bool = False,
-    *args: Any,
-    **kwargs: Any,
+    *args: object,
+    **kwargs: object,
 ) -> None:
     if user and user.email:
         return
@@ -65,12 +66,12 @@ def require_email(
 
 
 def create_user(
-    strategy: Any,
+    strategy: object,
     details: dict,
-    backend: Any,
+    backend: object,
     user: bool | User,
-    *args: Any,
-    **kwargs: Any,
+    *args: object,
+    **kwargs: object,
 ) -> dict[str, bool | User] | None:
     if user:
         return {"is_new": False}

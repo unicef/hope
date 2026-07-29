@@ -1,5 +1,4 @@
 import json
-from typing import Any
 
 from constance import config
 from django.conf import settings
@@ -18,7 +17,7 @@ class MailjetClient:
         mailjet_template_id: int | None = None,
         html_body: str | None = None,
         text_body: str | None = None,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         self.mailjet_template_id = mailjet_template_id
         self.html_body = html_body
@@ -75,7 +74,7 @@ class MailjetClient:
             data_json = json.dumps(data)
             send_email_async_task.delay(data_json)
 
-    def _get_email_body(self) -> dict[str, Any]:
+    def _get_email_body(self) -> dict[str, object]:
         """Construct the dictionary with the data responsible for email body.
 
         Built for passed content (html and/or text) or mailjet template (with variables).

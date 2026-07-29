@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 import contextlib
-from typing import Any, Generator
+from typing import Generator
 import uuid
 
 import pytest
@@ -13,7 +13,7 @@ from hope.models import BusinessArea, Role, RoleAssignment, User
 
 
 @pytest.fixture
-def user_with_no_permissions(create_super_user: Any) -> User:
+def user_with_no_permissions(create_super_user: object) -> User:
     partner = PartnerFactory(name=f"isolated-partner-{uuid.uuid4()}")
     return User.objects.create_user(
         username="noperm_user",

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any, cast
+from typing import cast
 
 from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button
@@ -45,9 +45,7 @@ class HasErrorsListFilter(admin.SimpleListFilter):
     title = "has errors"
     parameter_name = "has_errors"
 
-    def lookups(
-        self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]
-    ) -> tuple[tuple[str, str], tuple[str, str]]:
+    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin) -> tuple[tuple[str, str], tuple[str, str]]:
         return (
             ("yes", "Yes"),
             ("no", "No"),
@@ -65,7 +63,7 @@ class UsedValuesListFilter(admin.SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     @staticmethod
-    def async_job_queryset(request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> QuerySet[AsyncJob]:
+    def async_job_queryset(request: HttpRequest, model_admin: admin.ModelAdmin[object]) -> QuerySet[AsyncJob]:
         return cast("QuerySet[AsyncJob]", model_admin.get_queryset(request))
 
 
@@ -105,7 +103,7 @@ class UsedBusinessAreaAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
 
 
 class UsedProgramAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
-    parent = cast("Any", "program__business_area")
+    parent = cast("object", "program__business_area")
     autocomplete_view_name_suffix = "used_program_autocomplete"
 
 
@@ -113,7 +111,7 @@ class UsedContentTypeListFilter(UsedValuesListFilter):
     title = "content type"
     parameter_name = "content_type__exact"
 
-    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> list[tuple[str, str]]:
+    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[object]) -> list[tuple[str, str]]:
         used_content_type_ids = (
             self.async_job_queryset(request, model_admin)
             .exclude(content_type__isnull=True)
@@ -138,7 +136,7 @@ class UsedJobNameListFilter(UsedValuesListFilter):
     title = "job name"
     parameter_name = "job_name"
 
-    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> list[tuple[str, str]]:
+    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[object]) -> list[tuple[str, str]]:
         job_names = {
             str(job_name)
             for job_name in self.async_job_queryset(request, model_admin)
@@ -159,7 +157,7 @@ class MissingListFilter(admin.SimpleListFilter):
     parameter_name = "missing_age"
 
     def lookups(
-        self, request: HttpRequest, model_admin: admin.ModelAdmin[Any]
+        self, request: HttpRequest, model_admin: admin.ModelAdmin
     ) -> tuple[tuple[str, str], tuple[str, str], tuple[str, str]]:
         return (
             (
@@ -361,7 +359,7 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
             ),
         )
 
-    def get_urls(self) -> list[Any]:
+    def get_urls(self) -> list[object]:
         info = self.model._meta.app_label, self.model._meta.model_name
         custom_urls = [
             path(
@@ -403,11 +401,11 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return False
 
     @button(label="Recover If Missing", enabled=is_missing, permission="core.recover_missing_async_job")
-    def recover_missing(self, request: HttpRequest, pk: str) -> Any:
+    def recover_missing(self, request: HttpRequest, pk: str) -> object:
         job = cast("AsyncJob | PeriodicAsyncJob | None", self.get_object(request, pk))
         if job is None:
             self.message_user(request, "Async job not found", messages.ERROR)

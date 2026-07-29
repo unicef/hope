@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import patch
 
 from django.contrib.admin import AdminSite
@@ -197,7 +196,7 @@ def test_get_and_set_context_data(households_context, post_request) -> None:
         "program": str(program.id),
         "business_area": str(program.business_area.pk),
     }
-    context: dict[str, Any] = {}
+    context: dict[str, object] = {}
     HouseholdWithdrawnMixin.get_and_set_context_data(post_request, context)
     assert context["program"] == str(program.id)
     assert context["household_list"] == household_list

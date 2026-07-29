@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -332,12 +332,12 @@ def update_url(afghanistan: BusinessArea, program: Program) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_update_program_with_permissions(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -367,7 +367,7 @@ def test_update_program_with_permissions(
 
 
 def test_update_program_without_permissions(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     update_url: str,
@@ -385,7 +385,7 @@ def test_update_program_without_permissions(
 
 
 def test_update_program_with_no_changes(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -415,7 +415,7 @@ def test_update_program_with_no_changes(
 
 
 def test_update_data_collecting_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -449,7 +449,7 @@ def test_update_data_collecting_type(
 
 
 def test_update_data_collecting_type_invalid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -518,7 +518,7 @@ def test_update_data_collecting_type_invalid(
 
 
 def test_update_data_collecting_type_for_active_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -551,7 +551,7 @@ def test_update_data_collecting_type_for_active_program(
 
 
 def test_update_data_collecting_type_for_program_with_population(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -588,7 +588,7 @@ def test_update_data_collecting_type_for_program_with_population(
 
 
 def test_update_data_collecting_type_invalid_with_beneficiary_group(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -622,7 +622,7 @@ def test_update_data_collecting_type_invalid_with_beneficiary_group(
 
 
 def test_update_beneficiary_group(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -656,7 +656,7 @@ def test_update_beneficiary_group(
 
 
 def test_update_beneficiary_group_invalid_with_data_collecting_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -690,7 +690,7 @@ def test_update_beneficiary_group_invalid_with_data_collecting_type(
 
 
 def test_update_beneficiary_group_invalid_with_population(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -723,7 +723,7 @@ def test_update_beneficiary_group_invalid_with_population(
 
 
 def test_update_start_and_end_dates(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -765,7 +765,7 @@ def test_update_start_and_end_dates(
 
 
 def test_update_end_date_and_start_date_invalid_end_date_before_start_date(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -796,7 +796,7 @@ def test_update_end_date_and_start_date_invalid_end_date_before_start_date(
 
 
 def test_update_end_date_and_start_date_invalid_end_date_before_last_cycle(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -834,7 +834,7 @@ def test_update_end_date_and_start_date_invalid_end_date_before_last_cycle(
 
 
 def test_update_end_date_and_start_date_invalid_start_date_after_first_cycle(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -872,7 +872,7 @@ def test_update_end_date_and_start_date_invalid_start_date_after_first_cycle(
 
 
 def test_update_program_with_duplicate_name_same_business_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -905,7 +905,7 @@ def test_update_program_with_duplicate_name_same_business_area(
 
 
 def test_update_program_with_same_name_same_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -935,7 +935,7 @@ def test_update_program_with_same_name_same_program(
 
 
 def test_update_multiple_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -983,7 +983,7 @@ def test_update_multiple_fields(
 
 
 def test_update_pdu_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1084,7 +1084,7 @@ def test_update_pdu_fields(
 
 
 def test_update_pdu_fields_and_add_new(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1211,7 +1211,7 @@ def test_update_pdu_fields_and_add_new(
 
 
 def test_update_pdu_fields_invalid_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1286,7 +1286,7 @@ def test_update_pdu_fields_invalid_data(
 
 
 def test_update_pdu_fields_invalid_data_duplicated_field_names_in_input(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1355,7 +1355,7 @@ def test_update_pdu_fields_invalid_data_duplicated_field_names_in_input(
 
 
 def test_update_pdu_fields_add_field_with_same_field_name_in_different_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1491,7 +1491,7 @@ def test_update_pdu_fields_add_field_with_same_field_name_in_different_program(
 
 
 def test_update_pdu_fields_with_same_name_in_different_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1598,7 +1598,7 @@ def test_update_pdu_fields_with_same_name_in_different_program(
 
 
 def test_update_pdu_fields_when_program_has_rdi(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1718,7 +1718,7 @@ def test_update_pdu_fields_when_program_has_rdi(
 
 
 def test_update_pdu_fields_invalid_when_program_has_rdi_decrease_rounds(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1772,7 +1772,7 @@ def test_update_pdu_fields_invalid_when_program_has_rdi_decrease_rounds(
 
 
 def test_update_pdu_fields_invalid_when_program_has_rdi_change_rounds_names(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1830,7 +1830,7 @@ def test_update_pdu_fields_invalid_when_program_has_rdi_change_rounds_names(
 
 
 def test_update_pdu_fields_remove_all(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1874,7 +1874,7 @@ def test_update_pdu_fields_remove_all(
 
 
 def test_update_program_can_add_purposes(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1902,7 +1902,7 @@ def test_update_program_can_add_purposes(
 
 
 def test_update_program_cannot_remove_purpose_in_use_by_payment_plan(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1932,7 +1932,7 @@ def test_update_program_cannot_remove_purpose_in_use_by_payment_plan(
 
 
 def test_update_program_can_remove_unused_purpose(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1959,7 +1959,7 @@ def test_update_program_can_remove_unused_purpose(
 
 
 def test_update_program_rejects_more_than_10_purposes_total(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1982,7 +1982,7 @@ def test_update_program_rejects_more_than_10_purposes_total(
 
 
 def test_update_program_rejects_purpose_not_allowed_for_business_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

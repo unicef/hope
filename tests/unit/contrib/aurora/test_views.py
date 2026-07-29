@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib.messages import get_messages
 from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -14,7 +12,7 @@ from hope.contrib.aurora.views import FetchDataView, RegistrationDataView
 pytestmark = pytest.mark.django_db
 
 
-def _request_with_messages(rf: RequestFactory, **post: Any):
+def _request_with_messages(rf: RequestFactory, **post: object):
     request = rf.post("/fetch/", data=post, HTTP_REFERER="/referrer/")
     request.user = UserFactory()
     SessionMiddleware(lambda r: None).process_request(request)
@@ -31,7 +29,7 @@ def test_fetch_data_get_redirects_to_referrer() -> None:
     assert response.url == "/referrer/"
 
 
-def test_fetch_data_post_fetches_and_reports_success(mocker: Any) -> None:
+def test_fetch_data_post_fetches_and_reports_success(mocker: object) -> None:
     fetch = mocker.patch("hope.contrib.aurora.views.fetch_metadata")
     request = _request_with_messages(RequestFactory(), _fetch="1")
 
@@ -42,7 +40,7 @@ def test_fetch_data_post_fetches_and_reports_success(mocker: Any) -> None:
     assert [str(m) for m in get_messages(request)] == ["Data fetched"]
 
 
-def test_fetch_data_post_reports_error_on_exception(mocker: Any) -> None:
+def test_fetch_data_post_reports_error_on_exception(mocker: object) -> None:
     mocker.patch("hope.contrib.aurora.views.fetch_metadata", side_effect=RuntimeError("RuntimeError test"))
     request = _request_with_messages(RequestFactory(), _fetch="1")
 
@@ -52,7 +50,7 @@ def test_fetch_data_post_reports_error_on_exception(mocker: Any) -> None:
     assert [str(m) for m in get_messages(request)] == ["RuntimeError test"]
 
 
-def test_fetch_data_post_without_fetch_flag_just_redirects(mocker: Any) -> None:
+def test_fetch_data_post_without_fetch_flag_just_redirects(mocker: object) -> None:
     fetch = mocker.patch("hope.contrib.aurora.views.fetch_metadata")
     request = _request_with_messages(RequestFactory())
 

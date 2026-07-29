@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -8,7 +8,7 @@ from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
-from django.db import transaction
+from django.db import models, transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -55,13 +55,13 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
         "total_open_amount_usd",
     )
 
-    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: object = None) -> bool:
         return False
 
-    def has_change_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: object = None) -> bool:
         return False
 
-    def has_delete_permission(self: Any, request: Any, obj: Any = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object = None) -> bool:
         return False
 
 
@@ -127,14 +127,14 @@ def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
     ]
 
 
-def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
+def has_payment_plan_pg_sync_permission(request: HttpRequest, payment_plan: PaymentPlan) -> bool:
     return request.user.has_perm(
         Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
         payment_plan.program,
     )
 
 
-def has_payment_instruction_download_permission(request: Any) -> bool:
+def has_payment_instruction_download_permission(request: HttpRequest) -> bool:
     permission = "payment.download_payment_instruction"
     return request.user.has_perm(permission)
 
@@ -235,11 +235,11 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
 
-    def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> Any:
+    def get_form(self, request: HttpRequest, obj: object = None, change: bool = False, **kwargs: object) -> object:
         request._payment_plan_obj = obj
         return super().get_form(request, obj, change, **kwargs)
 
-    def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:
+    def save_model(self, request: HttpRequest, obj: PaymentPlan, form: object, change: bool) -> None:
         old_payment_plan = copy_model_object(PaymentPlan.objects.get(pk=obj.pk)) if change and obj.pk else None
         super().save_model(request, obj, form, change)
         # skip a no-op log when an edit touched only fields outside ACTIVITY_LOG_MAPPING
@@ -254,14 +254,14 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             new_object=obj,
         )
 
-    def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_manytomany(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "payment_plan_purposes":
             obj = getattr(request, "_payment_plan_obj", None)
             if obj is not None:
                 kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return is_root(request)
 
     @button(
@@ -389,7 +389,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             message="Do you confirm to send this payment plan to Vision?",
         )
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
 
@@ -542,7 +542,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
             message="Do you confirm to restart importing reconciliation XLSX file task?",
         )
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
 
@@ -666,7 +666,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             )
         )
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return False
 
     @button(
@@ -688,7 +688,7 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             message="Do you confirm to Sync with Payment Gateway?",
         )
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
 
@@ -703,5 +703,5 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
         "payment_plan",
     )
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False

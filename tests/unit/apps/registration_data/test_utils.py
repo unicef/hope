@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -14,7 +13,7 @@ FILES_DIR = Path(__file__).resolve().parent / "test_file"
 
 
 @pytest.fixture
-def kobo_test_data() -> dict[str, Any]:
+def kobo_test_data() -> dict[str, object]:
     with (
         open(FILES_DIR / "test_calculate_hash_for_kobo_submission1.json") as f1,
         open(FILES_DIR / "test_calculate_hash_for_kobo_submission2.json") as f2,
@@ -28,7 +27,7 @@ def kobo_test_data() -> dict[str, Any]:
 
 
 @pytest.fixture
-def social_program() -> Any:
+def social_program() -> object:
     business_area = BusinessAreaFactory()
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
@@ -39,7 +38,7 @@ def social_program() -> Any:
     )
 
 
-def test_calculate_hash_for_kobo_submission(kobo_test_data: dict[str, Any]) -> None:
+def test_calculate_hash_for_kobo_submission(kobo_test_data: dict[str, object]) -> None:
     hash1 = calculate_hash_for_kobo_submission(kobo_test_data["data1"])
     hash2 = calculate_hash_for_kobo_submission(kobo_test_data["data2"])
     hash3 = calculate_hash_for_kobo_submission(kobo_test_data["data3"])
@@ -61,8 +60,8 @@ def test_calculate_hash_for_kobo_submission(kobo_test_data: dict[str, Any]) -> N
     ],
 )
 def test_list_of_integer_validator_for_primary_collector_id(
-    social_program: Any,
-    value: Any,
+    social_program: object,
+    value: object,
     expected: bool,
 ) -> None:
     validator = UploadXLSXInstanceValidator(program=social_program)
@@ -70,7 +69,7 @@ def test_list_of_integer_validator_for_primary_collector_id(
 
 
 def test_list_of_integer_validator_for_required_primary_collector_id(
-    social_program: Any,
+    social_program: object,
 ) -> None:
     validator = UploadXLSXInstanceValidator(program=social_program)
     assert validator.list_of_integer_validator(None, "pp_index_id") is False
@@ -86,5 +85,5 @@ def test_list_of_integer_validator_for_required_primary_collector_id(
         (None, None),
     ],
 )
-def test_collectors_str_ids_to_list(value: Any, expected: Any) -> None:
+def test_collectors_str_ids_to_list(value: object, expected: object) -> None:
     assert collectors_str_ids_to_list(value) == expected

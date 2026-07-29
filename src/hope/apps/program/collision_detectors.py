@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.db import models
 from django.db.transaction import atomic
@@ -162,7 +162,7 @@ class AbstractCollisionDetector:
         source: models.Model,
         destination: models.Model,
         exclude: set[str],
-        extra_fields: dict[str, Any] | None = None,
+        extra_fields: dict[str, object] | None = None,
     ) -> None:
         """Update a database instance by copying data from a source model to a destination model.
 
@@ -191,7 +191,7 @@ class AbstractCollisionDetector:
         self,
         individual: Individual,
         household_id: str,
-        old_head_of_household_id: Any,
+        old_head_of_household_id: object,
     ) -> None:
         """Process an individual being removed from household during collision.
 

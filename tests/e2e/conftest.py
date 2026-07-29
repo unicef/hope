@@ -4,7 +4,6 @@ import logging
 import os
 from pathlib import Path
 import re
-from typing import Any
 
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
@@ -294,7 +293,7 @@ def browser(driver: Chrome, live_server_with_static) -> Chrome:
 
 
 @pytest.fixture
-def dedup_engine_stub(monkeypatch: pytest.MonkeyPatch) -> Any:
+def dedup_engine_stub(monkeypatch: pytest.MonkeyPatch) -> object:
     # Minimal happy-path stub for the external deduplication engine.
     # Opt-in: tests that talk to the engine declare `dedup_engine_stub` in
     # their signature. Selenium/live_server calls are unaffected (they don't
@@ -593,7 +592,7 @@ def page_generic_import(request: FixtureRequest, browser: Chrome) -> GenericImpo
 
 
 @pytest.fixture
-def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
+def business_area(create_unicef_partner: object, create_role_with_all_permissions: object) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
         code="0060",
@@ -844,7 +843,7 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> None:
+def register_custom_sql_signal(django_db_setup: object, django_db_blocker: object) -> None:
     from django.db import connections
     from django.db.utils import ProgrammingError
 

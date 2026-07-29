@@ -1,7 +1,7 @@
 """Tests for registration data import (RDI) views - main RDI operations."""
 
 from contextlib import contextmanager
-from typing import Any, Callable, Generator
+from typing import Callable, Generator
 from unittest.mock import ANY, Mock, patch
 
 from django.db import DEFAULT_DB_ALIAS, connections
@@ -72,12 +72,12 @@ def create_household_and_individuals(
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def unicef_partner(db: Any) -> Partner:
+def unicef_partner(db: object) -> Partner:
     return PartnerFactory(name="UNICEF")
 
 
@@ -110,7 +110,7 @@ def user(unicef_hq: Partner, business_area: BusinessArea) -> User:
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="Test Partner")
 
 
@@ -546,8 +546,8 @@ def test_refuse_rdi_without_permission(
 @patch("hope.apps.registration_data.api.views.BiometricDeduplicationService")
 @patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
 def test_refuse_rdi(
-    remove_elasticsearch_documents_by_matching_ids_moc: Any,
-    mock_biometric_service: Any,
+    remove_elasticsearch_documents_by_matching_ids_moc: object,
+    mock_biometric_service: object,
     api_client: APIClient,
     program: Program,
     business_area: BusinessArea,

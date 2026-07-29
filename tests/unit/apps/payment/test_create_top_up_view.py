@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -21,12 +21,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def top_up_view_context(api_client: Callable, business_area: Any) -> dict[str, Any]:
+def top_up_view_context(api_client: Callable, business_area: object) -> dict[str, object]:
     user = UserFactory()
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program)
@@ -67,8 +67,8 @@ def top_up_view_context(api_client: Callable, business_area: Any) -> dict[str, A
     ],
 )
 def test_create_top_up_view_arrange_permissions_act_post_assert_status(
-    top_up_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    top_up_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -89,8 +89,8 @@ def test_create_top_up_view_arrange_permissions_act_post_assert_status(
 
 
 def test_create_top_up_view_arrange_eligible_pp_act_post_assert_top_up_payload(
-    top_up_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    top_up_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         top_up_view_context["user"],
@@ -114,8 +114,8 @@ def test_create_top_up_view_arrange_eligible_pp_act_post_assert_top_up_payload(
 
 
 def test_create_top_up_view_arrange_missing_dispersion_dates_act_post_assert_400(
-    top_up_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    top_up_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         top_up_view_context["user"],
@@ -130,8 +130,8 @@ def test_create_top_up_view_arrange_missing_dispersion_dates_act_post_assert_400
 
 
 def test_create_top_up_view_arrange_end_date_before_start_act_post_assert_400(
-    top_up_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    top_up_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         top_up_view_context["user"],
@@ -150,8 +150,8 @@ def test_create_top_up_view_arrange_end_date_before_start_act_post_assert_400(
 
 
 def test_create_top_up_view_arrange_end_date_in_past_act_post_assert_400(
-    top_up_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    top_up_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         top_up_view_context["user"],

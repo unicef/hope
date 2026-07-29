@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, List
+from typing import List
 
 from django.urls import reverse
 import pytest
@@ -34,7 +34,7 @@ def user(partner):
 
 
 @pytest.fixture
-def api_client_user(api_client: Any, user):
+def api_client_user(api_client: object, user):
     return api_client(user)
 
 
@@ -108,7 +108,7 @@ def global_urls(business_area):
 def test_global_list(
     permissions: List,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
     business_area,
     program_active,
@@ -138,7 +138,7 @@ def test_global_list(
 def test_global_choices(
     permissions: List,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
     business_area,
     program_active,
@@ -158,7 +158,7 @@ def test_global_choices(
 
 
 def test_count_endpoint(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
     business_area,
     program_active,
@@ -186,7 +186,7 @@ def test_count_endpoint(
 
 
 def test_ordering(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
     business_area,
     program_active,
@@ -227,7 +227,7 @@ def test_ordering(
 
 
 def test_excludes_pre_payment_statuses(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
     business_area,
     program_active,
@@ -260,7 +260,7 @@ def test_excludes_pre_payment_statuses(
 
 
 def test_program_filtering(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
     business_area,
     program_active,
@@ -296,7 +296,7 @@ def test_program_filtering(
 
 
 @pytest.fixture
-def office_search_setup(api_client: Any, business_area, global_urls):
+def office_search_setup(api_client: object, business_area, global_urls):
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = program.cycles.first()
 
@@ -414,7 +414,7 @@ def office_search_setup(api_client: Any, business_area, global_urls):
 
 
 def test_search_by_payment_unicef_id(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -434,7 +434,7 @@ def test_search_by_payment_unicef_id(
 
 
 def test_search_by_household_unicef_id(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -454,7 +454,7 @@ def test_search_by_household_unicef_id(
 
 
 def test_search_by_individual_unicef_id(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -474,7 +474,7 @@ def test_search_by_individual_unicef_id(
 
 
 def test_search_by_payment_plan_unicef_id(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -496,7 +496,7 @@ def test_search_by_payment_plan_unicef_id(
 
 
 def test_search_by_grievance_unicef_id(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -527,7 +527,7 @@ def test_search_by_grievance_unicef_id(
 
 
 def test_search_by_phone_number(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -550,7 +550,7 @@ def test_search_by_phone_number(
 
 
 def test_search_by_phone_number_alternative(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -573,7 +573,7 @@ def test_search_by_phone_number_alternative(
 
 
 def test_search_by_individual_name(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(
@@ -596,7 +596,7 @@ def test_search_by_individual_name(
 
 
 def test_search_with_active_programs_filter(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     office_search_setup: dict,
 ) -> None:
     create_user_role_with_permissions(

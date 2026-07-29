@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.exceptions import ValidationError
 
 from hope.apps.household.const import (
@@ -108,7 +106,7 @@ class GenericRegistrationService(BaseRegistrationService):
     }
 
     @staticmethod
-    def get_boolean(value: Any) -> bool:
+    def get_boolean(value: object) -> bool:
         if value in ["yes", "YES", "Y", "y", "1", 1, True]:
             return True
         if value in ["no", "NO", "N", "n", "0", 0, False]:
@@ -128,11 +126,11 @@ class GenericRegistrationService(BaseRegistrationService):
         return value.upper() if value else ""
 
     @staticmethod
-    def get_disability(value: Any) -> str:
+    def get_disability(value: object) -> str:
         return DISABLED if GenericRegistrationService.get_boolean(value) else NOT_DISABLED
 
     @classmethod
-    def get(cls, data: dict, key: str) -> Any:
+    def get(cls, data: dict, key: str) -> object:
         """Generate value given a list of one dict or a dict.
 
         {"key": "value"}
@@ -193,7 +191,7 @@ class GenericRegistrationService(BaseRegistrationService):
         return extra_ffs
 
     @classmethod
-    def _apply_mapped_value(cls, my_dict: dict, model: str, field: str, retrieved_value: Any) -> None:
+    def _apply_mapped_value(cls, my_dict: dict, model: str, field: str, retrieved_value: object) -> None:
         if model == INDIVIDUAL_FIELD:
             my_dict[field] = retrieved_value
         elif model == DOCUMENT_FIELD:
@@ -235,7 +233,7 @@ class GenericRegistrationService(BaseRegistrationService):
 
     def create_household_data(
         self,
-        record: Any,
+        record: object,
         registration_data_import: RegistrationDataImport,
         mapping: dict,
     ) -> PendingHousehold:
@@ -273,7 +271,12 @@ class GenericRegistrationService(BaseRegistrationService):
         )
 
     def _assign_individual_roles(
-        self, individual: "PendingIndividual", extra_data: dict, head: Any, pr_collector: Any, sec_collector: Any
+        self,
+        individual: "PendingIndividual",
+        extra_data: dict,
+        head: object,
+        pr_collector: object,
+        sec_collector: object,
     ) -> tuple:
         if individual.relationship == HEAD:
             if head:
@@ -294,7 +297,7 @@ class GenericRegistrationService(BaseRegistrationService):
 
     def create_individuals(
         self,
-        record: Any,
+        record: object,
         household: PendingHousehold,
         mapping: dict,
     ) -> tuple:
@@ -372,7 +375,9 @@ class GenericRegistrationService(BaseRegistrationService):
                     )
                 self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
-    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
+    def create_household_for_rdi_household(
+        self, record: object, registration_data_import: RegistrationDataImport
+    ) -> None:
         mapping = mergedicts(self.default_mapping, self.registration.mapping, [])
 
         household = self.create_household_data(record, registration_data_import, mapping)

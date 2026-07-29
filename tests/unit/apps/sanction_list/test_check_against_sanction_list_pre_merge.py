@@ -1,5 +1,5 @@
 from datetime import date
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from constance.test import override_config
 from django.conf import settings
@@ -33,7 +33,6 @@ from hope.models import Individual, RegistrationDataImport
 if TYPE_CHECKING:
     from hope.models import SanctionList
 
-
 pytestmark = [
     pytest.mark.usefixtures("django_elasticsearch_setup"),
     pytest.mark.elasticsearch,
@@ -42,7 +41,7 @@ pytestmark = [
 
 
 @pytest.fixture
-def sanction_list(db: Any) -> "SanctionList":
+def sanction_list(db: object) -> "SanctionList":
     from extras.test_utils.factories import SanctionListFactory
 
     sanction_list = SanctionListFactory(strategy=fqn(UNSanctionList))

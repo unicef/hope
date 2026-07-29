@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories.geo import CountryFactory
@@ -153,12 +151,12 @@ def test_delivery_data(account_setup):
         fsp=account_setup["fsp"],
     )
 
-    def my_custom_ind_name(self: Any) -> str:
+    def my_custom_ind_name(self) -> str:
         return f"{self.full_name} Custom"
 
     dmd.individual.__class__.my_custom_ind_name = property(my_custom_ind_name)
 
-    def my_custom_hh_address(self: Any) -> str:
+    def my_custom_hh_address(self) -> str:
         return f"{self.address} Custom"
 
     account_setup["household"].__class__.my_custom_hh_address = property(my_custom_hh_address)

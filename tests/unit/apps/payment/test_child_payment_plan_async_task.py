@@ -12,7 +12,6 @@ Two review findings are pinned here:
 
 from datetime import timedelta
 from types import SimpleNamespace
-from typing import Any
 from unittest import mock
 
 from freezegun import freeze_time
@@ -35,12 +34,12 @@ pytestmark = pytest.mark.django_db
 
 def _run_copy_action(plan: PaymentPlan) -> bool:
     """Invoke the async action exactly as the worker would, with the job's config."""
-    job: Any = SimpleNamespace(config={"payment_plan_id": str(plan.id)})
+    job: object = SimpleNamespace(config={"payment_plan_id": str(plan.id)})
     return prepare_child_payment_plan_async_task_action(job)
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
@@ -50,13 +49,13 @@ def user() -> User:
 
 
 @pytest.fixture
-def cycle(business_area: Any) -> ProgramCycle:
+def cycle(business_area: object) -> ProgramCycle:
     program = ProgramFactory(business_area=business_area)
     return ProgramCycleFactory(program=program)
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+def regular_pp(business_area: object, cycle: ProgramCycle) -> PaymentPlan:
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -73,7 +72,7 @@ def source_payment(regular_pp: PaymentPlan) -> Payment:
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_action_arrange_copied_top_up_act_run_again_assert_idempotent(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     regular_pp: PaymentPlan,
     source_payment: Payment,
@@ -93,7 +92,7 @@ def test_action_arrange_copied_top_up_act_run_again_assert_idempotent(
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_action_arrange_eligible_payments_act_run_assert_build_status_ok(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     regular_pp: PaymentPlan,
     source_payment: Payment,
@@ -112,7 +111,7 @@ def test_action_arrange_eligible_payments_act_run_assert_build_status_ok(
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_action_arrange_plan_without_source_act_run_assert_skips_source_lock(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     regular_pp: PaymentPlan,
 ) -> None:
     with mock.patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService") as service_cls:
@@ -126,7 +125,7 @@ def test_action_arrange_plan_without_source_act_run_assert_skips_source_lock(
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_action_arrange_eligible_consumed_by_sibling_act_run_assert_build_status_failed(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     regular_pp: PaymentPlan,
     source_payment: Payment,

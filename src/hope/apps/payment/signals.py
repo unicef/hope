@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.db import transaction
+from django.db.models import Model
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
@@ -11,7 +10,7 @@ from hope.models.payment_plan_purpose import PaymentPlanPurpose
 
 @receiver(post_save, sender=ProgramCycle)
 def create_default_payment_plan_group(
-    sender: Any, instance: ProgramCycle, created: bool, raw: bool = False, **kwargs: dict
+    sender: type[Model], instance: ProgramCycle, created: bool, raw: bool = False, **kwargs: dict
 ) -> None:
     if created and not raw:
         PaymentPlanGroup.objects.create(cycle=instance, name="Default Group")
@@ -19,7 +18,7 @@ def create_default_payment_plan_group(
 
 @receiver(post_save, sender=PaymentPlanGroup)
 @receiver(post_delete, sender=PaymentPlanGroup)
-def increment_payment_plan_group_list_cache(sender: Any, instance: PaymentPlanGroup, **kwargs: dict) -> None:
+def increment_payment_plan_group_list_cache(sender: type[Model], instance: PaymentPlanGroup, **kwargs: dict) -> None:
     if kwargs.get("raw"):
         return
     program = instance.cycle.program
@@ -36,12 +35,16 @@ def increment_payment_plan_group_list_cache(sender: Any, instance: PaymentPlanGr
 
 @receiver(post_save, sender=PaymentPlanPurpose)
 @receiver(post_delete, sender=PaymentPlanPurpose)
-def increment_payment_plan_purpose_list_cache(sender: Any, instance: PaymentPlanPurpose, **kwargs: dict) -> None:
+def increment_payment_plan_purpose_list_cache(
+    sender: type[Model], instance: PaymentPlanPurpose, **kwargs: dict
+) -> None:
     transaction.on_commit(lambda: increment_cache_key("payment_plan_purposes_list"))
 
 
 @receiver(post_save, sender=PaymentPlan)
-def increment_payment_plan_version_cache(sender: Any, instance: PaymentPlan, created: bool, **kwargs: dict) -> None:
+def increment_payment_plan_version_cache(
+    sender: type[Model], instance: PaymentPlan, created: bool, **kwargs: dict
+) -> None:
     if instance.status in [
         PaymentPlan.Status.IN_APPROVAL,
         PaymentPlan.Status.IN_AUTHORIZATION,

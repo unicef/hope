@@ -1,6 +1,5 @@
 """Tests for grievance utils — traverse_sibling_tickets intersection guard."""
 
-from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -28,42 +27,42 @@ pytestmark = [
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def rdi(program: Any, business_area: Any) -> Any:
+def rdi(program: object, business_area: object) -> object:
     return RegistrationDataImportFactory(program=program, business_area=business_area)
 
 
 @pytest.fixture
-def household_golden(program: Any, business_area: Any, rdi: Any) -> Any:
+def household_golden(program: object, business_area: object, rdi: object) -> object:
     return HouseholdFactory(program=program, business_area=business_area, create_role=False)
 
 
 @pytest.fixture
-def household_dup(program: Any, business_area: Any, rdi: Any) -> Any:
+def household_dup(program: object, business_area: object, rdi: object) -> object:
     return HouseholdFactory(program=program, business_area=business_area, create_role=False)
 
 
 @pytest.fixture
-def individual_golden(household_golden: Any) -> Any:
+def individual_golden(household_golden: object) -> object:
     return household_golden.head_of_household
 
 
 @pytest.fixture
-def individual_dup(household_dup: Any) -> Any:
+def individual_dup(household_dup: object) -> object:
     return household_dup.head_of_household
 
 
 @pytest.fixture
-def grievance_ticket(business_area: Any, rdi: Any) -> Any:
+def grievance_ticket(business_area: object, rdi: object) -> object:
     return GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
@@ -74,7 +73,7 @@ def grievance_ticket(business_area: Any, rdi: Any) -> Any:
 
 
 @pytest.fixture
-def sibling_ticket(business_area: Any, rdi: Any, individual_golden: Any, individual_dup: Any) -> Any:
+def sibling_ticket(business_area: object, rdi: object, individual_golden: object, individual_dup: object) -> object:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
@@ -94,7 +93,7 @@ def sibling_ticket(business_area: Any, rdi: Any, individual_golden: Any, individ
 
 
 @pytest.fixture
-def household_update_details(business_area: Any, household_golden: Any) -> Any:
+def household_update_details(business_area: object, household_golden: object) -> object:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
@@ -104,7 +103,7 @@ def household_update_details(business_area: Any, household_golden: Any) -> Any:
 
 
 @pytest.fixture
-def grievance_document(business_area: Any) -> Any:
+def grievance_document(business_area: object) -> object:
     ticket = GrievanceTicketFactory(business_area=business_area)
     return GrievanceDocumentFactory(
         grievance_ticket=ticket,
@@ -114,8 +113,8 @@ def grievance_document(business_area: Any) -> Any:
 
 
 def test_traverse_sibling_tickets_no_rdi_returns_early(
-    grievance_ticket: Any,
-    individual_golden: Any,
+    grievance_ticket: object,
+    individual_golden: object,
 ) -> None:
     # When the ticket has no rdi the function returns immediately without error.
     grievance_ticket.registration_data_import = None
@@ -125,13 +124,13 @@ def test_traverse_sibling_tickets_no_rdi_returns_early(
 
 
 def test_traverse_sibling_tickets_empty_intersection_skips_add(
-    grievance_ticket: Any,
-    sibling_ticket: Any,
-    individual_golden: Any,
-    individual_dup: Any,
-    program: Any,
-    business_area: Any,
-    rdi: Any,
+    grievance_ticket: object,
+    sibling_ticket: object,
+    individual_golden: object,
+    individual_dup: object,
+    program: object,
+    business_area: object,
+    rdi: object,
 ) -> None:
     # Use an individual that is NOT in the sibling ticket — intersection will be empty.
     unrelated_household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
@@ -148,8 +147,8 @@ def test_traverse_sibling_tickets_empty_intersection_skips_add(
 
 
 def test_traverse_sibling_tickets_empty_selected_returns_early(
-    grievance_ticket: Any,
-    sibling_ticket: Any,
+    grievance_ticket: object,
+    sibling_ticket: object,
 ) -> None:
     # Empty queryset → selected_individual_ids = [] → returns immediately, no DB writes.
     sibling_details = sibling_ticket.needs_adjudication_ticket_details
@@ -162,9 +161,9 @@ def test_traverse_sibling_tickets_empty_selected_returns_early(
 
 
 def test_traverse_sibling_tickets_non_empty_intersection_adds_individuals(
-    grievance_ticket: Any,
-    sibling_ticket: Any,
-    individual_dup: Any,
+    grievance_ticket: object,
+    sibling_ticket: object,
+    individual_dup: object,
 ) -> None:
     # Use individual_dup which IS in the sibling ticket's possible_duplicates.
     selected = Individual.objects.filter(id=individual_dup.id)
@@ -177,14 +176,14 @@ def test_traverse_sibling_tickets_non_empty_intersection_adds_individuals(
     assert sibling_details.selected_individuals.filter(id=individual_dup.id).exists()
 
 
-def test_clear_cache_for_household_details_deletes_household_pattern(household_update_details: Any) -> None:
+def test_clear_cache_for_household_details_deletes_household_pattern(household_update_details: object) -> None:
     with patch("hope.apps.grievance.utils.cache") as mock_cache:
         clear_cache(household_update_details, "afghanistan")
 
     mock_cache.delete_pattern.assert_called_once_with("count_afghanistan_HouseholdNodeConnection_*")
 
 
-def test_update_grievance_documents_replaces_file_and_metadata(grievance_document: Any) -> None:
+def test_update_grievance_documents_replaces_file_and_metadata(grievance_document: object) -> None:
     assert grievance_document.file_size == 9
     assert "old" in grievance_document.file.name
     new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
@@ -198,7 +197,7 @@ def test_update_grievance_documents_replaces_file_and_metadata(grievance_documen
     assert "new" in grievance_document.file.name
 
 
-def test_update_grievance_documents_skips_missing_document(grievance_document: Any) -> None:
+def test_update_grievance_documents_skips_missing_document(grievance_document: object) -> None:
     new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
 
     update_grievance_documents([{"id": uuid4(), "name": "updated name", "file": new_file}])

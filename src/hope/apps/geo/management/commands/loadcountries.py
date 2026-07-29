@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django.core.management import BaseCommand
 from django.db import Error
@@ -12,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(self, *args: object, **options: object) -> None:
         initialize_countries()
 
 

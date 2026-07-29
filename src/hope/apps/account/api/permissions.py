@@ -1,5 +1,4 @@
-from typing import Any
-
+from django.http import HttpRequest
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 
@@ -9,7 +8,7 @@ from hope.apps.account.permissions import check_permissions
 class BaseRestPermission(BasePermission):
     """Base class for custom permissions."""
 
-    def has_permission(self, request: Any, view: Any) -> bool:
+    def has_permission(self, request: HttpRequest, view: object) -> bool:
         user = request.user
         permissions = view.get_permissions_for_action()
         kwargs = {

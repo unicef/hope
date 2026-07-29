@@ -1,4 +1,3 @@
-from typing import Any
 from urllib.parse import urlencode
 
 from django.urls import reverse
@@ -21,32 +20,32 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Any:
+def partner(db: object) -> object:
     return PartnerFactory(name="unittest")
 
 
 @pytest.fixture
-def user(partner: Any) -> Any:
+def user(partner: object) -> object:
     return UserFactory(partner=partner, first_name="Test", last_name="User")
 
 
 @pytest.fixture
-def partner_2(db: Any) -> Any:
+def partner_2(db: object) -> object:
     return PartnerFactory(name="Test_2")
 
 
 @pytest.fixture
-def user_without_perms(partner_2: Any) -> Any:
+def user_without_perms(partner_2: object) -> object:
     return UserFactory(partner=partner_2)
 
 
 @pytest.fixture
-def program_1(business_area: Any) -> Any:
+def program_1(business_area: object) -> object:
     return ProgramFactory(
         name="Program 1",
         business_area=business_area,
@@ -55,7 +54,7 @@ def program_1(business_area: Any) -> Any:
 
 
 @pytest.fixture
-def program_2(business_area: Any) -> Any:
+def program_2(business_area: object) -> object:
     return ProgramFactory(
         name="Program 2",
         business_area=business_area,
@@ -64,7 +63,7 @@ def program_2(business_area: Any) -> Any:
 
 
 @pytest.fixture
-def grievance_ticket(business_area: Any) -> Any:
+def grievance_ticket(business_area: object) -> object:
     return GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
         issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
@@ -75,12 +74,12 @@ def grievance_ticket(business_area: Any) -> Any:
 
 @pytest.fixture
 def log_entries(
-    user: Any,
-    user_without_perms: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
-    grievance_ticket: Any,
+    user: object,
+    user_without_perms: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
+    grievance_ticket: object,
 ) -> dict:
     l1 = LogEntry.objects.create(
         action=LogEntry.UPDATE,
@@ -142,7 +141,7 @@ def log_entries(
 
 
 @pytest.fixture
-def url_list(business_area: Any) -> str:
+def url_list(business_area: object) -> str:
     return reverse(
         "api:activity-logs:activity-logs-list",
         kwargs={"business_area_slug": business_area.slug},
@@ -150,7 +149,7 @@ def url_list(business_area: Any) -> str:
 
 
 @pytest.fixture
-def url_count(business_area: Any) -> str:
+def url_count(business_area: object) -> str:
     return reverse(
         "api:activity-logs:activity-logs-count",
         kwargs={"business_area_slug": business_area.slug},
@@ -158,7 +157,7 @@ def url_count(business_area: Any) -> str:
 
 
 @pytest.fixture
-def url_choices(business_area: Any) -> str:
+def url_choices(business_area: object) -> str:
     return reverse(
         "api:activity-logs:activity-logs-log-entry-action-choices",
         kwargs={"business_area_slug": business_area.slug},
@@ -166,7 +165,7 @@ def url_choices(business_area: Any) -> str:
 
 
 @pytest.fixture
-def url_list_per_program(business_area: Any, program_1: Any) -> str:
+def url_list_per_program(business_area: object, program_1: object) -> str:
     return reverse(
         "api:activity-logs:activity-logs-per-program-list",
         kwargs={
@@ -177,7 +176,7 @@ def url_list_per_program(business_area: Any, program_1: Any) -> str:
 
 
 @pytest.fixture
-def url_count_per_program(business_area: Any, program_1: Any) -> str:
+def url_count_per_program(business_area: object, program_1: object) -> str:
     return reverse(
         "api:activity-logs:activity-logs-per-program-count",
         kwargs={
@@ -189,14 +188,14 @@ def url_count_per_program(business_area: Any, program_1: Any) -> str:
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_returns_correct_count_when_user_has_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -210,14 +209,14 @@ def test_activity_logs_list_returns_correct_count_when_user_has_permission(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_returns_logs_in_correct_order(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -238,14 +237,14 @@ def test_activity_logs_list_returns_logs_in_correct_order(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_returns_log_with_correct_fields(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -267,14 +266,14 @@ def test_activity_logs_list_returns_log_with_correct_fields(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_returns_is_user_generated_for_grievance_ticket(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -292,14 +291,14 @@ def test_activity_logs_list_returns_is_user_generated_for_grievance_ticket(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_returns_correct_codes(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -316,14 +315,14 @@ def test_activity_logs_list_returns_correct_codes(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_returns_403_when_user_has_no_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [], business_area, program_1)
     create_user_role_with_permissions(user, [], business_area, program_2)
@@ -335,14 +334,14 @@ def test_activity_logs_list_returns_403_when_user_has_no_permission(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_count_returns_count_when_user_has_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
     url_count: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -356,13 +355,13 @@ def test_activity_logs_count_returns_count_when_user_has_permission(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_count_returns_403_when_user_has_no_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     url_count: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [], business_area, program_1)
     create_user_role_with_permissions(user, [], business_area, program_2)
@@ -374,13 +373,13 @@ def test_activity_logs_count_returns_403_when_user_has_no_permission(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_per_program_returns_correct_count(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     log_entries: dict,
     url_list_per_program: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     client = api_client(user)
@@ -393,13 +392,13 @@ def test_activity_logs_list_per_program_returns_correct_count(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_per_program_returns_logs_in_correct_order(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     log_entries: dict,
     url_list_per_program: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     client = api_client(user)
@@ -415,13 +414,13 @@ def test_activity_logs_list_per_program_returns_logs_in_correct_order(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_per_program_returns_log_with_correct_fields(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     log_entries: dict,
     url_list_per_program: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     client = api_client(user)
@@ -443,12 +442,12 @@ def test_activity_logs_list_per_program_returns_log_with_correct_fields(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_per_program_returns_403_when_user_has_no_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     url_list_per_program: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [], business_area, program_1)
     client = api_client(user)
@@ -459,13 +458,13 @@ def test_activity_logs_list_per_program_returns_403_when_user_has_no_permission(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_count_per_program_returns_count_when_user_has_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     log_entries: dict,
     url_count_per_program: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     client = api_client(user)
@@ -478,12 +477,12 @@ def test_activity_logs_count_per_program_returns_count_when_user_has_permission(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_count_per_program_returns_403_when_user_has_no_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     url_count_per_program: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [], business_area, program_1)
     client = api_client(user)
@@ -494,13 +493,13 @@ def test_activity_logs_count_per_program_returns_403_when_user_has_no_permission
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_filters_by_object_id(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -524,14 +523,14 @@ def test_activity_logs_filters_by_object_id(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_filters_by_user_id(
-    api_client: Any,
-    user: Any,
-    user_without_perms: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
+    api_client: object,
+    user: object,
+    user_without_perms: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
     log_entries: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -556,14 +555,14 @@ def test_activity_logs_filters_by_user_id(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_filters_by_module(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
-    grievance_ticket: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
+    grievance_ticket: object,
     log_entries: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -588,14 +587,14 @@ def test_activity_logs_filters_by_module(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_filters_by_program_id(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    program_2: Any,
-    grievance_ticket: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
+    program_2: object,
+    grievance_ticket: object,
     log_entries: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
@@ -619,12 +618,12 @@ def test_activity_logs_filters_by_program_id(
 
 
 def test_activity_logs_choices_returns_action_choices(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     url_choices: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     client = api_client(user)
@@ -640,13 +639,13 @@ def test_activity_logs_choices_returns_action_choices(
 
 @pytest.mark.enable_activity_log
 def test_activity_logs_list_search_filters_by_action(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program_1: object,
     log_entries: dict,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
     client = api_client(user)

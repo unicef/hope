@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import FileResponse
 from django.urls import reverse
@@ -21,12 +19,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def payment_plan(business_area: Any) -> PaymentPlan:
+def payment_plan(business_area: object) -> PaymentPlan:
     return PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
         business_area=business_area,
@@ -49,7 +47,7 @@ def upload_file() -> SimpleUploadedFile:
 
 
 @pytest.fixture
-def serializer_context(payment_plan: PaymentPlan, user: User) -> dict[str, Any]:
+def serializer_context(payment_plan: PaymentPlan, user: User) -> dict[str, object]:
     factory = APIRequestFactory()
     request = factory.post("")
     request.user = user
@@ -60,9 +58,9 @@ def serializer_context(payment_plan: PaymentPlan, user: User) -> dict[str, Any]:
 @pytest.fixture
 def upload_user(
     user: User,
-    business_area: Any,
+    business_area: object,
     payment_plan: PaymentPlan,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> User:
     create_user_role_with_permissions(
         user,
@@ -75,9 +73,9 @@ def upload_user(
 
 @pytest.fixture
 def delete_download_user(
-    business_area: Any,
+    business_area: object,
     payment_plan: PaymentPlan,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> User:
     user = UserFactory()
     create_user_role_with_permissions(
@@ -93,7 +91,7 @@ def delete_download_user(
 
 
 @pytest.fixture
-def supporting_documents_list_url(business_area: Any, payment_plan: PaymentPlan) -> str:
+def supporting_documents_list_url(business_area: object, payment_plan: PaymentPlan) -> str:
     return reverse(
         "api:payments:supporting-documents-list",
         kwargs={
@@ -105,7 +103,7 @@ def supporting_documents_list_url(business_area: Any, payment_plan: PaymentPlan)
 
 
 @pytest.fixture
-def supporting_documents_detail_url(business_area: Any, payment_plan: PaymentPlan, document: Any) -> str:
+def supporting_documents_detail_url(business_area: object, payment_plan: PaymentPlan, document: object) -> str:
     return reverse(
         "api:payments:supporting-documents-detail",
         kwargs={
@@ -118,7 +116,7 @@ def supporting_documents_detail_url(business_area: Any, payment_plan: PaymentPla
 
 
 @pytest.fixture
-def supporting_documents_download_url(business_area: Any, payment_plan: PaymentPlan, document: Any) -> str:
+def supporting_documents_download_url(business_area: object, payment_plan: PaymentPlan, document: object) -> str:
     return reverse(
         "api:payments:supporting-documents-download",
         kwargs={
@@ -137,14 +135,14 @@ def document(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
     )
 
 
-def test_validate_file_size_success(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
+def test_validate_file_size_success(serializer_context: dict[str, object], upload_file: SimpleUploadedFile) -> None:
     document_data = {"file": upload_file, "title": "test"}
     serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
     serializer.is_valid()
     assert serializer.errors == {}
 
 
-def test_validate_file_size_failure(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
+def test_validate_file_size_failure(serializer_context: dict[str, object], upload_file: SimpleUploadedFile) -> None:
     upload_file.size = PaymentPlanSupportingDocument.FILE_SIZE_LIMIT + 1
     document_data = {"file": upload_file, "title": "test"}
     serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
@@ -153,14 +151,14 @@ def test_validate_file_size_failure(serializer_context: dict[str, Any], upload_f
     assert serializer.errors["file"][0] == "File size must be ≤ 10MB."
 
 
-def test_validate_file_extension_success(serializer_context: dict[str, Any]) -> None:
+def test_validate_file_extension_success(serializer_context: dict[str, object]) -> None:
     valid_file = SimpleUploadedFile("test.jpg", b"abc", content_type="image/jpeg")
     document_data = {"file": valid_file, "title": "test"}
     serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
     assert serializer.is_valid()
 
 
-def test_validate_file_extension_failure(serializer_context: dict[str, Any]) -> None:
+def test_validate_file_extension_failure(serializer_context: dict[str, object]) -> None:
     invalid_file = SimpleUploadedFile("test.exe", b"abc", content_type="application/octet-stream")
     document_data = {"file": invalid_file, "title": "test"}
     serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
@@ -169,7 +167,7 @@ def test_validate_file_extension_failure(serializer_context: dict[str, Any]) -> 
     assert serializer.errors["file"][0] == "Unsupported file type."
 
 
-def test_validate_file_limit_failure(payment_plan: PaymentPlan, serializer_context: dict[str, Any]) -> None:
+def test_validate_file_limit_failure(payment_plan: PaymentPlan, serializer_context: dict[str, object]) -> None:
     PaymentPlanSupportingDocumentFactory.create_batch(
         PaymentPlanSupportingDocument.FILE_LIMIT + 1,
         payment_plan=payment_plan,

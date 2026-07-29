@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django import template
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -15,7 +15,7 @@ register = template.Library()
 
 
 @register.simple_tag()
-def get_related(user: "User", field: Any) -> dict[str, Any]:
+def get_related(user: "User", field: object) -> dict[str, object]:
     info = {
         "to": field.model._meta.model_name,
         "field_name": field.name,
@@ -32,7 +32,7 @@ def get_related(user: "User", field: Any) -> dict[str, Any]:
 
 
 @register.filter()
-def get_admin_link(record: Any) -> str:
+def get_admin_link(record: object) -> str:
     opts = record._meta
     url_name = admin_urlname(opts, "change")  # type: ignore # str vs SafeString
     return reverse(url_name, args=[record.pk])

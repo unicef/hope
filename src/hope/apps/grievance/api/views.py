@@ -1,5 +1,5 @@
 import itertools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.db import transaction
 from django.db.models import (
@@ -132,7 +132,7 @@ from hope.models import (
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser
-
+from django.http import HttpRequest
 
 TICKET_ORDERING_KEYS = [
     "Data Change",
@@ -159,11 +159,11 @@ TICKET_ORDERING = {
 }
 
 
-def transform_to_chart_dataset(qs: QuerySet) -> dict[str, Any]:
+def transform_to_chart_dataset(qs: QuerySet) -> dict[str, object]:
     labels, data = [], []
     for q in qs:
-        label: Any
-        value: Any
+        label: object
+        value: object
         label, value = q
         labels.append(label)
         data.append(value)
@@ -171,7 +171,7 @@ def transform_to_chart_dataset(qs: QuerySet) -> dict[str, Any]:
     return {"labels": labels, "datasets": [{"data": data}]}
 
 
-def display_value(choices: tuple, field: str, default_field: Any = None) -> Case:
+def display_value(choices: tuple, field: str, default_field: object | None = None) -> Case:
     options = [When(**{field: k, "then": Value(force_str(v))}) for k, v in choices]
     return Case(*options, default=default_field, output_field=CharField())
 
@@ -190,7 +190,7 @@ def create_type_generated_queries() -> tuple[Q, Q]:
 class GrievanceDashboardMixin:
     """Common dashboard logic for grievance tickets."""
 
-    def get_dashboard_base_queryset(self, program: Any = None) -> QuerySet:
+    def get_dashboard_base_queryset(self, program: object | None = None) -> QuerySet:
         """Get base queryset for dashboard data with optional program filtering."""
         base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=self.business_area_slug)
 
@@ -199,7 +199,7 @@ class GrievanceDashboardMixin:
 
         return base_queryset
 
-    def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, Any]:
+    def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, object]:
         """Generate dashboard data from base queryset."""
         # Tickets by type data
         user_generated, system_generated = create_type_generated_queries()
@@ -378,12 +378,12 @@ class GrievanceTicketViewSet(
 
     @etag_decorator(GrievanceTicketListKeyConstructor)
     @cached_response(key_func=GrievanceTicketListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(responses={200: GrievanceDashboardSerializer})
     @action(detail=False, methods=["get"], url_path="dashboard")
-    def dashboard(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def dashboard(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Get grievance dashboard data filtered by program."""
         base_queryset = self.get_dashboard_base_queryset(self.program)
         dashboard_data = self.get_dashboard_data(base_queryset)
@@ -609,7 +609,7 @@ class GrievanceTicketGlobalViewSet(
         )
 
     @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def choices(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         return Response(data=self.get_serializer(instance={}).data)
 
     @extend_schema(
@@ -623,7 +623,7 @@ class GrievanceTicketGlobalViewSet(
         filter_backends=[],
         pagination_class=None,
     )
-    def related_tickets(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def related_tickets(self, request: Request, *args: object, **kwargs: object) -> Response:
         ticket = self.get_object()
         qs = ticket._related_tickets.order_by("-created_at")
         serializer = GrievanceTicketRelatedSerializer(qs, many=True)
@@ -631,7 +631,7 @@ class GrievanceTicketGlobalViewSet(
 
     @transaction.atomic
     @extend_schema(responses={201: GrievanceTicketDetailSerializer(many=True)})
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user: AbstractUser = request.user  # type: ignore
@@ -675,7 +675,7 @@ class GrievanceTicketGlobalViewSet(
 
     @transaction.atomic
     @extend_schema(responses={200: GrievanceTicketDetailSerializer})
-    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def partial_update(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         user = request.user
         serializer = self.get_serializer(grievance_ticket, data=request.data, partial=True)
@@ -736,7 +736,7 @@ class GrievanceTicketGlobalViewSet(
         return Response(resp.data, status.HTTP_200_OK)
 
     def _validate_status_change_preconditions(
-        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int, notifications: list
+        self, user: object, grievance_ticket: GrievanceTicket, new_status: int, notifications: list
     ) -> None:
         if permissions_to_use := self.get_permissions_for_status_change(
             new_status, grievance_ticket.status, grievance_ticket.is_feedback
@@ -778,7 +778,7 @@ class GrievanceTicketGlobalViewSet(
 
     @staticmethod
     def _build_status_change_notifications(
-        user: Any, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
+        user: object, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
     ) -> None:
         if ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
             notifications.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
@@ -802,7 +802,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="status-change")
-    def status_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def status_change(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(grievance_ticket, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -851,7 +851,7 @@ class GrievanceTicketGlobalViewSet(
     @transaction.atomic
     @extend_schema(request=GrievanceCloseAsUniqueSerializer, responses={202: GrievanceTicketDetailSerializer})
     @action(detail=True, methods=["post"], url_path="close-as-unique")
-    def close_as_unique(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def close_as_unique(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -918,7 +918,7 @@ class GrievanceTicketGlobalViewSet(
     @transaction.atomic
     @extend_schema(request=GrievanceCreateNoteSerializer, responses={201: TicketNoteSerializer})
     @action(detail=True, methods=["post"], url_path="create-note")
-    def create_note(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def create_note(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -955,7 +955,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-individual-data-change")
-    def approve_individual_data_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve_individual_data_change(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1027,7 +1027,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-household-data-change")
-    def approve_household_data_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve_household_data_change(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1090,7 +1090,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-status-update")
-    def approve_status_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve_status_update(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Approve action.
 
         approve_add_individual, approve_delete_individual, approve_system_flagging.
@@ -1143,7 +1143,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-delete-household")
-    def approve_delete_household(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve_delete_household(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1197,7 +1197,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-needs-adjudication")
-    def approve_needs_adjudication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve_needs_adjudication(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1278,7 +1278,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="approve-payment-details")
-    def approve_payment_details(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def approve_payment_details(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1315,7 +1315,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="reassign-role")
-    def reassign_role(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def reassign_role(self, request: Request, *args: object, **kwargs: object) -> Response:
         grievance_ticket = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1373,7 +1373,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer(many=True)},
     )
     @action(detail=False, methods=["post"], url_path="bulk-update-assignee")
-    def bulk_update_assignee(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def bulk_update_assignee(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         tickets = BulkActionService().bulk_assign(
@@ -1392,7 +1392,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer(many=True)},
     )
     @action(detail=False, methods=["post"], url_path="bulk-update-priority")
-    def bulk_update_priority(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def bulk_update_priority(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         tickets = BulkActionService().bulk_set_priority(
@@ -1411,7 +1411,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer(many=True)},
     )
     @action(detail=False, methods=["post"], url_path="bulk-update-urgency")
-    def bulk_update_urgency(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def bulk_update_urgency(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         tickets = BulkActionService().bulk_set_urgency(
@@ -1430,7 +1430,7 @@ class GrievanceTicketGlobalViewSet(
         responses={202: GrievanceTicketDetailSerializer(many=True)},
     )
     @action(detail=False, methods=["post"], url_path="bulk-add-note")
-    def bulk_add_note(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def bulk_add_note(self, request: Request, *args: object, **kwargs: object) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         tickets = BulkActionService().bulk_add_note(
@@ -1448,7 +1448,7 @@ class GrievanceTicketGlobalViewSet(
         responses={200: FieldAttributeSerializer(many=True)},
     )
     @action(detail=False, methods=["get"], url_path="all-edit-household-fields-attributes")
-    def all_edit_household_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_edit_household_fields_attributes(self, request: Request, *args: object, **kwargs: object) -> Response:
         fields = (
             FieldFactory.from_scope(Scope.HOUSEHOLD_UPDATE)
             .associated_with_household()
@@ -1469,7 +1469,7 @@ class GrievanceTicketGlobalViewSet(
         responses={200: FieldAttributeSerializer(many=True)},
     )
     @action(detail=False, methods=["get"], url_path="all-edit-people-fields-attributes")
-    def all_edit_people_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_edit_people_fields_attributes(self, request: Request, *args: object, **kwargs: object) -> Response:
         fields = FieldFactory.from_scope(Scope.PEOPLE_UPDATE).apply_business_area(self.business_area_slug)
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(
@@ -1495,7 +1495,7 @@ class GrievanceTicketGlobalViewSet(
         url_path="all-add-individuals-fields-attributes",
         pagination_class=None,
     )
-    def all_add_individuals_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_add_individuals_fields_attributes(self, request: Request, *args: object, **kwargs: object) -> Response:
         fields = (
             FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)
             .associated_with_individual()
@@ -1515,7 +1515,7 @@ class GrievanceTicketGlobalViewSet(
 
     @extend_schema(responses={200: GrievanceDashboardSerializer})
     @action(detail=False, methods=["get"], url_path="dashboard")
-    def dashboard(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def dashboard(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Get grievance dashboard data without program filtering (global view)."""
         base_queryset = self.get_dashboard_base_queryset()  # No program filtering
         dashboard_data = self.get_dashboard_data(base_queryset)

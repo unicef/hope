@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Any
 from unittest import mock
 
 from freezegun import freeze_time
@@ -23,7 +22,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
@@ -33,20 +32,20 @@ def user() -> User:
 
 
 @pytest.fixture
-def cycle(business_area: Any) -> ProgramCycle:
+def cycle(business_area: object) -> ProgramCycle:
     program = ProgramFactory(business_area=business_area)
     return ProgramCycleFactory(program=program)
 
 
 @pytest.fixture
-def purpose(cycle: ProgramCycle) -> Any:
+def purpose(cycle: ProgramCycle) -> object:
     p = PaymentPlanPurposeFactory()
     cycle.program.payment_plan_purposes.add(p)
     return p
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+def regular_pp(business_area: object, cycle: ProgramCycle) -> PaymentPlan:
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -56,10 +55,10 @@ def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
 
 @pytest.fixture
 def top_up_pp(
-    business_area: Any,
+    business_area: object,
     cycle: ProgramCycle,
     user: User,
-    purpose: Any,
+    purpose: object,
     regular_pp: PaymentPlan,
 ) -> PaymentPlan:
     return PaymentPlanFactory(
@@ -84,9 +83,9 @@ def top_up_payments(top_up_pp: PaymentPlan) -> dict[str, Payment]:
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_top_up_amendment_arrange_eligible_payments_act_create_assert_inherits_attributes(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
-    purpose: Any,
+    purpose: object,
     top_up_pp: PaymentPlan,
     top_up_payments: dict[str, Payment],
 ) -> None:
@@ -109,11 +108,11 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_create_assert_inh
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_copies_only_delivered(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     top_up_pp: PaymentPlan,
     top_up_payments: dict[str, Payment],
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
@@ -134,11 +133,11 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_c
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_top_up_amendment_arrange_query_budget_act_create_assert_within_limit(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     top_up_pp: PaymentPlan,
     top_up_payments: dict[str, Payment],
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
@@ -156,7 +155,7 @@ def test_create_top_up_amendment_arrange_query_budget_act_create_assert_within_l
     ],
 )
 def test_create_top_up_amendment_arrange_non_top_up_origin_act_create_assert_raises(
-    user: User, business_area: Any, cycle: ProgramCycle, plan_type: str
+    user: User, business_area: object, cycle: ProgramCycle, plan_type: str
 ) -> None:
     source_pp = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, plan_type=plan_type)
     start = source_pp.dispersion_start_date + timedelta(days=1)

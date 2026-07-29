@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -74,7 +72,7 @@ class BusinessAreaViewSet(
 
     @etag_decorator(BusinessAreaKeyConstructor)
     @cached_response(key_func=BusinessAreaKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(
@@ -83,7 +81,7 @@ class BusinessAreaViewSet(
         },
     )
     @action(detail=False, methods=["get"], url_path="all-collector-fields-attributes")
-    def all_collector_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_collector_fields_attributes(self, request: Request, *args: object, **kwargs: object) -> Response:
         account_types = AccountType.objects.all()
         definitions = [
             {
@@ -109,7 +107,7 @@ class BusinessAreaViewSet(
         },
     )
     @action(detail=True, methods=["get"], url_path="all-fields-attributes")
-    def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_fields_attributes(self, request: Request, *args: object, **kwargs: object) -> Response:
         program_id = request.query_params.get("program_id", None)
         business_area_slug = self.kwargs["slug"]
         result_list = get_fields_attr_generators(business_area_slug=business_area_slug, program_id=program_id)
@@ -127,7 +125,7 @@ class BusinessAreaViewSet(
         url_path="all-kobo-projects",
         pagination_class=None,
     )
-    def all_kobo_projects(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_kobo_projects(self, request: Request, *args: object, **kwargs: object) -> Response:
         """Return all Kobo projects/assets."""
         assets_list = resolve_assets_list(
             business_area_slug=self.kwargs["slug"],

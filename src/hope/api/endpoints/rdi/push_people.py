@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from django.db.transaction import atomic
@@ -98,14 +98,14 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     country_workspace_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=150)
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         super().__init__(*args, **kwargs)
         self.fields["admin1"].choices = Area.objects.filter(area_type__area_level=1).values_list("p_code", "name")
         self.fields["admin2"].choices = Area.objects.filter(area_type__area_level=2).values_list("p_code", "name")
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
-    def validate_disability(self, value: Any) -> Any:
+    def validate_disability(self, value: object) -> object:
         if value == "":
             return NOT_DISABLED
         return value

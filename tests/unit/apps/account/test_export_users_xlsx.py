@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -16,12 +14,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def role_create(db: Any) -> Role:
+def role_create(db: object) -> Role:
     return RoleFactory(name="Create_program", permissions=["PROGRAMME_CREATE"])
 
 
@@ -64,7 +62,7 @@ def user_role_assignment(business_area: BusinessArea, user: User, other_user: Us
 
 def test_get_exported_users_file_no_users(
     business_area: BusinessArea,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     export = ExportUsersXlsx(business_area_slug=business_area.slug)
 
@@ -79,7 +77,7 @@ def test_get_exported_users_file_with_users(
     user: User,
     other_user: User,
     user_role_assignment: RoleAssignment,
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     export = ExportUsersXlsx(business_area_slug=business_area.slug)
 

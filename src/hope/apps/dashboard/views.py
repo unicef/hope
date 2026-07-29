@@ -1,9 +1,9 @@
 import logging
-from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.db import OperationalError
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -37,7 +37,7 @@ class DashboardDataView(APIView):
     permission_classes = [IsAuthenticated]
 
     @sentry_tags
-    def get(self, request: Any, business_area_slug: str) -> Response:
+    def get(self, request: HttpRequest, business_area_slug: str) -> Response:
         """Retrieve dashboard data for a given business area from Redis cache.
 
         If data is not cached or needs updating, refresh it.
@@ -77,7 +77,7 @@ class CreateOrUpdateDashReportView(APIView):
     permission_classes = [IsAuthenticated]
 
     @sentry_tags
-    def post(self, request: Any, business_area_slug: str) -> Response:
+    def post(self, request: HttpRequest, business_area_slug: str) -> Response:
         slug = business_area_slug.lower()
         is_global = slug == GLOBAL_SLUG
         business_area_obj = get_object_or_404(BusinessArea, slug=slug)
@@ -113,7 +113,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
 
     template_name = "dashboard/dashboard.html"
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+    def get_context_data(self, **kwargs: object) -> dict[str, object]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
         slug = business_area_slug.lower()

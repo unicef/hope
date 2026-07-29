@@ -1,7 +1,6 @@
 from collections import defaultdict
 import json
 import logging
-from typing import Any
 
 from dateutil.parser import parse
 from django.core.exceptions import ValidationError
@@ -77,11 +76,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         )
         self.business_area = BusinessArea.objects.get(id=business_area_id)
 
-        self.reduced_submissions: list[Any] = []
+        self.reduced_submissions: list[object] = []
         self.attachments: list[dict] = []
         super().__init__()
 
-    def _handle_image_field(self, value: Any, is_flex_field: bool) -> str | File | None:
+    def _handle_image_field(self, value: object, is_flex_field: bool) -> str | File | None:
         logger.info(f"Processing image field: {value}")
         if not self.registration_data_import.pull_pictures:
             return None
@@ -100,13 +99,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         logger.info(f"Image field processed: {value}")
         return file
 
-    def _handle_geopoint_field(self, value: Any, is_flex_field: bool) -> tuple[float, float]:
+    def _handle_geopoint_field(self, value: object, is_flex_field: bool) -> tuple[float, float]:
         geopoint = value.split(" ")
         x = float(geopoint[0])
         y = float(geopoint[1])
         return x, y
 
-    def _handle_decimal_field(self, value: Any, is_flex_field: bool) -> Any:
+    def _handle_decimal_field(self, value: object, is_flex_field: bool) -> object:
         if not is_flex_field:
             return value
         return float(value)
@@ -299,7 +298,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def _process_doc_identity_field(
         self,
         i_field: str,
-        i_value: Any,
+        i_value: object,
         current_individual_docs_and_identities: dict,
         individual_obj: PendingIndividual,
     ) -> None:
@@ -355,7 +354,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def _finalize_household(
         self,
         household_obj: PendingHousehold,
-        registration_date: Any,
+        registration_date: object,
         current_individuals: list,
         individuals_to_create_list: list,
         documents_and_identities_to_create: list,
@@ -433,7 +432,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")  # type: ignore[assignment]
         submission_meta_data: dict = kwargs.get("submission_meta_data")  # type: ignore[assignment]

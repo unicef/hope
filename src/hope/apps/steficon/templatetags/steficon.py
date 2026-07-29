@@ -1,5 +1,4 @@
 import json
-from typing import Any
 
 from django import template
 from pygments import highlight, lexers
@@ -16,12 +15,12 @@ def pretty_json(json_object: dict) -> str:
 
 
 @register.filter
-def get_item(dictionary: dict, key: Any) -> Any:
+def get_item(dictionary: dict, key: object) -> object:
     return dictionary.get(key)
 
 
 @register.filter
-def pygmentize(code: Any) -> str:
+def pygmentize(code: object) -> str:
     formatter = HtmlFormatter(linenos=True)
     lex = lexers.get_lexer_by_name("python")
     return highlight(code, lex, formatter)

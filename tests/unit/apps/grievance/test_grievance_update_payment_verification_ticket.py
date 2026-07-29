@@ -1,6 +1,6 @@
 """Tests for grievance update payment verification ticket functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -126,7 +126,7 @@ def detail_url(afghanistan: BusinessArea, payment_verification_ticket) -> str:
 
 
 def test_update_payment_verification_ticket_with_new_received_amount_extras(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -154,7 +154,7 @@ def test_update_payment_verification_ticket_with_new_received_amount_extras(
 
 
 def test_payment_verification_ticket_approve_payment_details(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,

@@ -1,5 +1,4 @@
 from smtplib import SMTPException
-from typing import Any
 
 from django.http import HttpRequest, HttpResponse
 from smart_admin.console.email import (
@@ -14,13 +13,13 @@ from smart_admin.console.email import (
 from hope.apps.utils.security import is_root
 
 
-def masker(value: Any, request: HttpRequest) -> Any | str:
+def masker(value: object, request: HttpRequest) -> object | str:
     if is_root(request):
         return value
     return "****"
 
 
-def email(self: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
+def email(self, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
     context = self.each_context(request)
     context["title"] = "Test Email"
     context["smtp"] = {

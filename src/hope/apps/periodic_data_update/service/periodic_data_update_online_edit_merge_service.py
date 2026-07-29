@@ -1,5 +1,4 @@
 import datetime
-from typing import Any
 import uuid
 
 from django.db import transaction
@@ -58,7 +57,7 @@ class PDUOnlineEditMergeService(PDURoundValueMixin):
                 Individual.objects.bulk_update(individuals_to_update, ["flex_fields"])
 
     @staticmethod
-    def _validate_value(value: Any, expected_type: str, field_name: str) -> Any:
+    def _validate_value(value: object, expected_type: str, field_name: str) -> object:
         if expected_type == PeriodicFieldData.BOOL and not isinstance(value, bool):
             raise ValidationError(f"Invalid type for field {field_name}. Expected boolean, got {type(value).__name__}.")
         if expected_type == PeriodicFieldData.DECIMAL and not isinstance(value, int | float):

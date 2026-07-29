@@ -1,5 +1,3 @@
-from typing import Any
-
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.periodic_data_update.signals import (
@@ -37,7 +35,7 @@ class FlexibleAttributeForPDUService:
         for pdu_field in self.pdu_fields:
             self.create_pdu_flex_attribute(pdu_field)
 
-    def update_pdu_flex_attribute(self, pdu_field: dict, flexible_attribute_id: Any) -> None:
+    def update_pdu_flex_attribute(self, pdu_field: dict, flexible_attribute_id: object) -> None:
         pdu_data = pdu_field.pop("pdu_data")
         self._validate_pdu_data(pdu_data)
         flexible_attribute_object = FlexibleAttribute.objects.get(id=flexible_attribute_id)

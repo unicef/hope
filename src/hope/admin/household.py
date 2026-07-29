@@ -1,7 +1,7 @@
 from itertools import chain
 import logging
 import re
-from typing import Any, cast
+from typing import cast
 from uuid import UUID
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -15,7 +15,7 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
+from django.db import models, transaction
 from django.db.models import Q, QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
@@ -64,7 +64,7 @@ class MessageRecipientFilter(SimpleListFilter):
     title = "message"
     parameter_name = "message_id"
 
-    def lookups(self, request: HttpRequest, model_admin: Any) -> list:
+    def lookups(self, request: HttpRequest, model_admin: object) -> list:
         return []
 
     def has_output(self) -> bool:
@@ -488,7 +488,7 @@ class HouseholdAdmin(
             qs = qs.order_by(*ordering)
         return qs
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "head_of_household":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -499,7 +499,7 @@ class HouseholdAdmin(
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return False
 
     @button(permission="grievance.view_grievanceticket")

@@ -1,12 +1,10 @@
-from typing import Any
-
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 
 
 class DynamicChoiceField(forms.MultipleChoiceField):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         kwargs.pop("base_field", None)
         kwargs.pop("max_length", None)
 
@@ -20,7 +18,7 @@ class DynamicChoiceField(forms.MultipleChoiceField):
 
 
 class DynamicChoiceArrayField(ArrayField):
-    def __init__(self, base_field: Any, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, base_field: object, *args: object, **kwargs: object) -> None:
         self.choices_callable = kwargs.pop("choices_callable", None)
         super().__init__(base_field, *args, **kwargs)
 
@@ -28,8 +26,8 @@ class DynamicChoiceArrayField(ArrayField):
         self,
         form_class: type[forms.Field] | None = None,
         choices_form_class: type[forms.ChoiceField] | None = None,
-        **kwargs: Any,
-    ) -> Any:
+        **kwargs: object,
+    ) -> object:
         kwargs["choices_callable"] = self.choices_callable
         widget = FilteredSelectMultiple(self.verbose_name, False)
         return super().formfield(

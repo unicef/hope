@@ -1,7 +1,6 @@
 """Tests for Survey ViewSet."""
 
 import datetime
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.urls import reverse
@@ -588,7 +587,7 @@ def payment_creation_invalid(
 
 
 def test_survey_list_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -645,7 +644,7 @@ def test_survey_list_returns_403_without_permission(
 
 
 def test_survey_get_count_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -675,7 +674,7 @@ def test_survey_get_count_returns_403_without_permission(
 
 
 def test_survey_details_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -712,7 +711,7 @@ def test_survey_details_returns_403_without_permission(
 
 
 def test_create_survey_returns_created_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -744,7 +743,7 @@ def test_create_survey_returns_created_with_permission(
 
 
 def test_create_survey_with_payment_plan(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -798,7 +797,7 @@ def test_create_survey_returns_403_without_permission(
 
 
 def test_survey_export_sample_returns_accepted_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -826,7 +825,7 @@ def test_survey_export_sample_returns_403_without_permission(
 
 
 def test_get_category_choices(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -852,7 +851,7 @@ def test_get_category_choices(
 
 
 def test_get_available_flows(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -887,7 +886,7 @@ def test_get_available_flows(
 
 
 def test_filter_surveys_by_created_at(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -915,7 +914,7 @@ def test_filter_surveys_by_created_at(
 
 
 def test_filter_surveys_by_created_by(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -938,7 +937,7 @@ def test_filter_surveys_by_created_by(
 
 
 def test_search_surveys(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -977,7 +976,7 @@ def test_search_surveys(
 
 
 def test_get_available_flows_no_token(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1002,7 +1001,7 @@ def test_get_available_flows_no_token(
 
 
 def test_sample_size(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1058,7 +1057,7 @@ def test_sample_size(
 
 
 def test_sample_size_with_excluded_recipients_phone_validation(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1101,7 +1100,7 @@ def test_sample_size_with_excluded_recipients_phone_validation(
 
 
 def test_sample_size_all_excluded_recipients(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1141,7 +1140,7 @@ def test_sample_size_all_excluded_recipients(
 
 
 def test_survey_creation_with_mixed_phone_validation(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1177,7 +1176,7 @@ def test_survey_creation_with_mixed_phone_validation(
 
 
 def test_survey_creation_fails_with_all_invalid_phones(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,

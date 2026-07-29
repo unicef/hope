@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -30,15 +30,15 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
 def payment_plan_list_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
@@ -97,8 +97,8 @@ def payment_plan_list_context(
 @pytest.fixture
 def payment_plan_detail_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
@@ -146,9 +146,9 @@ def payment_plan_detail_context(
 @pytest.fixture
 def payment_plan_filter_context(
     api_client: Callable,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
-) -> dict[str, Any]:
+    business_area: object,
+    create_user_role_with_permissions: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
@@ -195,8 +195,8 @@ def payment_plan_filter_context(
 
 
 def test_payment_plan_list_without_permissions(
-    payment_plan_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_list_context["user"],
@@ -215,9 +215,9 @@ def test_payment_plan_list_without_permissions(
     ],
 )
 def test_payment_plan_list_with_permissions(
-    payment_plan_list_context: dict[str, Any],
+    payment_plan_list_context: dict[str, object],
     permissions: list,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_list_context["user"],
@@ -260,8 +260,8 @@ def test_payment_plan_list_with_permissions(
 
 
 def test_payment_plan_caching(
-    payment_plan_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_list_context["user"],
@@ -366,10 +366,10 @@ def test_payment_plan_caching(
     ],
 )
 def test_payment_plan_detail_permissions(
-    payment_plan_detail_context: dict[str, Any],
+    payment_plan_detail_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -383,8 +383,8 @@ def test_payment_plan_detail_permissions(
 
 
 def test_payment_plan_detail(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -444,8 +444,8 @@ def test_payment_plan_detail(
 
 
 def test_follow_ups_and_top_ups_return_correct_children(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -478,8 +478,8 @@ def test_follow_ups_and_top_ups_return_correct_children(
 
 
 def test_can_create_follow_up(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -497,8 +497,8 @@ def test_can_create_follow_up(
 
 
 def test_can_create_top_up_returns_true_when_has_delivered_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -517,8 +517,8 @@ def test_can_create_top_up_returns_true_when_has_delivered_payments(
 
 
 def test_can_create_top_up_returns_false_when_no_delivered_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -534,8 +534,8 @@ def test_can_create_top_up_returns_false_when_no_delivered_payments(
 
 
 def test_can_create_top_up_returns_false_when_only_failed_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -552,8 +552,8 @@ def test_can_create_top_up_returns_false_when_only_failed_payments(
 
 
 def test_can_create_top_up_returns_false_when_plan_is_top_up(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -573,8 +573,8 @@ def test_can_create_top_up_returns_false_when_plan_is_top_up(
 
 
 def test_get_can_split(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -593,8 +593,8 @@ def test_get_can_split(
 
 
 def test_get_can_split_returns_false_when_instruction_managed(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_detail_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_detail_context["user"],
@@ -616,7 +616,7 @@ def test_get_can_split_returns_false_when_instruction_managed(
     assert response.json()["can_split"] is False
 
 
-def test_filter_by_status(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_status(payment_plan_filter_context: dict[str, object]) -> None:
     response = payment_plan_filter_context["client"].get(
         payment_plan_filter_context["list_url"],
         {"status": PaymentPlan.Status.FINISHED.value},
@@ -643,7 +643,7 @@ def test_filter_by_status(payment_plan_filter_context: dict[str, Any]) -> None:
 
 
 def test_filter_by_program_cycle(
-    payment_plan_filter_context: dict[str, Any],
+    payment_plan_filter_context: dict[str, object],
 ) -> None:
     new_cycle = ProgramCycleFactory(program=payment_plan_filter_context["program_active"], title="Program Cycle ABC")
     new_pp = PaymentPlanFactory(
@@ -664,7 +664,7 @@ def test_filter_by_program_cycle(
     assert response_data[0]["status"] == "ACCEPTED"
 
 
-def test_filter_by_search(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_search(payment_plan_filter_context: dict[str, object]) -> None:
     new_pp = PaymentPlanFactory(
         name="TEST_ABC_999",
         business_area=payment_plan_filter_context["business_area"],
@@ -704,7 +704,7 @@ def test_filter_by_search(payment_plan_filter_context: dict[str, Any]) -> None:
     assert response_data[0]["name"] == "TEST_ABC_999"
 
 
-def test_filter_by_entitled_quantity(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_entitled_quantity(payment_plan_filter_context: dict[str, object]) -> None:
     PaymentPlanFactory(
         name="PP_1",
         business_area=payment_plan_filter_context["business_area"],
@@ -741,7 +741,7 @@ def test_filter_by_entitled_quantity(payment_plan_filter_context: dict[str, Any]
     assert response_data[0]["name"] == "PP_1"
 
 
-def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, object]) -> None:
     PaymentPlanFactory(
         name="PP_abc",
         business_area=payment_plan_filter_context["business_area"],
@@ -779,7 +779,7 @@ def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) 
     assert response_data[0]["name"] == "PP_xyz"
 
 
-def test_filter_by_plan_type_follow_up(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_plan_type_follow_up(payment_plan_filter_context: dict[str, object]) -> None:
     PaymentPlanFactory(
         name="NEW_FOLLOW_up",
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
@@ -798,7 +798,7 @@ def test_filter_by_plan_type_follow_up(payment_plan_filter_context: dict[str, An
     assert response_data[0]["name"] == "NEW_FOLLOW_up"
 
 
-def test_filter_by_plan_type_regular(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_plan_type_regular(payment_plan_filter_context: dict[str, object]) -> None:
     PaymentPlanFactory(
         name="FOLLOW_UP_plan",
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
@@ -825,7 +825,7 @@ def test_filter_by_plan_type_regular(payment_plan_filter_context: dict[str, Any]
     assert returned_names == {"PP Filter Open", "PP Filter Finished"}
 
 
-def test_filter_by_plan_type_top_up(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_plan_type_top_up(payment_plan_filter_context: dict[str, object]) -> None:
     PaymentPlanFactory(
         name="FOLLOW_UP_plan",
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
@@ -852,7 +852,7 @@ def test_filter_by_plan_type_top_up(payment_plan_filter_context: dict[str, Any])
     assert response_data[0]["name"] == "TOP_UP_plan"
 
 
-def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:
+def test_filter_by_program(payment_plan_filter_context: dict[str, object]) -> None:
     other_program = ProgramFactory(
         business_area=payment_plan_filter_context["business_area"],
         status=Program.ACTIVE,
@@ -878,7 +878,7 @@ def test_filter_by_program(payment_plan_filter_context: dict[str, Any]) -> None:
 
 
 def test_filter_by_payment_plan_group(
-    payment_plan_filter_context: dict[str, Any],
+    payment_plan_filter_context: dict[str, object],
 ) -> None:
     group = payment_plan_filter_context["pp"].payment_plan_group
     other_group = PaymentPlanGroupFactory(cycle=payment_plan_filter_context["cycle"])

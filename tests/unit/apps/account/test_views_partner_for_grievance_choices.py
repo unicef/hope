@@ -1,7 +1,5 @@
 """Tests for partner for grievance choices API views."""
 
-from typing import Any
-
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -21,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         code="0060",
         name="Afghanistan",
@@ -62,7 +60,7 @@ def individual(household: Household) -> Individual:
 
 
 @pytest.fixture
-def unicef_structure(db: Any) -> dict:
+def unicef_structure(db: object) -> dict:
     partner_unicef = PartnerFactory(name="UNICEF")
     unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
     unicef_partner_for_afghanistan = PartnerFactory(name="UNICEF Partner for afghanistan", parent=partner_unicef)
@@ -79,7 +77,7 @@ def unicef_user(unicef_structure: dict) -> User:
 
 @pytest.fixture
 def partner_with_access_to_test_program(
-    afghanistan: BusinessArea, program: Program, create_partner_role_with_permissions: Any
+    afghanistan: BusinessArea, program: Program, create_partner_role_with_permissions: object
 ) -> Partner:
     """Partner with access to Test Program.
 
@@ -93,7 +91,7 @@ def partner_with_access_to_test_program(
 
 @pytest.fixture
 def partner_with_access_to_test_program_for_hh(
-    afghanistan: BusinessArea, program_for_household: Program, create_partner_role_with_permissions: Any
+    afghanistan: BusinessArea, program_for_household: Program, create_partner_role_with_permissions: object
 ) -> Partner:
     """Partner with access to Test Program for Household.
 
@@ -108,7 +106,7 @@ def partner_with_access_to_test_program_for_hh(
 
 @pytest.fixture
 def partner_with_access_to_all_programs(
-    afghanistan: BusinessArea, create_partner_role_with_permissions: Any
+    afghanistan: BusinessArea, create_partner_role_with_permissions: object
 ) -> Partner:
     """Partner with access to all programs.
 
@@ -122,7 +120,7 @@ def partner_with_access_to_all_programs(
 
 
 @pytest.fixture
-def partner_without_program_access(db: Any) -> Partner:
+def partner_without_program_access(db: object) -> Partner:
     """Partner without access to any program in this BA.
 
     Should not be returned in any case.
@@ -139,20 +137,20 @@ def partner_for_grievance_choices_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Any, unicef_user: User) -> Any:
+def authenticated_client(api_client: object, unicef_user: User) -> object:
     return api_client(unicef_user)
 
 
 def test_get_partner_for_grievance_choices_for_program(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     unicef_user: User,
     program: Program,
     partner_for_grievance_choices_url: str,
     partner_with_access_to_test_program: Partner,
     partner_with_access_to_all_programs: Partner,
     unicef_structure: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=unicef_user,
@@ -186,14 +184,14 @@ def test_get_partner_for_grievance_choices_for_program(
 
 def test_get_partner_for_grievance_choices_for_household(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     unicef_user: User,
     household: Household,
     partner_for_grievance_choices_url: str,
     partner_with_access_to_test_program_for_hh: Partner,
     partner_with_access_to_all_programs: Partner,
     unicef_structure: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=unicef_user,
@@ -227,14 +225,14 @@ def test_get_partner_for_grievance_choices_for_household(
 
 def test_get_partner_for_grievance_choices_for_individual(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     unicef_user: User,
     individual: Individual,
     partner_for_grievance_choices_url: str,
     partner_with_access_to_test_program_for_hh: Partner,
     partner_with_access_to_all_programs: Partner,
     unicef_structure: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=unicef_user,
@@ -268,14 +266,14 @@ def test_get_partner_for_grievance_choices_for_individual(
 
 def test_get_partner_for_grievance_choices_without_params(
     afghanistan: BusinessArea,
-    authenticated_client: Any,
+    authenticated_client: object,
     unicef_user: User,
     partner_for_grievance_choices_url: str,
     partner_with_access_to_test_program: Partner,
     partner_with_access_to_test_program_for_hh: Partner,
     partner_with_access_to_all_programs: Partner,
     unicef_structure: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=unicef_user,

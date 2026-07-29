@@ -1,6 +1,6 @@
 """Tests for program deduplication flags functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -20,12 +20,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -55,12 +55,12 @@ def deduplication_flags_url(afghanistan: BusinessArea, program: Program) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_deduplication_flags_can_run_deduplication_and_deduplication_enabled(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -88,7 +88,7 @@ def test_deduplication_flags_can_run_deduplication_and_deduplication_enabled(
 
 
 def test_deduplication_flags_can_run_deduplication_and_deduplication_engine_in_progress(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -117,7 +117,7 @@ def test_deduplication_flags_can_run_deduplication_and_deduplication_engine_in_p
 
 
 def test_deduplication_flags_can_run_deduplication_and_all_rdis_deduplicated(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -147,7 +147,7 @@ def test_deduplication_flags_can_run_deduplication_and_all_rdis_deduplicated(
 
 
 def test_deduplication_flags_can_run_deduplication_and_not_all_rdis_deduplicated(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -179,7 +179,7 @@ def test_deduplication_flags_can_run_deduplication_and_not_all_rdis_deduplicated
 
 
 def test_deduplication_flags_cannot_run_deduplication_and_rdi_merge_in_progress(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

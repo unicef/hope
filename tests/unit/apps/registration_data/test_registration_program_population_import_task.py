@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -52,29 +51,29 @@ def run_registration_program_population_import_task(
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def programs(business_area: Any) -> dict[str, Any]:
+def programs(business_area: object) -> dict[str, object]:
     program_from = ProgramFactory(business_area=business_area)
     program_to = ProgramFactory(business_area=business_area)
     return {"from": program_from, "to": program_to}
 
 
 @pytest.fixture
-def registration_data_import(business_area: Any, programs: dict[str, Any]) -> Any:
+def registration_data_import(business_area: object, programs: dict[str, object]) -> object:
     return RegistrationDataImportFactory(business_area=business_area, program=programs["to"])
 
 
 @pytest.fixture
-def rdi_other(business_area: Any, programs: dict[str, Any]) -> Any:
+def rdi_other(business_area: object, programs: dict[str, object]) -> object:
     return RegistrationDataImportFactory(business_area=business_area, program=programs["from"])
 
 
 @pytest.fixture
-def admin_areas() -> dict[str, Any]:
+def admin_areas() -> dict[str, object]:
     return {
         "admin1": AreaFactory(),
         "admin2": AreaFactory(),
@@ -85,11 +84,11 @@ def admin_areas() -> dict[str, Any]:
 
 @pytest.fixture
 def population_source(
-    admin_areas: dict[str, Any],
-    business_area: Any,
-    programs: dict[str, Any],
-    rdi_other: Any,
-) -> dict[str, Any]:
+    admin_areas: dict[str, object],
+    business_area: object,
+    programs: dict[str, object],
+    rdi_other: object,
+) -> dict[str, object]:
     household = HouseholdFactory(
         registration_data_import=rdi_other,
         business_area=business_area,
@@ -136,9 +135,9 @@ def population_source(
 
 
 def test_registration_program_population_import_task_wrong_status(
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
 ) -> None:
     status_before = registration_data_import.status
 
@@ -154,10 +153,10 @@ def test_registration_program_population_import_task_wrong_status(
 
 
 def test_registration_program_population_import_task(
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
-    population_source: dict[str, Any],
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
+    population_source: dict[str, object],
 ) -> None:
     business_area.postpone_deduplication = True
     business_area.save()
@@ -206,9 +205,9 @@ def test_registration_program_population_import_task(
 
 
 def test_registration_program_population_import_task_error(
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
 ) -> None:
     rdi_id = registration_data_import.id
     registration_data_import.delete()
@@ -226,12 +225,12 @@ def test_registration_program_population_import_task_error(
 @patch("hope.apps.registration_data.celery_tasks.logger.warning")
 @patch("hope.apps.registration_data.celery_tasks.RdiProgramPopulationCreateTask.execute")
 def test_registration_program_population_import_task_handles_exception(
-    mock_execute: Any,
-    mock_warning: Any,
-    mock_handle_rdi_exception: Any,
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
+    mock_execute: object,
+    mock_warning: object,
+    mock_handle_rdi_exception: object,
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
 ) -> None:
     registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
     registration_data_import.save()
@@ -251,10 +250,10 @@ def test_registration_program_population_import_task_handles_exception(
 
 
 def test_registration_program_population_import_ba_postpone_deduplication(
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
-    population_source: dict[str, Any],
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
+    population_source: dict[str, object],
 ) -> None:
     business_area.postpone_deduplication = True
     business_area.save()
@@ -274,11 +273,11 @@ def test_registration_program_population_import_ba_postpone_deduplication(
 
 @patch("hope.apps.registration_data.tasks.rdi_program_population_create.DeduplicateTask")
 def test_registration_program_population_import_with_deduplication(
-    mock_dedupe_task: Any,
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
-    population_source: dict[str, Any],
+    mock_dedupe_task: object,
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
+    population_source: dict[str, object],
 ) -> None:
     business_area.postpone_deduplication = False
     business_area.save()
@@ -300,10 +299,10 @@ def test_registration_program_population_import_with_deduplication(
 
 @patch("hope.apps.registration_data.celery_tasks.locked_cache")
 def test_registration_program_population_import_locked_cache(
-    mocked_locked_cache: Any,
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
+    mocked_locked_cache: object,
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
 ) -> None:
     mocked_locked_cache.return_value.__enter__.return_value = False
     registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
@@ -321,9 +320,9 @@ def test_registration_program_population_import_locked_cache(
 
 
 def test_registration_program_population_import_task_queues_retry_job(
-    business_area: Any,
-    programs: dict[str, Any],
-    registration_data_import: Any,
+    business_area: object,
+    programs: dict[str, object],
+    registration_data_import: object,
     django_capture_on_commit_callbacks,
 ) -> None:
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:

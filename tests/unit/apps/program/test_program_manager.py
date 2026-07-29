@@ -1,6 +1,5 @@
 """Tests for program manager functionality."""
 
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -15,7 +14,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 

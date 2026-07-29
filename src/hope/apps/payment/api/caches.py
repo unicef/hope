@@ -1,5 +1,4 @@
-from typing import Any
-
+from django.http import HttpRequest
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import (
@@ -27,10 +26,10 @@ class PaymentPlanGroupListKeyBit(BusinessAreaAndProgramKeyBitMixin):
 class PaymentPlanPurposeListVersionsKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -49,10 +48,10 @@ class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:

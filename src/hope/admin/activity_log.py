@@ -1,5 +1,3 @@
-from typing import Any
-
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
@@ -38,7 +36,7 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, admin.ModelAdm
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:

@@ -1,7 +1,7 @@
 import calendar
 from datetime import timezone as dt_timezone
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Dict
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -178,7 +178,7 @@ def dashboard_cache_test_data(populate_dashboard_cache, business_area_test):
 @pytest.mark.django_db
 def test_dashboard_data_cache_ba(
     test_name: str,
-    payment_updates: Dict[str, Any],
+    payment_updates: Dict[str, object],
     expected_total: Decimal,
     dashboard_cache_test_data,
 ) -> None:

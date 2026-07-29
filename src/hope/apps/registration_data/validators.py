@@ -7,7 +7,7 @@ import logging
 from operator import itemgetter
 from pathlib import Path
 import re
-from typing import Any, Callable, Sequence
+from typing import Callable, Sequence
 from zipfile import BadZipfile
 
 from dateutil import parser
@@ -55,7 +55,7 @@ class XlsxError(Exception):
 
 class XLSXValidator(BaseValidator):
     @classmethod
-    def validate(cls, excluded_validators: Any | None = None, *args: Any, **kwargs: Any) -> None:
+    def validate(cls, excluded_validators: object | None = None, *args: object, **kwargs: object) -> None:
         validate_methods: list[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
         errors_list = []
@@ -68,7 +68,7 @@ class XLSXValidator(BaseValidator):
             raise XlsxError(errors_list)
 
     @classmethod
-    def validate_file_extension(cls, *args: Any, **kwargs: Any) -> list:
+    def validate_file_extension(cls, *args: object, **kwargs: object) -> list:
         try:
             xlsx_file = kwargs["file"]
             file_suffix = Path(xlsx_file.name).suffix
@@ -261,7 +261,7 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def identity_validator(self, identities_numbers_dict: dict, is_xlsx: bool = True) -> list[dict[str, Any]]:
+    def identity_validator(self, identities_numbers_dict: dict, is_xlsx: bool = True) -> list[dict[str, object]]:
         try:
             invalid_rows = []
             for key, values in identities_numbers_dict.items():
@@ -352,7 +352,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool | None:
+    def string_validator(self, value: object, header: str, *args: object, **kwargs: object) -> bool | None:
         try:
             if not self.required_validator(value, header, *args, **kwargs):
                 return False
@@ -363,7 +363,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
         return True
 
-    def integer_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool | None:
+    def integer_validator(self, value: object, header: str, *args: object, **kwargs: object) -> bool | None:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
@@ -381,7 +381,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def list_of_integer_validator(self, values: Any, header: str, *args: Any, **kwargs: Any) -> bool | None:
+    def list_of_integer_validator(self, values: object, header: str, *args: object, **kwargs: object) -> bool | None:
         if not self.required_validator(values, header, *args, **kwargs):
             return False
         if values is None:
@@ -403,7 +403,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         else:
             return False
 
-    def float_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
+    def float_validator(self, value: object, header: str, *args: object, **kwargs: object) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
@@ -417,7 +417,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def decimal_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
+    def decimal_validator(self, value: object, header: str, *args: object, **kwargs: object) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
@@ -431,7 +431,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def geolocation_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def geolocation_validator(self, value: str, header: str, *args: object, **kwargs: object) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
@@ -444,7 +444,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def date_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> bool:
+    def date_validator(self, value: object, header: str, *args: object, **kwargs: object) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
@@ -468,7 +468,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def phone_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:
+    def phone_validator(self, value: str, header: str, *args: object, **kwargs: object) -> bool:
         try:
             if not self.required_validator(value, header, *args, **kwargs):  # pragma: no cover
                 return False
@@ -484,7 +484,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def choice_validator(self, value: str, header: str, *args: Any, **kwargs: Any) -> bool:  # noqa: PLR0912
+    def choice_validator(self, value: str, header: str, *args: object, **kwargs: object) -> bool:  # noqa: PLR0912
         try:
             field = self.all_fields.get(header)
             if field is None:
@@ -496,7 +496,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
 
             choices = field["choices"]
-            handlers: dict[str, Callable[[Any, set], bool]] = {
+            handlers: dict[str, Callable[[object, set], bool]] = {
                 TYPE_SELECT_ONE: self._validate_select_one_choice,
                 TYPE_SELECT_MANY: self._validate_select_many_choice,
             }
@@ -508,21 +508,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def _validate_select_one_choice(self, value: Any, choices: set) -> bool:
+    def _validate_select_one_choice(self, value: object, choices: set) -> bool:
         return str(value).strip() in choices
 
-    def _validate_select_many_choice(self, value: Any, choices: set) -> bool:
+    def _validate_select_many_choice(self, value: object, choices: set) -> bool:
         selected_choices = [p.strip() for p in re.split(r"[,\s;]+", value.strip()) if p]
         return all(choice in choices or choice.upper() in choices for choice in selected_choices)
 
-    def not_empty_validator(self, value: str | Image, *args: Any, **kwargs: Any) -> bool:
+    def not_empty_validator(self, value: str | Image, *args: object, **kwargs: object) -> bool:
         try:
             return not (value is None or value == "")
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise
 
-    def bool_validator(self, value: bool, header: str, *args: Any, **kwargs: Any) -> bool:
+    def bool_validator(self, value: bool, header: str, *args: object, **kwargs: object) -> bool:
         try:
             if isinstance(value, bool):
                 return True
@@ -541,7 +541,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def required_validator(self, value: str | Image, header: str, *args: Any, **kwargs: Any) -> bool:
+    def required_validator(self, value: str | Image, header: str, *args: object, **kwargs: object) -> bool:
         try:
             is_required = self.all_fields[header]["required"]
             is_not_empty = self.not_empty_validator(value)
@@ -556,7 +556,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def image_validator(self, value: Image, header: str, cell: Cell, *args: Any, **kwargs: Any) -> Any:
+    def image_validator(self, value: Image, header: str, cell: Cell, *args: object, **kwargs: object) -> object:
         try:
             if self.required_validator(value, header, *args, **kwargs):
                 return True
@@ -605,7 +605,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
         return errors
 
-    def get_cell_value(self, first_row: Any, row: Any, field_name: str) -> Any:
+    def get_cell_value(self, first_row: object, row: object, field_name: str) -> object:
         headers = [cell.value for cell in first_row]
         if field_name in headers:
             idx = headers.index(field_name)
@@ -705,7 +705,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 relationship_col_idx = idx
         return household_id_col_idx, relationship_col_idx
 
-    def _init_doc_identity_dicts(self) -> tuple[dict, dict[str, dict[str, Any]]]:
+    def _init_doc_identity_dicts(self) -> tuple[dict, dict[str, dict[str, object]]]:
         identities_numbers = {
             "unhcr_id_no_i_c": {
                 "partner": "UNHCR",
@@ -720,7 +720,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "issuing_countries": [],
             },
         }
-        documents_numbers: dict[str, dict[str, Any]] = {
+        documents_numbers: dict[str, dict[str, object]] = {
             "birth_certificate_no_i_c": {
                 "type": "BIRTH_CERTIFICATE",
                 "validation_data": [],
@@ -790,7 +790,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         return current_household_id
 
     def _validate_admin_column(
-        self, header_value: str, cell_value: Any, row_number: int, admin_area_code_tuples: list
+        self, header_value: str, cell_value: object, row_number: int, admin_area_code_tuples: list
     ) -> dict | None:
         if header_value in self.ADMIN_COLUMNS_ALL:
             if cell_value:
@@ -810,7 +810,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
     def _validate_field_type(
         self,
-        value: Any,
+        value: object,
         header_value: str,
         cell: Cell,
         field_type: str,
@@ -839,8 +839,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def _process_document_number(
         self,
         header_value_doc: str,
-        value: Any,
-        documents_numbers: dict[str, dict[str, Any]],
+        value: object,
+        documents_numbers: dict[str, dict[str, object]],
         identities_numbers: dict,
     ) -> None:
         if header_value_doc in documents_numbers:
@@ -862,7 +862,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         if header_value_doc in identities_numbers:
             identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
 
-    def _validate_row_household_reference(self, current_household_id: Any, row_number: int) -> dict | None:
+    def _validate_row_household_reference(self, current_household_id: object, row_number: int) -> dict | None:
         if current_household_id and current_household_id not in self.household_ids:
             message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
             return {
@@ -879,7 +879,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             )
             documents_or_identity_dict[header_value_doc]["validation_data"].append({"row_number": row[0].row})
 
-    def _validate_head_of_household(self) -> list[dict[str, Any]]:
+    def _validate_head_of_household(self) -> list[dict[str, object]]:
         invalid_rows = []
         for household_id, count in self.head_of_household_count.items():
             if count == 0:
@@ -916,7 +916,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self,
         admin_area_code_tuples: list[tuple[int, str, str]],
         business_area_slug: str | None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, object]]:
         invalid_rows = []
         if admin_area_code_tuples:
             business_area_countries = BusinessArea.objects.get(slug=business_area_slug).countries.all()
@@ -992,7 +992,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def validate_file_extension(self, xlsx_file: Any) -> None:
+    def validate_file_extension(self, xlsx_file: object) -> None:
         try:
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
@@ -1008,7 +1008,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> list[dict[str, Any]]:
+    def validate_everything(self, xlsx_file: object, business_area_slug: str) -> list[dict[str, object]]:
         try:
             self.validate_file_extension(xlsx_file)
             if self.errors:
@@ -1052,7 +1052,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def collector_column_validator(header: str, data_dict: dict, household_ids: set[str]) -> list[dict[str, Any]]:
+    def collector_column_validator(header: str, data_dict: dict, household_ids: set[str]) -> list[dict[str, object]]:
         try:
             is_primary_collector = header == "primary_collector_id"
             errors = []
@@ -1143,7 +1143,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def validate_collectors_unique(self, primary_collectors: dict, alternate_collectors: dict) -> list[dict[str, Any]]:
+    def validate_collectors_unique(
+        self, primary_collectors: dict, alternate_collectors: dict
+    ) -> list[dict[str, object]]:
         try:
             errors = []
 
@@ -1341,7 +1343,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def _validate_pdu(self, row: list[Any], header_row: list[Any], row_number: int) -> list:
+    def _validate_pdu(self, row: list[object], header_row: list[object], row_number: int) -> list:
         header_row = [header.value for header in header_row]
         validation_subtype_mapping = {
             PeriodicFieldData.DATE: self.date_validator,
@@ -1494,7 +1496,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             return None
         return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
 
-    def image_validator(self, value: str, field: str, attachments: list[dict], *args: Any, **kwargs: Any) -> str | None:
+    def image_validator(
+        self, value: str, field: str, attachments: list[dict], *args: object, **kwargs: object
+    ) -> str | None:
         try:
             if kwargs.get("skip_validate_pictures") is True:
                 # skip validation if skip_validate_pictures=True
@@ -1519,7 +1523,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def geopoint_validator(self, value: Sequence[Any] | None, field: str, *args: Any, **kwargs: Any) -> str | None:
+    def geopoint_validator(
+        self, value: Sequence[object] | None, field: str, *args: object, **kwargs: object
+    ) -> str | None:
         message = f"Invalid geopoint {value} for field {field}"
 
         if not value or not isinstance(value, str):
@@ -1533,7 +1539,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
         return None if is_valid_geopoint else message
 
-    def date_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> str | None:
+    def date_validator(self, value: str, field: str, *args: object, **kwargs: object) -> str | None:
         try:
             message = (
                 f"Invalid datetime/date {value} for field {field}, accepted formats: datetime ISO 8601, date YYYY-MM-DD"
@@ -1561,13 +1567,13 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def choice_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> str | None:
+    def choice_validator(self, value: str, field: str, *args: object, **kwargs: object) -> str | None:
         try:
             message = f"Invalid choice {value} for field {field}"
             if not value:
                 return message
 
-            found_field: dict[str, Any] = self.all_fields[field]
+            found_field: dict[str, object] = self.all_fields[field]
             handler = self._get_choice_handler(found_field["type"])
             if handler is None:
                 return None
@@ -1577,14 +1583,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def _get_choice_handler(self, choice_type: str) -> Callable[[str, dict[str, Any], str], str | None] | None:
-        handlers: dict[str, Callable[[str, dict[str, Any], str], str | None]] = {
+    def _get_choice_handler(self, choice_type: str) -> Callable[[str, dict[str, object], str], str | None] | None:
+        handlers: dict[str, Callable[[str, dict[str, object], str], str | None]] = {
             TYPE_SELECT_ONE: self._validate_select_one_choice,
             TYPE_SELECT_MANY: self._validate_select_many_choice,
         }
         return handlers.get(choice_type)
 
-    def _validate_select_one_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+    def _validate_select_one_choice(self, value: str, found_field: dict[str, object], message: str) -> str | None:
         custom_validate = found_field.get("custom_validate_choices")
         if custom_validate is not None:
             return None if custom_validate(value) else message
@@ -1593,7 +1599,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         normalized_value = value if value in choices else value.upper()
         return None if normalized_value in choices else message
 
-    def _validate_select_many_choice(self, value: str, found_field: dict[str, Any], message: str) -> str | None:
+    def _validate_select_many_choice(self, value: str, found_field: dict[str, object], message: str) -> str | None:
         str_value = str(value)
         custom_validate = found_field.get("custom_validate_choices")
         if custom_validate is not None:
@@ -1610,7 +1616,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def _get_field_type_error(
         self,
         field: str,
-        value: Any,
+        value: object,
         attachments: list,
         skip_validate_pictures: bool | None = False,
     ) -> dict | None:
@@ -1677,7 +1683,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             collectors_unique_data.append(collector_data)
         return None
 
-    def _init_kobo_doc_identity_dicts(self) -> tuple[dict, dict[str, dict[str, Any]]]:
+    def _init_kobo_doc_identity_dicts(self) -> tuple[dict, dict[str, dict[str, object]]]:
         identities_numbers = {
             "unhcr_id_no_i_c": {
                 "partner": "UNHCR",
@@ -1692,7 +1698,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 "issuing_countries": [],
             },
         }
-        documents_numbers: dict[str, dict[str, Any]] = {
+        documents_numbers: dict[str, dict[str, object]] = {
             "birth_certificate_no_i_c": {
                 "type": "BIRTH_CERTIFICATE",
                 "validation_data": [],
@@ -1760,7 +1766,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def _is_duplicate_submission(
         self,
-        household: dict[str, Any],
+        household: dict[str, object],
         all_saved_submissions_dict: dict[str, list[str]],
         household_hash_list: list[str],
     ) -> tuple[bool, str]:
@@ -1773,8 +1779,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def _process_individual_doc_identity_kobo(
         self,
         i_field: str,
-        i_value: Any,
-        documents_numbers: dict[str, dict[str, Any]],
+        i_value: object,
+        documents_numbers: dict[str, dict[str, object]],
         identities_numbers: dict,
     ) -> None:
         if i_field in documents_numbers:
@@ -1788,7 +1794,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 documents_numbers[i_field]["numbers"].append(i_value)
         if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING:
             document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING[i_field]
-            documents_dict: dict[str, dict[str, Any]] = documents_numbers
+            documents_dict: dict[str, dict[str, object]] = documents_numbers
             if document_key in identities_numbers:
                 documents_dict = identities_numbers
             documents_dict[document_key]["issuing_countries"].append(i_value)
@@ -1798,7 +1804,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             identities_numbers[i_field]["validation_data"].append({"value": i_value})
 
     def _count_individual_roles(
-        self, i_field: str, i_value: Any, head_ctr: int, primary_ctr: int, alternate_ctr: int
+        self, i_field: str, i_value: object, head_ctr: int, primary_ctr: int, alternate_ctr: int
     ) -> tuple[int, int, int]:
         if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
             head_ctr += 1
@@ -1849,7 +1855,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             )
         return errors
 
-    def validate_facility(self, facility_data: dict[str, Any]) -> dict[str, str] | None:
+    def validate_facility(self, facility_data: dict[str, object]) -> dict[str, str] | None:
         area_p_code = facility_data.get("facility_admin_area_h_c")
         if "facility_name_h_c" in facility_data and (
             "facility_admin_area_h_c" not in facility_data or area_p_code is None
@@ -1864,7 +1870,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def _validate_household(
         self,
-        household: dict[str, Any],
+        household: dict[str, object],
         skip_validate_pictures: bool | None,
         documents_numbers: dict,
         identities_numbers: dict,
@@ -1967,7 +1973,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
             identities_numbers, documents_numbers = self._init_kobo_doc_identity_dicts()
             all_saved_submissions_dict = self._build_saved_submissions_lookup(reduced_submissions, business_area)
-            household: dict[str, Any]
+            household: dict[str, object]
             household_hash_list: list[str] = []
             for household in reduced_submissions:
                 is_duplicate, household_hash = self._is_duplicate_submission(

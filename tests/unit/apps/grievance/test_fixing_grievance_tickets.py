@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import (
@@ -98,7 +96,7 @@ def make_ticket_with_details(business_area, individual):
     ],
 )
 def test_wrong_value_in_disability_field(
-    previous_value: Any,
+    previous_value: object,
     new_value: str,
     make_ticket_with_details,
 ) -> None:
@@ -129,7 +127,7 @@ def test_skipping_when_ind_data_update_ticket_details_does_not_exist(
     "value",
     ["some_string", 42, None, 0, 1, "", [], {}],
 )
-def test_map_disability_value_none_for_non_boolean(value: Any) -> None:
+def test_map_disability_value_none_for_non_boolean(value: object) -> None:
     assert _map_disability_value(value) is None
 
 

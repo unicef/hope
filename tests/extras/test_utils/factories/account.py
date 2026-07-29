@@ -1,7 +1,6 @@
 """Account-related factories."""
 
 import os
-from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -63,7 +62,7 @@ class RoleAssignmentFactory(DjangoModelFactory):
     program = None
 
     @classmethod
-    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> RoleAssignment:
+    def _create(cls, model_class: object, *args: object, **kwargs: object) -> RoleAssignment:
         partner = kwargs.get("partner")
         user = kwargs.get("user")
         business_area = kwargs.get("business_area")
@@ -129,7 +128,7 @@ class UserGroupFactory(DjangoModelFactory):
     business_area = factory.SubFactory(BusinessAreaFactory)
 
 
-def create_superuser(**kwargs: Any) -> User:
+def create_superuser(**kwargs: object) -> User:
     password = os.environ.get("LOCAL_ROOT_PASSWORD", "root1234")
     user_data = {
         "username": kwargs.get("username") or "root",

@@ -1,6 +1,5 @@
 import csv
 import io
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.contrib.admin.sites import site
@@ -32,7 +31,7 @@ AZURE_ID = "11111111-1111-1111-1111-111111111111"
 AZURE_ID_NEW = "22222222-2222-2222-2222-222222222222"
 
 
-def _request(method: str = "get", path: str = "/", data: Any = None, user: Any = None) -> Any:
+def _request(method: str = "get", path: str = "/", data: object = None, user: object = None) -> object:
     request = getattr(RequestFactory(), method)(path, data=data)
     SessionMiddleware(lambda r: None).process_request(request)
     MessageMiddleware(lambda r: None).process_request(request)

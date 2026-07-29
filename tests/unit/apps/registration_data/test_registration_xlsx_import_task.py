@@ -1,5 +1,4 @@
 import contextlib
-from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -16,12 +15,12 @@ from hope.models import AsyncRetryJob, RegistrationDataImport
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area)
 
 
@@ -47,9 +46,9 @@ def run_registration_xlsx_import_task(
     return_value=None,
 )
 def test_task_start_importing(
-    mock_execute: Any,
-    business_area: Any,
-    program: Any,
+    mock_execute: object,
+    business_area: object,
+    program: object,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         status=RegistrationDataImport.IMPORT_SCHEDULED,
@@ -69,8 +68,8 @@ def test_task_start_importing(
 
 
 def test_rdi_cannot_be_import_if_not_schedule_for_import(
-    business_area: Any,
-    program: Any,
+    business_area: object,
+    program: object,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         status=RegistrationDataImport.LOADING,
@@ -90,8 +89,8 @@ def test_rdi_cannot_be_import_if_not_schedule_for_import(
 
 
 def test_only_one_task_for_the_same_rdi_could_be_run(
-    business_area: Any,
-    program: Any,
+    business_area: object,
+    program: object,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         status=RegistrationDataImport.IMPORT_SCHEDULED,
@@ -100,7 +99,7 @@ def test_only_one_task_for_the_same_rdi_could_be_run(
     )
 
     @contextlib.contextmanager
-    def _mock(*args: Any, **kwargs: Any) -> Any:
+    def _mock(*args: object, **kwargs: object) -> object:
         yield False
 
     with patch("hope.apps.registration_data.celery_tasks.locked_cache", new=_mock):
@@ -118,8 +117,8 @@ def test_only_one_task_for_the_same_rdi_could_be_run(
 
 
 def test_rdi_marked_as_import_error_on_task_failed(
-    business_area: Any,
-    program: Any,
+    business_area: object,
+    program: object,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         status=RegistrationDataImport.IMPORT_SCHEDULED,
@@ -127,7 +126,7 @@ def test_rdi_marked_as_import_error_on_task_failed(
         program=program,
     )
 
-    def _mock(*args: Any, **kwargs: Any) -> None:
+    def _mock(*args: object, **kwargs: object) -> None:
         raise Exception("something went wrong")
 
     with patch(
@@ -147,7 +146,7 @@ def test_rdi_marked_as_import_error_on_task_failed(
 
 
 def test_registration_xlsx_import_task_queues_retry_job(
-    business_area: Any, program: Any, django_capture_on_commit_callbacks
+    business_area: object, program: object, django_capture_on_commit_callbacks
 ) -> None:
     rdi = RegistrationDataImportFactory(
         status=RegistrationDataImport.IMPORT_SCHEDULED,

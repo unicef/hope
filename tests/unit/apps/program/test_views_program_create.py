@@ -1,6 +1,6 @@
 """Tests for program create API endpoint."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -39,7 +39,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
@@ -58,7 +58,7 @@ def partner2(afghanistan: BusinessArea) -> Partner:
 
 
 @pytest.fixture
-def unicef_partner(db: Any) -> Partner:
+def unicef_partner(db: object) -> Partner:
     return PartnerFactory(name="UNICEF")
 
 
@@ -94,22 +94,22 @@ def area2(afghanistan: BusinessArea) -> Area:
 
 
 @pytest.fixture
-def dct_standard(db: Any) -> DataCollectingType:
+def dct_standard(db: object) -> DataCollectingType:
     return DataCollectingTypeFactory(label="Full", code="full", type=DataCollectingType.Type.STANDARD)
 
 
 @pytest.fixture
-def dct_social(db: Any) -> DataCollectingType:
+def dct_social(db: object) -> DataCollectingType:
     return DataCollectingTypeFactory(label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL)
 
 
 @pytest.fixture
-def bg_household(db: Any) -> BeneficiaryGroup:
+def bg_household(db: object) -> BeneficiaryGroup:
     return BeneficiaryGroupFactory(name="Household", master_detail=True)
 
 
 @pytest.fixture
-def bg_sw(db: Any) -> BeneficiaryGroup:
+def bg_sw(db: object) -> BeneficiaryGroup:
     return BeneficiaryGroupFactory(name="Social Worker", master_detail=False)
 
 
@@ -184,12 +184,12 @@ def list_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_create_program_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -214,7 +214,7 @@ def test_create_program_with_permission(
 
 
 def test_create_program_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -228,7 +228,7 @@ def test_create_program_without_permission(
 
 
 def test_create_program_with_code(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -259,7 +259,7 @@ def test_create_program_with_code(
 
 
 def test_create_program_with_code_invalid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -286,7 +286,7 @@ def test_create_program_with_code_invalid(
 
 
 def test_create_program_with_code_existing(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -311,7 +311,7 @@ def test_create_program_with_code_existing(
 
 
 def test_create_program_with_missing_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -338,7 +338,7 @@ def test_create_program_with_missing_data(
 
 
 def test_create_program_with_invalid_data_collecting_type(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -400,7 +400,7 @@ def test_create_program_with_invalid_data_collecting_type(
 
 
 def test_create_program_with_invalid_beneficiary_group(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -428,7 +428,7 @@ def test_create_program_with_invalid_beneficiary_group(
 
 
 def test_create_program_with_invalid_dates(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -453,7 +453,7 @@ def test_create_program_with_invalid_dates(
 
 
 def test_create_program_without_end_date(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -485,7 +485,7 @@ def test_create_program_without_end_date(
 
 
 def test_create_program_with_duplicate_name_same_business_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -517,7 +517,7 @@ def test_create_program_with_duplicate_name_same_business_area(
 
 
 def test_create_program_with_duplicate_name_different_business_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -552,7 +552,7 @@ def test_create_program_with_duplicate_name_different_business_area(
 
 
 def test_create_program_with_partners_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     partner: Partner,
@@ -622,7 +622,7 @@ def test_create_program_with_partners_data(
 
 
 def test_create_program_with_invalid_partners_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     partner2: Partner,
@@ -654,7 +654,7 @@ def test_create_program_with_invalid_partners_data(
 
 
 def test_create_program_with_invalid_partners_data_and_partner_access(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     partner: Partner,
@@ -692,7 +692,7 @@ def test_create_program_with_invalid_partners_data_and_partner_access(
 
 
 def test_create_program_with_pdu_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -772,7 +772,7 @@ def test_create_program_with_pdu_fields(
 
 
 def test_create_program_with_invalid_pdu_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -817,7 +817,7 @@ def test_create_program_with_invalid_pdu_fields(
 
 
 def test_create_program_with_invalid_pdu_fields_duplicated_names(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -858,7 +858,7 @@ def test_create_program_with_invalid_pdu_fields_duplicated_names(
 
 
 def test_create_program_with_valid_pdu_fields_existing_field_name_in_different_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -950,7 +950,7 @@ def test_create_program_with_valid_pdu_fields_existing_field_name_in_different_p
 
 
 def test_create_program_with_purposes(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -974,7 +974,7 @@ def test_create_program_with_purposes(
 
 
 def test_create_program_requires_at_least_one_purpose(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -993,7 +993,7 @@ def test_create_program_requires_at_least_one_purpose(
 
 
 def test_create_program_rejects_null_purposes(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -1012,7 +1012,7 @@ def test_create_program_rejects_null_purposes(
 
 
 def test_create_program_rejects_missing_purposes_key(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -1031,7 +1031,7 @@ def test_create_program_rejects_missing_purposes_key(
 
 
 def test_create_program_requires_max_10_purposes(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -1051,7 +1051,7 @@ def test_create_program_requires_max_10_purposes(
 
 
 def test_create_program_rejects_purpose_not_allowed_for_business_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,

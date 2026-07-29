@@ -1,7 +1,7 @@
 import datetime
 from itertools import groupby
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Union, cast
+from typing import TYPE_CHECKING, Callable, Union, cast
 
 from constance import config
 from django.conf import settings
@@ -522,7 +522,7 @@ class PaymentPlanService:
         PaymentPlanService.generate_signature(payment_plan)
 
     @staticmethod
-    def _get_collector(household: dict[str, Any]) -> tuple[Individual, str]:
+    def _get_collector(household: dict[str, object]) -> tuple[Individual, str]:
         use_alt_collector = household.get("use_alt_collector", False)
         if use_alt_collector:
             collector_id = household.get("alt_collector")
@@ -802,7 +802,7 @@ class PaymentPlanService:
         )
         self.payment_plan.payment_plan_group = payment_plan_group
 
-    def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
+    def _set_dispersion_dates(self, dispersion_end_date: object | None, dispersion_start_date: object | None) -> None:
         if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
             self.payment_plan.dispersion_start_date = dispersion_start_date
 
@@ -812,12 +812,12 @@ class PaymentPlanService:
 
     def _validate_pp_status(
         self,
-        dispersion_end_date: Any,
-        dispersion_start_date: Any,
-        excluded_ids: Any,
-        exclusion_reason: Any,
+        dispersion_end_date: object,
+        dispersion_start_date: object,
+        excluded_ids: object,
+        exclusion_reason: object,
         input_data: dict,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         rules = kwargs.get("rules")
         vulnerability_score_max = kwargs.get("vulnerability_score_max")
@@ -1159,7 +1159,7 @@ class PaymentPlanService:
             Payment.objects.bulk_update(payments, ("signature_hash",))
 
     def _build_payments_chunks(
-        self, split_type: str, chunks_no: int | None, payments: Any, payments_count: int
+        self, split_type: str, chunks_no: int | None, payments: object, payments_count: int
     ) -> list:
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             self._validate_split_by_record(chunks_no, payments_count)

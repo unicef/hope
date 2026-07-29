@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -66,7 +66,7 @@ def authenticated_client(
     afghanistan: BusinessArea,
     program: Program,
     create_user_role_with_permissions: Callable,
-) -> Any:
+) -> object:
     create_user_role_with_permissions(
         user,
         [Permissions.RDI_VIEW_LIST, Permissions.RDI_VIEW_DETAILS],
@@ -101,7 +101,7 @@ def url_detail_legacy(afghanistan: BusinessArea, program: Program, rdi_legacy: R
 
 
 def test_detail_response_country_workspace_id_sourced_from_country_workspace_id(
-    authenticated_client: Any,
+    authenticated_client: object,
     rdi_cw: RegistrationDataImport,
     url_detail_cw: str,
 ) -> None:
@@ -114,7 +114,7 @@ def test_detail_response_country_workspace_id_sourced_from_country_workspace_id(
 
 
 def test_detail_response_country_workspace_id_null_when_no_country_workspace_id(
-    authenticated_client: Any,
+    authenticated_client: object,
     rdi_legacy: RegistrationDataImport,
     url_detail_legacy: str,
 ) -> None:
@@ -127,7 +127,7 @@ def test_detail_response_country_workspace_id_null_when_no_country_workspace_id(
 
 
 def test_list_response_country_workspace_id_sourced_from_country_workspace_id(
-    authenticated_client: Any,
+    authenticated_client: object,
     rdi_cw: RegistrationDataImport,
     rdi_legacy: RegistrationDataImport,
     url_list: str,

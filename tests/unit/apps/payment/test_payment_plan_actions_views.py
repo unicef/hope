@@ -2,7 +2,7 @@ from datetime import timezone as dt_timezone
 from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -52,15 +52,15 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
 def payment_plan_actions_context(
     api_client: Callable,
-    business_area: Any,
-) -> dict[str, Any]:
+    business_area: object,
+) -> dict[str, object]:
     partner = PartnerFactory(name="unittest")
     user = UserFactory(partner=partner)
     program_active = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
@@ -144,10 +144,10 @@ def payment_plan_actions_context(
     ],
 )
 def test_create_pp(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -176,8 +176,8 @@ def test_create_pp(
 
 
 def test_create_pp_validation_errors(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -204,10 +204,10 @@ def test_create_pp_validation_errors(
     ],
 )
 def test_pp_lock(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -233,10 +233,10 @@ def test_pp_lock(
     ],
 )
 def test_pp_unlock(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -261,10 +261,10 @@ def test_pp_unlock(
     ],
 )
 def test_payment_plan_delete(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -303,10 +303,10 @@ def test_payment_plan_delete(
     ],
 )
 def test_exclude_beneficiaries(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -334,8 +334,8 @@ def test_exclude_beneficiaries(
 
 
 def test_exclude_beneficiaries_validation_errors(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -374,8 +374,8 @@ def test_exclude_beneficiaries_validation_errors(
 @patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
 def test_apply_custom_exchange_rate(
     mock_delay: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -416,8 +416,8 @@ def test_apply_custom_exchange_rate(
 
 
 def test_apply_custom_exchange_rate_validation_errors(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -440,8 +440,8 @@ def test_apply_custom_exchange_rate_validation_errors(
 
 
 def test_apply_custom_exchange_rate_requires_one_rate_value(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -468,8 +468,8 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
 @patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
 def test_apply_unore_exchange_rate_clears_custom_flag(
     mock_delay: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -518,10 +518,10 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
     ],
 )
 def test_apply_engine_formula_pp(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -553,8 +553,8 @@ def test_apply_engine_formula_pp(
 
 
 def test_apply_engine_formula_pp_validation_errors(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -611,10 +611,10 @@ def test_apply_engine_formula_pp_validation_errors(
     ],
 )
 def test_pp_fsp_lock(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -642,10 +642,10 @@ def test_pp_fsp_lock(
     ],
 )
 def test_pp_fsp_unlock(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -670,11 +670,11 @@ def test_pp_fsp_unlock(
     ],
 )
 def test_pp_entitlement_export_xlsx(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
-    django_capture_on_commit_callbacks: Any,
+    create_user_role_with_permissions: object,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -696,8 +696,8 @@ def test_pp_entitlement_export_xlsx(
 
 
 def test_pp_entitlement_export_xlsx_invalid_status(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -743,12 +743,12 @@ def test_pp_entitlement_export_xlsx_invalid_status(
     ],
 )
 def test_entitlement_actions_are_blocked_for_follow_up_payment_plans(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
     permission: Permissions,
     url_key: str,
     method: str,
-    payload: dict[str, Any] | None,
+    payload: dict[str, object] | None,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -784,9 +784,9 @@ def test_entitlement_actions_are_blocked_for_follow_up_payment_plans(
 
 @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_pp_entitlement_import_xlsx(
-    mock_exchange_rate: Any,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    mock_exchange_rate: object,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -825,8 +825,8 @@ def test_pp_entitlement_import_xlsx(
 
 
 def test_pp_entitlement_flat_value_invalid_status(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -862,9 +862,9 @@ def test_pp_entitlement_flat_value_invalid_status(
 
 @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_pp_entitlement_import_flat_value(
-    mock_exchange_rate: Any,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    mock_exchange_rate: object,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -900,8 +900,8 @@ def test_pp_entitlement_import_flat_value(
 
 
 def test_pp_entitlement_import_xlsx_status_invalid(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.OPEN
     payment_plan_actions_context["pp"].save()
@@ -930,10 +930,10 @@ def test_pp_entitlement_import_xlsx_status_invalid(
     ],
 )
 def test_send_for_approval(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -972,11 +972,11 @@ def test_send_for_approval(
     ],
 )
 def test_approval_process_reject(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
     payment_plan_status: PaymentPlan.Status,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1005,10 +1005,10 @@ def test_approval_process_reject(
     ],
 )
 def test_approval_process_approve(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1037,10 +1037,10 @@ def test_approval_process_approve(
     ],
 )
 def test_approval_process_authorize(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1069,10 +1069,10 @@ def test_approval_process_authorize(
     ],
 )
 def test_approval_process_mark_as_released(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1101,10 +1101,10 @@ def test_approval_process_mark_as_released(
     ],
 )
 def test_pp_send_to_payment_gateway(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1136,10 +1136,10 @@ def test_pp_send_to_payment_gateway(
     ],
 )
 def test_split(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1224,10 +1224,10 @@ def test_split(
     ],
 )
 def test_export_pdf_payment_plan_summary(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1255,10 +1255,10 @@ def test_export_pdf_payment_plan_summary(
     ],
 )
 def test_create_follow_up(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1299,10 +1299,10 @@ def test_create_follow_up(
     ],
 )
 def test_assign_funds_commitments(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1337,8 +1337,8 @@ def test_assign_funds_commitments(
 
 
 def test_assign_funds_commitments_validation_errors(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1395,8 +1395,8 @@ def test_assign_funds_commitments_validation_errors(
 
 
 def test_fsp_xlsx_template_list(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1441,10 +1441,10 @@ def test_fsp_xlsx_template_list(
     ],
 )
 def test_pp_ready_for_closure(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     pp_status: str,
 ) -> None:
     create_user_role_with_permissions(
@@ -1484,10 +1484,10 @@ def test_pp_ready_for_closure(
     ],
 )
 def test_pp_send_back_to_finished(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     pp_status: str,
 ) -> None:
     create_user_role_with_permissions(
@@ -1522,10 +1522,10 @@ def test_pp_send_back_to_finished(
     ],
 )
 def test_pp_close(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     pp_status: str,
 ) -> None:
     create_user_role_with_permissions(
@@ -1550,8 +1550,8 @@ def test_pp_close(
 
 
 def test_pp_close_success(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1577,8 +1577,8 @@ def test_pp_close_success(
 
 
 def test_pp_close_requires_comment_when_no_verification(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1599,8 +1599,8 @@ def test_pp_close_requires_comment_when_no_verification(
 
 
 def test_pp_close_with_comment_when_no_verification(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1626,8 +1626,8 @@ def test_pp_close_with_comment_when_no_verification(
 
 
 def test_pp_close_verification_plan_with_no_responses_requires_comment(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1658,10 +1658,10 @@ def test_pp_close_verification_plan_with_no_responses_requires_comment(
     ],
 )
 def test_pp_abort(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     pp_status: str,
 ) -> None:
     create_user_role_with_permissions(
@@ -1701,10 +1701,10 @@ def test_pp_abort(
     ],
 )
 def test_pp_reactivate_abort(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     pp_status: str,
 ) -> None:
     create_user_role_with_permissions(
@@ -1732,8 +1732,8 @@ def test_pp_reactivate_abort(
 
 
 def test_create_pp_without_target_population_id_returns_400(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1751,8 +1751,8 @@ def test_create_pp_without_target_population_id_returns_400(
 
 
 def test_apply_engine_formula_without_version_skips_concurrency_check(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1773,8 +1773,8 @@ def test_apply_engine_formula_without_version_skips_concurrency_check(
 
 
 def test_apply_engine_formula_rejects_when_rule_engine_already_running(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1797,8 +1797,8 @@ def test_apply_engine_formula_rejects_when_rule_engine_already_running(
 
 
 def test_entitlement_import_xlsx_rejects_when_already_importing(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1822,8 +1822,8 @@ def test_entitlement_import_xlsx_rejects_when_already_importing(
 
 
 def test_entitlement_import_xlsx_returns_400_on_validation_errors(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1850,9 +1850,9 @@ def test_entitlement_import_xlsx_returns_400_on_validation_errors(
 
 @patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_entitlement_import_xlsx_copies_existing_imported_file(
-    mock_exchange_rate: Any,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    mock_exchange_rate: object,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1886,8 +1886,8 @@ def test_entitlement_import_xlsx_copies_existing_imported_file(
 
 
 def test_entitlement_flat_amount_without_version_skips_concurrency_check(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1911,8 +1911,8 @@ def test_entitlement_flat_amount_without_version_skips_concurrency_check(
 @patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
 def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
     mock_delay: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1936,8 +1936,8 @@ def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
 
 
 def test_split_with_split_type_no_split_skips_records_branch(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -1961,8 +1961,8 @@ def test_split_with_split_type_no_split_skips_records_branch(
 
 
 def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     create_user_role_with_permissions(
@@ -1990,8 +1990,8 @@ def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
 
 
 def test_get_object_raises_for_instruction_managed_blocked_action(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -2023,8 +2023,8 @@ def _enable_vision_flag() -> None:
 
 
 def test_send_to_vision_flag_disabled_returns_403(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -2041,8 +2041,8 @@ def test_send_to_vision_flag_disabled_returns_403(
 
 
 def test_send_to_vision_wrong_status_returns_403(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     _enable_vision_flag()
     create_user_role_with_permissions(
@@ -2062,8 +2062,8 @@ def test_send_to_vision_wrong_status_returns_403(
 @patch("hope.apps.payment.api.views.VisionAPI")
 def test_send_to_vision_already_sent_returns_403(
     mock_vision: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     _enable_vision_flag()
     create_user_role_with_permissions(
@@ -2083,7 +2083,7 @@ def test_send_to_vision_already_sent_returns_403(
 
 
 def test_send_to_vision_no_permission_returns_403(
-    payment_plan_actions_context: dict[str, Any],
+    payment_plan_actions_context: dict[str, object],
 ) -> None:
     _enable_vision_flag()
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
@@ -2097,8 +2097,8 @@ def test_send_to_vision_no_permission_returns_403(
 @patch("hope.apps.payment.api.views.VisionAPI")
 def test_send_to_vision_success(
     mock_vision: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     _enable_vision_flag()
     mock_vision.return_value.send_payment_plan.return_value = {"status": "ok", "messageId": "test-msg-id"}
@@ -2121,8 +2121,8 @@ def test_send_to_vision_success(
 @patch("hope.apps.payment.api.views.VisionAPI")
 def test_send_to_vision_api_error_returns_400(
     mock_vision: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     _enable_vision_flag()
     mock_vision.return_value.send_payment_plan.side_effect = VisionAPIError("boom")
@@ -2143,8 +2143,8 @@ def test_send_to_vision_api_error_returns_400(
 @patch("hope.apps.payment.api.views.VisionAPI")
 def test_send_to_vision_missing_creds_returns_400(
     mock_vision: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    payment_plan_actions_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     _enable_vision_flag()
     mock_vision.return_value.send_payment_plan.side_effect = VisionAPIMissingCredentialsError("no creds")

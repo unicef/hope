@@ -1,6 +1,5 @@
 """Tests for account authentication pipeline functions."""
 
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,22 +20,21 @@ from hope.models import ACTIVE, BusinessArea, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
-
 # --- Fixtures ---
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory(email="test@example.com", first_name="John", last_name="Doe")
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(code="AFG", slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def basic_user_role(db: Any) -> Role:
+def basic_user_role(db: object) -> Role:
     return RoleFactory(name="Basic User")
 
 
@@ -53,7 +51,7 @@ def mock_strategy() -> MagicMock:
 
 
 @pytest.fixture
-def mock_ms_graph() -> Any:
+def mock_ms_graph() -> object:
     with patch("hope.apps.account.authentication.MicrosoftGraphAPI") as mock_class:
         mock_instance = MagicMock()
         mock_instance.get_user_data.return_value = {}

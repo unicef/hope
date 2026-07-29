@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
@@ -11,7 +11,7 @@ from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.validators import RegexValidator
-from django.db import transaction
+from django.db import models, transaction
 from django.forms import inlineformset_factory
 from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -187,10 +187,10 @@ class BusinessAreaAdmin(
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
     filter_horizontal = ("countries", "payment_countries")
 
-    def document_types_valid_for_deduplication(self, obj: Any) -> list:
+    def document_types_valid_for_deduplication(self, obj: object) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

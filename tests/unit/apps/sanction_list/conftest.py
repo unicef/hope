@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Generator
+from typing import Generator
 
 import pytest
 from responses import RequestsMock
@@ -20,7 +20,7 @@ def eu_file() -> str:
 
 
 @pytest.fixture
-def always_eager() -> Generator[Any, None, None]:
+def always_eager() -> Generator[object, None, None]:
     status = app.conf.task_always_eager
     app.conf.task_always_eager = False
     yield
@@ -28,7 +28,7 @@ def always_eager() -> Generator[Any, None, None]:
 
 
 @pytest.fixture
-def sanction_list(db: Any) -> SanctionList:
+def sanction_list(db: object) -> SanctionList:
     sanction_list, _ = SanctionList.objects.get_or_create(
         pk=123,
         name="EU",

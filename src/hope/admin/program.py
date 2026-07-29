@@ -2,7 +2,7 @@ from io import BytesIO
 import json
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -17,6 +17,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import models
 from django.db.models import Q, QuerySet
 from django.forms import CheckboxSelectMultiple, formset_factory
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -97,11 +98,11 @@ class PaymentPlanPurposeInline(admin.TabularInline):
     verbose_name = "Payment Plan Purpose"
     verbose_name_plural = "Payment Plan Purposes"
 
-    def get_formset(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> Any:
+    def get_formset(self, request: HttpRequest, obj: object = None, **kwargs: object) -> object:
         request._program_obj = obj
         return super().get_formset(request, obj, **kwargs)
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "paymentplanpurpose":
             obj = getattr(request, "_program_obj", None)
             if obj is not None:
@@ -123,7 +124,7 @@ class PartnerAreaLimitForm(forms.Form):
 class BulkUploadIndividualsPhotosForm(forms.Form):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={"accept": ".zip"}))
 
-    def clean_file(self) -> Any:
+    def clean_file(self) -> object:
         file = self.cleaned_data["file"]
 
         if not file.name.lower().endswith(".zip"):
@@ -186,7 +187,7 @@ class ProgramAdminForm(forms.ModelForm):
         ) as exc:
             raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
 
-    def clean(self) -> dict[str, Any] | None:
+    def clean(self) -> dict[str, object] | None:
         cleaned_data = super().clean()
         if self.errors:
             return cleaned_data
@@ -374,7 +375,7 @@ class ProgramAdmin(
         return TemplateResponse(request, "admin/program/program/program_area_limits_readonly.html", context)
 
     @choice(permission="account.can_reindex_programs", label="ES Index", change_list=False)
-    def es_index_menu(self, button: Any) -> None:
+    def es_index_menu(self, button: object) -> None:
         button.choices = [self.check_index, self.reindex_program]
 
     @button(permission="account.can_reindex_programs", label="Check Index", visible=False)

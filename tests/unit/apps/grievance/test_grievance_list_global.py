@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Callable
+from typing import Callable
 
 from django.utils import timezone
 from freezegun import freeze_time
@@ -50,7 +50,7 @@ def user2(partner: Partner) -> User:
 
 
 @pytest.fixture
-def social_dct() -> Any:
+def social_dct() -> object:
     return DataCollectingTypeFactory(
         label="Social",
         code="social",
@@ -59,12 +59,12 @@ def social_dct() -> Any:
 
 
 @pytest.fixture
-def social_beneficiary_group() -> Any:
+def social_beneficiary_group() -> object:
     return BeneficiaryGroupFactory(master_detail=False)
 
 
 @pytest.fixture
-def program_afghanistan1(afghanistan: BusinessArea, social_dct: Any, social_beneficiary_group: Any) -> Program:
+def program_afghanistan1(afghanistan: BusinessArea, social_dct: object, social_beneficiary_group: object) -> Program:
     return ProgramFactory(
         business_area=afghanistan,
         status=Program.ACTIVE,
@@ -89,22 +89,22 @@ def program_ukraine(ukraine: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def country() -> Any:
+def country() -> object:
     return CountryFactory()
 
 
 @pytest.fixture
-def admin_type(country: Any) -> Any:
+def admin_type(country: object) -> object:
     return AreaTypeFactory(country=country, area_level=1)
 
 
 @pytest.fixture
-def area1(admin_type: Any) -> Any:
+def area1(admin_type: object) -> object:
     return AreaFactory(parent=None, p_code="AF01", area_type=admin_type)
 
 
 @pytest.fixture
-def area2(admin_type: Any) -> Any:
+def area2(admin_type: object) -> object:
     return AreaFactory(parent=None, p_code="AF0101", area_type=admin_type)
 
 
@@ -117,9 +117,9 @@ def grievance_tickets_setup(
     program_ukraine: Program,
     user: User,
     user2: User,
-    area1: Any,
-    area2: Any,
-    country: Any,
+    area1: object,
+    area2: object,
+    country: object,
 ) -> dict:
     created_at_dates_to_set = {
         GrievanceTicket.STATUS_NEW: [
@@ -387,7 +387,7 @@ def grievance_tickets_setup(
 
 @freeze_time("2024-08-25 12:00:00")
 def test_grievance_ticket_global_list_with_all_permissions(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     grievance_tickets_setup: dict,
@@ -496,7 +496,7 @@ def test_grievance_ticket_global_list_with_all_permissions(
     ],
 )
 def test_grievance_ticket_global_list_without_permissions(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     grievance_tickets_setup: dict,
@@ -530,7 +530,7 @@ def test_grievance_ticket_global_list_without_permissions(
 
 @freeze_time("2024-08-25 12:00:00")
 def test_grievance_ticket_global_list_check_non_program(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     grievance_tickets_setup: dict,
@@ -581,14 +581,14 @@ def test_grievance_ticket_global_list_check_non_program(
 
 @freeze_time("2024-08-25 12:00:00")
 def test_grievance_ticket_global_list_area_limits(
-    api_client: Any,
+    api_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
     program_afghanistan1: Program,
     program_afghanistan2: Program,
-    area1: Any,
-    area2: Any,
+    area1: object,
+    area2: object,
     grievance_tickets_setup: dict,
     create_user_role_with_permissions: Callable,
     set_admin_area_limits_in_program: Callable,
@@ -638,7 +638,7 @@ def test_grievance_ticket_global_list_area_limits(
 
 @freeze_time("2024-08-25 12:00:00")
 def test_grievance_ticket_global_list_with_permissions_in_one_program(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program_afghanistan1: Program,
@@ -766,13 +766,13 @@ def test_grievance_ticket_global_list_with_permissions_in_one_program(
     ],
 )
 def test_grievance_ticket_global_list_based_on_permissions(
-    api_client: Any,
+    api_client: object,
     user: User,
     partner: Partner,
     afghanistan: BusinessArea,
     program_afghanistan1: Program,
     program_afghanistan2: Program,
-    area1: Any,
+    area1: object,
     grievance_tickets_setup: dict,
     permissions: list,
     program_num: int,
@@ -819,7 +819,7 @@ def test_grievance_ticket_global_list_based_on_permissions(
 
 
 def test_all_edit_household_fields_attributes(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     create_user_role_with_permissions: Callable,
@@ -863,7 +863,7 @@ def test_all_edit_household_fields_attributes(
 
 
 def test_all_edit_people_fields_attributes(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     create_user_role_with_permissions: Callable,
@@ -906,7 +906,7 @@ def test_all_edit_people_fields_attributes(
 
 
 def test_all_add_individuals_fields_attributes(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     create_user_role_with_permissions: Callable,

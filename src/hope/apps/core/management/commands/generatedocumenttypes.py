@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.management import BaseCommand
 from django.db import transaction
 
@@ -12,7 +10,7 @@ class Command(BaseCommand):
     help = "Generate document types for all countries"
 
     @transaction.atomic
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(self, *args: object, **options: object) -> None:
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:

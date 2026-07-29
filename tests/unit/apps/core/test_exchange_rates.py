@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Optional
 
 from django.utils import timezone
 import pytest
@@ -282,7 +282,7 @@ def test_get_exchange_rate_for_currency_code(
     api_key_in_env,
     currency_code: str,
     dispersion_date: Optional[datetime],
-    expected_result: Any,
+    expected_result: object,
 ):
     with requests_mock_lib.Mocker() as adapter:
         adapter.register_uri(

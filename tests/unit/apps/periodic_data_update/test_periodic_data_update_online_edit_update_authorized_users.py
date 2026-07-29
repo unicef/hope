@@ -1,6 +1,6 @@
 """Tests for PDU online edit update authorized users functionality."""
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -60,7 +60,7 @@ def authorized_user3(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, creator: User) -> Any:
+def authenticated_client(api_client: Callable, creator: User) -> object:
     return api_client(creator)
 
 
@@ -155,7 +155,7 @@ def get_update_authorized_users_url(afghanistan: BusinessArea, program: Program,
 def test_update_authorized_users_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -178,7 +178,7 @@ def test_update_authorized_users_permissions(
 
 
 def test_update_authorized_users_success_add_users(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -218,7 +218,7 @@ def test_update_authorized_users_success_add_users(
 
 
 def test_update_authorized_users_success_remove_users(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -257,7 +257,7 @@ def test_update_authorized_users_success_remove_users(
 
 
 def test_update_authorized_users_success_replace_all_users(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -295,7 +295,7 @@ def test_update_authorized_users_success_replace_all_users(
 
 
 def test_update_authorized_users_success_clear_all_users(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -326,7 +326,7 @@ def test_update_authorized_users_success_clear_all_users(
 
 
 def test_update_authorized_users_not_creator(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -359,7 +359,7 @@ def test_update_authorized_users_not_creator(
 
 
 def test_update_authorized_users_works_in_all_statuses(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -400,7 +400,7 @@ def test_update_authorized_users_works_in_all_statuses(
 
 
 def test_update_authorized_users_invalid_user_id(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -432,7 +432,7 @@ def test_update_authorized_users_invalid_user_id(
 
 
 def test_update_authorized_users_missing_field(
-    authenticated_client: Any,
+    authenticated_client: object,
     creator: User,
     afghanistan: BusinessArea,
     program: Program,

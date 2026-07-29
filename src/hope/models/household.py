@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.core.validators import validate_image_file_extension
 from django.db import models
@@ -711,7 +711,7 @@ class Household(
             ),
         ]
 
-    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict[str, int]]:
+    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
         household_deleted.send(self.__class__, instance=self)
         return super().delete(*args, **kwargs)
 
@@ -719,7 +719,7 @@ class Household(
     def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag: Any | None = None, notify: bool = True) -> None:
+    def withdraw(self, tag: object | None = None, notify: bool = True) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.internal_data["withdrawn_tag"] = tag

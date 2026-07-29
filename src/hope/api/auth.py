@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.db.models import Q
 from django.http import Http404
@@ -38,7 +38,7 @@ class HOPEAuthentication(TokenAuthentication):
 
 
 class HOPEPermission(IsAuthenticated):
-    def has_permission(self, request: Request, view: Any) -> bool:
+    def has_permission(self, request: Request, view: object) -> bool:
         if not bool(request.auth):
             return False
         if not view.permission or view.permission.name not in request.auth.grants:

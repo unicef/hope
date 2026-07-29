@@ -1,7 +1,7 @@
 """Tests for user list API views."""
 
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -25,17 +25,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> Any:
+def afghanistan(db: object) -> object:
     return BusinessAreaFactory(code="0060", name="Afghanistan", slug="afghanistan", active=True)
 
 
 @pytest.fixture
-def ukraine(db: Any) -> Any:
+def ukraine(db: object) -> object:
     return BusinessAreaFactory(code="4410", name="Ukraine", slug="ukraine", active=True)
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -45,38 +45,38 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def program(afghanistan: Any) -> Program:
+def program(afghanistan: object) -> Program:
     return ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
 
 @pytest.fixture
-def role(db: Any) -> Role:
+def role(db: object) -> Role:
     return RoleFactory(name="TestRole", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value])
 
 
 @pytest.fixture
-def partner_with_role_1(afghanistan: Any, role: Role) -> Partner:
+def partner_with_role_1(afghanistan: object, role: Role) -> Partner:
     partner = PartnerFactory(name="TestPartner1")
     RoleAssignmentFactory(partner=partner, business_area=afghanistan, role=role)
     return partner
 
 
 @pytest.fixture
-def partner_with_role_2(afghanistan: Any, program: Program, role: Role) -> Partner:
+def partner_with_role_2(afghanistan: object, program: Program, role: Role) -> Partner:
     partner = PartnerFactory(name="TestPartner2")
     RoleAssignmentFactory(partner=partner, business_area=afghanistan, program=program, role=role)
     return partner
 
 
 @pytest.fixture
-def user1(partner: Partner, afghanistan: Any, role: Role) -> User:
+def user1(partner: Partner, afghanistan: object, role: Role) -> User:
     user = UserFactory(partner=partner, first_name="Bob")
     RoleAssignmentFactory(user=user, business_area=afghanistan, role=role)
     return user
 
 
 @pytest.fixture
-def user2(partner: Partner, afghanistan: Any, program: Program, role: Role) -> User:
+def user2(partner: Partner, afghanistan: object, program: Program, role: Role) -> User:
     user = UserFactory(partner=partner, first_name="Carol")
     RoleAssignmentFactory(user=user, business_area=afghanistan, program=program, role=role)
     return user
@@ -93,24 +93,24 @@ def user4(partner_with_role_2: Partner) -> User:
 
 
 @pytest.fixture
-def user_in_different_ba(partner: Partner, ukraine: Any, role: Role) -> User:
+def user_in_different_ba(partner: Partner, ukraine: object, role: Role) -> User:
     user = UserFactory(partner=partner, first_name="Frank")
     RoleAssignmentFactory(user=user, business_area=ukraine, role=role)
     return user
 
 
 @pytest.fixture
-def list_url(afghanistan: Any) -> str:
+def list_url(afghanistan: object) -> str:
     return reverse("api:accounts:users-list", kwargs={"business_area_slug": afghanistan.slug})
 
 
 @pytest.fixture
-def count_url(afghanistan: Any) -> str:
+def count_url(afghanistan: object) -> str:
     return reverse("api:accounts:users-count", kwargs={"business_area_slug": afghanistan.slug})
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -124,11 +124,11 @@ def authenticated_client(api_client: Callable, user: User) -> Any:
     ],
 )
 def test_user_list_permissions(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
-    afghanistan: Any,
+    afghanistan: object,
     list_url: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -144,9 +144,9 @@ def test_user_list_permissions(
 
 
 def test_user_list_returns_all_users_in_business_area(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
-    afghanistan: Any,
+    afghanistan: object,
     list_url: str,
     count_url: str,
     user1: User,
@@ -154,7 +154,7 @@ def test_user_list_returns_all_users_in_business_area(
     user3: User,
     user4: User,
     user_in_different_ba: User,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -189,16 +189,16 @@ def test_user_list_returns_all_users_in_business_area(
     ],
 )
 def test_user_count_permissions(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
-    afghanistan: Any,
+    afghanistan: object,
     program: Program,
     count_url: str,
     user1: User,
     user2: User,
     user3: User,
     user4: User,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -217,9 +217,9 @@ def test_user_count_permissions(
 
 
 def test_user_list_caching(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
-    afghanistan: Any,
+    afghanistan: object,
     program: Program,
     list_url: str,
     user1: User,
@@ -227,7 +227,7 @@ def test_user_list_caching(
     user3: User,
     user4: User,
     user_in_different_ba: User,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=user,

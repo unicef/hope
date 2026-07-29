@@ -1,5 +1,4 @@
 from decimal import Decimal
-from typing import Any
 
 from django.conf import settings
 from django.db import models
@@ -113,7 +112,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
             self.export_file.delete()
             self.export_file = None
 
-    def payments_summary(self) -> dict[str, Any]:
+    def payments_summary(self) -> dict[str, object]:
         payments = Payment.objects.filter(parent__follow_up_instruction=self).eligible()
         summary = payments.aggregate(
             child_payment_plans_count=Count("parent_id", distinct=True),

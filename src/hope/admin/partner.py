@@ -1,5 +1,3 @@
-from typing import Any
-
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
@@ -34,18 +32,18 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
 
-    def get_inline_instances(self, request: Any, obj: Partner | None = None) -> list:
+    def get_inline_instances(self, request: HttpRequest, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []
         return super().get_inline_instances(request, obj)
 
-    def sub_partners(self, obj: Any) -> str | None:
+    def sub_partners(self, obj: object) -> str | None:
         return self.links_to_objects(obj.get_children()) if obj else None
 
     sub_partners.short_description = "Sub-Partners"
 
     @classmethod
-    def links_to_objects(cls, objects: Any) -> str:
+    def links_to_objects(cls, objects: object) -> str:
         rel_list = "<ul>"
         for obj in objects:
             link = reverse("admin:account_partner_change", args=[obj.id])
@@ -60,7 +58,7 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
-        self, request: HttpRequest, obj: Partner | None = None, change: bool = False, **kwargs: Any
+        self, request: HttpRequest, obj: Partner | None = None, change: bool = False, **kwargs: object
     ) -> type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 

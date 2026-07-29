@@ -1,7 +1,6 @@
 """Tests for Feedback ViewSet."""
 
 import datetime
-from typing import Any
 
 from django.urls import reverse
 from django.utils import timezone
@@ -337,7 +336,7 @@ def url_details_per_program_finished(business_area, program_finished, feedback_w
 
 # per BA
 def test_feedback_get_list_returns_all_feedbacks_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -426,7 +425,7 @@ def test_feedback_get_list_returns_403_without_permission(
 
 
 def test_feedback_get_count_returns_count_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -450,7 +449,7 @@ def test_feedback_get_count_returns_count_with_permission(
 
 
 def test_feedback_get_count_includes_all_programs_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -490,7 +489,7 @@ def test_feedback_get_count_returns_403_without_permission(
 
 
 def test_feedback_details_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -550,7 +549,7 @@ def test_feedback_details_admin_url(
 
 
 def test_create_feedback_returns_created_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -628,7 +627,7 @@ def test_create_feedback_returns_403_without_permission(
 
 
 def test_create_feedback_without_permission_in_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -663,7 +662,7 @@ def test_create_feedback_without_permission_in_program(
 
 
 def test_create_feedback_for_finished_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -697,7 +696,7 @@ def test_create_feedback_for_finished_program(
 
 
 def test_create_feedback_with_minimum_data_returns_created_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -755,7 +754,7 @@ def test_create_feedback_with_minimum_data_returns_403_without_permission(
 
 
 def test_update_feedback_without_program_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -834,7 +833,7 @@ def test_update_feedback_without_program_returns_403_without_permission(
 
 
 def test_update_feedback_with_program_with_permission_in_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -867,7 +866,7 @@ def test_update_feedback_with_program_with_permission_in_program(
 
 
 def test_update_feedback_with_program_without_permission_in_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -900,7 +899,7 @@ def test_update_feedback_with_program_without_permission_in_program(
 
 
 def test_update_feedback_hh_lookup_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -978,7 +977,7 @@ def test_update_feedback_hh_lookup_returns_403_without_permission(
 
 # per Program
 def test_feedback_per_program_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1027,7 +1026,7 @@ def test_feedback_per_program_returns_403_without_permission(
 
 
 def test_feedback_get_count_per_program_returns_count_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1059,7 +1058,7 @@ def test_feedback_get_count_per_program_returns_403_without_permission(
 
 
 def test_feedback_details_per_program_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1119,7 +1118,7 @@ def test_feedback_details_per_program_admin_url(
 
 
 def test_create_feedback_per_program_returns_created_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1189,7 +1188,7 @@ def test_create_feedback_per_program_returns_403_without_permission(
 
 
 def test_update_feedback_per_program_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1264,7 +1263,7 @@ def test_update_feedback_per_program_returns_403_without_permission(
 
 
 def test_update_feedback_per_program_when_finished(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1303,7 +1302,7 @@ def test_list_feedback_issue_type(authenticated_client) -> None:
 
 
 def test_create_feedback_message_returns_created_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1360,7 +1359,7 @@ def test_create_feedback_message_returns_403_without_permission(
 
 
 def test_create_feedback_message_with_program_with_permission_in_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1382,7 +1381,7 @@ def test_create_feedback_message_with_program_with_permission_in_program(
 
 
 def test_create_feedback_message_with_program_without_permission_in_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1404,7 +1403,7 @@ def test_create_feedback_message_with_program_without_permission_in_program(
 
 
 def test_create_feedback_message_per_program_returns_created_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1470,7 +1469,7 @@ def test_create_feedback_message_per_program_returns_403_without_permission(
 def test_filter_feedback_by_issue_type(
     filter_value: str,
     expected_count: int,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1495,7 +1494,7 @@ def test_filter_feedback_by_issue_type(
 
 
 def test_filter_by_created_at(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1539,7 +1538,7 @@ def test_filter_by_created_at(
 
 
 def test_filter_by_created_by(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -1563,7 +1562,7 @@ def test_filter_by_created_by(
 
 
 def test_filter_by_is_active_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,

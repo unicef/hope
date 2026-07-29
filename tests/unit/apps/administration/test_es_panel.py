@@ -1,6 +1,6 @@
-from typing import Any
 from unittest.mock import MagicMock
 
+from django.http import HttpRequest
 import pytest
 
 from hope.apps.administration.panels.es import ElasticsearchPanel
@@ -12,14 +12,14 @@ def panel() -> ElasticsearchPanel:
 
 
 @pytest.fixture
-def model_admin_mock() -> Any:
+def model_admin_mock() -> object:
     mock = MagicMock()
     mock.each_context.return_value = {}
     return mock
 
 
 def test_es_panel_info_action_calls_conn_info(
-    rf: Any, panel: ElasticsearchPanel, model_admin_mock: Any, mocker: Any
+    rf: object, panel: ElasticsearchPanel, model_admin_mock: object, mocker: object
 ) -> None:
     info_result = {"cluster_name": "test-cluster", "name": "node-1"}
     mock_conn = MagicMock()
@@ -28,7 +28,7 @@ def test_es_panel_info_action_calls_conn_info(
 
     captured: dict = {}
 
-    def capture_render(request: Any, template: str, context: dict) -> MagicMock:
+    def capture_render(request: HttpRequest, template: str, context: dict) -> MagicMock:
         captured.update(context)
         return MagicMock()
 

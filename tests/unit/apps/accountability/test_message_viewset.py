@@ -1,7 +1,6 @@
 """Tests for Message ViewSet."""
 
 import datetime
-from typing import Any
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
 
@@ -338,7 +337,7 @@ def url_details(business_area, program_active, msg_1):
 
 
 def test_msg_get_list_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -379,7 +378,7 @@ def test_msg_get_list_returns_403_without_permission(
 
 
 def test_msg_filter_by_program(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -405,7 +404,7 @@ def test_msg_filter_by_program(
 
 
 def test_msg_get_count_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -434,7 +433,7 @@ def test_msg_get_count_returns_403_without_permission(
 
 
 def test_msg_details_returns_data_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -480,7 +479,7 @@ def test_msg_details_admin_url(
 
 
 def test_create_new_message_returns_created_with_permission(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -553,7 +552,7 @@ def test_create_new_message_returns_403_without_permission(
 
 
 def test_create_new_message_by_households_full_list(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -595,7 +594,7 @@ def test_create_new_message_by_households_full_list(
 
 
 def test_create_new_message_by_households_random(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -643,7 +642,7 @@ def test_create_new_message_by_households_random(
 
 
 def test_create_new_message_by_target_population_full_list(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -686,7 +685,7 @@ def test_create_new_message_by_target_population_full_list(
 
 
 def test_create_new_message_target_population_random(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -735,7 +734,7 @@ def test_create_new_message_target_population_random(
 
 
 def test_create_message_validation_error_payment_plan_no_recipients(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -765,7 +764,7 @@ def test_create_message_validation_error_payment_plan_no_recipients(
 
 
 def test_create_message_validation_error_rdi_no_recipients(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -796,7 +795,7 @@ def test_create_message_validation_error_rdi_no_recipients(
 
 
 def test_create_message_invalid_request(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -834,7 +833,7 @@ def test_create_message_invalid_request(
 
 
 def test_sample_size(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -877,7 +876,7 @@ def test_sample_size(
 
 
 def test_filter_messages_by_created_at(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -906,7 +905,7 @@ def test_filter_messages_by_created_at(
 
 
 def test_filter_messages_by_title(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -937,7 +936,7 @@ def test_filter_messages_by_title(
 
 
 def test_filter_messages_by_body(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,
@@ -968,7 +967,7 @@ def test_filter_messages_by_body(
 
 
 def test_filter_messages_by_sampling_type(
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     authenticated_client,
     user,
     business_area,

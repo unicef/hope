@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
@@ -30,7 +29,7 @@ LANGUAGES: list[Language] = [
 
 class Languages:
     @classmethod
-    def get_choices(cls) -> list[dict[str, Any]]:
+    def get_choices(cls) -> list[dict[str, object]]:
         return [
             {
                 "label": {"English(EN)": language.english},

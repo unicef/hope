@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.postgres.fields import ArrayField
@@ -189,7 +189,9 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     sender=PaymentVerificationPlan,
     dispatch_uid="update_verification_status_in_cash_plan",
 )
-def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerificationPlan, **kwargs: Any) -> None:
+def update_verification_status_in_cash_plan(
+    sender: type[models.Model], instance: PaymentVerificationPlan, **kwargs: object
+) -> None:
     build_summary(instance.payment_plan)
 
 
@@ -199,6 +201,6 @@ def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerifi
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
 def update_verification_status_in_cash_plan_on_delete(
-    sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
+    sender: type[models.Model], instance: PaymentVerificationPlan, **kwargs: object
 ) -> None:
     build_summary(instance.payment_plan)

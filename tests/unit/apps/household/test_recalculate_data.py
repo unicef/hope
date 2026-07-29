@@ -1,5 +1,4 @@
 import datetime
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.utils import timezone
@@ -47,7 +46,7 @@ def business_area() -> BusinessArea:
 
 
 @pytest.fixture
-def program(business_area: BusinessArea) -> Any:
+def program(business_area: BusinessArea) -> object:
     program = ProgramFactory(business_area=business_area)
     dct = program.data_collecting_type
     dct.recalculate_composition = True
@@ -56,13 +55,13 @@ def program(business_area: BusinessArea) -> Any:
 
 
 @pytest.fixture
-def registration_data_import(business_area: BusinessArea, program: Any) -> Any:
+def registration_data_import(business_area: BusinessArea, program: object) -> object:
     return RegistrationDataImportFactory(business_area=business_area, program=program)
 
 
 @pytest.fixture
 def household_with_individuals(
-    business_area: BusinessArea, program: Any, registration_data_import: Any
+    business_area: BusinessArea, program: object, registration_data_import: object
 ) -> tuple[Household, list[Individual]]:
     household = HouseholdFactory(
         business_area=business_area,
@@ -231,7 +230,7 @@ def test_recalculate_population_fields_task(household_with_individuals: tuple) -
 
 @freeze_time("2021-07-30")
 def test_recalculation_for_last_registration_date(
-    business_area: BusinessArea, program: Any, registration_data_import: Any
+    business_area: BusinessArea, program: object, registration_data_import: object
 ) -> None:
     household = HouseholdFactory(
         business_area=business_area,

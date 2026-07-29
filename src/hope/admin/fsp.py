@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
@@ -45,7 +45,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
 
     readonly_fields = ("created_by",)
 
-    def total_selected_columns(self, obj: Any) -> str:
+    def total_selected_columns(self, obj: object) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
 
     total_selected_columns.short_description = "# of columns"
@@ -64,10 +64,10 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
             obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_change_fsp()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_change_fsp()
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -79,7 +79,7 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
         model = FspXlsxTemplatePerDeliveryMechanism
         fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
 
-    def clean(self) -> dict[str, Any] | None:
+    def clean(self) -> dict[str, object] | None:
         cleaned_data = super().clean()
         delivery_mechanism = cleaned_data.get("delivery_mechanism")
         financial_service_provider = cleaned_data.get("financial_service_provider")
@@ -147,10 +147,10 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
             obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_change_fsp()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_change_fsp()
 
     def has_add_permission(self, request: HttpRequest) -> bool:
@@ -172,7 +172,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
             financial_service_provider=obj,
         ).distinct()
 
-    def clean(self) -> dict[str, Any] | None:
+    def clean(self) -> dict[str, object] | None:
         if self.instance:
             protected_fields = [
                 "name",
@@ -264,10 +264,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
             obj.created_by = cast("User", request.user)
         return super().save_model(request, obj, form, change)
 
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_change_fsp()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.can_change_fsp()
 
     def has_add_permission(self, request: HttpRequest) -> bool:

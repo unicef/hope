@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.db import transaction
+from django.db.models import Model
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
@@ -11,7 +10,7 @@ from hope.models import FlexibleAttribute, PDUXlsxTemplate, PDUXlsxUpload, Perio
 @receiver(post_save, sender=PDUXlsxTemplate)
 @receiver(pre_delete, sender=PDUXlsxTemplate)
 def increment_periodic_data_update_template_version_cache(
-    sender: Any, instance: PDUXlsxTemplate, **kwargs: dict
+    sender: type[Model], instance: PDUXlsxTemplate, **kwargs: dict
 ) -> None:
     business_area_slug = instance.business_area.slug
     program_code = instance.program.code
@@ -28,7 +27,9 @@ def increment_periodic_data_update_template_version_cache_function(business_area
 
 @receiver(post_save, sender=PDUXlsxUpload)
 @receiver(pre_delete, sender=PDUXlsxUpload)
-def increment_periodic_data_update_upload_version_cache(sender: Any, instance: PDUXlsxUpload, **kwargs: dict) -> None:
+def increment_periodic_data_update_upload_version_cache(
+    sender: type[Model], instance: PDUXlsxUpload, **kwargs: dict
+) -> None:
     business_area_slug = instance.template.business_area.slug
     program_code = instance.template.program.code
 
@@ -43,7 +44,7 @@ def increment_periodic_data_update_upload_version_cache(sender: Any, instance: P
 @receiver(post_save, sender=FlexibleAttribute)
 @receiver(pre_delete, sender=FlexibleAttribute)
 def increment_periodic_field_version_cache_for_flexible_attribute(
-    sender: Any, instance: FlexibleAttribute, **kwargs: dict
+    sender: type[Model], instance: FlexibleAttribute, **kwargs: dict
 ) -> None:
     if instance.type == FlexibleAttribute.PDU and instance.program:
         business_area_slug = instance.program.business_area.slug
@@ -54,7 +55,7 @@ def increment_periodic_field_version_cache_for_flexible_attribute(
 @receiver(post_save, sender=PeriodicFieldData)
 @receiver(pre_delete, sender=PeriodicFieldData)
 def increment_periodic_field_version_cache_for_periodic_field_data(
-    sender: Any, instance: PeriodicFieldData, **kwargs: dict
+    sender: type[Model], instance: PeriodicFieldData, **kwargs: dict
 ) -> None:
     flex_field = getattr(instance, "flex_field", None)
     if flex_field:

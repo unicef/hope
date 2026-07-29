@@ -1,6 +1,5 @@
 from io import BytesIO
 from pathlib import Path
-from typing import Any
 from unittest.mock import Mock, patch
 
 from django.core.files import File
@@ -18,17 +17,17 @@ FILES_DIR = Path(__file__).resolve().parent / "test_file"
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area)
 
 
 @pytest.fixture
-def program_with_social_worker(business_area: Any) -> Any:
+def program_with_social_worker(business_area: object) -> object:
     data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
     beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
     return ProgramFactory(
@@ -39,14 +38,14 @@ def program_with_social_worker(business_area: Any) -> Any:
 
 
 @pytest.fixture
-def import_data(business_area: Any) -> ImportData:
+def import_data(business_area: object) -> ImportData:
     content = (FILES_DIR / "new_reg_data_import.xlsx").read_bytes()
     file = File(BytesIO(content), name="new_reg_data_import.xlsx")
     return ImportDataFactory(file=file, business_area_slug=business_area.slug)
 
 
 @pytest.fixture
-def import_data_people(business_area: Any) -> ImportData:
+def import_data_people(business_area: object) -> ImportData:
     content = (FILES_DIR / "rdi_people_test.xlsx").read_bytes()
     file = File(BytesIO(content), name="rdi_people_test.xlsx")
     return ImportDataFactory(file=file, business_area_slug=business_area.slug)
@@ -56,7 +55,7 @@ def import_data_people(business_area: Any) -> ImportData:
 def test_people(
     validate_everything_mock: Mock,
     import_data_people: ImportData,
-    program_with_social_worker: Any,
+    program_with_social_worker: object,
 ) -> None:
     validate_everything_mock.return_value = []
     ValidateXlsxImport().execute(import_data_people, program_with_social_worker)
@@ -72,7 +71,7 @@ def test_people(
 def test_import_individuals_without_errors(
     validate_everything_mock: Mock,
     import_data: ImportData,
-    program: Any,
+    program: object,
 ) -> None:
     validate_everything_mock.return_value = []
     ValidateXlsxImport().execute(import_data, program)
@@ -88,7 +87,7 @@ def test_import_individuals_without_errors(
 def test_import_individuals_with_errors(
     validate_everything_mock: Mock,
     import_data: ImportData,
-    program: Any,
+    program: object,
 ) -> None:
     validate_everything_mock.return_value = [
         {
@@ -106,7 +105,7 @@ def test_import_individuals_with_errors(
 def test_import_individuals_with_general_errors(
     validate_everything_mock: Mock,
     import_data: ImportData,
-    program: Any,
+    program: object,
 ) -> None:
     validate_everything_mock.return_value = [
         {

@@ -1,7 +1,5 @@
 """Tests for Groups API endpoints."""
 
-from typing import Any
-
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 import pytest
@@ -21,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_afg(db: Any) -> BusinessArea:
+def business_area_afg(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -30,7 +28,7 @@ def business_area_afg(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -40,12 +38,12 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def content_type_user(db: Any) -> ContentType:
+def content_type_user(db: object) -> ContentType:
     return ContentType.objects.get_for_model(User)
 
 
 @pytest.fixture
-def content_type_group(db: Any) -> ContentType:
+def content_type_group(db: object) -> ContentType:
     return ContentType.objects.get_for_model(Group)
 
 
@@ -179,11 +177,11 @@ def test_list_groups_without_authentication(all_groups):
 
 
 def test_list_groups(
-    api_client: Any,
+    api_client: object,
     user: User,
     business_area_afg: BusinessArea,
     all_groups,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ):
     create_user_role_with_permissions(
         user=user,
@@ -210,12 +208,12 @@ def test_retrieve_group_without_authentication(group_approver: Group):
 
 
 def test_retrieve_group_with_authentication(
-    api_client: Any,
+    api_client: object,
     user: User,
     business_area_afg: BusinessArea,
     group_approver: Group,
     perm_view_user: Permission,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ):
     create_user_role_with_permissions(
         user=user,
@@ -249,10 +247,10 @@ def test_retrieve_group_with_authentication(
 
 
 def test_retrieve_nonexistent_group(
-    api_client: Any,
+    api_client: object,
     user: User,
     business_area_afg: BusinessArea,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ):
     create_user_role_with_permissions(
         user=user,
@@ -266,11 +264,11 @@ def test_retrieve_nonexistent_group(
 
 
 def test_list_groups_ordering(
-    api_client: Any,
+    api_client: object,
     user: User,
     business_area_afg: BusinessArea,
     all_groups,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ):
     create_user_role_with_permissions(
         user=user,
@@ -301,11 +299,11 @@ def test_count_groups_without_authentication(all_groups):
 
 
 def test_count_groups(
-    api_client: Any,
+    api_client: object,
     user: User,
     business_area_afg: BusinessArea,
     all_groups,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ):
     create_user_role_with_permissions(
         user=user,

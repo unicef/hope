@@ -1,7 +1,7 @@
 """Tests for periodic data field views."""
 
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -28,12 +28,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -43,7 +43,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -58,25 +58,25 @@ def program2(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def periodic_field1(program1: Program) -> Any:
+def periodic_field1(program1: Program) -> object:
     periodic_field1_data = PeriodicFieldDataFactory()
     return FlexibleAttributeForPDUFactory(program=program1, pdu_data=periodic_field1_data)
 
 
 @pytest.fixture
-def periodic_field2(program1: Program) -> Any:
+def periodic_field2(program1: Program) -> object:
     periodic_field2_data = PeriodicFieldDataFactory()
     return FlexibleAttributeForPDUFactory(program=program1, pdu_data=periodic_field2_data)
 
 
 @pytest.fixture
-def periodic_field3(program1: Program) -> Any:
+def periodic_field3(program1: Program) -> object:
     periodic_field3_data = PeriodicFieldDataFactory()
     return FlexibleAttributeForPDUFactory(program=program1, pdu_data=periodic_field3_data)
 
 
 @pytest.fixture
-def periodic_field_program2(program2: Program) -> Any:
+def periodic_field_program2(program2: Program) -> object:
     periodic_field_data_program2 = PeriodicFieldDataFactory()
     return FlexibleAttributeForPDUFactory(program=program2, pdu_data=periodic_field_data_program2)
 
@@ -98,12 +98,12 @@ def test_list_periodic_fields(
     user: User,
     business_area: BusinessArea,
     program1: Program,
-    periodic_field1: Any,
-    periodic_field2: Any,
-    periodic_field3: Any,
-    periodic_field_program2: Any,
+    periodic_field1: object,
+    periodic_field2: object,
+    periodic_field3: object,
+    periodic_field_program2: object,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -166,12 +166,12 @@ def test_list_periodic_fields_caching(
     user: User,
     business_area: BusinessArea,
     program1: Program,
-    periodic_field1: Any,
-    periodic_field2: Any,
-    periodic_field3: Any,
-    periodic_field_program2: Any,
+    periodic_field1: object,
+    periodic_field2: object,
+    periodic_field3: object,
+    periodic_field_program2: object,
     url_list: str,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,

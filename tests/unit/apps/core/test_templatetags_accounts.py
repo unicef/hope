@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.test import RequestFactory
 import pytest
 
@@ -56,7 +54,7 @@ def test_get_admin_link_returns_admin_change_url(user: User) -> None:
     assert get_admin_link(user) == f"/api/unicorn/account/user/{user.pk}/change/"
 
 
-def test_is_root_true_for_superuser_with_valid_token(superuser: User, settings: Any) -> None:
+def test_is_root_true_for_superuser_with_valid_token(superuser: User, settings: object) -> None:
     settings.ROOT_TOKEN = "root-token"
     request = RequestFactory().get("/", headers={"x-root-token": "root-token"})
     request.user = superuser
@@ -64,7 +62,7 @@ def test_is_root_true_for_superuser_with_valid_token(superuser: User, settings: 
     assert _is_root(request) is True
 
 
-def test_is_root_false_for_superuser_with_wrong_token(superuser: User, settings: Any) -> None:
+def test_is_root_false_for_superuser_with_wrong_token(superuser: User, settings: object) -> None:
     settings.ROOT_TOKEN = "root-token"
     request = RequestFactory().get("/", headers={"x-root-token": "wrong-token"})
     request.user = superuser
@@ -72,7 +70,7 @@ def test_is_root_false_for_superuser_with_wrong_token(superuser: User, settings:
     assert _is_root(request) is False
 
 
-def test_is_root_false_for_non_superuser_with_valid_token(user: User, settings: Any) -> None:
+def test_is_root_false_for_non_superuser_with_valid_token(user: User, settings: object) -> None:
     settings.ROOT_TOKEN = "root-token"
     request = RequestFactory().get("/", headers={"x-root-token": "root-token"})
     request.user = user

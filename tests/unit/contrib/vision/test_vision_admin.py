@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -24,7 +23,7 @@ def program_cycle(afghanistan):
 
 
 @pytest.fixture
-def admin_user() -> Any:
+def admin_user() -> object:
     User = get_user_model()  # noqa: N806
     return User.objects.create_superuser(
         username="admin",
@@ -34,7 +33,7 @@ def admin_user() -> Any:
 
 
 @pytest.fixture
-def admin_client(admin_user: Any) -> Client:
+def admin_client(admin_user: object) -> Client:
     client = Client()
     client.login(username="admin", password="password")
     return client

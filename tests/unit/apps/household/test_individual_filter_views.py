@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 from constance.test import override_config
 from django.utils import timezone
@@ -83,7 +83,7 @@ def program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def user(afghanistan: BusinessArea, program: Program, create_user_role_with_permissions: Callable) -> Any:
+def user(afghanistan: BusinessArea, program: Program, create_user_role_with_permissions: Callable) -> object:
     partner = PartnerFactory(name="TestPartner")
     user = UserFactory(partner=partner)
     create_user_role_with_permissions(
@@ -96,7 +96,7 @@ def user(afghanistan: BusinessArea, program: Program, create_user_role_with_perm
 
 
 @pytest.fixture
-def client(api_client: Callable, user: Any, mock_elasticsearch: Any) -> Any:
+def client(api_client: Callable, user: object, mock_elasticsearch: object) -> object:
     return api_client(user)
 
 
@@ -157,7 +157,7 @@ def golden_duplicate_individual(afghanistan: BusinessArea, program: Program) -> 
 
 
 @pytest.fixture
-def individual_update_ticket(afghanistan: BusinessArea, program: Program) -> dict[str, Any]:
+def individual_update_ticket(afghanistan: BusinessArea, program: Program) -> dict[str, object]:
     household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
     individual = household.head_of_household
     ticket_details = TicketIndividualDataUpdateDetailsFactory(individual=individual, individual_data={})
@@ -168,7 +168,7 @@ def individual_update_ticket(afghanistan: BusinessArea, program: Program) -> dic
 
 
 @pytest.fixture
-def empty_complaint_ticket() -> Any:
+def empty_complaint_ticket() -> object:
     ticket_details = TicketComplaintDetailsFactory(household=None, individual=None, payment=None)
     ticket = ticket_details.ticket
     ticket.unicef_id = "GRV-8004"
@@ -177,7 +177,7 @@ def empty_complaint_ticket() -> Any:
 
 
 def _test_filter_individuals_in_list(
-    client: Any,
+    client: object,
     list_url: str,
     filters: dict,
     program: Program,
@@ -202,7 +202,9 @@ def _test_filter_individuals_in_list(
     assert response_data[0]["id"] == str(individual2.id)
 
 
-def test_filter_by_rdi_id(client: Any, list_url: str, user: Any, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_rdi_id(
+    client: object, list_url: str, user: object, afghanistan: BusinessArea, program: Program
+) -> None:
     registration_data_import_1 = RegistrationDataImportFactory(
         imported_by=user, business_area=afghanistan, program=program
     )
@@ -220,7 +222,7 @@ def test_filter_by_rdi_id(client: Any, list_url: str, user: Any, afghanistan: Bu
     )
 
 
-def test_filter_by_document_number(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_document_number(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     document_passport = DocumentTypeFactory(key="passport")
     document_id_card = DocumentTypeFactory(key="id_card")
     individual1, individual2 = _create_test_individuals(program, afghanistan)
@@ -236,7 +238,7 @@ def test_filter_by_document_number(client: Any, list_url: str, afghanistan: Busi
     assert response_data[0]["id"] == str(individual2.id)
 
 
-def test_filter_by_full_name(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_full_name(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     _test_filter_individuals_in_list(
         client,
         list_url,
@@ -248,7 +250,7 @@ def test_filter_by_full_name(client: Any, list_url: str, afghanistan: BusinessAr
     )
 
 
-def test_filter_by_sex(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_sex(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     individual_m, individual_f = _create_test_individuals(
         program, afghanistan, individual1_data={"sex": MALE}, individual2_data={"sex": FEMALE}
     )
@@ -272,7 +274,7 @@ def test_filter_by_sex(client: Any, list_url: str, afghanistan: BusinessArea, pr
     assert str(individual_nc.id) not in individuals_ids
 
 
-def test_filter_by_status(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_status(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     _test_filter_individuals_in_list(
         client,
         list_url,
@@ -284,7 +286,7 @@ def test_filter_by_status(client: Any, list_url: str, afghanistan: BusinessArea,
     )
 
 
-def test_filter_by_flags(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_flags(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     _test_filter_individuals_in_list(
         client,
         list_url,
@@ -295,7 +297,7 @@ def test_filter_by_flags(client: Any, list_url: str, afghanistan: BusinessArea, 
     )
 
 
-def test_filter_by_withdrawn(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_withdrawn(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     _test_filter_individuals_in_list(
         client,
         list_url,
@@ -307,7 +309,7 @@ def test_filter_by_withdrawn(client: Any, list_url: str, afghanistan: BusinessAr
     )
 
 
-def test_filter_by_excluded_id(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_excluded_id(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     individual1, individual2 = _create_test_individuals(program, afghanistan)
     response = client.get(list_url, {"excluded_id": str(individual1.id)})
     assert response.status_code == status.HTTP_200_OK
@@ -326,7 +328,7 @@ def test_filter_by_excluded_id(client: Any, list_url: str, afghanistan: Business
     ],
 )
 def test_filter_by_is_active_program(
-    client: Any,
+    client: object,
     list_url: str,
     afghanistan: BusinessArea,
     program: Program,
@@ -342,7 +344,7 @@ def test_filter_by_is_active_program(
     assert len(response.json()["results"]) == expected_results
 
 
-def test_filter_by_rdi_merge_status(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_rdi_merge_status(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     _test_filter_individuals_in_list(
         client,
         list_url,
@@ -356,7 +358,7 @@ def test_filter_by_rdi_merge_status(client: Any, list_url: str, afghanistan: Bus
 
 @pytest.mark.parametrize("filter_by_field", ["admin1", "admin2"])
 def test_filter_by_area(
-    client: Any, list_url: str, afghanistan: BusinessArea, program: Program, filter_by_field: str
+    client: object, list_url: str, afghanistan: BusinessArea, program: Program, filter_by_field: str
 ) -> None:
     country = CountryFactory()
     admin_type_1 = AreaTypeFactory(country=country, area_level=1)
@@ -375,7 +377,7 @@ def test_filter_by_area(
 
 
 def test_filter_by_last_registration_date(
-    client: Any, list_url: str, afghanistan: BusinessArea, program: Program
+    client: object, list_url: str, afghanistan: BusinessArea, program: Program
 ) -> None:
     import datetime
 
@@ -398,7 +400,7 @@ def test_filter_by_last_registration_date(
     assert response_data_before[0]["id"] == str(individual1.id)
 
 
-def test_filter_by_duplicates_only(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_duplicates_only(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     _test_filter_individuals_in_list(
         client,
         list_url,
@@ -410,7 +412,7 @@ def test_filter_by_duplicates_only(client: Any, list_url: str, afghanistan: Busi
     )
 
 
-def test_filter_by_age(client: Any, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
+def test_filter_by_age(client: object, list_url: str, afghanistan: BusinessArea, program: Program) -> None:
     individual_age_5, individual_age_10 = _create_test_individuals(
         program,
         afghanistan,
@@ -453,7 +455,7 @@ def test_filter_by_age(client: Any, list_url: str, afghanistan: BusinessArea, pr
 
 
 @pytest.fixture
-def search_user(afghanistan: BusinessArea, create_user_role_with_permissions: Callable) -> Any:
+def search_user(afghanistan: BusinessArea, create_user_role_with_permissions: Callable) -> object:
     partner = PartnerFactory(name="SearchPartner")
     user = UserFactory(partner=partner)
     create_user_role_with_permissions(
@@ -466,12 +468,12 @@ def search_user(afghanistan: BusinessArea, create_user_role_with_permissions: Ca
 
 
 @pytest.fixture
-def search_client(api_client: Callable, search_user: Any) -> Any:
+def search_client(api_client: Callable, search_user: object) -> object:
     return api_client(search_user)
 
 
 def _test_search(
-    client: Any,
+    client: object,
     list_url: str,
     afghanistan: BusinessArea,
     program: Program,
@@ -481,7 +483,7 @@ def _test_search(
     household1_data: Dict,
     household2_data: Dict,
     is_elasticsearch_enabled: bool = False,
-) -> tuple[Any, list[Individual]]:
+) -> tuple[object, list[Individual]]:
     program2 = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
     individual1_p1, individual2_p1 = _create_test_individuals(
@@ -523,7 +525,7 @@ def _test_search(
     ],
 )
 def test_search(
-    search_client: Any,
+    search_client: object,
     list_url: str,
     afghanistan: BusinessArea,
     program: Program,
@@ -561,7 +563,7 @@ def test_search(
     ],
 )
 def test_search_db(
-    search_client: Any,
+    search_client: object,
     list_url: str,
     afghanistan: BusinessArea,
     program: Program,
@@ -600,7 +602,7 @@ def test_search_db(
     ],
 )
 def test_search_db_no_program_filter(
-    search_client: Any,
+    search_client: object,
     afghanistan: BusinessArea,
     program: Program,
     filters: Dict,
@@ -656,7 +658,7 @@ def test_status_filter_matches_duplicate_and_withdrawn(flagged_individuals: dict
     assert set(result) == {flagged_individuals["duplicate"], flagged_individuals["withdrawn"]}
 
 
-def test_filter_is_active_program_with_none_returns_queryset_unchanged(db: Any) -> None:
+def test_filter_is_active_program_with_none_returns_queryset_unchanged(db: object) -> None:
     queryset = Individual.objects.all()
     individual_filter = IndividualFilter(data={}, queryset=queryset, request=None)
 
@@ -693,7 +695,7 @@ def test_merged_individual_filter_duplicates_only_false_returns_queryset_unchang
 
 
 def test_office_search_filter_by_grievance_returns_ticket_individual(
-    individual_update_ticket: dict[str, Any],
+    individual_update_ticket: dict[str, object],
 ) -> None:
     queryset = Individual.objects.all()
     individual_filter = IndividualOfficeSearchFilter(data={}, queryset=queryset, request=None)
@@ -703,7 +705,7 @@ def test_office_search_filter_by_grievance_returns_ticket_individual(
     assert list(result) == [individual_update_ticket["individual"]]
 
 
-def test_office_search_filter_by_grievance_without_individual_returns_none(empty_complaint_ticket: Any) -> None:
+def test_office_search_filter_by_grievance_without_individual_returns_none(empty_complaint_ticket: object) -> None:
     queryset = Individual.objects.all()
     individual_filter = IndividualOfficeSearchFilter(data={}, queryset=queryset, request=None)
 

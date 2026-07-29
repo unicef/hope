@@ -1,7 +1,6 @@
 """Tests for user import CSV and Kobo user actions."""
 
 from pathlib import Path
-from typing import Any
 
 from django.urls import reverse
 from django_webtest import WebTest
@@ -21,7 +20,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_afghanistan(db: Any) -> BusinessArea:
+def business_area_afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         code="0060",
         slug="afghanistan",
@@ -30,22 +29,22 @@ def business_area_afghanistan(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def superuser_staff(db: Any) -> User:
+def superuser_staff(db: object) -> User:
     return UserFactory(is_superuser=True, is_staff=True)
 
 
 @pytest.fixture
-def role_no_access(db: Any) -> Role:
+def role_no_access(db: object) -> Role:
     return RoleFactory(name="NoAccess")
 
 
 @pytest.fixture
-def role_2(db: Any) -> Role:
+def role_2(db: object) -> Role:
     return RoleFactory(name="Role_2")
 
 
 @pytest.fixture
-def partner_1(db: Any) -> Partner:
+def partner_1(db: object) -> Partner:
     return PartnerFactory(name="Partner1")
 
 

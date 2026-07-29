@@ -2,7 +2,7 @@
 
 import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -35,12 +35,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -65,12 +65,12 @@ def pdu_field2(program: Program) -> FlexibleAttribute:
 
 
 @pytest.fixture
-def pdu_field_other(db: Any) -> FlexibleAttribute:
+def pdu_field_other(db: object) -> FlexibleAttribute:
     return FlexibleAttributeForPDUFactory()
 
 
 @pytest.fixture
-def ukraine(db: Any) -> BusinessArea:
+def ukraine(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Ukraine", slug="ukraine")
 
 
@@ -125,7 +125,7 @@ def count_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -149,7 +149,7 @@ def clear_cache() -> None:
 )
 def test_program_list_with_permissions(
     permissions: list,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -243,7 +243,7 @@ def test_program_list_with_permissions(
 )
 def test_program_list_without_permissions(
     permissions: Enum,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -261,7 +261,7 @@ def test_program_list_without_permissions(
 
 
 def test_program_list_ordering(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -303,7 +303,7 @@ def test_program_list_ordering(
 
 
 def test_program_list_caching(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -363,7 +363,7 @@ def test_program_list_caching(
 
 
 def test_program_count_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     count_url: str,
@@ -386,7 +386,7 @@ def test_program_count_with_permission(
 
 
 def test_program_count_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     count_url: str,
@@ -408,7 +408,7 @@ def test_program_count_without_permission(
 
 
 def test_filter_by_status(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -438,7 +438,7 @@ def test_filter_by_status(
 
 
 def test_filter_by_sector(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -468,7 +468,7 @@ def test_filter_by_sector(
 
 
 def test_filter_by_budget(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -498,7 +498,7 @@ def test_filter_by_budget(
 
 
 def test_filter_by_start_date(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -528,7 +528,7 @@ def test_filter_by_start_date(
 
 
 def test_filter_by_end_date(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -566,7 +566,7 @@ def test_filter_by_end_date(
 
 
 def test_filter_by_name(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -595,7 +595,7 @@ def test_filter_by_name(
 
 
 def test_filter_by_compatible_dct(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -627,7 +627,7 @@ def test_filter_by_compatible_dct(
 
 
 def test_filter_by_beneficiary_group_match(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -671,7 +671,7 @@ def test_filter_by_beneficiary_group_match(
 
 
 def test_filter_by_search(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,
@@ -700,7 +700,7 @@ def test_filter_by_search(
 
 
 def test_filter_number_of_households(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     list_url: str,

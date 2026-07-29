@@ -1,7 +1,7 @@
 from functools import cached_property
 import logging
 import re
-from typing import Any, Generator
+from typing import Generator
 from uuid import UUID
 
 from constance import config
@@ -87,7 +87,7 @@ class DjAdminManager:
         self._username = request.session["kobo_username"] = None
         self._password = request.session["kobo_password"] = None
 
-    def login(self, request: HttpRequest | None = None, twin: Any | None = None) -> None:
+    def login(self, request: HttpRequest | None = None, twin: object | None = None) -> None:
         try:
             username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
         except ValueError:
@@ -117,12 +117,12 @@ class DjAdminManager:
             logger.warning(e)
             raise
 
-    def _get(self, url: str) -> Any:
+    def _get(self, url: str) -> object:
         self._last_response = self.client.get(url, allow_redirects=False)
         self.client.headers["Referer"] = url
         return self._last_response
 
-    def _post(self, url: str, data: dict) -> Any:
+    def _post(self, url: str, data: dict) -> object:
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
@@ -145,7 +145,7 @@ class DjAdminManager:
 
             page += 1
 
-    def get_csrfmiddlewaretoken(self) -> Any:
+    def get_csrfmiddlewaretoken(self) -> object:
         regex = re.compile("""csrfmiddlewaretoken["'] +value=["'](.*)["']""")
         try:
             m = regex.search(self._last_response.content.decode("utf8"))

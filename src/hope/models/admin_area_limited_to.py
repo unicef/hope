@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -25,6 +23,6 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
         if self.program.partner_access != self.program.SELECTED_PARTNERS_ACCESS:
             raise ValidationError(f"Area limits cannot be set for programs with {self.program.partner_access} access.")
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         self.clean()
         super().save(*args, **kwargs)

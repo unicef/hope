@@ -1,7 +1,6 @@
 """Tests for signals that invalidate permission caches."""
 
 from datetime import timedelta
-from typing import Any
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -25,7 +24,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_afg(db: Any) -> BusinessArea:
+def business_area_afg(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -34,12 +33,12 @@ def business_area_afg(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def partner1(db: Any) -> Partner:
+def partner1(db: object) -> Partner:
     return PartnerFactory(name="Partner")
 
 
 @pytest.fixture
-def partner2(db: Any) -> Partner:
+def partner2(db: object) -> Partner:
     return PartnerFactory(name="Partner 2")
 
 
@@ -64,12 +63,12 @@ def user2_partner2(partner2: Partner) -> User:
 
 
 @pytest.fixture
-def role1(db: Any) -> Role:
+def role1(db: object) -> Role:
     return RoleFactory(name="Role 1")
 
 
 @pytest.fixture
-def role2(db: Any) -> Role:
+def role2(db: object) -> Role:
     return RoleFactory(name="Role 2")
 
 
@@ -113,7 +112,7 @@ def role_assignment3(partner1: Partner, role2: Role, business_area_afg: Business
 
 
 @pytest.fixture
-def content_type(db: Any) -> ContentType:
+def content_type(db: object) -> ContentType:
     return ContentType.objects.get_for_model(BusinessArea)
 
 

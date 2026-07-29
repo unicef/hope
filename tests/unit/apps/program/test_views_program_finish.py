@@ -1,7 +1,7 @@
 """Tests for program finish API endpoint."""
 
 import datetime
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -22,12 +22,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="Test Partner")
 
 
@@ -64,12 +64,12 @@ def finish_url(afghanistan: BusinessArea, program: Program) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_finish_program_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -101,7 +101,7 @@ def test_finish_program_with_permission(
 )
 def test_finish_program_without_permission(
     permissions: list,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -119,7 +119,7 @@ def test_finish_program_without_permission(
 
 
 def test_finish_program_already_finished(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -145,7 +145,7 @@ def test_finish_program_already_finished(
 
 
 def test_finish_program_invalid_status_draft(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -171,7 +171,7 @@ def test_finish_program_invalid_status_draft(
 
 
 def test_finish_program_without_end_date(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -197,7 +197,7 @@ def test_finish_program_without_end_date(
 
 
 def test_finish_program_with_active_cycles(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -222,7 +222,7 @@ def test_finish_program_with_active_cycles(
 
 
 def test_finish_program_with_unreconciled_payment_plans(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -255,7 +255,7 @@ def test_finish_program_with_unreconciled_payment_plans(
 
 
 def test_finish_program_with_reconciled_payment_plans(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

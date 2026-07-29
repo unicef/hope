@@ -1,10 +1,11 @@
 import functools
-from typing import Any, Callable, ParamSpec
+from typing import Callable, ParamSpec
 
 from constance import config
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Count, Max, QuerySet
+from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import CacheResponse
@@ -20,13 +21,13 @@ class _ConstanceTTLCacheResponse(CacheResponse):
     # breaking bootstrap (URL resolver runs during `manage.py check`).
     def __init__(
         self,
-        key_func: Any = None,
+        key_func: object | None = None,
         cache: str | None = None,
         cache_errors: bool | None = None,
     ) -> None:
         super().__init__(timeout=0, key_func=key_func, cache=cache, cache_errors=cache_errors)
 
-    def calculate_timeout(self, view_instance: Any, **_: Any) -> int:
+    def calculate_timeout(self, view_instance: object, **_: object) -> int:
         return config.REST_API_TTL
 
 
@@ -101,7 +102,7 @@ def etag_decorator(
     return inner
 
 
-def get_or_create_cache_key(key: str, default: Any = 1) -> Any:
+def get_or_create_cache_key(key: str, default: object = 1) -> object:
     """Get value from cache by key or create it with default value."""
     return cache.get_or_set(key, default, timeout=config.REST_API_TTL)
 
@@ -120,10 +121,10 @@ def increment_cache_key(key: str) -> int:
 class BusinessAreaVersionKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -137,10 +138,10 @@ class RendererKeyBit(KeyBitBase):
 
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -164,10 +165,10 @@ class BusinessAreaKeyBitMixin(KeyBitBase):
 
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -184,10 +185,10 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
 
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -215,18 +216,18 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
 
     def _get_queryset(
         self,
-        business_area_slug: Any | None,
-        program_code: Any | None,
-        view_instance: Any | None,
+        business_area_slug: object | None,
+        program_code: object | None,
+        view_instance: object | None,
     ) -> QuerySet:
         return view_instance.get_queryset()
 
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -249,10 +250,10 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
 class AreaLimitKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: Any,
-        view_instance: Any,
-        view_method: Any,
-        request: Any,
+        params: object,
+        view_instance: object,
+        view_method: object,
+        request: HttpRequest,
         args: tuple,
         kwargs: dict,
     ) -> str:

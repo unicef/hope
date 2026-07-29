@@ -1,7 +1,7 @@
 """Tests for registration data import views."""
 
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -106,7 +106,7 @@ def url_list(afghanistan: BusinessArea, program1: Program) -> str:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -144,7 +144,7 @@ def test_list_registration_data_imports_permission(
     partner_permissions: list,
     is_permission_in_correct_program: bool,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     partner: Partner,
     user: User,
@@ -171,7 +171,7 @@ def test_list_registration_data_imports_permission(
 
 @freezegun.freeze_time("2022-01-01")
 def test_list_registration_data_imports(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     program1: Program,
@@ -254,7 +254,7 @@ def test_list_registration_data_imports(
 
 @freezegun.freeze_time("2022-01-01")
 def test_list_registration_data_imports_filter(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     program1: Program,
@@ -280,7 +280,7 @@ def test_list_registration_data_imports_filter(
 
 @freezegun.freeze_time("2022-01-01")
 def test_list_registration_data_imports_search_by_name(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     program1: Program,
@@ -306,7 +306,7 @@ def test_list_registration_data_imports_search_by_name(
 
 @freezegun.freeze_time("2022-01-01")
 def test_list_registration_data_imports_caching(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     program1: Program,

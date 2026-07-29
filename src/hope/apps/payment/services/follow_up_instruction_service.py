@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import IO, TYPE_CHECKING, Any, cast
+from typing import IO, TYPE_CHECKING, cast
 
 from django.db import transaction
 from django.db.models import Exists, OuterRef
@@ -187,7 +187,7 @@ class FollowUpInstructionService:
         self,
         action: str,
         user: "User",
-        extra_input_data: dict[str, Any] | None = None,
+        extra_input_data: dict[str, object] | None = None,
     ) -> FollowUpInstruction:
         instruction = self._require_instruction()
         for payment_plan in self._get_child_payment_plans():

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from unittest.mock import MagicMock, patch
 import uuid
 
@@ -113,12 +113,12 @@ def make_dummy_response(
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(name="Afghanistan")
 
 
 @pytest.fixture
-def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
+def rapidpro_task_setup(business_area: object) -> dict[str, object]:
     user = UserFactory()
 
     program = ProgramFactory(business_area=business_area, cycle=False)
@@ -172,7 +172,7 @@ def rapidpro_task_setup(business_area: Any) -> dict[str, Any]:
 
 
 @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-def test_filtering_by_start_id(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+def test_filtering_by_start_id(mock_parent_init: object, rapidpro_task_setup: dict[str, object]) -> None:
     mock_parent_init.return_value = None
     verification = rapidpro_task_setup["verification"]
     payment_record_verification_obj = verification.payment_record_verifications.first()
@@ -189,7 +189,7 @@ def test_filtering_by_start_id(mock_parent_init: Any, rapidpro_task_setup: dict[
 
 
 @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-def test_mapping(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+def test_mapping(mock_parent_init: object, rapidpro_task_setup: dict[str, object]) -> None:
     mock_parent_init.return_value = None
     verification = rapidpro_task_setup["verification"]
     payment_record_verification_obj = verification.payment_record_verifications.first()
@@ -212,7 +212,7 @@ def test_mapping(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> 
 
 
 @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-def test_not_received(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+def test_not_received(mock_parent_init: object, rapidpro_task_setup: dict[str, object]) -> None:
     mock_parent_init.return_value = None
     verification = rapidpro_task_setup["verification"]
     payment_record_verification = verification.payment_record_verifications.order_by("?").first()
@@ -238,7 +238,7 @@ def test_not_received(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]
 
 
 @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-def test_received_with_issues(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+def test_received_with_issues(mock_parent_init: object, rapidpro_task_setup: dict[str, object]) -> None:
     mock_parent_init.return_value = None
     verification = rapidpro_task_setup["verification"]
     payment_record_verification = verification.payment_record_verifications.order_by("?").first()
@@ -265,7 +265,7 @@ def test_received_with_issues(mock_parent_init: Any, rapidpro_task_setup: dict[s
 
 
 @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-def test_received(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+def test_received(mock_parent_init: object, rapidpro_task_setup: dict[str, object]) -> None:
     mock_parent_init.return_value = None
     verification = rapidpro_task_setup["verification"]
     payment_record_verification = verification.payment_record_verifications.order_by("?").first()
@@ -292,7 +292,7 @@ def test_received(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) ->
 
 
 @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-def test_wrong_phone_number(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+def test_wrong_phone_number(mock_parent_init: object, rapidpro_task_setup: dict[str, object]) -> None:
     mock_parent_init.return_value = None
     verification = rapidpro_task_setup["verification"]
     payment_record_verification = verification.payment_record_verifications.order_by("?").first()
@@ -317,7 +317,7 @@ def test_wrong_phone_number(mock_parent_init: Any, rapidpro_task_setup: dict[str
         assert payment_record_verification.status == PaymentVerification.STATUS_PENDING
 
 
-def test_recalculating_validity_on_number_change(rapidpro_task_setup: dict[str, Any]) -> None:
+def test_recalculating_validity_on_number_change(rapidpro_task_setup: dict[str, object]) -> None:
     individuals = rapidpro_task_setup["individuals"]
     ind = individuals[0]
 
@@ -335,7 +335,7 @@ def test_recalculating_validity_on_number_change(rapidpro_task_setup: dict[str, 
 
 
 @patch("hope.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
-def test_requests(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) -> None:
+def test_requests(mock_parent_init: object, rapidpro_task_setup: dict[str, object]) -> None:
     mock_parent_init.return_value = None
     api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
     api.url = ""
@@ -358,7 +358,7 @@ def test_requests(mock_parent_init: Any, rapidpro_task_setup: dict[str, Any]) ->
         api._handle_post_request("/endpoint", {"b": 2})
 
 
-def test_parse_json_urns_error(business_area: Any) -> None:
+def test_parse_json_urns_error(business_area: object) -> None:
     ba = business_area
     ba.rapid_pro_payment_verification_token = "TEST_TOKEN"
     ba.rapid_pro_host = "http://rapidpro.local"

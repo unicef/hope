@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.contrib import admin
 from django.http import HttpRequest
@@ -18,10 +18,10 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country", "alpha2", "alpha3", "ca_code")
 
-    def alpha2(self, obj: Any) -> str:
+    def alpha2(self, obj: object) -> str:
         return obj.country.iso_code2
 
-    def alpha3(self, obj: Any) -> str:
+    def alpha3(self, obj: object) -> str:
         return obj.country.iso_code3
 
     def get_queryset(self, request: HttpRequest) -> "QuerySet":

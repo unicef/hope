@@ -1,7 +1,6 @@
 """Tests for program admin functionality."""
 
 from io import BytesIO
-from typing import Any
 from unittest.mock import MagicMock, patch
 import zipfile
 
@@ -54,12 +53,12 @@ def _program_form_data(program: Program, **overrides: object) -> dict:
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory(username="adminuser", is_staff=True, is_superuser=True)
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
@@ -69,7 +68,7 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def area_type(db: Any) -> AreaType:
+def area_type(db: object) -> AreaType:
     return AreaTypeFactory(name="State1", area_level=1)
 
 
@@ -101,7 +100,7 @@ def admin_area3(business_area: BusinessArea, area_type: AreaType) -> Area:
 
 
 @pytest.fixture
-def unicef(db: Any) -> Partner:
+def unicef(db: object) -> Partner:
     return PartnerFactory(name="UNICEF")
 
 
@@ -111,7 +110,7 @@ def unicef_hq(unicef: Partner) -> Partner:
 
 
 @pytest.fixture
-def partner_without_role(db: Any) -> Partner:
+def partner_without_role(db: object) -> Partner:
     return PartnerFactory(name="Partner without role")
 
 
@@ -128,7 +127,7 @@ def partner_with_role(business_area: BusinessArea, program: Program) -> Partner:
 
 
 @pytest.fixture
-def django_app_no_csrf(django_app_factory: Any) -> Any:
+def django_app_no_csrf(django_app_factory: object) -> object:
     return django_app_factory(csrf_checks=False)
 
 
@@ -138,7 +137,7 @@ def area_limits_url(program: Program) -> str:
 
 
 def test_area_limits_get_request(
-    django_app: Any,
+    django_app: object,
     user: User,
     program: Program,
     business_area: BusinessArea,
@@ -164,7 +163,7 @@ def test_area_limits_get_request(
 
 
 def test_area_limits_post_request_create(
-    django_app_no_csrf: Any,
+    django_app_no_csrf: object,
     user: User,
     program: Program,
     unicef_hq: Partner,
@@ -193,7 +192,7 @@ def test_area_limits_post_request_create(
 
 
 def test_area_limits_post_request_edit(
-    django_app_no_csrf: Any,
+    django_app_no_csrf: object,
     user: User,
     program: Program,
     unicef_hq: Partner,
@@ -223,7 +222,7 @@ def test_area_limits_post_request_edit(
 
 
 def test_area_limits_post_request_delete(
-    django_app_no_csrf: Any,
+    django_app_no_csrf: object,
     user: User,
     program: Program,
     unicef_hq: Partner,
@@ -450,7 +449,7 @@ def test_bulk_upload_individuals_photos_action_updates_photos(
     job.save.assert_called_with(update_fields=["errors"])
 
 
-def test_check_index_button(django_app: Any, program: Program) -> None:
+def test_check_index_button(django_app: object, program: Program) -> None:
     user_with_perm = UserFactory(is_staff=True, is_superuser=False)
     perm = Permission.objects.get(codename="can_reindex_programs")
     user_with_perm.user_permissions.add(perm)
@@ -462,7 +461,7 @@ def test_check_index_button(django_app: Any, program: Program) -> None:
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
 
 
-def test_check_index_button_no_permission(django_app: Any, program: Program) -> None:
+def test_check_index_button_no_permission(django_app: object, program: Program) -> None:
     user_no_perm = UserFactory(is_staff=True, is_superuser=False)
     url = reverse("admin:program_program_check_index", args=[program.pk])
     with patch("hope.admin.program.check_program_indexes") as mock_check:
@@ -471,7 +470,7 @@ def test_check_index_button_no_permission(django_app: Any, program: Program) -> 
     assert response.status_code == 403
 
 
-def test_reindex_program_button(django_app: Any, program: Program) -> None:
+def test_reindex_program_button(django_app: object, program: Program) -> None:
     user_with_perm = UserFactory(is_staff=True, is_superuser=False)
     perm = Permission.objects.get(codename="can_reindex_programs")
     user_with_perm.user_permissions.add(perm)
@@ -483,7 +482,7 @@ def test_reindex_program_button(django_app: Any, program: Program) -> None:
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
 
 
-def test_reindex_program_button_no_permission(django_app: Any, program: Program) -> None:
+def test_reindex_program_button_no_permission(django_app: object, program: Program) -> None:
     user_no_perm = UserFactory(is_staff=True, is_superuser=False)
     url = reverse("admin:program_program_reindex_program", args=[program.pk])
     with patch("hope.admin.program.rebuild_program_indexes") as mock_rebuild:

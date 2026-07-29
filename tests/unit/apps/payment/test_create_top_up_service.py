@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Any
 from unittest import mock
 
 from freezegun import freeze_time
@@ -23,7 +22,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
@@ -33,20 +32,20 @@ def user() -> User:
 
 
 @pytest.fixture
-def cycle(business_area: Any) -> ProgramCycle:
+def cycle(business_area: object) -> ProgramCycle:
     program = ProgramFactory(business_area=business_area)
     return ProgramCycleFactory(program=program)
 
 
 @pytest.fixture
-def purpose(cycle: ProgramCycle) -> Any:
+def purpose(cycle: ProgramCycle) -> object:
     p = PaymentPlanPurposeFactory()
     cycle.program.payment_plan_purposes.add(p)
     return p
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle, user: User, purpose: Any) -> PaymentPlan:
+def regular_pp(business_area: object, cycle: ProgramCycle, user: User, purpose: object) -> PaymentPlan:
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -69,9 +68,9 @@ def source_payments(regular_pp: PaymentPlan) -> dict[str, Payment]:
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attributes(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
-    purpose: Any,
+    purpose: object,
     regular_pp: PaymentPlan,
     source_payments: dict[str, Payment],
 ) -> None:
@@ -97,11 +96,11 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_top_up_arrange_eligible_payments_act_run_task_assert_copies_with_empty_entitlement(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     regular_pp: PaymentPlan,
     source_payments: dict[str, Payment],
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
@@ -125,11 +124,11 @@ def test_create_top_up_arrange_eligible_payments_act_run_task_assert_copies_with
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_top_up_arrange_query_budget_act_create_assert_within_limit(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     regular_pp: PaymentPlan,
     source_payments: dict[str, Payment],
-    django_assert_num_queries: Any,
+    django_assert_num_queries: object,
 ) -> None:
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
@@ -139,7 +138,7 @@ def test_create_top_up_arrange_query_budget_act_create_assert_within_limit(
 
 
 def test_create_top_up_arrange_follow_up_origin_act_create_assert_raises(
-    user: User, business_area: Any, cycle: ProgramCycle
+    user: User, business_area: object, cycle: ProgramCycle
 ) -> None:
     follow_up_pp = PaymentPlanFactory(
         business_area=business_area,

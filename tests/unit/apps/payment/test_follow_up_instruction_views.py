@@ -1,6 +1,6 @@
 from decimal import Decimal
 import io
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 import openpyxl
@@ -32,24 +32,24 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def delivery_mechanism() -> Any:
+def delivery_mechanism() -> object:
     return DeliveryMechanismFactory(code="cash", name="Cash", payment_gateway_id="dm-cash")
 
 
 @pytest.fixture
-def fsp(delivery_mechanism: Any) -> Any:
+def fsp(delivery_mechanism: object) -> object:
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.add(delivery_mechanism)
     return fsp
 
 
 @pytest.fixture
-def delivery_template(fsp: Any, delivery_mechanism: Any) -> Any:
+def delivery_template(fsp: object, delivery_mechanism: object) -> object:
     template = FinancialServiceProviderXlsxTemplateFactory(
         columns=["payment_id", "entitlement_quantity", "delivered_quantity"],
         core_fields=[],
@@ -65,7 +65,7 @@ def delivery_template(fsp: Any, delivery_mechanism: Any) -> Any:
 
 
 @pytest.fixture
-def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any]:
+def follow_up_context(api_client: Callable, business_area: object) -> dict[str, object]:
     partner = PartnerFactory()
     user = UserFactory(partner=partner)
     program = ProgramFactory(business_area=business_area)
@@ -86,8 +86,8 @@ def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any
 
 def test_follow_up_instruction_detail_is_scoped_to_program(
     api_client: Callable,
-    create_user_role_with_permissions: Any,
-    business_area: Any,
+    create_user_role_with_permissions: object,
+    business_area: object,
 ) -> None:
     partner = PartnerFactory(name="Test Partner")
     user = UserFactory(partner=partner)
@@ -122,8 +122,8 @@ def test_follow_up_instruction_detail_is_scoped_to_program(
 
 def test_create_follow_up_instruction_rejects_duplicate_group_ids(
     api_client: Callable,
-    create_user_role_with_permissions: Any,
-    business_area: Any,
+    create_user_role_with_permissions: object,
+    business_area: object,
 ) -> None:
     partner = PartnerFactory(name="TestPartnerFI")
     user = UserFactory(partner=partner)
@@ -153,8 +153,8 @@ def test_create_follow_up_instruction_rejects_duplicate_group_ids(
 
 
 def test_follow_up_instruction_unlock(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -183,8 +183,8 @@ def test_follow_up_instruction_unlock(
 
 
 def test_follow_up_instruction_unlock_fsp(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -213,8 +213,8 @@ def test_follow_up_instruction_unlock_fsp(
 
 
 def test_follow_up_instruction_reject(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_LIST], ctx["business_area"], ctx["program"])
@@ -242,8 +242,8 @@ def test_follow_up_instruction_reject(
 
 
 def test_follow_up_instruction_delivery_import_xlsx_missing_file(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -265,8 +265,8 @@ def test_follow_up_instruction_delivery_import_xlsx_missing_file(
 
 
 def test_follow_up_instruction_delivery_import_xlsx_bad_zip_file(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -289,8 +289,8 @@ def test_follow_up_instruction_delivery_import_xlsx_bad_zip_file(
 
 
 def test_follow_up_instruction_delivery_import_xlsx_returns_400_on_errors(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -318,8 +318,8 @@ def test_follow_up_instruction_delivery_import_xlsx_returns_400_on_errors(
 
 
 def test_follow_up_instruction_abort(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(ctx["user"], [Permissions.PM_ABORT], ctx["business_area"], ctx["program"])
@@ -346,8 +346,8 @@ def test_follow_up_instruction_abort(
 
 
 def test_follow_up_instruction_reactivate_abort(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -376,10 +376,10 @@ def test_follow_up_instruction_reactivate_abort(
 
 
 def test_create_follow_up_instruction(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(ctx["user"], [Permissions.PM_CREATE], ctx["business_area"], ctx["program"])
@@ -426,10 +426,10 @@ def test_create_follow_up_instruction(
 
 
 def test_follow_up_instruction_lock(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -471,10 +471,10 @@ def test_follow_up_instruction_lock(
 
 
 def test_follow_up_instruction_lock_fsp(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -516,10 +516,10 @@ def test_follow_up_instruction_lock_fsp(
 
 
 def test_follow_up_instruction_send_for_approval(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -551,8 +551,8 @@ def test_follow_up_instruction_send_for_approval(
 
 
 def test_follow_up_instruction_approve(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -582,8 +582,8 @@ def test_follow_up_instruction_approve(
 
 
 def test_follow_up_instruction_authorize(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -613,8 +613,8 @@ def test_follow_up_instruction_authorize(
 
 
 def test_follow_up_instruction_mark_as_released(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -644,11 +644,11 @@ def test_follow_up_instruction_mark_as_released(
 
 
 def test_follow_up_instruction_delivery_export_xlsx(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
-    delivery_template: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    delivery_mechanism: object,
+    fsp: object,
+    delivery_template: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_LIST], ctx["business_area"], ctx["program"])
@@ -688,10 +688,10 @@ def test_follow_up_instruction_delivery_export_xlsx(
 
 
 def test_follow_up_instruction_delivery_import_xlsx(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(
@@ -747,10 +747,10 @@ def test_follow_up_instruction_delivery_import_xlsx(
 
 
 def test_follow_up_instruction_close(
-    follow_up_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    delivery_mechanism: Any,
-    fsp: Any,
+    follow_up_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    delivery_mechanism: object,
+    fsp: object,
 ) -> None:
     ctx = follow_up_context
     create_user_role_with_permissions(

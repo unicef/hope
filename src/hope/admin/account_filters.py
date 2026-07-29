@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable
+from typing import Iterable
 
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.contrib.admin.options import IncorrectLookupParameters
@@ -18,7 +18,7 @@ class BusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> list:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> list:
         return list(
             BusinessArea.objects.filter(role_assignments__user__isnull=False).values_list("id", "name").distinct()
         )
@@ -32,7 +32,7 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> Iterable[tuple[Any, str]] | None:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> Iterable[tuple[object, str]] | None:
         return Permissions.choices()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -46,7 +46,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     title = "Role"
     parameter_name = "role"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> list:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> list:
         types = Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 

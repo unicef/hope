@@ -2,7 +2,6 @@ import csv
 import logging
 from typing import (
     TYPE_CHECKING,
-    Any,
     Generator,
     Union,
 )
@@ -29,6 +28,7 @@ if TYPE_CHECKING:
     from django.db.models.fields.related import RelatedField
     from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
     from django.utils.functional import _StrOrPromise
+from django.db import models
 
 logger = logging.getLogger(__name__)
 
@@ -114,13 +114,13 @@ class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEMode
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: models.Field, request: "HttpRequest", **kwargs: object) -> None:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(self, request: "HttpRequest") -> Any:
+    def get_list_display(self, request: "HttpRequest") -> object:
         return super().get_list_display(request)
 
 

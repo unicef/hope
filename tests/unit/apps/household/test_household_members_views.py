@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.utils import timezone
 import pytest
 from rest_framework import status
@@ -22,7 +20,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def household_members_context(api_client: Any) -> dict[str, Any]:
+def household_members_context(api_client: object) -> dict[str, object]:
     members_url_name = "api:households:households-members"
 
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
@@ -109,8 +107,8 @@ def household_members_context(api_client: Any) -> dict[str, Any]:
 def test_household_members_permissions(
     permissions: list,
     expected_status: int,
-    create_user_role_with_permissions: Any,
-    household_members_context: dict[str, Any],
+    create_user_role_with_permissions: object,
+    household_members_context: dict[str, object],
 ) -> None:
     create_user_role_with_permissions(
         user=household_members_context["user"],
@@ -131,7 +129,9 @@ def test_household_members_permissions(
     assert response.status_code == expected_status
 
 
-def test_household_members(create_user_role_with_permissions: Any, household_members_context: dict[str, Any]) -> None:
+def test_household_members(
+    create_user_role_with_permissions: object, household_members_context: dict[str, object]
+) -> None:
     create_user_role_with_permissions(
         user=household_members_context["user"],
         permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],

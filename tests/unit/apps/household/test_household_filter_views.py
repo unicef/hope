@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Dict
 
 from constance.test import override_config
 from django.utils import timezone
@@ -38,8 +38,8 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def household_filter_context(
-    api_client: Any, create_user_role_with_permissions: Any, mock_elasticsearch: Any
-) -> dict[str, Any]:
+    api_client: object, create_user_role_with_permissions: object, mock_elasticsearch: object
+) -> dict[str, object]:
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
     list_url = reverse(
@@ -71,13 +71,13 @@ def household_filter_context(
 
 
 @pytest.fixture
-def merged_rdi_household() -> dict[str, Any]:
+def merged_rdi_household() -> dict[str, object]:
     household = HouseholdFactory(create_role=False)
     return {"rdi": household.registration_data_import, "household": household}
 
 
 @pytest.fixture
-def household_update_ticket(merged_rdi_household: dict[str, Any]) -> Any:
+def household_update_ticket(merged_rdi_household: dict[str, object]) -> object:
     ticket_details = TicketHouseholdDataUpdateDetailsFactory(
         household=merged_rdi_household["household"],
         household_data={},
@@ -89,7 +89,7 @@ def household_update_ticket(merged_rdi_household: dict[str, Any]) -> Any:
 
 
 @pytest.fixture
-def empty_complaint_ticket() -> Any:
+def empty_complaint_ticket() -> object:
     ticket_details = TicketComplaintDetailsFactory(household=None, individual=None, payment=None)
     ticket = ticket_details.ticket
     ticket.unicef_id = "GRV-8002"
@@ -97,7 +97,7 @@ def empty_complaint_ticket() -> Any:
     return ticket
 
 
-def test_filter_by_rdi_id(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_rdi_id(household_filter_context: dict[str, object]) -> None:
     registration_data_import_household1 = RegistrationDataImportFactory(
         imported_by=household_filter_context["user"],
         business_area=household_filter_context["afghanistan"],
@@ -151,7 +151,7 @@ def test_filter_by_rdi_id(household_filter_context: dict[str, Any]) -> None:
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_size(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_size(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -194,7 +194,7 @@ def test_filter_by_size(household_filter_context: dict[str, Any]) -> None:
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_document_number(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_document_number(household_filter_context: dict[str, object]) -> None:
     document_passport = DocumentTypeFactory(key="passport")
     document_id_card = DocumentTypeFactory(key="id_card")
 
@@ -269,7 +269,7 @@ def test_filter_by_document_number(household_filter_context: dict[str, Any]) -> 
     assert response_data[0]["id"] == str(household_passport1.id)
 
 
-def test_filter_by_address(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_address(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -312,7 +312,7 @@ def test_filter_by_address(household_filter_context: dict[str, Any]) -> None:
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_head_of_household_full_name(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_head_of_household_full_name(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -355,7 +355,7 @@ def test_filter_by_head_of_household_full_name(household_filter_context: dict[st
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_head_of_household_phone_no_valid_true(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_head_of_household_phone_no_valid_true(household_filter_context: dict[str, object]) -> None:
     invalid_phone_number = "12"
     valid_phone_number = "+48 609 456 789"
 
@@ -411,7 +411,7 @@ def test_filter_by_head_of_household_phone_no_valid_true(household_filter_contex
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_head_of_household_phone_no_valid_false(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_head_of_household_phone_no_valid_false(household_filter_context: dict[str, object]) -> None:
     invalid_phone_number = "12"
     valid_phone_number = "+48 609 456 789"
 
@@ -467,7 +467,7 @@ def test_filter_by_head_of_household_phone_no_valid_false(household_filter_conte
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_withdrawn(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_withdrawn(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -510,7 +510,7 @@ def test_filter_by_withdrawn(household_filter_context: dict[str, Any]) -> None:
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_country_origin(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_country_origin(household_filter_context: dict[str, object]) -> None:
     afghanistan = CountryFactory()
     ukraine = CountryFactory(name="Ukraine", iso_code3="UKR", iso_code2="UK", iso_num="050")
 
@@ -566,7 +566,7 @@ def test_filter_by_country_origin(household_filter_context: dict[str, Any]) -> N
     ],
 )
 def test_filter_by_is_active_program(
-    program_status: str, filter_value: bool, expected_results: int, household_filter_context: dict[str, Any]
+    program_status: str, filter_value: bool, expected_results: int, household_filter_context: dict[str, object]
 ) -> None:
     program = household_filter_context["program"]
     program.status = program_status
@@ -610,7 +610,7 @@ def test_filter_by_is_active_program(
     assert len(response_data) == expected_results
 
 
-def test_filter_by_rdi_merge_status(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_rdi_merge_status(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -660,7 +660,7 @@ def test_filter_by_rdi_merge_status(household_filter_context: dict[str, Any]) ->
         "admin2",
     ],
 )
-def test_filter_by_area(filter_by_field: str, household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_area(filter_by_field: str, household_filter_context: dict[str, object]) -> None:
     country = CountryFactory()
     admin_type_1 = AreaTypeFactory(country=country, area_level=1)
     admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
@@ -716,7 +716,7 @@ def test_filter_by_area(filter_by_field: str, household_filter_context: dict[str
         "admin2",
     ],
 )
-def test_filter_by_admin_area(area: str, household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_admin_area(area: str, household_filter_context: dict[str, object]) -> None:
     country = CountryFactory()
     admin_type_1 = AreaTypeFactory(country=country, area_level=1)
     admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
@@ -765,7 +765,7 @@ def test_filter_by_admin_area(area: str, household_filter_context: dict[str, Any
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_residence_status(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_residence_status(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -808,7 +808,7 @@ def test_filter_by_residence_status(household_filter_context: dict[str, Any]) ->
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_last_registration_date(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_last_registration_date(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -851,7 +851,7 @@ def test_filter_by_last_registration_date(household_filter_context: dict[str, An
     assert response_data[0]["id"] == str(household1.id)
 
 
-def test_filter_by_first_registration_date(household_filter_context: dict[str, Any]) -> None:
+def test_filter_by_first_registration_date(household_filter_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_context["program"],
         business_area=household_filter_context["afghanistan"],
@@ -895,7 +895,7 @@ def test_filter_by_first_registration_date(household_filter_context: dict[str, A
 
 
 @pytest.fixture
-def household_filter_search_context(api_client: Any, create_user_role_with_permissions: Any) -> dict[str, Any]:
+def household_filter_search_context(api_client: object, create_user_role_with_permissions: object) -> dict[str, object]:
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
     list_url = reverse(
@@ -988,8 +988,8 @@ def _test_search(
     household2_data: Dict,
     hoh_1_data: Dict,
     hoh_2_data: Dict,
-    household_filter_search_context: dict[str, Any],
-) -> tuple[Any, list[Any]]:
+    household_filter_search_context: dict[str, object],
+) -> tuple[object, list[object]]:
     afghanistan = household_filter_search_context["afghanistan"]
     program2 = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
 
@@ -1051,7 +1051,7 @@ def test_search(
     household2_data: Dict,
     hoh_1_data: Dict,
     hoh_2_data: Dict,
-    household_filter_search_context: dict[str, Any],
+    household_filter_search_context: dict[str, object],
 ) -> None:
     response_data, expected_results = _test_search(
         filters=filters,
@@ -1072,7 +1072,7 @@ def test_search_db(
     household2_data: Dict,
     hoh_1_data: Dict,
     hoh_2_data: Dict,
-    household_filter_search_context: dict[str, Any],
+    household_filter_search_context: dict[str, object],
 ) -> None:
     program = household_filter_search_context["program"]
     program.status = Program.FINISHED
@@ -1097,7 +1097,7 @@ def test_search_db_no_program_filter(
     household2_data: Dict,
     hoh_1_data: Dict,
     hoh_2_data: Dict,
-    household_filter_search_context: dict[str, Any],
+    household_filter_search_context: dict[str, object],
 ) -> None:
     household_filter_search_context["list_url"] = reverse(
         "api:households:households-global-list",
@@ -1119,14 +1119,14 @@ def test_search_db_no_program_filter(
     assert str(expected_results[1].id) in result_ids
 
 
-def test_filter_detail_id_requires_numeric(household_filter_search_context: dict[str, Any]) -> None:
+def test_filter_detail_id_requires_numeric(household_filter_search_context: dict[str, object]) -> None:
     household_filter = HouseholdFilter(data={}, queryset=Household.objects.all(), request=None)
 
     with pytest.raises(SearchError):
         household_filter._filter_detail_id(Household.objects.all(), "abc123")
 
 
-def test_filter_detail_id_filters_queryset(household_filter_search_context: dict[str, Any]) -> None:
+def test_filter_detail_id_filters_queryset(household_filter_search_context: dict[str, object]) -> None:
     household1 = HouseholdFactory(
         program=household_filter_search_context["program"],
         business_area=household_filter_search_context["afghanistan"],
@@ -1166,14 +1166,14 @@ def test_filter_detail_id_filters_queryset(household_filter_search_context: dict
     assert list(result_qs.values_list("id", flat=True)) == [household1.id]
 
 
-def test_phone_no_valid_filter_with_none_returns_queryset_unchanged(db: Any) -> None:
+def test_phone_no_valid_filter_with_none_returns_queryset_unchanged(db: object) -> None:
     queryset = Household.objects.all()
     household_filter = HouseholdFilter(data={}, queryset=queryset, request=None)
 
     assert household_filter.phone_no_valid_filter(queryset, "phone_no_valid", None) is queryset
 
 
-def test_merged_household_filter_rdi_id_filters_by_rdi(merged_rdi_household: dict[str, Any]) -> None:
+def test_merged_household_filter_rdi_id_filters_by_rdi(merged_rdi_household: dict[str, object]) -> None:
     queryset = Household.all_objects.all()
     household_filter = MergedHouseholdFilter(data={}, queryset=queryset)
 
@@ -1183,7 +1183,7 @@ def test_merged_household_filter_rdi_id_filters_by_rdi(merged_rdi_household: dic
 
 
 def test_office_search_filter_by_grievance_returns_ticket_household(
-    household_update_ticket: Any, merged_rdi_household: dict[str, Any]
+    household_update_ticket: object, merged_rdi_household: dict[str, object]
 ) -> None:
     queryset = Household.objects.all()
     household_filter = HouseholdOfficeSearchFilter(data={}, queryset=queryset, request=None)
@@ -1193,7 +1193,7 @@ def test_office_search_filter_by_grievance_returns_ticket_household(
     assert list(result) == [merged_rdi_household["household"]]
 
 
-def test_office_search_filter_by_grievance_without_household_returns_none(empty_complaint_ticket: Any) -> None:
+def test_office_search_filter_by_grievance_without_household_returns_none(empty_complaint_ticket: object) -> None:
     queryset = Household.objects.all()
     household_filter = HouseholdOfficeSearchFilter(data={}, queryset=queryset, request=None)
 

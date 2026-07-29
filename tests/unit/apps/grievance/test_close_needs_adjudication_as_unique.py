@@ -6,7 +6,7 @@ services, the close-as-unique API action, and the Data Change ticket's link to i
 Adjudication counterpart (IndividualDataUpdateTicketDetailsSerializer.linked_needs_adjudication_ticket_id).
 """
 
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -46,50 +46,50 @@ pytestmark = [
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area, name="program afghanistan 1")
 
 
 @pytest.fixture
-def partner() -> Any:
+def partner() -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> Any:
+def user(partner: object) -> object:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def country() -> Any:
+def country() -> object:
     return CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616")
 
 
 @pytest.fixture
-def national_id_type() -> Any:
+def national_id_type() -> object:
     return DocumentTypeFactory(key="national_id", valid_for_deduplication=True)
 
 
 @pytest.fixture
-def receipt_type() -> Any:
+def receipt_type() -> object:
     return DocumentTypeFactory(key="receipt", valid_for_deduplication=False)
 
 
-def _build_individual(program: Any, business_area: Any) -> Any:
+def _build_individual(program: object, business_area: object) -> object:
     household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
     return household.head_of_household
 
 
 def _add_national_id(
-    individual: Any,
-    national_id_type: Any,
-    country: Any,
-    program: Any,
+    individual: object,
+    national_id_type: object,
+    country: object,
+    program: object,
     number: str,
     doc_status: str = Document.STATUS_VALID,
 ) -> Document:
@@ -104,9 +104,9 @@ def _add_national_id(
 
 
 def _build_ticket(
-    business_area: Any,
-    program: Any,
-    golden: Any,
+    business_area: object,
+    program: object,
+    golden: object,
     duplicates: list,
     issue_type: int = GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
     ticket_status: int = GrievanceTicket.STATUS_FOR_APPROVAL,
@@ -132,7 +132,7 @@ def _build_ticket(
 # Document.dedup_signature
 # --------------------------------------------------------------------------- #
 def test_dedup_signature_includes_type_and_country_when_valid_for_deduplication(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     individual = _build_individual(program, business_area)
     document = _add_national_id(individual, national_id_type, country, program, "ID-1")
@@ -141,7 +141,7 @@ def test_dedup_signature_includes_type_and_country_when_valid_for_deduplication(
 
 
 def test_dedup_signature_excludes_type_when_not_valid_for_deduplication(
-    business_area: Any, program: Any, receipt_type: Any, country: Any
+    business_area: object, program: object, receipt_type: object, country: object
 ) -> None:
     individual = _build_individual(program, business_area)
     document = DocumentFactory(
@@ -160,7 +160,7 @@ def test_dedup_signature_excludes_type_when_not_valid_for_deduplication(
 # TicketNeedsAdjudicationDetails.documents_no_longer_conflict
 # --------------------------------------------------------------------------- #
 def test_documents_no_longer_conflict_true_when_numbers_differ(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -172,7 +172,7 @@ def test_documents_no_longer_conflict_true_when_numbers_differ(
 
 
 def test_documents_no_longer_conflict_false_when_numbers_match(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -186,7 +186,7 @@ def test_documents_no_longer_conflict_false_when_numbers_match(
 
 
 def test_documents_no_longer_conflict_true_for_single_individual(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     _add_national_id(golden, national_id_type, country, program, "ID-ONLY")
@@ -196,7 +196,7 @@ def test_documents_no_longer_conflict_true_for_single_individual(
 
 
 def test_documents_no_longer_conflict_false_on_partial_resolution(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     fixed = _build_individual(program, business_area)
@@ -212,7 +212,7 @@ def test_documents_no_longer_conflict_false_on_partial_resolution(
 
 
 def test_documents_no_longer_conflict_false_for_selected_duplicate_still_sharing(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     selected_duplicate = _build_individual(program, business_area)
@@ -232,7 +232,7 @@ def test_documents_no_longer_conflict_false_for_selected_duplicate_still_sharing
 
 
 def test_documents_no_longer_conflict_ignores_invalid_documents(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -247,7 +247,7 @@ def test_documents_no_longer_conflict_ignores_invalid_documents(
 # can_close_as_unique
 # --------------------------------------------------------------------------- #
 def test_can_close_as_unique_true_when_resolved(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -259,7 +259,7 @@ def test_can_close_as_unique_true_when_resolved(
 
 
 def test_can_close_as_unique_false_for_biographical_issue_type(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -277,7 +277,7 @@ def test_can_close_as_unique_false_for_biographical_issue_type(
 
 
 def test_can_close_as_unique_false_when_conflict_remains(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -291,7 +291,7 @@ def test_can_close_as_unique_false_when_conflict_remains(
 
 
 def test_can_close_as_unique_false_when_other_open_ticket(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -307,7 +307,7 @@ def test_can_close_as_unique_false_when_other_open_ticket(
 # mark_unique_and_close
 # --------------------------------------------------------------------------- #
 def test_mark_unique_and_close_marks_all_distinct_and_closes(
-    user: Any, business_area: Any, program: Any, national_id_type: Any, country: Any
+    user: object, business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -344,7 +344,7 @@ def test_mark_unique_and_close_marks_all_distinct_and_closes(
     ],
 )
 def test_mark_unique_and_close_raises_for_non_unique_identifiers_issue_type(
-    user: Any, business_area: Any, program: Any, national_id_type: Any, country: Any, issue_type: int
+    user: object, business_area: object, program: object, national_id_type: object, country: object, issue_type: int
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -357,7 +357,7 @@ def test_mark_unique_and_close_raises_for_non_unique_identifiers_issue_type(
 
 
 def test_mark_unique_and_close_raises_when_already_closed(
-    user: Any, business_area: Any, program: Any, national_id_type: Any, country: Any
+    user: object, business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -372,7 +372,7 @@ def test_mark_unique_and_close_raises_when_already_closed(
 
 
 def test_mark_unique_and_close_raises_when_documents_still_conflict(
-    user: Any, business_area: Any, program: Any, national_id_type: Any, country: Any
+    user: object, business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -387,7 +387,7 @@ def test_mark_unique_and_close_raises_when_documents_still_conflict(
 
 
 def test_mark_unique_and_close_raises_when_other_open_ticket(
-    user: Any, business_area: Any, program: Any, national_id_type: Any, country: Any
+    user: object, business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -403,7 +403,7 @@ def test_mark_unique_and_close_raises_when_other_open_ticket(
 # --------------------------------------------------------------------------- #
 # close-as-unique API action
 # --------------------------------------------------------------------------- #
-def _close_as_unique_url(business_area: Any, ticket_details: TicketNeedsAdjudicationDetails) -> str:
+def _close_as_unique_url(business_area: object, ticket_details: TicketNeedsAdjudicationDetails) -> str:
     return reverse(
         "api:grievance-tickets:grievance-tickets-global-close-as-unique",
         kwargs={
@@ -414,12 +414,12 @@ def _close_as_unique_url(business_area: Any, ticket_details: TicketNeedsAdjudica
 
 
 def test_close_as_unique_endpoint_success(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    national_id_type: Any,
-    country: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -442,12 +442,12 @@ def test_close_as_unique_endpoint_success(
 
 
 def test_close_as_unique_endpoint_rejects_when_conflict_remains(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    national_id_type: Any,
-    country: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -470,12 +470,12 @@ def test_close_as_unique_endpoint_rejects_when_conflict_remains(
 
 
 def test_close_as_unique_endpoint_forbidden_without_permission(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    national_id_type: Any,
-    country: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -492,12 +492,12 @@ def test_close_as_unique_endpoint_forbidden_without_permission(
 
 
 def test_close_as_unique_endpoint_forbidden_with_creator_scoped_permission_when_not_creator(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    national_id_type: Any,
-    country: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -518,12 +518,12 @@ def test_close_as_unique_endpoint_forbidden_with_creator_scoped_permission_when_
 
 
 def test_close_as_unique_endpoint_success_with_creator_scoped_permission_when_creator(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    national_id_type: Any,
-    country: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -546,13 +546,13 @@ def test_close_as_unique_endpoint_success_with_creator_scoped_permission_when_cr
 
 
 def test_close_as_unique_endpoint_forbidden_without_area_access(
-    api_client: Any,
-    user: Any,
-    partner: Any,
-    business_area: Any,
-    program: Any,
-    national_id_type: Any,
-    country: Any,
+    api_client: object,
+    user: object,
+    partner: object,
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     area_type = AreaTypeFactory(name="District", country=country, area_level=2)
@@ -578,10 +578,10 @@ def test_close_as_unique_endpoint_forbidden_without_area_access(
 
 
 def test_close_as_unique_endpoint_rejects_non_needs_adjudication_ticket(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     grievance = GrievanceTicketFactory(
@@ -609,7 +609,7 @@ def test_close_as_unique_endpoint_rejects_non_needs_adjudication_ticket(
 # find_open_unique_identifiers_ticket_for_individual
 # --------------------------------------------------------------------------- #
 def test_find_open_unique_identifiers_ticket_for_individual_finds_golden(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -621,7 +621,7 @@ def test_find_open_unique_identifiers_ticket_for_individual_finds_golden(
 
 
 def test_find_open_unique_identifiers_ticket_for_individual_finds_possible_duplicate(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -633,7 +633,7 @@ def test_find_open_unique_identifiers_ticket_for_individual_finds_possible_dupli
 
 
 def test_find_open_unique_identifiers_ticket_for_individual_none_when_ticket_closed(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -645,7 +645,7 @@ def test_find_open_unique_identifiers_ticket_for_individual_none_when_ticket_clo
 
 
 def test_find_open_unique_identifiers_ticket_for_individual_none_for_other_issue_type(
-    business_area: Any, program: Any, national_id_type: Any, country: Any
+    business_area: object, program: object, national_id_type: object, country: object
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -663,7 +663,7 @@ def test_find_open_unique_identifiers_ticket_for_individual_none_for_other_issue
 
 
 def test_find_open_unique_identifiers_ticket_for_individual_none_when_no_ticket(
-    business_area: Any, program: Any
+    business_area: object, program: object
 ) -> None:
     unrelated = _build_individual(program, business_area)
 
@@ -671,7 +671,11 @@ def test_find_open_unique_identifiers_ticket_for_individual_none_when_no_ticket(
 
 
 def test_find_open_unique_identifiers_ticket_for_individual_single_query(
-    business_area: Any, program: Any, national_id_type: Any, country: Any, django_assert_num_queries: Callable
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
+    django_assert_num_queries: Callable,
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
@@ -686,7 +690,7 @@ def test_find_open_unique_identifiers_ticket_for_individual_single_query(
 # --------------------------------------------------------------------------- #
 # Data Change ticket detail exposes linked_needs_adjudication_ticket_id
 # --------------------------------------------------------------------------- #
-def _data_change_ticket_detail_url(business_area: Any, grievance_ticket: GrievanceTicket) -> str:
+def _data_change_ticket_detail_url(business_area: object, grievance_ticket: GrievanceTicket) -> str:
     return reverse(
         "api:grievance-tickets:grievance-tickets-global-detail",
         kwargs={"business_area_slug": business_area.slug, "pk": str(grievance_ticket.id)},
@@ -694,12 +698,12 @@ def _data_change_ticket_detail_url(business_area: Any, grievance_ticket: Grievan
 
 
 def test_data_change_ticket_exposes_linked_ticket_id_when_present(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    national_id_type: Any,
-    country: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    national_id_type: object,
+    country: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -726,10 +730,10 @@ def test_data_change_ticket_exposes_linked_ticket_id_when_present(
 
 
 def test_data_change_ticket_linked_ticket_id_none_when_absent(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
+    api_client: object,
+    user: object,
+    business_area: object,
+    program: object,
     create_user_role_with_permissions: Callable,
 ) -> None:
     unrelated = _build_individual(program, business_area)

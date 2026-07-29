@@ -1,6 +1,5 @@
 import datetime
 import json
-from typing import Any
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -34,7 +33,7 @@ class StrictBooleanField(forms.Field):
 
 
 class StrictDateField(forms.DateField):
-    def to_python(self, value: Any) -> datetime.date | None:
+    def to_python(self, value: object) -> datetime.date | None:
         """Override to cover other cases, i.e. integer value provided."""
         if value in self.empty_values:
             return None
@@ -53,7 +52,7 @@ class RowValidationError(ValidationError):
 
 def validation_error_to_json(
     error: ValidationError | list[ValidationError], seen: set[int] | None = None
-) -> Any:  # pragma: no cover
+) -> object:  # pragma: no cover
     """Recursively convert a Django ValidationError into a JSON-serializable format.
 
     Handles nested ValidationError instances within dicts and lists, avoiding infinite recursion by tracking seen objs.

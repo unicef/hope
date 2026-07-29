@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import json
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -73,17 +73,17 @@ def country() -> Country:
 
 
 @pytest.fixture
-def admin_type(country: Country) -> Any:
+def admin_type(country: Country) -> object:
     return AreaTypeFactory(country=country, area_level=1)
 
 
 @pytest.fixture
-def area1(admin_type: Any) -> Area:
+def area1(admin_type: object) -> Area:
     return AreaFactory(parent=None, p_code="AF01", area_type=admin_type)
 
 
 @pytest.fixture
-def area2(admin_type: Any) -> Area:
+def area2(admin_type: object) -> Area:
     return AreaFactory(parent=None, p_code="AF0101", area_type=admin_type)
 
 
@@ -250,7 +250,7 @@ def household_and_individuals(
     area1: Area,
     area2: Area,
     country: Country,
-) -> tuple[Any, list[Any]]:
+) -> tuple[object, list[object]]:
     individual1 = IndividualFactory(
         business_area=afghanistan,
         household=None,
@@ -276,8 +276,8 @@ def household_and_individuals(
 @pytest.fixture
 def needs_adjudication_details(
     grievance_tickets: list[GrievanceTicket],
-    household_and_individuals: tuple[Any, list[Any]],
-) -> Any:
+    household_and_individuals: tuple[object, list[object]],
+) -> object:
     _, individuals = household_and_individuals
     return TicketNeedsAdjudicationDetailsFactory(
         ticket=grievance_tickets[0],
@@ -341,7 +341,7 @@ def grievance_ticket_different_program(
 def setup_grievance_tickets(
     grievance_tickets: list[GrievanceTicket],
     program: Program,
-    needs_adjudication_details: Any,
+    needs_adjudication_details: object,
     grievance_ticket_different_program: GrievanceTicket,
 ) -> list[GrievanceTicket]:
     for grievance_ticket in grievance_tickets:
@@ -377,13 +377,13 @@ def count_url(afghanistan: BusinessArea, program: Program) -> str:
 
 
 @pytest.fixture
-def api_client(user: User, api_client: Callable) -> Any:
+def api_client(user: User, api_client: Callable) -> object:
     return api_client(user)
 
 
 @freeze_time("2024-08-25 12:00:00")
 def test_grievance_ticket_list_with_all_permissions(
-    api_client: Any,
+    api_client: object,
     list_url: str,
     count_url: str,
     user: User,
@@ -480,7 +480,7 @@ def test_grievance_ticket_list_with_all_permissions(
     ],
 )
 def test_grievance_ticket_list_without_permissions(
-    api_client: Any,
+    api_client: object,
     list_url: str,
     count_url: str,
     user: User,
@@ -503,7 +503,7 @@ def test_grievance_ticket_list_without_permissions(
 
 
 def test_grievance_ticket_list_area_limits(
-    api_client: Any,
+    api_client: object,
     list_url: str,
     user: User,
     afghanistan: BusinessArea,
@@ -549,7 +549,7 @@ def test_grievance_ticket_list_area_limits(
 
 
 def test_grievance_ticket_list_with_all_permissions_in_program(
-    api_client: Any,
+    api_client: object,
     list_url: str,
     count_url: str,
     user: User,
@@ -626,7 +626,7 @@ def test_grievance_ticket_list_with_all_permissions_in_program(
     ],
 )
 def test_grievance_ticket_list_based_on_permissions(
-    api_client: Any,
+    api_client: object,
     list_url: str,
     count_url: str,
     user: User,
@@ -667,7 +667,7 @@ def test_grievance_ticket_list_based_on_permissions(
 
 
 def test_grievance_ticket_list_caching(
-    api_client: Any,
+    api_client: object,
     list_url: str,
     user: User,
     afghanistan: BusinessArea,
@@ -759,7 +759,7 @@ def test_grievance_ticket_list_caching(
 
 
 def test_grievance_ticket_list_cache_invalidated_when_ticket_programs_change(
-    api_client: Any,
+    api_client: object,
     list_url: str,
     user: User,
     afghanistan: BusinessArea,
@@ -810,7 +810,7 @@ def test_grievance_ticket_list_cache_invalidated_when_ticket_programs_change(
 
 
 def test_grievance_ticket_count_changes_when_ticket_programs_change(
-    api_client: Any,
+    api_client: object,
     count_url: str,
     user: User,
     afghanistan: BusinessArea,

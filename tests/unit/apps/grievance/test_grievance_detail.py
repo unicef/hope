@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Callable
+from typing import Callable
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -78,8 +78,8 @@ pytestmark = pytest.mark.django_db
 
 def assign_ticket_data(
     grievance_ticket: GrievanceTicket,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     program: Program,
     linked_ticket: GrievanceTicket,
 ) -> None:
@@ -126,7 +126,7 @@ def user2(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -136,17 +136,17 @@ def country() -> Country:
 
 
 @pytest.fixture
-def admin_type(country: Country) -> Any:
+def admin_type(country: Country) -> object:
     return AreaTypeFactory(country=country, area_level=1)
 
 
 @pytest.fixture
-def area1(admin_type: Any) -> Area:
+def area1(admin_type: object) -> Area:
     return AreaFactory(parent=None, p_code="AF01", area_type=admin_type)
 
 
 @pytest.fixture
-def area2(admin_type: Any) -> Area:
+def area2(admin_type: object) -> Area:
     return AreaFactory(parent=None, p_code="AF0101", area_type=admin_type)
 
 
@@ -166,7 +166,7 @@ def grievance_ticket_base_data(afghanistan: BusinessArea, area1: Area, user: Use
 
 
 @pytest.fixture
-def ticket_note(user: User) -> Any:
+def ticket_note(user: User) -> object:
     return TicketNoteFactory(
         description="Test Note",
         created_by=user,
@@ -176,7 +176,7 @@ def ticket_note(user: User) -> Any:
 
 
 @pytest.fixture
-def grievance_document(user: User) -> Any:
+def grievance_document(user: User) -> object:
     return GrievanceDocumentFactory(
         name="Test Document",
         created_by=user,
@@ -277,8 +277,8 @@ def configured_grievance_ticket(
     grievance_ticket_base_data: dict,
     program: Program,
     household1: Household,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
 ) -> GrievanceTicket:
     grievance_ticket = GrievanceTicketFactory(
@@ -301,8 +301,8 @@ def detail_url_name() -> str:
 def assert_base_grievance_data(
     data: dict,
     grievance_ticket: GrievanceTicket,
-    linked_ticket: Any,
-    existing_ticket: Any,
+    linked_ticket: object,
+    existing_ticket: object,
     delivered_quantities: list | None = None,
 ) -> None:
     """Assert base grievance ticket data for detail responses."""
@@ -590,14 +590,14 @@ def assert_base_grievance_data(
 
 @freeze_time("2024-08-25 12:00:00")
 def test_grievance_detail_with_all_permissions(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
     configured_grievance_ticket: GrievanceTicket,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -643,7 +643,7 @@ def test_grievance_detail_with_all_permissions(
 )
 def test_grievance_detail_without_permissions(
     permissions: list,
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     configured_grievance_ticket: GrievanceTicket,
@@ -669,7 +669,7 @@ def test_grievance_detail_without_permissions(
 
 
 def test_grievance_detail_area_limits(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -709,14 +709,14 @@ def test_grievance_detail_area_limits(
 
 
 def test_grievance_detail_with_permissions_in_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
     configured_grievance_ticket: GrievanceTicket,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -810,7 +810,7 @@ def test_grievance_ticket_detail_access_based_on_permissions(
     area_limit: bool,
     expected_status_1: int,
     expected_status_2: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -872,15 +872,15 @@ def test_grievance_ticket_detail_access_based_on_permissions(
 
 
 def test_grievance_detail_household_data_update(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
     household1: Household,
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -931,7 +931,7 @@ def test_grievance_detail_household_data_update(
 
 
 def test_grievance_detail_individual_data_update(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -939,8 +939,8 @@ def test_grievance_detail_individual_data_update(
     individuals1: list[Individual],
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -993,15 +993,15 @@ def test_grievance_detail_individual_data_update(
 
 
 def test_grievance_detail_add_individual(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
     household1: Household,
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -1062,7 +1062,7 @@ def test_grievance_detail_add_individual(
 
 
 def test_grievance_detail_delete_individual(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -1070,8 +1070,8 @@ def test_grievance_detail_delete_individual(
     individuals1: list[Individual],
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -1136,7 +1136,7 @@ def test_grievance_detail_delete_individual(
 
 
 def test_grievance_detail_delete_household(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -1146,8 +1146,8 @@ def test_grievance_detail_delete_household(
     individuals2: list[Individual],
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -1246,7 +1246,7 @@ def test_grievance_detail_delete_household(
 
 
 def test_grievance_detail_system_flagging(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -1255,8 +1255,8 @@ def test_grievance_detail_system_flagging(
     individuals1: list[Individual],
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -1438,15 +1438,15 @@ def test_grievance_detail_system_flagging(
 
 
 def test_grievance_detail_payment_verification(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
     household1: Household,
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -1552,7 +1552,7 @@ def test_grievance_detail_payment_verification(
 
 
 def test_grievance_detail_needs_adjudication(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -1563,8 +1563,8 @@ def test_grievance_detail_needs_adjudication(
     individuals2: list[Individual],
     grievance_ticket_base_data: dict,
     detail_url_name: str,
-    ticket_note: Any,
-    grievance_document: Any,
+    ticket_note: object,
+    grievance_document: object,
     linked_ticket: GrievanceTicket,
     existing_ticket: GrievanceTicket,
     create_user_role_with_permissions: Callable,
@@ -2026,7 +2026,7 @@ def test_grievance_detail_needs_adjudication(
 
 
 def test_grievance_detail_individual_data_update_with_photo(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -2080,7 +2080,7 @@ def test_grievance_detail_individual_data_update_with_photo(
 
 
 def test_grievance_detail_individual_data_update_with_photo_value_only(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -2133,7 +2133,7 @@ def test_grievance_detail_individual_data_update_with_photo_value_only(
 
 
 def test_grievance_detail_add_individual_with_photo(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -2188,7 +2188,7 @@ def test_grievance_detail_add_individual_with_photo(
 
 
 def test_grievance_detail_individual_data_update_no_photo(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -2238,7 +2238,7 @@ def test_grievance_detail_individual_data_update_no_photo(
 
 
 def test_grievance_detail_add_individual_no_photo(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -2290,7 +2290,7 @@ def test_grievance_detail_add_individual_no_photo(
 
 
 def test_grievance_detail_individual_data_update_null_individual_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,
@@ -2334,7 +2334,7 @@ def test_grievance_detail_individual_data_update_null_individual_data(
 
 
 def test_grievance_detail_add_individual_null_individual_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     program: Program,
     user: User,

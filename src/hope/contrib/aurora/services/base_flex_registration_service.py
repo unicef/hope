@@ -3,7 +3,7 @@ import base64
 import binascii
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Iterable
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -32,7 +32,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
 
     @atomic("default")
     def create_rdi(
-        self, imported_by: Any | None, rdi_name: str = "rdi_name", is_open: bool = False
+        self, imported_by: object | None, rdi_name: str = "rdi_name", is_open: bool = False
     ) -> RegistrationDataImport:
         project = self.registration.project
         programme = project.programme
@@ -69,7 +69,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         )
 
     @abc.abstractmethod
-    def create_household_for_rdi_household(self, record: Any, rdi_datahub: RegistrationDataImport) -> None:
+    def create_household_for_rdi_household(self, record: object, rdi_datahub: RegistrationDataImport) -> None:
         raise NotImplementedError
 
     def validate_data_collection_type(self) -> None:
@@ -194,7 +194,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             )
             raise
 
-    def _create_object_and_validate(self, data: dict, model_class: Any, model_form: Any | None = None) -> Any:
+    def _create_object_and_validate(self, data: dict, model_class: object, model_form: object | None = None) -> object:
         files = {}
         if photo := data.get("photo"):
             if isinstance(photo, str | bytes):
@@ -216,7 +216,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             raise ValidationError(form.errors)
         return form.save()
 
-    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> ContentFile | Any:
+    def _prepare_picture_from_base64(self, certificate_picture: object, document_number: str) -> ContentFile | object:
         if certificate_picture:
             format_image = "jpg"
             name = hashlib.sha256(document_number.encode()).hexdigest()

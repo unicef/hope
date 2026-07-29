@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 import csv
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, Sequence, Union, cast
+from typing import TYPE_CHECKING, Sequence, Union, cast
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -64,7 +64,7 @@ class LoadUsersForm(forms.Form):
         widget=AutocompleteWidget(Partner, ""),
     )
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
@@ -282,7 +282,7 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         ),
     )
 
-    def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
+    def get_inline_instances(self, request: HttpRequest, obj: object = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []
 
     @button(permission=lambda request, obj, handler: is_root(request) and request.user.has_perm("account.ad_users"))
@@ -298,7 +298,7 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         return TemplateResponse(request, "admin/ad.html", {"ctx": context, "opts": self.model._meta})
 
     @property
-    def media(self) -> Any:
+    def media(self) -> object:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -316,12 +316,14 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Any:
+    def get_readonly_fields(self, request: HttpRequest, obj: object | None = ...) -> object:
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
 
-    def get_deleted_objects(self, objs: Union[Sequence[Any], "_QuerySet[Any, Any]"], request: HttpRequest) -> Any:
+    def get_deleted_objects(
+        self, objs: Union[Sequence[object], "_QuerySet[object, object]"], request: HttpRequest
+    ) -> object:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -497,7 +499,7 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
-    def _get_user(self, email: str, partner: Any, row: dict) -> tuple:
+    def _get_user(self, email: str, partner: object, row: dict) -> tuple:
         if "username" in row:
             username = row["username"].strip()
         else:
@@ -509,10 +511,10 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         )
         return isnew, u
 
-    def __init__(self, model: type, admin_site: Any) -> None:
+    def __init__(self, model: type, admin_site: object) -> None:
         super().__init__(model, admin_site)
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "partner":  # Exclude partners that are parent partners
             kwargs["queryset"] = Partner.objects.exclude(
                 id__in=Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)

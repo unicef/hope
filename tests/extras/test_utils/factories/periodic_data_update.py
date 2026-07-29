@@ -1,6 +1,6 @@
 """Periodic data update factories."""
 
-from typing import Any, List
+from typing import Sequence
 
 import factory
 from factory.django import DjangoModelFactory
@@ -58,7 +58,7 @@ class PDUOnlineEditFactory(DjangoModelFactory):
     edit_data = {}
 
     @factory.post_generation
-    def authorized_users(self, create: bool, extracted: List[Any], **kwargs: Any):
+    def authorized_users(self, create: bool, extracted: Sequence[object], **kwargs: object):
         if not create:
             return
 

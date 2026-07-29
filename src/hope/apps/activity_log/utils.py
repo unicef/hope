@@ -1,5 +1,4 @@
 import decimal
-from typing import Any
 
 from hope.apps.core.utils import nested_getattr
 
@@ -12,7 +11,7 @@ def create_mapping_dict(simple_mapping: list, complex_mapping: dict | None = Non
     return concatenated_dict
 
 
-def create_diff(old_object: Any, new_object: Any, mapping: dict) -> dict:
+def create_diff(old_object: object, new_object: object, mapping: dict) -> dict:
     changes_dict = {}
     for field_name, repr_name in mapping.items():
         old_value = None
@@ -32,7 +31,7 @@ def create_diff(old_object: Any, new_object: Any, mapping: dict) -> dict:
 
         if str(old_value) == str(new_value):
             continue
-        change: dict[str, Any] = {"from": None, "to": None}
+        change: dict[str, object] = {"from": None, "to": None}
         if old_value is not None:
             change["from"] = str(old_value)
         if new_value is not None:
@@ -41,7 +40,7 @@ def create_diff(old_object: Any, new_object: Any, mapping: dict) -> dict:
     return changes_dict
 
 
-def copy_model_object(model_object: Any) -> dict:
+def copy_model_object(model_object: object) -> dict:
     model_dict = {}
     model_dict.update(model_object.__dict__)
     if "_state" in model_dict:

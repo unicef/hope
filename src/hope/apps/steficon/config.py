@@ -17,8 +17,6 @@ REST framework settings, checking for user settings first, then falling
 back to the defaults.
 """
 
-from typing import Any
-
 from django.conf import settings
 from django.core.signals import setting_changed
 from django.utils.module_loading import import_string
@@ -54,7 +52,7 @@ class Config:
             self._user_settings = getattr(settings, "STEFICON", {})
         return self._user_settings
 
-    def __getattr__(self, attr: Any) -> Any:
+    def __getattr__(self, attr: object) -> object:
         if attr not in self.defaults:
             raise AttributeError("Invalid STEFICON setting: '%s'" % attr)
 
@@ -84,7 +82,7 @@ class Config:
 config = Config(None, DEFAULTS)
 
 
-def reload_config(*args: Any, **kwargs: str) -> None:
+def reload_config(*args: object, **kwargs: str) -> None:
     setting: str = kwargs["setting"]
     if setting == "STEFICON":
         config.reload()

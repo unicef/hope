@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 from django.utils import timezone
 import pytest
@@ -41,7 +40,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def household_global_context(api_client: Any) -> dict[str, Any]:
+def household_global_context(api_client: object) -> dict[str, object]:
     global_url_name = "api:households:households-global-list"
     global_count_url = "api:households:households-global-count"
 
@@ -139,7 +138,7 @@ def household_global_context(api_client: Any) -> dict[str, Any]:
     ],
 )
 def test_household_global_list_with_permissions(
-    permissions: list, create_user_role_with_permissions: Any, household_global_context: dict[str, Any]
+    permissions: list, create_user_role_with_permissions: object, household_global_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_global_context["user"],
@@ -200,7 +199,7 @@ def test_household_global_list_with_permissions(
 
 
 def test_household_global_list_with_permissions_in_one_program(
-    create_user_role_with_permissions: Any, household_global_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_global_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_global_context["user"],
@@ -233,7 +232,7 @@ def test_household_global_list_with_permissions_in_one_program(
     ],
 )
 def test_household_global_list_without_permissions(
-    permissions: list, create_user_role_with_permissions: Any, household_global_context: dict[str, Any]
+    permissions: list, create_user_role_with_permissions: object, household_global_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_global_context["user"],
@@ -252,9 +251,9 @@ def test_household_global_list_without_permissions(
 
 
 def test_household_global_list_area_limits(
-    create_user_role_with_permissions: Any,
-    set_admin_area_limits_in_program: Any,
-    household_global_context: dict[str, Any],
+    create_user_role_with_permissions: object,
+    set_admin_area_limits_in_program: object,
+    household_global_context: dict[str, object],
 ) -> None:
     create_user_role_with_permissions(
         user=household_global_context["user"],
@@ -304,7 +303,7 @@ def test_household_global_list_area_limits(
 
 
 @pytest.fixture
-def household_office_search_context(api_client: Any) -> dict[str, Any]:
+def household_office_search_context(api_client: object) -> dict[str, object]:
     global_url_name = "api:households:households-global-list"
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
@@ -313,7 +312,7 @@ def household_office_search_context(api_client: Any) -> dict[str, Any]:
     user = UserFactory(partner=partner)
     client = api_client(user)
 
-    def create_household_with_individuals(count: int) -> tuple[Household, list[Any]]:
+    def create_household_with_individuals(count: int) -> tuple[Household, list[object]]:
         household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
         individuals = [household.head_of_household]
         individuals.extend(
@@ -469,7 +468,7 @@ def household_office_search_context(api_client: Any) -> dict[str, Any]:
 
 
 def test_search_by_household_unicef_id(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -491,7 +490,7 @@ def test_search_by_household_unicef_id(
 
 
 def test_search_by_individual_unicef_id(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -513,7 +512,7 @@ def test_search_by_individual_unicef_id(
 
 
 def test_search_by_payment_unicef_id(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -535,7 +534,7 @@ def test_search_by_payment_unicef_id(
 
 
 def test_search_by_payment_plan_unicef_id(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -562,7 +561,7 @@ def test_search_by_payment_plan_unicef_id(
 
 
 def test_search_by_grievance_unicef_id(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -585,7 +584,7 @@ def test_search_by_grievance_unicef_id(
 
 
 def test_search_by_grievance_unicef_id_delete_household_ticket(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -610,7 +609,7 @@ def test_search_by_grievance_unicef_id_delete_household_ticket(
 
 
 def test_search_by_grievance_unicef_id_not_found(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -631,7 +630,7 @@ def test_search_by_grievance_unicef_id_not_found(
 
 
 def test_search_by_needs_adjudication_household(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -654,7 +653,7 @@ def test_search_by_needs_adjudication_household(
 
 
 def test_search_by_system_flagging_household(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -677,7 +676,7 @@ def test_search_by_system_flagging_household(
 
 
 def test_search_by_delete_individual_household(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -700,7 +699,7 @@ def test_search_by_delete_individual_household(
 
 
 def test_search_by_payment_verification_household(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -723,7 +722,7 @@ def test_search_by_payment_verification_household(
 
 
 def test_search_by_phone_number(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -748,7 +747,7 @@ def test_search_by_phone_number(
 
 
 def test_search_by_phone_number_alternative(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -773,7 +772,7 @@ def test_search_by_phone_number_alternative(
 
 
 def test_search_by_member_name(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -798,7 +797,7 @@ def test_search_by_member_name(
 
 
 def test_search_by_member_given_name(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -823,7 +822,7 @@ def test_search_by_member_given_name(
 
 
 def test_search_with_active_programs_filter(
-    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_office_search_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_office_search_context["user"],
@@ -879,7 +878,7 @@ def test_search_with_active_programs_filter(
 
 
 @pytest.fixture
-def household_choices_context(api_client: Any) -> dict[str, Any]:
+def household_choices_context(api_client: object) -> dict[str, object]:
     choices_url = "api:households:households-global-choices"
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     partner = PartnerFactory(name="TestPartner")
@@ -899,7 +898,7 @@ def household_choices_context(api_client: Any) -> dict[str, Any]:
     }
 
 
-def test_get_choices(create_user_role_with_permissions: Any, household_choices_context: dict[str, Any]) -> None:
+def test_get_choices(create_user_role_with_permissions: object, household_choices_context: dict[str, object]) -> None:
     create_user_role_with_permissions(
         user=household_choices_context["user"],
         permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],

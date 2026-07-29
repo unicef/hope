@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -21,12 +21,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str, Any]:
+def amendment_view_context(api_client: Callable, business_area: object) -> dict[str, object]:
     user = UserFactory()
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program)
@@ -74,8 +74,8 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
     ],
 )
 def test_create_top_up_amendment_view_arrange_permissions_act_post_assert_status(
-    amendment_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    amendment_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -96,8 +96,8 @@ def test_create_top_up_amendment_view_arrange_permissions_act_post_assert_status
 
 
 def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_amendment_payload(
-    amendment_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    amendment_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],
@@ -120,8 +120,8 @@ def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_am
 
 
 def test_create_top_up_amendment_view_arrange_missing_dispersion_dates_act_post_assert_400(
-    amendment_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    amendment_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],
@@ -136,8 +136,8 @@ def test_create_top_up_amendment_view_arrange_missing_dispersion_dates_act_post_
 
 
 def test_create_top_up_amendment_view_arrange_end_date_before_start_act_post_assert_400(
-    amendment_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    amendment_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],
@@ -156,8 +156,8 @@ def test_create_top_up_amendment_view_arrange_end_date_before_start_act_post_ass
 
 
 def test_create_top_up_amendment_view_arrange_end_date_in_past_act_post_assert_400(
-    amendment_view_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    amendment_view_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         amendment_view_context["user"],

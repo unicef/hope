@@ -1,7 +1,7 @@
 """Tests for program copy API endpoint."""
 
 import datetime
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 from rest_framework import status
@@ -41,17 +41,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def ukraine(db: Any) -> BusinessArea:
+def ukraine(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Ukraine", slug="ukraine")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="Test Partner")
 
 
@@ -61,7 +61,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def dct_original(db: Any) -> DataCollectingType:
+def dct_original(db: object) -> DataCollectingType:
     return DataCollectingTypeFactory(
         label="Original DCT",
         code="origdct",
@@ -71,7 +71,7 @@ def dct_original(db: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def dct_compatible(dct_original: Any) -> DataCollectingType:
+def dct_compatible(dct_original: object) -> DataCollectingType:
     dct = DataCollectingTypeFactory(
         label="Compatible DCT",
         code="compdct",
@@ -83,7 +83,7 @@ def dct_compatible(dct_original: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def dct_incompatible(db: Any) -> DataCollectingType:
+def dct_incompatible(db: object) -> DataCollectingType:
     return DataCollectingTypeFactory(
         label="Incompatible DCT",
         code="incompdct",
@@ -93,7 +93,7 @@ def dct_incompatible(db: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def bg_original(db: Any) -> BeneficiaryGroup:
+def bg_original(db: object) -> BeneficiaryGroup:
     return BeneficiaryGroupFactory(name="Original BG", master_detail=True)
 
 
@@ -132,14 +132,14 @@ def program_to_copy(
 
 
 @pytest.fixture
-def partner1_for_assign(afghanistan: Any) -> Partner:
+def partner1_for_assign(afghanistan: object) -> Partner:
     partner = PartnerFactory(name="Partner 1")
     partner.allowed_business_areas.set([afghanistan])
     return partner
 
 
 @pytest.fixture
-def partner2_for_assign(afghanistan: Any) -> Partner:
+def partner2_for_assign(afghanistan: object) -> Partner:
     partner = PartnerFactory(name="Partner 2")
     partner.allowed_business_areas.set([afghanistan])
     return partner
@@ -161,7 +161,7 @@ def setup_partners_with_role_assignments(
 
 
 @pytest.fixture
-def area1(afghanistan: Any) -> Any:
+def area1(afghanistan: object) -> object:
     country = CountryFactory()
     country.business_areas.set([afghanistan])
     admin_type = AreaTypeFactory(country=country, area_level=1)
@@ -169,7 +169,7 @@ def area1(afghanistan: Any) -> Any:
 
 
 @pytest.fixture
-def area2(afghanistan: BusinessArea, area1: Any) -> Any:
+def area2(afghanistan: BusinessArea, area1: object) -> object:
     return AreaFactory(parent=None, area_type=area1.area_type, p_code="AFCPY2", name="AreaCopy2")
 
 
@@ -185,7 +185,7 @@ def copy_url(afghanistan: BusinessArea, program_to_copy: Program) -> str:
 
 
 @pytest.fixture
-def base_copy_payload(dct_compatible: Any, area1: Any) -> dict:
+def base_copy_payload(dct_compatible: object, area1: object) -> dict:
     return {
         "name": "Copied Program Name",
         "code": "copy",
@@ -215,12 +215,12 @@ def base_copy_payload(dct_compatible: Any, area1: Any) -> dict:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_copy_program_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -238,7 +238,7 @@ def test_copy_program_with_permission(
 
 
 def test_copy_program_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -252,7 +252,7 @@ def test_copy_program_without_permission(
 
 
 def test_copy_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -330,7 +330,7 @@ def test_copy_program(
 
 
 def test_copy_program_new_code_generation(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -359,7 +359,7 @@ def test_copy_program_new_code_generation(
 
 
 def test_copy_program_existing_code(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -387,7 +387,7 @@ def test_copy_program_existing_code(
 
 
 def test_copy_program_invalid_code(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -417,7 +417,7 @@ def test_copy_program_invalid_code(
 
 
 def test_copy_program_with_invalid_dates(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -445,7 +445,7 @@ def test_copy_program_with_invalid_dates(
 
 
 def test_copy_program_incompatible_dct(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -476,7 +476,7 @@ def test_copy_program_incompatible_dct(
 
 
 def test_copy_program_dct_invalid(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     ukraine: BusinessArea,
@@ -534,7 +534,7 @@ def test_copy_program_dct_invalid(
 
 
 def test_copy_program_all_partners_access(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -572,7 +572,7 @@ def test_copy_program_all_partners_access(
 
 
 def test_copy_program_all_partners_access_with_partners_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -606,7 +606,7 @@ def test_copy_program_all_partners_access_with_partners_data(
 
 
 def test_copy_program_none_partners_access_with_partners_data(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -640,7 +640,7 @@ def test_copy_program_none_partners_access_with_partners_data(
 
 
 def test_copy_program_selected_access(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,
@@ -695,7 +695,7 @@ def test_copy_program_selected_access(
 
 
 def test_copy_program_selected_access_without_partner(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     copy_url: str,

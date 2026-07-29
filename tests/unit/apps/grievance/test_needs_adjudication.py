@@ -1,7 +1,6 @@
 """Tests for create_needs_adjudication_tickets_for_biometrics guard branches."""
 
 from decimal import Decimal
-from typing import Any
 
 import pytest
 
@@ -22,22 +21,22 @@ pytestmark = [
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="na-mypy-ba")
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True)
 
 
 @pytest.fixture
-def rdi(program: Any, business_area: Any) -> Any:
+def rdi(program: object, business_area: object) -> object:
     return RegistrationDataImportFactory(program=program, business_area=business_area)
 
 
 @pytest.fixture
-def pair_both_individuals_none(program: Any) -> Any:
+def pair_both_individuals_none(program: object) -> object:
     """A similarity pair where both individual1 and individual2 are None."""
     return DeduplicationEngineSimilarityPair.objects.create(
         program=program,
@@ -49,8 +48,8 @@ def pair_both_individuals_none(program: Any) -> Any:
 
 
 def test_create_needs_adjudication_tickets_for_biometrics_skips_pair_when_both_individuals_none(
-    pair_both_individuals_none: Any,
-    rdi: Any,
+    pair_both_individuals_none: object,
+    rdi: object,
 ) -> None:
     """When both individual1 and individual2 are None, the pair is skipped."""
     from hope.apps.grievance.models import GrievanceTicket

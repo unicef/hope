@@ -1,6 +1,5 @@
 import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
-from typing import Any
 
 import openpyxl
 import pytest
@@ -127,7 +126,7 @@ def create_flexible_attribute(
 
 
 def add_pdu_data_to_xlsx(
-    periodic_data_update_template: PDUXlsxTemplate, rows: list[list[Any]]
+    periodic_data_update_template: PDUXlsxTemplate, rows: list[list[object]]
 ) -> _TemporaryFileWrapper:
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     ws_pdu = wb[PDUXlsxExportTemplateService.PDU_SHEET]

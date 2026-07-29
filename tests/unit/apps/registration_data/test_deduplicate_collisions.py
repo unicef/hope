@@ -1,5 +1,4 @@
 from types import SimpleNamespace
-from typing import Any
 
 import pytest
 
@@ -20,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def collision_context() -> dict[str, Any]:
+def collision_context() -> dict[str, object]:
     business_area = BusinessAreaFactory()
     poland = CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
     business_area.countries.add(poland)
@@ -71,7 +70,7 @@ def collision_context() -> dict[str, Any]:
     }
 
 
-def test_collided_individuals_ids_to_exclude(collision_context: dict[str, Any]) -> None:
+def test_collided_individuals_ids_to_exclude(collision_context: dict[str, object]) -> None:
     program = collision_context["program"]
     importing_rdi = collision_context["importing_rdi"]
     pending_individual = collision_context["pending_individual"]
@@ -86,8 +85,8 @@ def test_collided_individuals_ids_to_exclude(collision_context: dict[str, Any]) 
 
 
 def test_deduplicate_pending_individuals_skips_collided(
-    collision_context: dict[str, Any],
-    mocker: Any,
+    collision_context: dict[str, object],
+    mocker: object,
 ) -> None:
     program = collision_context["program"]
     importing_rdi = collision_context["importing_rdi"]

@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib.messages import get_messages
 from django.test import Client
 from django.urls import reverse
@@ -13,7 +11,7 @@ from hope.models import User
 pytestmark = pytest.mark.django_db
 
 
-def test_panel_rebuild_search_index_method_delegates_to_helper(mocker: Any) -> None:
+def test_panel_rebuild_search_index_method_delegates_to_helper(mocker: object) -> None:
     rebuild = mocker.patch("hope.apps.administration.panels.es.rebuild_search_index")
 
     panel_elasticsearch.rebuild_search_index(request=mocker.Mock())
@@ -40,7 +38,7 @@ def test_es_panel_get_renders_config(superuser_client: Client) -> None:
     assert response.context["logs"] == {}
 
 
-def test_es_panel_post_info_returns_cluster_info(superuser_client: Client, mocker: Any) -> None:
+def test_es_panel_post_info_returns_cluster_info(superuser_client: Client, mocker: object) -> None:
     conn = mocker.Mock()
     # es-py 9.x wraps responses in an ObjectApiResponse; the panel reads ``.body``.
     conn.info.return_value = mocker.Mock(body={"version": {"number": "8.14.0"}})
@@ -52,7 +50,7 @@ def test_es_panel_post_info_returns_cluster_info(superuser_client: Client, mocke
     assert response.context["logs"] == {"version": {"number": "8.14.0"}}
 
 
-def test_es_panel_post_test_connection_pings(superuser_client: Client, mocker: Any) -> None:
+def test_es_panel_post_test_connection_pings(superuser_client: Client, mocker: object) -> None:
     conn = mocker.Mock()
     create_connection = mocker.patch("hope.apps.administration.panels.es.create_connection", return_value=conn)
 
@@ -63,7 +61,7 @@ def test_es_panel_post_test_connection_pings(superuser_client: Client, mocker: A
     conn.ping.assert_called_once()
 
 
-def test_es_panel_post_rebuild_search_index_invokes_helper(superuser_client: Client, mocker: Any) -> None:
+def test_es_panel_post_rebuild_search_index_invokes_helper(superuser_client: Client, mocker: object) -> None:
     rebuild = mocker.patch("hope.apps.administration.panels.es.rebuild_search_index")
 
     response = superuser_client.post(reverse("admin:console-es"), {"action": "rebuild_search_index"})
@@ -72,7 +70,7 @@ def test_es_panel_post_rebuild_search_index_invokes_helper(superuser_client: Cli
     rebuild.assert_called_once()
 
 
-def test_es_panel_post_populate_all_indexes_invokes_helper(superuser_client: Client, mocker: Any) -> None:
+def test_es_panel_post_populate_all_indexes_invokes_helper(superuser_client: Client, mocker: object) -> None:
     populate = mocker.patch("hope.apps.administration.panels.es.populate_all_indexes")
 
     response = superuser_client.post(reverse("admin:console-es"), {"action": "populate_all_indexes"})
@@ -81,7 +79,7 @@ def test_es_panel_post_populate_all_indexes_invokes_helper(superuser_client: Cli
     populate.assert_called_once()
 
 
-def test_es_panel_post_connection_error_adds_error_message(superuser_client: Client, mocker: Any) -> None:
+def test_es_panel_post_connection_error_adds_error_message(superuser_client: Client, mocker: object) -> None:
     mocker.patch(
         "hope.apps.administration.panels.es.create_connection",
         side_effect=ElasticsearchConnectionError("no cluster"),

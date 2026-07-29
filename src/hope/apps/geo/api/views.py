@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -36,7 +35,7 @@ class AreaViewSet(
 
     @etag_decorator(AreasKeyConstructor)
     @cached_response(key_func=AreasKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(
@@ -47,7 +46,7 @@ class AreaViewSet(
     @etag_decorator(AreasKeyConstructor)
     @cached_response(key_func=AreasKeyConstructor())
     @action(detail=False, methods=["get"], url_path="all-areas-tree")
-    def all_areas_tree(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_areas_tree(self, request: Request, *args: object, **kwargs: object) -> Response:
         # get Area max level 3
         queryset = (
             Area.objects.filter(

@@ -1,7 +1,6 @@
 import base64
 import io
 import json
-from typing import Any
 from unittest.mock import patch
 
 from constance.test import override_config
@@ -19,7 +18,7 @@ pytestmark = pytest.mark.django_db
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_body_with_template(mocked_requests_post: Any) -> None:
+def test_mailjet_body_with_template(mocked_requests_post: object) -> None:
     mocked_requests_post.return_value.status_code = 200
     mailjet = MailjetClient(
         mailjet_template_id=1,
@@ -74,7 +73,7 @@ def test_mailjet_body_with_template(mocked_requests_post: Any) -> None:
     CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"],
 )
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_body_with_template_with_catch_all(mocked_requests_post: Any) -> None:
+def test_mailjet_body_with_template_with_catch_all(mocked_requests_post: object) -> None:
     mocked_requests_post.return_value.status_code = 200
     mailjet = MailjetClient(
         mailjet_template_id=1,
@@ -126,7 +125,7 @@ def test_mailjet_body_with_template_with_catch_all(mocked_requests_post: Any) ->
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_body_with_html_and_text_body(mocked_requests_post: Any) -> None:
+def test_mailjet_body_with_html_and_text_body(mocked_requests_post: object) -> None:
     mocked_requests_post.return_value.status_code = 200
     mailjet = MailjetClient(
         html_body="<h1>HTML Body</h1>",
@@ -177,7 +176,7 @@ def test_mailjet_body_with_html_and_text_body(mocked_requests_post: Any) -> None
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_body_with_text_body(mocked_requests_post: Any) -> None:
+def test_mailjet_body_with_text_body(mocked_requests_post: object) -> None:
     mocked_requests_post.return_value.status_code = 200
     mailjet = MailjetClient(
         text_body="Text Body",
@@ -226,7 +225,7 @@ def test_mailjet_body_with_text_body(mocked_requests_post: Any) -> None:
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_body_with_template_and_attachment(mocked_requests_post: Any) -> None:
+def test_mailjet_body_with_template_and_attachment(mocked_requests_post: object) -> None:
     mocked_requests_post.return_value.status_code = 200
     mailjet = MailjetClient(
         mailjet_template_id=1,
@@ -312,7 +311,7 @@ def test_mailjet_body_with_template_and_attachment(mocked_requests_post: Any) ->
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_incorrect_body_with_template_and_html_body(mocked_requests_post: Any) -> None:
+def test_mailjet_incorrect_body_with_template_and_html_body(mocked_requests_post: object) -> None:
     mailjet = MailjetClient(
         html_body="<h1>HTML Body</h1>",
         mailjet_template_id=1,
@@ -328,7 +327,7 @@ def test_mailjet_incorrect_body_with_template_and_html_body(mocked_requests_post
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_incorrect_body_with_template_and_text_body(mocked_requests_post: Any) -> None:
+def test_mailjet_incorrect_body_with_template_and_text_body(mocked_requests_post: object) -> None:
     mailjet = MailjetClient(
         text_body="Text Body",
         mailjet_template_id=1,
@@ -344,7 +343,7 @@ def test_mailjet_incorrect_body_with_template_and_text_body(mocked_requests_post
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_config(ENABLE_MAILJET=True)
-def test_mailjet_incorrect_body_with_template_and_without_variables(mocked_requests_post: Any) -> None:
+def test_mailjet_incorrect_body_with_template_and_without_variables(mocked_requests_post: object) -> None:
     mailjet = MailjetClient(
         mailjet_template_id=1,
         subject="Subject for incorrect body",
@@ -359,7 +358,7 @@ def test_mailjet_incorrect_body_with_template_and_without_variables(mocked_reque
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_config(ENABLE_MAILJET=True)
 def test_mailjet_incorrect_body_without_template_and_without_html_and_text_body(
-    mocked_requests_post: Any,
+    mocked_requests_post: object,
 ) -> None:
     mailjet = MailjetClient(
         subject="Subject for incorrect body",
@@ -374,7 +373,7 @@ def test_mailjet_incorrect_body_without_template_and_without_html_and_text_body(
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)
-def test_email_user_via_mailjet(mocked_requests_post: Any) -> None:
+def test_email_user_via_mailjet(mocked_requests_post: object) -> None:
     mocked_requests_post.return_value.status_code = 200
     user = UserFactory(email="testuser@email.com", username="testuser")
     user.email_user(

@@ -2,7 +2,6 @@ import datetime
 from datetime import date
 from io import BytesIO
 from pathlib import Path
-from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
@@ -68,10 +67,10 @@ class ImageLoaderMock(SheetImageLoader):
     def __init__(self) -> None:
         pass
 
-    def image_in(self, *args: Any, **kwargs: Any) -> bool:
+    def image_in(self, *args: object, **kwargs: object) -> bool:
         return True
 
-    def get(self, *args: Any, **kwargs: Any) -> Image.Image:
+    def get(self, *args: object, **kwargs: object) -> Image.Image:
         file_obj = BytesIO()
         build_test_image().save(file_obj, format="PNG")
         file_obj.seek(0)
@@ -81,7 +80,7 @@ class ImageLoaderMock(SheetImageLoader):
 
 
 class CellMock:
-    def __init__(self, value: Any, coordinate: Any) -> None:
+    def __init__(self, value: object, coordinate: object) -> None:
         self.value = value
         self.coordinate = coordinate
 
@@ -757,7 +756,7 @@ def test_exception_with_cell_processing(
     assert header_value is not None
     task.COMBINED_FIELDS = {header_value: {"name": "dummy", "required": True}}
 
-    def raise_cast_value(value: Any, header: str) -> None:
+    def raise_cast_value(value: object, header: str) -> None:
         raise ValueError("boom")
 
     with patch.object(task, "_cast_value", side_effect=raise_cast_value):

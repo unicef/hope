@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.db import transaction
+from django.db.models import Model
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import Signal, receiver
 
@@ -26,7 +25,7 @@ def invalidate_rdi_cache(business_area_slug: str, program_code: str) -> None:
 @receiver(post_save, sender=RegistrationDataImport)
 @receiver(pre_delete, sender=RegistrationDataImport)
 def increment_registration_data_import_version_cache(
-    sender: Any, instance: RegistrationDataImport, **kwargs: dict
+    sender: type[Model], instance: RegistrationDataImport, **kwargs: dict
 ) -> None:
     invalidate_rdi_cache(instance.business_area.slug, instance.program.code)
 

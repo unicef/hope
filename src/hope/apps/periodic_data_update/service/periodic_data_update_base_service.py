@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db.models import QuerySet
 
 from hope.apps.core.attributes_qet_queries import age_to_birth_date_query
@@ -53,7 +51,7 @@ class PDUDataExtractionService:
 
     @staticmethod
     def _apply_boolean_filter(
-        queryset: QuerySet[Individual], filter_value: Any, filter_fn: Any
+        queryset: QuerySet[Individual], filter_value: object, filter_fn: object
     ) -> QuerySet[Individual]:
         if filter_value:
             return filter_fn(queryset)
@@ -157,8 +155,8 @@ class PDURoundValueMixin:
         individual: Individual,
         pdu_field_name: str,
         round_number: int,
-        value: Any,
-        collection_date: Any,
+        value: object,
+        collection_date: object,
     ) -> None:
         flex_fields_data = individual.flex_fields
         if pdu_field_name not in flex_fields_data:

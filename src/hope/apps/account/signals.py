@@ -1,9 +1,9 @@
-from typing import Any, Iterable
+from typing import Iterable
 
 from django.contrib.auth.models import Group, Permission
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Model, Q
 from django.db.models.signals import m2m_changed, post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -17,19 +17,19 @@ from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, Role
 @receiver(post_save, sender=UserRoleAssignment)
 @receiver(pre_delete, sender=RoleAssignment)
 @receiver(pre_delete, sender=UserRoleAssignment)
-def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
+def post_save_pre_delete_role_assignment(sender: type[Model], instance: User, *args: object, **kwargs: object) -> None:
     if instance.user:
         instance.user.last_modify_date = timezone.now()
         instance.user.save()
 
 
 @receiver(pre_save, sender=User)
-def pre_save_user(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
+def pre_save_user(sender: type[Model], instance: User, *args: object, **kwargs: object) -> None:
     instance.last_modify_date = timezone.now()
 
 
 @receiver(post_save, sender=User)
-def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwargs: Any) -> None:
+def post_save_user(sender: type[Model], instance: User, created: bool, *args: object, **kwargs: object) -> None:
     if created is False:
         return
 
@@ -40,7 +40,9 @@ def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwa
 
 
 @receiver(m2m_changed, sender=Partner.allowed_business_areas.through)
-def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, pk_set: set, **kwargs: Any) -> None:
+def allowed_business_areas_changed(
+    sender: type[Model], instance: Partner, action: str, pk_set: set, **kwargs: object
+) -> None:
     if action == "post_remove":
         removed_business_areas_ids = pk_set
         RoleAssignment.objects.filter(partner=instance, business_area_id__in=removed_business_areas_ids).delete()
@@ -74,7 +76,7 @@ def _invalidate_user_permissions_cache(users: Iterable) -> None:
 @receiver(pre_delete, sender=UserRoleAssignment)
 @receiver(pre_delete, sender=PartnerRoleAssignment)
 def invalidate_permissions_cache_on_role_assignment_change(
-    sender: Any, instance: RoleAssignment, **kwargs: Any
+    sender: type[Model], instance: RoleAssignment, **kwargs: object
 ) -> None:
     """Invalidate the cache for the User/Partner's Users associated with the RoleAssignment.
 
@@ -90,7 +92,7 @@ def invalidate_permissions_cache_on_role_assignment_change(
 
 @receiver(post_save, sender=Role)
 @receiver(pre_delete, sender=Role)
-def invalidate_permissions_cache_on_role_change(sender: Any, instance: Role, **kwargs: Any) -> None:
+def invalidate_permissions_cache_on_role_change(sender: type[Model], instance: Role, **kwargs: object) -> None:
     """Invalidate the cache for the User/Partner's Users.
 
     It applies to users associated with the Role through a RoleAssignment when the Role is created, updated, or deleted.
@@ -103,7 +105,7 @@ def invalidate_permissions_cache_on_role_change(sender: Any, instance: Role, **k
 
 @receiver(m2m_changed, sender=Group.permissions.through)
 def invalidate_permissions_cache_on_group_permissions_change(
-    sender: Any, instance: Group, action: str, **kwargs: Any
+    sender: type[Model], instance: Group, action: str, **kwargs: object
 ) -> None:
     """Invalidate the cache for all Users that are assigned to that Group.
 
@@ -120,7 +122,7 @@ def invalidate_permissions_cache_on_group_permissions_change(
 
 @receiver(post_save, sender=Group)
 @receiver(pre_delete, sender=Group)
-def invalidate_permissions_cache_on_group_change(sender: Any, instance: Group, **kwargs: Any) -> None:
+def invalidate_permissions_cache_on_group_change(sender: type[Model], instance: Group, **kwargs: object) -> None:
     """Invalidate the cache for all Users that are assigned to that Group.
 
     or are assigned to this Group's RoleAssignment
@@ -134,7 +136,9 @@ def invalidate_permissions_cache_on_group_change(sender: Any, instance: Group, *
 
 
 @receiver(m2m_changed, sender=User.groups.through)
-def invalidate_permissions_cache_on_user_groups_change(action: str, instance: User, pk_set: set, **kwargs: Any) -> None:
+def invalidate_permissions_cache_on_user_groups_change(
+    action: str, instance: User, pk_set: set, **kwargs: object
+) -> None:
     """Invalidate the cache for a User when their Groups are modified."""
     if action in {"post_add", "post_remove", "post_clear"}:
         _invalidate_user_permissions_cache([instance])
@@ -142,7 +146,7 @@ def invalidate_permissions_cache_on_user_groups_change(action: str, instance: Us
 
 @receiver(post_save, sender=User)
 @receiver(pre_delete, sender=User)
-def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **kwargs: Any) -> None:
+def invalidate_permissions_cache_on_user_change(sender: type[Model], instance: User, **kwargs: object) -> None:
     """Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)."""
     _invalidate_user_permissions_cache([instance])
 
@@ -163,12 +167,12 @@ def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **k
 @receiver(post_delete, sender=RoleAssignment)
 @receiver(post_delete, sender=UserRoleAssignment)
 @receiver(post_delete, sender=PartnerRoleAssignment)
-def _authz_global_changed(*args: Any, **kwargs: Any) -> None:
+def _authz_global_changed(*args: object, **kwargs: object) -> None:
     transaction.on_commit(profile_cache.bump_global)
 
 
 @receiver(m2m_changed, sender=Group.permissions.through)
-def _group_permissions_changed(action: str, **kwargs: Any) -> None:
+def _group_permissions_changed(action: str, **kwargs: object) -> None:
     if action in {"post_add", "post_remove", "post_clear"}:
         transaction.on_commit(profile_cache.bump_global)
 
@@ -176,11 +180,11 @@ def _group_permissions_changed(action: str, **kwargs: Any) -> None:
 # Invalidate only the UserProfile associated with the User
 @receiver(post_save, sender=User)
 @receiver(post_delete, sender=User)
-def _user_changed(instance: User, **kwargs: Any) -> None:
+def _user_changed(instance: User, **kwargs: object) -> None:
     transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))
 
 
 @receiver(m2m_changed, sender=User.groups.through)
-def _user_groups_changed(instance: User, action: str, **kwargs: Any) -> None:
+def _user_groups_changed(instance: User, action: str, **kwargs: object) -> None:
     if action in {"post_add", "post_remove", "post_clear"}:
         transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))

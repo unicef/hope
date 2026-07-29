@@ -1,5 +1,4 @@
 import json
-from typing import Any
 
 from django.core.cache import cache
 from django.db import connection
@@ -40,7 +39,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def household_list_context(api_client: Any) -> dict[str, Any]:
+def household_list_context(api_client: object) -> dict[str, object]:
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
     program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
     different_program = ProgramFactory(business_area=afghanistan, status=Program.ACTIVE)
@@ -143,8 +142,8 @@ def household_list_context(api_client: Any) -> dict[str, Any]:
 )
 def test_household_list_with_permissions(
     permissions: list,
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=household_list_context["user"],
@@ -191,8 +190,8 @@ def test_household_list_with_permissions(
 
 
 def test_household_count_with_permissions(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=household_list_context["user"],
@@ -206,8 +205,8 @@ def test_household_count_with_permissions(
 
 
 def test_household_count_without_permissions(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=household_list_context["user"],
@@ -228,8 +227,8 @@ def test_household_count_without_permissions(
 )
 def test_household_list_without_permissions(
     permissions: list,
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user=household_list_context["user"],
@@ -243,8 +242,8 @@ def test_household_list_without_permissions(
 
 
 def test_household_list_on_draft_program(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     program = ProgramFactory(business_area=household_list_context["afghanistan"], status=Program.DRAFT)
     list_url = reverse(
@@ -282,9 +281,9 @@ def test_household_list_on_draft_program(
 
 
 def test_household_list_with_admin_area_limits(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    set_admin_area_limits_in_program: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    set_admin_area_limits_in_program: object,
 ) -> None:
     create_user_role_with_permissions(
         user=household_list_context["user"],
@@ -337,9 +336,9 @@ def test_household_list_with_admin_area_limits(
 
 
 def test_household_list_caching(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    set_admin_area_limits_in_program: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
+    set_admin_area_limits_in_program: object,
 ) -> None:
     create_user_role_with_permissions(
         user=household_list_context["user"],
@@ -418,8 +417,8 @@ def test_household_list_caching(
 
 
 def test_household_all_flex_fields_attributes(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     program = ProgramFactory(business_area=household_list_context["afghanistan"], status=Program.DRAFT)
     list_url = reverse(
@@ -451,8 +450,8 @@ def test_household_all_flex_fields_attributes(
 
 
 def test_household_all_accountability_communication_message_recipients(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     household_list_context["household1"].head_of_household.phone_no_valid = True
     household_list_context["household2"].head_of_household.phone_no_alternative_valid = True
@@ -503,8 +502,8 @@ def test_household_all_accountability_communication_message_recipients(
 
 
 def test_household_recipients(
-    household_list_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+    household_list_context: dict[str, object],
+    create_user_role_with_permissions: object,
 ) -> None:
     list_url = reverse(
         "api:households:households-recipients",
@@ -539,7 +538,7 @@ def test_household_recipients(
 
 
 @pytest.fixture
-def household_detail_context(api_client: Any) -> dict[str, Any]:
+def household_detail_context(api_client: object) -> dict[str, object]:
     detail_url_name = "api:households:households-detail"
 
     afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
@@ -645,7 +644,7 @@ def household_detail_context(api_client: Any) -> dict[str, Any]:
     ],
 )
 def test_household_detail_with_permissions(
-    permissions: list, create_user_role_with_permissions: Any, household_detail_context: dict[str, Any]
+    permissions: list, create_user_role_with_permissions: object, household_detail_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_detail_context["user"],
@@ -798,7 +797,7 @@ def test_household_detail_with_permissions(
     ]
 
 
-def test_household_detail_admin_url(household_detail_context: dict[str, Any]) -> None:
+def test_household_detail_admin_url(household_detail_context: dict[str, object]) -> None:
     user = household_detail_context["user"]
     user.is_staff = True
     user.is_superuser = True
@@ -826,7 +825,7 @@ def test_household_detail_admin_url(household_detail_context: dict[str, Any]) ->
     ],
 )
 def test_household_detail_without_permissions(
-    permissions: list, create_user_role_with_permissions: Any, household_detail_context: dict[str, Any]
+    permissions: list, create_user_role_with_permissions: object, household_detail_context: dict[str, object]
 ) -> None:
     create_user_role_with_permissions(
         user=household_detail_context["user"],
@@ -848,7 +847,7 @@ def test_household_detail_without_permissions(
 
 
 def test_household_detail_with_permissions_in_different_program(
-    create_user_role_with_permissions: Any, household_detail_context: dict[str, Any]
+    create_user_role_with_permissions: object, household_detail_context: dict[str, object]
 ) -> None:
     program_other = ProgramFactory(
         name="Program Other",

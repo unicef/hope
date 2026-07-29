@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 import pytest
@@ -37,7 +35,7 @@ class _Stub:
 
 
 class _Filter(TargetingCriteriaFilterBase):
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: object) -> None:
         self.__dict__.update(kwargs)
 
 

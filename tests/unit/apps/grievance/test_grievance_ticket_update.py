@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Callable
+from typing import Callable
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -128,7 +128,7 @@ def area2(area_type: AreaType) -> Area:
 
 
 @pytest.fixture
-def household_one(afghanistan: BusinessArea, program: Program, document_types: None) -> Any:
+def household_one(afghanistan: BusinessArea, program: Program, document_types: None) -> object:
     first_individual = IndividualFactory(
         full_name="Benjamin Butler",
         given_name="Benjamin",
@@ -187,7 +187,7 @@ def household_one(afghanistan: BusinessArea, program: Program, document_types: N
 
 @pytest.fixture
 def add_individual_ticket(
-    afghanistan: BusinessArea, program: Program, area1: Area, household_one: Any
+    afghanistan: BusinessArea, program: Program, area1: Area, household_one: object
 ) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -229,7 +229,7 @@ def individual_data_change_ticket(
     afghanistan: BusinessArea,
     program: Program,
     area1: Area,
-    household_one: Any,
+    household_one: object,
 ) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -333,7 +333,7 @@ def bulk_grievance_tickets(
 
 
 @pytest.fixture
-def payment(afghanistan: BusinessArea, program: Program) -> Any:
+def payment(afghanistan: BusinessArea, program: Program) -> object:
     return PaymentFactory(
         parent__business_area=afghanistan,
         parent__program_cycle=program.cycles.first(),
@@ -345,7 +345,7 @@ def household_data_change_grievance_ticket(
     afghanistan: BusinessArea,
     program: Program,
     area1: Area,
-    household_one: Any,
+    household_one: object,
     user: User,
 ) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(
@@ -377,8 +377,8 @@ def complaint_ticket(
     afghanistan: BusinessArea,
     program: Program,
     area1: Area,
-    household_one: Any,
-    payment: Any,
+    household_one: object,
+    payment: object,
     user: User,
 ) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(
@@ -451,7 +451,7 @@ def complaint_ticket_create_note_url(afghanistan: BusinessArea, complaint_ticket
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_hh_update(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -508,7 +508,7 @@ def test_update_grievance_ticket_hh_update(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_with_no_area_access(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -545,7 +545,7 @@ def test_update_grievance_ticket_with_no_area_access(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_as_creator(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -602,7 +602,7 @@ def test_update_grievance_ticket_as_creator(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_as_owner(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -662,7 +662,7 @@ def test_update_grievance_ticket_as_owner(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_payment_verification_ticket_with_new_received_amount_extras(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -735,13 +735,13 @@ def test_update_payment_verification_ticket_with_new_received_amount_extras(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_complaint(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
-    household_one: Any,
+    household_one: object,
     document_types: None,
-    payment: Any,
+    payment: object,
     complaint_ticket: GrievanceTicket,
     complaint_ticket_detail_url: str,
     create_user_role_with_permissions: Callable,
@@ -782,7 +782,7 @@ def test_update_grievance_ticket_complaint(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_validation_error(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -821,7 +821,7 @@ def test_update_grievance_ticket_validation_error(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_grievance_status_change(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -846,7 +846,7 @@ def test_grievance_status_change(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_grievance_status_change_invalid_status(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -867,7 +867,7 @@ def test_grievance_status_change_invalid_status(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_grievance_status_change_invalid_status_flow(
-    api_client: Any,
+    api_client: object,
     user: UserFactory,
     afghanistan: BusinessArea,
     program: Program,
@@ -912,7 +912,7 @@ def test_grievance_status_change_invalid_status_flow(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_grievance_status_change_other_statuses(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -972,7 +972,7 @@ def test_grievance_status_change_other_statuses(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_grievance_status_change_assigned_to(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1019,7 +1019,7 @@ def test_grievance_status_change_assigned_to(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_grievance_status_change_close_na_without_access(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1110,7 +1110,7 @@ def test_grievance_status_change_close_na_without_access(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_create_ticket_note(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1134,7 +1134,7 @@ def test_create_ticket_note(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_reassign_role(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1243,7 +1243,7 @@ def test_reassign_role(
     ],
 )
 def test_bulk_update_grievance_assignee(
-    api_client: Any,
+    api_client: object,
     user: User,
     user2: User,
     afghanistan: BusinessArea,
@@ -1312,7 +1312,7 @@ def test_bulk_update_grievance_assignee(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_bulk_update_grievance_priority(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1348,7 +1348,7 @@ def test_bulk_update_grievance_priority(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_bulk_update_grievance_urgency(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1384,7 +1384,7 @@ def test_bulk_update_grievance_urgency(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_bulk_add_note(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1421,7 +1421,7 @@ def test_bulk_add_note(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_individual_data_with_photo(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1470,7 +1470,7 @@ def test_update_grievance_ticket_individual_data_with_photo(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_add_individual_with_photo(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -1519,7 +1519,7 @@ def test_update_grievance_ticket_add_individual_with_photo(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_individual_data_clear_photo(
-    api_client: Any,
+    api_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,

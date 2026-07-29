@@ -6,7 +6,6 @@ import json
 import logging
 from pathlib import Path
 from typing import (
-    Any,
     NamedTuple,
     Protocol,
     TypedDict,
@@ -174,13 +173,13 @@ class DashboardCacheBase(Protocol):
         return f"{cls.CACHE_KEY_PREFIX}{identifier}"
 
     @classmethod
-    def get_data(cls, identifier: str) -> list[dict[str, Any]] | None:
+    def get_data(cls, identifier: str) -> list[dict[str, object]] | None:
         cache_key = cls.get_cache_key(identifier)
         data = cache.get(cache_key)
         return json.loads(data) if data else None
 
     @classmethod
-    def store_data(cls, identifier: str, data: list[dict[str, Any]]) -> None:
+    def store_data(cls, identifier: str, data: list[dict[str, object]]) -> None:
         cache_key = cls.get_cache_key(identifier)
         # No expiry: dashboard data should always be available, even if stale.
         # It is overwritten by the next successful refresh.
@@ -302,11 +301,11 @@ class DashboardCacheBase(Protocol):
         )
 
     @classmethod
-    def _get_household_data(cls, household_ids: set[UUID]) -> dict[UUID, dict[str, Any]]:
+    def _get_household_data(cls, household_ids: set[UUID]) -> dict[UUID, dict[str, object]]:
         if not household_ids:
             return {}
 
-        household_map: dict[UUID, dict[str, Any]] = {}
+        household_map: dict[UUID, dict[str, object]] = {}
         household_id_list = list(household_ids)
 
         for i in range(0, len(household_id_list), HOUSEHOLD_BATCH_SIZE):
@@ -428,13 +427,13 @@ class DashboardCacheBase(Protocol):
         cls,
         payment_ids: list[UUID],
         business_area: BusinessArea | None = None,
-    ) -> Iterable[dict[str, Any]]:
+    ) -> Iterable[dict[str, object]]:
         for batch_ids in batched(payment_ids, DEFAULT_ITERATOR_CHUNK_SIZE, strict=False):
             batch_qs = cls._get_base_payment_queryset(business_area=business_area).filter(id__in=batch_ids)
             yield from cls._get_payment_data(batch_qs)
 
     @classmethod
-    def refresh_data(cls, identifier: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
+    def refresh_data(cls, identifier: str, years_to_refresh: list[int] | None = None) -> list[dict[str, object]]:
         raise NotImplementedError
 
 
@@ -459,7 +458,7 @@ class DashboardDataCache(DashboardCacheBase):
     @classmethod
     def _get_cached_data_for_other_years(
         cls, identifier: str, years_to_refresh: list[int]
-    ) -> tuple[list[dict[str, Any]], bool]:
+    ) -> tuple[list[dict[str, object]], bool]:
         cache_key = cls.get_cache_key(identifier)
         cached_data_str = cache.get(cache_key)
         if cached_data_str:
@@ -469,7 +468,7 @@ class DashboardDataCache(DashboardCacheBase):
         return [], False
 
     @classmethod
-    def _build_country_summary_results(cls, summary: dict) -> list[dict[str, Any]]:
+    def _build_country_summary_results(cls, summary: dict) -> list[dict[str, object]]:
         results = []
         for key, totals in summary.items():
             month_name = "Unknown"
@@ -505,11 +504,11 @@ class DashboardDataCache(DashboardCacheBase):
     @classmethod
     def _aggregate_country_payment(
         cls,
-        payment: dict[str, Any],
+        payment: dict[str, object],
         summary: defaultdict[CountrySummaryKey, CountrySummaryDict],
         plan_counts: dict[str, dict[tuple, int]],
-        household_map: dict[UUID, dict[str, Any]],
-        seen_households_by_year: defaultdict[Any, set[UUID]],
+        household_map: dict[UUID, dict[str, object]],
+        seen_households_by_year: defaultdict[object, set[UUID]],
     ) -> None:
         key = CountrySummaryKey(
             year=payment.get("year"),
@@ -539,8 +538,10 @@ class DashboardDataCache(DashboardCacheBase):
         cls._summary_count(current_summary, household_id, household_map, payment, seen_households_by_year[payment_year])
 
     @classmethod
-    def refresh_data(cls, business_area_slug: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
-        existing_data_for_other_years: list[dict[str, Any]] = []
+    def refresh_data(
+        cls, business_area_slug: str, years_to_refresh: list[int] | None = None
+    ) -> list[dict[str, object]]:
+        existing_data_for_other_years: list[dict[str, object]] = []
         is_partial_refresh_attempt = bool(years_to_refresh)
 
         if is_partial_refresh_attempt and years_to_refresh:
@@ -589,12 +590,12 @@ class DashboardDataCache(DashboardCacheBase):
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
         all_payment_ids = list(base_payments_qs.values_list("id", flat=True))
-        payment_data_iter: Iterable[dict[str, Any]] = cls._iter_payment_data_in_batches(
+        payment_data_iter: Iterable[dict[str, object]] = cls._iter_payment_data_in_batches(
             all_payment_ids, business_area=business_area
         )
 
         summary: defaultdict[CountrySummaryKey, CountrySummaryDict] = defaultdict(cls._create_empty_country_summary)
-        seen_households_by_year: defaultdict[Any, set[UUID]] = defaultdict(set)
+        seen_households_by_year: defaultdict[object, set[UUID]] = defaultdict(set)
 
         for payment in payment_data_iter:
             cls._aggregate_country_payment(payment, summary, plan_counts, household_map, seen_households_by_year)
@@ -602,7 +603,7 @@ class DashboardDataCache(DashboardCacheBase):
         newly_processed_result_list = cls._build_country_summary_results(summary)
 
         serialized_data = cast(
-            "list[dict[str, Any]]",
+            "list[dict[str, object]]",
             DashboardBaseSerializer(newly_processed_result_list, many=True).data,
         )
 
@@ -625,10 +626,10 @@ class DashboardDataCache(DashboardCacheBase):
     @classmethod
     def _summary_count(
         cls,
-        current_summary: CountrySummaryDict | dict[str, Any],
+        current_summary: CountrySummaryDict | dict[str, object],
         household_id: UUID | None,
-        household_map: dict[UUID, dict[str, Any]],
-        payment: dict[str, Any],
+        household_map: dict[UUID, dict[str, object]],
+        payment: dict[str, object],
         global_seen_households: set[UUID] | None = None,
     ) -> None:
         seen_set = global_seen_households if global_seen_households is not None else current_summary["_seen_households"]
@@ -688,7 +689,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         }
 
     @classmethod
-    def _build_summary_results(cls, summary_for_year: dict) -> list[dict[str, Any]]:
+    def _build_summary_results(cls, summary_for_year: dict) -> list[dict[str, object]]:
         results = []
         for (
             year_val_from_key,
@@ -723,12 +724,12 @@ class DashboardGlobalDataCache(DashboardCacheBase):
     @classmethod
     def refresh_data(
         cls, identifier: str = GLOBAL_SLUG, years_to_refresh: list[int] | None = None
-    ) -> list[dict[str, Any]]:
-        all_newly_processed_data: list[dict[str, Any]] = []
+    ) -> list[dict[str, object]]:
+        all_newly_processed_data: list[dict[str, object]] = []
         is_explicit_partial_refresh = years_to_refresh is not None
 
         actual_years_to_process: list[int]
-        data_from_cache_for_other_years: list[dict[str, Any]] = []
+        data_from_cache_for_other_years: list[dict[str, object]] = []
 
         if years_to_refresh is None:
             actual_years_to_process = cls._get_all_db_years()
@@ -816,7 +817,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     }
                 )
 
-        serialized_data: list[dict[str, Any]] = list(DashboardBaseSerializer(all_newly_processed_data, many=True).data)
+        serialized_data: list[dict[str, object]] = list(
+            DashboardBaseSerializer(all_newly_processed_data, many=True).data
+        )
 
         if is_explicit_partial_refresh:
             final_data_to_cache = serialized_data + data_from_cache_for_other_years
@@ -829,8 +832,8 @@ class DashboardGlobalDataCache(DashboardCacheBase):
     @classmethod
     def _process_payment_data_iter(
         cls,
-        household_map: dict[UUID, dict[str, Any]],
-        payment: dict[str, Any],
+        household_map: dict[UUID, dict[str, object]],
+        payment: dict[str, object],
         plan_counts: dict[str, dict[tuple, int]],
         summary_for_year: defaultdict[tuple, GlobalSummaryDict],
         global_seen_households: set[UUID] | None = None,

@@ -1,7 +1,5 @@
 """Tests for account models - RoleAssignment, Partner, AdminAreaLimitedTo."""
 
-from typing import Any
-
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 import pytest
@@ -22,17 +20,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_1(db: Any) -> BusinessArea:
+def business_area_1(db: object) -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def business_area_2(db: Any) -> BusinessArea:
+def business_area_2(db: object) -> BusinessArea:
     return BusinessAreaFactory()
 
 
 @pytest.fixture
-def role(db: Any) -> Role:
+def role(db: object) -> Role:
     return RoleFactory(
         name="Test Role",
         permissions=["PROGRAMME_CREATE", "PROGRAMME_FINISH"],
@@ -40,7 +38,7 @@ def role(db: Any) -> Role:
 
 
 @pytest.fixture
-def role_2(db: Any) -> Role:
+def role_2(db: object) -> Role:
     return RoleFactory(
         name="Test Role 2",
         permissions=["PROGRAMME_UPDATE"],
@@ -48,7 +46,7 @@ def role_2(db: Any) -> Role:
 
 
 @pytest.fixture
-def user(db: Any) -> User:
+def user(db: object) -> User:
     return UserFactory(first_name="Test", last_name="User")
 
 
@@ -88,7 +86,7 @@ def user_role_assignment(user: User, role: Role, business_area_1: BusinessArea) 
 
 
 @pytest.fixture
-def area_1(db: Any) -> Area:
+def area_1(db: object) -> Area:
     return AreaFactory(name="Area 1", p_code="AREA1")
 
 

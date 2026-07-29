@@ -1,9 +1,10 @@
 import logging
-from typing import Any, cast
+from typing import cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 from django.contrib import admin
+from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils import timezone
@@ -66,12 +67,12 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
             .defer("photo")
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def save_model(self, request: HttpRequest, obj: "Document", form: Any, change: bool) -> None:
+    def save_model(self, request: HttpRequest, obj: "Document", form: object, change: bool) -> None:
         if "cleared" in form.changed_data and obj.individual.relationship == FOSTER_CHILD:
             cleared = form.cleaned_data["cleared"]
             obj.individual.set_relationship_confirmed_flag(cleared)

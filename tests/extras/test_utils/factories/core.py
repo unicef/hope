@@ -1,7 +1,5 @@
 """Core-related factories."""
 
-from typing import Any
-
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 import factory
@@ -112,7 +110,7 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     program = factory.SubFactory("extras.test_utils.factories.program.ProgramFactory")
 
     @classmethod
-    def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
+    def _create(cls, target_class: object, *args: object, **kwargs: object) -> FlexibleAttribute:
         label = kwargs.pop("label", None)
         kwargs["label"] = {"English(EN)": label}
         return super()._create(target_class, *args, **kwargs)

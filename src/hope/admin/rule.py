@@ -2,7 +2,7 @@ import csv
 from io import StringIO
 import json
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from admin_extra_buttons.api import button
@@ -41,6 +41,7 @@ from .steficon import TestRuleMixin
 
 if TYPE_CHECKING:
     from django.forms import ModelForm
+from django.db import models
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +166,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             )
         )
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> None:
         if db_field.name == "flags":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -174,7 +175,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
+    def get_readonly_fields(self, request: HttpRequest, obj: object | None = None) -> list:
         readonly_fields = list(super().get_readonly_fields(request, obj) or [])
         # not editable for is_superuser
         if not is_root(request):
@@ -194,13 +195,13 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             readonly_fields.append("allowed_business_areas")
         return readonly_fields
 
-    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return is_root(request)
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return is_root(request)
 
-    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.is_superuser
 
     def get_ignored_linked_objects(self, request: HttpRequest) -> list[str]:
@@ -209,13 +210,13 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
     def get_form(
         self,
         request: HttpRequest,
-        obj: Any | None = None,
+        obj: object | None = None,
         change: bool = False,
-        **kwargs: Any,
-    ) -> type["ModelForm[Any]"]:
+        **kwargs: object,
+    ) -> type["ModelForm"]:
         return super().get_form(request, obj, change, **kwargs)
 
-    def stable(self, obj: Any) -> str | None:
+    def stable(self, obj: object) -> str | None:
         try:
             url = reverse("admin:steficon_rulecommit_change", args=[obj.latest.pk])
             return f'<a href="{url}">{obj.latest.version}</a>'
@@ -223,7 +224,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             return None
 
     def delete_view(
-        self, request: HttpRequest, object_id: str, extra_context: Any | None = None
+        self, request: HttpRequest, object_id: str, extra_context: object | None = None
     ) -> HttpResponse | HttpResponse:
         return super().delete_view(request, object_id, extra_context)
 
@@ -282,7 +283,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
     def _step_first_processing(
-        self, context: dict[str, Any], form: Form, request: HttpRequest, rule: Rule | None
+        self, context: dict[str, object], form: Form, request: HttpRequest, rule: Rule | None
     ) -> None:
         if form.is_valid():
             csv_config = self._get_csv_config(form)
@@ -393,7 +394,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
         request: HttpRequest,
         object_id: str,
         form_url: str = "",
-        extra_context: Any | None = None,
+        extra_context: object | None = None,
     ) -> HttpResponse:
         return super().change_view(request, object_id, form_url, extra_context)
 
@@ -402,7 +403,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
         request: HttpRequest,
         object_id: str | None,
         form_url: str = "",
-        extra_context: Any | None = None,
+        extra_context: object | None = None,
     ) -> HttpResponse:
         if request.method == "POST" and "_release" in request.POST:
             object_id = None
@@ -412,16 +413,16 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
     def save_model(
         self,
         request: HttpRequest,
-        obj: Any,
+        obj: object,
         form_url: str = "",
-        extra_context: Any | None = None,
+        extra_context: object | None = None,
     ) -> None:
         if not obj.pk:
             obj.created_by = request.user
         obj.updated_by = request.user
         obj.save()
 
-    def _get_data(self, record: Any) -> str:
+    def _get_data(self, record: object) -> str:
         roles = RuleCommit.objects.filter(rule=record)
         collector = ForeignKeysCollector("")
         objs = []

@@ -1,5 +1,4 @@
 import csv
-from typing import Any
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
@@ -44,7 +43,7 @@ class RegistrationAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, ExtraBut
             and RegistrationAdmin.has_ignored_records(btn.original)
         ),
     )
-    def export_ignored_records(self, request: HttpRequest, pk: Any) -> HttpResponse:
+    def export_ignored_records(self, request: HttpRequest, pk: object) -> HttpResponse:
         registration = models.Registration.objects.get(pk=pk)
         if not self.is_nigeria_registration(registration):
             return redirect("admin:aurora_registration_change", registration.pk)

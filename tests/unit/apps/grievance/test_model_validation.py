@@ -1,5 +1,4 @@
 import re
-from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.http import QueryDict
@@ -23,17 +22,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def base_model_data(user: Any, business_area: Any) -> dict[str, Any]:
+def base_model_data(user: object, business_area: object) -> dict[str, object]:
     return {
         "status": GrievanceTicket.STATUS_NEW,
         "description": "test description",
@@ -47,7 +46,7 @@ def base_model_data(user: Any, business_area: Any) -> dict[str, Any]:
 
 
 @pytest.fixture
-def transfer_to_account_delivery_mechanism() -> Any:
+def transfer_to_account_delivery_mechanism() -> object:
     return DeliveryMechanismFactory(
         code="transfer_to_account",
         name="Transfer to Account",
@@ -55,12 +54,12 @@ def transfer_to_account_delivery_mechanism() -> Any:
 
 
 @pytest.fixture
-def fsp_xlsx_template() -> Any:
+def fsp_xlsx_template() -> object:
     return FinancialServiceProviderXlsxTemplateFactory()
 
 
 @pytest.fixture
-def fsp() -> Any:
+def fsp() -> object:
     return FinancialServiceProviderFactory(
         name="Test FSP",
         vision_vendor_number="123",
@@ -81,7 +80,7 @@ def fsp() -> Any:
         ),
     ],
 )
-def test_valid_issue_types(base_model_data: dict[str, Any], category: int, issue_type: int | None) -> None:
+def test_valid_issue_types(base_model_data: dict[str, object], category: int, issue_type: int | None) -> None:
     grievance_ticket = GrievanceTicket(**base_model_data, category=category, issue_type=issue_type)
     grievance_ticket.save()
     assert grievance_ticket.issue_type == issue_type
@@ -100,16 +99,16 @@ def test_valid_issue_types(base_model_data: dict[str, Any], category: int, issue
         ),
     ],
 )
-def test_invalid_issue_types(base_model_data: dict[str, Any], category: int, issue_type: int | None) -> None:
+def test_invalid_issue_types(base_model_data: dict[str, object], category: int, issue_type: int | None) -> None:
     grievance_ticket = GrievanceTicket(**base_model_data, category=category, issue_type=issue_type)
     with pytest.raises(ValidationError, match="Invalid issue type for selected category"):
         grievance_ticket.save()
 
 
 def test_admin_form_clean_standalone_valid(
-    fsp_xlsx_template: Any,
-    fsp: Any,
-    transfer_to_account_delivery_mechanism: Any,
+    fsp_xlsx_template: object,
+    fsp: object,
+    transfer_to_account_delivery_mechanism: object,
 ) -> None:
     fsp.delivery_mechanisms.add(transfer_to_account_delivery_mechanism)
     form_data = QueryDict(mutable=True)
@@ -123,9 +122,9 @@ def test_admin_form_clean_standalone_valid(
 
 
 def test_admin_form_clean_inline_valid(
-    fsp_xlsx_template: Any,
-    fsp: Any,
-    transfer_to_account_delivery_mechanism: Any,
+    fsp_xlsx_template: object,
+    fsp: object,
+    transfer_to_account_delivery_mechanism: object,
 ) -> None:
     fsp.delivery_mechanisms.add(transfer_to_account_delivery_mechanism)
     form_data = QueryDict(mutable=True)
@@ -140,9 +139,9 @@ def test_admin_form_clean_inline_valid(
 
 
 def test_admin_form_clean_delivery_mechanism_not_supported(
-    fsp_xlsx_template: Any,
-    fsp: Any,
-    transfer_to_account_delivery_mechanism: Any,
+    fsp_xlsx_template: object,
+    fsp: object,
+    transfer_to_account_delivery_mechanism: object,
 ) -> None:
     form_data = QueryDict(mutable=True)
     form_data["financial_service_provider"] = str(fsp.id)
@@ -161,9 +160,9 @@ def test_admin_form_clean_delivery_mechanism_not_supported(
 
 
 def test_admin_form_clean_inline_invalid_delivery_mechanisms(
-    fsp_xlsx_template: Any,
-    fsp: Any,
-    transfer_to_account_delivery_mechanism: Any,
+    fsp_xlsx_template: object,
+    fsp: object,
+    transfer_to_account_delivery_mechanism: object,
 ) -> None:
     form_data = QueryDict(mutable=True)
     form_data["financial_service_provider"] = str(fsp.id)

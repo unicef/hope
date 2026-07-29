@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db import models
 from django.db.models import JSONField
 
@@ -51,5 +49,5 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     def get_core_fields(self) -> list:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
-    def get_lookup_prefix(self, associated_with: Any) -> str:
+    def get_lookup_prefix(self, associated_with: object) -> str:
         return ""

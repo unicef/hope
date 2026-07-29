@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Callable, Dict
+from typing import Callable, Dict
 
 from django.urls import reverse
 from django.utils.dateparse import parse_date
@@ -31,12 +31,12 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -111,12 +111,12 @@ def cycle_1_detail_url(afghanistan: BusinessArea, program: Program, cycle1: Prog
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 def test_list_program_cycles_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -147,7 +147,7 @@ def test_list_program_cycles_with_permission(
 
 
 def test_list_program_cycles_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -168,7 +168,7 @@ def test_list_program_cycles_without_permission(
 
 
 def test_retrieve_program_cycle_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -187,7 +187,7 @@ def test_retrieve_program_cycle_with_permission(
 
 
 def test_retrieve_program_cycle_admin_url_for_staff_user(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -210,7 +210,7 @@ def test_retrieve_program_cycle_admin_url_for_staff_user(
 
 
 def test_retrieve_program_cycle_admin_url_hidden_for_non_staff_user(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -230,7 +230,7 @@ def test_retrieve_program_cycle_admin_url_hidden_for_non_staff_user(
 
 
 def test_retrieve_program_cycle_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -249,7 +249,7 @@ def test_retrieve_program_cycle_without_permission(
 
 
 def test_create_program_cycle_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -277,7 +277,7 @@ def test_create_program_cycle_with_permission(
 
 
 def test_create_program_cycle_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -302,7 +302,7 @@ def test_create_program_cycle_without_permission(
 
 
 def test_update_program_cycle_put_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -331,7 +331,7 @@ def test_update_program_cycle_put_with_permission(
 
 
 def test_update_program_cycle_patch_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -355,7 +355,7 @@ def test_update_program_cycle_patch_with_permission(
 
 
 def test_update_program_cycle_put_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -379,7 +379,7 @@ def test_update_program_cycle_put_without_permission(
 
 
 def test_update_program_cycle_patch_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -399,7 +399,7 @@ def test_update_program_cycle_patch_without_permission(
 
 
 def test_update_cycle_dates_and_payment_plan(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -435,7 +435,7 @@ def test_update_cycle_dates_and_payment_plan(
 
 
 def test_delete_program_cycle_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -480,7 +480,7 @@ def test_delete_program_cycle_with_permission(
 
 
 def test_delete_program_cycle_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -518,7 +518,7 @@ def test_delete_program_cycle_without_permission(
 
 
 def test_delete_program_cycle_succeeds_when_only_empty_groups_remain(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -556,7 +556,7 @@ def test_delete_program_cycle_succeeds_when_only_empty_groups_remain(
 
 
 def test_filter_by_status(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -580,7 +580,7 @@ def test_filter_by_status(
 
 
 def test_filter_by_title_startswith(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -603,7 +603,7 @@ def test_filter_by_title_startswith(
 
 
 def test_filter_by_start_date_gte(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -626,7 +626,7 @@ def test_filter_by_start_date_gte(
 
 
 def test_filter_by_end_date_lte(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -649,7 +649,7 @@ def test_filter_by_end_date_lte(
 
 
 def test_filter_by_program(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -671,7 +671,7 @@ def test_filter_by_program(
 
 
 def test_search_filter(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -694,7 +694,7 @@ def test_search_filter(
 
 
 def test_filter_total_delivered_quantity_usd(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -727,7 +727,7 @@ def test_filter_total_delivered_quantity_usd(
 
 
 def test_filter_total_entitled_quantity_usd(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -760,7 +760,7 @@ def test_filter_total_entitled_quantity_usd(
 
 
 def test_reactivate_program_cycle_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -787,7 +787,7 @@ def test_reactivate_program_cycle_with_permission(
 
 
 def test_reactivate_program_cycle_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -812,7 +812,7 @@ def test_reactivate_program_cycle_without_permission(
 
 
 def test_finish_program_cycle_with_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -845,7 +845,7 @@ def test_finish_program_cycle_with_permission(
 
 
 def test_finish_program_cycle_without_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     afghanistan: BusinessArea,
     program: Program,
@@ -870,7 +870,7 @@ def test_finish_program_cycle_without_permission(
 
 
 @pytest.fixture
-def serializer_context(program: Program) -> Dict[str, Any]:
+def serializer_context(program: Program) -> Dict[str, object]:
     factory = APIRequestFactory()
     request = factory.get("/")
     user, _ = User.objects.get_or_create(
@@ -891,7 +891,7 @@ def serializer_context(program: Program) -> Dict[str, Any]:
 
 def test_create_serializer_validate_title_unique(
     program: Program,
-    serializer_context: Dict[str, Any],
+    serializer_context: Dict[str, object],
 ) -> None:
     ProgramCycleFactory(program=program, title="Cycle 1")
     data = {
@@ -907,7 +907,7 @@ def test_create_serializer_validate_title_unique(
 
 def test_create_serializer_validate_if_no_end_date(
     program: Program,
-    serializer_context: Dict[str, Any],
+    serializer_context: Dict[str, object],
 ) -> None:
     ProgramCycleFactory(program=program, title="Cycle 1", end_date=None)
     data = {
@@ -923,7 +923,7 @@ def test_create_serializer_validate_if_no_end_date(
 
 def test_create_serializer_validate_program_status(
     program: Program,
-    serializer_context: Dict[str, Any],
+    serializer_context: Dict[str, object],
 ) -> None:
     program.status = Program.DRAFT
     program.save()
@@ -940,7 +940,7 @@ def test_create_serializer_validate_program_status(
 
 def test_create_serializer_validate_start_date(
     program: Program,
-    serializer_context: Dict[str, Any],
+    serializer_context: Dict[str, object],
 ) -> None:
     # before program start date
     data = {
@@ -1000,7 +1000,7 @@ def test_create_serializer_validate_start_date(
 
 def test_create_serializer_validate_end_date(
     program: Program,
-    serializer_context: Dict[str, Any],
+    serializer_context: Dict[str, object],
 ) -> None:
     # after program end date
     data = {
@@ -1050,7 +1050,7 @@ def test_create_serializer_validate_end_date(
 
 
 @pytest.fixture
-def update_serializer_context(program: Program) -> Dict[str, Any]:
+def update_serializer_context(program: Program) -> Dict[str, object]:
     factory = APIRequestFactory()
     request = factory.get("/")
     cycle = program.cycles.first()
@@ -1061,7 +1061,7 @@ def update_serializer_context(program: Program) -> Dict[str, Any]:
 
 def test_update_serializer_validate_title_unique(
     program: Program,
-    update_serializer_context: Dict[str, Any],
+    update_serializer_context: Dict[str, object],
 ) -> None:
     cycle = program.cycles.first()
     ProgramCycleFactory(program=program, title="Cycle 1")
@@ -1074,7 +1074,7 @@ def test_update_serializer_validate_title_unique(
 
 def test_update_serializer_validate_program_status(
     program: Program,
-    update_serializer_context: Dict[str, Any],
+    update_serializer_context: Dict[str, object],
 ) -> None:
     cycle = program.cycles.first()
     program.status = Program.DRAFT
@@ -1088,7 +1088,7 @@ def test_update_serializer_validate_program_status(
 
 def test_update_serializer_validate_start_date(
     program: Program,
-    update_serializer_context: Dict[str, Any],
+    update_serializer_context: Dict[str, object],
 ) -> None:
     cycle = program.cycles.first()
     cycle.start_date = datetime.strptime("2023-01-02", "%Y-%m-%d").date()
@@ -1175,7 +1175,7 @@ def test_update_serializer_validate_start_date(
 
 def test_update_serializer_validate_end_date(
     program: Program,
-    update_serializer_context: Dict[str, Any],
+    update_serializer_context: Dict[str, object],
 ) -> None:
     cycle = program.cycles.first()
     cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()

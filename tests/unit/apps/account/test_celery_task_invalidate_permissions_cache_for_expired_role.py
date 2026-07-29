@@ -1,7 +1,6 @@
 """Tests for account celery tasks."""
 
 from datetime import timedelta
-from typing import Any
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -29,7 +28,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_afg(db: Any) -> BusinessArea:
+def business_area_afg(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -38,7 +37,7 @@ def business_area_afg(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="TestPartner")
 
 
@@ -48,7 +47,7 @@ def user1(partner: Partner) -> User:
 
 
 @pytest.fixture
-def user2(db: Any) -> User:
+def user2(db: object) -> User:
     return UserFactory(partner=None)
 
 
@@ -62,17 +61,17 @@ def program(business_area_afg: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def role_for_user_1(db: Any) -> Role:
+def role_for_user_1(db: object) -> Role:
     return RoleFactory(name="Test User Role 1")
 
 
 @pytest.fixture
-def role_for_user_2(db: Any) -> Role:
+def role_for_user_2(db: object) -> Role:
     return RoleFactory(name="Test User Role 2")
 
 
 @pytest.fixture
-def role_for_partner(db: Any) -> Role:
+def role_for_partner(db: object) -> Role:
     return RoleFactory(name="Test Partner Role")
 
 
@@ -152,7 +151,7 @@ def get_cache_version(user: User) -> int:
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
 def test_invalidate_permissions_cache_role_on_user_action(
-    mock_invalidate_cache: Any,
+    mock_invalidate_cache: object,
     user1: User,
     user2: User,
     role_assignment_user1: RoleAssignment,
@@ -190,7 +189,7 @@ def test_invalidate_permissions_cache_role_on_user_action(
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
 def test_invalidate_permissions_cache_role_on_users_action(
-    mock_invalidate_cache: Any,
+    mock_invalidate_cache: object,
     user1: User,
     user2: User,
     role_assignment_user1: RoleAssignment,
@@ -227,7 +226,7 @@ def test_invalidate_permissions_cache_role_on_users_action(
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
 def test_invalidate_permissions_cache_role_action_failure(
-    mock_invalidate_cache: Any,
+    mock_invalidate_cache: object,
 ) -> None:
     mock_invalidate_cache.side_effect = RuntimeError("boom")
 
@@ -237,7 +236,7 @@ def test_invalidate_permissions_cache_role_action_failure(
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
 def test_invalidate_permissions_cache_role_on_partner_action(
-    mock_invalidate_cache: Any,
+    mock_invalidate_cache: object,
     user1: User,
     user2: User,
     role_assignment_partner: RoleAssignment,
@@ -265,7 +264,7 @@ def test_invalidate_permissions_cache_role_on_partner_action(
 
 @patch("hope.apps.account.celery_tasks._invalidate_user_permissions_cache")
 def test_invalidate_permissions_cache_role_on_users_and_partner_action(
-    mock_invalidate_cache: Any,
+    mock_invalidate_cache: object,
     user1: User,
     user2: User,
     role_assignment_user1: RoleAssignment,
@@ -306,7 +305,7 @@ def test_invalidate_permissions_cache_role_on_users_and_partner_action(
 
 @patch.object(PeriodicAsyncRetryJob, "queue")
 def test_invalidate_permissions_cache_role_task_schedules_async_job(
-    mock_queue: Any, django_capture_on_commit_callbacks: Any
+    mock_queue: object, django_capture_on_commit_callbacks: object
 ) -> None:
     with django_capture_on_commit_callbacks(execute=True):
         result = invalidate_permissions_cache_for_user_if_expired_role_async_task()

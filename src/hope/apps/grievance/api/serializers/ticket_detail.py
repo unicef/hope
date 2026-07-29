@@ -1,6 +1,5 @@
 from copy import deepcopy
 from datetime import date
-from typing import Any
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -162,11 +161,11 @@ class DeduplicationResultSerializer(serializers.Serializer):
     duplicate = serializers.BooleanField(default=False)
     distinct = serializers.BooleanField(default=False)
 
-    def get_unicef_id(self, obj: Any) -> str:
+    def get_unicef_id(self, obj: object) -> str:
         individual = Individual.all_objects.get(id=obj.get("hit_id"))
         return str(individual.unicef_id)
 
-    def get_age(self, obj: Any) -> int | None:
+    def get_age(self, obj: object) -> int | None:
         date_of_birth = obj.get("dob")
         if date_of_birth:
             today = date.today()
@@ -180,7 +179,7 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     full_name = serializers.CharField()
     unicef_id = serializers.CharField()
 
-    def get_photo(self, obj: Any) -> str | None:
+    def get_photo(self, obj: object) -> str | None:
         if not (ind_id := obj.get("id")):
             return ""
         individual = Individual.all_objects.filter(id=ind_id).first()
@@ -199,7 +198,7 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
     possible_duplicate = DeduplicationResultSerializer(many=True)
     dedup_engine_similarity_pair = serializers.SerializerMethodField()
 
-    def get_dedup_engine_similarity_pair(self, obj: Any) -> dict:
+    def get_dedup_engine_similarity_pair(self, obj: object) -> dict:
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         if program_code := self.context["request"].parser_context["kwargs"].get("program_code"):
             scope = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()

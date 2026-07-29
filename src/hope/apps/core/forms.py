@@ -1,5 +1,3 @@
-from typing import Any
-
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -9,7 +7,7 @@ from hope.models import BusinessArea, DataCollectingType, Program
 
 
 class StorageFileForm(forms.Form):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
 
@@ -20,7 +18,7 @@ class StorageFileForm(forms.Form):
     def get_business_area_queryset(self) -> QuerySet[BusinessArea]:
         return BusinessArea.objects.filter(role_assignments__user=self.user)
 
-    def clean(self, *args: Any, **kwargs: Any) -> dict[str, Any] | None:
+    def clean(self, *args: object, **kwargs: object) -> dict[str, object] | None:
         cleaned_data = super().clean()
         limit = settings.MAX_STORAGE_FILE_SIZE * 1024 * 1024
         if self.cleaned_data["file"].size > limit:
@@ -31,7 +29,7 @@ class StorageFileForm(forms.Form):
 class ProgramForm(forms.Form):
     name = forms.CharField(max_length=255, label="RDI name")
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         self.business_area_id = kwargs.pop("business_area_id")
         super().__init__(*args, **kwargs)
 
@@ -42,7 +40,7 @@ class ProgramForm(forms.Form):
 
 
 class DataCollectingTypeForm(forms.ModelForm):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         super().__init__(*args, **kwargs)
         self.fields["type"].required = True
 

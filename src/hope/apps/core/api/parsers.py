@@ -1,4 +1,4 @@
-from typing import IO, Any, Mapping
+from typing import IO, Mapping
 
 from nested_multipart_parser.drf import NestedParser
 from rest_framework.exceptions import ParseError
@@ -10,7 +10,7 @@ class DictDrfNestedParser(MultiPartParser):
         self,
         stream: IO,
         media_type: str | None = None,
-        parser_context: Mapping[str, Any] | None = None,
+        parser_context: Mapping[str, object] | None = None,
     ) -> DataAndFiles:
         cls_data_and_file = super().parse(stream, media_type, parser_context)
 

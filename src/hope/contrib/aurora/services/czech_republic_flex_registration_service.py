@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -97,7 +96,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
     def _prepare_household_data(
         self,
-        record: Any,
+        record: object,
         household_address: dict,
         consent_data: dict,
         needs_assessment: dict,
@@ -222,7 +221,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         return documents
 
     @staticmethod
-    def _set_default_head_of_household(individuals_array: list[Any]) -> None:
+    def _set_default_head_of_household(individuals_array: list[object]) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
@@ -246,7 +245,9 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
+    def create_household_for_rdi_household(
+        self, record: object, registration_data_import: RegistrationDataImport
+    ) -> None:
         record_data_dict = record.get_data()
         if isinstance(record_data_dict, str):
             record_data_dict = json.loads(record_data_dict)

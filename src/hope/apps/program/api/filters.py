@@ -1,5 +1,4 @@
 from decimal import Decimal
-from typing import Any
 
 from django.db.models import DecimalField, Q, QuerySet
 from django.db.models.aggregates import Count, Sum
@@ -37,13 +36,13 @@ class ProgramCycleFilter(UpdatedAtFilter):
             "total_delivered_quantity_usd_to",
         ]
 
-    def search_filter(self, qs: QuerySet, name: str, values: Any) -> QuerySet:
+    def search_filter(self, qs: QuerySet, name: str, values: object) -> QuerySet:
         q_obj = Q()
         for value in values.split(" "):
             q_obj |= Q(Q(title__istartswith=value))
         return qs.filter(q_obj)
 
-    def filter_total_delivered_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
+    def filter_total_delivered_quantity_usd(self, queryset: QuerySet, name: str, value: object) -> QuerySet:
         filter_dict = {}
         filter_mapping = {
             "total_delivered_quantity_usd_from": "total_delivered_q_usd__gte",
@@ -62,7 +61,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
             filter_dict = {filter_mapping[name]: value}
         return queryset.filter(**filter_dict)
 
-    def filter_total_entitled_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
+    def filter_total_entitled_quantity_usd(self, queryset: QuerySet, name: str, value: object) -> QuerySet:
         filter_dict = {}
         filter_mapping = {
             "total_entitled_quantity_usd_from": "total_entitled_q_usd__gte",
@@ -130,7 +129,7 @@ class ProgramFilter(UpdatedAtFilter):
             queryset = queryset.filter(hh_count__lte=max_value)
         return queryset
 
-    def search_filter(self, qs: QuerySet, name: str, values: Any) -> QuerySet:
+    def search_filter(self, qs: QuerySet, name: str, values: object) -> QuerySet:
         q_obj = Q()
         for value in values.split(" "):
             q_obj |= Q(name__istartswith=value)

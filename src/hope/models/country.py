@@ -1,7 +1,7 @@
 # - Country
 # - AreaType
 # - Area
-from typing import Any
+
 
 from django.db import models
 from django.db.models import JSONField
@@ -17,7 +17,7 @@ from hope.models.utils import TimeStampedUUIDModel
 
 
 class ValidityQuerySet(TreeQuerySet):
-    def active(self, *args: Any, **kwargs: Any) -> "ValidityQuerySet":
+    def active(self, *args: object, **kwargs: object) -> "ValidityQuerySet":
         return super().filter(valid_until__isnull=True).filter(*args, **kwargs)
 
 
@@ -83,7 +83,7 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         return self.name
 
     @classmethod
-    def get_choices(cls) -> list[dict[str, Any]]:
+    def get_choices(cls) -> list[dict[str, object]]:
         queryset = cls.objects.all().order_by("name")
         return [
             {

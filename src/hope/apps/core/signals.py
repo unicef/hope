@@ -1,7 +1,6 @@
-from typing import Any
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import Model
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import Signal, receiver
 
@@ -17,7 +16,7 @@ post_bulk_create = Signal()
 
 @receiver(m2m_changed, sender=DataCollectingType.compatible_types.through)
 def validate_compatible_types(
-    sender: Any, instance: DataCollectingType, action: str, pk_set: set, **kwargs: Any
+    sender: type[Model], instance: DataCollectingType, action: str, pk_set: set, **kwargs: object
 ) -> None:
     if action == "pre_add":
         incompatible_dcts = DataCollectingType.objects.filter(pk__in=pk_set).exclude(type=instance.type)
@@ -26,13 +25,17 @@ def validate_compatible_types(
 
 
 @receiver(post_save, sender=DataCollectingType)
-def add_self_to_compatible_types(sender: Any, instance: DataCollectingType, created: bool, **kwargs: Any) -> None:
+def add_self_to_compatible_types(
+    sender: type[Model], instance: DataCollectingType, created: bool, **kwargs: object
+) -> None:
     if created:
         instance.compatible_types.add(instance)
 
 
 @receiver(post_save, sender=BusinessArea)
-def business_area_created(sender: Any, instance: BusinessArea, created: bool, raw: bool = False, **kwargs: Any) -> None:
+def business_area_created(
+    sender: type[Model], instance: BusinessArea, created: bool, raw: bool = False, **kwargs: object
+) -> None:
     """Create new UNICEF subpartners for the new business area."""
     if raw:
         return

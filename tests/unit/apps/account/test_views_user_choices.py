@@ -1,7 +1,5 @@
 """Tests for user choices API views."""
 
-from typing import Any
-
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -20,7 +18,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any):
+def afghanistan(db: object):
     return BusinessAreaFactory(
         code="0060",
         name="Afghanistan",
@@ -30,7 +28,7 @@ def afghanistan(db: Any):
 
 
 @pytest.fixture
-def partner(db: Any):
+def partner(db: object):
     return PartnerFactory(name="TestPartner")
 
 
@@ -40,14 +38,14 @@ def user(partner: Partner):
 
 
 @pytest.fixture
-def roles_setup(db: Any):
+def roles_setup(db: object):
     RoleFactory(name="TestRole")
     RoleFactory(name="TestRole2")
     RoleFactory(name="TestRole3")
 
 
 @pytest.fixture
-def unicef_partners(db: Any):
+def unicef_partners(db: object):
     unicef_hq = PartnerFactory(name="UNICEF HQ")
     unicef_partner_for_afghanistan = PartnerFactory(name="UNICEF Partner for afghanistan")
     return {
@@ -62,19 +60,19 @@ def choices_url(afghanistan):
 
 
 @pytest.fixture
-def authenticated_client(api_client: Any, user: User):
+def authenticated_client(api_client: object, user: User):
     return api_client(user)
 
 
 def test_get_choices(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     partner: Partner,
     afghanistan,
     choices_url: str,
     roles_setup: None,
     unicef_partners: dict,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
 ):
     partner.allowed_business_areas.add(afghanistan)
 

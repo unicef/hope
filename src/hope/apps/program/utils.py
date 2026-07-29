@@ -1,6 +1,5 @@
 import re
 from secrets import randbelow
-from typing import Any
 
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -73,7 +72,7 @@ class CopyProgramPopulation:
         program: Program,
         rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-        **kwargs: Any,
+        **kwargs: object,
     ) -> None:
         """Copy the population data from a programme to another programme.
 

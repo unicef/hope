@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from typing import Any, Callable
+from typing import Callable
 from uuid import UUID
 
 from django.core.paginator import Paginator
@@ -25,7 +25,7 @@ from hope.models import (
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
 
-encode_typedict: dict[type, Callable[[Any], Any]] = {
+encode_typedict: dict[type, Callable[[object], object]] = {
     UUID: str,
     PhoneNumber: str,
     datetime.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
@@ -37,7 +37,7 @@ encode_typedict: dict[type, Callable[[Any], Any]] = {
 page_size = 100
 
 
-def handle_type_mapping(value: Any) -> Any:
+def handle_type_mapping(value: object) -> object:
     value_type = type(value)
     if value_type in encode_typedict:
         value = encode_typedict[value_type](value)
@@ -83,7 +83,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_household_snapshot(household: Household, payment: Payment | None = None) -> dict[Any, Any]:
+def get_household_snapshot(household: Household, payment: Payment | None = None) -> dict[object, object]:
     household_data = {}
     all_household_data_dict = household.__dict__
     keys = [key for key in all_household_data_dict if key not in excluded_household_fields]

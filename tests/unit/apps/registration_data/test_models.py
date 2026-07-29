@@ -1,7 +1,6 @@
 """Tests for registration data models."""
 
 import datetime
-from typing import Any
 
 from django.db import IntegrityError, transaction
 from freezegun import freeze_time
@@ -31,7 +30,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def afghanistan(db: Any) -> BusinessArea:
+def afghanistan(db: object) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
@@ -41,7 +40,7 @@ def program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def unicef(db: Any) -> Partner:
+def unicef(db: object) -> Partner:
     return PartnerFactory(name="UNICEF")
 
 

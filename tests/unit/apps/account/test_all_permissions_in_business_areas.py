@@ -1,7 +1,6 @@
 """Tests for user all_permissions_in_business_areas method."""
 
 from datetime import timezone as dt_timezone
-from typing import Any
 from unittest.mock import patch
 
 from django.contrib.auth.models import Group, Permission
@@ -22,7 +21,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area_afg(db: Any) -> BusinessArea:
+def business_area_afg(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="afghanistan",
         code="0060",
@@ -32,7 +31,7 @@ def business_area_afg(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def business_area_ukr(db: Any) -> BusinessArea:
+def business_area_ukr(db: object) -> BusinessArea:
     return BusinessAreaFactory(
         slug="ukraine",
         code="4410",
@@ -42,7 +41,7 @@ def business_area_ukr(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
-def role_rdi(db: Any) -> Role:
+def role_rdi(db: object) -> Role:
     return RoleFactory(
         name="RDI Role Test",
         permissions=[Permissions.RDI_VIEW_LIST.value, Permissions.RDI_VIEW_DETAILS.value],
@@ -50,7 +49,7 @@ def role_rdi(db: Any) -> Role:
 
 
 @pytest.fixture
-def role_program(db: Any) -> Role:
+def role_program(db: object) -> Role:
     return RoleFactory(
         name="Program Role Test",
         permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value, Permissions.PROGRAMME_CREATE.value],
@@ -58,7 +57,7 @@ def role_program(db: Any) -> Role:
 
 
 @pytest.fixture
-def partner(db: Any) -> Partner:
+def partner(db: object) -> Partner:
     return PartnerFactory(name="Test Partner")
 
 

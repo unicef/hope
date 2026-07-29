@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
 from datetime import timedelta
 import os
-from typing import Any
 
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
@@ -168,7 +167,7 @@ class Command(BaseCommand):
             type=int,
         )
 
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(self, *args: object, **options: object) -> None:
         {
             "targeting": init_targeting,
             "payment_plan": init_payment_plan,

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Callable
+from typing import Callable
 
 from django.urls import reverse
 import pytest
@@ -39,7 +39,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -62,7 +62,7 @@ def admin_area_1() -> Area:
 
 
 @pytest.fixture
-def individuals(program_one: Program, business_area: BusinessArea) -> list[Any]:
+def individuals(program_one: Program, business_area: BusinessArea) -> list[object]:
     household = HouseholdFactory(business_area=business_area, program=program_one, create_role=False)
     individuals_to_create = [
         {
@@ -103,8 +103,8 @@ def grievance_context(
     business_area: BusinessArea,
     program_one: Program,
     admin_area_1: Area,
-    individuals: list[Any],
-) -> dict[str, Any]:
+    individuals: list[object],
+) -> dict[str, object]:
     sanction_list_individual = SanctionListIndividualFactory()
 
     system_flagging_grievance_ticket = GrievanceTicketFactory(
@@ -152,8 +152,8 @@ def grievance_context(
 
 
 def test_approve_system_flagging(
-    authenticated_client: Any,
-    grievance_context: dict[str, Any],
+    authenticated_client: object,
+    grievance_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     user = grievance_context["user"]
@@ -188,8 +188,8 @@ def test_approve_system_flagging(
 
 
 def test_approve_needs_adjudication(
-    authenticated_client: Any,
-    grievance_context: dict[str, Any],
+    authenticated_client: object,
+    grievance_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     user = grievance_context["user"]
@@ -225,8 +225,8 @@ def test_approve_needs_adjudication(
 
 
 def test_approve_needs_adjudication_should_allow_uncheck_selected_individual(
-    authenticated_client: Any,
-    grievance_context: dict[str, Any],
+    authenticated_client: object,
+    grievance_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     user = grievance_context["user"]
@@ -261,8 +261,8 @@ def test_approve_needs_adjudication_should_allow_uncheck_selected_individual(
 
 
 def test_approve_needs_adjudication_allows_multiple_selected_individuals_without_permission(
-    authenticated_client: Any,
-    grievance_context: dict[str, Any],
+    authenticated_client: object,
+    grievance_context: dict[str, object],
 ) -> None:
     business_area = grievance_context["business_area"]
     individuals = grievance_context["individuals"]
@@ -287,8 +287,8 @@ def test_approve_needs_adjudication_allows_multiple_selected_individuals_without
 
 
 def test_approve_needs_adjudication_allows_multiple_selected_individuals_with_permission(
-    authenticated_client: Any,
-    grievance_context: dict[str, Any],
+    authenticated_client: object,
+    grievance_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     user = grievance_context["user"]
@@ -326,8 +326,8 @@ def test_approve_needs_adjudication_allows_multiple_selected_individuals_with_pe
 
 
 def test_approve_needs_adjudication_new_input_fields(
-    authenticated_client: Any,
-    grievance_context: dict[str, Any],
+    authenticated_client: object,
+    grievance_context: dict[str, object],
     create_user_role_with_permissions: Callable,
 ) -> None:
     user = grievance_context["user"]

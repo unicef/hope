@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
@@ -29,7 +29,7 @@ def does_payment_record_have_right_hoh_phone_number(record: "Payment") -> bool:
     return bool(hoh.phone_no_valid or hoh.phone_no_alternative_valid)
 
 
-def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Any | None) -> QuerySet:
+def get_payment_records(payment_plan: "PaymentPlan", verification_channel: object | None) -> QuerySet:
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
         return payment_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return payment_plan.available_payment_records()

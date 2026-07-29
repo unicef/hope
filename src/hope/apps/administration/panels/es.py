@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django import forms
 from django.conf import settings
@@ -34,14 +33,14 @@ class ElasticsearchPanel:
     def rebuild_search_index(self, request: HttpRequest) -> None:
         rebuild_search_index()
 
-    def __call__(self, model_admin: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
+    def __call__(self, model_admin: object, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
         context = model_admin.each_context(request)
         context["config"] = {
             "ELASTICSEARCH_HOST": settings.ELASTICSEARCH_HOST,
             "ELASTICSEARCH_DSL_AUTOSYNC": settings.ELASTICSEARCH_DSL_AUTOSYNC,
             "ELASTICSEARCH_INDEX_PREFIX": settings.ELASTICSEARCH_INDEX_PREFIX,
         }
-        logs: Any = {}
+        logs: object = {}
         if request.method == "POST":
             form = EsForm(request.POST)
             if form.is_valid():

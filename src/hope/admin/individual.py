@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable
+from typing import Iterable
 from uuid import UUID
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -10,7 +10,7 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
-from django.db import Error
+from django.db import Error, models
 from django.db.models import Count, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -53,7 +53,7 @@ class IndividualAccountInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return Account.all_objects.select_related("financial_institution")
 
-    def view_link(self, obj: Any) -> str:
+    def view_link(self, obj: object) -> str:
         if obj.pk:
             url = reverse("admin:payment_account_change", args=[obj.pk])
             return format_html('<a href="{}" target="_blank">View</a>', url)
@@ -197,7 +197,7 @@ class IndividualAdmin(
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "household":
             kwargs["queryset"] = Household.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -245,7 +245,7 @@ class IndividualAdmin(
 class InputFilter(admin.SimpleListFilter):
     template: str = "admin/household/individual/business_area_slug_input_filter.html"
 
-    def lookups(self, request: HttpRequest, model_admin: Any) -> Iterable[tuple[Any, str]] | None:
+    def lookups(self, request: HttpRequest, model_admin: object) -> Iterable[tuple[object, str]] | None:
         return [(None, "")]
 
 
@@ -290,7 +290,7 @@ class IndividualRoleInHouseholdAdmin(
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         if db_field.name == "household":
@@ -314,7 +314,7 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "partner", "copied_from", "country")
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -353,7 +353,7 @@ class IndividualCollectionAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).annotate(representations_count=Count("individuals"))
 
-    def number_of_representations(self, obj: Any) -> int:
+    def number_of_representations(self, obj: object) -> int:
         return obj.representations_count
 
     def business_area(self, obj: IndividualCollection) -> BusinessArea | None:

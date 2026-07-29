@@ -1,6 +1,5 @@
 import abc
 from dataclasses import dataclass
-from typing import Any
 
 from django.db.models import Q, QuerySet
 
@@ -10,7 +9,7 @@ from hope.models import Household, Message
 
 
 class BaseSampling(abc.ABC):
-    def __init__(self, arguments: Any):
+    def __init__(self, arguments: object):
         self.confidence_interval = arguments.get("confidence_interval")
         self.margin_of_error = arguments.get("margin_of_error")
         self.sex = arguments.get("sex")

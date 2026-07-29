@@ -1,14 +1,11 @@
-from typing import Any
-
-
 class RuleError(Exception):
     def __init__(
         self,
-        rule: Any,
-        error_class: Any,
-        detail: Any,
+        rule: object,
+        error_class: object,
+        detail: object,
         line_number: int | None,
-        traceback: Any = None,
+        traceback: object | None = None,
     ) -> None:
         self.rule = rule
         self.error_class = error_class

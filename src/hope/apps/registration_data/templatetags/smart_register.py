@@ -2,7 +2,6 @@ import base64
 import io
 import logging
 import re
-from typing import Any
 
 from django.template import Context, Library, Node
 from PIL import Image, UnidentifiedImageError
@@ -22,54 +21,54 @@ class EscapeScriptNode(Node):
 
 
 @register.tag()
-def escapescript(parser: Any, token: Any) -> EscapeScriptNode:
+def escapescript(parser: object, token: object) -> EscapeScriptNode:
     nodelist = parser.parse(("endescapescript",))
     parser.delete_first_token()
     return EscapeScriptNode(nodelist)
 
 
 @register.filter
-def islist(value: Any) -> bool:
+def islist(value: object) -> bool:
     return isinstance(value, list | tuple)
 
 
 @register.filter
-def isstring(value: Any) -> bool:
+def isstring(value: object) -> bool:
     return isinstance(value, str)
 
 
 @register.filter
-def isdict(value: Any) -> bool:
+def isdict(value: object) -> bool:
     return isinstance(value, dict)
 
 
 @register.inclusion_tag("dump/dump.html")
-def dump(value: Any, key: Any | None = None, original: Any | None = None) -> dict:
+def dump(value: object, key: object | None = None, original: object | None = None) -> dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/list.html")
-def dump_list(value: Any, key: Any | None = None, original: Any | None = None) -> dict:
+def dump_list(value: object, key: object | None = None, original: object | None = None) -> dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/dict.html")
-def dump_dict(value: Any, key: Any | None = None, original: Any | None = None) -> dict:
+def dump_dict(value: object, key: object | None = None, original: object | None = None) -> dict:
     return {"value": value, "key": key, "original": original}
 
 
 @register.filter(name="smart")
-def smart_attr(field: Any, attr: Any) -> Any:
+def smart_attr(field: object, attr: object) -> object:
     return field.field.flex_field.advanced.get("smart", {}).get(attr, "")
 
 
 @register.filter(name="lookup")
-def lookup(value: Any, arg: Any) -> Any:
+def lookup(value: object, arg: object) -> object:
     return value.get(arg, None)
 
 
 @register.filter()
-def is_image(element: Any) -> bool:
+def is_image(element: object) -> bool:
     if not isinstance(element, str) or len(element) < 200 or (isinstance(element, str) and not element.isascii()):
         return False
     try:
@@ -82,7 +81,7 @@ def is_image(element: Any) -> bool:
 
 
 @register.filter()
-def is_base64(element: Any) -> bool:
+def is_base64(element: object) -> bool:
     expression = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
     try:
         if isinstance(element, str) and element.strip().endswith("=="):
@@ -93,6 +92,6 @@ def is_base64(element: Any) -> bool:
 
 
 @register.filter
-def concat(a: Any, b: Any) -> str:
+def concat(a: object, b: object) -> str:
     """Concatenate arg1 & arg2."""
     return "".join(map(str, (a, b)))

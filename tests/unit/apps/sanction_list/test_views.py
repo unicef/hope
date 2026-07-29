@@ -1,6 +1,6 @@
 from io import BytesIO
 from pathlib import Path
-from typing import Any, List
+from typing import List
 from unittest.mock import patch
 
 from django.conf import settings
@@ -32,7 +32,7 @@ def user(partner):
 
 
 @pytest.fixture
-def client(api_client: Any, user):
+def client(api_client: object, user):
     return api_client(user)
 
 
@@ -99,7 +99,7 @@ def test_get_sanction_list(
     client,
     business_area,
     url_list,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
 ):
     create_user_role_with_permissions(user, permissions, business_area)
@@ -131,7 +131,7 @@ def test_get_sanction_list_count(
     client,
     business_area,
     url_list_count,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
 ):
     create_user_role_with_permissions(user, permissions, business_area)
@@ -156,7 +156,7 @@ def test_get_sanction_list_details(
     client,
     business_area,
     url_details,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
 ):
     create_user_role_with_permissions(user, permissions, business_area)
@@ -187,7 +187,7 @@ def test_check_against_sanction_list(
     business_area,
     url_check,
     sanction_file,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
 ):
     create_user_role_with_permissions(user, permissions, business_area)
@@ -207,7 +207,7 @@ def test_check_against_sanction_list_validation_error(
     business_area,
     url_check,
     sanction_file,
-    create_user_role_with_permissions: Any,
+    create_user_role_with_permissions: object,
     user,
 ):
     create_user_role_with_permissions(

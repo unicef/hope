@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -75,7 +75,7 @@ class APITokenForm(forms.ModelForm):
         model = APIToken
         fields = ("id", "user", "grants", "valid_from", "valid_to", "valid_for")
 
-    def __init__(self, *args: Any, instance: Any | None = None, **kwargs: Any) -> None:
+    def __init__(self, *args: object, instance: object | None = None, **kwargs: object) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
             self.fields["valid_for"].queryset = BusinessArea.objects.filter(
@@ -112,17 +112,17 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("user")
 
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> tuple[str, ...]:
+    def get_fields(self, request: HttpRequest, obj: object | None = None) -> tuple[str, ...]:
         if obj:
             return super().get_fields(request, obj)
         return "user", "grants", "valid_to"
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> tuple[str, ...]:
+    def get_readonly_fields(self, request: HttpRequest, obj: object | None = None) -> tuple[str, ...]:
         if obj:
             return "user", "valid_from"
         return ()
 
-    def _get_email_context(self, request: HttpRequest, obj: Any) -> dict[str, Any]:
+    def _get_email_context(self, request: HttpRequest, obj: object) -> dict[str, object]:
         return {
             "obj": obj,
             "friendly_name": obj.user.first_name or obj.user.username,
@@ -130,7 +130,7 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _send_token_email(self, request: HttpRequest, obj: Any, template: str) -> None:
+    def _send_token_email(self, request: HttpRequest, obj: object, template: str) -> None:
         try:
             user = obj.user
             user.email_user(
@@ -157,9 +157,9 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
     def changeform_view(
         self,
         request: HttpRequest,
-        object_id: Any | None = None,
+        object_id: object | None = None,
         form_url: str = "",
-        extra_context: Any | None = None,
+        extra_context: object | None = None,
     ) -> HttpResponse | HttpResponse | HttpResponseRedirect:
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
@@ -171,11 +171,11 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             )
             return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))  # type: ignore # str vs SafeString
 
-    def log_addition(self, request: HttpRequest, obj: Any, message: str) -> LogEntry:
+    def log_addition(self, request: HttpRequest, obj: object, message: str) -> LogEntry:
         return super().log_addition(request, obj, message)
 
     @atomic()
-    def save_model(self, request: HttpRequest, obj: Any, form: Form, change: bool) -> None:
+    def save_model(self, request: HttpRequest, obj: object, form: Form, change: bool) -> None:
         obj.save()
         obj.valid_for.set(BusinessArea.objects.filter(role_assignments__user=obj.user))
         obj.save()

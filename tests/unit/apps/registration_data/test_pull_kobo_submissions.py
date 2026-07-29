@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Any
 from unittest import mock
 
 import pytest
@@ -15,7 +14,7 @@ FILES_DIR = Path(__file__).resolve().parent / "test_file"
 
 
 @pytest.fixture
-def kobo_settings(settings: Any) -> None:
+def kobo_settings(settings: object) -> None:
     settings.KOBO_MASTER_API_TOKEN = "token-from-env"
     settings.KOBO_URL = "https://kf.hope.unicef.org"
 

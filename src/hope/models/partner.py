@@ -1,4 +1,3 @@
-from typing import Any
 from uuid import UUID
 
 from django.conf import settings
@@ -34,7 +33,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
+    def save(self, *args: object, **kwargs: object) -> None:
         # Partner cannot be a parent if it has RoleAssignments
         if self.parent:
             if RoleAssignment.objects.filter(partner=self.parent).exists():

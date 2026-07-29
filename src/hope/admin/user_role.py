@@ -1,8 +1,8 @@
 import logging
-from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
+from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
@@ -23,7 +23,7 @@ class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     formset = RoleAssignmentInlineFormSet
     ordering = ["business_area__name"]
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest = None, **kwargs: object) -> object:
         partner_id = request.resolver_match.kwargs.get("object_id")
 
         if db_field.name == "business_area":
@@ -67,7 +67,7 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest = None, **kwargs: object) -> object:
         if db_field.name == "role":
             kwargs["queryset"] = Role.objects.order_by("name")
         elif db_field.name == "business_area":
@@ -77,10 +77,10 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
     def get_actions(self, request: HttpRequest) -> dict:
         return admin.ModelAdmin.get_actions(self, request)  # unoverride
 
-    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+    def check_publish_permission(self, request: HttpRequest, obj: object | None = None) -> bool:
         return False
 
 
@@ -104,7 +104,7 @@ class UserRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
         qs = super().get_queryset(request)
         return qs.filter(user__isnull=False)
 
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
+    def get_fields(self, request: HttpRequest, obj: object | None = None) -> list:
         return ["user", "business_area", "program", "role", "expiry_date", "group"]
 
 
@@ -123,10 +123,10 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
         qs = super().get_queryset(request)
         return qs.filter(partner__isnull=False)
 
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
+    def get_fields(self, request: HttpRequest, obj: object | None = None) -> list:
         return ["partner", "business_area", "program", "role", "expiry_date", "group"]
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest = None, **kwargs: object) -> object:
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "role":
             obj = self.get_object(request, request.resolver_match.kwargs.get("object_id")) if request else None

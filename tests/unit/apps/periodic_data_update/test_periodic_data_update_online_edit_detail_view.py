@@ -1,7 +1,7 @@
 """Tests for PDU online edit detail view."""
 
 from datetime import datetime
-from typing import Any, Callable
+from typing import Callable
 
 from django.utils import timezone
 import pytest
@@ -23,7 +23,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> BusinessArea:
+def business_area(db: object) -> BusinessArea:
     return BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
 
 
@@ -33,28 +33,28 @@ def program(business_area: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def partner(db: Any) -> Any:
+def partner(db: object) -> object:
     return PartnerFactory(name="TestPartner")
 
 
 @pytest.fixture
-def user(partner: Any) -> User:
+def user(partner: object) -> User:
     return UserFactory(partner=partner)
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
 @pytest.fixture
-def partner_empty(db: Any) -> Any:
+def partner_empty(db: object) -> object:
     return PartnerFactory(name="EmptyPartner")
 
 
 @pytest.fixture
 def user_can_approve(
-    partner_empty: Any,
+    partner_empty: object,
     business_area: BusinessArea,
     program: Program,
     create_user_role_with_permissions: Callable,
@@ -71,7 +71,7 @@ def user_can_approve(
 
 @pytest.fixture
 def user_can_all(
-    partner_empty: Any,
+    partner_empty: object,
     business_area: BusinessArea,
     program: Program,
     create_user_role_with_permissions: Callable,
@@ -130,7 +130,7 @@ def pdu_edit(
 
 
 @pytest.fixture
-def sent_back_comment(pdu_edit: PDUOnlineEdit, user_can_approve: User) -> Any:
+def sent_back_comment(pdu_edit: PDUOnlineEdit, user_can_approve: User) -> object:
     return PDUOnlineEditSentBackCommentFactory(
         pdu_online_edit=pdu_edit,
         comment="This is a sent back comment.",
@@ -160,7 +160,7 @@ def url_detail(business_area: BusinessArea, program: Program, pdu_edit: PDUOnlin
 def test_pdu_online_edit_detail_permissions(
     permissions: list,
     expected_status: int,
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
@@ -168,7 +168,7 @@ def test_pdu_online_edit_detail_permissions(
     user_can_approve: User,
     user_can_all: User,
     user_partner_can_merge: User,
-    sent_back_comment: Any,
+    sent_back_comment: object,
     url_detail: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
@@ -183,7 +183,7 @@ def test_pdu_online_edit_detail_permissions(
 
 
 def test_pdu_online_edit_detail(
-    authenticated_client: Any,
+    authenticated_client: object,
     user: User,
     business_area: BusinessArea,
     program: Program,
@@ -191,7 +191,7 @@ def test_pdu_online_edit_detail(
     user_can_approve: User,
     user_can_all: User,
     user_partner_can_merge: User,
-    sent_back_comment: Any,
+    sent_back_comment: object,
     url_detail: str,
     create_user_role_with_permissions: Callable,
 ) -> None:

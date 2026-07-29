@@ -2,7 +2,6 @@ from collections import namedtuple
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 import io
-from typing import Any
 
 import pytest
 
@@ -37,7 +36,7 @@ def user() -> User:
 
 
 @pytest.fixture
-def base_context(user: User) -> dict[str, Any]:
+def base_context(user: User) -> dict[str, object]:
     business_area = BusinessAreaFactory()
     program = ProgramFactory(business_area=business_area, start_date=date.today() - timedelta(days=100))
     program_cycle = program.cycles.first()
@@ -52,7 +51,7 @@ def base_context(user: User) -> dict[str, Any]:
 
 
 @pytest.fixture
-def households_with_individuals(base_context: dict[str, Any]) -> list[dict[str, Any]]:
+def households_with_individuals(base_context: dict[str, object]) -> list[dict[str, object]]:
     households = []
     for _ in range(3):
         household = HouseholdFactory(
@@ -65,7 +64,7 @@ def households_with_individuals(base_context: dict[str, Any]) -> list[dict[str, 
 
 
 @pytest.fixture
-def payment_plan(base_context: dict[str, Any]) -> PaymentPlan:
+def payment_plan(base_context: dict[str, object]) -> PaymentPlan:
     return PaymentPlanFactory(
         created_by=base_context["user"],
         business_area=base_context["business_area"],
@@ -74,7 +73,7 @@ def payment_plan(base_context: dict[str, Any]) -> PaymentPlan:
 
 
 @pytest.fixture
-def payment_plan_finished(base_context: dict[str, Any]) -> PaymentPlan:
+def payment_plan_finished(base_context: dict[str, object]) -> PaymentPlan:
     return PaymentPlanFactory(
         created_by=base_context["user"],
         business_area=base_context["business_area"],
@@ -94,7 +93,7 @@ def payment_verification_plan(payment_plan_finished: PaymentPlan) -> PaymentVeri
 @pytest.fixture
 def payment_for_extras(
     payment_plan_finished: PaymentPlan,
-    base_context: dict[str, Any],
+    base_context: dict[str, object],
 ) -> Payment:
     household = HouseholdFactory(
         business_area=base_context["business_area"],
@@ -178,7 +177,7 @@ def test_get_delivered_quantity_status_and_value_raises(
 def test_import_row_updates_payment_and_verification_status(
     payment_plan_finished: PaymentPlan,
     payment_verification_plan: PaymentVerificationPlan,
-    households_with_individuals: list[dict[str, Any]],
+    households_with_individuals: list[dict[str, object]],
 ) -> None:
     payment_1 = PaymentFactory(
         parent=payment_plan_finished,

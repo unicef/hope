@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable
+from typing import Iterable
 
 from hope.apps.registration_data.templatetags.smart_register import is_image
 from hope.contrib.aurora.models import Record
@@ -7,8 +7,8 @@ from hope.contrib.aurora.models import Record
 logger = logging.getLogger(__name__)
 
 
-def extract(records_ids: Iterable[int], raise_exception: bool = False) -> Any:
-    def _filter(d: Any) -> Any:
+def extract(records_ids: Iterable[int], raise_exception: bool = False) -> object:
+    def _filter(d: object) -> object:
         if isinstance(d, list):
             return [_filter(v) for v in d]
         if isinstance(d, dict):

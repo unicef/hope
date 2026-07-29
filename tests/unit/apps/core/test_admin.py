@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Any
 from unittest.mock import PropertyMock, patch
 
 from django.contrib import admin, messages
@@ -133,13 +132,13 @@ def test_async_job_admin_change_page_loads(client_logged, program) -> None:
 def build_async_job_admin_filter(
     filter_cls: type,
     params: dict[str, str] | None = None,
-) -> tuple[Any, HttpRequest, AsyncJobAdmin]:
+) -> tuple[object, HttpRequest, AsyncJobAdmin]:
     request = RequestFactory().get("/", data=params or {})
     model_admin = AsyncJobAdmin(AsyncJob, admin.site)
     return filter_cls(request, request.GET.copy(), AsyncJob, model_admin), request, model_admin
 
 
-def get_changelist_job_names(response: Any) -> list[str]:
+def get_changelist_job_names(response: object) -> list[str]:
     return [job.job_name for job in response.context["cl"].result_list]
 
 

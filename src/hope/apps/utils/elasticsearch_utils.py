@@ -1,6 +1,6 @@
 import enum
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from constance import config
 from elasticsearch import NotFoundError
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from django_elasticsearch_dsl import Document
 
 
-def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
+def populate_index(queryset: "QuerySet", doc: object, parallel: bool = False, chunk_size: int = 2000) -> None:
     if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
     qs = queryset.iterator(chunk_size=chunk_size)

@@ -7,7 +7,6 @@ top-up, follow-up must still COPY the source entitlement and keep ``is_follow_up
 
 from datetime import timedelta
 from decimal import Decimal
-from typing import Any
 from unittest import mock
 
 from freezegun import freeze_time
@@ -30,7 +29,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
@@ -40,13 +39,13 @@ def user() -> User:
 
 
 @pytest.fixture
-def cycle(business_area: Any) -> ProgramCycle:
+def cycle(business_area: object) -> ProgramCycle:
     program = ProgramFactory(business_area=business_area)
     return ProgramCycleFactory(program=program)
 
 
 @pytest.fixture
-def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+def regular_pp(business_area: object, cycle: ProgramCycle) -> PaymentPlan:
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -58,10 +57,10 @@ def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement_copied(
-    get_exchange_rate_mock: Any,
+    get_exchange_rate_mock: object,
     user: User,
     regular_pp: PaymentPlan,
-    django_capture_on_commit_callbacks: Any,
+    django_capture_on_commit_callbacks: object,
 ) -> None:
     failed_payment = PaymentFactory(parent=regular_pp, status=Payment.STATUS_ERROR)
     failed_payment.entitlement_quantity = Decimal("250.00")
@@ -85,7 +84,7 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
 
 
 def test_create_follow_up_arrange_follow_up_origin_act_create_assert_raises(
-    user: User, business_area: Any, cycle: ProgramCycle
+    user: User, business_area: object, cycle: ProgramCycle
 ) -> None:
     follow_up_pp = PaymentPlanFactory(
         business_area=business_area,

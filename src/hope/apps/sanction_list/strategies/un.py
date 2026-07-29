@@ -3,7 +3,7 @@ from datetime import date, datetime
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Iterable
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from xml.etree.ElementTree import Element
@@ -45,10 +45,10 @@ class LoadSanctionListXMLTask:
 
     INDIVIDUAL_TAG_PATH = "INDIVIDUALS/INDIVIDUAL"
 
-    def __init__(self, sanction_list: "SanctionList", **kwargs: Any) -> None:
+    def __init__(self, sanction_list: "SanctionList", **kwargs: object) -> None:
         self.sanction_list = sanction_list
         self.url = kwargs.get("url", self.DEFAULT_URL)
-        self.VALUES_PATHS: dict[str, Any] = {
+        self.VALUES_PATHS: dict[str, object] = {
             "data_id": "DATAID",
             "version_num": "VERSIONNUM",
             "first_name": "FIRST_NAME",
@@ -81,7 +81,7 @@ class LoadSanctionListXMLTask:
         return None
 
     @staticmethod
-    def _get_designation(individual_tag: Element, *args: Any, **kwargs: Any) -> str | None:
+    def _get_designation(individual_tag: Element, *args: object, **kwargs: object) -> str | None:
         designation_tag_name = "DESIGNATION"
         designation_tag = individual_tag.find(designation_tag_name)
         if isinstance(designation_tag, Element):
@@ -93,8 +93,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> "set[SanctionListIndividualDateOfBirth]":
         from hope.models import SanctionListIndividualDateOfBirth
 
@@ -163,8 +163,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> "set[SanctionListIndividualAliasName]":
         from hope.models import SanctionListIndividualAliasName
 
@@ -189,7 +189,7 @@ class LoadSanctionListXMLTask:
         return set(aliases.values())
 
     @staticmethod
-    def _get_country_field(individual_tag: Element, path: str, *args: Any, **kwargs: Any) -> str | None | set:
+    def _get_country_field(individual_tag: Element, path: str, *args: object, **kwargs: object) -> str | None | set:
         tags = individual_tag.findall(path)
 
         countries = set()
@@ -207,8 +207,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> "set[SanctionListIndividualCountries]":
         from hope.models import SanctionListIndividualCountries
 
@@ -224,7 +224,7 @@ class LoadSanctionListXMLTask:
             }
         return set()
 
-    def _get_country_of_birth(self, individual_tag: Element, *args: Any, **kwargs: Any) -> str | None:
+    def _get_country_of_birth(self, individual_tag: Element, *args: object, **kwargs: object) -> str | None:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
@@ -235,8 +235,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> "set[SanctionListIndividualNationalities]":
         from hope.models import SanctionListIndividualNationalities
 
@@ -256,8 +256,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> "set[SanctionListIndividualDocument]":
         from hope.models import SanctionListIndividualDocument
 
@@ -406,7 +406,7 @@ class LoadSanctionListXMLTask:
         return {i.reference_number for i in individuals_from_file}
 
     @staticmethod
-    def _cast_field_value_to_correct_type(model: Any, field_name: str, value: Any) -> Any:
+    def _cast_field_value_to_correct_type(model: object, field_name: str, value: object) -> object:
         field = model._meta.get_field(field_name)
         # silencing lxml warning
         with open(os.devnull, "w") as devnull, contextlib.redirect_stderr(devnull):

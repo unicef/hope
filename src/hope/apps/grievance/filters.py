@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from django.db.models import Count, F, Func, Q, QuerySet, Window
 from django_filters import (
@@ -28,7 +27,7 @@ class IsNull(Func):
 
 
 class GrievanceOrderingFilter(OrderingFilter):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
         super().__init__(*args, **kwargs)
         self.extra["choices"] += [
             ("linked_tickets", "Linked tickets"),
@@ -217,7 +216,7 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(q_obj)
         return qs
 
-    def filter_grievance_type(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
+    def filter_grievance_type(self, qs: QuerySet, name: object, val: str) -> QuerySet:
         choices = dict(GrievanceTicket.CATEGORY_CHOICES)
         user_generated = [value for value in choices if value in dict(GrievanceTicket.MANUAL_CATEGORIES)]
 
@@ -227,7 +226,7 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(category__in=user_generated)
         return qs
 
-    def filter_grievance_status(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
+    def filter_grievance_status(self, qs: QuerySet, name: object, val: str) -> QuerySet:
         if val == "active":
             return qs.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         return qs

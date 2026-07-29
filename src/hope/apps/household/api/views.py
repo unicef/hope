@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.db.models import Exists, F, OuterRef, Prefetch, QuerySet
+from django.http import HttpRequest
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
@@ -149,12 +148,12 @@ class HouseholdViewSet(
 
     @etag_decorator(HouseholdListKeyConstructor)
     @cached_response(key_func=HouseholdListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(responses={200: HouseholdMemberSerializer(many=True)})
     @action(detail=True, methods=["get"], filter_backends=())
-    def members(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def members(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         instance = self.get_object()
         individuals_ids = list(instance.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
         collectors_ids = list(instance.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
@@ -182,7 +181,7 @@ class HouseholdViewSet(
         detail=True,
         methods=["post"],
     )
-    def withdraw(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def withdraw(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         instance = self.get_object()
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -193,7 +192,7 @@ class HouseholdViewSet(
         },
     )
     @action(detail=True, methods=["get"])
-    def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def payments(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         hh = self.get_object()
         payments = (
             hh.payment_set.eligible()
@@ -216,7 +215,7 @@ class HouseholdViewSet(
         filters=True,
     )
     @action(detail=True, methods=["get"], url_path="payments/count")
-    def payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def payments_count(self, request: HttpRequest, *args: object, **kwargs: object) -> Response:
         hh = self.get_object()
         payments_count = (
             hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).count()
@@ -229,7 +228,7 @@ class HouseholdViewSet(
         },
     )
     @action(detail=False, methods=["get"], url_path="all-flex-fields-attributes")
-    def all_flex_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_flex_fields_attributes(self, request: Request, *args: object, **kwargs: object) -> Response:
         qs = (
             FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
             .prefetch_related("choices")
@@ -243,7 +242,9 @@ class HouseholdViewSet(
         methods=["get"],
         url_path="all-accountability-communication-message-recipients",
     )
-    def all_accountability_communication_message_recipients(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def all_accountability_communication_message_recipients(
+        self, request: HttpRequest, *args: object, **kwargs: object
+    ) -> object:
         recipients = self.filter_queryset(
             self.get_queryset().exclude(
                 head_of_household__phone_no_valid=False,
@@ -261,7 +262,7 @@ class HouseholdViewSet(
 
     @extend_schema(responses={200: RecipientSerializer(many=True)})
     @action(detail=False, methods=["get"])
-    def recipients(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def recipients(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         recipients = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(recipients)
         if page is not None:
@@ -335,7 +336,7 @@ class HouseholdGlobalViewSet(
         )
 
     @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def choices(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         return Response(data=self.get_serializer(instance={}).data)
 
 
@@ -421,11 +422,11 @@ class IndividualViewSet(
 
     @etag_decorator(IndividualListKeyConstructor)
     @cached_response(key_func=IndividualListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"])
-    def photos(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def photos(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         individual = self.get_object()
         return Response(IndividualPhotoDetailSerializer(individual).data, status=status.HTTP_200_OK)
 
@@ -435,7 +436,7 @@ class IndividualViewSet(
         },
     )
     @action(detail=False, methods=["get"], url_path="all-flex-fields-attributes")
-    def all_flex_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def all_flex_fields_attributes(self, request: Request, *args: object, **kwargs: object) -> Response:
         qs = (
             FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
             .exclude(type=FlexibleAttribute.PDU)
@@ -489,5 +490,5 @@ class IndividualGlobalViewSet(
         )
 
     @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def choices(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
         return Response(data=self.get_serializer(instance={}, context={"business_area": self.business_area}).data)

@@ -1,7 +1,5 @@
 """Tests for cross-area flag on grievance tickets."""
 
-from typing import Any
-
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, IndividualFactory
@@ -72,7 +70,9 @@ def individual_without_household(business_area: BusinessArea) -> Individual:
 
 
 @pytest.fixture
-def needs_adjudication_ticket_cross_area(individual1_from_area1: Individual, individual_from_area2: Individual) -> Any:
+def needs_adjudication_ticket_cross_area(
+    individual1_from_area1: Individual, individual_from_area2: Individual
+) -> object:
     ticket = TicketNeedsAdjudicationDetailsFactory(
         golden_records_individual=individual1_from_area1,
     )
@@ -81,7 +81,9 @@ def needs_adjudication_ticket_cross_area(individual1_from_area1: Individual, ind
 
 
 @pytest.fixture
-def needs_adjudication_ticket_same_area(individual1_from_area1: Individual, individual2_from_area1: Individual) -> Any:
+def needs_adjudication_ticket_same_area(
+    individual1_from_area1: Individual, individual2_from_area1: Individual
+) -> object:
     ticket = TicketNeedsAdjudicationDetailsFactory(
         golden_records_individual=individual1_from_area1,
     )
@@ -92,7 +94,7 @@ def needs_adjudication_ticket_same_area(individual1_from_area1: Individual, indi
 @pytest.fixture
 def needs_adjudication_ticket_ind_no_household(
     individual_without_household: Individual, individual_from_area2: Individual
-) -> Any:
+) -> object:
     ticket = TicketNeedsAdjudicationDetailsFactory(
         golden_records_individual=individual_without_household,
     )
@@ -100,20 +102,20 @@ def needs_adjudication_ticket_ind_no_household(
     return ticket
 
 
-def test_cross_area_flag_is_true_for_cross_area_ticket(needs_adjudication_ticket_cross_area: Any) -> None:
+def test_cross_area_flag_is_true_for_cross_area_ticket(needs_adjudication_ticket_cross_area: object) -> None:
     needs_adjudication_ticket_cross_area.populate_cross_area_flag()
     needs_adjudication_ticket_cross_area.refresh_from_db()
     assert needs_adjudication_ticket_cross_area.is_cross_area is True
 
 
-def test_cross_area_flag_is_false_for_same_area_ticket(needs_adjudication_ticket_same_area: Any) -> None:
+def test_cross_area_flag_is_false_for_same_area_ticket(needs_adjudication_ticket_same_area: object) -> None:
     needs_adjudication_ticket_same_area.populate_cross_area_flag()
     needs_adjudication_ticket_same_area.refresh_from_db()
     assert needs_adjudication_ticket_same_area.is_cross_area is False
 
 
 def test_cross_area_flag_is_false_for_individual_without_household(
-    needs_adjudication_ticket_ind_no_household: Any,
+    needs_adjudication_ticket_ind_no_household: object,
 ) -> None:
     needs_adjudication_ticket_ind_no_household.populate_cross_area_flag()
     needs_adjudication_ticket_ind_no_household.refresh_from_db()

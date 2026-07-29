@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from rest_framework.exceptions import ValidationError
 
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def _resolve_attribute(rule_filter: dict, program: Program) -> Any:
+    def _resolve_attribute(rule_filter: dict, program: Program) -> object:
         flex_field_classification = rule_filter["flex_field_classification"]
         if flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")

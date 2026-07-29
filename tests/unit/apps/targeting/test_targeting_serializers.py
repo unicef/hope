@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 from rest_framework.test import APIRequestFactory
 
@@ -27,17 +25,17 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area(db: Any) -> Any:
+def business_area(db: object) -> object:
     return BusinessAreaFactory(slug="afghanistan")
 
 
 @pytest.fixture
-def payment_plan(db: Any) -> Any:
+def payment_plan(db: object) -> object:
     return PaymentPlanFactory()
 
 
 @pytest.fixture
-def rule(payment_plan: Any) -> TargetingCriteriaRule:
+def rule(payment_plan: object) -> TargetingCriteriaRule:
     return TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
 
 
@@ -53,7 +51,7 @@ def api_request_factory() -> APIRequestFactory:
 
 def test_targeting_criteria_serializer_for_not_flex_field_on_hh(
     rule: TargetingCriteriaRule,
-    payment_plan: Any,
+    payment_plan: object,
 ) -> None:
     filter_data = {
         "comparison_method": "EQUALS",
@@ -96,7 +94,7 @@ def test_targeting_criteria_serializer_for_not_flex_field_on_hh(
 
 def test_targeting_criteria_serializer_for_not_flex_field_on_ind(
     rule: TargetingCriteriaRule,
-    payment_plan: Any,
+    payment_plan: object,
 ) -> None:
     filter_data = {
         "comparison_method": "EQUALS",
@@ -225,7 +223,7 @@ def test_targeting_criteria_serializer_for_flex_field_on_ind(
 
 def test_targeting_criteria_serializer_for_pdu_flex_field(
     rule: TargetingCriteriaRule,
-    business_area: Any,
+    business_area: object,
     api_request_factory: APIRequestFactory,
 ) -> None:
     program = ProgramFactory(business_area=business_area)
@@ -283,8 +281,8 @@ def test_targeting_criteria_serializer_for_pdu_flex_field(
 
 
 def test_get_field_by_name_does_not_load_all_choices(
-    payment_plan: Any,
-    django_assert_num_queries: Any,
+    payment_plan: object,
+    django_assert_num_queries: object,
 ) -> None:
     country = CountryFactory()
     payment_plan.business_area.countries.add(country)

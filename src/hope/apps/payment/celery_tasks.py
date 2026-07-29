@@ -1,7 +1,7 @@
 import datetime
 from decimal import Decimal
 import logging
-from typing import Any, cast
+from typing import cast
 
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
@@ -1526,7 +1526,7 @@ class CheckRapidProVerificationTask:
             except Exception as e:
                 logger.exception(e)
 
-    def _verify_cashplan_payment_verification(self, payment_verification_plan: Any) -> None:
+    def _verify_cashplan_payment_verification(self, payment_verification_plan: object) -> None:
         from hope.models import PaymentVerification
 
         payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(
@@ -1547,7 +1547,7 @@ class CheckRapidProVerificationTask:
         calculate_counts(payment_verification_plan)
         payment_verification_plan.save()
 
-    def _get_payment_record_verification_to_update(self, results: Any, phone_numbers: dict) -> list:
+    def _get_payment_record_verification_to_update(self, results: object, phone_numbers: dict) -> list:
         output = []
         for rapid_pro_result in results:
             payment_record_verification = self._rapid_pro_results_to_payment_record_verification(
@@ -1558,8 +1558,8 @@ class CheckRapidProVerificationTask:
         return output
 
     def _rapid_pro_results_to_payment_record_verification(
-        self, payment_record_verifications_phone_number_dict: Any, rapid_pro_result: Any
-    ) -> Any | None:
+        self, payment_record_verifications_phone_number_dict: object, rapid_pro_result: object
+    ) -> object | None:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")

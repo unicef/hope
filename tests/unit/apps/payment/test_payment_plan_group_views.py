@@ -1,6 +1,6 @@
 from decimal import Decimal
 from io import BytesIO
-from typing import Any, Callable
+from typing import Callable
 from unittest import mock
 from unittest.mock import patch
 from zipfile import BadZipFile
@@ -42,27 +42,27 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> Any:
+def business_area() -> object:
     return BusinessAreaFactory(slug="test-ba")
 
 
 @pytest.fixture
-def program(business_area: Any) -> Any:
+def program(business_area: object) -> object:
     return ProgramFactory(business_area=business_area, cycle=False)
 
 
 @pytest.fixture
-def cycle(program: Any) -> Any:
+def cycle(program: object) -> object:
     return ProgramCycleFactory(program=program)
 
 
 @pytest.fixture
-def user() -> Any:
+def user() -> object:
     return UserFactory()
 
 
 @pytest.fixture
-def client(api_client: Callable, user: Any) -> Any:
+def client(api_client: Callable, user: object) -> object:
     return api_client(user)
 
 
@@ -80,28 +80,28 @@ def _count_url(ba_slug: str, program_code: str) -> str:
     )
 
 
-def _detail_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+def _detail_url(ba_slug: str, program_code: str, group_id: object) -> str:
     return reverse(
         "api:payments:payment-plan-groups-detail",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
     )
 
 
-def _export_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+def _export_url(ba_slug: str, program_code: str, group_id: object) -> str:
     return reverse(
         "api:payments:payment-plan-groups-delivery-export-xlsx",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
     )
 
 
-def _import_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+def _import_url(ba_slug: str, program_code: str, group_id: object) -> str:
     return reverse(
         "api:payments:payment-plan-groups-delivery-import-xlsx",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
     )
 
 
-def _send_xlsx_password_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+def _send_xlsx_password_url(ba_slug: str, program_code: str, group_id: object) -> str:
     return reverse(
         "api:payments:payment-plan-groups-send-xlsx-password",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
@@ -109,33 +109,33 @@ def _send_xlsx_password_url(ba_slug: str, program_code: str, group_id: Any) -> s
 
 
 @pytest.fixture
-def second_cycle_in_program(cycle: Any) -> Any:
+def second_cycle_in_program(cycle: object) -> object:
     return ProgramCycleFactory(program=cycle.program)
 
 
 @pytest.fixture
-def extra_group_in_cycle(cycle: Any) -> Any:
+def extra_group_in_cycle(cycle: object) -> object:
     return PaymentPlanGroupFactory(cycle=cycle)
 
 
 @pytest.fixture
-def existing_named_group_in_cycle(cycle: Any) -> Any:
+def existing_named_group_in_cycle(cycle: object) -> object:
     return PaymentPlanGroupFactory(cycle=cycle, name="Existing Group")
 
 
 @pytest.fixture
-def taken_named_group_in_cycle(cycle: Any) -> Any:
+def taken_named_group_in_cycle(cycle: object) -> object:
     return PaymentPlanGroupFactory(cycle=cycle, name="Taken Name")
 
 
 @pytest.fixture
-def shared_named_group_in_other_cycle(program: Any) -> Any:
+def shared_named_group_in_other_cycle(program: object) -> object:
     other_cycle = ProgramCycleFactory(program=program)
     return PaymentPlanGroupFactory(cycle=other_cycle, name="Shared Name")
 
 
 @pytest.fixture
-def group_with_two_aggregated_plans(business_area: Any, cycle: Any) -> Any:
+def group_with_two_aggregated_plans(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
@@ -157,14 +157,14 @@ def group_with_two_aggregated_plans(business_area: Any, cycle: Any) -> Any:
 
 
 @pytest.fixture
-def group_with_plan(business_area: Any, cycle: Any) -> Any:
+def group_with_plan(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group)
     return group
 
 
 @pytest.fixture
-def group_with_accepted_plan(business_area: Any, cycle: Any) -> Any:
+def group_with_accepted_plan(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
@@ -176,7 +176,7 @@ def group_with_accepted_plan(business_area: Any, cycle: Any) -> Any:
 
 
 @pytest.fixture
-def group_with_accepted_plan_and_payment(business_area: Any, cycle: Any) -> Any:
+def group_with_accepted_plan_and_payment(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     fsp = FinancialServiceProviderFactory()
     delivery_mechanism = DeliveryMechanismFactory()
@@ -198,7 +198,7 @@ def group_with_accepted_plan_and_payment(business_area: Any, cycle: Any) -> Any:
 
 
 @pytest.fixture
-def group_with_accepted_follow_up_plan_and_payment(business_area: Any, cycle: Any) -> Any:
+def group_with_accepted_follow_up_plan_and_payment(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     fsp = FinancialServiceProviderFactory()
     delivery_mechanism = DeliveryMechanismFactory()
@@ -221,7 +221,7 @@ def group_with_accepted_follow_up_plan_and_payment(business_area: Any, cycle: An
 
 
 @pytest.fixture
-def group_with_accepted_top_up_plan_and_payment(business_area: Any, cycle: Any) -> Any:
+def group_with_accepted_top_up_plan_and_payment(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     fsp = FinancialServiceProviderFactory()
     delivery_mechanism = DeliveryMechanismFactory()
@@ -244,7 +244,7 @@ def group_with_accepted_top_up_plan_and_payment(business_area: Any, cycle: Any) 
 
 
 @pytest.fixture
-def group_with_accepted_top_up_amendment_plan_and_payment(business_area: Any, cycle: Any) -> Any:
+def group_with_accepted_top_up_amendment_plan_and_payment(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     fsp = FinancialServiceProviderFactory()
     delivery_mechanism = DeliveryMechanismFactory()
@@ -267,7 +267,7 @@ def group_with_accepted_top_up_amendment_plan_and_payment(business_area: Any, cy
 
 
 @pytest.fixture
-def group_with_accepted_plan_and_payment_no_template(business_area: Any, cycle: Any) -> Any:
+def group_with_accepted_plan_and_payment_no_template(business_area: object, cycle: object) -> object:
     """Accepted plan with an eligible payment but no resolvable FSP XLSX template - export yields no rows."""
     group = cycle.payment_plan_groups.first()
     plan = PaymentPlanFactory(
@@ -281,7 +281,7 @@ def group_with_accepted_plan_and_payment_no_template(business_area: Any, cycle: 
 
 
 @pytest.fixture
-def group_with_locked_plan(business_area: Any, cycle: Any) -> Any:
+def group_with_locked_plan(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
@@ -293,21 +293,21 @@ def group_with_locked_plan(business_area: Any, cycle: Any) -> Any:
 
 
 @pytest.fixture
-def other_business_area_cycle() -> Any:
+def other_business_area_cycle() -> object:
     other_ba = BusinessAreaFactory(slug="other-ba")
     other_program = ProgramFactory(business_area=other_ba)
     return ProgramCycleFactory(program=other_program)
 
 
 @pytest.fixture
-def groups_for_name_search(cycle: Any) -> dict:
+def groups_for_name_search(cycle: object) -> dict:
     alpha = PaymentPlanGroupFactory(cycle=cycle, name="Alpha Group")
     beta = PaymentPlanGroupFactory(cycle=cycle, name="Beta Group")
     return {"alpha": alpha, "beta": beta}
 
 
 @pytest.fixture
-def groups_for_unicef_id_search(cycle: Any) -> dict:
+def groups_for_unicef_id_search(cycle: object) -> dict:
     target = PaymentPlanGroupFactory(cycle=cycle)
     other = PaymentPlanGroupFactory(cycle=cycle)
     PaymentPlanGroup.objects.filter(pk=target.pk).update(unicef_id="GRP-FIND-ME")
@@ -316,28 +316,28 @@ def groups_for_unicef_id_search(cycle: Any) -> dict:
 
 
 @pytest.fixture
-def two_named_groups_zebra_alpha(cycle: Any) -> dict:
+def two_named_groups_zebra_alpha(cycle: object) -> dict:
     zebra = PaymentPlanGroupFactory(cycle=cycle, name="Zebra")
     alpha = PaymentPlanGroupFactory(cycle=cycle, name="Alpha")
     return {"zebra": zebra, "alpha": alpha}
 
 
 @pytest.fixture
-def two_named_groups_first_second(cycle: Any) -> dict:
+def two_named_groups_first_second(cycle: object) -> dict:
     first = PaymentPlanGroupFactory(cycle=cycle, name="First")
     second = PaymentPlanGroupFactory(cycle=cycle, name="Second")
     return {"first": first, "second": second}
 
 
 @pytest.fixture
-def two_cycles_a_b(program: Any) -> dict:
+def two_cycles_a_b(program: object) -> dict:
     cycle_b = ProgramCycleFactory(program=program, title="Cycle B")
     cycle_a = ProgramCycleFactory(program=program, title="Cycle A")
     return {"cycle_a": cycle_a, "cycle_b": cycle_b}
 
 
 @pytest.fixture
-def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
+def e2e_import_setup(business_area: object, cycle: object) -> dict:
     fsp_one = FinancialServiceProviderFactory(name="E2E FSP One", vision_vendor_number="999111111")
     fsp_two = FinancialServiceProviderFactory(name="E2E FSP Two", vision_vendor_number="999222222")
     dm_one = DeliveryMechanismFactory(code="e2e-cash", name="E2ECash", payment_gateway_id="e2e-cash")
@@ -397,13 +397,13 @@ def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
 
 
 def test_list_groups_for_cycle(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    second_cycle_in_program: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    second_cycle_in_program: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -420,13 +420,13 @@ def test_list_groups_for_cycle(
 
 
 def test_list_groups_no_cycle_filter(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    second_cycle_in_program: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    second_cycle_in_program: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -442,14 +442,14 @@ def test_list_groups_no_cycle_filter(
 
 
 def test_count_groups_for_cycle(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    second_cycle_in_program: Any,
-    extra_group_in_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    second_cycle_in_program: object,
+    extra_group_in_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -462,13 +462,13 @@ def test_count_groups_for_cycle(
 
 
 def test_count_groups_no_cycle_filter(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    second_cycle_in_program: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    second_cycle_in_program: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -481,12 +481,12 @@ def test_count_groups_no_cycle_filter(
 
 
 def test_create_group_under_cycle(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
 
@@ -501,13 +501,13 @@ def test_create_group_under_cycle(
 
 
 def test_create_group_duplicate_name_in_same_cycle_rejected(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    existing_named_group_in_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    existing_named_group_in_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
 
@@ -521,13 +521,13 @@ def test_create_group_duplicate_name_in_same_cycle_rejected(
 
 
 def test_create_group_same_name_different_cycle_allowed(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    shared_named_group_in_other_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    shared_named_group_in_other_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
 
@@ -540,12 +540,12 @@ def test_create_group_same_name_different_cycle_allowed(
 
 
 def test_retrieve_detail_aggregated_totals(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_two_aggregated_plans: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_two_aggregated_plans: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -562,12 +562,12 @@ def test_retrieve_detail_aggregated_totals(
 
 
 def test_retrieve_detail_can_export_follow_up_flag(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_follow_up_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_follow_up_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -585,12 +585,12 @@ def test_retrieve_detail_can_export_follow_up_flag(
 
 
 def test_retrieve_detail_can_export_top_up_flag(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_top_up_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_top_up_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -608,12 +608,12 @@ def test_retrieve_detail_can_export_top_up_flag(
 
 
 def test_retrieve_detail_can_export_regular_flag(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -630,12 +630,12 @@ def test_retrieve_detail_can_export_regular_flag(
 
 
 def test_retrieve_detail_can_export_flags_false_for_open_plan(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -652,12 +652,12 @@ def test_retrieve_detail_can_export_flags_false_for_open_plan(
 
 
 def test_retrieve_detail_can_export_top_up_amendment_flag(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_top_up_amendment_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_top_up_amendment_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -675,12 +675,12 @@ def test_retrieve_detail_can_export_top_up_amendment_flag(
 
 
 def test_retrieve_detail_can_export_regular_false_when_already_exported(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_exported_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -694,12 +694,12 @@ def test_retrieve_detail_can_export_regular_false_when_already_exported(
 
 
 def test_delete_group_with_no_plans_succeeds(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    extra_group_in_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    extra_group_in_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE], business_area, program=program)
 
@@ -711,12 +711,12 @@ def test_delete_group_with_no_plans_succeeds(
 
 
 def test_delete_last_group_in_cycle_blocked(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE], business_area, program=program)
 
@@ -730,12 +730,12 @@ def test_delete_last_group_in_cycle_blocked(
 
 
 def test_delete_group_with_plans_blocked(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE], business_area, program=program)
 
@@ -747,13 +747,13 @@ def test_delete_group_with_plans_blocked(
 
 
 def test_list_excludes_other_business_area(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    other_business_area_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    other_business_area_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -781,11 +781,11 @@ def test_list_excludes_other_business_area(
     ],
 )
 def test_list_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -805,12 +805,12 @@ def test_list_permissions(
     ],
 )
 def test_create_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -830,12 +830,12 @@ def test_create_permissions(
     ],
 )
 def test_retrieve_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -857,12 +857,12 @@ def test_retrieve_permissions(
     ],
 )
 def test_update_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -884,12 +884,12 @@ def test_update_permissions(
     ],
 )
 def test_delete_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    extra_group_in_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    extra_group_in_cycle: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -901,12 +901,12 @@ def test_delete_permissions(
 
 
 def test_update_group_name_succeeds(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
 
@@ -921,13 +921,13 @@ def test_update_group_name_succeeds(
 
 
 def test_update_group_name_duplicate_in_same_cycle_rejected(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    taken_named_group_in_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    taken_named_group_in_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
 
@@ -943,12 +943,12 @@ def test_update_group_name_duplicate_in_same_cycle_rejected(
 
 
 def test_update_group_name_same_as_self_succeeds(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
 
@@ -961,13 +961,13 @@ def test_update_group_name_same_as_self_succeeds(
 
 
 def test_update_group_name_same_as_other_cycle_allowed(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    shared_named_group_in_other_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    shared_named_group_in_other_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
 
@@ -982,12 +982,12 @@ def test_update_group_name_same_as_other_cycle_allowed(
 
 
 def test_list_cache_invalidated_on_group_create(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1019,12 +1019,12 @@ def test_list_cache_invalidated_on_group_create(
 
 
 def test_list_cache_invalidated_on_group_rename(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1058,12 +1058,12 @@ def test_list_cache_invalidated_on_group_rename(
 
 
 def test_list_cache_invalidated_on_group_delete(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    extra_group_in_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    extra_group_in_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -1101,12 +1101,12 @@ def test_list_cache_invalidated_on_group_delete(
     [("name", False), ("-name", True)],
 )
 def test_list_ordering_by_name(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    two_named_groups_zebra_alpha: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    two_named_groups_zebra_alpha: object,
+    create_user_role_with_permissions: object,
     ordering: str,
     reverse: bool,
 ) -> None:
@@ -1122,12 +1122,12 @@ def test_list_ordering_by_name(
 
 
 def test_list_ordering_by_created_at_descending(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    two_named_groups_first_second: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    two_named_groups_first_second: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -1147,12 +1147,12 @@ def test_list_ordering_by_created_at_descending(
     [("cycle", "cycle_a", "cycle_b"), ("-cycle", "cycle_b", "cycle_a")],
 )
 def test_list_ordering_by_cycle_title(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    two_cycles_a_b: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    two_cycles_a_b: object,
+    create_user_role_with_permissions: object,
     ordering: str,
     first_key: str,
     second_key: str,
@@ -1171,12 +1171,12 @@ def test_list_ordering_by_cycle_title(
 
 
 def test_search_by_name(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    groups_for_name_search: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    groups_for_name_search: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -1192,12 +1192,12 @@ def test_search_by_name(
 
 
 def test_search_by_unicef_id(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    groups_for_unicef_id_search: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    groups_for_unicef_id_search: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
@@ -1213,12 +1213,12 @@ def test_search_by_unicef_id(
 
 
 def test_export_with_correct_permission_returns_200(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1234,12 +1234,12 @@ def test_export_with_correct_permission_returns_200(
 
 
 def test_export_sets_background_action_status_to_exporting(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1255,12 +1255,12 @@ def test_export_sets_background_action_status_to_exporting(
 
 
 def test_export_when_already_exporting_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1278,12 +1278,12 @@ def test_export_when_already_exporting_returns_400(
 
 
 def test_export_without_accepted_payment_plan_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_locked_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_locked_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1303,12 +1303,12 @@ def test_export_without_accepted_payment_plan_returns_400(
 
 
 def test_export_excludes_already_tagged_plan_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1332,12 +1332,12 @@ def test_export_excludes_already_tagged_plan_returns_400(
 
 
 def test_export_excludes_follow_up_plan_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1361,12 +1361,12 @@ def test_export_excludes_follow_up_plan_returns_400(
 
 
 def test_export_follow_up_plan_type_queues_task_with_plan_type(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_follow_up_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_follow_up_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1389,12 +1389,12 @@ def test_export_follow_up_plan_type_queues_task_with_plan_type(
 
 
 def test_export_follow_up_plan_type_without_follow_up_plans_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1413,12 +1413,12 @@ def test_export_follow_up_plan_type_without_follow_up_plans_returns_400(
 
 
 def test_export_top_up_plan_type_queues_task_with_plan_type(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_top_up_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_top_up_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1441,12 +1441,12 @@ def test_export_top_up_plan_type_queues_task_with_plan_type(
 
 
 def test_export_top_up_amendment_plan_type_queues_task_with_plan_type(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_top_up_amendment_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_top_up_amendment_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1469,12 +1469,12 @@ def test_export_top_up_amendment_plan_type_queues_task_with_plan_type(
 
 
 def test_export_invalid_plan_type_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1493,12 +1493,12 @@ def test_export_invalid_plan_type_returns_400(
 
 
 def test_export_without_eligible_payments_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1516,12 +1516,12 @@ def test_export_without_eligible_payments_returns_400(
 
 
 def test_export_without_resolvable_template_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment_no_template: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment_no_template: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1539,12 +1539,12 @@ def test_export_without_resolvable_template_returns_400(
 
 
 def test_export_queues_async_task_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1568,12 +1568,12 @@ def test_export_queues_async_task_on_commit(
 
 
 def test_export_rejected_for_group_in_other_business_area(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    other_business_area_cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    other_business_area_cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -1599,12 +1599,12 @@ def test_export_rejected_for_group_in_other_business_area(
     ],
 )
 def test_export_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -1617,7 +1617,7 @@ def test_export_permissions(
     assert response.status_code == expected_status
 
 
-def _send_group_to_payment_gateway_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+def _send_group_to_payment_gateway_url(ba_slug: str, program_code: str, group_id: object) -> str:
     return reverse(
         "api:payments:payment-plan-groups-send-to-payment-gateway",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
@@ -1625,12 +1625,12 @@ def _send_group_to_payment_gateway_url(ba_slug: str, program_code: str, group_id
 
 
 def test_detail_can_send_to_payment_gateway_true(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     create_sendable_payment_plan: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -1646,12 +1646,12 @@ def test_detail_can_send_to_payment_gateway_true(
 
 
 def test_detail_can_send_to_payment_gateway_false_without_sendable_plan(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
@@ -1671,8 +1671,8 @@ def test_detail_can_send_to_payment_gateway_false_without_sendable_plan(
 
 
 @pytest.fixture
-def create_sendable_payment_plan(business_area: Any) -> Callable:
-    def _create_sendable_payment_plan(cycle: Any, group: Any) -> Any:
+def create_sendable_payment_plan(business_area: object) -> Callable:
+    def _create_sendable_payment_plan(cycle: object, group: object) -> object:
         payment_plan = PaymentPlanFactory(
             business_area=business_area,
             program_cycle=cycle,
@@ -1688,12 +1688,12 @@ def create_sendable_payment_plan(business_area: Any) -> Callable:
 
 
 def test_send_group_to_payment_gateway_dispatches_each_plan(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     create_sendable_payment_plan: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -1724,12 +1724,12 @@ def test_send_group_to_payment_gateway_dispatches_each_plan(
 
 
 def test_send_group_to_payment_gateway_with_no_plans_fails(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
@@ -1743,12 +1743,12 @@ def test_send_group_to_payment_gateway_with_no_plans_fails(
 
 
 def test_send_group_to_payment_gateway_dispatches_only_sendable_plans(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     create_sendable_payment_plan: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -1781,12 +1781,12 @@ def test_send_group_to_payment_gateway_dispatches_only_sendable_plans(
 
 
 def test_send_group_to_payment_gateway_fails_when_no_plan_is_sendable(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
@@ -1806,12 +1806,12 @@ def test_send_group_to_payment_gateway_fails_when_no_plan_is_sendable(
 
 
 def test_send_group_to_payment_gateway_fails_when_plan_has_no_unsent_splits(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
@@ -1834,12 +1834,12 @@ def test_send_group_to_payment_gateway_fails_when_plan_has_no_unsent_splits(
 
 
 def test_send_group_to_payment_gateway_skips_plan_already_being_sent(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     create_sendable_payment_plan: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -1869,12 +1869,12 @@ def test_send_group_to_payment_gateway_skips_plan_already_being_sent(
 
 
 def test_send_group_to_payment_gateway_locks_the_group_object(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     create_sendable_payment_plan: Callable,
 ) -> None:
     create_user_role_with_permissions(
@@ -1900,12 +1900,12 @@ def test_send_group_to_payment_gateway_locks_the_group_object(
     ],
 )
 def test_send_group_to_payment_gateway_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
     create_sendable_payment_plan: Callable,
     permissions: list,
     expected_status: int,
@@ -1919,7 +1919,7 @@ def test_send_group_to_payment_gateway_permissions(
     assert response.status_code == expected_status
 
 
-def test_get_batches_returns_empty_when_no_export(cycle: Any, business_area: Any) -> None:
+def test_get_batches_returns_empty_when_no_export(cycle: object, business_area: object) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group)
 
@@ -1928,7 +1928,7 @@ def test_get_batches_returns_empty_when_no_export(cycle: Any, business_area: Any
     assert result == []
 
 
-def test_get_batches_sets_link_when_file_present(cycle: Any, business_area: Any) -> None:
+def test_get_batches_sets_link_when_file_present(cycle: object, business_area: object) -> None:
     group = cycle.payment_plan_groups.first()
     file_temp = FileTempFactory()
     PaymentPlanFactory(
@@ -1953,7 +1953,7 @@ def test_get_batches_sets_link_when_file_present(cycle: Any, business_area: Any)
     ]
 
 
-def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: Any) -> None:
+def test_get_batches_link_is_none_when_file_missing(cycle: object, business_area: object) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
@@ -1975,7 +1975,7 @@ def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: A
     ]
 
 
-def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> None:
+def test_get_batches_orders_by_export_tag(cycle: object, business_area: object) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=2)
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=1)
@@ -1985,7 +1985,7 @@ def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> Non
     assert [batch["export_tag"] for batch in result] == [1, 2]
 
 
-def test_get_batches_carries_plan_type_of_batch(cycle: Any, business_area: Any) -> None:
+def test_get_batches_carries_plan_type_of_batch(cycle: object, business_area: object) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(
         business_area=business_area,
@@ -2001,12 +2001,12 @@ def test_get_batches_carries_plan_type_of_batch(cycle: Any, business_area: Any) 
 
 
 def test_delivery_import_xlsx_returns_400_when_no_file(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2021,12 +2021,12 @@ def test_delivery_import_xlsx_returns_400_when_no_file(
 
 
 def test_delivery_import_xlsx_rejects_bad_zip_file(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2046,12 +2046,12 @@ def test_delivery_import_xlsx_rejects_bad_zip_file(
 
 
 def test_delivery_import_xlsx_returns_400_on_validation_errors(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2074,12 +2074,12 @@ def test_delivery_import_xlsx_returns_400_on_validation_errors(
 
 
 def test_delivery_import_xlsx_succeeds(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2107,12 +2107,12 @@ def test_delivery_import_xlsx_succeeds(
 
 
 def test_delivery_import_xlsx_when_already_importing_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2133,12 +2133,12 @@ def test_delivery_import_xlsx_when_already_importing_returns_400(
 
 
 def test_delivery_import_xlsx_when_exporting_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2159,12 +2159,12 @@ def test_delivery_import_xlsx_when_exporting_returns_400(
 
 
 def test_export_when_importing_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2182,12 +2182,12 @@ def test_export_when_importing_returns_400(
 
 
 def test_export_when_in_error_state_is_allowed(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2206,12 +2206,12 @@ def test_export_when_in_error_state_is_allowed(
 
 
 def test_delivery_import_xlsx_without_accepted_plan_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_locked_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_locked_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2229,12 +2229,12 @@ def test_delivery_import_xlsx_without_accepted_plan_returns_400(
 
 
 def test_delivery_import_xlsx_with_only_follow_up_plan_passes_plan_check(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2263,12 +2263,12 @@ def test_delivery_import_xlsx_with_only_follow_up_plan_passes_plan_check(
 
 
 def test_delivery_import_xlsx_queues_async_task_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2305,12 +2305,12 @@ def test_delivery_import_xlsx_queues_async_task_on_commit(
     ],
 )
 def test_delivery_import_xlsx_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -2332,12 +2332,12 @@ def test_delivery_import_xlsx_permissions(
 
 
 def test_delivery_import_xlsx_end_to_end_updates_payment_data(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    e2e_import_setup: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    e2e_import_setup: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
@@ -2389,12 +2389,12 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
 
 
 def test_export_with_template_queues_task_with_template_id_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -2447,12 +2447,12 @@ def test_export_with_template_queues_task_with_template_id_on_commit(
     ],
 )
 def test_export_with_template_permission_checks(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_accepted_plan_and_payment: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_accepted_plan_and_payment: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     body: dict,
     expected_status: int,
@@ -2474,7 +2474,7 @@ def test_export_with_template_permission_checks(
 
 
 @pytest.fixture
-def group_with_exported_batch(business_area: Any, cycle: Any) -> Any:
+def group_with_exported_batch(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     file_temp = FileTempFactory()
     PaymentPlanFactory(
@@ -2489,12 +2489,12 @@ def group_with_exported_batch(business_area: Any, cycle: Any) -> Any:
 
 
 def test_send_xlsx_password_queues_task_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_exported_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
     group = group_with_exported_batch
@@ -2518,12 +2518,12 @@ def test_send_xlsx_password_queues_task_on_commit(
 
 
 def test_send_xlsx_password_task_not_called_before_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_exported_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
     group = group_with_exported_batch
@@ -2539,12 +2539,12 @@ def test_send_xlsx_password_task_not_called_before_commit(
 
 
 def test_send_xlsx_password_unknown_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_exported_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
     group = group_with_exported_batch
@@ -2561,12 +2561,12 @@ def test_send_xlsx_password_unknown_tag_returns_400(
 
 
 def test_send_xlsx_password_tag_with_no_file_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    cycle: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
     group = cycle.payment_plan_groups.first()
@@ -2591,12 +2591,12 @@ def test_send_xlsx_password_tag_with_no_file_returns_400(
 
 
 def test_send_xlsx_password_zero_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_exported_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
     group = group_with_exported_batch
@@ -2620,12 +2620,12 @@ def test_send_xlsx_password_zero_tag_returns_400(
     ],
 )
 def test_send_xlsx_password_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_exported_batch: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:
@@ -2645,7 +2645,7 @@ def test_send_xlsx_password_permissions(
 
 
 @pytest.fixture
-def group_with_tagged_batch(business_area: Any, cycle: Any) -> Any:
+def group_with_tagged_batch(business_area: object, cycle: object) -> object:
     group = cycle.payment_plan_groups.first()
     file_temp = FileTempFactory()
     PaymentPlanFactory(
@@ -2660,12 +2660,12 @@ def group_with_tagged_batch(business_area: Any, cycle: Any) -> Any:
 
 
 def test_export_for_batch_returns_200_and_sets_exporting_status(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_tagged_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2685,12 +2685,12 @@ def test_export_for_batch_returns_200_and_sets_exporting_status(
 
 
 def test_export_for_batch_queues_task_without_template_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_tagged_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2716,12 +2716,12 @@ def test_export_for_batch_queues_task_without_template_on_commit(
 
 
 def test_export_for_batch_queues_task_with_template_id_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_tagged_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2748,12 +2748,12 @@ def test_export_for_batch_queues_task_with_template_id_on_commit(
 
 
 def test_export_for_batch_when_already_exporting_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_tagged_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2774,12 +2774,12 @@ def test_export_for_batch_when_already_exporting_returns_400(
 
 
 def test_export_for_batch_unknown_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_tagged_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2798,12 +2798,12 @@ def test_export_for_batch_unknown_tag_returns_400(
 
 
 def test_export_for_batch_zero_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_tagged_batch: object,
+    create_user_role_with_permissions: object,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
@@ -2828,12 +2828,12 @@ def test_export_for_batch_zero_tag_returns_400(
     ],
 )
 def test_export_for_batch_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
+    client: object,
+    user: object,
+    business_area: object,
+    program: object,
+    group_with_tagged_batch: object,
+    create_user_role_with_permissions: object,
     permissions: list,
     expected_status: int,
 ) -> None:

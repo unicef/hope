@@ -1,7 +1,7 @@
 """Tests for the grievance-tickets-global ``related-tickets`` action."""
 
 from datetime import datetime
-from typing import Any, Callable
+from typing import Callable
 
 from django.utils import timezone
 import pytest
@@ -41,7 +41,7 @@ def user(partner: Partner) -> User:
 
 
 @pytest.fixture
-def authenticated_client(api_client: Callable, user: User) -> Any:
+def authenticated_client(api_client: Callable, user: User) -> object:
     return api_client(user)
 
 
@@ -51,12 +51,12 @@ def country() -> Country:
 
 
 @pytest.fixture
-def admin_type(country: Country) -> Any:
+def admin_type(country: Country) -> object:
     return AreaTypeFactory(country=country, area_level=1)
 
 
 @pytest.fixture
-def area1(admin_type: Any) -> Area:
+def area1(admin_type: object) -> Area:
     return AreaFactory(parent=None, p_code="AF01", area_type=admin_type)
 
 
@@ -156,7 +156,7 @@ def _url(name: str, afghanistan: BusinessArea, ticket: GrievanceTicket) -> str:
 
 
 def test_related_tickets_returns_rich_fields(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     main_ticket: GrievanceTicket,
@@ -190,7 +190,7 @@ def test_related_tickets_returns_rich_fields(
 
 
 def test_related_tickets_ordered_by_created_at_desc(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     main_ticket: GrievanceTicket,
@@ -215,7 +215,7 @@ def test_related_tickets_ordered_by_created_at_desc(
 
 
 def test_related_tickets_requires_detail_permission(
-    authenticated_client: Any,
+    authenticated_client: object,
     afghanistan: BusinessArea,
     user: User,
     main_ticket: GrievanceTicket,
