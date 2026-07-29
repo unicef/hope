@@ -57,17 +57,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
         );
         showMessage(t('File uploaded successfully'));
         queryClient.invalidateQueries({
-          queryKey: [
-            'periodicDataUpdateUploads',
-            {
-              ordering: 'created_at',
-              businessAreaSlug: businessArea,
-              programCode: programId,
-            },
-            businessArea,
-            programId,
-            0,
-          ],
+          queryKey: ['periodicDataUpdateUploads'],
         });
         queryClient.invalidateQueries({
           queryKey: ['periodicDataUpdateUploadsCount'],

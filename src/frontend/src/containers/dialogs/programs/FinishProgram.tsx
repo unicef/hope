@@ -40,6 +40,9 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
         queryClient.invalidateQueries({
           queryKey: ['program', businessArea, program.code],
         });
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasProgramsList'],
+        });
       },
     });
 

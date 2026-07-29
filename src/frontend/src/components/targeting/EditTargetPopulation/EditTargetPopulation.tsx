@@ -142,9 +142,12 @@ const EditTargetPopulation = ({
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate and refetch the grievance ticket details
+        // Invalidate the target population detail and the list so edits are reflected.
         queryClient.invalidateQueries({
           queryKey: ['targetPopulation', businessArea, id, programCode],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasProgramsTargetPopulationsList'],
         });
       },
     });

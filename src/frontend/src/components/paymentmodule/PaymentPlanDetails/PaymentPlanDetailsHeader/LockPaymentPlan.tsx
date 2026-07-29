@@ -59,6 +59,12 @@ export function LockPaymentPlan({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
         exact: false,
       });
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

@@ -64,6 +64,12 @@ export function RejectPaymentPlan({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
   });
 

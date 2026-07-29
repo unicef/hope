@@ -8,7 +8,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageCreate } from '@restgenerated/models/MessageCreate';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -120,6 +120,7 @@ function prepareSampleSizeRequest(
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: (data: MessageCreate) =>
       RestService.restBusinessAreasProgramsMessagesCreate({
@@ -127,6 +128,11 @@ const CreateCommunicationPage = (): ReactElement => {
         programCode: programId,
         requestBody: data,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsMessagesList'],
+      });
+    },
   });
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();

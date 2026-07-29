@@ -11,7 +11,7 @@ import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/Pay
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -49,6 +49,7 @@ export const DuplicateTargetPopulation = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { data: programData } = useQuery<ProgramDetail>({
     queryKey: ['programDetail', businessArea, programId],
@@ -81,6 +82,11 @@ export const DuplicateTargetPopulation = ({
         id,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+      });
+    },
   });
 
   const initialValues = {

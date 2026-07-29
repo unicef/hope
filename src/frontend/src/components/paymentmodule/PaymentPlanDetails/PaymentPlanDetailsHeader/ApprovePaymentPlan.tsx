@@ -65,6 +65,12 @@ export function ApprovePaymentPlan({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
   });
   const initialValues = {

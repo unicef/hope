@@ -32,7 +32,7 @@ export function BulkAddNoteModal({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = useState<string>('');
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
@@ -49,10 +49,7 @@ export function BulkAddNoteModal({
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: ['businessAreasProgramsGrievanceTickets'],
         });
       }
       setSelected([]);

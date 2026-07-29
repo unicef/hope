@@ -75,6 +75,12 @@ export function ClosePaymentPlanDialog({
       queryClient.invalidateQueries({
         queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsPaymentPlansList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasPaymentPlans'],
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

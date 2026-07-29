@@ -52,6 +52,9 @@ export const FinalizeTargetPopulationPaymentPlan = ({
           programId,
         ],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+      });
       navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
     },
     onError: (error) => {

@@ -76,7 +76,12 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', paymentPlan.id],
+          queryKey: [
+            'paymentPlan',
+            businessArea,
+            paymentPlan.id,
+            paymentPlan.program.code,
+          ],
         });
       },
     });

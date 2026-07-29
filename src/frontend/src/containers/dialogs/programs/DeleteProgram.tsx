@@ -47,7 +47,7 @@ export const DeleteProgram = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const { mutateAsync: deleteProgram, isPending: isPendingDelete } =
@@ -59,7 +59,7 @@ export const DeleteProgram = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['businessAreasProgramsList', businessArea, programId],
+          queryKey: ['businessAreasProgramsList'],
         });
         showMessage(t('Programme removed'));
         navigate(`/${businessArea}/programs/all/list`);

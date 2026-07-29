@@ -60,7 +60,7 @@ export function ImportXlsxPaymentPlanPaymentList({
       showMessage(t('Your import was successful!'));
       setXlsxError(null);
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', paymentPlan.id],
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
       });
     },
     onError: (error: any) => {

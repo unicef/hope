@@ -137,6 +137,15 @@ const EditGrievancePage = (): ReactElement => {
           id: data.id,
           formData: data.formData,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'businessAreasGrievanceTicketsRetrieve',
+            businessAreaSlug,
+            id,
+          ],
+        });
+      },
     });
 
   const { mutateAsync: changeTicketStatus } = useMutation({

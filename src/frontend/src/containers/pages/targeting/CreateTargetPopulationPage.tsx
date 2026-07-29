@@ -68,7 +68,12 @@ const CreateTargetPopulationPage = (): ReactElement => {
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate the list and detail queries for target populations and program
+        // Invalidate the list and detail queries for target populations and program.
+        // The table reads under `businessAreasProgramsTargetPopulationsList`; the
+        // `targetPopulations` key only backs the autocomplete.
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        });
         queryClient.invalidateQueries({
           queryKey: ['targetPopulations', businessAreaSlug, programCode],
         });

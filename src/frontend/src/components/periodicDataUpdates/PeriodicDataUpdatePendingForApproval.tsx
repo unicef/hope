@@ -123,17 +123,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
         ],
       });
       queryClient.invalidateQueries({
-        queryKey: [
-          'periodicDataUpdatePendingForMerge',
-          {
-            ordering: 'created_at',
-            businessAreaSlug,
-            programCode: programId,
-            status: ['APPROVED' as const],
-          },
-          businessAreaSlug,
-          programId,
-        ],
+        queryKey: ['periodicDataUpdatePendingForMerge'],
       });
     },
     onError: (error: any) => {

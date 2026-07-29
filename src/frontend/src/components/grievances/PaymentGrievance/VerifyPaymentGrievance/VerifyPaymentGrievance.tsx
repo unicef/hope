@@ -51,7 +51,7 @@ export function VerifyPaymentGrievance({
       setVerifyManualDialogOpen(false);
       showMessage(t('Payment has been verified.'));
       queryClient.invalidateQueries({
-        queryKey: ['GrievanceTicketDetail', ticket.id],
+        queryKey: ['businessAreasGrievanceTicketsRetrieve', businessArea, ticket.id],
       });
     },
     onError: (error: any) => {

@@ -76,8 +76,17 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
         requestBody: { description },
       });
 
+      // Refresh both feedback detail readers: the details page keys via
+      // useHopeDetailsQuery (`restBusinessAreasFeedbacksRetrieve`), the edit page keys
+      // `['businessAreasFeedbacksRetrieve', businessArea, id]`.
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasFeedbacksRetrieve', id],
+        queryKey: [
+          'restBusinessAreasFeedbacksRetrieve',
+          { id, programCode, businessAreaSlug },
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasFeedbacksRetrieve', businessAreaSlug, id],
       });
     } catch (error) {
       showApiErrorMessages(error, showMessage);

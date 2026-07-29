@@ -31,7 +31,7 @@ export const BulkSetPriorityModal = ({
 }: BulkSetPriorityModalProps): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const [value, setValue] = useState<number>(0);
   const queryClient = useQueryClient();
 
@@ -59,10 +59,7 @@ export const BulkSetPriorityModal = ({
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: ['businessAreasProgramsGrievanceTickets'],
         });
       }
       setSelected([]);

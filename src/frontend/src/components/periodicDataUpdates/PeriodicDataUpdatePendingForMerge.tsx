@@ -117,17 +117,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
         ],
       });
       queryClient.invalidateQueries({
-        queryKey: [
-          'mergedPeriodicDataUpdates',
-          {
-            ordering: 'created_at',
-            businessAreaSlug,
-            programCode: programId,
-            status: ['MERGED' as const],
-          },
-          businessAreaSlug,
-          programId,
-        ],
+        queryKey: ['mergedPeriodicDataUpdates'],
       });
     },
     onError: (error: any) => {

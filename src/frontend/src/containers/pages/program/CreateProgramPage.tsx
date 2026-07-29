@@ -88,7 +88,7 @@ export const CreateProgramPage = (): ReactElement => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programs', businessArea],
+        queryKey: ['businessAreasProgramsList'],
       });
       await queryClient.invalidateQueries({
         queryKey: ['programChoices', businessArea],

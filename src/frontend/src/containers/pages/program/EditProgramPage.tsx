@@ -106,7 +106,10 @@ const EditProgramPage = (): ReactElement => {
           queryKey: ['businessAreaProgram', businessArea, id],
         });
         await queryClient.invalidateQueries({
-          queryKey: ['businessAreaPrograms', businessArea],
+          queryKey: ['program', businessArea, id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['businessAreasProgramsList'],
         });
       },
     });
@@ -127,7 +130,10 @@ const EditProgramPage = (): ReactElement => {
         queryKey: ['businessAreaProgram', businessArea, id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ['businessAreaPrograms', businessArea],
+        queryKey: ['program', businessArea, id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsList'],
       });
       // Invalidate activity logs cache
       await queryClient.invalidateQueries({

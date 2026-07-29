@@ -47,7 +47,10 @@ const NewOnlineTemplatePage = (): ReactElement => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['periodicFields', businessArea, programId, programId],
+        queryKey: ['periodicFields', businessArea, programId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['periodicDataUpdateOnlineEdits'],
       });
       showMessage(t('Template created successfully.'));
       navigate(
@@ -88,7 +91,7 @@ const NewOnlineTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId, programId],
+      queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,

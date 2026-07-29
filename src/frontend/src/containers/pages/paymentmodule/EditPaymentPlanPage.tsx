@@ -12,7 +12,7 @@ import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedPr
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
@@ -40,6 +40,7 @@ const EditPaymentPlanForm = ({
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
     useMutation({
@@ -60,6 +61,17 @@ const EditPaymentPlanForm = ({
           programCode,
           requestBody,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasProgramsPaymentPlansList'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasPaymentPlans'],
+        });
+      },
     });
 
   const { data: cyclesData } = useQuery<PaginatedProgramCycleListList>({

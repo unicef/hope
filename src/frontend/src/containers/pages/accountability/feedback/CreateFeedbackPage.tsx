@@ -29,7 +29,7 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
@@ -147,6 +147,7 @@ function CreateFeedbackPage(): ReactElement {
         ),
     });
 
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -159,6 +160,14 @@ function CreateFeedbackPage(): ReactElement {
         businessAreaSlug,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsFeedbacksList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasFeedbacksList'],
+      });
+    },
   });
 
   if (choicesLoading || programsDataLoading) return <LoadingComponent />;

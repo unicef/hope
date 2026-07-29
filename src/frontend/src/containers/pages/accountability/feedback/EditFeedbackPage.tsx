@@ -21,7 +21,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -59,6 +59,7 @@ const EditFeedbackPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const queryClient = useQueryClient();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -108,6 +109,17 @@ const EditFeedbackPage = (): ReactElement => {
         id: feedbackId,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasFeedbacksRetrieve', businessArea, id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsFeedbacksList'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasFeedbacksList'],
+      });
+    },
   });
 
   if (feedbackDataLoading || choicesLoading || programsDataLoading)

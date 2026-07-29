@@ -57,7 +57,7 @@ const DuplicateProgramPage = (): ReactElement => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['businessAreaPrograms', businessArea],
+        queryKey: ['businessAreasProgramsList'],
       });
     },
   });

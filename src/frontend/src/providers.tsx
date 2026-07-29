@@ -1,5 +1,10 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  MutationCache,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { isStaticReferenceQuery } from '@utils/queryCacheUtils';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { FC, ReactNode } from 'react';
@@ -15,7 +20,20 @@ interface ProvidersProps {
   children: ReactNode[];
 }
 
-const queryClient = new QueryClient({
+// After ANY successful mutation, invalidate active queries so the UI reflects the write
+// immediately (create/edit/status-change etc.). Static reference data (choices, geo areas,
+// permissions) is exempt so it keeps its long staleTime. Individual mutations may still add
+// their own targeted invalidation; this is the safety net for the app's drifted query keys.
+// The onSuccess closure references `queryClient` lazily — it only runs on a mutation success,
+// long after the binding is initialised — so the self-reference is safe.
+const queryClient: QueryClient = new QueryClient({
+  mutationCache: new MutationCache({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        predicate: (query) => !isStaticReferenceQuery(query.queryKey),
+      });
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000, // Data is considered fresh for 60 seconds

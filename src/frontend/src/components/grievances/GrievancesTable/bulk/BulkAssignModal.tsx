@@ -32,7 +32,7 @@ export function BulkAssignModal({
 }: BulkAssignModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const [value, setValue] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
   const queryClient = useQueryClient();
@@ -53,10 +53,7 @@ export function BulkAssignModal({
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: ['businessAreasProgramsGrievanceTickets'],
         });
       }
       setSelected([]);

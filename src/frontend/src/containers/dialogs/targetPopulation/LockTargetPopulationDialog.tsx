@@ -56,6 +56,9 @@ export const LockTargetPopulationDialog = ({
           programId,
         ],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+      });
       showMessage(t('Payment Plan has been locked.'));
     },
     onError: (error) => {

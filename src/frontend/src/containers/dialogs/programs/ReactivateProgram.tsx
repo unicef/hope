@@ -48,6 +48,9 @@ export function ReactivateProgram({
       queryClient.invalidateQueries({
         queryKey: ['program', businessAreaSlug, program.code],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsList'],
+      });
       showMessage(t('Programme reactivated.'));
       setOpen(false);
     },

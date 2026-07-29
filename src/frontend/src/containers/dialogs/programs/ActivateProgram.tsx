@@ -38,6 +38,9 @@ export const ActivateProgram = ({
       queryClient.invalidateQueries({
         queryKey: ['program', businessArea, program.code],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsList'],
+      });
       setOpen(false);
     },
     onError: (error) => {
