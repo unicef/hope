@@ -185,3 +185,21 @@ def test_create_top_up_amendment_arrange_no_eligible_payments_act_create_assert_
         PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
 
     assert "no eligible payments" in str(error.value.detail[0]).lower()
+
+
+@pytest.mark.parametrize(
+    "status",
+    [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED, PaymentPlan.Status.CLOSED],
+)
+def test_create_top_up_amendment_arrange_source_outside_release_window_act_create_assert_raises(
+    user: User, top_up_pp: PaymentPlan, top_up_payments: dict[str, Payment], status: str
+) -> None:
+    top_up_pp.status = status
+    top_up_pp.save(update_fields=["status"])
+    start = top_up_pp.dispersion_start_date + timedelta(days=1)
+    end = top_up_pp.dispersion_end_date + timedelta(days=1)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
+
+    assert "Accepted or Finished" in str(error.value.detail[0])

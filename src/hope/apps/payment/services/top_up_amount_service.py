@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from typing import IO, TYPE_CHECKING
 from zipfile import BadZipFile
 
@@ -55,10 +55,7 @@ def _row_amount(raw_amount: object, payment_id: str) -> Decimal | None:
     """Amount for one row, or ``None`` when the row funds nobody (blank or zero)."""
     if raw_amount is None or str(raw_amount).strip() == "":
         return None
-    try:
-        amount = to_decimal(str(raw_amount))
-    except (InvalidOperation, ValueError):
-        amount = None
+    amount = to_decimal(str(raw_amount))  # returns None for anything non-numeric
     if amount is None:
         raise ValidationError(f"Invalid amount '{raw_amount}' for payment {payment_id}.")
     if amount < 0:

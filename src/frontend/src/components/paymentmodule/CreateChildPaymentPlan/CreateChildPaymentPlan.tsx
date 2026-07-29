@@ -301,24 +301,24 @@ export function CreateChildPaymentPlan({
                         <Typography>
                           {t('Configure Top-Up Amount')}
                         </Typography>
-                        <GreyText>
-                          {t(
-                            'Set one amount for everyone, or upload a template with an amount per beneficiary. Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',
-                          )}
-                        </GreyText>
                       </Box>
                       <Grid container spacing={3} sx={{ alignItems: 'center' }}>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid size={{ xs: 5 }}>
+                          <Typography>{t('Fixed:')}</Typography>
+                        </Grid>
+                        <Grid size={{ xs: 7 }}>
                           <Field
                             name="fixedAmount"
-                            label={t('Fixed')}
                             type="number"
                             component={FormikTextField}
                             fullWidth
                             disabled={loadingCreate || Boolean(values.file)}
                           />
                         </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid size={{ xs: 5 }}>
+                          <Typography>{t('Custom / per Beneficiary:')}</Typography>
+                        </Grid>
+                        <Grid size={{ xs: 7 }}>
                           <Button
                             color="primary"
                             variant="contained"
@@ -338,6 +338,11 @@ export function CreateChildPaymentPlan({
                               setFieldValue('file', files[0] ?? null);
                             }}
                           />
+                          <GreyText>
+                            {t(
+                              'Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',
+                            )}
+                          </GreyText>
                         </Grid>
                       </Grid>
                       <Grid size={{ xs: 12 }}>
