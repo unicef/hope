@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 from unittest.mock import patch
 
 from constance.test import override_config
@@ -15,7 +16,7 @@ from extras.test_utils.factories import (
     UserRoleAssignmentFactory,
 )
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.models import BusinessArea, User
 
 pytestmark = pytest.mark.django_db
@@ -59,6 +60,31 @@ def test_init_builds_recipients_and_emails_for_assignment_changed(
     assert correlation_id == f"grievance-ticket:{assigned_ticket.id}:{notification.action}:{assignee.id}"
     assert payload.recipients == [assignee.email]
     assert notification.enable_email_notification is True
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_send_grievance_notification_event_emits_rendered_payload(
+    assigned_ticket: GrievanceTicket,
+    assignee: User,
+    mocker: Any,
+) -> None:
+    event = mocker.Mock()
+
+    send_grievance_notification_event(
+        event,
+        assigned_ticket,
+        GrievanceNotification.ACTION_ASSIGNMENT_CHANGED,
+    )
+
+    event.send_robust.assert_called_once()
+    assert event.send_robust.call_args.kwargs["sender"] is GrievanceTicket
+    assert event.send_robust.call_args.kwargs["instance"] == assigned_ticket
+    assert event.send_robust.call_args.kwargs["business_area"] == assigned_ticket.business_area
+    assert event.send_robust.call_args.kwargs["payload"].recipients == [assignee.email]
+    assert event.send_robust.call_args.kwargs["correlation_id"] == (
+        f"grievance-ticket:{assigned_ticket.id}:{GrievanceNotification.ACTION_ASSIGNMENT_CHANGED}:{assignee.id}"
+    )
+    assert event.send_robust.call_args.kwargs["send_notification"] is True
 
 
 def test_assigned_to_recipient_returns_empty_when_unassigned(business_area: BusinessArea) -> None:
