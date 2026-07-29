@@ -76,7 +76,7 @@ def _handle_photo_field(new_individual_data: dict) -> None:
         if photo is None:
             new_individual_data["photo"] = ""
         else:
-            saved_photo = handle_photo(photo, None)
+            saved_photo = handle_photo(photo, None, Individual._meta.get_field("photo"))
             if saved_photo:
                 new_individual_data["photo"] = saved_photo
 

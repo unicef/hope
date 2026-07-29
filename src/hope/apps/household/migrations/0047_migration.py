@@ -43,13 +43,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name="individual",
-            name="photo",
-            field=models.ImageField(
-                blank=True, help_text="Photo", max_length=255, upload_to=hope.models.utils.unique_upload_name
-            ),
-        ),
-        migrations.AlterField(
             model_name="xlsxupdatefile",
             name="file",
             field=models.FileField(max_length=255, upload_to=hope.models.utils.UniqueUploadPath("xlsx_update")),

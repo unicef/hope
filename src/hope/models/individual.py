@@ -61,7 +61,6 @@ from hope.models.utils import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
     UniqueUploadPath,
-    unique_upload_name,
 )
 
 
@@ -185,7 +184,8 @@ class Individual(
     )
 
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
-    photo = models.ImageField(upload_to=unique_upload_name, max_length=255, blank=True, help_text="Photo")
+    # no upload to cause of dedup engine logic
+    photo = models.ImageField(blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(2)],

@@ -331,11 +331,13 @@ def test_handle_image_field(
 
         result = task._handle_image_field("signature-14_59_24.png", False)
         assert isinstance(result, File)
-        assert result.name == "signature-14_59_24.png"
+        assert result.name.startswith(registration_data_import.program.code)
+        assert result.name.endswith(".png")
 
-        result = task._handle_image_field("signature-21_37.png", False)
-        assert isinstance(result, File)
-        assert result.name == "signature-21_37.png"
+        other_result = task._handle_image_field("signature-21_37.png", False)
+        assert isinstance(other_result, File)
+        assert other_result.name.endswith(".png")
+        assert other_result.name != result.name
 
 
 def test_handle_geopoint_field(business_area: object, registration_data_import: object) -> None:
@@ -449,7 +451,7 @@ def test_handle_documents_and_identities(
     photo = PendingDocument.objects.first().photo
     assert isinstance(photo, ImageFieldFile)
     assert photo.name.startswith("document_photo/")
-    assert photo.name.rsplit("/", 1)[-1].startswith("signature-14_59_24")
+    assert photo.name.endswith(".png")
 
     birth_certificate = PendingDocument.objects.get(document_number=123123123).type.key
     national_passport = PendingDocument.objects.get(document_number=444111123).type.key

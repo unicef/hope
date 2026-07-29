@@ -8,6 +8,8 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
+from django.core.files import File
+from django.core.files.storage import default_storage
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -39,7 +41,7 @@ class UniqueUploadPath:
     def __init__(self, prefix: str) -> None:
         self.prefix = prefix
 
-    def __call__(self, instance: models.Model, filename: str) -> str:
+    def __call__(self, instance: models.Model | None, filename: str) -> str:
         return f"{self.prefix}/{timezone.now():%Y/%m}/{uuid4().hex}/{filename}"
 
     def __eq__(self, other: Any) -> bool:
@@ -49,18 +51,26 @@ class UniqueUploadPath:
         return hash((self.__class__, self.prefix))
 
 
-def unique_upload_name(instance: models.Model, filename: str) -> str:
-    """Prefix the file name with a uuid, keeping the path flat.
-
-    Same purpose as UniqueUploadPath, for files whose stored name is handed to an external
-    service: the name stays a single path segment.
-    """
-    return f"{uuid4().hex}_{filename}"
-
-
 def upload_basename(name: str) -> str:
     """Drop the generated upload path, leaving the name only."""
     return name.rsplit("/", 1)[-1]
+
+
+def save_unique_upload(content: File, prefix: str, filename: str) -> str:
+    """Store a file that has no model field, under the same unique path scheme.
+
+    Flex field images are kept as a name inside a JSONField, so there is no FileField to
+    carry an upload_to. This applies the same path and the same name validation the field
+    would: Storage.generate_filename rejects a `..` directory and strips the base name down
+    to word characters, dashes and dots, which plain Storage.save does not do.
+    """
+    name = default_storage.generate_filename(UniqueUploadPath(prefix)(None, filename))
+    return default_storage.save(name, content)
+
+
+def save_flex_field_image(content: File, filename: str) -> str:
+    """Store a flex field image under the shared flex field prefix."""
+    return save_unique_upload(content, "flex_field_image", filename)
 
 
 class BulkSignalsManagerMixin:

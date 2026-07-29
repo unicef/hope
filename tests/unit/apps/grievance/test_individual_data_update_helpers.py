@@ -2,6 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
+from hope.models import Individual
+
 
 def test_handle_photo_field_no_photo_key_dict_unchanged():
     from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
@@ -36,7 +38,7 @@ def test_handle_photo_field_with_value_handle_photo_returns_result(mock_handle_p
     data = {"photo": "some_photo_data", "name": "John"}
     _handle_photo_field(data)
     assert data["photo"] == "saved/photo/path.jpg"
-    mock_handle_photo.assert_called_once_with("some_photo_data", None)
+    mock_handle_photo.assert_called_once_with("some_photo_data", None, Individual._meta.get_field("photo"))
 
 
 @patch("hope.apps.grievance.services.data_change.individual_data_update_service.handle_photo")
@@ -49,7 +51,7 @@ def test_handle_photo_field_with_value_handle_photo_returns_none(mock_handle_pho
     # photo was popped and handle_photo returned None, so "photo" should not be in dict
     assert "photo" not in data
     assert data["name"] == "John"
-    mock_handle_photo.assert_called_once_with("some_photo_data", None)
+    mock_handle_photo.assert_called_once_with("some_photo_data", None, Individual._meta.get_field("photo"))
 
 
 @patch("hope.apps.grievance.services.data_change.individual_data_update_service.handle_photo")
@@ -72,7 +74,7 @@ def test_handle_photo_field_with_truthy_value_sets_photo(mock_handle_photo):
     _handle_photo_field(data)
     assert data["photo"] == "path/to/photo.png"
     assert data["other_field"] == 42
-    mock_handle_photo.assert_called_once_with({"some": "complex_data"}, None)
+    mock_handle_photo.assert_called_once_with({"some": "complex_data"}, None, Individual._meta.get_field("photo"))
 
 
 def test_handle_photo_field_preserves_other_keys():

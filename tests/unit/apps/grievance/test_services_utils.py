@@ -67,6 +67,7 @@ from hope.models import (
     DeduplicationEngineSimilarityPair,
     Document,
     FlexibleAttribute,
+    Individual,
     IndividualRoleInHousehold,
 )
 from hope.models.utils import MergeStatusModel
@@ -668,6 +669,7 @@ def test_handle_photo_string_returns_photoraw() -> None:
     result = handle_photo(
         photo="already-exists",
         photoraw="https://cdn.example.com/photo.jpg",
+        field=Document._meta.get_field("photo"),
     )
     assert result == "https://cdn.example.com/photo.jpg"
 
@@ -681,7 +683,7 @@ def test_handle_photo_saves_and_return() -> None:
         size=3,
         charset=None,
     )
-    result = handle_photo(file, photoraw=None)
+    result = handle_photo(file, photoraw=None, field=Document._meta.get_field("photo"))
     assert result is not None
     assert result.endswith(".jpg")
 
@@ -690,10 +692,32 @@ def test_handle_photo_saves_into_the_document_photo_folder(
     media_root: Path, photo_upload: InMemoryUploadedFile
 ) -> None:
     with freeze_time("2026-07-28"):
-        saved_name = handle_photo(photo_upload, photoraw=None)
+        saved_name = handle_photo(photo_upload, photoraw=None, field=Document._meta.get_field("photo"))
 
     assert saved_name.startswith("document_photo/2026/07/")
-    assert saved_name.endswith("/test123.jpg")
+    assert saved_name.count("/") == 4
+    assert saved_name.endswith(".jpg")
+
+
+def test_handle_photo_keeps_individual_photo_name_flat(media_root: Path, photo_upload: InMemoryUploadedFile) -> None:
+    saved_name = handle_photo(photo_upload, photoraw=None, field=Individual._meta.get_field("photo"))
+
+    assert "/" not in saved_name
+    assert saved_name.endswith(".jpg")
+
+
+def test_handle_photo_does_not_truncate_the_individual_photo_name(
+    media_root: Path, photo_upload: InMemoryUploadedFile
+) -> None:
+    saved_name = handle_photo(photo_upload, photoraw=None, field=Individual._meta.get_field("photo"))
+
+    assert re.fullmatch(r"[A-Z0-9]-[\w.-]+\.jpg", saved_name)
+
+
+def test_handle_photo_fits_the_individual_photo_column(media_root: Path, photo_upload: InMemoryUploadedFile) -> None:
+    saved_name = handle_photo(photo_upload, photoraw=None, field=Individual._meta.get_field("photo"))
+
+    assert len(saved_name) <= Individual._meta.get_field("photo").max_length
 
 
 def test_document_photo_field_saves_into_the_document_photo_folder(media_root: Path, document: Document) -> None:
@@ -1007,6 +1031,7 @@ def test_save_images_persists_uploaded_image() -> None:
     save_images(flex_fields, "individuals")
 
     assert isinstance(flex_fields["profile_picture_i_f"], str)
+    assert flex_fields["profile_picture_i_f"].startswith("flex_field_image/")
     assert flex_fields["profile_picture_i_f"].endswith(".jpg")
 
 

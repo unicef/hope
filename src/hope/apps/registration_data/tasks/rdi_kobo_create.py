@@ -1,12 +1,13 @@
 from collections import defaultdict
 import json
 import logging
+from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from dateutil.parser import parse
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.files.storage import default_storage
 from django.db import Error, transaction
 from django_countries.fields import Country
 
@@ -53,6 +54,7 @@ from hope.models import (
     log_create,
 )
 from hope.models.currency import Currency
+from hope.models.utils import save_flex_field_image
 
 logger = logging.getLogger(__name__)
 
@@ -94,9 +96,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         download_url = current_download_url.replace("?format=json", "")
         api = KoboAPI()
         image_bytes = api.get_attached_file(download_url)
-        file = File(image_bytes, name=value)
+        # kobo returns the enumerator's own file name, which collides across submissions;
+        # Individual.photo is stored under that name as-is, so make it unique here
+        program = self.registration_data_import.program
+        file_name = f"{program.code if program else ''}{uuid4().hex}{Path(value).suffix}"
+        file = File(image_bytes, name=file_name)
         if is_flex_field:
-            return default_storage.save(value, file)
+            return save_flex_field_image(file, file_name)
         logger.info(f"Image field processed: {value}")
         return file
 

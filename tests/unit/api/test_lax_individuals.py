@@ -453,9 +453,8 @@ def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program,
 
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
     assert individual.photo is not None
-    stored_name = individual.photo.name
-    assert stored_name.split("_", 1)[-1].startswith(lax_program.code)
-    assert stored_name.endswith(".png")
+    assert individual.photo.name.startswith(lax_program.code)
+    assert individual.photo.name.endswith(".png")
 
 
 def test_create_individual_with_disability_certificate_picture(lax_api_client, lax_push_url, lax_program, base64_image):
