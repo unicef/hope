@@ -415,7 +415,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         flex_fields = {}
         for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
             if image_base64 := individual_dict.get(field_name):
-                image = self._prepare_picture_from_base64(image_base64, f"{field_name}_{uuid.uuid4()}")
+                image = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
                 flex_fields[field_name] = default_storage.save(image.name, image)
         if flex_fields:
             individual_data["flex_fields"] = flex_fields
