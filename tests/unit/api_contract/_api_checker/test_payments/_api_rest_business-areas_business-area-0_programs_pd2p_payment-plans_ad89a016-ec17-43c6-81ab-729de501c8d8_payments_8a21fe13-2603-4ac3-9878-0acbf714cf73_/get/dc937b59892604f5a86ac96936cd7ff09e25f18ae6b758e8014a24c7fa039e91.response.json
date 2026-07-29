@@ -159,7 +159,7 @@
             "excluded_households": [],
             "excluded_individuals": [],
             "can_create_follow_up": false,
-            "can_create_top_up": true,
+            "can_create_top_up": false,
             "can_create_top_up_amendment": false,
             "total_withdrawn_households_count": 0,
             "unsuccessful_payments_count": 0,

@@ -548,6 +548,8 @@ def test_can_create_top_up_returns_true_when_has_delivered_payments(
         payment_plan_detail_context["program_active"],
     )
     pp = payment_plan_detail_context["pp"]
+    pp.status = PaymentPlan.Status.ACCEPTED
+    pp.save(update_fields=["status"])
     PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     PaymentFactory(parent=pp, status=Payment.STATUS_ERROR)
 
