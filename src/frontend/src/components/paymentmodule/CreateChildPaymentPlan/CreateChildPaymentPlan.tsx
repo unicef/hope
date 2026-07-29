@@ -304,7 +304,7 @@ export function CreateChildPaymentPlan({
                       </Box>
                       <Grid container spacing={3} sx={{ alignItems: 'center' }}>
                         <Grid size={{ xs: 5 }}>
-                          <Typography>{t('Fixed:')}</Typography>
+                          <Typography>{t('Fixed')}:</Typography>
                         </Grid>
                         <Grid size={{ xs: 7 }}>
                           <Field
@@ -316,7 +316,7 @@ export function CreateChildPaymentPlan({
                           />
                         </Grid>
                         <Grid size={{ xs: 5 }}>
-                          <Typography>{t('Custom / per Beneficiary:')}</Typography>
+                          <Typography>{t('Custom / per Beneficiary')}:</Typography>
                         </Grid>
                         <Grid size={{ xs: 7 }}>
                           <Button

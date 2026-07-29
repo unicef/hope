@@ -164,6 +164,10 @@ def test_create_top_up_payment_plan(
     login.click('[data-cy="button-create-topup"]')
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    # Both labels are asserted because a trailing colon inside t() is swallowed by i18next,
+    # which silently renders an empty label.
+    login.assert_text("Fixed:")
+    login.assert_text("Custom / per Beneficiary:")
     _fill_date(login, "dispersionStartDate", "2027-01-01")
     # The end date is disabled until a start date is set.
     login.wait_for_element_clickable('input[name="dispersionEndDate"]')
