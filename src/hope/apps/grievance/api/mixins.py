@@ -11,7 +11,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import nested_dict_get
 from hope.apps.grievance.events import grievance_assignment_changed, grievance_sent_back_to_in_progress
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.apps.grievance.utils import (
     create_grievance_documents,
     delete_grievance_documents,
@@ -498,11 +498,11 @@ class GrievanceMutationMixin:
         ticket: GrievanceTicket,
         assigned_to: User | None,
         messages: list,
-        events: list[tuple[Signal, dict[str, Any]]],
+        events: list[tuple[Signal, Any, dict[str, Any]]],
     ) -> None:
         if assigned_to != ticket.assigned_to:
             messages.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
-            events.append((grievance_assignment_changed, {}))
+            events.append((grievance_assignment_changed, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, {}))
             self._set_status_based_on_assigned_to(approver, ticket, messages, events)
             ticket.assigned_to = assigned_to
         elif ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
@@ -514,11 +514,17 @@ class GrievanceMutationMixin:
                     approver=approver,
                 )
             )
-            events.append((grievance_sent_back_to_in_progress, {"approver": approver}))
+            events.append(
+                (
+                    grievance_sent_back_to_in_progress,
+                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                    {"approver": approver},
+                )
+            )
 
     def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
         messages = []
-        events: list[tuple[Signal, dict[str, Any]]] = []
+        events: list[tuple[Signal, Any, dict[str, Any]]] = []
         self._handle_document_operations(approver, grievance_ticket, input_data)
         assigned_to = input_data.pop("assigned_to", None)
         self._apply_ticket_field_updates(grievance_ticket, input_data)
@@ -527,12 +533,13 @@ class GrievanceMutationMixin:
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
 
-        for event, event_kwargs in events:
+        for event, action, event_kwargs in events:
             transaction.on_commit(
                 partial(
-                    event.send_robust,
-                    sender=GrievanceTicket,
-                    instance=grievance_ticket,
+                    send_grievance_notification_event,
+                    event,
+                    grievance_ticket,
+                    action,
                     **event_kwargs,
                 )
             )
@@ -544,7 +551,7 @@ class GrievanceMutationMixin:
         approver: User,
         grievance_ticket: GrievanceTicket,
         messages: list,
-        events: list[tuple[Signal, dict[str, Any]]],
+        events: list[tuple[Signal, Any, dict[str, Any]]],
     ) -> None:
         if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
             grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
@@ -561,7 +568,13 @@ class GrievanceMutationMixin:
                     approver=approver,
                 )
             )
-            events.append((grievance_sent_back_to_in_progress, {"approver": approver}))
+            events.append(
+                (
+                    grievance_sent_back_to_in_progress,
+                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                    {"approver": approver},
+                )
+            )
 
     def get_permissions_for_status_change(
         self, status: int, current_status: int, is_feedback: bool

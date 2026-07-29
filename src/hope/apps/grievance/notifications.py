@@ -331,3 +331,21 @@ class GrievanceNotification:
     def send_all_notifications(cls, notifications: list) -> None:
         for notification in notifications:
             notification.send_email_notification()
+
+
+def send_grievance_notification_event(
+    event: Any,
+    grievance_ticket: GrievanceTicket,
+    action: Any,
+    **kwargs: Any,
+) -> None:
+    notification = GrievanceNotification(grievance_ticket, action, **kwargs)
+    for payload, correlation_id in notification.rendered_email_notifications:
+        event.send_robust(
+            sender=GrievanceTicket,
+            instance=grievance_ticket,
+            business_area=grievance_ticket.business_area,
+            payload=payload,
+            correlation_id=correlation_id,
+            send_notification=config.SEND_GRIEVANCES_NOTIFICATION,
+        )

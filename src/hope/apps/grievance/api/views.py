@@ -95,7 +95,7 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketNote,
 )
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.apps.grievance.services.data_change_services import update_data_change_extras
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
@@ -949,9 +949,10 @@ class GrievanceTicketGlobalViewSet(
         )
         transaction.on_commit(
             partial(
-                grievance_notes_added.send_robust,
-                sender=GrievanceTicket,
-                instance=grievance_ticket,
+                send_grievance_notification_event,
+                grievance_notes_added,
+                grievance_ticket,
+                GrievanceNotification.ACTION_NOTES_ADDED,
                 created_by=user,
                 ticket_note=ticket_note,
             )

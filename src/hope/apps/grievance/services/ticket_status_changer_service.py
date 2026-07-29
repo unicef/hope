@@ -12,6 +12,7 @@ from hope.apps.grievance.events import (
     grievance_sent_to_approval,
 )
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.apps.grievance.services.data_change_services import (
     close_data_change_ticket_service,
 )
@@ -55,21 +56,26 @@ class TicketStatusChangerService:
 
     def _emit_events(self, old_status: int, old_assigned_to_id: UUID | None) -> None:
         if self.ticket.status == GrievanceTicket.STATUS_ASSIGNED and self.ticket.assigned_to_id != old_assigned_to_id:
-            self._emit_event(grievance_assignment_changed)
+            self._emit_event(grievance_assignment_changed, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
         if self.ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            self._emit_event(grievance_sent_to_approval)
+            self._emit_event(grievance_sent_to_approval, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
         if (
             old_status == GrievanceTicket.STATUS_FOR_APPROVAL
             and self.ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
         ):
-            self._emit_event(grievance_sent_back_to_in_progress, approver=self.user)
+            self._emit_event(
+                grievance_sent_back_to_in_progress,
+                GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                approver=self.user,
+            )
 
-    def _emit_event(self, event: Signal, **kwargs: object) -> None:
+    def _emit_event(self, event: Signal, action: object, **kwargs: object) -> None:
         transaction.on_commit(
             partial(
-                event.send_robust,
-                sender=GrievanceTicket,
-                instance=self.ticket,
+                send_grievance_notification_event,
+                event,
+                self.ticket,
+                action,
                 **kwargs,
             )
         )

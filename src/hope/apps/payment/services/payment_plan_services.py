@@ -50,6 +50,7 @@ from hope.apps.payment.events import (
     payment_plan_sent_for_approval,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.notifications import PaymentNotification
 from hope.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
@@ -178,19 +179,32 @@ class PaymentPlanService:
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
         )
+        action_date_formatted = f"{action_date:%-d %B %Y}"
+        notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.value,
+            self.user,
+            action_date_formatted,
+        )
         send_payment_notification_emails_async_task(
             self.payment_plan,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value,
             str(self.user.pk),
-            f"{action_date:%-d %B %Y}",
+            action_date_formatted,
         )
         transaction.on_commit(
             partial(
                 payment_plan_sent_for_approval.send_robust,
                 sender=PaymentPlan,
                 instance=self.payment_plan,
-                actor=self.user,
-                action_date=f"{action_date:%-d %B %Y}",
+                business_area=self.payment_plan.business_area,
+                payload=EmailPayload(
+                    recipients=notification.email.recipients,
+                    context=notification.email.variables or {},
+                    cc=notification.email.ccs,
+                ),
+                correlation_id=f"payment-plan:{self.payment_plan.id}:{PaymentPlan.Action.SEND_FOR_APPROVAL.value}",
+                send_notification=config.SEND_PAYMENT_PLANS_NOTIFICATION,
             )
         )
         return self.payment_plan
@@ -454,11 +468,18 @@ class PaymentPlanService:
 
             action_date = timezone.now()
             if notification_action:
+                action_date_formatted = f"{action_date:%-d %B %Y}"
+                notification = PaymentNotification(
+                    self.payment_plan,
+                    notification_action.value,
+                    self.user,
+                    action_date_formatted,
+                )
                 send_payment_notification_emails_async_task(
                     self.payment_plan,
                     notification_action.value,
                     str(self.user.id),
-                    f"{action_date:%-d %B %Y}",
+                    action_date_formatted,
                 )
 
             self.payment_plan.save()
@@ -473,8 +494,14 @@ class PaymentPlanService:
                         event.send_robust,
                         sender=PaymentPlan,
                         instance=self.payment_plan,
-                        actor=self.user,
-                        action_date=f"{action_date:%-d %B %Y}",
+                        business_area=self.payment_plan.business_area,
+                        payload=EmailPayload(
+                            recipients=notification.email.recipients,
+                            context=notification.email.variables or {},
+                            cc=notification.email.ccs,
+                        ),
+                        correlation_id=f"payment-plan:{self.payment_plan.id}:{notification_action.value}",
+                        send_notification=config.SEND_PAYMENT_PLANS_NOTIFICATION,
                     )
                 )
 

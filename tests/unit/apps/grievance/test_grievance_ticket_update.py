@@ -1126,7 +1126,7 @@ def test_create_ticket_note(
     input_data = {"version": complaint_ticket.version, "description": "test new note"}
 
     client = api_client(user)
-    mock_event = mocker.patch("hope.apps.grievance.api.views.grievance_notes_added.send_robust")
+    mock_send_event = mocker.patch("hope.apps.grievance.api.views.send_grievance_notification_event")
     with django_capture_on_commit_callbacks(execute=True):
         response = client.post(complaint_ticket_create_note_url, input_data, format="json")
 
@@ -1134,10 +1134,10 @@ def test_create_ticket_note(
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in resp_data
     assert resp_data["description"] == "test new note"
-    assert mock_event.call_args.kwargs["sender"] is GrievanceTicket
-    assert mock_event.call_args.kwargs["instance"] == complaint_ticket
-    assert mock_event.call_args.kwargs["created_by"] == user
-    assert mock_event.call_args.kwargs["ticket_note"].description == "test new note"
+    mock_send_event.assert_called_once()
+    assert mock_send_event.call_args.args[1] == complaint_ticket
+    assert mock_send_event.call_args.kwargs["created_by"] == user
+    assert mock_send_event.call_args.kwargs["ticket_note"].description == "test new note"
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

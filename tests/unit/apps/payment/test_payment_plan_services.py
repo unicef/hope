@@ -1965,11 +1965,11 @@ def test_check_payment_plan_and_update_status_does_not_change_when_count_below_r
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
 def test_check_payment_plan_and_update_status_triggers_when_count_meets_required(
-    mock_flow_cls, mock_notify, locked_payment_plan, django_capture_on_commit_callbacks
+    mock_flow_cls, mock_notify, locked_payment_plan, user, django_capture_on_commit_callbacks
 ):
     service = PaymentPlanService(payment_plan=locked_payment_plan)
     service.action = PaymentPlan.Action.APPROVE.value
-    service.user = mock.MagicMock()
+    service.user = user
     approval_process = mock.MagicMock()
     approval_process.approvals.filter.return_value.count.return_value = 5
 
@@ -1983,7 +1983,11 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
     mock_flow_cls.return_value.status_approve.assert_called_once()
     assert mock_event.call_args.kwargs["sender"] is PaymentPlan
     assert mock_event.call_args.kwargs["instance"] == locked_payment_plan
-    assert mock_event.call_args.kwargs["actor"] == service.user
+    assert mock_event.call_args.kwargs["business_area"] == locked_payment_plan.business_area
+    assert isinstance(mock_event.call_args.kwargs["payload"].recipients, list)
+    assert mock_event.call_args.kwargs["payload"].context["payment_plan_id"] == locked_payment_plan.unicef_id
+    assert mock_event.call_args.kwargs["correlation_id"] == f"payment-plan:{locked_payment_plan.id}:APPROVE"
+    assert mock_event.call_args.kwargs["send_notification"] is True
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")

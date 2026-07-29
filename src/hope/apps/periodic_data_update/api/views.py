@@ -2,6 +2,7 @@ from functools import partial
 import logging
 from typing import Any
 
+from constance import config
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Prefetch, Q, QuerySet
@@ -24,6 +25,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
+from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
 from hope.apps.periodic_data_update.api.filters import PDUOnlineEditFilter, UserAvailableFilter
 from hope.apps.periodic_data_update.api.mixins import PDUOnlineEditAuthorizedUserMixin
@@ -58,6 +60,7 @@ from hope.apps.periodic_data_update.events import (
     pdu_online_edit_sent_back,
     pdu_online_edit_sent_for_approval,
 )
+from hope.apps.periodic_data_update.notifications import PDUOnlineEditNotification
 from hope.apps.periodic_data_update.service.periodic_data_update_import_service import PDUXlsxImportService
 from hope.models import (
     BusinessArea,
@@ -314,13 +317,22 @@ class PDUOnlineEditViewSet(
             str(request.user.pk),
             f"{action_date:%-d %B %Y}",
         )
+        action = PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL
+        action_date_formatted = f"{action_date:%-d %B %Y}"
+        notification = PDUOnlineEditNotification(instance, action, request.user, action_date_formatted)
         transaction.on_commit(
             partial(
                 pdu_online_edit_sent_for_approval.send_robust,
                 sender=PDUOnlineEdit,
                 instance=instance,
-                actor=request.user,
-                action_date=f"{action_date:%-d %B %Y}",
+                business_area=instance.business_area,
+                payload=EmailPayload(
+                    recipients=notification.email.recipients,
+                    context=notification.email.variables or {},
+                    cc=notification.email.ccs,
+                ),
+                correlation_id=f"pdu-online-edit:{instance.id}:{action}",
+                send_notification=config.SEND_PDU_ONLINE_EDIT_NOTIFICATION,
             )
         )
 
@@ -387,13 +399,22 @@ class PDUOnlineEditViewSet(
             str(request.user.pk),
             f"{action_date:%-d %B %Y}",
         )
+        action = PDUOnlineEditNotification.ACTION_SEND_BACK
+        action_date_formatted = f"{action_date:%-d %B %Y}"
+        notification = PDUOnlineEditNotification(instance, action, request.user, action_date_formatted)
         transaction.on_commit(
             partial(
                 pdu_online_edit_sent_back.send_robust,
                 sender=PDUOnlineEdit,
                 instance=instance,
-                actor=request.user,
-                action_date=f"{action_date:%-d %B %Y}",
+                business_area=instance.business_area,
+                payload=EmailPayload(
+                    recipients=notification.email.recipients,
+                    context=notification.email.variables or {},
+                    cc=notification.email.ccs,
+                ),
+                correlation_id=f"pdu-online-edit:{instance.id}:{action}",
+                send_notification=config.SEND_PDU_ONLINE_EDIT_NOTIFICATION,
             )
         )
 
@@ -425,13 +446,22 @@ class PDUOnlineEditViewSet(
                 str(request.user.pk),
                 f"{action_date:%-d %B %Y}",
             )
+            action = PDUOnlineEditNotification.ACTION_APPROVE
+            action_date_formatted = f"{action_date:%-d %B %Y}"
+            notification = PDUOnlineEditNotification(pdu_edit, action, request.user, action_date_formatted)
             transaction.on_commit(
                 partial(
                     pdu_online_edit_approved.send_robust,
                     sender=PDUOnlineEdit,
                     instance=pdu_edit,
-                    actor=request.user,
-                    action_date=f"{action_date:%-d %B %Y}",
+                    business_area=pdu_edit.business_area,
+                    payload=EmailPayload(
+                        recipients=notification.email.recipients,
+                        context=notification.email.variables or {},
+                        cc=notification.email.ccs,
+                    ),
+                    correlation_id=f"pdu-online-edit:{pdu_edit.id}:{action}",
+                    send_notification=config.SEND_PDU_ONLINE_EDIT_NOTIFICATION,
                 )
             )
 

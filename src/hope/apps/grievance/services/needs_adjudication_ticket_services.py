@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.events import grievance_deduplication_created
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
@@ -289,9 +289,10 @@ def create_grievance_ticket_with_details(
 
     transaction.on_commit(
         partial(
-            grievance_deduplication_created.send_robust,
-            sender=GrievanceTicket,
-            instance=ticket,
+            send_grievance_notification_event,
+            grievance_deduplication_created,
+            ticket,
+            GrievanceNotification.ACTION_DEDUPLICATION_CREATED,
         )
     )
     GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))

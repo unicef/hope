@@ -127,6 +127,7 @@ def test_email_event_handler_serializes_payload_and_queues_event(mocker: Any) ->
     assert correlation_id == "survey-sample:1"
     assert payload["recipients"] == ["user@example.org"]
     assert payload["cc"] == ["cc@example.org"]
+    assert payload["send_notification"] is True
     assert payload["context"] == {
         "date": "2050-01-02",
         "expires_at": "2050-01-01 12:30:00",
@@ -194,31 +195,31 @@ def test_handle_bitcaster_event_skips_when_flag_disabled(mocker: Any) -> None:
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
 def test_handle_bitcaster_event_queues_allowed_event(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
-    notification_class = mocker.patch("hope.apps.payment.notifications.PaymentNotification")
-    notification = notification_class.return_value
-    notification.email.recipients = ["user@example.org"]
-    notification.email.variables = {"payment_plan_id": "PP-1"}
-    notification.email.ccs = ["actor@example.org"]
     payment_plan = SimpleNamespace(
         id=1,
         business_area=SimpleNamespace(enable_email_notification=True),
     )
-    actor = SimpleNamespace()
 
     payment_plan_approved.send(
         sender=PaymentPlan,
         instance=payment_plan,
-        actor=actor,
-        action_date="1 January 2025",
+        business_area=payment_plan.business_area,
+        payload=EmailPayload(
+            recipients=["user@example.org"],
+            context={"payment_plan_id": "PP-1"},
+            cc=["actor@example.org"],
+        ),
+        correlation_id="payment-plan:1:APPROVE",
+        send_notification=True,
     )
 
-    notification_class.assert_called_once_with(payment_plan, "APPROVE", actor, "1 January 2025")
     mock_delay.assert_called_once_with(
         "payment.payment_plan.approved",
         {
             "recipients": ["user@example.org"],
             "context": {"payment_plan_id": "PP-1"},
             "cc": ["actor@example.org"],
+            "send_notification": True,
         },
         "payment-plan:1:APPROVE",
     )
@@ -228,38 +229,38 @@ def test_handle_bitcaster_event_queues_allowed_event(mocker: Any) -> None:
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
 def test_pdu_online_edit_event_handler_queues_allowed_event(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
-    notification_class = mocker.patch("hope.apps.periodic_data_update.notifications.PDUOnlineEditNotification")
-    notification = notification_class.return_value
-    notification.email.recipients = ["merger@example.org"]
-    notification.email.variables = {"pdu_online_edit_id": "PDU-1"}
-    notification.email.ccs = ["actor@example.org"]
     pdu_online_edit = SimpleNamespace(
         id=1,
         business_area=SimpleNamespace(enable_email_notification=True),
     )
-    actor = SimpleNamespace()
 
     pdu_online_edit_approved.send(
         sender=PDUOnlineEdit,
         instance=pdu_online_edit,
-        actor=actor,
-        action_date="1 January 2025",
+        business_area=pdu_online_edit.business_area,
+        payload=EmailPayload(
+            recipients=["merger@example.org"],
+            context={"pdu_online_edit_id": "PDU-1"},
+            cc=["actor@example.org"],
+        ),
+        correlation_id="pdu-online-edit:1:APPROVE",
+        send_notification=True,
     )
 
-    notification_class.assert_called_once_with(pdu_online_edit, "APPROVE", actor, "1 January 2025")
     mock_delay.assert_called_once_with(
         "pdu.online_edit.approved",
         {
             "recipients": ["merger@example.org"],
             "context": {"pdu_online_edit_id": "PDU-1"},
             "cc": ["actor@example.org"],
+            "send_notification": True,
         },
         "pdu-online-edit:1:APPROVE",
     )
 
 
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
-def test_email_event_handler_skips_when_business_area_notifications_are_disabled(mocker: Any) -> None:
+def test_email_event_handler_queues_when_business_area_notifications_are_disabled(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
 
     survey_sample_xlsx_generated.send(
@@ -269,33 +270,42 @@ def test_email_event_handler_skips_when_business_area_notifications_are_disabled
         correlation_id="1",
     )
 
-    mock_delay.assert_not_called()
+    mock_delay.assert_called_once_with(
+        "accountability.survey_sample.xlsx_generated",
+        {
+            "recipients": ["user@example.org"],
+            "context": {},
+            "cc": [],
+            "send_notification": False,
+        },
+        "1",
+    )
 
 
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_grievance_event_handler_prepares_and_queues_notification(mocker: Any) -> None:
     mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
-    notification_class = mocker.patch("hope.apps.core.notifications.handlers.GrievanceNotification")
-    notification_class.return_value.rendered_email_notifications = [
-        (
-            EmailPayload(recipients=["user@example.org"], context={"ticket_id": "GRV-1"}),
-            "grievance-ticket:1",
-        )
-    ]
     ticket = SimpleNamespace(
         business_area=SimpleNamespace(enable_email_notification=True),
     )
 
-    grievance_assignment_changed.send(sender=GrievanceTicket, instance=ticket)
+    grievance_assignment_changed.send(
+        sender=GrievanceTicket,
+        instance=ticket,
+        business_area=ticket.business_area,
+        payload=EmailPayload(recipients=["user@example.org"], context={"ticket_id": "GRV-1"}),
+        correlation_id="grievance-ticket:1",
+        send_notification=True,
+    )
 
-    assert notification_class.call_args.args[0] == ticket
     mock_delay.assert_called_once_with(
         "grievance.ticket.assignment_changed",
         {
             "recipients": ["user@example.org"],
             "context": {"ticket_id": "GRV-1"},
             "cc": [],
+            "send_notification": True,
         },
         "grievance-ticket:1",
     )
@@ -306,20 +316,27 @@ def test_grievance_event_handler_prepares_and_queues_notification(mocker: Any) -
     [(False, True), (True, False)],
 )
 @override_settings(FLAGS={"BITCASTER_ENABLED": [{"condition": "boolean", "value": True}]})
-def test_grievance_event_handler_respects_notification_flags(
+def test_email_event_handler_sets_send_notification_from_flags(
     mocker: Any,
     app_enabled: bool,
     business_area_enabled: bool,
 ) -> None:
-    notification_class = mocker.patch("hope.apps.core.notifications.handlers.GrievanceNotification")
+    mock_delay = mocker.patch("hope.apps.core.notifications.handlers.send_bitcaster_event_task.delay")
     ticket = SimpleNamespace(
         business_area=SimpleNamespace(enable_email_notification=business_area_enabled),
     )
 
     with override_config(SEND_GRIEVANCES_NOTIFICATION=app_enabled):
-        grievance_assignment_changed.send(sender=GrievanceTicket, instance=ticket)
+        grievance_assignment_changed.send(
+            sender=GrievanceTicket,
+            instance=ticket,
+            business_area=ticket.business_area,
+            payload=EmailPayload(recipients=["user@example.org"], context={}),
+            correlation_id="grievance-ticket:1",
+            send_notification=app_enabled,
+        )
 
-    notification_class.assert_not_called()
+    assert mock_delay.call_args.args[1]["send_notification"] is False
 
 
 def test_send_bitcaster_event_task_passes_options_and_correlation_id(mocker: Any) -> None:
