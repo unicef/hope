@@ -36,6 +36,20 @@ Possible matches will continue to receive cash transfers until a decision has be
 4. To view individual details, click on the Individual ID link, bio data, vulnerabilities and an activity log are also displayed.
     ![Image](_screenshots/population/popu_11.png)
 
+### Known Affected Beneficiaries
+
+Next to the household composition, the household record carries a second set of age and gender
+disaggregated counters, the **known affected beneficiaries**. They state how many people HOPE has
+knowledge of in that household, and they are maintained for every data collecting type - including
+the partial ones, which have no composition of their own.
+
+These counters are empty when the number is unknown; an empty value must never be read as zero.
+See [Known Affected Beneficiaries](known-affected-beneficiaries.md) for how the values are derived,
+which individuals are counted and when they are refreshed.
+
+Known affected beneficiaries were introduced by
+[AB#326718: Calculate Gender and Age disaggregated group ALSO for Partial Data collecting Type](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/326718).
+
 ### Identification Key
 
 The **Bio Data** section of the individual details page displays an identification key when one is available for the individual. This key can be used as the registration-time identity reference for the individual.
