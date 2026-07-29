@@ -130,17 +130,16 @@ def dynamic_system_header_import_file(payments, request):
 
 @pytest.fixture
 def account_system_header_import_file(payments):
-    PaymentHouseholdSnapshotFactory(
-        payment=payments[0],
-        snapshot_data={
-            "primary_collector": {
-                "account_data": {
-                    "financial_institution_name": "Example Bank",
-                    "number": "123456",
-                }
+    snapshot = payments[0].household_snapshot
+    snapshot.snapshot_data = {
+        "primary_collector": {
+            "account_data": {
+                "financial_institution_name": "Example Bank",
+                "number": "123456",
             }
-        },
-    )
+        }
+    }
+    snapshot.save(update_fields=["snapshot_data"])
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
     worksheet.append(["payment_id", "number"])
