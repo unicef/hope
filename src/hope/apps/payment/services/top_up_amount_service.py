@@ -34,11 +34,13 @@ class TopUpAmountTemplateService(XlsxPaymentPlanExportService):
         for payment in qs.iterator(chunk_size=self.batch_size):
             self._add_payment_row(payment)
 
-    def _add_payment_row(self, payment: "Payment") -> None:
-        super()._add_payment_row(payment)
-        row = self.ws_export_list[self.ws_export_list.max_row]
+    def _payment_row(self, payment: "Payment") -> list:
+        # Blank the amounts before the row reaches the sheet: reading them back out of openpyxl
+        # costs a full-sheet scan per row, which turns a 10k export into minutes.
+        row = super()._payment_row(payment)
         for column_name in (self.COLUMN_ENTITLEMENT_QUANTITY, "entitlement_quantity_usd"):
-            row[self.headers.index(column_name)].value = None
+            row[self.headers.index(column_name)] = None
+        return row
 
 
 def _open_amount_sheet(file: IO[bytes]) -> Worksheet:
