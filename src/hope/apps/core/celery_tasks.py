@@ -2,9 +2,11 @@ from datetime import timedelta
 import logging
 from typing import Any
 
+from celery.exceptions import Retry
 from django.apps import apps
 from django.conf import settings
 from django.utils import timezone
+from django.utils.module_loading import import_string
 from sentry_sdk import set_tag
 
 from hope.apps.core.celery import app
@@ -187,7 +189,19 @@ def async_retry_job_task(
         }
         job.save(update_fields=["errors"])
         logger.exception(f"Async retry job action failed for job {job.pk} ({job.action})")
-        raise self.retry(exc=exc)
+        try:
+            raise self.retry(exc=exc)
+        except Retry:
+            raise
+        except Exception as raised:
+            if raised is exc:  # retries exhausted — Celery re-raised the original exc
+                action = job.config.get("on_failure_action")
+                if action:
+                    try:
+                        import_string(action)(job, exc)
+                    except Exception:
+                        logger.exception("on_failure_action %s failed (job %s)", action, job.pk)
+            raise
 
 
 def recover_missing_async_jobs_async_task_action(

@@ -1,7 +1,7 @@
 from datetime import timedelta
 from unittest.mock import MagicMock, PropertyMock, patch
 
-from celery.exceptions import Retry
+from celery.exceptions import MaxRetriesExceededError, Retry
 from django.utils import timezone
 import pytest
 
@@ -808,3 +808,23 @@ def test_async_retry_job_task_non_retriable_error_skips_on_failure_action(mock_r
 
     mock_import_string.assert_not_called()
     mock_retry.assert_not_called()
+
+
+@pytest.mark.django_db
+@patch("hope.apps.core.celery_tasks.import_string", create=True)
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_async_retry_job_task_does_not_fire_on_failure_action_when_retry_raises_other_error(
+    mock_retry, mock_import_string
+) -> None:
+    mock_retry.side_effect = MaxRetriesExceededError("max retries")
+
+    job = AsyncRetryJob.queue_task(
+        action="unit.apps.core.test_celery_tasks.fake_async_retry_job_failure_action",
+        config={"on_failure_action": ON_FAILURE_ACTION},
+    )
+
+    with pytest.raises(MaxRetriesExceededError):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    mock_import_string.assert_not_called()
+    mock_retry.assert_called_once()
