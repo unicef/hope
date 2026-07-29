@@ -258,3 +258,24 @@ def test_create_top_up_with_amount_file_funds_only_listed_beneficiaries(
     assert top_up.payment_items.count() == 1
     assert top_up.payment_items.first().entitlement_quantity == Decimal("40.00")
     assert source.eligible_payments_for_top_up().count() == 2
+
+
+def test_top_up_dialog_without_dispersion_dates_shows_validation_errors(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    topup_program: Program,
+    topup_eligible_plan: PaymentPlan,
+) -> None:
+    """Submitting with the required dates empty must say so rather than sit silent."""
+    source = topup_eligible_plan
+    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
+
+    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
+    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
+
+    login.wait_for_element_visible('input[name="dispersionStartDate"]')
+    _fill_fixed_amount(login, "25")
+    login.click('[data-cy="button-submit"]')
+
+    login.assert_text("Dispersion Start Date is required")

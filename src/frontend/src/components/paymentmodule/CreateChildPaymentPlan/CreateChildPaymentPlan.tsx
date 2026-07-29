@@ -126,9 +126,12 @@ export function CreateChildPaymentPlan({
     dispersionEndDate: Yup.date()
       .required(t('Dispersion End Date is required'))
       .min(today, t('Dispersion End Date cannot be in the past'))
+      // Yup 1.x hands the dependency values in as an array; taking it as a bare value made the
+      // condition always truthy and fed an Invalid Date into min(), which threw and left Formik
+      // with no errors at all — the dialog just sat there on submit.
       .when(
         'dispersionStartDate',
-        (dispersionStartDate: any, schema: Yup.DateSchema) =>
+        ([dispersionStartDate]: any[], schema: Yup.DateSchema) =>
           dispersionStartDate
             ? schema.min(
                 new Date(dispersionStartDate),
