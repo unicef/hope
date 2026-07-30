@@ -919,6 +919,12 @@ class PaymentPlanViewSet(
         already exist, so there is nothing to wait for.
         """
         payment_plan = self.get_object()
+        if payment_plan.plan_type not in (PaymentPlan.PlanType.REGULAR, PaymentPlan.PlanType.TOP_UP):
+            raise ValidationError(f"No amount template exists for a {payment_plan.plan_type} plan")
+        if payment_plan.status not in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES:
+            raise ValidationError(
+                f"The amount template is only available for an Accepted or Finished plan, got {payment_plan.status}"
+            )
         if not payment_plan.eligible_payments_for_child_plan().exists():
             raise ValidationError("Cannot create a top-up for a payment plan with no eligible payments")
 

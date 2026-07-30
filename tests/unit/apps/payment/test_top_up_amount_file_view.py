@@ -190,3 +190,25 @@ def test_create_top_up_arrange_negative_amount_in_file_act_post_assert_400(top_u
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "Negative amount" in str(response.json())
+
+
+def test_top_up_amount_template_arrange_follow_up_plan_act_get_assert_400(top_up_context: dict[str, Any]) -> None:
+    source_pp = top_up_context["source_pp"]
+    source_pp.plan_type = PaymentPlan.PlanType.FOLLOW_UP
+    source_pp.save(update_fields=["plan_type"])
+
+    response = top_up_context["client"].get(top_up_context["template_url"])
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "No amount template" in str(response.json())
+
+
+def test_top_up_amount_template_arrange_open_plan_act_get_assert_400(top_up_context: dict[str, Any]) -> None:
+    source_pp = top_up_context["source_pp"]
+    source_pp.status = PaymentPlan.Status.OPEN
+    source_pp.save(update_fields=["status"])
+
+    response = top_up_context["client"].get(top_up_context["template_url"])
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Accepted or Finished" in str(response.json())

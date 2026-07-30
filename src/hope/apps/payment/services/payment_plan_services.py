@@ -1072,6 +1072,17 @@ class PaymentPlanService:
         eligible = self.payment_plan.source_payment_plan.eligible_payments_for_child_plan()
         if amounts is not None:
             eligible = eligible.filter(unicef_id__in=amounts.keys())
+            # The file was validated against the pool at request time, but the pool is recomputed
+            # here — a concurrently created sibling plan may have claimed some beneficiaries since.
+            # They are legitimately blocked now, but the shrink must not be invisible.
+            if missing := set(amounts) - set(eligible.values_list("unicef_id", flat=True)):
+                logging.warning(
+                    "Payment plan %s: %d payment(s) from the amount file are no longer eligible "
+                    "and will not be copied: %s",
+                    self.payment_plan.unicef_id,
+                    len(missing),
+                    sorted(missing),
+                )
         elif fixed_amount is not None:
             amounts = {payment.unicef_id: fixed_amount for payment in eligible}
         # With neither, amounts stays None and the payments are copied with an empty entitlement
@@ -1197,9 +1208,9 @@ class PaymentPlanService:
         Amounts are stringified because the job config is JSON, and JSON has no decimal type —
         a float would round the money on the way through.
         """
-        # ponytail: resolved amounts ride along in the job config as {unicef_id: "12.34"}. Fine for
-        # the plan sizes we see; if a Top-Up ever spans tens of thousands of beneficiaries, persist
-        # the uploaded file against the plan and re-parse it in the job instead.
+        # Resolved amounts ride along in the job config as {unicef_id: "12.34"}. Fine for the plan
+        # sizes we see; if a Top-Up ever spans tens of thousands of beneficiaries, persist the
+        # uploaded file against the plan and re-parse it in the job instead.
         extra_config: dict[str, Any] = {}
         if amounts is not None:
             extra_config["amounts"] = {unicef_id: str(amount) for unicef_id, amount in amounts.items()}

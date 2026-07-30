@@ -206,7 +206,16 @@ export function CreateChildPaymentPlan({
       validateOnChange
       validateOnBlur
     >
-      {({ submitForm, values, setValues }) => (
+      {({ submitForm, values, setValues, resetForm }) => {
+        const closeDialog = (): void => {
+          setDialogOpen(false);
+          // A reopened dialog must start clean: a file picked and abandoned minutes ago,
+          // with its funded-rows count still attached, is too easy to submit by accident.
+          resetForm();
+          selectedFile.current = null;
+          setFundedRows(null);
+        };
+        return (
         <Form>
           <Box p={2}>
             <Button
@@ -225,7 +234,7 @@ export function CreateChildPaymentPlan({
           </Box>
           <Dialog
             open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
+            onClose={closeDialog}
             scroll="paper"
             maxWidth="md"
           >
@@ -364,7 +373,9 @@ export function CreateChildPaymentPlan({
                           {fundedRows !== null && (
                             <Box sx={{ mt: 1 }}>
                               <Typography data-cy="top-up-funded-rows">
-                                {t('New Top-Up will be created for')}{' '}
+                                {variant === 'amendment'
+                                  ? t('New Amendment will be created for')
+                                  : t('New Top-Up will be created for')}{' '}
                                 {fundedRows}{' '}
                                 {fundedRows === 1
                                   ? t('payment')
@@ -373,9 +384,13 @@ export function CreateChildPaymentPlan({
                             </Box>
                           )}
                           <GreyText>
-                            {t(
-                              'Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',
-                            )}
+                            {variant === 'amendment'
+                              ? t(
+                                  'Beneficiaries left empty or at zero are not part of this Amendment and stay available for a later one.',
+                                )
+                              : t(
+                                  'Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',
+                                )}
                           </GreyText>
                         </Grid>
                       </Grid>
@@ -430,9 +445,7 @@ export function CreateChildPaymentPlan({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setDialogOpen(false)}>
-                  {t('Cancel')}
-                </Button>
+                <Button onClick={closeDialog}>{t('Cancel')}</Button>
                 <LoadingButton
                   loading={loadingCreate}
                   type="submit"
@@ -447,7 +460,8 @@ export function CreateChildPaymentPlan({
             </DialogFooter>
           </Dialog>
         </Form>
-      )}
+        );
+      }}
     </Formik>
   );
 }

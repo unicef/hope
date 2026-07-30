@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
+import logging
 from typing import Any
 from unittest import mock
 
@@ -254,3 +255,41 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_query_count(
 
     with django_assert_num_queries(111), django_capture_on_commit_callbacks(execute=True):
         PaymentPlanService(source_pp).create_top_up(user, start, end, fixed_amount=Decimal("25.00"))
+
+
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
+def test_create_top_up_arrange_beneficiary_claimed_between_validation_and_copy_act_run_task_assert_shrink_logged(
+    get_exchange_rate_mock: Any,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    source_pp: PaymentPlan,
+    three_payments: list[Payment],
+    django_capture_on_commit_callbacks: Any,
+    caplog: Any,
+) -> None:
+    """A beneficiary claimed by a sibling Top-Up after validation is skipped, but never silently."""
+    claimed, funded, _other = three_payments
+    amounts = {claimed.unicef_id: Decimal("10.00"), funded.unicef_id: Decimal("30.00")}
+    start = source_pp.dispersion_start_date + timedelta(days=1)
+    end = source_pp.dispersion_end_date + timedelta(days=1)
+    top_up = PaymentPlanService(source_pp).create_top_up(user, start, end, amounts=amounts)
+    competing_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_payment_plan=source_pp,
+    )
+    PaymentFactory(parent=competing_pp, household=claimed.household, status=Payment.STATUS_PENDING)
+
+    with (
+        caplog.at_level(logging.WARNING),
+        django_capture_on_commit_callbacks(execute=True),
+    ):
+        prepare_child_payment_plan_async_task(
+            top_up, extra_config={"amounts": {unicef_id: str(amount) for unicef_id, amount in amounts.items()}}
+        )
+
+    top_up.refresh_from_db()
+    assert list(top_up.payment_items.values_list("source_payment__unicef_id", flat=True)) == [funded.unicef_id]
+    assert claimed.unicef_id in caplog.text

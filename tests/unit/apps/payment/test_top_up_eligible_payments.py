@@ -162,3 +162,21 @@ def test_eligible_payments_for_top_up_amendment_arrange_already_amended_act_quer
     result = list(top_up_pp.eligible_payments_for_top_up_amendment())
 
     assert result == []
+
+
+def test_eligible_payments_for_top_up_amendment_arrange_excluded_amendment_payment_act_query_assert_still_blocked(
+    business_area: Any, cycle: ProgramCycle, top_up_pp: PaymentPlan
+) -> None:
+    """Membership alone blocks, exactly as for top-ups: exclusion does not recycle a beneficiary."""
+    payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    amendment_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+        source_payment_plan=top_up_pp,
+    )
+    PaymentFactory(parent=amendment_pp, household=payment.household, status=Payment.STATUS_PENDING, excluded=True)
+
+    result = list(top_up_pp.eligible_payments_for_top_up_amendment())
+
+    assert result == []

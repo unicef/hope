@@ -479,7 +479,7 @@ def test_create_top_up_amendment_with_amount_file(
     login.wait_for_element_clickable('input[name="dispersionEndDate"]')
     _fill_date(login, "dispersionEndDate", "2027-12-31")
     login.choose_file('input[type="file"]', amount_file)
-    login.wait_for_text("New Top-Up will be created for 1 payment", '[data-cy="top-up-funded-rows"]')
+    login.wait_for_text("New Amendment will be created for 1 payment", '[data-cy="top-up-funded-rows"]')
     login.click('[data-cy="button-submit"]')
 
     login.wait_for_text("Payment Plan Created")

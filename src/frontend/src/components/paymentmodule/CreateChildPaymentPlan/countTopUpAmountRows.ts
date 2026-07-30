@@ -11,12 +11,15 @@ import { readSheet } from 'read-excel-file/browser';
  */
 
 const AMOUNT_HEADER = 'entitlement_quantity';
+// The backend parser only accepts this sheet (XlsxPaymentPlanBaseService.TITLE), so the
+// preview must count the same one — not whatever happens to be first in the workbook.
+const SHEET_NAME = 'Payment Plan - Payment List';
 
 export async function countTopUpAmountRows(file: File): Promise<number | null> {
   let headers: unknown[] | undefined;
   let dataRows: unknown[][];
   try {
-    [headers, ...dataRows] = await readSheet(file);
+    [headers, ...dataRows] = await readSheet(file, SHEET_NAME);
   } catch {
     return null;
   }

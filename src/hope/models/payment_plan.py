@@ -874,12 +874,12 @@ class PaymentPlan(
         Must be called on the source TopUp Payment Plan. Mirrors top-up eligibility: payment
         status does not gate an amendment either, so a beneficiary can be adjusted whether the
         TopUp payment was delivered, is still pending, or failed. Excludes withdrawn households
-        and beneficiaries already covered by another Amendment under the same TopUp.
+        and beneficiaries already covered by another Amendment under the same TopUp — membership
+        alone blocks, so excluding someone from an Amendment does not recycle them into the pool.
         """
         amended_households = Payment.objects.filter(
             parent__plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
             parent__source_payment_plan=self,
-            excluded=False,
             household_id=OuterRef("household_id"),
         )
         return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(amended_households))
