@@ -18,6 +18,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { createApiParams } from '@utils/apiUtils';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -46,33 +47,36 @@ const ProgramCyclesTableProgramDetails = ({
   }, [page]);
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
+  const programCyclesListParams = createApiParams(
+    { businessAreaSlug, programCode: program.code },
+    queryVariables,
+    { withPagination: true },
+  );
   const { data, error, isLoading, isFetching } = useQuery({
-    queryKey: ['programCycles', businessAreaSlug, program.code, queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCyclesList,
+      programCyclesListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesList(
-        createApiParams(
-          { businessAreaSlug, programCode: program.code },
-          queryVariables,
-          { withPagination: true },
-        ),
+        programCyclesListParams,
       );
     },
     placeholderData: keepPreviousData,
   });
 
+  const programCyclesCountParams = createApiParams(
+    { businessAreaSlug, programCode: program.code },
+    queryVariables,
+  );
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsCyclesCountRetrieve',
-      program.code,
-      businessAreaSlug,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve,
+      programCyclesCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
-        createApiParams(
-          { businessAreaSlug, programCode: program.code },
-          queryVariables,
-        ),
+        programCyclesCountParams,
       ),
     enabled: page === 0,
   });

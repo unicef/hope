@@ -6,6 +6,7 @@ import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPayment
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
@@ -38,53 +39,49 @@ function PaymentsHouseholdTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   const [page, setPage] = useState(0);
 
+  const paymentsListParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      id: household?.id,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentsData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsPaymentsList',
-      queryVariables,
-      household?.id,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsList,
+      paymentsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsHouseholdsPaymentsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: household?.id,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
+        paymentsListParams,
       );
     },
     placeholderData: keepPreviousData,
   });
 
+  const paymentsCountParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      id: household?.id,
+    },
+    queryVariables,
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsPaymentsCount',
-      programId,
-      businessArea,
-      queryVariables,
-      household?.id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve,
+      paymentsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: household?.id,
-          },
-          queryVariables,
-        ),
+        paymentsCountParams,
       ),
     enabled: page === 0,
   });

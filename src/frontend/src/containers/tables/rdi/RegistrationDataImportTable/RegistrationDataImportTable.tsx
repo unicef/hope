@@ -15,6 +15,7 @@ import {
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
 import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
@@ -52,13 +53,19 @@ function RegistrationDataImportTable({
   const { businessAreaSlug, programCode, businessArea, programId } =
     useBaseUrl();
 
+  const deduplicationFlagsParams = {
+    businessAreaSlug,
+    code: programCode,
+  };
   const { data: deduplicationFlags } = useQuery({
-    queryKey: ['deduplicationFlags', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve,
+      deduplicationFlagsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
-        businessAreaSlug,
-        code: programCode,
-      }),
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve(
+        deduplicationFlagsParams,
+      ),
   });
 
   const initialVariables = useMemo(
@@ -133,44 +140,41 @@ function RegistrationDataImportTable({
 
   const [page, setPage] = useState(0);
 
+  const registrationDataImportsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: listData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedRegistrationDataImportListList>({
-    queryKey: [
-      'businessAreasProgramsRegistrationDataImportsList',
-      businessArea,
-      programCode,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsList,
+      registrationDataImportsListParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode },
-          queryVariables,
-          { withPagination: true },
-        ),
+        registrationDataImportsListParams,
       ),
     placeholderData: keepPreviousData,
   });
 
+  const registrationDataImportsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode },
+    queryVariables,
+    { withPagination: false },
+  );
   const { data: countData } = useQuery<{ count: number }>({
-    queryKey: [
-      'businessAreasProgramsRegistrationDataImportsCount',
-      businessArea,
-      programCode,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve,
+      registrationDataImportsCountParams,
+    ),
     queryFn: async () => {
-      const params = createApiParams(
-        { businessAreaSlug: businessArea, programCode },
-        queryVariables,
-        { withPagination: false },
-      );
       return RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve(
-        params,
+        registrationDataImportsCountParams,
       );
     },
     enabled: page === 0,

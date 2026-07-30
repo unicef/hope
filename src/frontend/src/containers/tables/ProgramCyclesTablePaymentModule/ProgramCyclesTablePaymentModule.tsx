@@ -11,6 +11,7 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   keepPreviousData,
   useMutation,
@@ -62,43 +63,38 @@ export const ProgramCyclesTablePaymentModule = ({
     queryVariables && typeof queryVariables.limit === 'number'
       ? queryVariables.limit
       : 5;
+  const programCyclesListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    { ...queryVariables, offset: page * rowsPerPage },
+    { withPagination: true },
+  );
   const { data, refetch, error, isLoading, isFetching } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: [
-        'programCycles',
-        queryVariables,
-        businessArea,
-        programId,
-        page,
-        rowsPerPage,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsCyclesList,
+        programCyclesListParams,
+      ),
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            { ...queryVariables, offset: page * rowsPerPage },
-            { withPagination: true },
-          ),
+          programCyclesListParams,
         );
       },
       placeholderData: keepPreviousData,
       enabled: shouldFetchData,
     });
 
+  const programCyclesCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsCyclesCountRetrieve',
-      programId,
-      businessArea,
-      queryVariables,
-      page,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve,
+      programCyclesCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        programCyclesCountParams,
       ),
     enabled: page === 0,
   });
@@ -123,7 +119,9 @@ export const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.code],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesList,
+          ),
           exact: false,
         });
       },
@@ -148,7 +146,9 @@ export const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.code],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesList,
+          ),
           exact: false,
         });
       },

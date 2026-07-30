@@ -8,6 +8,7 @@ import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPayment
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
@@ -90,54 +91,50 @@ const PaymentsTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const paymentsListParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      paymentPlanPk: paymentPlan.id,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentsData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsList',
-      queryVariables,
-      businessArea,
-      programId,
-      paymentPlan.id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsList,
+      paymentsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            paymentPlanPk: paymentPlan.id,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
+        paymentsListParams,
       );
     },
     placeholderData: keepPreviousData,
   });
 
   // Payments count
+  const paymentsCountParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      paymentPlanPk: paymentPlan.id,
+    },
+    queryVariables,
+  );
   const { data: paymentsCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsPaymentsCountRetrieve',
-      businessArea,
-      programId,
-      paymentPlan.id,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve,
+      paymentsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            paymentPlanPk: paymentPlan.id,
-          },
-          queryVariables,
-        ),
+        paymentsCountParams,
       ),
     // fetch count only on the first page and persist it across pages
     enabled: !!businessArea && !!paymentPlan?.id && page === 0,

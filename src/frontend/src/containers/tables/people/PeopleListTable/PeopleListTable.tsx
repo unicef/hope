@@ -4,6 +4,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
@@ -76,41 +77,39 @@ export const PeopleListTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const individualsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve,
+      individualsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        individualsCountParams,
       ),
     enabled: page === 0,
   });
 
   const itemsCount = usePersistedCount(page, countData);
 
+  const individualsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedIndividualListList>({
-      queryKey: [
-        'businessAreasProgramsIndividualsList',
-        queryVariables,
-        businessArea,
-        programId,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsList,
+        individualsListParams,
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-            { withPagination: true },
-          ),
+          individualsListParams,
         ),
       placeholderData: keepPreviousData,
     });

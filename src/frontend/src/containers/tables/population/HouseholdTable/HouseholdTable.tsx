@@ -12,6 +12,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { TableCell } from '@mui/material';
 import { Box } from '@mui/system';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   adjustHeadCells,
@@ -111,38 +112,36 @@ export const HouseholdTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const householdsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedHouseholdListList>({
-      queryKey: [
-        'businessAreasProgramsHouseholdsList',
-        queryVariables,
-        programId,
-        businessArea,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsHouseholdsList,
+        householdsListParams,
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsHouseholdsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-            { withPagination: true },
-          ),
+          householdsListParams,
         ),
       placeholderData: keepPreviousData,
     });
 
+  const householdsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve,
+      householdsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        householdsCountParams,
       ),
     enabled: page === 0,
   });

@@ -4,6 +4,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -44,22 +45,20 @@ export function VerificationsTable({
   const [page, setPage] = useState(0);
 
   // Add count query for verification records, only enabled on first page
+  const verificationsCountParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    paymentVerificationPk: paymentPlanId,
+    ...queryVariables,
+  };
   const { data: verificationCountData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsPaymentVerificationsVerificationsCount',
-      queryVariables,
-      businessArea,
-      programId,
-      paymentPlanId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve,
+      verificationsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          paymentVerificationPk: paymentPlanId,
-          ...queryVariables,
-        },
+        verificationsCountParams,
       ),
     enabled: page === 0,
   });
@@ -69,30 +68,28 @@ export function VerificationsTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const verificationsListParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      paymentVerificationPk: paymentPlanId,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentsData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentVerificationsVerificationsList',
-      queryVariables,
-      businessArea,
-      programId,
-      paymentPlanId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList,
+      verificationsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            paymentVerificationPk: paymentPlanId,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
+        verificationsListParams,
       );
     },
     placeholderData: keepPreviousData,

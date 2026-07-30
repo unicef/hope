@@ -2,6 +2,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
@@ -101,21 +102,20 @@ function LookUpHouseholdTableCommunication({
 
   const [page, setPage] = useState(0);
 
+  const householdsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedHouseholdListList>({
-      queryKey: [
-        'businessAreasProgramsHouseholdsList',
-        queryVariables,
-        businessArea,
-        programId,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsHouseholdsList,
+        householdsListParams,
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsHouseholdsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-            { withPagination: true },
-          ),
+          householdsListParams,
         ),
       placeholderData: keepPreviousData,
     });
