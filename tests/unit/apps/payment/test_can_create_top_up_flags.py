@@ -9,7 +9,6 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hope.apps.payment.api.serializers import PaymentPlanDetailSerializer
 from hope.models import Payment, PaymentPlan, ProgramCycle
 
 pytestmark = pytest.mark.django_db
@@ -37,7 +36,7 @@ def test_can_create_top_up_arrange_regular_with_eligible_payment_act_get_assert_
     )
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up(regular_pp) is True
+    assert regular_pp.can_create_top_up is True
 
 
 def test_can_create_top_up_arrange_regular_without_eligible_payment_act_get_assert_false(
@@ -51,7 +50,7 @@ def test_can_create_top_up_arrange_regular_without_eligible_payment_act_get_asse
     )
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS, excluded=True)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up(regular_pp) is False
+    assert regular_pp.can_create_top_up is False
 
 
 @pytest.mark.parametrize(
@@ -69,7 +68,7 @@ def test_can_create_top_up_arrange_status_outside_release_window_act_get_assert_
     )
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up(regular_pp) is False
+    assert regular_pp.can_create_top_up is False
 
 
 @pytest.mark.parametrize(
@@ -91,7 +90,7 @@ def test_can_create_top_up_arrange_non_regular_plan_act_get_assert_false(
     )
     PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up(plan) is False
+    assert plan.can_create_top_up is False
 
 
 def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_get_assert_true(
@@ -105,7 +104,7 @@ def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_g
     )
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is True
+    assert top_up_pp.can_create_top_up_amendment is True
 
 
 def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_assert_true(
@@ -120,7 +119,7 @@ def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_as
     )
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is True
+    assert top_up_pp.can_create_top_up_amendment is True
 
 
 def test_can_create_top_up_amendment_arrange_top_up_without_eligible_payment_act_get_assert_false(
@@ -134,7 +133,7 @@ def test_can_create_top_up_amendment_arrange_top_up_without_eligible_payment_act
     )
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS, excluded=True)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is False
+    assert top_up_pp.can_create_top_up_amendment is False
 
 
 @pytest.mark.parametrize(
@@ -156,4 +155,4 @@ def test_can_create_top_up_amendment_arrange_non_top_up_plan_act_get_assert_fals
     )
     PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
-    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(plan) is False
+    assert plan.can_create_top_up_amendment is False

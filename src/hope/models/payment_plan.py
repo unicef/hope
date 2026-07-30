@@ -884,6 +884,22 @@ class PaymentPlan(
         )
         return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(amended_households))
 
+    @property
+    def can_create_top_up(self) -> bool:
+        return (
+            self.plan_type == PaymentPlan.PlanType.REGULAR
+            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
+            and self.eligible_payments_for_top_up().exists()
+        )
+
+    @property
+    def can_create_top_up_amendment(self) -> bool:
+        return (
+            self.plan_type == PaymentPlan.PlanType.TOP_UP
+            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
+            and self.eligible_payments_for_top_up_amendment().exists()
+        )
+
     def eligible_payments_for_child_plan(self) -> "QuerySet":
         """Payments eligible for the child plan this plan can spawn.
 

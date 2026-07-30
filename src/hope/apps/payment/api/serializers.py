@@ -889,8 +889,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_households = serializers.SerializerMethodField()
     excluded_individuals = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
-    can_create_top_up = serializers.SerializerMethodField()
-    can_create_top_up_amendment = serializers.SerializerMethodField()
+    can_create_top_up = serializers.BooleanField()
+    can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField()
@@ -1108,20 +1108,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
         return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
             qs.values_list("id", flat=True)
-        )
-
-    def get_can_create_top_up(self, obj: PaymentPlan) -> bool:
-        return (
-            obj.plan_type == PaymentPlan.PlanType.REGULAR
-            and obj.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
-            and obj.eligible_payments_for_top_up().exists()
-        )
-
-    def get_can_create_top_up_amendment(self, obj: PaymentPlan) -> bool:
-        return (
-            obj.plan_type == PaymentPlan.PlanType.TOP_UP
-            and obj.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
-            and obj.eligible_payments_for_top_up_amendment().exists()
         )
 
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
