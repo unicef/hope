@@ -23,6 +23,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   deepUnderscore,
   isPartnerVisible,
@@ -57,7 +58,7 @@ const DuplicateProgramPage = (): ReactElement => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
     },
   });
@@ -70,7 +71,10 @@ const DuplicateProgramPage = (): ReactElement => {
       }),
   });
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
-    queryKey: ['businessAreaProgram', businessArea, id],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,

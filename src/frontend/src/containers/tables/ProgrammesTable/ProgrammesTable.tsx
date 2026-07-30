@@ -3,6 +3,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { createApiParams } from '@utils/apiUtils';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
@@ -69,34 +70,38 @@ function ProgrammesTable({
 
   const [page, setPage] = useState(0);
 
+  const programsListParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
     isFetching: isFetchingPrograms,
     error: errorPrograms,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: [
-      'businessAreasProgramsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsList,
+      programsListParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsList(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
-          withPagination: true,
-        }),
-      ),
+      RestService.restBusinessAreasProgramsList(programsListParams),
     placeholderData: keepPreviousData,
     enabled: !!queryVariables.businessAreaSlug,
   });
 
+  const programsCountParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    queryVariables,
+  );
   const { data: dataProgramsCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasProgramsCount', businessArea, queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCountRetrieve,
+      programsCountParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCountRetrieve(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
-      ),
+      RestService.restBusinessAreasProgramsCountRetrieve(programsCountParams),
     enabled: page === 0,
   });
 

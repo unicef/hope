@@ -10,6 +10,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,7 +58,10 @@ function ProgramDetailsPage(): ReactElement {
     isLoading: loading,
     error,
   } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessArea, id],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: id,
+    }),
     queryFn: async () => {
       try {
         return await RestService.restBusinessAreasProgramsRetrieve({

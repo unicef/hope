@@ -22,6 +22,7 @@ import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   deepUnderscore,
   mapPartnerChoicesFromChoicesWithoutUnicef,
@@ -88,7 +89,7 @@ export const CreateProgramPage = (): ReactElement => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       await queryClient.invalidateQueries({
         queryKey: ['programChoices', businessArea],

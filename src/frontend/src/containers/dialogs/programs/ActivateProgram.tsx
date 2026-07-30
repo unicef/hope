@@ -5,6 +5,7 @@ import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,10 +37,10 @@ export const ActivateProgram = ({
     onSuccess: () => {
       showMessage(t('Programme activated.'));
       queryClient.invalidateQueries({
-        queryKey: ['program', businessArea, program.code],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       setOpen(false);
     },
