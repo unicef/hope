@@ -138,7 +138,6 @@ def test_create_top_up_amendment_arrange_per_beneficiary_amounts_act_run_task_as
     copied = amendment.payment_items.first()
     assert copied.source_payment == funded
     assert copied.entitlement_quantity == Decimal("12.50")
-    # The beneficiaries left out stay available for a later Amendment.
     assert set(top_up_pp.eligible_payments_for_top_up_amendment()) == set(rest)
 
 

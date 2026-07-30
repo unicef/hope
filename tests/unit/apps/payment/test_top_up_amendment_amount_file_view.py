@@ -148,5 +148,4 @@ def test_create_amendment_arrange_zero_amount_in_file_act_post_assert_row_left_o
     assert response.status_code == status.HTTP_201_CREATED
     amendment = PaymentPlan.objects.get(pk=response.json()["id"])
     assert list(amendment.payment_items.values_list("source_payment_id", flat=True)) == [funded.id]
-    # The zeroed and the blank row are both still available for a later Amendment.
     assert set(amendment_context["top_up_pp"].eligible_payments_for_top_up_amendment()) == {zeroed, skipped}

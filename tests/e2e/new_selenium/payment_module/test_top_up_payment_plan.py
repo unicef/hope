@@ -135,8 +135,7 @@ def topup_eligible_plan(topup_program: Program) -> PaymentPlan:
 
 @pytest.fixture
 def topup_finished_plan_with_mixed_payments(topup_program: Program) -> PaymentPlan:
-    # Delivered, pending and failed side by side in a Finished plan: none of the three statuses
-    # disqualifies a beneficiary, and neither does the plan having moved past Accepted.
+    # Neither the payment status nor the plan having moved past Accepted disqualifies anybody.
     return _create_source_plan(
         topup_program,
         payment_statuses=[Payment.STATUS_SUCCESS, Payment.STATUS_PENDING, Payment.STATUS_ERROR],
@@ -151,8 +150,6 @@ def mixed_plan_amount_file(topup_finished_plan_with_mixed_payments: PaymentPlan)
 
 @pytest.fixture
 def topup_ineligible_plan(topup_program: Program) -> PaymentPlan:
-    # Excluded payment → no eligible payments → canCreateTopUp False, even though the
-    # Accepted-state header still renders.
     return _create_source_plan(topup_program, payment_statuses=[Payment.STATUS_SUCCESS], excluded=True)
 
 
@@ -261,17 +258,14 @@ def test_create_top_up_with_amount_file_funds_only_listed_beneficiaries(
     _fill_date(login, "dispersionStartDate", "2027-01-01")
     login.wait_for_element_clickable('input[name="dispersionEndDate"]')
     _fill_date(login, "dispersionEndDate", "2027-12-31")
-    # A fixed amount typed first must not survive the upload: the file wins on submit, so
-    # leaving the value on screen would promise something that never happens.
+    # The file wins on submit, so a fixed amount typed first must not survive the upload.
     _fill_fixed_amount(login, "25")
     login.choose_file('input[type="file"]', amount_file)
     # The count is read from the workbook in the browser, before anything is sent.
     login.wait_for_text("New Top-Up will be created for 1 payment", '[data-cy="top-up-funded-rows"]')
     login.assert_value('input[data-cy="input-fixedAmount"]', "")
-    # Fixed and Custom are mutually exclusive: with a file loaded the amount cannot be typed.
     login.assert_attribute('input[data-cy="input-fixedAmount"]', "disabled")
-    # Clearing the amount must not leave the "amount required" error standing next to a file
-    # that plainly satisfies it.
+    # Clearing the amount must not leave its error standing next to a file that satisfies it.
     login.assert_text_not_visible("Enter a fixed amount or upload an amount file")
     login.click('[data-cy="button-submit"]')
 
@@ -412,7 +406,6 @@ def test_create_second_top_up_for_the_beneficiaries_left_over(
     ).order_by("created_at")
     assert first.payment_items.count() == 1
     assert second.payment_items.count() == 2
-    # Nobody appears in both, and the source is now exhausted.
     assert not set(first.payment_items.values_list("household_id", flat=True)) & set(
         second.payment_items.values_list("household_id", flat=True)
     )

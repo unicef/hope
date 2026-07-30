@@ -64,9 +64,7 @@ export default defineConfig({
           'https://excubo.unicef.io',
           'https://sentry.io',
         ],
-        // read-excel-file inflates xlsx in a Web Worker that fflate builds from a blob URL,
-        // which `default-src 'self'` blocks. Only this dev-server policy is enforced anywhere —
-        // the deployed environments send no CSP header at all.
+        // blob: keeps the xlsx row counter alive — read-excel-file inflates in a blob-URL worker.
         'worker-src': ["'self'", 'blob:'],
       },
       build: {

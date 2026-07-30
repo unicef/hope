@@ -1009,8 +1009,7 @@ class PaymentPlanService:
 
         exchange_rate = Decimal(self.payment_plan.exchange_rate or 0)
         # Without a rate on the plan, get_quantity_in_usd builds its own ExchangeRates — a full
-        # rates fetch and parse — on every single call. That is once per copied payment, inside the
-        # job holding the source-plan lock, so build one client up front and hand it over instead.
+        # rates fetch and parse — on every single call, so hand it one built up front.
         exchange_rates_client = ExchangeRates() if amounts and not exchange_rate else None
 
         def entitlement_of(payment: Payment) -> tuple[Decimal | None, Decimal | None]:
@@ -1082,9 +1081,8 @@ class PaymentPlanService:
         eligible = self.payment_plan.source_payment_plan.eligible_payments_for_child_plan()
         if amounts is not None:
             eligible = eligible.filter(unicef_id__in=amounts.keys())
-            # The file was validated against the pool at request time, but the pool is recomputed
-            # here — a concurrently created sibling plan may have claimed some beneficiaries since.
-            # They are legitimately blocked now, but the shrink must not be invisible.
+            # The pool is recomputed here, so a sibling plan created since the request may have
+            # claimed some beneficiaries. Legitimate, but it must not shrink the plan silently.
             if missing := set(amounts) - set(eligible.values_list("unicef_id", flat=True)):
                 logger.warning(
                     "Payment plan %s: %d payment(s) from the amount file are no longer eligible "
@@ -1095,8 +1093,6 @@ class PaymentPlanService:
                 )
         elif fixed_amount is not None:
             amounts = {payment.unicef_id: fixed_amount for payment in eligible}
-        # With neither, amounts stays None and the payments are copied with an empty entitlement
-        # for the operator to fill in later with the standard entitlement tools.
         self._copy_payments(eligible, copy_entitlement=False, is_follow_up=False, amounts=amounts)
 
     def create_child_plan_payments(

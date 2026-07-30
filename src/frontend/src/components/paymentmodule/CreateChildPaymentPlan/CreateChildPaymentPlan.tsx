@@ -68,8 +68,7 @@ export function CreateChildPaymentPlan({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isFollowUp = variant === 'followup';
-  // A Top-Up and its Amendment are funded identically at creation; only the source plan
-  // differs, so they share the whole amount section.
+  // The Amendment counts as a Top-Up here: both are funded the same way at creation.
   const isTopUp = variant === 'topup' || variant === 'amendment';
   const labels = {
     followup: {
@@ -106,7 +105,6 @@ export function CreateChildPaymentPlan({
             params,
           );
         }
-        // Top-Up and Amendment both accept an amount file, so both go out as multipart.
         const multipartParams = {
           businessAreaSlug: businessArea,
           id: paymentPlan.id,
@@ -134,9 +132,6 @@ export function CreateChildPaymentPlan({
     dispersionEndDate: Yup.date()
       .required(t('Dispersion End Date is required'))
       .min(today, t('Dispersion End Date cannot be in the past'))
-      // Yup 1.x hands the dependency values in as an array; taking it as a bare value made the
-      // condition always truthy and fed an Invalid Date into min(), which threw and left Formik
-      // with no errors at all — the dialog just sat there on submit.
       .when(
         'dispersionStartDate',
         ([dispersionStartDate]: any[], schema: Yup.DateSchema) =>
@@ -149,15 +144,13 @@ export function CreateChildPaymentPlan({
               )
             : schema,
       ),
-    // A Top-Up has to be funded one way or the other. Picking a file clears the fixed amount,
-    // so "both at once" cannot arise here — only "neither" needs catching, and catching it
-    // client-side keeps the error under the field instead of in a snackbar from the server.
+    // Only "neither" is checked: picking a file clears the fixed amount, so the two
+    // funding modes can never both be set.
     fixedAmount: Yup.string().when('file', ([file]: any[], schema: Yup.StringSchema) =>
       isTopUp && !file
         ? schema
             .required(t('Enter a fixed amount or upload an amount file'))
-            // Mirrors the serializer's min_value — a zero or negative amount would otherwise
-            // travel to the server and come back as a snackbar instead of a field error.
+            // Mirrors the serializer's min_value; keep the two in step.
             .test(
               'min-amount',
               t('Amount has to be at least 0.01'),
@@ -217,8 +210,7 @@ export function CreateChildPaymentPlan({
       {({ submitForm, values, setValues, resetForm }) => {
         const closeDialog = (): void => {
           setDialogOpen(false);
-          // A reopened dialog must start clean: a file picked and abandoned minutes ago,
-          // with its funded-rows count still attached, is too easy to submit by accident.
+          // A file picked and abandoned earlier would otherwise still be attached on reopen.
           resetForm();
           selectedFile.current = null;
           setFundedRows(null);
@@ -348,20 +340,13 @@ export function CreateChildPaymentPlan({
                             loading={loadingCreate}
                             onChange={(files) => {
                               const file = files[0] ?? null;
-                              // One setValues rather than two setFieldValue calls: Formik
-                              // validates on each of them against the state it had when the
-                              // call was made, so the second ran before `file` had landed and
-                              // flagged the amount as missing while the file sat right there.
-                              // Setting both at once leaves nothing to race.
-                              // The updater form is required, not stylistic: DropzoneField
-                              // memoises its onDrop with an empty dependency list, so this
-                              // closure keeps the values from the first render and spreading
-                              // them would wipe the dispersion dates typed since.
+                              // Updater form, not `...values`: DropzoneField memoises its
+                              // onDrop with an empty dependency list, so this closure only
+                              // ever sees the first render's values.
                               void setValues((previous) => ({
                                 ...previous,
                                 file,
-                                // The file wins on submit, so drop whatever was typed above
-                                // rather than leaving a value that silently does nothing.
+                                // The file wins on submit, so drop whatever was typed above.
                                 ...(file ? { fixedAmount: '' } : {}),
                               }));
                               selectedFile.current = file;
@@ -373,8 +358,7 @@ export function CreateChildPaymentPlan({
                                   if (selectedFile.current === file)
                                     setFundedRows(count);
                                 })
-                                // Never let a preview failure become an unhandled rejection;
-                                // the file still uploads and the server validates it.
+                                // A failed preview must not block the upload itself.
                                 .catch(() => setFundedRows(null));
                             }}
                           />

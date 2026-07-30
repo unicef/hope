@@ -88,9 +88,8 @@ def parse_top_up_amount_file(source_payment_plan: "PaymentPlan", file: IO[bytes]
     eligible_ids = set(source_payment_plan.eligible_payments_for_child_plan().values_list("unicef_id", flat=True))
 
     amounts: dict[str, Decimal] = {}
-    # Duplicates are tracked separately from the amounts: a blank or zero row funds nobody and so
-    # never reaches ``amounts``, and checking there would make the same file pass or fail depending
-    # on whether the blank row happens to come before or after the funded one.
+    # Tracked separately from ``amounts``, which a blank or zero row never reaches: checking there
+    # would let a duplicate through or not depending on which of its rows carries the amount.
     seen_payment_ids: set[str] = set()
     for row in worksheet.iter_rows(min_row=2):
         raw_payment_id = row[payment_id_index].value
