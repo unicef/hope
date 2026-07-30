@@ -13,6 +13,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 
 const ComboBox = styled(Select)`
   & {
@@ -35,7 +36,9 @@ export function KoboProjectSelect(): ReactElement {
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: ['koboProjects', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasAllKoboProjectsCreate, {
+      slug: businessArea,
+    }),
     queryFn: async() => {
       return RestService.restBusinessAreasAllKoboProjectsCreate({
         slug: businessArea,
