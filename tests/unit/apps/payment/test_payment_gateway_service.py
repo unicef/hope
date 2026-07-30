@@ -146,6 +146,17 @@ def pg_fsp(delivery_mechanisms):
 
 
 @pytest.fixture
+def unchanged_pg_fsp():
+    return FinancialServiceProviderFactory(
+        name="Unchanged FSP",
+        vision_vendor_number="VEN-UNCHANGED",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        data_transfer_configuration=[],
+        payment_gateway_id="fsp-unchanged",
+    )
+
+
+@pytest.fixture
 def uba_fsp():
     return FinancialServiceProviderFactory(
         name="United Bank for Africa - Nigeria",
@@ -478,6 +489,32 @@ def test_sync_records_error_messages(
     pg_service.sync_records()
     assert get_records_for_payment_instruction_mock.call_count == 0
     assert change_payment_instruction_status_mock.call_count == 2
+
+
+def test_bulk_update_payments_uses_one_query_and_persists_signatures(
+    payment_gateway_setup: dict,
+    django_assert_num_queries: Any,
+) -> None:
+    source_payments = payment_gateway_setup["payments"]
+    payment_1, payment_2 = Payment.objects.filter(pk__in=[source_payments[0].pk, source_payments[1].pk]).select_related(
+        "household_snapshot", "delivery_type", "currency"
+    )
+    old_signature_1 = payment_1.signature_hash
+    old_signature_2 = payment_2.signature_hash
+    payment_1.status = Payment.STATUS_ERROR
+    payment_2.status = Payment.STATUS_ERROR
+
+    with django_assert_num_queries(1):
+        PaymentGatewayService._bulk_update_payments({("status",): [payment_1, payment_2]})
+
+    expected_signature_1 = payment_1.signature_hash
+    expected_signature_2 = payment_2.signature_hash
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    assert payment_1.signature_hash == expected_signature_1
+    assert payment_2.signature_hash == expected_signature_2
+    assert payment_1.signature_hash != old_signature_1
+    assert payment_2.signature_hash != old_signature_2
 
 
 @mock.patch(
@@ -1692,6 +1729,31 @@ def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
     assert existing_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
     assert list(existing_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
     assert FinancialServiceProvider.objects.filter(vision_vendor_number="VEN-EXISTING").count() == 1
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_does_not_update_unchanged_fsp(
+    get_fsps_mock: Any,
+    unchanged_pg_fsp: FinancialServiceProvider,
+) -> None:
+    original_updated_at = unchanged_pg_fsp.updated_at
+    get_fsps_mock.return_value = [
+        FspData(
+            id=unchanged_pg_fsp.payment_gateway_id,
+            remote_id=unchanged_pg_fsp.payment_gateway_id,
+            name=unchanged_pg_fsp.name,
+            vendor_number=unchanged_pg_fsp.vision_vendor_number,
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    unchanged_pg_fsp.refresh_from_db()
+    assert unchanged_pg_fsp.updated_at == original_updated_at
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
