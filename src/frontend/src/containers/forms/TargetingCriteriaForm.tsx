@@ -255,7 +255,6 @@ export const TargetingCriteriaForm = ({
   const filteredIndividualData = useMemo(
     () => ({
       allFieldsAttributes: data
-        //@ts-ignore
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     }),
@@ -264,7 +263,6 @@ export const TargetingCriteriaForm = ({
 
   const filteredHouseholdData = useMemo(
     () => ({
-      //@ts-ignore
       allFieldsAttributes: data?.filter(associatedWith('Household')),
     }),
     [data],
@@ -272,7 +270,6 @@ export const TargetingCriteriaForm = ({
 
   const allDataChoicesDictTmp = useMemo(
     () =>
-      // @ts-ignore
       data?.reduce((acc, item) => {
         acc[item.name] = item.choices;
         return acc;
