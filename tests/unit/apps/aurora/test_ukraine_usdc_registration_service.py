@@ -2,12 +2,17 @@ import datetime
 import json
 from typing import Any
 
+from django.core.files.storage import default_storage
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.aurora import OrganizationFactory, ProjectFactory, RecordFactory, RegistrationFactory
-from extras.test_utils.factories.core import BusinessAreaFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.core import (
+    BusinessAreaFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeFactory,
+)
 from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import (
@@ -16,7 +21,7 @@ from extras.test_utils.factories.payment import (
     FinancialInstitutionFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, resolve_flex_fields_choices_to_string
 from hope.apps.household.const import IDENTIFICATION_TYPE_TAX_ID, ROLE_PRIMARY
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.ukraine_flex_registration_service import UkraineUSDCRegistrationService
@@ -24,6 +29,7 @@ from hope.models import (
     DataCollectingType,
     DeliveryMechanism,
     FinancialInstitution,
+    FlexibleAttribute,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -219,7 +225,7 @@ def test_wallet_stored_on_account(
     assert account.data == {"wallet_address": "0xABCDEF0123456789", "wallet_name": "MetaMask"}
 
 
-def test_wallet_images_stored_as_flex_fields(
+def test_wallet_images_stored_as_saved_files(
     registration: Any,
     user: Any,
     ukraine_country: Any,
@@ -233,8 +239,33 @@ def test_wallet_images_stored_as_flex_fields(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    assert individual.flex_fields["wallet_num_image_i_f"] == "d2FsbGV0X251bV9pbWFnZQ=="
-    assert individual.flex_fields["id_wallet_image_i_f"] == "aWRfd2FsbGV0X2ltYWdl"
+    num_image_path = individual.flex_fields["wallet_num_image_i_f"]
+    id_image_path = individual.flex_fields["id_wallet_image_i_f"]
+    assert num_image_path.endswith(".jpg")
+    assert default_storage.exists(num_image_path)
+    assert default_storage.exists(id_image_path)
+
+
+def test_individual_detail_flex_image_resolves_to_url(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    FlexibleAttributeFactory(name="wallet_num_image_i_f", type=FlexibleAttribute.IMAGE)
+    FlexibleAttributeFactory(name="id_wallet_image_i_f", type=FlexibleAttribute.IMAGE)
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    resolved = resolve_flex_fields_choices_to_string(individual)
+
+    assert resolved["wallet_num_image_i_f"].endswith(".jpg")
+    assert resolved["id_wallet_image_i_f"].endswith(".jpg")
 
 
 def test_creates_only_tax_id_document(
@@ -435,3 +466,205 @@ def test_no_wallet_account_when_address_missing(
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
     assert not PendingAccount.objects.filter(individual=individual).exists()
+
+
+def test_head_of_household_phone_number_marked_valid(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.phone_no_valid is True
+
+
+def test_head_of_household_phone_number_marked_invalid(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    usdc_record.fields["individual_details"][0]["phone_no_i_c"] = "123"
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.phone_no_valid is False
+
+
+def test_no_flex_fields_when_wallet_images_missing(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    usdc_record.fields["individual_details"][0].pop("wallet_num_image_i_f")
+    usdc_record.fields["individual_details"][0].pop("id_wallet_image_i_f")
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.flex_fields == {}
+
+
+def test_only_present_wallet_image_stored(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    usdc_record.fields["individual_details"][0].pop("id_wallet_image_i_f")
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert "id_wallet_image_i_f" not in individual.flex_fields
+    assert individual.flex_fields["wallet_num_image_i_f"].endswith(".jpg")
+    assert default_storage.exists(individual.flex_fields["wallet_num_image_i_f"])
+
+
+def test_rejects_record_with_no_individuals(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    submission_timestamp: datetime.datetime,
+) -> None:
+    record = RecordFactory(
+        registration=registration.source_id,
+        timestamp=submission_timestamp,
+        source_id=9,
+        fields={"consent": [{"consent_h_c": ["1"]}], "individual_details": []},
+        files=json.dumps({}).encode(),
+    )
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [record.id])
+
+    record.refresh_from_db()
+    assert record.status == Record.STATUS_ERROR
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
+
+
+def test_wallet_account_created_when_name_missing(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    usdc_record.fields["individual_details"][0].pop("wallet_name_i_c")
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    account = PendingAccount.objects.get(individual=individual)
+    assert account.number == "0xABCDEF0123456789"
+    assert account.data == {"wallet_address": "0xABCDEF0123456789", "wallet_name": ""}
+
+
+def test_detail_id_links_household_and_individual_to_source_record(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    household = PendingHousehold.objects.get(registration_data_import=rdi)
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert household.detail_id == str(usdc_record.source_id)
+    assert individual.detail_id == str(usdc_record.source_id)
+
+
+def test_reimporting_same_record_does_not_duplicate_household(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+    service.process_records(rdi.id, [usdc_record.id])
+
+    assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
+
+
+def test_malformed_wallet_image_rejects_record_without_killing_batch(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    usdc_record.fields["individual_details"][0]["wallet_num_image_i_f"] = "abcde"
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    usdc_record.refresh_from_db()
+    assert usdc_record.status == Record.STATUS_ERROR
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
+
+
+def test_failed_individual_validation_leaves_no_orphan_images(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+    settings: Any,
+    tmp_path: Any,
+) -> None:
+    settings.MEDIA_ROOT = str(tmp_path)
+    usdc_record.fields["individual_details"][0]["birth_date"] = "1990-99-99"
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    usdc_record.refresh_from_db()
+    assert usdc_record.status == Record.STATUS_ERROR
+    assert list(tmp_path.iterdir()) == []

@@ -1,5 +1,6 @@
 import abc
 import base64
+import binascii
 import hashlib
 import logging
 from typing import TYPE_CHECKING, Any, Iterable
@@ -219,5 +220,9 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         if certificate_picture:
             format_image = "jpg"
             name = hashlib.sha256(document_number.encode()).hexdigest()
-            certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
+            try:
+                decoded = base64.b64decode(certificate_picture)
+            except (binascii.Error, TypeError, ValueError) as e:
+                raise ValidationError("Invalid image data") from e
+            certificate_picture = ContentFile(decoded, name=f"{name}.{format_image}")
         return certificate_picture
