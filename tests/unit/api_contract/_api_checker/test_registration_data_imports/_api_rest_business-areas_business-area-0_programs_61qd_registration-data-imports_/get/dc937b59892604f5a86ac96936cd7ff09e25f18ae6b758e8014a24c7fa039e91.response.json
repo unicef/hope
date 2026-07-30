@@ -1,0 +1,35 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST, HEAD, OPTIONS",
+        "ETag": "8f0efb9847b989d51ca7a7293b04add1",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "441"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/61qd/registration-data-imports/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "475675bc-9f1b-4d0e-8719-edb0aa3762a2",
+                "name": "RDI 0",
+                "status": "Merged",
+                "data_source": "Excel",
+                "imported_by": "",
+                "created_at": "2025-01-01T00:00:00Z",
+                "erased": false,
+                "import_date": "2025-01-01T00:00:00Z",
+                "number_of_households": 1,
+                "number_of_individuals": 1,
+                "country_workspace_id": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

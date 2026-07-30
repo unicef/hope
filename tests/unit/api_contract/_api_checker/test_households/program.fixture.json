@@ -2,19 +2,19 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "661715ee-22cd-43d8-83c5-70a2b658357b",
+            "pk": "fec1fe48-bb3c-4f84-8965-b8ea3595da05",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
-                "data_collecting_type": 10,
-                "beneficiary_group": "9d8bf8d5-38fc-4ce6-8ec7-c2f2c047368d",
-                "business_area": "2f4de02c-0254-4343-9b0e-9456d0d40ae9",
+                "version": 1735688653315201,
+                "data_collecting_type": 3,
+                "beneficiary_group": "d17749ef-84b0-4408-85f9-69f1ed670345",
+                "business_area": "2214baf1-a516-458f-a3d5-3b1ed0fbfe52",
                 "name": "Program 0",
+                "code": "psg9",
                 "status": "ACTIVE",
-                "code": "ky0b",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -28,19 +28,23 @@
                 "administrative_areas_of_implementation": "",
                 "biometric_deduplication_enabled": false,
                 "collision_detector": "hope.apps.program.collision_detectors.NoopCollisionDetector",
+                "identification_key_individual_label": null,
                 "is_visible": true,
                 "household_count": 0,
                 "individual_count": 0,
                 "reconciliation_window_in_days": 0,
                 "send_reconciliation_window_expiry_notifications": false,
                 "admin_areas": [],
-                "sanction_lists": []
+                "sanction_lists": [],
+                "payment_plan_purposes": [
+                    "f80d8c15-eb77-42f4-b8bb-a1b78f94cd1c"
+                ]
             }
         },
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 10,
+                "pk": 3,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -53,16 +57,17 @@
                     "individual_filters_available": false,
                     "household_filters_available": true,
                     "recalculate_composition": false,
+                    "collects_individual_data": false,
                     "weight": 0,
                     "compatible_types": [
-                        10
+                        3
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "9d8bf8d5-38fc-4ce6-8ec7-c2f2c047368d",
+                "pk": "d17749ef-84b0-4408-85f9-69f1ed670345",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -76,7 +81,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "2f4de02c-0254-4343-9b0e-9456d0d40ae9",
+                "pk": "2214baf1-a516-458f-a3d5-3b1ed0fbfe52",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -94,12 +99,12 @@
                     "rdi_import_xlsx_disabled": false,
                     "active": true,
                     "enable_email_notification": true,
-
                     "rapid_pro_host": null,
                     "rapid_pro_payment_verification_token": null,
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -111,6 +116,18 @@
                     "custom_fields": {},
                     "countries": [],
                     "payment_countries": []
+                }
+            },
+            {
+                "model": "payment.paymentplanpurpose",
+                "pk": "f80d8c15-eb77-42f4-b8bb-a1b78f94cd1c",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPP-11",
+                    "name": "Purpose 0",
+                    "description": "",
+                    "limit_to": []
                 }
             }
         ]

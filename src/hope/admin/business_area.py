@@ -171,6 +171,7 @@ class BusinessAreaAdmin(
         "parent",
         "enable_email_notification",
         "is_accountability_applicable",
+        "ingest_source",
     )
     search_fields = ("name", "slug")
     list_filter = (
@@ -183,9 +184,16 @@ class BusinessAreaAdmin(
         "is_split",
         "enable_email_notification",
         "is_accountability_applicable",
+        "ingest_source",
     )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
     filter_horizontal = ("countries", "payment_countries")
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
+        read_only_fields = super().get_readonly_fields(request, obj)
+        if obj and obj.ingest_source == BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY:
+            return tuple(read_only_fields) + ("ingest_source",)
+        return read_only_fields
 
     def document_types_valid_for_deduplication(self, obj: Any) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))

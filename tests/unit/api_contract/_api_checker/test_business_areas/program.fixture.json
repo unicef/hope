@@ -2,19 +2,19 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "547cce92-dc3a-4699-8d91-acb5331a5707",
+            "pk": "72c9e9e2-f1d5-4b02-aaf7-65923e82df81",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
-                "version": 1735688653315200,
-                "data_collecting_type": 1,
-                "beneficiary_group": "bcc5b4f2-dcd2-4607-8bdc-7a258166efd0",
-                "business_area": "c7210972-7cea-4929-9055-14b5eb27d11e",
+                "version": 1735688653315201,
+                "data_collecting_type": 2,
+                "beneficiary_group": "465f4546-d3ef-4b98-b278-995b8a13667b",
+                "business_area": "7d9b1a64-74ab-49a6-9aea-bca1ff6d978f",
                 "name": "Program 0",
+                "code": "xwzu",
                 "status": "ACTIVE",
-                "code": "6jr5",
                 "description": "",
                 "start_date": "2025-01-01",
                 "end_date": "2026-01-01",
@@ -35,13 +35,16 @@
                 "reconciliation_window_in_days": 0,
                 "send_reconciliation_window_expiry_notifications": false,
                 "admin_areas": [],
-                "sanction_lists": []
+                "sanction_lists": [],
+                "payment_plan_purposes": [
+                    "95bee55e-a101-4f07-82bf-011ba91b33ad"
+                ]
             }
         },
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 1,
+                "pk": 2,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -54,16 +57,17 @@
                     "individual_filters_available": false,
                     "household_filters_available": true,
                     "recalculate_composition": false,
+                    "collects_individual_data": false,
                     "weight": 0,
                     "compatible_types": [
-                        1
+                        2
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "bcc5b4f2-dcd2-4607-8bdc-7a258166efd0",
+                "pk": "465f4546-d3ef-4b98-b278-995b8a13667b",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -77,7 +81,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "c7210972-7cea-4929-9055-14b5eb27d11e",
+                "pk": "7d9b1a64-74ab-49a6-9aea-bca1ff6d978f",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -100,6 +104,7 @@
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -110,14 +115,14 @@
                     "biometric_deduplication_threshold": 0.0,
                     "custom_fields": {},
                     "countries": [
-                        "68d47416-e1ec-4c13-b452-a9f5153c3fc0"
+                        "e3f2b796-cc19-444c-8105-95a911a73cbf"
                     ],
                     "payment_countries": []
                 }
             },
             {
                 "model": "geo.country",
-                "pk": "68d47416-e1ec-4c13-b452-a9f5153c3fc0",
+                "pk": "e3f2b796-cc19-444c-8105-95a911a73cbf",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -127,6 +132,7 @@
                     "iso_code2": "TL",
                     "iso_code3": "TLN",
                     "iso_num": "9999",
+                    "currency": null,
                     "parent": null,
                     "valid_from": "2025-01-01T00:00:00Z",
                     "valid_until": null,
@@ -135,6 +141,18 @@
                     "rght": 2,
                     "tree_id": 1,
                     "level": 0
+                }
+            },
+            {
+                "model": "payment.paymentplanpurpose",
+                "pk": "95bee55e-a101-4f07-82bf-011ba91b33ad",
+                "fields": {
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "updated_at": "2025-01-01T00:00:00Z",
+                    "unicef_id": "PPP-7",
+                    "name": "Purpose 0",
+                    "description": "",
+                    "limit_to": []
                 }
             }
         ]

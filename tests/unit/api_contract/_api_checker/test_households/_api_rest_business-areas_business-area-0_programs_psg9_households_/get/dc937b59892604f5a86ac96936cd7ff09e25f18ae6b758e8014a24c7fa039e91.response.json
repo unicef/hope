@@ -1,0 +1,43 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "2086221e66463c11f847cac10e8fd133",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "702"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/psg9/households/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "d9986496-2ae7-4956-975d-9eb206e78810",
+                "unicef_id": "HH-25-0000.0001",
+                "head_of_household": "Person 0",
+                "admin1": null,
+                "admin2": null,
+                "status": "ACTIVE",
+                "size": null,
+                "residence_status": "None",
+                "total_cash_received": null,
+                "total_cash_received_usd": null,
+                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01T00:00:00Z",
+                "currency": null,
+                "has_duplicates": false,
+                "sanction_list_possible_match": false,
+                "sanction_list_confirmed_match": false,
+                "program_id": "fec1fe48-bb3c-4f84-8965-b8ea3595da05",
+                "program_name": "Program 0",
+                "program_code": "psg9"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
