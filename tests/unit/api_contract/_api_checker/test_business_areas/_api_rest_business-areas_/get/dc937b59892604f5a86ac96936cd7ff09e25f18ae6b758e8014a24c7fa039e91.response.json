@@ -4,20 +4,20 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "71875bcb01ec7c5841295cd4bd88d3b7",
+        "ETag": "70dd98ed43193d7394a70190f499678f",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "450"
+        "Content-Length": "474"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "c7210972-7cea-4929-9055-14b5eb27d11e",
+                "id": "7d9b1a64-74ab-49a6-9aea-bca1ff6d978f",
                 "name": "Business Area Contract",
                 "code": "BA9000",
                 "long_name": "Business Area 0 Long Name",
@@ -27,6 +27,7 @@
                 "active": true,
                 "is_accountability_applicable": false,
                 "rdi_import_xlsx_disabled": false,
+                "is_manual_ingest": true,
                 "countries": [
                     {
                         "name": "Testland",

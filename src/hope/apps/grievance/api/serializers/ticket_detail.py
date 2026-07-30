@@ -181,7 +181,7 @@ class DeduplicationResultSerializer(serializers.Serializer):
         return None
 
 
-class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
+class BiometricDeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
     id = serializers.CharField()
     photo = serializers.SerializerMethodField()
     full_name = serializers.CharField()
@@ -194,9 +194,9 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
         return individual.photo.url if individual and individual.photo else ""
 
 
-class DeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
-    individual1 = DeduplicationEngineSimilarityPairIndividualSerializer()
-    individual2 = DeduplicationEngineSimilarityPairIndividualSerializer()
+class BiometricDeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
+    individual1 = BiometricDeduplicationEngineSimilarityPairIndividualSerializer()
+    individual2 = BiometricDeduplicationEngineSimilarityPairIndividualSerializer()
     similarity_score = serializers.CharField()
     status_code = serializers.CharField()
 
@@ -221,7 +221,7 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
 
     def get_dedup_engine_similarity_pair(self, obj: Any) -> dict:
         if self.context["na_can_view_biometric_results"]:
-            return DeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
+            return BiometricDeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
         return {}
 
 

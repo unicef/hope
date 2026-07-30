@@ -15,7 +15,11 @@ DATA_DIR = Path(__file__).parent / "_api_checker" / Path(__file__).stem
 
 @frozenfixture()
 def superuser(request, db):
-    return UserFactory(is_staff=True, is_superuser=True)
+    return UserFactory(
+        id="11111111-1111-1111-1111-111111111111",
+        is_staff=True,
+        is_superuser=True,
+    )
 
 
 @frozenfixture()
