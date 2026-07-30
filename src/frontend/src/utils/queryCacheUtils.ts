@@ -1,15 +1,12 @@
-// Query keys in this app are hand-written string-array literals (not derived from
-// restgenerated), so they drift. The global MutationCache.onSuccess in providers.tsx
-// invalidates every query after any successful mutation to keep the UI fresh, but static
-// reference data (choices, geo areas, permissions) is never changed by those mutations and
-// carries a deliberately long staleTime. This predicate exempts that data from the blanket
-// invalidation so it is not needlessly refetched after every write.
+// Exempts static reference data (choices, geo areas, permissions) from the blanket
+// post-mutation invalidation in providers.tsx, so it keeps its long staleTime. Query
+// keys are derived from the fetcher via restQueryKey (see utils/queryKeys.ts).
 const STATIC_QUERY_KEY_ROOTS = new Set<string>([
   'profile', // permissions / current-user profile (usePermissions, AppBar)
   'businessArea', // business-area details
   'allAreasTree', // geo areas
   'beneficiaryGroups',
-  'restChoicesCountriesList',
+  // restChoicesCountriesList / any *choices* root is covered by the heuristic below.
 ]);
 
 /** True when a query holds static reference data that user mutations never change. */

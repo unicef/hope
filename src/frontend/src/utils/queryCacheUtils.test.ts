@@ -9,7 +9,6 @@ describe('isStaticReferenceQuery', () => {
     expect(isStaticReferenceQuery(['businessArea', 'afghanistan'])).toBe(true);
     expect(isStaticReferenceQuery(['allAreasTree', 'afghanistan'])).toBe(true);
     expect(isStaticReferenceQuery(['beneficiaryGroups'])).toBe(true);
-    expect(isStaticReferenceQuery(['restChoicesCountriesList'])).toBe(true);
   });
 
   it('returns true for any choices endpoint key', () => {
@@ -18,6 +17,15 @@ describe('isStaticReferenceQuery', () => {
     expect(isStaticReferenceQuery(['choicesPaymentPlanStatusList'])).toBe(true);
     expect(
       isStaticReferenceQuery(['businessAreasGrievanceTicketsChoices', 'afg']),
+    ).toBe(true);
+    // Dropped from the STATIC_QUERY_KEY_ROOTS set but still matched by the choices heuristic.
+    expect(isStaticReferenceQuery(['restChoicesCountriesList'])).toBe(true);
+    // A derived (normalized) choices retrieve root is exempt too.
+    expect(
+      isStaticReferenceQuery([
+        'businessAreasGrievanceTicketsChoicesRetrieve',
+        { businessAreaSlug: 'afg' },
+      ]),
     ).toBe(true);
   });
 
@@ -33,6 +41,16 @@ describe('isStaticReferenceQuery', () => {
     ).toBe(false);
     expect(
       isStaticReferenceQuery(['businessAreaProgram', 'afghanistan', 'prog-1']),
+    ).toBe(false);
+    // Derived (normalized) mutable-data roots must not be exempt.
+    expect(
+      isStaticReferenceQuery(['businessAreasProgramsList', { limit: 20 }]),
+    ).toBe(false);
+    expect(
+      isStaticReferenceQuery([
+        'businessAreasProgramsRetrieve',
+        { businessAreaSlug: 'afg', code: 'p1' },
+      ]),
     ).toBe(false);
   });
 
