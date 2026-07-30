@@ -45,7 +45,13 @@ export function GrievanceFlexFieldPhotoModal({
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (
-    <Box style={{ height: '100%' }} display="flex" alignItems="center">
+    <Box
+      style={{ height: '100%' }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       -
     </Box>
   );

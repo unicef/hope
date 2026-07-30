@@ -22,7 +22,12 @@ export function NumberTextField({
   ...otherProps
 }): ReactElement {
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
       <TextContainer
         {...otherProps}
@@ -32,15 +37,15 @@ export function NumberTextField({
         onChange={onChange}
         variant="outlined"
         type="number"
-        InputProps={
-          icon
+        slotProps={{
+          input: icon
             ? {
                 startAdornment: (
                   <InputAdornment position="start">{icon}</InputAdornment>
                 ),
               }
-            : null
-        }
+            : undefined,
+        }}
       />
     </Box>
   );

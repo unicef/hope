@@ -75,8 +75,18 @@ export const PageNotFound: FC = () => {
           exciting content.
         </Paragraph>
       </TextContainer>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <Box mr={4}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            mr: 4,
+          }}
+        >
           <Button
             endIcon={<Refresh />}
             variant="outlined"

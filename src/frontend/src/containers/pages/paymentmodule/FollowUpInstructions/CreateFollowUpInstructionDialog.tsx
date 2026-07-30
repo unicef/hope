@@ -160,7 +160,7 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
                         );
                       }}
                       getOptionLabel={(opt) => opt.label}
-                      renderTags={(value, getTagProps) =>
+                      renderValue={(value, getTagProps) =>
                         value.map((opt, index) => (
                           <Chip
                             label={opt.label}
@@ -172,9 +172,12 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          inputProps={{
-                            ...params.inputProps,
-                            'aria-label': 'Payment Plan Groups',
+                          slotProps={{
+                            ...params.slotProps,
+                            htmlInput: {
+                              ...params.slotProps.htmlInput,
+                              'aria-label': 'Payment Plan Groups',
+                            },
                           }}
                           label={t('Payment Plan Groups')}
                           required

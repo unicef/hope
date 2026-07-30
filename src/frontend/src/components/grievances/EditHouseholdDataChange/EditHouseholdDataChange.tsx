@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { Button, Grid, Typography } from '@mui/material';
 import { Field, FieldArray } from 'formik';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { AddCircleOutline, Delete } from '@mui/icons-material';
+import { AddCircleOutlined, Delete } from '@mui/icons-material';
 import Tooltip from '@mui/material/Tooltip';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -159,7 +159,6 @@ function EditHouseholdDataChange({
     (fieldItem) => fieldItem.fieldName,
   );
 
-
   return (
     !isEditTicket && (
       <>
@@ -187,7 +186,7 @@ function EditHouseholdDataChange({
                 <Grid size={4}>
                   <Button
                     color="primary"
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     onClick={() => {
                       arrayHelpers.push({ fieldName: null, fieldValue: null });
                     }}
@@ -200,12 +199,17 @@ function EditHouseholdDataChange({
             )}
           />
         </Grid>
-
         {/* Roles in Household Section */}
         <Title>
           <Typography variant="h6">{t('Roles in Household')}</Typography>
         </Title>
-        <Grid container spacing={2} alignItems="center">
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Grid size={4}>
             <strong>{t('Full Name')}</strong>
           </Grid>
@@ -295,7 +299,7 @@ function EditHouseholdDataChange({
                   <span>
                     <Button
                       color="primary"
-                      startIcon={<AddCircleOutline />}
+                      startIcon={<AddCircleOutlined />}
                       onClick={() => {
                         if (availableIndividuals.length > 0) {
                           const defaultIndividual = availableIndividuals[0].id;

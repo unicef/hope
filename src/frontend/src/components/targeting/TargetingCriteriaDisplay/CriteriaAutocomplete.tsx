@@ -72,14 +72,13 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
           fullWidth
           helperText={isInvalid && get(otherProps.form.errors, field.name)}
           error={isInvalid}
-          InputProps={{
-            ...params.InputProps,
-          }}
           // https://github.com/mui-org/material-ui/issues/12805
-           
-          inputProps={{
-            ...params.inputProps,
-            'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,
+          slotProps={{
+            ...params.slotProps,
+            htmlInput: {
+              ...params.slotProps?.htmlInput,
+              'data-cy': `autocomplete-target-criteria-option-${otherProps.index}`,
+            },
           }}
         />
       )}

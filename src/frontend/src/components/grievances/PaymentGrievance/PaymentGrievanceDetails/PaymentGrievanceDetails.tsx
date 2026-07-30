@@ -101,7 +101,12 @@ export function PaymentGrievanceDetails({
   return (
     <StyledBox>
       <Title>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Payment Details')}</Typography>
           {ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS ? (
             <VerifyPaymentGrievance ticket={ticket} />

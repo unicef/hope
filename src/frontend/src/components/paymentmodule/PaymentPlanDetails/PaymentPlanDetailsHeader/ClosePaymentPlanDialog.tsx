@@ -150,7 +150,11 @@ export function ClosePaymentPlanDialog({
           </DialogTitleWrapper>
           <DialogContent>
             <DialogContainer>
-              <Box p={3}>
+              <Box
+                sx={{
+                  p: 3,
+                }}
+              >
                 <Grid container spacing={2}>
                   {summaryRows.map((row) => (
                     <Grid size={{ xs: 6 }} key={row.label}>
@@ -159,13 +163,22 @@ export function ClosePaymentPlanDialog({
                   ))}
                 </Grid>
               </Box>
-              <Box p={3}>
+              <Box
+                sx={{
+                  p: 3,
+                }}
+              >
                 {t(
                   'By closing this payment plan you confirm you have verified the information above and considered it correct. Once closed, the payment plan cannot be modified again and all information is considered final.',
                 )}
               </Box>
               {!hasVerification && (
-                <WarningBox p={3} m={3}>
+                <WarningBox
+                  sx={{
+                    p: 3,
+                    m: 3,
+                  }}
+                >
                   <GreyText>
                     {t(
                       'This payment plan has not had any verification carried out. Please include below a justification about closing the payment plan without having carried forward any payment verification.',

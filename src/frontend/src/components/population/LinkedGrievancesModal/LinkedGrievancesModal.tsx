@@ -199,7 +199,12 @@ export function LinkedGrievancesModal({
           <DialogTitle>{t('Linked Grievances')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box mt={2} mb={6}>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 6,
+            }}
+          >
             <Typography>
               <Bold>
                 {beneficiaryGroup?.groupLabel} ID {household.unicefId}

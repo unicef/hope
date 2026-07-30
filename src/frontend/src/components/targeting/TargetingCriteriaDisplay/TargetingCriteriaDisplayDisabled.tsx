@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Tooltip, Box } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
@@ -47,7 +47,7 @@ function TargetingCriteriaDisplayDisabled({
                 data-cy="button-target-population-disabled-add-criteria"
               >
                 <IconWrapper>
-                  <AddCircleOutline />
+                  <AddCircleOutlined />
                   <p>{t('Add Filter')}</p>
                 </IconWrapper>
               </AddCriteria>
@@ -61,7 +61,7 @@ function TargetingCriteriaDisplayDisabled({
             data-cy="button-target-population-disabled-add-criteria"
           >
             <IconWrapper>
-              <AddCircleOutline />
+              <AddCircleOutlined />
               <p>{t('Add Filter')}</p>
             </IconWrapper>
           </AddCriteria>

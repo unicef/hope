@@ -366,7 +366,12 @@ export function RequestedIndividualDataChange({
         return (
           <ApproveBox>
             <Title>
-              <Box display="flex" justifyContent="space-between">
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography variant="h6">Requested Data Change</Typography>
                 {shouldShowEditButton(allChangesLength) ? (
                   <Button

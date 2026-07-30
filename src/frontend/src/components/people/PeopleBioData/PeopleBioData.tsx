@@ -63,8 +63,16 @@ export const PeopleBioData = ({
 
   const mappedIndividualDocuments = individual?.documents?.map((doc) => (
     <Grid size={{ xs: 3 }} key={doc.id}>
-      <Box flexDirection="column">
-        <Box mb={1}>
+      <Box
+        sx={{
+          flexDirection: 'column',
+        }}
+      >
+        <Box
+          sx={{
+            mb: 1,
+          }}
+        >
           <LabelizedField label={doc.type?.label}>
             {doc.photo ? (
               <DocumentPopulationPhotoModal
@@ -84,8 +92,16 @@ export const PeopleBioData = ({
 
   const mappedIdentities = individual?.identities?.map((item) => (
     <Grid size={{ xs: 3 }} key={item.id}>
-      <Box flexDirection="column">
-        <Box mb={1}>
+      <Box
+        sx={{
+          flexDirection: 'column',
+        }}
+      >
+        <Box
+          sx={{
+            mb: 1,
+          }}
+        >
           <LabelizedField label={`${item.partner} ID`}>
             {item.number}
           </LabelizedField>

@@ -1,5 +1,10 @@
-from extras.test_utils.factories import DataCollectingTypeFactory, PartnerFactory
+from faker import Faker
+
+from extras.test_utils.factories import DataCollectingTypeFactory
 from hope.models import BusinessArea, Country, CountryCodeMap, DataCollectingType
+
+faker = Faker()
+
 
 business_area_short_name_code_map = {
     "Analysis,Planning & Monitoring": "456C",
@@ -168,13 +173,6 @@ business_area_short_name_code_map = {
 }
 
 
-def generate_unicef_partners() -> None:
-    unicef_main_partner = PartnerFactory(name="UNICEF")
-    PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
-    PartnerFactory(name="UNHCR")
-    PartnerFactory(name="WFP")
-
-
 def generate_country_codes() -> None:
     for country in Country.objects.all():
         CountryCodeMap.objects.get_or_create(country=country, defaults={"ca_code": country.iso_code3})
@@ -192,7 +190,6 @@ def generate_business_areas() -> None:
                     "region_name": country.iso_code3,
                     "has_data_sharing_agreement": True,
                     "active": True,
-                    "kobo_token": "abc_test",
                     "is_accountability_applicable": True,
                 },
             )

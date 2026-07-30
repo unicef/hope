@@ -19,10 +19,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  GroupExportPlanTypeOption,
-  planTypeDisplayLabel,
-} from '../utils';
+import { GroupExportPlanTypeOption, planTypeDisplayLabel } from '../utils';
 
 interface GroupExportXlsxDialogProps {
   groupId: string;
@@ -131,7 +128,11 @@ export function GroupExportXlsxDialog({
 
   return (
     <>
-      <Box m={2}>
+      <Box
+        sx={{
+          m: 2,
+        }}
+      >
         <LoadingButton
           loading={loadingExport}
           startIcon={<GetApp />}

@@ -35,8 +35,18 @@ export function EditFspHeader({
           : null
       }
     >
-      <Box display="flex" mt={2} mb={2}>
-        <Box mr={3}>
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 2,
+          mb: 2,
+        }}
+      >
+        <Box
+          sx={{
+            mr: 3,
+          }}
+        >
           <Button
             component={Link}
             to={`/${baseUrl}/payment-module/payment-plans`}

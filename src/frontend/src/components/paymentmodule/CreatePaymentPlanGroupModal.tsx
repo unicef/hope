@@ -77,7 +77,11 @@ export const CreatePaymentPlanGroupModal = ({
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle>{t('Create Payment Plan Group')}</DialogTitle>
       <DialogContent>
-        <Box mb={2}>
+        <Box
+          sx={{
+            mb: 2,
+          }}
+        >
           <Typography variant="body2" color="textSecondary">
             {t('Cycle')}: <strong>{cycleTitle}</strong>
           </Typography>

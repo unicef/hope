@@ -21,7 +21,12 @@ function Exclusions({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <PaperContainer>
-      <Box display="flex" justifyContent="space-between">
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <Typography data-cy="title-excluded-entries" variant="h6">
           {isSocialDctType
             ? t('Excluded Target Population Entries')
@@ -40,7 +45,11 @@ function Exclusions({
         </Button>
       </Box>
       <Collapse in={isExclusionsOpen}>
-        <Box mt={2}>
+        <Box
+          sx={{
+            mt: 2,
+          }}
+        >
           <Grid container>
             <Grid size={6}>
               <Field
@@ -60,7 +69,11 @@ function Exclusions({
             </Grid>
           </Grid>
         </Box>
-        <Box mt={2}>
+        <Box
+          sx={{
+            mt: 2,
+          }}
+        >
           <Grid container>
             <Grid size={6}>
               <Field

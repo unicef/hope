@@ -49,19 +49,20 @@ export function FormikDecimalField({
       autoComplete="off"
       type="number"
       helperText={isInvalid && get(form.errors, field.name)}
-      InputProps={{
-        onKeyPress: handleKeyPress,
-        startAdornment: decoratorStart && (
-          <InputAdornment position="start">{decoratorStart}</InputAdornment>
-        ),
-        endAdornment: decoratorEnd && (
-          <InputAdornment position="end">{decoratorEnd}</InputAdornment>
-        ),
-      }}
       // https://github.com/mui-org/material-ui/issues/12805
-       
-      inputProps={{
-        'data-cy': `input-${field.name}`,
+      slotProps={{
+        input: {
+          onKeyPress: handleKeyPress,
+          startAdornment: decoratorStart && (
+            <InputAdornment position="start">{decoratorStart}</InputAdornment>
+          ),
+          endAdornment: decoratorEnd && (
+            <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+          ),
+        },
+        htmlInput: {
+          'data-cy': `input-${field.name}`,
+        },
       }}
     />
   );

@@ -1,9 +1,4 @@
-from typing import TYPE_CHECKING, cast
-
 from django.contrib.auth.models import AbstractUser
-
-if TYPE_CHECKING:
-    from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
@@ -40,7 +35,7 @@ class SurveyCrudServices:
         survey.full_list_arguments = result.full_list_arguments or {}
         survey.random_sampling_arguments = result.random_sampling_arguments or {}
         survey.number_of_recipients = result.number_of_recipients
-        survey.recipients.set(cast("QuerySet[Household, Household]", result.households))
+        survey.recipients.set(result.households)
 
         if "flow" in input_data:
             survey.flow_id = input_data["flow"]

@@ -36,7 +36,7 @@ export function FormikSelectField({
 }): ReactElement {
   const isInvalid = Boolean(
     get(form.errors, field.name) &&
-      (get(form.touched, field.name) || form.submitCount > 0 || form.errors),
+    (get(form.touched, field.name) || form.submitCount > 0 || form.errors),
   );
   const value = multiple
     ? field.value || otherProps.value || []
@@ -143,9 +143,11 @@ export function FormikSelectField({
               <ListItemText
                 primary={each.labelEn || each.name || each.label}
                 secondary={each.description}
-                primaryTypographyProps={{ noWrap: true }}
-                secondaryTypographyProps={{
-                  style: { whiteSpace: 'normal', maxWidth: '300px' },
+                slotProps={{
+                  primary: { noWrap: true },
+                  secondary: {
+                    style: { whiteSpace: 'normal', maxWidth: '300px' },
+                  },
                 }}
               />
             ) : (

@@ -204,7 +204,12 @@ export function DeleteIndividualGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">
             {t(`${beneficiaryGroup?.memberLabel} to be withdrawn`)}
           </Typography>

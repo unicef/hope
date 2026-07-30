@@ -146,7 +146,11 @@ export const CreateImportFromProgramPopulationForm = ({
 
   return (
     <FormikProvider value={formik}>
-      <Box mt={2}>
+      <Box
+        sx={{
+          mt: 2,
+        }}
+      >
         <Field
           name="name"
           fullWidth
@@ -157,7 +161,11 @@ export const CreateImportFromProgramPopulationForm = ({
         />
       </Box>
       <ScreenBeneficiaryField />
-      <Box mt={2}>
+      <Box
+        sx={{
+          mt: 2,
+        }}
+      >
         <Field
           name="importFromProgramId"
           label={t('Programme Name')}
@@ -168,7 +176,11 @@ export const CreateImportFromProgramPopulationForm = ({
           onInputChange={(_e, value) => setProgramSearch(value)}
         />
       </Box>
-      <Box mt={2}>
+      <Box
+        sx={{
+          mt: 2,
+        }}
+      >
         <Field
           name="importType"
           data-cy="checkbox-verification-channel"
@@ -190,7 +202,11 @@ export const CreateImportFromProgramPopulationForm = ({
         />
       </Box>
       {values.importType === 'usingIds' && (
-        <Box mt={2}>
+        <Box
+          sx={{
+            mt: 2,
+          }}
+        >
           <Field
             data-cy="input-import-from-ids"
             name="importFromIds"

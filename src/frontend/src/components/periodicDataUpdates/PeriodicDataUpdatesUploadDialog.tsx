@@ -118,7 +118,12 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
       >
         <DialogTitleWrapper data-cy="dialog-import">
           <DialogTitle>
-            <Box display="flex" flexDirection="column">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
               {t('Select Files to Upload')}
               <GreyText>
                 {t(
