@@ -11,6 +11,7 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
@@ -163,43 +164,36 @@ export const GrievancesTable = ({
   }, [usersListData]);
 
   //ALL PROGRAMS
+  const allGrievanceTicketsParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      program: programId === 'all' ? undefined : programId,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: allProgramsGrievanceTicketsData,
     isLoading: isLoadingAll,
     isFetching: isFetchingAll,
     error: errorAll,
   } = useQuery<PaginatedGrievanceTicketListList>({
-    queryKey: [
-      'businessAreasGrievanceTickets',
-      queryVariables,
-      businessArea,
-      filter.grievanceType,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsList,
+      allGrievanceTicketsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            program: programId === 'all' ? undefined : programId,
-          },
-          queryVariables,
-          {
-            withPagination: true,
-          },
-        ),
-      ),
+      RestService.restBusinessAreasGrievanceTicketsList(allGrievanceTicketsParams),
     enabled: isAllPrograms,
     placeholderData: keepPreviousData,
   });
 
   //ALL PROGRAMS COUNT
   const { data: allProgramsGrievanceTicketsCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasGrievanceTicketsCount',
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+      createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
@@ -208,45 +202,42 @@ export const GrievancesTable = ({
   });
 
   // SELECTED PROGRAM
+  const selectedProgramGrievanceTicketsParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: selectedProgramGrievanceTicketsData,
     isLoading: isLoadingSelected,
     isFetching: isFetchingSelected,
     error: errorSelected,
   } = useQuery<PaginatedGrievanceTicketListList>({
-    queryKey: [
-      'businessAreasProgramsGrievanceTickets',
-      queryVariables,
-      programId,
-      businessArea,
-      filter.grievanceType,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsGrievanceTicketsList,
+      selectedProgramGrievanceTicketsParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsGrievanceTicketsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        selectedProgramGrievanceTicketsParams,
       ),
     enabled: !isAllPrograms,
     placeholderData: keepPreviousData,
   });
   //SELECTED PROGRAM COUNT
+  const selectedProgramGrievanceTicketsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: selectedProgramGrievanceTicketsCount } =
     useQuery<CountResponse>({
-      queryKey: [
-        'businessAreasProgramsGrievanceTicketsCount',
-        businessArea,
-        programId,
-        queryVariables,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
+        selectedProgramGrievanceTicketsCountParams,
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-          ),
+          selectedProgramGrievanceTicketsCountParams,
         ),
       enabled: !isAllPrograms && page === 0,
     });

@@ -3,6 +3,7 @@ import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -78,7 +79,9 @@ export function GrievancesTableRow({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsGrievanceTickets'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsList,
+        ),
       });
     },
     onError: (error: any) => {

@@ -5,6 +5,7 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
@@ -73,14 +74,23 @@ export function LookUpLinkedTicketsTable({
 
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedGrievanceTicketListList>({
-      queryKey: [
-        programId
-          ? 'businessAreasProgramsGrievanceTicketsList'
-          : 'businessAreasGrievanceTicketsList',
-        queryVariables,
-        businessArea,
-        programId,
-      ],
+      queryKey: programId
+        ? restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+            createApiParams(
+              { businessAreaSlug: businessArea, programCode: programId },
+              queryVariables,
+              { withPagination: true },
+            ),
+          )
+        : restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+            createApiParams(
+              { businessAreaSlug: businessArea },
+              queryVariables,
+              { withPagination: true },
+            ),
+          ),
       queryFn: () => {
         if (programId) {
           return RestService.restBusinessAreasProgramsGrievanceTicketsList(
@@ -105,14 +115,18 @@ export function LookUpLinkedTicketsTable({
     });
 
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      programId
-        ? 'businessAreasProgramsGrievanceTicketsCount'
-        : 'businessAreasGrievanceTicketsCount',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: programId
+      ? restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+          ),
+        )
+      : restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+          createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+        ),
     queryFn: () => {
       if (programId) {
         return RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(

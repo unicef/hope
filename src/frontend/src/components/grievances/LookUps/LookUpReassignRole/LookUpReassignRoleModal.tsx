@@ -15,6 +15,7 @@ import {
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
@@ -71,7 +72,9 @@ export function LookUpReassignRoleModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasGrievanceTicketsRetrieve', businessArea, id],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
       showMessage(t('Role Reassigned'));
     },

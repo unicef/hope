@@ -16,6 +16,7 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 
 export interface VerifyPaymentGrievanceProps {
@@ -51,7 +52,9 @@ export function VerifyPaymentGrievance({
       setVerifyManualDialogOpen(false);
       showMessage(t('Payment has been verified.'));
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasGrievanceTicketsRetrieve', businessArea, ticket.id],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
     onError: (error: any) => {

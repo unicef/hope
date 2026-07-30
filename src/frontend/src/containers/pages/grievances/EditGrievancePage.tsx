@@ -35,6 +35,7 @@ import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -98,7 +99,10 @@ const EditGrievancePage = (): ReactElement => {
     isLoading: ticketLoading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
@@ -139,11 +143,9 @@ const EditGrievancePage = (): ReactElement => {
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasGrievanceTicketsRetrieve',
-            businessAreaSlug,
-            id,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsRetrieve,
+          ),
         });
       },
     });
@@ -157,11 +159,9 @@ const EditGrievancePage = (): ReactElement => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });

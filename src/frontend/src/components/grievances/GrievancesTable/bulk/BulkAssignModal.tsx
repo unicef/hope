@@ -8,6 +8,7 @@ import { BulkBaseModal } from './BulkBaseModal';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { User } from '@restgenerated/models/User';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -49,11 +50,15 @@ export function BulkAssignModal({
     onSuccess: () => {
       if (isAllPrograms) {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasGrievanceTickets'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+          ),
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasProgramsGrievanceTickets'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+          ),
         });
       }
       setSelected([]);

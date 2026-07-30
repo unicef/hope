@@ -12,6 +12,7 @@ import Grid from '@mui/material/Grid';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -48,7 +49,10 @@ const GrievancesDetailsPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
