@@ -115,7 +115,8 @@ const AddFilterTargetingCriteriaDisplay = ({
 
   useEffect(() => {
     if (loading) return;
-    const allDataChoicesDictTmp = allCoreFieldsAttributesData?.results?.reduce(
+    // restBusinessAreasAllFieldsAttributesList returns a bare array, not a paginated page.
+    const allDataChoicesDictTmp = allCoreFieldsAttributesData?.reduce(
       (acc, item) => {
         acc[item.name] = item.choices;
         return acc;

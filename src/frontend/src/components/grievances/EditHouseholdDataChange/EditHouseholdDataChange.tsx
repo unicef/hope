@@ -317,21 +317,13 @@ function EditHouseholdDataChange({
                       onClick={() => {
                         if (availableIndividuals.length > 0) {
                           const defaultIndividual = availableIndividuals[0].id;
-                          // Find current role for this individual
-                          const currentRoleObj =
-                            fullHousehold.rolesInHousehold.find(
-                              (r) => r.individual.id === defaultIndividual,
-                            );
-                          // Only add if newRole is not equal to current role
-                          if (!currentRoleObj || '' !== currentRoleObj.role) {
-                            setFieldValue('roles', [
-                              ...(values.roles || []),
-                              {
-                                individual: defaultIndividual,
-                                newRole: '',
-                              },
-                            ]);
-                          }
+                          setFieldValue('roles', [
+                            ...(values.roles || []),
+                            {
+                              individual: defaultIndividual,
+                              newRole: '',
+                            },
+                          ]);
                         }
                       }}
                       data-cy="button-add-new-role"

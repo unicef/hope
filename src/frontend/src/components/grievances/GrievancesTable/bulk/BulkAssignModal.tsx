@@ -68,12 +68,14 @@ export function BulkAssignModal({
     },
   });
 
+  // `satisfies` keeps the orderBy string literals narrowed to the fetcher's enum, which a
+  // bare object literal loses once it is hoisted out of the call.
   const usersParams = {
     businessAreaSlug: businessAreaSlug,
     limit: 20,
     orderBy: ['first_name', 'last_name', 'email'],
     search: inputValue,
-  };
+  } satisfies Parameters<typeof RestService.restBusinessAreasUsersList>[0];
   const { data: usersData } = useQuery({
     queryKey: restQueryKey(RestService.restBusinessAreasUsersList, usersParams),
     queryFn: () => RestService.restBusinessAreasUsersList(usersParams),
