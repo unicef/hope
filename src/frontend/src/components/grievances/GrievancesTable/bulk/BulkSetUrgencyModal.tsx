@@ -66,7 +66,10 @@ export function BulkSetUrgencyModal({
     },
   });
   const { data: choices } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,

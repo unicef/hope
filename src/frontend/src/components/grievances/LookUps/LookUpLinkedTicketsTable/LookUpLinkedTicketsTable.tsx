@@ -30,7 +30,10 @@ export function LookUpLinkedTicketsTable({
 }: LookUpLinkedTicketsTableProps): ReactElement {
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug: businessArea,

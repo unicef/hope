@@ -47,13 +47,17 @@ export function Notes({
   const { businessAreaSlug, programCode } = useBaseUrl();
   const { showMessage } = useSnackbar();
 
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersProfileRetrieve,
+      profileParams,
+    ),
     queryFn: () => {
-      return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug,
-        program: programCode === 'all' ? undefined : programCode,
-      });
+      return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
     gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes

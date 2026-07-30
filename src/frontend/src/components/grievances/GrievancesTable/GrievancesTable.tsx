@@ -137,15 +137,12 @@ export const GrievancesTable = ({
   const [page, setPage] = useState<number>(0);
 
   const { data: usersListData } = useQuery<PaginatedUserList>({
-    queryKey: [
-      'businessAreasUsersList',
-      {
-        businessAreaSlug: businessArea,
-        limit: 20,
-        ordering: 'first_name,last_name,email',
-        search: debouncedInputText || undefined,
-      },
-    ],
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, {
+      businessAreaSlug: businessArea,
+      limit: 20,
+      ordering: 'first_name,last_name,email',
+      search: debouncedInputText || undefined,
+    }),
     queryFn: ({ queryKey }) => {
       const [, params] = queryKey;
       return RestService.restBusinessAreasUsersList(params as any);
@@ -273,21 +270,30 @@ export const GrievancesTable = ({
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,
       }),
   });
 
+  const currentUserParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programCode],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        currentUserParams,
+      ),
       queryFn: () => {
-        return RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug,
-          program: programCode === 'all' ? undefined : programCode,
-        });
+        return RestService.restBusinessAreasUsersProfileRetrieve(
+          currentUserParams,
+        );
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
       gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes

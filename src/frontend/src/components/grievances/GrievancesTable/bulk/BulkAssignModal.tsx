@@ -68,15 +68,15 @@ export function BulkAssignModal({
     },
   });
 
+  const usersParams = {
+    businessAreaSlug: businessAreaSlug,
+    limit: 20,
+    orderBy: ['first_name', 'last_name', 'email'],
+    search: inputValue,
+  };
   const { data: usersData } = useQuery({
-    queryKey: ['users', businessAreaSlug, inputValue],
-    queryFn: () =>
-      RestService.restBusinessAreasUsersList({
-        businessAreaSlug: businessAreaSlug,
-        limit: 20,
-        orderBy: ['first_name', 'last_name', 'email'],
-        search: inputValue,
-      }),
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, usersParams),
+    queryFn: () => RestService.restBusinessAreasUsersList(usersParams),
   });
 
   const optionsData: User[] = usersData?.results || [];

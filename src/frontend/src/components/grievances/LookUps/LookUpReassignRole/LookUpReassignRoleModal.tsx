@@ -85,7 +85,10 @@ export function LookUpReassignRoleModal({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,

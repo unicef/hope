@@ -70,7 +70,10 @@ export function DeleteIndividualGrievanceDetails({
   const queryClient = useQueryClient();
 
   const { data: addIndividualFieldsData, isLoading } = useQuery({
-    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {

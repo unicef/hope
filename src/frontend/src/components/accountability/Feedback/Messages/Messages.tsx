@@ -50,7 +50,10 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { businessAreaSlug, programCode } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessAreaSlug, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersProfileRetrieve, {
+      businessAreaSlug,
+      program: programCode,
+    }),
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug,
