@@ -46,9 +46,6 @@ export function AbortedPaymentPlanHeaderButtons({
       queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasPaymentPlans'],
-      });
     },
     onError: () => {
       setLoading(false);

@@ -57,9 +57,6 @@ export function DeletePaymentPlan({
         queryClient.invalidateQueries({
           queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
         });
-        queryClient.invalidateQueries({
-          queryKey: ['businessAreasPaymentPlans'],
-        });
       },
     });
   const { id } = paymentPlan;

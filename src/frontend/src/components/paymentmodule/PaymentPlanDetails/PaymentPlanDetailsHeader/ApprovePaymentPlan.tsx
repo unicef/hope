@@ -69,9 +69,6 @@ export function ApprovePaymentPlan({
       queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasPaymentPlans'],
-      });
     },
   });
   const initialValues = {

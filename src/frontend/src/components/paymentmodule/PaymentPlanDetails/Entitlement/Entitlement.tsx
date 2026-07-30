@@ -182,16 +182,16 @@ function Entitlement({
       },
     });
 
+  const engineRulesParams = {
+    type: 'PAYMENT_PLAN' as const,
+    deprecated: false,
+    enabled: true,
+    businessArea: businessArea,
+  };
   const { data: steficonData, isLoading: loading } =
     useQuery<PaginatedRuleList>({
-      queryKey: ['engineRules', businessArea],
-      queryFn: () =>
-        RestService.restEngineRulesList({
-          type: 'PAYMENT_PLAN',
-          deprecated: false,
-          enabled: true,
-          businessArea: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restEngineRulesList, engineRulesParams),
+      queryFn: () => RestService.restEngineRulesList(engineRulesParams),
     });
 
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({

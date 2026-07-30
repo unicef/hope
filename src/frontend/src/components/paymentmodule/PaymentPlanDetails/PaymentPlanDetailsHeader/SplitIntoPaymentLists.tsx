@@ -78,9 +78,6 @@ export const SplitIntoPaymentLists = ({
       queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasPaymentPlans'],
-      });
     },
   });
 

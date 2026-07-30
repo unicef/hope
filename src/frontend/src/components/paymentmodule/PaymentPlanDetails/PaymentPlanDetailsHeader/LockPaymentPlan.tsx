@@ -63,9 +63,6 @@ export function LockPaymentPlan({
       await queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
-      await queryClient.invalidateQueries({
-        queryKey: ['businessAreasPaymentPlans'],
-      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

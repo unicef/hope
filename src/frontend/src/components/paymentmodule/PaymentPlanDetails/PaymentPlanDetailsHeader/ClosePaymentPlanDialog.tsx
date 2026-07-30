@@ -79,9 +79,6 @@ export function ClosePaymentPlanDialog({
       queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasPaymentPlans'],
-      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);

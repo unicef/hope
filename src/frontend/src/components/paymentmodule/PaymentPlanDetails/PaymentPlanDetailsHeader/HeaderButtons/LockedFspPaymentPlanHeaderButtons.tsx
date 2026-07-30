@@ -47,9 +47,6 @@ export function LockedFspPaymentPlanHeaderButtons({
       queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasPaymentPlans'],
-      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);
@@ -74,9 +71,6 @@ export function LockedFspPaymentPlanHeaderButtons({
         });
         queryClient.invalidateQueries({
           queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['businessAreasPaymentPlans'],
         });
       },
       onError: (error: any) => {
