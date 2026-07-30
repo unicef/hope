@@ -38,7 +38,14 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const { data: group, isLoading } = useQuery({
-    queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: groupId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
         businessAreaSlug: businessArea,

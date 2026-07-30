@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,7 +48,9 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroup', businessArea, programId, group.id],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+        ),
       });
       setOpen(false);
       showMessage(t('Group name updated'));

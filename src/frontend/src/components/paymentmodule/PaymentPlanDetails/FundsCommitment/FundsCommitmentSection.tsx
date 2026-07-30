@@ -27,6 +27,7 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { WarningTooltip } from '@core/WarningTooltip';
 
 const EndInputAdornment = styled(InputAdornment)`
@@ -76,12 +77,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            'paymentPlan',
-            businessArea,
-            paymentPlan.id,
-            paymentPlan.program.code,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
       },
     });
@@ -149,7 +147,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         });
         showMessage(t('Funds commitment items assigned successfully'));
         await queryClient.invalidateQueries({
-          queryKey: ['paymentPlan'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
       } catch (e) {
         showApiErrorMessages(e, showMessage);

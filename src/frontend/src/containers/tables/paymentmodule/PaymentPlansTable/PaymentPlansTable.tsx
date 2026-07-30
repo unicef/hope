@@ -9,6 +9,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { createApiParams } from '@utils/apiUtils';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
@@ -63,43 +64,41 @@ function PaymentPlansTable({
 
   const [page, setPage] = useState(0);
 
+  const paymentPlansListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentPlansData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansList,
+      paymentPlansListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        paymentPlansListParams,
       );
     },
     placeholderData: keepPreviousData,
   });
 
+  const paymentPlansCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansCountRetrieve',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve,
+      paymentPlansCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        paymentPlansCountParams,
       ),
     enabled: !!businessArea && !!programId && page === 0,
   });
