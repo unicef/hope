@@ -51,6 +51,7 @@ import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FspChoices } from '@restgenerated/models/FspChoices';
+import { restQueryKey } from '@utils/queryKeys';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -209,21 +210,20 @@ export const TargetingCriteriaForm = ({
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
   >({
-    queryKey: [
-      'businessAreasAvailableFspsForDeliveryMechanismsList',
-      businessArea,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
         businessAreaSlug: businessArea,
       }),
   });
   const { data, isLoading: loading } = useQuery({
-    queryKey: [
-      'businessAreasAllFieldsAttributesList',
-      businessArea,
-      selectedProgram?.id,
-    ],
+    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
+      slug: businessArea,
+      programId: selectedProgram?.id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,

@@ -10,13 +10,17 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
+import { restQueryKey } from '@utils/queryKeys';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const { data } = useQuery({
-    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
+    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
+      slug: businessArea,
+      programId: selectedProgram?.id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
