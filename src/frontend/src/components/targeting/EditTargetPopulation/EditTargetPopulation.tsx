@@ -106,7 +106,10 @@ const EditTargetPopulation = ({
   };
 
   const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: programCode,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,

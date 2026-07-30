@@ -4,6 +4,7 @@ import { AddCircleOutlined } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -94,7 +95,10 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { businessArea, isAllPrograms } = useBaseUrl();
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
-    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
+    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
+      slug: businessArea,
+      programId: selectedProgram?.id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
