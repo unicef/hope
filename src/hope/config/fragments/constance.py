@@ -7,6 +7,10 @@ CONSTANCE_ADDITIONAL_FIELDS = {
         "django.forms.ImageField",
         {"required": False},
     ],
+    "textarea": (
+        "django.forms.fields.CharField",
+        {"required": False, "widget": "django.forms.widgets.Textarea"},
+    ),
     "percentages": (
         "django.forms.fields.IntegerField",
         {
@@ -238,6 +242,11 @@ Clear Cache,clear-cache/
         "Congratulations, explorer.",
         "Subheading shown on the surprise/easter-egg page.",
         str,
+    ),
+    "SURPRISE_PAGE_BODY": (
+        "",
+        "Body text for the surprise/easter-egg page. Separate paragraphs with a blank line.",
+        "textarea",
     ),
     "SURPRISE_PAGE_IMAGE": (
         "",
