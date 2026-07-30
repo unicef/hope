@@ -3,8 +3,9 @@ import io
 
 import openpyxl
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet as OpenpyxlWorksheet
 from rest_framework.exceptions import ValidationError
-from xlwt import Row, Worksheet
+from xlwt import Row
 
 from hope.apps.payment.utils import from_received_yes_no_to_status, to_decimal
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
@@ -44,7 +45,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.COLUMN_DICT_TYPES = {}
 
     @staticmethod
-    def get_columns_from_worksheet(ws: Worksheet) -> dict:
+    def get_columns_from_worksheet(ws: OpenpyxlWorksheet) -> dict:
         return {
             cell.value: {
                 "letter": get_column_letter(cell.column),
@@ -77,7 +78,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             self._import_row(row)
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
-    def _get_sheet_by_name(self, sheet_name: str) -> openpyxl.Workbook | object:
+    def _get_sheet_by_name(self, sheet_name: str) -> OpenpyxlWorksheet:
         try:
             ws = self.wb[sheet_name]
         except KeyError:
@@ -86,8 +87,8 @@ class XlsxVerificationImportService(XlsxImportBaseService):
 
     def _check_version(self) -> None:
         ws_meta = self._get_sheet_by_name(XlsxVerificationExportService.META_SHEET)
-        version_cell_name = ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES].value
-        version = ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES].value
+        version_cell_name: str = ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES].value or ""
+        version: str = ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES].value or ""
 
         if (
             version_cell_name != XlsxVerificationExportService.VERSION_CELL_NAME

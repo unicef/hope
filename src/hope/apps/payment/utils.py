@@ -3,7 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 import hashlib
 import json
 from math import ceil
-from typing import TYPE_CHECKING, no_type_check
+from typing import TYPE_CHECKING, Any, no_type_check
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -71,7 +71,7 @@ def log_payment_plan_change(
 
 
 def _log_payment_plan_event(
-    payment_plan: PaymentPlan, user: "AbstractBaseUser | AnonymousUser | None", changes: dict[str, object]
+    payment_plan: PaymentPlan, user: "AbstractBaseUser | AnonymousUser | None", changes: dict[str, Any]
 ) -> None:
     """Attach a free-form activity-log entry to a PaymentPlan (events the field-diff cannot express)."""
     log = LogEntry.objects.create(
@@ -97,7 +97,7 @@ def log_payment_plan_approval(
     The PaymentPlan status transition is logged separately; this adds a readable entry capturing
     WHO acted at which stage and any comment, which the field-diff log cannot express.
     """
-    changes: dict[str, object] = {"acceptance_process": {"from": None, "to": approval_type}}
+    changes: dict[str, Any] = {"acceptance_process": {"from": None, "to": approval_type}}
     if comment:
         changes["comment"] = {"from": None, "to": comment}
     _log_payment_plan_event(payment_plan, user, changes)
@@ -255,7 +255,7 @@ def get_quantity_in_usd(
     amount: Decimal | None,
     currency: "Currency | None",
     exchange_rate: None | Decimal | float,
-    currency_exchange_date: datetime.datetime,
+    currency_exchange_date: datetime.date,
     exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None,
 ) -> Decimal | None:
     if amount is None:
@@ -313,7 +313,7 @@ def get_payment_delivered_quantity_status_and_value(
     raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
 
-def generate_cache_key(data: dict[str, object]) -> str:
+def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
     return hashlib.sha256(task_params_str.encode()).hexdigest()
 

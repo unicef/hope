@@ -54,11 +54,7 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
 
 
 def clear_cache(
-    ticket_details: TicketHouseholdDataUpdateDetails
-    | TicketDeleteHouseholdDetails
-    | TicketAddIndividualDetails
-    | TicketIndividualDataUpdateDetails
-    | TicketDeleteIndividualDetails,
+    ticket_details: object,
     business_area_slug: str,
 ) -> None:
     if isinstance(ticket_details, TicketHouseholdDataUpdateDetails | TicketDeleteHouseholdDetails):

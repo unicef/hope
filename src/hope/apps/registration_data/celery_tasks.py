@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from contextlib import contextmanager
 import logging
 from typing import TYPE_CHECKING
@@ -45,7 +46,7 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
 
 
 @contextmanager
-def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> object:
+def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> Iterator[bool]:
     now = timezone.now()
     acquired = False
     try:

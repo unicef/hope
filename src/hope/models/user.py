@@ -1,6 +1,7 @@
 from collections import defaultdict
 from functools import cached_property, lru_cache
 import logging
+from typing import Any
 from uuid import UUID
 
 from django.conf import settings
@@ -54,7 +55,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.partner_id:
             self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
@@ -234,13 +235,13 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
         html_body: str | None = None,
         text_body: str | None = None,
         mailjet_template_id: int | None = None,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> None:
         """Send email to this user via Mailjet.
 
         kwargs can have keys: 'body_variables', 'ccs', 'from_email', 'from_email_display',
         """
-        body_variables: dict[str, object] = kwargs.get("body_variables") or {}
+        body_variables: dict[str, Any] = kwargs.get("body_variables") or {}
         from_email: str | None = kwargs.get("from_email")
         from_email_display: str | None = kwargs.get("from_email_display")
         ccs: list[str] | None = kwargs.get("ccs")

@@ -3,7 +3,7 @@ from datetime import date, datetime
 from functools import cached_property, partial
 from io import BytesIO
 import logging
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable, cast
 import uuid
 
 from django.core.files import File
@@ -92,8 +92,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         header: str,
         row_num: int,
         individual: PendingIndividual,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if value is None:
             return
@@ -118,8 +118,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         row_num: int,
         individual: PendingIndividual,
         header: str,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if not self.image_loader.image_in(cell.coordinate):
             return
@@ -144,8 +144,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         header: str,
         row_num: int,
         individual: PendingIndividual,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if value is None:
             return
@@ -160,7 +160,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "key": document_key,
             },
         )
-        document_data["issuing_country"] = Country(value)
+        document_data["issuing_country"] = Country(str(value))
         self.documents[common_header] = document_data
 
     def _handle_image_field(
@@ -168,8 +168,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: object,
         is_flex_field: bool = False,
         is_field_required: bool = False,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> File | str | None:
         if self.image_loader.image_in(cell.coordinate):
             image = self.image_loader.get(cell.coordinate)
@@ -191,8 +191,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: object,
         is_flex_field: bool = False,
         is_field_required: bool = False,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> object:
         value = cell.value
         if not is_flex_field:
@@ -204,8 +204,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: object,
         is_flex_field: bool = False,
         is_field_required: bool = False,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> object:
         value = cell.value
         if isinstance(value, str):
@@ -215,7 +215,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 return True
         return value
 
-    def _handle_geopoint_field(self, value: object, *args: object, **kwargs: object) -> tuple[float, float] | None:
+    def _handle_geopoint_field(self, value: object, *args: Any, **kwargs: Any) -> tuple[float, float] | None:
         if not value:
             return None
 
@@ -230,8 +230,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: object,
         is_flex_field: bool = False,
         is_field_required: bool = False,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> str:
         return str(cell.value)
 
@@ -240,8 +240,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: object,
         is_flex_field: bool = False,
         is_field_required: bool = False,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> datetime:
         return timezone_datetime(cell.value)
 
@@ -250,8 +250,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: object,
         is_flex_field: bool = False,
         is_field_required: bool = False,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> date:
         return timezone_datetime(cell.value).date()
 
@@ -261,8 +261,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         header: str,
         row_num: int,
         individual: PendingIndividual,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if value is None:
             return
@@ -287,8 +287,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         row_num: int,
         header: str,
         individual: PendingIndividual,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if not self.image_loader.image_in(cell.coordinate):
             return
@@ -320,8 +320,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         header: str,
         row_num: int,
         individual: PendingIndividual,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         if value is None:
             return
@@ -331,11 +331,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         identities_data = self.identities.get(f"individual_{row_num}_{partner}")
 
         if identities_data:
-            identities_data["issuing_country"] = Country(value)
+            identities_data["issuing_country"] = Country(str(value))
         else:
             self.identities[f"individual_{row_num}_{partner}"] = {
                 "individual": individual,
-                "issuing_country": Country(value),
+                "issuing_country": Country(str(value)),
                 "partner": partner,
             }
 
@@ -344,8 +344,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         value: object,
         header: str,
         individual: PendingIndividual,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         list_of_ids = collectors_str_ids_to_list(value)
         if list_of_ids is None:
@@ -405,7 +405,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     @staticmethod
-    def _validate_birth_date(obj_to_create: object) -> object:
+    def _validate_birth_date(obj_to_create: Any) -> Any:
         birth_date = obj_to_create.birth_date
 
         obj_to_create.birth_date = max(obj_to_create.birth_date, datetime(1923, 1, 1))
@@ -495,7 +495,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
         raise ValueError(f"Unhandled sheet label '{sheet_title!r}'")
 
-    def _find_header_indices(self, first_row: object) -> tuple[int | None, int | None]:
+    def _find_header_indices(self, first_row: tuple[Cell, ...]) -> tuple[int | None, int | None]:
         """Find household_id and relationship column indices."""
         household_id_col_idx = None
         relationship_col_idx = None
@@ -678,7 +678,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         cell: object,
         obj_to_create: object,
         current_field: dict,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> bool:
         """Process flex field and set attribute. Returns True if field was processed."""
         if header not in self.FLEX_FIELDS[self.sheet_title]:
@@ -709,7 +709,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _process_cell(self, cell: object, header_cell: object, obj_to_create: object) -> None:
         header = header_cell.value
         if header.startswith(Account.ACCOUNT_FIELD_PREFIX):
-            self._handle_account_fields(cell.value, header, cell.row, obj_to_create)
+            self._handle_account_fields(cell.value, header, cell.row, cast("PendingIndividual", obj_to_create))
             return
 
         current_field = self.COMBINED_FIELDS.get(header, {})

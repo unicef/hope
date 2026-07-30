@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Any
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -20,7 +21,7 @@ class Command(BaseCommand):
         else:
             pass
 
-    def handle(self, *args: object, **options: object) -> object:
+    def handle(self, *args: Any, **options: Any) -> str | None:
         actions = ("view", "add", "change", "delete")
         app_model_map = {
             "account": ["incompatibleroles", "partner", "role", "userrole", "user"],
@@ -165,3 +166,4 @@ class Command(BaseCommand):
             self.create_group_and_set_permissions(general_groups_map[action], self.perms_list_map[action])
 
         self.stdout.write(self.style.SUCCESS("Successfully created/updated all Groups"))
+        return None

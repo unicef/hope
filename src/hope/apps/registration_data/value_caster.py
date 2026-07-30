@@ -1,6 +1,6 @@
 import abc
 from datetime import date, datetime
-from typing import Optional
+from typing import Any, Optional
 
 from dateutil.parser import parse
 
@@ -20,61 +20,62 @@ class BaseValueCaster(abc.ABC):
         self._next_caster = next_caster
 
     @abc.abstractmethod
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         pass
 
     @abc.abstractmethod
-    def process(self, field: object, value: object) -> object:
+    def process(self, field: dict[str, Any], value: object) -> object:
         pass
 
-    def cast(self, field: object, value: object) -> object:
+    def cast(self, field: dict[str, Any], value: object) -> object:
         if self.can_process(field):
             return self.process(field, value)
         return self._next_caster.cast(field, value)
 
 
 class StringValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return field["type"] == TYPE_STRING
 
-    def process(self, field: object, value: object) -> str:
+    def process(self, field: dict[str, Any], value: object) -> str:
         if isinstance(value, float) and value.is_integer():
             value = int(value)
         return str(value)
 
 
 class IntegerValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return field["type"] == TYPE_INTEGER
 
-    def process(self, field: object, value: object) -> int:
-        return int(value)
+    def process(self, field: dict[str, Any], value: object) -> int:
+        return int(str(value))
 
 
 class DecimalValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return field["type"] == TYPE_DECIMAL
 
-    def process(self, field: object, value: object) -> float:
-        return float(value)
+    def process(self, field: dict[str, Any], value: object) -> float:
+        return float(str(value))
 
 
 class SelectManyValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return field["type"] == TYPE_SELECT_MANY
 
-    def process(self, field: object, value: object) -> list:
+    def process(self, field: dict[str, Any], value: object) -> list:
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 
         choices = [x.get("value") for x in field["choices"]]
 
-        if "," in value:
-            values = value.split(",")
-        elif ";" in value:
-            values = value.split(";")
+        value_str = str(value)
+        if "," in value_str:
+            values = value_str.split(",")
+        elif ";" in value_str:
+            values = value_str.split(";")
         else:
-            values = value.split(" ")
+            values = value_str.split(" ")
         valid_choices: list = []
         for single_choice in values:
             if isinstance(single_choice, str):
@@ -96,10 +97,10 @@ class SelectManyValueCaster(BaseValueCaster):
 
 
 class SelectOneValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return field["type"] == TYPE_SELECT_ONE
 
-    def process(self, field: object, value: object) -> int | str | None:
+    def process(self, field: dict[str, Any], value: object) -> int | str | None:
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 
@@ -120,7 +121,7 @@ class SelectOneValueCaster(BaseValueCaster):
 
         if value not in choices:
             try:
-                return int(value)
+                return int(str(value))
             except ValueError:
                 return str(value)
 
@@ -128,10 +129,10 @@ class SelectOneValueCaster(BaseValueCaster):
 
 
 class DateValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return field["type"] == TYPE_DATE
 
-    def process(self, field: object, value: date | datetime | str) -> date | datetime:
+    def process(self, field: dict[str, Any], value: object) -> date | datetime | None:
         if isinstance(value, date | datetime):
             return value
 
@@ -141,10 +142,10 @@ class DateValueCaster(BaseValueCaster):
 
 
 class BooleanValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return field["type"] == TYPE_BOOL
 
-    def process(self, field: object, value: bool | str) -> bool | str:
+    def process(self, field: dict[str, Any], value: object) -> object:
         if isinstance(value, str):
             if value.lower() == "false":
                 return False
@@ -158,8 +159,8 @@ class BooleanValueCaster(BaseValueCaster):
 
 
 class DefaultValueCaster(BaseValueCaster):
-    def can_process(self, field: object) -> bool:
+    def can_process(self, field: dict[str, Any]) -> bool:
         return True
 
-    def process(self, field: object, value: object) -> object:
+    def process(self, field: dict[str, Any], value: object) -> object:
         return value

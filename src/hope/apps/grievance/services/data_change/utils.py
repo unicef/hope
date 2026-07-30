@@ -2,6 +2,7 @@ from datetime import datetime
 import logging
 import secrets
 import string
+from typing import Any
 import urllib.parse
 
 from constance import config
@@ -315,7 +316,7 @@ def handle_add_account(account: dict, individual: Individual) -> Account:
 def prepare_previous_documents(
     documents_to_remove_with_approve_status: list[dict],
 ) -> dict[str, dict]:
-    previous_documents: dict[str, object] = {}
+    previous_documents: dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = document_data.get("value")
         document: Document = get_object_or_404(Document, id=document_id)
@@ -372,8 +373,8 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
 
 def prepare_previous_identities(
     identities_to_remove_with_approve_status: list[dict],
-) -> dict[str, object]:
-    previous_identities: dict[str, object] = {}
+) -> dict[str, Any]:
+    previous_identities: dict[str, Any] = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
         identity = get_object_or_404(IndividualIdentity, id=identity_id)

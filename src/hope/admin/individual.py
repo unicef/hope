@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable
+from typing import Any, Iterable, cast
 from uuid import UUID
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -197,7 +197,9 @@ class IndividualAdmin(
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> Any:
         if db_field.name == "household":
             kwargs["queryset"] = Household.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -245,8 +247,8 @@ class IndividualAdmin(
 class InputFilter(admin.SimpleListFilter):
     template: str = "admin/household/individual/business_area_slug_input_filter.html"
 
-    def lookups(self, request: HttpRequest, model_admin: object) -> Iterable[tuple[object, str]] | None:
-        return [(None, "")]
+    def lookups(self, request: HttpRequest, model_admin: object) -> Iterable[tuple[str, str]] | None:
+        return cast("Iterable[tuple[str, str]] | None", [(None, "")])
 
 
 class BusinessAreaSlugFilter(InputFilter):
@@ -290,7 +292,9 @@ class IndividualRoleInHouseholdAdmin(
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> Any:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         if db_field.name == "household":
@@ -314,7 +318,9 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "partner", "copied_from", "country")
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> Any:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

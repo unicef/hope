@@ -1,5 +1,6 @@
 from datetime import timedelta
 import logging
+from typing import Any
 
 from constance import config
 from django.utils import timezone
@@ -88,7 +89,7 @@ def fresh_extract_records_async_task(
     )
 
 
-def automate_rdi_creation_async_task_action(job: AsyncRetryJob) -> list[object]:
+def automate_rdi_creation_async_task_action(job: AsyncRetryJob) -> list[Any]:
     registration_id = int(job.config["registration_id"])
     page_size = int(job.config["page_size"])
     template = str(job.config["template"])

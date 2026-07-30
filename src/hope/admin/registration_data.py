@@ -220,7 +220,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         ),
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
-    def delete_rdi(self, request: HttpRequest, pk: str) -> object:  # TODO: typing
+    def delete_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:  # TODO: typing
         try:
             if request.method == "POST":
                 with transaction.atomic():
@@ -250,6 +250,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         except (RegistrationDataImport.DoesNotExist, Error) as e:
             logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
+            return None
 
     @staticmethod
     def delete_merged_rdi_visible(rdi: RegistrationDataImport) -> bool:

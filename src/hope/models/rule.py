@@ -1,5 +1,5 @@
 from builtins import type as builtin_type
-from typing import Callable, Optional, Sequence
+from typing import Any, Callable, Iterable, Optional, Sequence
 
 from concurrency.fields import AutoIncVersionField
 from django.conf import settings
@@ -97,7 +97,7 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     def __str__(self) -> str:
         return self.name
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.__original_security = self.security
 
@@ -133,10 +133,11 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
 
     def save(  # type: ignore[override]
         self,
+        *,
         force_insert: bool | tuple[builtin_type[models.Model], ...] = False,
         force_update: bool = False,
-        using: object | None = None,
-        update_fields: object | None = None,
+        using: str | None = None,
+        update_fields: Iterable[str] | None = None,
     ) -> None:
         with atomic():
             super().save(force_insert, force_update, using, update_fields)

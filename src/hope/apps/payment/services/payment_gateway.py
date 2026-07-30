@@ -2,7 +2,7 @@ from _decimal import Decimal
 import dataclasses
 from enum import Enum
 import logging
-from typing import cast
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import Exists, OuterRef, Prefetch, Q, QuerySet
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 class FlexibleArgumentsDataclassMixin:
     @classmethod
-    def create_from_dict(cls, _dict: dict) -> object:
+    def create_from_dict(cls, _dict: dict) -> Any:
         class_fields = {f.name for f in dataclasses.fields(cls)}  # type: ignore[arg-type]
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models import Model
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -13,20 +15,20 @@ from hope.contrib.aurora.models import Organization, Project, Registration
 
 @receiver(post_save, sender=Registration)
 @receiver(post_delete, sender=Registration)
-def clear_registration_list_cache(sender: type[Model], instance: Registration, **kwargs: object) -> None:
+def clear_registration_list_cache(sender: type[Model], instance: Registration, **kwargs: Any) -> None:
     cache_key = RegistrationListVersionsKeyBit.specific_view_cache_key
     clear_cache_for_key(cache_key)
 
 
 @receiver(post_save, sender=Project)
 @receiver(post_delete, sender=Project)
-def clear_project_list_cache(sender: type[Model], instance: Project, **kwargs: object) -> None:
+def clear_project_list_cache(sender: type[Model], instance: Project, **kwargs: Any) -> None:
     cache_key = ProjectListVersionsKeyBit.specific_view_cache_key
     clear_cache_for_key(cache_key)
 
 
 @receiver(post_save, sender=Organization)
 @receiver(post_delete, sender=Organization)
-def clear_organization_list_cache(sender: type[Model], instance: Organization, **kwargs: object) -> None:
+def clear_organization_list_cache(sender: type[Model], instance: Organization, **kwargs: Any) -> None:
     cache_key = OrganizationListVersionsKeyBit.specific_view_cache_key
     clear_cache_for_key(cache_key)

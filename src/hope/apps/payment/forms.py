@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib.postgres.forms import DecimalRangeField
@@ -35,7 +35,7 @@ class BatchReexportForm(forms.Form):
         label="FSP XLSX Template (optional override)",
     )
 
-    def __init__(self, *args: object, payment_plan_group: "PaymentPlanGroup | None" = None, **kwargs: object) -> None:
+    def __init__(self, *args: Any, payment_plan_group: "PaymentPlanGroup | None" = None, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if payment_plan_group is not None:
             tags = (
@@ -54,7 +54,7 @@ class TemplateSelectForm(forms.Form):
         required=False,
     )
 
-    def __init__(self, *args: object, payment_plan: object = None, **kwargs: object) -> None:
+    def __init__(self, *args: Any, payment_plan: object = None, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if payment_plan:
             self.fields["template"].queryset = FinancialServiceProviderXlsxTemplate.objects.filter(

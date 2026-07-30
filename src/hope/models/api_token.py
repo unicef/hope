@@ -1,5 +1,6 @@
 import binascii
 import os
+from typing import Any
 
 from django.db import models
 from django.utils import timezone
@@ -30,7 +31,7 @@ class APIToken(models.Model):
     def __str__(self) -> str:
         return f"Token #{self.pk}"
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.key:
             self.key = self.generate_key()
         return super().save(*args, **kwargs)

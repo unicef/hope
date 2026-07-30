@@ -1,5 +1,6 @@
 from io import BytesIO
 import logging
+from typing import Any
 
 from django.db import transaction
 import openpyxl
@@ -98,7 +99,7 @@ class UniversalIndividualUpdateService:
         errors = []
         for field, (name, validator, _handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            kwargs: dict[str, object] = {}
+            kwargs: dict[str, Any] = {}
             if name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
                 kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
             error = validator(value, name, Household, self.business_area, self.program, **kwargs)
@@ -234,7 +235,7 @@ class UniversalIndividualUpdateService:
     def handle_household_update(self, row: tuple[object, ...], headers: list[str], household: object) -> None:
         for field, (_name, _validator, handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            kwargs: dict[str, object] = {}
+            kwargs: dict[str, Any] = {}
             if _name == "facility" and FACILITY_ADMIN_P_CODE_COLUMN in headers:
                 kwargs["admin_p_code"] = row[headers.index(FACILITY_ADMIN_P_CODE_COLUMN)]
             handled_value = handler(value, field, household, self.business_area, self.program, **kwargs)
@@ -288,7 +289,7 @@ class UniversalIndividualUpdateService:
                     document = doc
                     break
             if document:
-                document.document_number = document_number
+                document.document_number = document_number  # type: ignore[assignment]
                 document.status = Document.STATUS_PENDING
                 document.country = country
                 documents_to_update.append(document)
@@ -340,9 +341,9 @@ class UniversalIndividualUpdateService:
                             rdi_merge_status=Account.MERGED,
                         )
                     if field_name == "number":
-                        single_data_object.number = value
+                        single_data_object.number = value  # type: ignore[assignment]
                     if field_name == "financial_institution":
-                        single_data_object.financial_institution_id = value
+                        single_data_object.financial_institution_id = value  # type: ignore[assignment]
                         continue
                     single_data_object.data[field_name] = value
             if single_data_object:
@@ -418,7 +419,7 @@ class UniversalIndividualUpdateService:
 
     def batch_update(
         self,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> None:
         document_fields_to_update: list = kwargs.get("document_fields_to_update", [])
         documents_to_create: list = kwargs.get("documents_to_create", [])
@@ -467,11 +468,11 @@ class UniversalIndividualUpdateService:
         if household_ids:
             recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
 
-    def get_excel_value(self, value: object) -> object:
+    def get_excel_value(self, value: object) -> Any:
         return get_generator_handler(value)(value)
 
-    def _get_household_row_values(self, household: object) -> list[object]:
-        values: list[object] = []
+    def _get_household_row_values(self, household: object) -> list[Any]:
+        values: list[Any] = []
         for field_data in self.household_fields.values():
             value = getattr(household, field_data[0])
             values.append(self.get_excel_value(value))
@@ -480,8 +481,8 @@ class UniversalIndividualUpdateService:
                 values.append(self.get_excel_value(admin_p_code))
         return values
 
-    def get_individual_row(self, individual: Individual) -> list[object]:
-        row = [individual.unicef_id]
+    def get_individual_row(self, individual: Individual) -> list[Any]:
+        row: list[Any] = [individual.unicef_id]
         household = individual.household
         row += [
             self.get_excel_value(getattr(individual, field_data[0])) for field_data in self.individual_fields.values()

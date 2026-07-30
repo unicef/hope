@@ -3,7 +3,7 @@ from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import Error, transaction
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
@@ -42,7 +42,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         request: HttpRequest,
         form_url: str = "",
         extra_context: dict | None = None,
-    ) -> object:
+    ) -> HttpResponse:
         return self.xlsx_update(request)
 
     def _stage1(self, request: HttpRequest) -> TemplateResponse:
@@ -151,7 +151,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
                 context,
             )
 
-    def xlsx_update(self, request: HttpRequest) -> object:
+    def xlsx_update(self, request: HttpRequest) -> HttpResponse:
         if request.method == "GET":
             return self._stage1(request)
 

@@ -5,6 +5,7 @@ import importlib
 import logging
 import sys
 import traceback
+from typing import Any
 
 from uuid import UUID
 
@@ -30,7 +31,7 @@ class Interpreter:
             raise ValidationError(str(e))
 
     def get_result(self) -> object:
-        return config.RESULT()
+        return config.RESULT()  # type: ignore[operator]
 
 
 def call_rule(rule_id: UUID, context: dict) -> object:
@@ -44,7 +45,7 @@ class PythonExec(Interpreter):
     label = "Python"
 
     @cached_property
-    def code(self) -> object:
+    def code(self) -> Any:
         return compile(self.init_string, "<code>", mode="exec")
 
     def execute(self, context: dict) -> object:
@@ -81,7 +82,7 @@ class PythonExec(Interpreter):
         pts = self.get_result()
         locals_ = {}
         locals_["context"] = context
-        locals_["result"] = pts
+        locals_["result"] = pts  # type: ignore[assignment]
         try:
             exec(self.init_string, gl, locals_)  # noqa
         except SyntaxError as err:

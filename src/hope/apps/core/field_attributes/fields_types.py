@@ -1,5 +1,6 @@
 from datetime import datetime
 import enum
+from typing import Any
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -15,7 +16,7 @@ TYPE_SELECT_MANY = "SELECT_MANY"
 TYPE_GEOPOINT = "GEOPOINT"
 TYPE_DECIMAL = "DECIMAL"
 
-FIELD_TYPES_TO_INTERNAL_TYPE: dict[str, object] = {
+FIELD_TYPES_TO_INTERNAL_TYPE: dict[str, Any] = {
     TYPE_ID: str,
     TYPE_INTEGER: int,
     TYPE_STRING: str,

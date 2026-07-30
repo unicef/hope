@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -25,7 +27,7 @@ class Currency(models.Model):
     def __str__(self) -> str:
         return f"{self.code} - {self.name}"
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.vision_code:
             self.vision_code = self.code
         super().save(*args, **kwargs)

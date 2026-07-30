@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import transaction
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
@@ -19,7 +21,7 @@ class CreateBeneficiaryTicketView(HOPEAPIBusinessAreaView, CreateAPIView):
     serializer_class = BeneficiaryTicketCreateSerializer
 
     @transaction.atomic()
-    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

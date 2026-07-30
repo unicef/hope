@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -90,7 +90,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
                 )
             )
 
-    def validate_unique(self, *args: object, **kwargs: object) -> None:
+    def validate_unique(self, *args: Any, **kwargs: Any) -> None:
         super().validate_unique(*args, **kwargs)
         if not self.role_one_id or not self.role_two_id:
             return

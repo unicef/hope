@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
@@ -79,7 +79,7 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
         model = FspXlsxTemplatePerDeliveryMechanism
         fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
 
-    def clean(self) -> dict[str, object] | None:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         delivery_mechanism = cleaned_data.get("delivery_mechanism")
         financial_service_provider = cleaned_data.get("financial_service_provider")
@@ -172,7 +172,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
             financial_service_provider=obj,
         ).distinct()
 
-    def clean(self) -> dict[str, object] | None:
+    def clean(self) -> dict[str, Any] | None:
         if self.instance:
             protected_fields = [
                 "name",

@@ -1,7 +1,7 @@
 """Aurora API sync helpers: pull org/project/registration/record data into Django models."""
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
 
 from constance import config
@@ -23,7 +23,7 @@ def _get_session(auth_token: str) -> requests.Session:
     return session
 
 
-def _get_json(session: requests.Session, url: str) -> object:
+def _get_json(session: requests.Session, url: str) -> Any:
     """GET ``url`` and decode JSON. Raises ``RequestException`` on HTTP error."""
     response = session.get(url)
     response.raise_for_status()
@@ -163,7 +163,7 @@ def get_metadata(auth_token: str) -> dict:
     return _get_json(session, f"{record_url}metadata/?{rnd}")
 
 
-def fetch_records(auth_token: str, overwrite: bool = False, **filters: object) -> dict:
+def fetch_records(auth_token: str, overwrite: bool = False, **filters: str) -> dict:
     session = _get_session(auth_token)
     schema = _get_json(session, config.AURORA_SERVER)
     record_url = schema.get("record")

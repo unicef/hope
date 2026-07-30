@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import logging
+from typing import Any
 
 from defusedxml import ElementTree
 from django.conf import settings
@@ -24,7 +25,7 @@ class Command(BaseCommand):
             help="file",
         )
 
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: object) -> None:
         """Load a business area.
 
         <DocumentElement>

@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
@@ -49,13 +51,13 @@ class BeneficiaryTicketResponseSerializer(serializers.ModelSerializer):
     def get_category(self, obj: GrievanceTicket) -> str:
         return "Beneficiary"
 
-    def get_business_area(self, obj: GrievanceTicket) -> dict[str, object]:
+    def get_business_area(self, obj: GrievanceTicket) -> dict[str, Any]:
         return {
             "slug": obj.business_area.slug,
             "name": obj.business_area.name,
         }
 
-    def get_assigned_to(self, obj: GrievanceTicket) -> dict[str, object] | None:
+    def get_assigned_to(self, obj: GrievanceTicket) -> dict[str, Any] | None:
         if obj.assigned_to:
             return {
                 "id": str(obj.assigned_to.id),

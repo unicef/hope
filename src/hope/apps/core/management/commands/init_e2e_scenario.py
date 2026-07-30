@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from datetime import timedelta
 import os
+from typing import Any
 
 from django.core.management import BaseCommand, execute_from_command_line
 from django.utils import timezone
@@ -69,7 +70,7 @@ def create_household_with_individual(address: str) -> tuple[Household, Individua
     hh.head_of_household.household = hh
     hh.head_of_household.save()
 
-    return hh, hh.head_of_household
+    return hh, hh.head_of_household  # type: ignore[return-value]
 
 
 def create_household_with_individual_for_payment_plan(address: str) -> None:
@@ -167,7 +168,7 @@ class Command(BaseCommand):
             type=int,
         )
 
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: Any) -> None:
         {
             "targeting": init_targeting,
             "payment_plan": init_payment_plan,

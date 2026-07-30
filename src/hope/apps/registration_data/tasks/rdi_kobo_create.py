@@ -1,6 +1,8 @@
 from collections import defaultdict
+from datetime import date, datetime
 import json
 import logging
+from typing import Any
 
 from dateutil.parser import parse
 from django.core.exceptions import ValidationError
@@ -76,7 +78,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         )
         self.business_area = BusinessArea.objects.get(id=business_area_id)
 
-        self.reduced_submissions: list[object] = []
+        self.reduced_submissions: Any = []
         self.attachments: list[dict] = []
         super().__init__()
 
@@ -86,16 +88,16 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             return None
         if self.attachments is None:
             return None
-        attachment = find_attachment_in_kobo(self.attachments, value)
+        attachment = find_attachment_in_kobo(self.attachments, str(value))
         if attachment is None:
             return None
         current_download_url = attachment.get("download_url", "")
         download_url = current_download_url.replace("?format=json", "")
         api = KoboAPI()
         image_bytes = api.get_attached_file(download_url)
-        file = File(image_bytes, name=value)
+        file = File(image_bytes, name=str(value))
         if is_flex_field:
-            return default_storage.save(value, file)
+            return default_storage.save(str(value), file)
         logger.info(f"Image field processed: {value}")
         return file
 
@@ -108,7 +110,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def _handle_decimal_field(self, value: object, is_flex_field: bool) -> object:
         if not is_flex_field:
             return value
-        return float(value)
+        return float(str(value))
 
     def _cast_and_assign(self, value: str | list, field: str, obj: PendingIndividual | PendingHousehold) -> None:
         complex_fields = {
@@ -221,12 +223,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         collectors_to_create = defaultdict(list)
         household_hash_list = []
         household_batch_size = 50
-        logger.info(f"Processing {len(self.reduced_submissions)} households")
+        logger.info(f"Processing {len(self.reduced_submissions)} households")  # type: ignore[arg-type]
         chunk_index = 0
         household_count = 0
-        for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
+        for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):  # type: ignore[arg-type]
             chunk_index += 1
-            logger.info(f"Processing chunk {chunk_index}/{len(self.reduced_submissions) // household_batch_size}")
+            logger.info(f"Processing chunk {chunk_index}/{len(self.reduced_submissions) // household_batch_size}")  # type: ignore[arg-type]
             for household in reduced_submission_chunk:
                 household_count += 1
                 # AB#199540
@@ -354,13 +356,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def _finalize_household(
         self,
         household_obj: PendingHousehold,
-        registration_date: object,
+        registration_date: str | datetime | date | None,
         current_individuals: list,
         individuals_to_create_list: list,
         documents_and_identities_to_create: list,
     ) -> None:
-        household_obj.first_registration_date = registration_date
-        household_obj.last_registration_date = registration_date
+        household_obj.first_registration_date = registration_date  # type: ignore[assignment]
+        household_obj.last_registration_date = registration_date  # type: ignore[assignment]
         household_obj.registration_data_import = self.registration_data_import
         household_obj.program = self.registration_data_import.program  # type: ignore[assignment]
         household_obj.business_area = self.business_area
@@ -432,7 +434,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping: dict,
         household: dict,
         households_to_create: list[PendingHousehold],
-        **kwargs: object,
+        **kwargs: Any,
     ) -> None:
         individuals_ids_hash_dict: dict = kwargs.get("individuals_ids_hash_dict")  # type: ignore[assignment]
         submission_meta_data: dict = kwargs.get("submission_meta_data")  # type: ignore[assignment]

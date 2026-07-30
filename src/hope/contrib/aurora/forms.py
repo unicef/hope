@@ -1,3 +1,5 @@
+from typing import Any
+
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -14,7 +16,7 @@ class FetchForm(forms.Form):
     after_date = forms.DateField(required=False)
     overwrite = forms.BooleanField(required=False)
 
-    def clean(self) -> dict[str, object] | None:
+    def clean(self) -> dict[str, Any] | None:
         if not (self.cleaned_data.get("from_id") or self.cleaned_data.get("after_date")):
             raise ValidationError("Set 'id' or 'data' ")
         return self.cleaned_data

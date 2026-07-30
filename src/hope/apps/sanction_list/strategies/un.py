@@ -3,7 +3,7 @@ from datetime import date, datetime
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from xml.etree.ElementTree import Element
@@ -45,10 +45,10 @@ class LoadSanctionListXMLTask:
 
     INDIVIDUAL_TAG_PATH = "INDIVIDUALS/INDIVIDUAL"
 
-    def __init__(self, sanction_list: "SanctionList", **kwargs: object) -> None:
+    def __init__(self, sanction_list: "SanctionList", **kwargs: Any) -> None:
         self.sanction_list = sanction_list
         self.url = kwargs.get("url", self.DEFAULT_URL)
-        self.VALUES_PATHS: dict[str, object] = {
+        self.VALUES_PATHS: dict[str, Any] = {
             "data_id": "DATAID",
             "version_num": "VERSIONNUM",
             "first_name": "FIRST_NAME",
@@ -81,7 +81,7 @@ class LoadSanctionListXMLTask:
         return None
 
     @staticmethod
-    def _get_designation(individual_tag: Element, *args: object, **kwargs: object) -> str | None:
+    def _get_designation(individual_tag: Element, *args: Any, **kwargs: Any) -> str | None:
         designation_tag_name = "DESIGNATION"
         designation_tag = individual_tag.find(designation_tag_name)
         if isinstance(designation_tag, Element):
@@ -93,8 +93,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> "set[SanctionListIndividualDateOfBirth]":
         from hope.models import SanctionListIndividualDateOfBirth
 
@@ -163,8 +163,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> "set[SanctionListIndividualAliasName]":
         from hope.models import SanctionListIndividualAliasName
 
@@ -189,7 +189,7 @@ class LoadSanctionListXMLTask:
         return set(aliases.values())
 
     @staticmethod
-    def _get_country_field(individual_tag: Element, path: str, *args: object, **kwargs: object) -> str | None | set:
+    def _get_country_field(individual_tag: Element, path: str, *args: Any, **kwargs: Any) -> str | None | set:
         tags = individual_tag.findall(path)
 
         countries = set()
@@ -207,8 +207,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> "set[SanctionListIndividualCountries]":
         from hope.models import SanctionListIndividualCountries
 
@@ -224,7 +224,7 @@ class LoadSanctionListXMLTask:
             }
         return set()
 
-    def _get_country_of_birth(self, individual_tag: Element, *args: object, **kwargs: object) -> str | None:
+    def _get_country_of_birth(self, individual_tag: Element, *args: Any, **kwargs: Any) -> str | None:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
@@ -235,8 +235,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> "set[SanctionListIndividualNationalities]":
         from hope.models import SanctionListIndividualNationalities
 
@@ -256,8 +256,8 @@ class LoadSanctionListXMLTask:
         self,
         individual_tag: Element,
         individual: "SanctionListIndividual",
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> "set[SanctionListIndividualDocument]":
         from hope.models import SanctionListIndividualDocument
 
@@ -281,11 +281,14 @@ class LoadSanctionListXMLTask:
             note_tag = document_tag.find("NOTE")
             note = ""
             if isinstance(note_tag, Element):
-                note = self._cast_field_value_to_correct_type(
+                note_val = self._cast_field_value_to_correct_type(
                     SanctionListIndividualDocument,
                     "note",
                     document_tag.find("NOTE"),
                 )
+                if isinstance(note_val, str):
+                    note = note_val
+            note = note if isinstance(note, str) else ""
             if isinstance(document_number_tag, Element) and isinstance(type_of_document_tag, Element):
                 document = SanctionListIndividualDocument(
                     individual=self._get_individual_from_db_or_file(individual),

@@ -1,5 +1,6 @@
 from collections import defaultdict
 import logging
+from typing import Any
 import uuid
 
 import openpyxl
@@ -130,7 +131,7 @@ class XlsxSomaliaParser(BaseParser):
         for _idx, row in enumerate(rows[1:]):
             self._process_individual(row, household_data["id"])
 
-    def _process_individual(self, row: dict, household_id: str) -> dict[str, object]:
+    def _process_individual(self, row: dict, household_id: str) -> dict[str, Any]:
         custom_individual_id = row.get("IndividualID")
         individual_id = uuid.uuid4().hex
         full_name = row.get("IndividualName") or ""
@@ -196,7 +197,7 @@ class XlsxSomaliaParser(BaseParser):
         if value is None or value == "":
             return 0
         try:
-            return int(float(value))
+            return int(float(str(value)))
         except (ValueError, TypeError):
             return 0
 
@@ -204,7 +205,7 @@ class XlsxSomaliaParser(BaseParser):
         if value is None or value == "":
             return 0.0
         try:
-            return float(value)
+            return float(str(value))
         except (ValueError, TypeError):
             return 0.0
 
@@ -233,28 +234,28 @@ class XlsxSomaliaParser(BaseParser):
         return [".xlsx", ".xls"]
 
     @property
-    def households_data(self) -> list[dict[str, object]]:
+    def households_data(self) -> list[dict[str, Any]]:
         return list(self._households.values())
 
     @property
-    def individuals_data(self) -> list[dict[str, object]]:
+    def individuals_data(self) -> list[dict[str, Any]]:
         return self._individuals
 
     @property
-    def individual_roles_in_households_data(self) -> list[dict[str, object]]:
+    def individual_roles_in_households_data(self) -> list[dict[str, Any]]:
         return self._individual_roles
 
     @property
-    def accounts_data(self) -> list[dict[str, object]]:
+    def accounts_data(self) -> list[dict[str, Any]]:
         """Return list of account dictionaries."""
         return self._accounts
 
     @property
-    def documents_data(self) -> list[dict[str, object]]:
+    def documents_data(self) -> list[dict[str, Any]]:
         """Return list of document dictionaries."""
         return self._documents
 
     @property
-    def identities_data(self) -> list[dict[str, object]]:
+    def identities_data(self) -> list[dict[str, Any]]:
         """Return list of identity dictionaries."""
         return self._identities

@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import os
 import secrets
+from typing import Any
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -175,7 +176,7 @@ def get_individual_header_mapping() -> dict:
 
 
 @transaction.atomic
-def generate_rdi_xlsx_files(*args: object, **options: object) -> None:
+def generate_rdi_xlsx_files(*args: Any, **options: Any) -> None:
     household_ids = []
     amount = options.get("amount", 1)
     seed = options.get("seed")
@@ -215,7 +216,7 @@ def generate_rdi_xlsx_files(*args: object, **options: object) -> None:
 
 
 def get_hh_ids(
-    count: int, household_ids: list[object], households: WriteOnlyWorksheet | Worksheet, seed: object | None
+    count: int, household_ids: list[object], households: WriteOnlyWorksheet | Worksheet, seed: object
 ) -> None:
     for index, (key, (_, value)) in enumerate(get_household_header_mapping().items()):
         if value is None:
@@ -247,5 +248,5 @@ class Command(BaseCommand):
             type=int,
         )
 
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: Any) -> None:
         generate_rdi_xlsx_files(*args, **options)

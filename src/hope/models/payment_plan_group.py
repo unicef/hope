@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -59,14 +59,14 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         unique_together = ("cycle", "name")
         ordering = ["created_at"]
 
-    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict]:
+    def delete(self, *args: Any, **kwargs: Any) -> tuple[int, dict]:
         with transaction.atomic():
             cycle_group_pks = list(
                 PaymentPlanGroup.objects.filter(cycle_id=self.cycle_id).values_list("pk", flat=True).select_for_update()
             )
             if len(cycle_group_pks) <= 1:
                 raise ValidationError("Cannot delete the last group in a cycle.")
-            return super().delete(*args, **kwargs)  # type: ignore
+            return super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"{self.name} for {self.cycle}"

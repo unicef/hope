@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -69,7 +71,7 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
         "error_msg",
     ]
 
-    def changelist_view(self, request: HttpRequest, extra_context: dict[str, object] | None = None) -> HttpResponse:
+    def changelist_view(self, request: HttpRequest, extra_context: dict[str, Any] | None = None) -> HttpResponse:
         if self.LEGACY_FILTER_PARAM not in request.GET:
             query_params = request.GET.copy()
             query_params[self.LEGACY_FILTER_PARAM] = "0"

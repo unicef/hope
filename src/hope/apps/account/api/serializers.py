@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
@@ -221,13 +223,13 @@ class UserChoicesSerializer(serializers.Serializer):
     partner_choices = serializers.SerializerMethodField()
     partner_choices_temp = serializers.SerializerMethodField()
 
-    def get_role_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_role_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": role.name, "value": role.id} for role in Role.objects.order_by("name")]
 
-    def get_status_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
 
-    def get_partner_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_partner_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         return to_choice_object(
             list(
@@ -238,7 +240,7 @@ class UserChoicesSerializer(serializers.Serializer):
             )
         )
 
-    def get_partner_choices_temp(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_partner_choices_temp(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         # TODO: can be removed after proper solution is applied; this is the temp solution to skip the user input in
         #  program mutations and retrieve partners already with a role in BA
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]

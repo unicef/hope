@@ -1,5 +1,6 @@
 from functools import cache
 import logging
+from typing import Any
 
 from django_countries import countries as internal_countries
 from django_countries.fields import Country
@@ -34,9 +35,7 @@ class Countries:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.get_countries())
 
     @classmethod
-    def get_country_value(
-        cls, input_value: str, output_type: str = "alpha2", *args: object, **kwargs: object
-    ) -> str | None:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> str | None:
         index_map = {
             "name": 0,
             "alpha2": 1,
@@ -1301,9 +1300,7 @@ class SanctionListCountries:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.COUNTRIES)
 
     @classmethod
-    def get_country_value(
-        cls, input_value: str, output_type: str = "alpha2", *args: object, **kwargs: object
-    ) -> str | None:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> str | None:
         index_map = {
             "name": 0,
             "alpha2": 1,

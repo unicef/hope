@@ -2,7 +2,7 @@ from datetime import datetime
 import io
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree
@@ -127,7 +127,7 @@ class EUSanctionList(BaseSanctionList):
             invalid_dob_added = False
             for date in entry["birthdays"]:
                 if date["date"]:
-                    date_data: dict[str, object] = date
+                    date_data: dict[str, Any] = date
                     try:
                         datetime.strptime(date["date"], "%Y-%m-%d")
                     except ValueError:
@@ -140,7 +140,7 @@ class EUSanctionList(BaseSanctionList):
                 ind.save(update_fields=["internal_data"])
 
             for doc in entry["identifications"]:
-                doc_data: dict[str, object] = doc
+                doc_data: dict[str, Any] = doc
                 ind.documents.get_or_create(**doc_data)
 
             for nationality in entry["citizenships"]:

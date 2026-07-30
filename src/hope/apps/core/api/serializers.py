@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 
 from rest_framework import serializers
 
@@ -83,7 +83,7 @@ def dict_resolver(attname: str, default_value: object, obj: object) -> object | 
     return obj.get(attname, default_value)
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: object, obj: object) -> object | None:
+def _custom_dict_or_attr_resolver(attname: str, default_value: Any, obj: Any) -> Any:
     resolver: Callable | None = attr_resolver
     if isinstance(obj, dict):
         resolver = dict_resolver
@@ -92,7 +92,7 @@ def _custom_dict_or_attr_resolver(attname: str, default_value: object, obj: obje
     return resolver(attname, default_value, obj)
 
 
-def resolve_label(obj: object) -> list[dict[str, object]]:
+def resolve_label(obj: object) -> list[dict[str, Any]]:
     return [{"language": k, "label": v} for k, v in obj.items()]
 
 
@@ -140,12 +140,12 @@ class FieldAttributeSerializer(serializers.Serializer):
     pdu_data = serializers.SerializerMethodField()
 
     @staticmethod
-    def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, object] | None:
+    def get_pdu_data(obj: dict | FlexibleAttribute) -> dict[str, Any] | None:
         if isinstance(obj, FlexibleAttribute) and obj.pdu_data:
             return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
 
-    def get_labels(self, obj: object) -> list[dict[str, object]]:
+    def get_labels(self, obj: object) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
     def get_label_en(self, obj: object) -> str | None:

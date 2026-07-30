@@ -1,3 +1,5 @@
+from typing import Any
+
 from dateutil.parser import parse
 
 from hope.apps.household.const import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
@@ -6,7 +8,7 @@ from hope.models import BusinessArea
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
 
-def reduce_asset(asset: dict, *args: object, **kwargs: object) -> dict:
+def reduce_asset(asset: dict, *args: Any, **kwargs: Any) -> dict:
     """Take from asset only values that are needed by our frontend.
 
     {
@@ -56,7 +58,7 @@ def get_field_name(field_name: str) -> str:
     return field_name
 
 
-def reduce_assets_list(assets: list, deployed: bool = True, *args: object, **kwarg: object) -> list:
+def reduce_assets_list(assets: list, deployed: bool = True, *args: Any, **kwarg: object) -> list:
     if deployed:
         return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
     return [reduce_asset(asset) for asset in assets]

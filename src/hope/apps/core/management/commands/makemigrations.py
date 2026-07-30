@@ -1,8 +1,10 @@
+from typing import Any
+
 from django.core.management.commands import makemigrations
 
 
 class Command(makemigrations.Command):
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: object) -> None:
         self.stdout.write(
             self.style.WARNING(
                 'This is the overridden command which creates migrations with the name "_migration" '

@@ -1,6 +1,6 @@
 from functools import partial
 import logging
-from typing import cast
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import QuerySet
@@ -130,7 +130,7 @@ class FeedbackViewSet(
             201: FeedbackDetailSerializer,
         },
     )
-    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -185,7 +185,7 @@ class FeedbackViewSet(
             200: FeedbackDetailSerializer,
         },
     )
-    def update(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         feedback = self.get_object()
         old_feedback = self.get_object()
         serializer = self.get_serializer(feedback, data=request.data, partial=True)
@@ -232,7 +232,7 @@ class FeedbackViewSet(
         },
     )
     @action(detail=True, methods=["post"])
-    def message(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def message(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         feedback = self.get_object()
@@ -301,7 +301,7 @@ class MessageViewSet(
             201: MessageDetailSerializer,
         },
     )
-    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -328,7 +328,7 @@ class MessageViewSet(
     @transaction.atomic
     @extend_schema(responses=SampleSizeSerializer)
     @action(detail=False, methods=["post"], url_path="sample-size")
-    def sample_size(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
@@ -401,7 +401,7 @@ class SurveyViewSet(
             201: SurveySerializer,
         },
     )
-    def create(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -432,7 +432,7 @@ class SurveyViewSet(
         responses={202: SurveySerializer},
     )
     @action(detail=True, methods=["get"], url_path="export-sample")
-    def export_sample(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def export_sample(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         survey = self.get_object()
         export_survey_sample_async_task(survey, cast("User", request.user))
         serializer = self.get_serializer(survey)
@@ -440,12 +440,12 @@ class SurveyViewSet(
 
     @extend_schema(responses=SurveyCategoryChoiceSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="category-choices")
-    def category_choices(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def category_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return Response(to_choice_object(Survey.CATEGORY_CHOICES))
 
     @extend_schema(responses=SurveyRapidProFlowSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="available-flows", pagination_class=None)
-    def available_flows(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def available_flows(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         try:
             api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
         except TokenNotProvidedError:
@@ -455,7 +455,7 @@ class SurveyViewSet(
     @transaction.atomic
     @extend_schema(responses=SampleSizeSerializer)
     @action(detail=False, methods=["post"], url_path="sample-size")
-    def sample_size(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data

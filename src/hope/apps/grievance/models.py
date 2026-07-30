@@ -1,7 +1,7 @@
 from decimal import Decimal
 from itertools import chain
 import logging
-from typing import TYPE_CHECKING, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -526,7 +526,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             logger.warning(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
@@ -744,7 +744,7 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
 def delete_grievance_ticket_on_household_details_update_delete(
     sender: TicketHouseholdDataUpdateDetails,
     instance: TicketHouseholdDataUpdateDetails,
-    **kwargs: object,
+    **kwargs: Any,
 ) -> None:
     if hasattr(instance, "ticket"):  # pragma: no cover
         instance.ticket.delete()
@@ -779,7 +779,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 def delete_grievance_ticket_on_individual_details_update_delete(
     sender: TicketIndividualDataUpdateDetails,
     instance: TicketIndividualDataUpdateDetails,
-    **kwargs: object,
+    **kwargs: Any,
 ) -> None:
     if hasattr(instance, "ticket"):  # pragma: no cover
         instance.ticket.delete()
@@ -988,7 +988,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     def individual(self) -> "Individual":
         return self.golden_records_individual
 
-    def populate_cross_area_flag(self, *args: object, **kwargs: object) -> None:
+    def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
         from hope.models import Individual
 
         unique_areas_count = (
@@ -1198,7 +1198,7 @@ class GrievanceDocument(UUIDModel):
 @receiver(post_save, sender=TicketNeedsAdjudicationDetails)
 @receiver(post_save, sender=TicketPaymentVerificationDetails)
 def update_household_unicef_id(
-    sender: type[models.Model], instance: GrievanceTicket, *args: object, **kwargs: object
+    sender: type[models.Model], instance: GrievanceTicket, *args: Any, **kwargs: Any
 ) -> None:
     instance.ticket.household_unicef_id = getattr(instance.household, "unicef_id", None)
     instance.ticket.save(update_fields=("household_unicef_id",))

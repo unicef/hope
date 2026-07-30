@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 from decimal import Decimal
 import logging
-from typing import IO, TYPE_CHECKING
+from typing import IO, TYPE_CHECKING, Any
 
 from dateutil.parser import parse
 from django.db.models import Prefetch
@@ -345,13 +345,11 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             calculate_counts(payment_verification_plan)
             payment_verification_plan.save()
 
-    def _normalize_delivery_date(self, delivery_date: object, payment_delivery_date: object) -> object:
-        delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
-        if (
-            delivery_date
-            and delivery_date > datetime.date.today()
-            or delivery_date
-            and delivery_date < self.payment_plan.program.start_date
+    def _normalize_delivery_date(self, delivery_date: Any, payment_delivery_date: Any) -> Any:
+        if isinstance(delivery_date, datetime.datetime):
+            delivery_date = delivery_date.date()
+        if isinstance(delivery_date, datetime.date) and (
+            delivery_date > datetime.date.today() or delivery_date < self.payment_plan.program.start_date
         ):
             delivery_date = payment_delivery_date
         return delivery_date
@@ -421,18 +419,18 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 self.payments_to_save.append(payment)
                 self._update_payment_verification(payment, delivered_quantity)
 
-    def _set_payment_delivery_date(self, delivery_date: object, payment: Payment) -> tuple[object, object]:
+    def _set_payment_delivery_date(self, delivery_date: Any, payment: Payment) -> tuple[Any, Any]:
         if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
-        if delivery_date and delivery_date.tzinfo is None:
+        if isinstance(delivery_date, datetime.datetime) and delivery_date.tzinfo is None:
             delivery_date = pytz.utc.localize(delivery_date)
 
         if payment_delivery_date := payment.delivery_date:
             payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
         return delivery_date, payment_delivery_date
 
-    def _get_values_for_update(self, row: Row) -> tuple[object, object, object, object, object, object, object]:
+    def _get_values_for_update(self, row: Row) -> tuple[Any, Any, Any, Any, Any, Any, Any]:
         if "delivery_date" in self.xlsx_headers:
             delivery_date = row[self.xlsx_headers.index("delivery_date")].value
         else:
@@ -483,7 +481,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         return additional_document_number, additional_document_type
 
     def _get_extras_for_row(self, row: Row) -> dict:
-        extras: dict[str, object] = {}
+        extras: dict[str, Any] = {}
         for idx, header in enumerate(self.xlsx_headers):
             if header in self.KNOWN_COLUMNS:
                 continue

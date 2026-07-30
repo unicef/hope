@@ -1,5 +1,6 @@
 import os
 import re
+from typing import Any
 
 from django.apps import apps
 from django.core.management import call_command
@@ -19,7 +20,7 @@ class Command(BaseCommand):
     )
     requires_system_checks: list[str] = []
 
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: object) -> None:
         labels = sorted(
             {cfg.label for cfg in apps.get_app_configs() if cfg.name == "hope" or cfg.name.startswith("hope.")}
         )

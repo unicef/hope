@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -25,7 +27,7 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
         kwargs["user"] = self.request.user
         return kwargs
 
-    def dispatch(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseBase:
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         """Check GENERIC_IMPORT_DATA permission before processing request.
 
         Note: This check is intentionally separate from form_valid() check.
@@ -131,7 +133,7 @@ class GenericImportUploadView(LoginRequiredMixin, FormView):
 
         return super().form_invalid(form)
 
-    def get_context_data(self, **kwargs: object) -> dict:
+    def get_context_data(self, **kwargs: Any) -> dict:
         """Add extra context to template."""
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Generic Import"

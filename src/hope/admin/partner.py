@@ -1,3 +1,5 @@
+from typing import Any
+
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
@@ -58,7 +60,7 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
-        self, request: HttpRequest, obj: Partner | None = None, change: bool = False, **kwargs: object
+        self, request: HttpRequest, obj: Partner | None = None, change: bool = False, **kwargs: Any
     ) -> type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 

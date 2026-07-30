@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -57,7 +58,7 @@ class PDUXlsxTemplateCreateSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("created_by",)
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         rounds_data = data.get("rounds_data", [])
         # Check for duplicate field names
         field_names = [item["field"] for item in rounds_data]
@@ -258,7 +259,7 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("created_by",)
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         rounds_data = data.get("rounds_data", [])
         # Check for duplicate field names
         field_names = [item["field"] for item in rounds_data]
@@ -266,7 +267,7 @@ class PDUOnlineEditCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 
-    def create(self, validated_data: dict[str, object]) -> PDUOnlineEdit:
+    def create(self, validated_data: dict[str, Any]) -> PDUOnlineEdit:
         authorized_users = validated_data.pop("authorized_users", [])
 
         pdu_online_edit = super().create(validated_data)
@@ -291,7 +292,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
     individual_uuid = serializers.UUIDField()
     pdu_fields = serializers.DictField(child=serializers.DictField())
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         individual_uuid = str(data.get("individual_uuid"))
         pdu_fields_update = data.get("pdu_fields", {})
 
@@ -335,7 +336,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
             self._validate_pdu_date_type(field_name, field_value)
 
     def _check_field_editability(
-        self, field_name: str, field_data: dict[str, object], existing_pdu_fields: dict[str, object]
+        self, field_name: str, field_data: dict[str, Any], existing_pdu_fields: dict[str, Any]
     ) -> bool:
         """Check field structure, existence, and editability. Returns True if the value needs type-checking."""
         if not isinstance(field_data, dict):
@@ -359,7 +360,7 @@ class PDUOnlineEditSaveDataSerializer(serializers.Serializer):
 
         return field_value is not None
 
-    def _validate_all_fields(self, individual_data: dict[str, object], pdu_fields_update: dict[str, object]) -> None:
+    def _validate_all_fields(self, individual_data: dict[str, Any], pdu_fields_update: dict[str, Any]) -> None:
         existing_pdu_fields = individual_data.get("pdu_fields", {})
         for field_name, field_data in pdu_fields_update.items():
             if self._check_field_editability(field_name, field_data, existing_pdu_fields):

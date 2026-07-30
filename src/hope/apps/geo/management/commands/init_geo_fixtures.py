@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.core.management import BaseCommand, call_command
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: object) -> None:
         initialize_geo_fixtures()
 
 

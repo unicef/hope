@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth.models import Group
 from django.db import models
@@ -88,7 +88,7 @@ class UserViewSet(
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UsersFilter
 
-    def get_serializer_context(self) -> dict[str, object]:
+    def get_serializer_context(self) -> dict[str, Any]:
         context = dict(super().get_serializer_context())
 
         if self.request and self.action == "profile" and (program_code := self.request.query_params.get("program")):
@@ -148,7 +148,7 @@ class UserViewSet(
     @action(detail=False, methods=["get"], url_path="profile", url_name="profile")
     @etag_decorator(ProfileEtagKey)
     @cached_response(key_func=ProfileKeyConstructor())
-    def profile(self, request: "Request", *args: object, **kwargs: object) -> Response:
+    def profile(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         user = request.user
         data = self.get_serializer(user).data
         return Response(data)
@@ -162,11 +162,11 @@ class UserViewSet(
     )
     @etag_decorator(UserListKeyConstructor)
     @cached_response(key_func=UserListKeyConstructor())
-    def list(self, request: "Request", *args: object, **kwargs: object) -> Response:
+    def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @action(detail=False, methods=["get"])
-    def choices(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
+    def choices(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
         return Response(data=self.get_serializer(instance={}).data)
 
     @action(
@@ -175,7 +175,7 @@ class UserViewSet(
         url_path="partner-for-grievance-choices",
         url_name="partner-for-grievance-choices",
     )
-    def partner_for_grievance_choices(self, request: "Request", *args: object, **kwargs: object) -> Response:
+    def partner_for_grievance_choices(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         business_area_slug = self.kwargs.get("business_area_slug")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 

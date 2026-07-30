@@ -3,7 +3,7 @@ import base64
 import binascii
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -194,7 +194,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             )
             raise
 
-    def _create_object_and_validate(self, data: dict, model_class: object, model_form: object | None = None) -> object:
+    def _create_object_and_validate(self, data: dict, model_class: Any, model_form: Any = None) -> Any:
         files = {}
         if photo := data.get("photo"):
             if isinstance(photo, str | bytes):

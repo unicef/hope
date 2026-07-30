@@ -1,10 +1,12 @@
+from typing import Any
+
 from django.core.management import BaseCommand, call_command
 
 from extras.test_utils.factories.account import create_superuser
 
 
 class Command(BaseCommand):
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: object) -> None:
         call_command("dropalldb")
         call_command("migrate")
         call_command("loadbusinessareas")

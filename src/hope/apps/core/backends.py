@@ -1,3 +1,5 @@
+from typing import Any
+
 from constance import config
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -19,7 +21,7 @@ class PermissionsBackend(BaseBackend):
     """
 
     def get_all_permissions(self, user: User, obj: Model | None = None) -> set[str]:  # type: ignore
-        filters: dict[str, object]
+        filters: dict[str, Any]
         if not obj:
             program = None
             business_area = None

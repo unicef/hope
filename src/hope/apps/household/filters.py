@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 import logging
+from typing import Any
 
 from constance import config
 from django.db.models import Exists, OuterRef, Q, QuerySet, Value
@@ -178,7 +179,7 @@ class HouseholdFilter(UpdatedAtFilter):
     def _get_elasticsearch_query_for_households(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         es_filters = [{"term": {"business_area": business_area}}, {"term": {"program_id": str(program.pk)}}]
-        query: dict[str, object] = {
+        query: dict[str, Any] = {
             "size": "100",
             "_source": False,
             "query": {
@@ -199,13 +200,13 @@ class HouseholdFilter(UpdatedAtFilter):
         }
         return query
 
-    def search_filter(self, qs: QuerySet[Household], name: str, value: object) -> QuerySet[Household]:
+    def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
         program_code = self.request.parser_context["kwargs"].get("program_code")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
         if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
-            return self._search_es(qs, value, program)
-        return self._search_db(qs, value, program)
+            return self._search_es(qs, str(value), program)
+        return self._search_db(qs, str(value), program)
 
     def _search_db(self, qs: QuerySet[Household], value: str, program: Program | None) -> QuerySet[Household]:
         program_filter = Q(program=program) if program else Q()
@@ -395,13 +396,13 @@ class IndividualFilter(UpdatedAtFilter):
             },
         }
 
-    def search_filter(self, qs: QuerySet[Individual], name: str, value: object) -> QuerySet[Individual]:
+    def search_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
         program_code = self.request.parser_context["kwargs"].get("program_code")
         business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
         program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
         if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
-            return self._search_es(qs, value, program)
-        return self._search_db(qs, value, program)
+            return self._search_es(qs, str(value), program)
+        return self._search_db(qs, str(value), program)
 
     def _search_db(self, qs: QuerySet[Individual], value: str, program: Program | None) -> QuerySet[Individual]:
         program_filter = Q(program=program) if program else Q()

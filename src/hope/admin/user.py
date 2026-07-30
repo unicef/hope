@@ -2,19 +2,21 @@ from collections import defaultdict, namedtuple
 import csv
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Sequence, Union, cast
+from typing import TYPE_CHECKING, Any, Sequence, Union, cast
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin import AdminSite
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import Error
 from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
-from django.forms.forms import Form
+from django.forms import Form, ModelChoiceField
+from django.forms.widgets import Media
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -64,7 +66,7 @@ class LoadUsersForm(forms.Form):
         widget=AutocompleteWidget(Partner, ""),
     )
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
@@ -99,7 +101,7 @@ class ADUSerMixin:
         for _filter in filters:
             try:
                 user_data = ms_graph.get_user_data(**_filter)
-                user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+                user_args = build_arg_dict_from_dict(cast("dict[Any, Any]", user_data), DJANGO_USER_MAP)
                 for field, value in user_args.items():
                     setattr(user, field, value or "")
                 user.save()
@@ -111,7 +113,7 @@ class ADUSerMixin:
 
     def _create_user_from_ad_data(self, ms_graph: MicrosoftGraphAPI, email: str, partner: Partner) -> User:
         user_data = ms_graph.get_user_data(email=email)
-        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+        user_args = build_arg_dict_from_dict(cast("dict[Any, Any]", user_data), DJANGO_USER_MAP)
         user = User(**user_args, partner=partner)
         if user.first_name is None:
             user.first_name = ""
@@ -298,7 +300,7 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         return TemplateResponse(request, "admin/ad.html", {"ctx": context, "opts": self.model._meta})
 
     @property
-    def media(self) -> object:
+    def media(self) -> Media:
         return super().media + forms.Media(js=["hijack/hijack.js"])
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -316,14 +318,14 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: object | None = ...) -> object:
+    def get_readonly_fields(self, request: HttpRequest, obj: object | None = ...) -> Any:
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
 
     def get_deleted_objects(
-        self, objs: Union[Sequence[object], "_QuerySet[object, object]"], request: HttpRequest
-    ) -> object:
+        self, objs: Union[Sequence[Any], "_QuerySet[Any, Any]"], request: HttpRequest
+    ) -> tuple[list[str], dict[str, int], set[str], list[str]]:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -454,7 +456,7 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         delimiter: str = form.cleaned_data["delimiter"]
         quotechar: str = form.cleaned_data["quotechar"]
         quoting: int = int(form.cleaned_data["quoting"])
-        return csv.DictReader(  # type: ignore[call-overload]
+        return csv.DictReader(
             data_set,
             delimiter=delimiter,
             quotechar=quotechar,
@@ -511,10 +513,12 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         )
         return isnew, u
 
-    def __init__(self, model: type, admin_site: object) -> None:
+    def __init__(self, model: type, admin_site: AdminSite) -> None:
         super().__init__(model, admin_site)
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: Any, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField[Any] | None:
         if db_field.name == "partner":  # Exclude partners that are parent partners
             kwargs["queryset"] = Partner.objects.exclude(
                 id__in=Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)

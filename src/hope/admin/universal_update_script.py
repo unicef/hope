@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Any, Iterator, cast
 
 from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button
@@ -10,7 +10,7 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.urls import path, reverse
+from django.urls import URLPattern, path, reverse
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.apps.universal_update_script.celery_tasks import (
@@ -50,7 +50,7 @@ class ProgramAutocompleteSelect(AutocompleteSelect):
 class ProgramChoiceField(forms.ModelChoiceField):
     """Programme choice field whose option labels carry the business area."""
 
-    def label_from_instance(self, obj: object) -> str:
+    def label_from_instance(self, obj: Program) -> str:
         return format_program_label(obj)
 
 
@@ -127,19 +127,23 @@ class UniversalUpdateAdminForm(forms.ModelForm):
 
     def get_dynamic_individual_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in individual_fields.values():
-            yield (field_data[0], field_data[0])
+            field_list = cast("list[str]", field_data)
+            yield (field_list[0], field_list[0])
 
     def get_dynamic_individual_flex_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in get_individual_flex_fields().values():
-            yield (field_data[0], field_data[0])
+            field_list = cast("list[str]", field_data)
+            yield (field_list[0], field_list[0])
 
     def get_dynamic_household_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in household_fields.values():
-            yield (field_data[0], field_data[0])
+            field_list = cast("list[str]", field_data)
+            yield (field_list[0], field_list[0])
 
     def get_dynamic_household_flex_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in get_household_flex_fields().values():
-            yield (field_data[0], field_data[0])
+            field_list = cast("list[str]", field_data)
+            yield (field_list[0], field_list[0])
 
     def get_dynamic_document_types_queryset(self) -> QuerySet[DocumentType]:
         return DocumentType.objects.all()
@@ -205,14 +209,16 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         ),
     )
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> Any:
         if db_field.name == "program":
             kwargs["queryset"] = Program.objects.select_related("business_area")
             kwargs["widget"] = ProgramAutocompleteSelect(db_field, self.admin_site)
             kwargs["form_class"] = ProgramChoiceField
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_urls(self) -> list[object]:
+    def get_urls(self) -> list[URLPattern]:
         info = self.model._meta.app_label, self.model._meta.model_name
         custom_urls = [
             path(

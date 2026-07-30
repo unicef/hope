@@ -1,5 +1,6 @@
 from datetime import timedelta
 import logging
+from typing import Any
 
 from django.apps import apps
 from django.conf import settings
@@ -122,15 +123,15 @@ def upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_templat
     )
 
 
-@app.task(bind=True, acks_late=True, reject_on_worker_lost=True)
+@app.task(bind=True, acks_late=True, reject_on_worker_lost=True)  # type: ignore[arg-type]
 @log_start_and_end
 def async_job_task(
-    self,
+    self: Any,
     model_label: str,
     pk: int,
     version: int | None = None,
-    *args: object,
-    **kwargs: object,
+    *args: Any,
+    **kwargs: Any,
 ) -> object:
     job = apps.get_model(model_label).objects.get(pk=pk)
     set_async_job_sentry_tags(job, model_label)
@@ -150,15 +151,15 @@ def async_job_task(
         raise
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3, acks_late=True, reject_on_worker_lost=True)
+@app.task(bind=True, default_retry_delay=60, max_retries=3, acks_late=True, reject_on_worker_lost=True)  # type: ignore[arg-type]
 @log_start_and_end
 def async_retry_job_task(
-    self,
+    self: Any,
     model_label: str,
     pk: int,
     version: int | None = None,
-    *args: object,
-    **kwargs: object,
+    *args: Any,
+    **kwargs: Any,
 ) -> object:
     job = apps.get_model(model_label).objects.get(pk=pk)
     set_async_job_sentry_tags(job, model_label)

@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -153,7 +154,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         return []
 
-    def _set_default_head_of_household(self, individuals_array: list[dict[str, object]]) -> None:
+    def _set_default_head_of_household(self, individuals_array: list[dict[str, Any]]) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"

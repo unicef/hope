@@ -1,4 +1,7 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -10,6 +13,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import models, transaction
 from django.db.models import QuerySet
+from django.forms import ModelForm, ModelMultipleChoiceField
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -129,7 +133,7 @@ def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
 
 def has_payment_plan_pg_sync_permission(request: HttpRequest, payment_plan: PaymentPlan) -> bool:
     return request.user.has_perm(
-        Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
+        str(Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value),
         payment_plan.program,
     )
 
@@ -235,7 +239,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
 
-    def get_form(self, request: HttpRequest, obj: object = None, change: bool = False, **kwargs: object) -> object:
+    def get_form(
+        self, request: HttpRequest, obj: object = None, change: bool = False, **kwargs: Any
+    ) -> type[ModelForm[Any]]:
         request._payment_plan_obj = obj
         return super().get_form(request, obj, change, **kwargs)
 
@@ -254,7 +260,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             new_object=obj,
         )
 
-    def formfield_for_manytomany(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_manytomany(
+        self, db_field: models.ManyToManyField[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> ModelMultipleChoiceField[Any] | None:
         if db_field.name == "payment_plan_purposes":
             obj = getattr(request, "_payment_plan_obj", None)
             if obj is not None:
@@ -275,7 +283,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 if payment_plan.currency is None:
                     raise ValueError("PaymentPlan.currency must not be None")
                 updates = []
-                currency_exchange_date = payment_plan.currency_exchange_date
+                currency_exchange_date = cast("datetime", payment_plan.currency_exchange_date)
                 for payment in payment_plan.eligible_payments:
                     payment.entitlement_quantity_usd = get_quantity_in_usd(
                         amount=payment.entitlement_quantity,

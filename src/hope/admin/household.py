@@ -1,7 +1,7 @@
 from itertools import chain
 import logging
 import re
-from typing import cast
+from typing import Any, cast
 from uuid import UUID
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -488,7 +488,9 @@ class HouseholdAdmin(
             qs = qs.order_by(*ordering)
         return qs
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> Any:
         if db_field.name == "head_of_household":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

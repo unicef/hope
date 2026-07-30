@@ -1,7 +1,7 @@
 from decimal import Decimal
 import json
 import logging
-from typing import cast
+from typing import Any, cast
 
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
@@ -101,7 +101,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return data
 
     @transaction.atomic
-    def create(self, validated_data: dict[str, object]) -> PaymentPlanSupportingDocument:
+    def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
 
 
@@ -547,7 +547,7 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
                 return "IN_APPROVAL"
         return None
 
-    def get_actions(self, obj: ApprovalProcess) -> dict[str, object]:
+    def get_actions(self, obj: ApprovalProcess) -> dict[str, Any]:
         actions_data = {
             "approval": obj.approvals.filter(type=Approval.APPROVAL),
             "authorization": obj.approvals.filter(type=Approval.AUTHORIZATION),
@@ -645,7 +645,7 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
 
-    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         dispersion_start_date = attrs["dispersion_start_date"]
         dispersion_end_date = attrs["dispersion_end_date"]
         if dispersion_end_date < dispersion_start_date:
@@ -805,7 +805,7 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
         )
 
     @staticmethod
-    def _payments_summary(obj: FollowUpInstruction) -> dict[str, object]:
+    def _payments_summary(obj: FollowUpInstruction) -> dict[str, Any]:
         if not hasattr(obj, "_payments_summary_cache"):
             obj._payments_summary_cache = obj.payments_summary()
         return obj._payments_summary_cache
@@ -1038,7 +1038,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "number_of_payments": summary["total_count"],
         }
 
-    def get_excluded_households(self, obj: PaymentPlan) -> dict[str, object]:
+    def get_excluded_households(self, obj: PaymentPlan) -> dict[str, Any]:
         qs = (
             Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if not obj.is_social_worker_program
@@ -1046,7 +1046,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return HouseholdSmallSerializer(qs, many=True).data
 
-    def get_excluded_individuals(self, obj: PaymentPlan) -> dict[str, object]:
+    def get_excluded_individuals(self, obj: PaymentPlan) -> dict[str, Any]:
         qs = (
             Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids, program=obj.program_cycle.program)
             if obj.is_social_worker_program
@@ -1110,16 +1110,16 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["error_count"]
 
-    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, object]]:
+    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
-    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, object]:
+    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
         return VolumeByDeliveryMechanismSerializer([obj], many=True).data
 
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
-    def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, object] | None:
+    def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
         available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj, office=obj.business_area)
 
         group = (
@@ -1145,7 +1145,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             }
         ).data
 
-    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, object]]:
+    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         available_items_qs = FundsCommitmentItem.objects.filter(
             Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
         )
@@ -1271,7 +1271,7 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
 class PaymentChoicesSerializer(serializers.Serializer):
     status_choices = serializers.SerializerMethodField()
 
-    def get_status_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
 
 
@@ -1415,7 +1415,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.fsp_auth_code or ""
 
     @extend_schema_field(PaymentVerificationDetailsSerializer)
-    def get_verification(self, obj: Payment) -> dict[str, object]:
+    def get_verification(self, obj: Payment) -> dict[str, Any]:
         # TODO: only one Verification per Payment?
         return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
 
@@ -1795,7 +1795,7 @@ class ApplyCustomExchangeRateSerializer(serializers.Serializer):
     custom_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
     version = serializers.IntegerField(required=False)
 
-    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if attrs.get("custom_exchange_rate") is None and attrs.get("unore_exchange_rate") is None:
             raise serializers.ValidationError(
                 {

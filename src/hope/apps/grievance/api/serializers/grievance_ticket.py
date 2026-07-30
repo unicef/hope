@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerSerializer, UserSerializer
@@ -29,6 +31,7 @@ from hope.models import (
     Program,
     User,
 )
+from hope.models.utils import TimeStampedUUIDModel
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -270,6 +273,8 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
 
     def get_ticket_details(self, obj: GrievanceTicket) -> dict | None:
         ticket_details = obj.ticket_details
+        if not isinstance(ticket_details, TimeStampedUUIDModel):
+            return None
         serializer = TICKET_DETAILS_SERIALIZER_MAPPING.get(type(ticket_details))
         return serializer(ticket_details, context=self.context).data if serializer else None
 
@@ -287,28 +292,28 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_issue_type_choices = serializers.SerializerMethodField()
     document_type_choices = serializers.SerializerMethodField()
 
-    def get_document_type_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
-    def get_grievance_ticket_status_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_grievance_ticket_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
 
-    def get_grievance_ticket_category_choices(self, info: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_grievance_ticket_category_choices(self, info: object, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
-    def get_grievance_ticket_manual_category_choices(self, info: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_grievance_ticket_manual_category_choices(self, info: object, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
 
-    def get_grievance_ticket_system_category_choices(self, info: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_grievance_ticket_system_category_choices(self, info: object, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
 
-    def get_grievance_ticket_priority_choices(self, info: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_grievance_ticket_priority_choices(self, info: object, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PRIORITY_CHOICES)
 
-    def get_grievance_ticket_urgency_choices(self, info: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_grievance_ticket_urgency_choices(self, info: object, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(URGENCY_CHOICES)
 
-    def get_grievance_ticket_issue_type_choices(self, info: object, **kwargs: object) -> list[dict]:
+    def get_grievance_ticket_issue_type_choices(self, info: object, **kwargs: Any) -> list[dict]:
         categories = dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
             {"category": key, "label": categories[key], "sub_categories": value}

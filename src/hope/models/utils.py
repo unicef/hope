@@ -1,6 +1,6 @@
 import hashlib
 import logging
-from typing import TYPE_CHECKING, Iterable, Sequence, T, TypeVar
+from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
 
 from concurrency.fields import IntegerVersionField
 from django import forms
@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
 
 
 class BulkSignalsManagerMixin:
-    def bulk_create(self, objs: Iterable[object], *args: object, **kwargs: object) -> list[object]:
+    def bulk_create(self, objs: Iterable[object], *args: Any, **kwargs: Any) -> list[object]:
         val = super().bulk_create(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_create
 
         post_bulk_create.send(sender=self.model, instances=objs, **kwargs)
         return val
 
-    def bulk_update(self, objs: Iterable[object], *args: object, **kwargs: object) -> int:
+    def bulk_update(self, objs: Iterable[object], *args: Any, **kwargs: Any) -> int:
         val = super().bulk_update(objs, *args, **kwargs)
         from hope.apps.core.signals import post_bulk_update
 
@@ -116,11 +116,11 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
 
     def delete(
         self,
-        using: object | None = None,
+        using: str | None = None,
         keep_parents: bool = False,
         soft: bool = True,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> tuple[int, dict[str, int]]:
         """Soft delete object (set its ``is_removed`` field to True).
 
@@ -161,7 +161,7 @@ class TimeStampedUUIDModel(UUIDModel):
 
 
 class SoftDeletionTreeManager(TreeManager):
-    def get_queryset(self, *args: object, **kwargs: object) -> "QuerySet":
+    def get_queryset(self, *args: Any, **kwargs: Any) -> "QuerySet":
         """Return queryset limited to not removed entries."""
         return (
             super(TreeManager, self)
@@ -181,7 +181,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     all_objects = BaseManager()
 
     def delete(  # type: ignore[override]
-        self, using: object | None = None, soft: bool = True, *args: object, **kwargs: object
+        self, using: str | None = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> tuple[int, dict[str, int]] | None:
         """Soft delete object (set its ``is_removed`` field to True).
 
@@ -221,11 +221,11 @@ class SoftDeletableDefaultManagerModel(models.Model):
 
     def delete(
         self,
-        using: object | None = None,
+        using: str | None = None,
         keep_parents: bool = False,
         soft: bool = True,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> tuple[int, dict[str, int]]:
         """Soft delete object (set its ``is_removed`` field to True).
 
@@ -252,7 +252,7 @@ class UnicefIdentifiedModel(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         super().save(*args, **kwargs)
         if self._state.adding or self.unicef_id is None:
             # due to existence of "CREATE TRIGGER" in migrations
@@ -260,7 +260,7 @@ class UnicefIdentifiedModel(models.Model):
 
 
 class SignatureManager(models.Manager):
-    def bulk_create_with_signature(self, objs: Iterable[T], *args: object, **kwargs: object) -> list[T]:
+    def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> list[T]:
         from hope.apps.payment.services.payment_household_snapshot_service import (
             bulk_create_payment_snapshot_data,
         )
@@ -272,9 +272,7 @@ class SignatureManager(models.Manager):
         super().bulk_update(created_objects, ["signature_hash"])
         return created_objects
 
-    def bulk_update_with_signature(
-        self, objs: Iterable[T], fields: Sequence[str], *args: object, **kwargs: object
-    ) -> int:
+    def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args: Any, **kwargs: Any) -> int:
         for obj in objs:
             if any(field in fields for field in obj.signature_fields):
                 obj.update_signature_hash()
@@ -291,7 +289,7 @@ class SignatureMixin(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.update_signature_hash()
         super().save(*args, **kwargs)
 
@@ -330,10 +328,11 @@ class InternalDataFieldModel(models.Model):
 class HorizontalChoiceArrayField(ArrayField):
     def formfield(
         self,
-        form_class: object | None = ...,
-        choices_form_class: object | None = ...,
-        **kwargs: object,
-    ) -> object:
+        *,
+        form_class: type[forms.Field] | None = None,
+        choices_form_class: type[forms.ChoiceField] | None = None,
+        **kwargs: Any,
+    ) -> forms.Field | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,

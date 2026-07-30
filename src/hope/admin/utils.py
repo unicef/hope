@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import Any, TypeVar
 from uuid import UUID
 
 from admin_extra_buttons.buttons import StandardButton
@@ -47,7 +47,7 @@ class RdiMergeStatusAdminMixin(admin.ModelAdmin):
 class JSONWidgetMixin:
     json_enabled = False
 
-    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: Any) -> object:
         if db_field.get_internal_type() == "JSONField":
             if is_root(request) or settings.DEBUG or self.json_enabled:
                 kwargs = {"widget": JSONEditor}
@@ -154,7 +154,7 @@ class AutocompleteForeignKeyMixin:
 class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
-    def get_fields(self, request: HttpRequest, obj: object | None = None) -> object:
+    def get_fields(self, request: HttpRequest, obj: object | None = None) -> Any:
         return super().get_fields(request, obj)
 
     def get_actions(self, request: HttpRequest) -> dict:
@@ -190,7 +190,7 @@ class BusinessAreaForCollectionsListFilter(admin.SimpleListFilter):
     parameter_name = "business_area__exact"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[object, str]]:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[str, str]]:
         return list(BusinessArea.objects.all().values_list("id", "name"))
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -472,9 +472,9 @@ class LinkedObjectsManagerMixin:
             context,
         )
 
-    def get_related(self, user: Model, field: object, manager: str, max_records: int = 200) -> dict[str, object]:
+    def get_related(self, user: Model, field: object, manager: str, max_records: int = 200) -> dict[str, Any]:
         """Override 'get_related' from 'smart_admin', to take related objects with a custom manager."""
-        info: dict[str, object] = {
+        info: dict[str, Any] = {
             "owner": user,
             "to": field.model._meta.model_name,
             "field_name": field.name,

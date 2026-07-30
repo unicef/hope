@@ -1,5 +1,5 @@
 import dataclasses
-from datetime import datetime
+import datetime
 
 from dateutil.parser import parse
 from django.conf import settings
@@ -14,8 +14,8 @@ from hope.apps.core.exchange_rates.api import (
 
 @dataclasses.dataclass(frozen=True)
 class HistoryExchangeRate:
-    valid_from: datetime
-    valid_to: datetime
+    valid_from: datetime.datetime
+    valid_to: datetime.datetime
     past_xrate: float
     past_ratio: float
 
@@ -28,8 +28,8 @@ class HistoryExchangeRate:
             past_ratio=float(data["PAST_RATIO"]),
         )
 
-    def is_valid(self, dispersion_date: datetime) -> bool:
-        dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
+    def is_valid(self, dispersion_date: datetime.date) -> bool:
+        dispersion_date = datetime.datetime.combine(dispersion_date, datetime.datetime.min.time())
         return self.valid_from <= dispersion_date <= self.valid_to
 
     def calc_exchange_rate(self) -> float:
@@ -41,15 +41,15 @@ class SingleExchangeRate:
     currency_code: str
     currency_name: str
     x_rate: float
-    valid_from: datetime
-    valid_to: datetime
+    valid_from: datetime.datetime
+    valid_to: datetime.datetime
     ratio: float
     no_of_decimal: int
     historical_exchange_rates: list[HistoryExchangeRate]
 
     @classmethod
     def from_dict(cls, data: dict) -> "SingleExchangeRate":
-        valid_to = datetime(9999, 12, 31) if data["VALID_TO"] == "31-DEC-99" else parse(data["VALID_TO"])
+        valid_to = datetime.datetime(9999, 12, 31) if data["VALID_TO"] == "31-DEC-99" else parse(data["VALID_TO"])
 
         past_xrates = data["PAST_XRATE"]["PAST_XRATE_ROW"] if data["PAST_XRATE"] is not None else []
         if isinstance(past_xrates, dict):
@@ -67,7 +67,7 @@ class SingleExchangeRate:
             historical_exchange_rates=list(map(HistoryExchangeRate.from_dict, past_xrates)),
         )
 
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> float | None:
+    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime.date) -> float | None:
         if self.is_valid(dispersion_date):
             return self.calc_exchange_rate()
 
@@ -80,11 +80,11 @@ class SingleExchangeRate:
     def calc_exchange_rate(self) -> float:
         return self.x_rate * self.ratio
 
-    def is_valid(self, dispersion_date: datetime) -> bool:
+    def is_valid(self, dispersion_date: datetime.date) -> bool:
         if not dispersion_date:
             return True
 
-        dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
+        dispersion_date = datetime.datetime.combine(dispersion_date, datetime.datetime.min.time())
         valid_to = timezone.now() if self.valid_to is None else self.valid_to
         return self.valid_from <= dispersion_date <= valid_to
 
@@ -114,7 +114,9 @@ class ExchangeRates:
             return response_json
         return self.api_client.fetch_exchange_rates()
 
-    def get_exchange_rate_for_currency_code(self, currency_code: str | None, dispersion_date: datetime) -> float | None:
+    def get_exchange_rate_for_currency_code(
+        self, currency_code: str | None, dispersion_date: datetime.date
+    ) -> float | None:
         if currency_code is None:
             return None
 

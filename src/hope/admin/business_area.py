@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.mixins import confirm_action
@@ -190,7 +190,7 @@ class BusinessAreaAdmin(
     def document_types_valid_for_deduplication(self, obj: object) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
 
-    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

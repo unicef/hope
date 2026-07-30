@@ -1,9 +1,11 @@
 import logging
+from typing import Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db import models
 from django.db.models import QuerySet
+from django.forms import ModelChoiceField
 from django.http import HttpRequest
 
 from hope.admin.account_forms import (
@@ -23,7 +25,9 @@ class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     formset = RoleAssignmentInlineFormSet
     ordering = ["business_area__name"]
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest = None, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField[Any] | None:
         partner_id = request.resolver_match.kwargs.get("object_id")
 
         if db_field.name == "business_area":
@@ -67,7 +71,9 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest = None, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField[Any] | None:
         if db_field.name == "role":
             kwargs["queryset"] = Role.objects.order_by("name")
         elif db_field.name == "business_area":
@@ -126,10 +132,13 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     def get_fields(self, request: HttpRequest, obj: object | None = None) -> list:
         return ["partner", "business_area", "program", "role", "expiry_date", "group"]
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest = None, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField[Any] | None:
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "role":
-            obj = self.get_object(request, request.resolver_match.kwargs.get("object_id")) if request else None
+            object_id = cast("str | None", request.resolver_match.kwargs.get("object_id"))
+            obj = self.get_object(request, object_id) if object_id else None
             if obj and obj.partner and obj.partner.is_unicef_subpartner:
                 field.queryset = Role.objects.order_by("name")
             else:

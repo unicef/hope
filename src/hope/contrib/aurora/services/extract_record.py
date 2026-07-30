@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable
+from typing import Any, Iterable
 
 from hope.apps.registration_data.templatetags.smart_register import is_image
 from hope.contrib.aurora.models import Record
@@ -7,8 +7,8 @@ from hope.contrib.aurora.models import Record
 logger = logging.getLogger(__name__)
 
 
-def extract(records_ids: Iterable[int], raise_exception: bool = False) -> object:
-    def _filter(d: object) -> object:
+def extract(records_ids: Iterable[int], raise_exception: bool = False) -> None:
+    def _filter(d: object) -> Any:
         if isinstance(d, list):
             return [_filter(v) for v in d]
         if isinstance(d, dict):
@@ -21,13 +21,13 @@ def extract(records_ids: Iterable[int], raise_exception: bool = False) -> object
     updated_records = []
     for record in records:
         try:
-            record.data = _filter(record.get_data())
+            data: dict[str, Any] = _filter(record.get_data())
 
-            individuals = record.data.get("individuals", {})
+            individuals = data.get("individuals", {})
             collectors = [individual for individual in individuals if individual.get("role_i_c", "n") == "y"]
             heads = [individual for individual in individuals if individual.get("relationship_i_c") == "head"]
 
-            record.data["w_counters"] = {
+            data["w_counters"] = {
                 "individuals_num": len(individuals),
                 "collectors_num": len(collectors),
                 "head": len(heads),
@@ -59,6 +59,7 @@ def extract(records_ids: Iterable[int], raise_exception: bool = False) -> object
                 ),
                 "collector_bank_account": len([individual.get("bank_account") for individual in collectors]) > 0,
             }
+            record.data = data
             updated_records.append(record)
         except Exception as e:
             if raise_exception:

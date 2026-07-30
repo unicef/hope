@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 from django.http import HttpRequest
@@ -154,7 +155,7 @@ MIDDLEWARE = [] + [
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
-TEMPLATES: list[dict[str, object]] = [
+TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
@@ -288,7 +289,7 @@ HIJACK_PERMISSION_CHECK = "hope.apps.utils.security.can_hijack"
 
 CACHE_ENABLED = env("CACHE_ENABLED")
 
-CACHES: dict[str, object]
+CACHES: dict[str, Any]
 if CACHE_ENABLED:
     CACHES = {
         "default": {
@@ -388,7 +389,7 @@ def masker(key: str, value: object, config: dict, request: HttpRequest) -> objec
         if key.startswith("DATABASE_URL"):
             from urllib.parse import urlparse
 
-            c = urlparse(value)
+            c = urlparse(str(value))
             return f"{c.scheme}://****:****@{c.hostname}{c.path}?{c.query}"
         return cleanse_setting(key, value, config, request)
     return value

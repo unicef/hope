@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
@@ -30,7 +31,7 @@ class CustomDatabaseScheduler(DatabaseScheduler):
         entry: object,
         producer: object = None,
         advance: bool = True,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> object:
         if self._is_periodic_task_already_in_queue(entry):
             logger.info(

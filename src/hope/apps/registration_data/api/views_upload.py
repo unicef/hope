@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import transaction
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -46,7 +48,7 @@ class ImportDataUploadViewSet(
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def upload_xlsx_file(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def upload_xlsx_file(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Upload an XLSX file asynchronously for registration data import."""
         from hope.apps.registration_data.celery_tasks import (
             validate_xlsx_import_async_task,
@@ -101,7 +103,7 @@ class KoboImportDataUploadViewSet(
         url_path="save-kobo-import-data",
     )
     @transaction.atomic
-    def save_kobo_import_data(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def save_kobo_import_data(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Save KoBo project import data asynchronously."""
         from hope.apps.registration_data.celery_tasks import (
             pull_kobo_submissions_async_task,

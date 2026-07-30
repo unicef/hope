@@ -2,7 +2,7 @@ import csv
 from io import StringIO
 import json
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from admin_extra_buttons.api import button
@@ -166,7 +166,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             )
         )
 
-    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> None:
+    def formfield_for_dbfield(self, db_field: models.Field, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "flags":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}
@@ -212,7 +212,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
         request: HttpRequest,
         obj: object | None = None,
         change: bool = False,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> type["ModelForm"]:
         return super().get_form(request, obj, change, **kwargs)
 
@@ -224,8 +224,8 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             return None
 
     def delete_view(
-        self, request: HttpRequest, object_id: str, extra_context: object | None = None
-    ) -> HttpResponse | HttpResponse:
+        self, request: HttpRequest, object_id: str, extra_context: dict[str, Any] | None = None
+    ) -> HttpResponse:
         return super().delete_view(request, object_id, extra_context)
 
     def render_delete_form(self, request: HttpRequest, context: dict) -> HttpResponse:
@@ -283,7 +283,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
     def _step_first_processing(
-        self, context: dict[str, object], form: Form, request: HttpRequest, rule: Rule | None
+        self, context: dict[str, Any], form: Form, request: HttpRequest, rule: Rule | None
     ) -> None:
         if form.is_valid():
             csv_config = self._get_csv_config(form)
@@ -394,7 +394,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
         request: HttpRequest,
         object_id: str,
         form_url: str = "",
-        extra_context: object | None = None,
+        extra_context: dict[str, Any] | None = None,
     ) -> HttpResponse:
         return super().change_view(request, object_id, form_url, extra_context)
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, cast
+from typing import TYPE_CHECKING, Any, Iterable, cast
 
 from django.core.cache import cache
 from rest_framework_extensions.key_constructor import bits
@@ -54,23 +54,21 @@ profile_cache = ProfileVersioner()
 
 
 class ProfileEtagKey:
-    def __call__(
-        self, view_instance: object, view_method: object, request: HttpRequest, args: object, kwargs: object
-    ) -> str:
-        return profile_cache.etag_for(request.user.id)
+    def __call__(self, view_instance: object, view_method: object, request: HttpRequest, args: Any, kwargs: Any) -> str:
+        return profile_cache.etag_for(request.user.id or 0)
 
 
 class ProfileVersionsKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913 – override of base method signature
         self,
-        params: object,
+        params: Any,
         view_instance: object,
         view_method: object,
         request: HttpRequest,
-        args: object,
-        kwargs: object,
+        args: Any,
+        kwargs: Any,
     ) -> str:
-        return profile_cache.cache_key_for(request.user.id)
+        return profile_cache.cache_key_for(request.user.id or 0)
 
 
 class ProfileKeyConstructor(KeyConstructor):

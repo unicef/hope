@@ -10,7 +10,7 @@ from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import redirect
-from django.urls import path, reverse
+from django.urls import URLPattern, path, reverse
 from django.utils import timezone
 
 from hope.admin.utils import HOPEModelAdminBase
@@ -63,7 +63,7 @@ class UsedValuesListFilter(admin.SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     @staticmethod
-    def async_job_queryset(request: HttpRequest, model_admin: admin.ModelAdmin[object]) -> QuerySet[AsyncJob]:
+    def async_job_queryset(request: HttpRequest, model_admin: admin.ModelAdmin) -> QuerySet[AsyncJob]:
         return cast("QuerySet[AsyncJob]", model_admin.get_queryset(request))
 
 
@@ -103,7 +103,7 @@ class UsedBusinessAreaAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
 
 
 class UsedProgramAutoCompleteFilter(AsyncJobAdminLinkedAutoCompleteFilter):
-    parent = cast("object", "program__business_area")
+    parent = "program__business_area"  # type: ignore[assignment]
     autocomplete_view_name_suffix = "used_program_autocomplete"
 
 
@@ -111,7 +111,7 @@ class UsedContentTypeListFilter(UsedValuesListFilter):
     title = "content type"
     parameter_name = "content_type__exact"
 
-    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[object]) -> list[tuple[str, str]]:
+    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin) -> list[tuple[str, str]]:
         used_content_type_ids = (
             self.async_job_queryset(request, model_admin)
             .exclude(content_type__isnull=True)
@@ -136,7 +136,7 @@ class UsedJobNameListFilter(UsedValuesListFilter):
     title = "job name"
     parameter_name = "job_name"
 
-    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin[object]) -> list[tuple[str, str]]:
+    def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin) -> list[tuple[str, str]]:
         job_names = {
             str(job_name)
             for job_name in self.async_job_queryset(request, model_admin)
@@ -359,7 +359,7 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
             ),
         )
 
-    def get_urls(self) -> list[object]:
+    def get_urls(self) -> list[URLPattern]:
         info = self.model._meta.app_label, self.model._meta.model_name
         custom_urls = [
             path(

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 from admin_extra_buttons.api import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -75,8 +75,8 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         request: HttpRequest,
         obj: object | None = None,
         change: bool = False,
-        **kwargs: object,
-    ) -> object:
+        **kwargs: Any,
+    ) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
@@ -108,7 +108,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self,
         request: HttpRequest,
         form_url: str = "",
-        extra_context: dict[str, object] | None = None,
+        extra_context: dict[str, Any] | None = None,
     ) -> HttpResponse:
         if not self.has_add_permission(request):
             logger.warning("The user did not have permission to do that")
@@ -186,7 +186,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         request: HttpRequest,
         object_id: str,
         form_url: str = "",
-        extra_context: dict[str, object] | None = None,
+        extra_context: dict[str, Any] | None = None,
     ) -> HttpResponse:
         extra_context = {
             "show_save": False,

@@ -1,5 +1,5 @@
 import logging
-from typing import cast
+from typing import Any, cast
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
@@ -67,7 +67,9 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
             .defer("photo")
         )
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> Any:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

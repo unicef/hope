@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django import template
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -15,7 +15,7 @@ register = template.Library()
 
 
 @register.simple_tag()
-def get_related(user: "User", field: object) -> dict[str, object]:
+def get_related(user: "User", field: object) -> dict[str, Any]:
     info = {
         "to": field.model._meta.model_name,
         "field_name": field.name,

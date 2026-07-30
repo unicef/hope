@@ -3,7 +3,7 @@ from decimal import Decimal
 from functools import partial
 import secrets
 import time
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -185,7 +185,7 @@ class Command(BaseCommand):
         PaymentVerificationFactory.create_batch(10)
 
     @transaction.atomic
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: Any) -> None:
         self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")

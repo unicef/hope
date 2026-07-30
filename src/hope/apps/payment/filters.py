@@ -265,7 +265,7 @@ class PaymentPlanFilter(FilterSet):
         return qs
 
     @staticmethod
-    def filter_by_status(queryset: "QuerySet", model_field: str, value: object) -> "QuerySet":
+    def filter_by_status(queryset: "QuerySet", model_field: str, value: str) -> "QuerySet":
         # assigned TP statuses
         is_assigned = [
             PaymentPlan.Status.PREPARING,
@@ -278,10 +278,12 @@ class PaymentPlanFilter(FilterSet):
             PaymentPlan.Status.ACCEPTED,
             PaymentPlan.Status.FINISHED,
         ]
-        if "ASSIGNED" in value:
+        if "ASSIGNED" in str(value):
             # add all list of statuses
-            value = is_assigned + [status for status in value if status != "ASSIGNED"]
-        return queryset.filter(status__in=value)
+            statuses = is_assigned + [status for status in value if status != "ASSIGNED"]
+        else:
+            statuses = [value]
+        return queryset.filter(status__in=statuses)
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_max(

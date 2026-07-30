@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Any
 
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
@@ -25,7 +26,7 @@ from hope.models import Area, Household, Individual, country as geo_models, log_
 from hope.models.currency import Currency
 
 
-def _prepare_roles_with_approve_status(roles_data: list[dict[object, object]]) -> list[dict[str, object]]:
+def _prepare_roles_with_approve_status(roles_data: list[dict[object, object]]) -> list[dict[str, Any]]:
     roles_with_approve_status = []
     for role in roles_data:
         individual = role["individual"]

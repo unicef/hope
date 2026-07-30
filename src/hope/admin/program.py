@@ -2,7 +2,7 @@ from io import BytesIO
 import json
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -98,11 +98,13 @@ class PaymentPlanPurposeInline(admin.TabularInline):
     verbose_name = "Payment Plan Purpose"
     verbose_name_plural = "Payment Plan Purposes"
 
-    def get_formset(self, request: HttpRequest, obj: object = None, **kwargs: object) -> object:
+    def get_formset(self, request: HttpRequest, obj: object = None, **kwargs: Any) -> Any:
         request._program_obj = obj
         return super().get_formset(request, obj, **kwargs)
 
-    def formfield_for_foreignkey(self, db_field: models.Field, request: HttpRequest, **kwargs: object) -> object:
+    def formfield_for_foreignkey(
+        self, db_field: models.ForeignKey[Any, Any], request: HttpRequest, **kwargs: Any
+    ) -> Any:
         if db_field.name == "paymentplanpurpose":
             obj = getattr(request, "_program_obj", None)
             if obj is not None:
@@ -187,7 +189,7 @@ class ProgramAdminForm(forms.ModelForm):
         ) as exc:
             raise ValidationError(f"BiometricDeduplicationService Error: {exc}") from exc
 
-    def clean(self) -> dict[str, object] | None:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         if self.errors:
             return cleaned_data

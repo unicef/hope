@@ -1,7 +1,7 @@
 from django import template
 from django.conf import settings
 from django.utils.safestring import SafeString
-import markdown
+import markdown  # type: ignore[import-untyped]
 import nh3
 
 register = template.Library()

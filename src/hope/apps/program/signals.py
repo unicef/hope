@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import transaction
 from django.db.models import Model
 from django.db.models.signals import post_delete, post_save, pre_save
@@ -20,14 +22,14 @@ def adjust_program_size(program: Program) -> None:
 
 
 @receiver(pre_save, sender=Program)
-def track_old_partner_access(sender: type[Model], instance: Program, **kwargs: object) -> None:
+def track_old_partner_access(sender: type[Model], instance: Program, **kwargs: Any) -> None:
     old_partner_access = getattr(Program.objects.filter(pk=instance.pk).first(), "partner_access", None)
 
     instance.old_partner_access = old_partner_access
 
 
 @receiver(post_save, sender=Program)
-def handle_partner_access_change(sender: type[Model], instance: Program, created: bool, **kwargs: object) -> None:
+def handle_partner_access_change(sender: type[Model], instance: Program, created: bool, **kwargs: Any) -> None:
     old_partner_access = instance.old_partner_access
     new_partner_access = instance.partner_access
 

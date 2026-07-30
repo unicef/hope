@@ -94,7 +94,7 @@ class TargetPopulationFilter(PaymentPlanFilter):
             PaymentPlan.Status.ACCEPTED.value,
             PaymentPlan.Status.FINISHED.value,
         ]
-        value_list = is_assigned if value == "ASSIGNED" else [value]
+        value_list: list[str] = is_assigned if str(value) == "ASSIGNED" else [str(value)]
         return queryset.filter(status__in=value_list)
 
 

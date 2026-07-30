@@ -1,13 +1,14 @@
 import csv
 import json
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import black
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db import Error
 from django.forms import HiddenInput, Media, Textarea
+from django.forms.widgets import Widget
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.steficon.config import config
@@ -88,7 +89,7 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # FIXME: 'data' is an internal field
     fields = forms.CharField(widget=HiddenInput)  # type: ignore # FIXME: 'fields' is an internal field
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
             self.fields[fname].widget = HiddenInput()  # type: ignore # FIXME
@@ -111,10 +112,10 @@ class TPModelChoiceField(forms.ModelChoiceField):
         self,
         empty_label: str = "---------",
         required: bool = True,
-        widget: object | None = None,
-        label: object | None = None,
+        widget: Widget | type[Widget] | None = None,
+        label: str | None = None,
         initial: object | None = None,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> None:
         help_text: str = kwargs.get("help_text", "")
         to_field_name = kwargs.get("to_field_name")

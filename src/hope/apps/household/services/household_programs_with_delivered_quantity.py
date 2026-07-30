@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Any
 
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Coalesce
@@ -6,7 +7,7 @@ from django.db.models.functions import Coalesce
 from hope.models import Household, Payment
 
 
-def delivered_quantity_service(household: Household) -> list[dict[str, object]]:
+def delivered_quantity_service(household: Household) -> list[dict[str, Any]]:
     payment_items = household.payment_set.all()
     quantity_in_usd = payment_items.exclude(status=Payment.STATUS_FORCE_FAILED).aggregate(
         total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)),

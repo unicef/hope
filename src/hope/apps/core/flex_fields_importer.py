@@ -71,7 +71,7 @@ class FlexibleAttributeImporter:
         "deviceid",
     )
 
-    def _get_model_fields(self, object_type_to_add: object) -> list[str] | None:
+    def _get_model_fields(self, object_type_to_add: str) -> list[str] | None:
         return {
             "attribute": self.ATTRIBUTE_MODEL_FIELDS,
             "group": self.GROUP_MODEL_FIELDS,

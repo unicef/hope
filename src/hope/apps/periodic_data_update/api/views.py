@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
@@ -96,7 +97,7 @@ class PDUXlsxTemplateViewSet(
     # to enable - just uncomment the decorators and related tests
     # @etag_decorator(PDUTemplateKeyConstructor)
     # @cache_response(timeout=config.REST_API_TTL, key_func=PDUTemplateKeyConstructor())
-    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     # export the template during template creation
@@ -118,7 +119,7 @@ class PDUXlsxTemplateViewSet(
         export_periodic_data_update_export_template_service_async_task(pdu_template)
 
     @action(detail=True, methods=["post"])
-    def export(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def export(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         pdu_template = self.get_object()
 
         if pdu_template.status == PDUXlsxTemplate.Status.EXPORTING:
@@ -130,7 +131,7 @@ class PDUXlsxTemplateViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
-    def download(self, request: Request, *args: object, **kwargs: object) -> FileResponse:
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         pdu_template = self.get_object()
 
         if pdu_template.status != PDUXlsxTemplate.Status.EXPORTED:
@@ -176,11 +177,11 @@ class PDUXlsxUploadViewSet(
     # to enable - just uncomment the decorators and related tests
     # @etag_decorator(PDUUpdateKeyConstructor)
     # @cache_response(timeout=config.REST_API_TTL, key_func=PDUUpdateKeyConstructor())
-    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @action(detail=False, methods=["post"], parser_classes=[DictDrfNestedParser])
-    def upload(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(
             data=request.data,
         )
@@ -277,7 +278,7 @@ class PDUOnlineEditViewSet(
         generate_pdu_online_edit_data_async_task(pdu_online_edit, **task_kwargs)
 
     @action(detail=True, methods=["post"])
-    def update_authorized_users(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def update_authorized_users(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -289,7 +290,7 @@ class PDUOnlineEditViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Authorized users updated successfully."})
 
     @action(detail=True, methods=["post"])
-    def send_for_approval(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
         if instance.status != PDUOnlineEdit.Status.NEW:
@@ -310,7 +311,7 @@ class PDUOnlineEditViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
 
     @action(detail=True, methods=["post"])
-    def save_data(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def save_data(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
 
@@ -344,7 +345,7 @@ class PDUOnlineEditViewSet(
 
     @transaction.atomic
     @action(detail=True, methods=["post"])
-    def send_back(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def send_back(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -373,7 +374,7 @@ class PDUOnlineEditViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
 
     @action(detail=False, methods=["post"])
-    def bulk_approve(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def bulk_approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -392,7 +393,7 @@ class PDUOnlineEditViewSet(
         # Send notification emails for each approved PDU Edit
         for pdu_edit in pdu_edits:
             send_pdu_online_edit_notification_emails_async_task(
-                pdu_edit,
+                pdu_edit,  # type: ignore[arg-type]
                 "APPROVE",
                 str(request.user.pk),
                 f"{timezone.now():%-d %B %Y}",
@@ -403,7 +404,7 @@ class PDUOnlineEditViewSet(
         )
 
     @action(detail=False, methods=["post"])
-    def bulk_merge(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def bulk_merge(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.check_user_authorization(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -416,7 +417,7 @@ class PDUOnlineEditViewSet(
         pdu_edits.update(status=PDUOnlineEdit.Status.PENDING_MERGE)
 
         for pdu_edit in pdu_edits:
-            merge_pdu_online_edit_async_task(pdu_edit)
+            merge_pdu_online_edit_async_task(pdu_edit)  # type: ignore[arg-type]
 
         return Response(
             status=status.HTTP_200_OK, data={"message": f"{pdu_edits.count()} PDU Online Edits queued for merging."}
@@ -441,7 +442,7 @@ class PDUOnlineEditViewSet(
         responses={200: AuthorizedUserSerializer(many=True)},
     )
     @action(detail=False, methods=["get"])
-    def users_available(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def users_available(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         business_area_slug = self.kwargs.get("business_area_slug")
         program_code = self.kwargs.get("program_code")
         permissions_to_check = [perm.value for perm in PDU_ONLINE_EDIT_RELATED_PERMISSIONS]
@@ -501,5 +502,5 @@ class PeriodicFieldViewSet(
 
     @etag_decorator(PeriodicFieldKeyConstructor)
     @cached_response(key_func=PeriodicFieldKeyConstructor())
-    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)

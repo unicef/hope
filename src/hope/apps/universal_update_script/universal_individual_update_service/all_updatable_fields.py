@@ -1,5 +1,7 @@
 """Static by design, it could be made dynamic by fetching the fields from the model itself."""
 
+from typing import Any
+
 from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
@@ -21,7 +23,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.valid
 )
 from hope.models import AccountType, DocumentType, FlexibleAttribute
 
-individual_fields: dict[str, tuple[str, object, object]] = {
+individual_fields: dict[str, tuple[str, Any, Any]] = {
     "full_name": ("full_name", validate_string, handle_simple_field),
     "given_name": ("given_name", validate_string, handle_simple_field),
     "middle_name": ("middle_name", validate_string, handle_simple_field),
@@ -103,7 +105,7 @@ individual_fields: dict[str, tuple[str, object, object]] = {
         handle_simple_field,
     ),
 }
-household_fields: dict[str, tuple[str, object, object]] = {
+household_fields: dict[str, tuple[str, Any, Any]] = {
     "consent": ("consent", validate_boolean, handle_boolean_field),
     "residence_status": ("residence_status", validate_choices, handle_simple_field),
     "country_origin": ("country_origin", validate_string, handle_simple_field),
@@ -266,7 +268,7 @@ household_fields: dict[str, tuple[str, object, object]] = {
 }
 
 
-def get_individual_flex_fields() -> dict[object, object]:
+def get_individual_flex_fields() -> dict[str, Any]:
     flex_fields_dict = {}
     for flexible_attribute in FlexibleAttribute.objects.filter(
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
@@ -279,7 +281,7 @@ def get_individual_flex_fields() -> dict[object, object]:
     return flex_fields_dict
 
 
-def get_household_flex_fields() -> dict[object, object]:
+def get_household_flex_fields() -> dict[str, Any]:
     flex_fields_dict = {}
     for flexible_attribute in FlexibleAttribute.objects.filter(
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
@@ -292,11 +294,11 @@ def get_household_flex_fields() -> dict[object, object]:
     return flex_fields_dict
 
 
-def get_document_fields() -> list[object]:
+def get_document_fields() -> list[tuple[str, str]]:
     return [(f"{x}_no_i_c", f"{x}_country_i_c") for x in DocumentType.objects.values_list("key", flat=True)]
 
 
-def get_account_fields() -> dict[object, object]:
+def get_account_fields() -> dict[str, Any]:
     deliver_mechanism_data_fields = {}
     for account_type_instance in AccountType.objects.all():
         account_type = account_type_instance.key

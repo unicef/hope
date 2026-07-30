@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Iterable
 
 from admin_extra_buttons.decorators import button
 from admin_sync.collector import ForeignKeysCollector
@@ -7,6 +7,8 @@ from admin_sync.mixins.base import BaseSyncMixin
 from admin_sync.protocol import LoadDumpProtocol
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
+from django.forms import Form
+from django.forms.formsets import BaseFormSet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -33,7 +35,7 @@ class RoleResource(resources.ModelResource):
 
 
 class UnrelatedForeignKeysCollector(ForeignKeysCollector):
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(False)
 
 
@@ -102,12 +104,12 @@ class RoleAdmin(ImportExportModelAdmin, BaseSyncMixin, HOPEModelAdminBase):
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def construct_change_message(
-        self, request: HttpRequest, form: object, formsets: object, add: bool = False
+        self, request: HttpRequest, form: Form, formsets: Iterable[BaseFormSet[Any]], add: bool = False
     ) -> list[dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            changed: dict[str, object] = change_message[0]["changed"]
+            changed: dict[str, Any] = change_message[0]["changed"]
             changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),

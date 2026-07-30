@@ -316,8 +316,8 @@ class RdiMergeTask:
         )
 
     def _create_kobo_submissions(
-        self, households: QuerySet[object, object], obj_hct: RegistrationDataImport
-    ) -> list[object]:
+        self, households: QuerySet[Household], obj_hct: RegistrationDataImport
+    ) -> list[KoboImportedSubmission]:
         kobo_submissions = []
         for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
             kobo_submission_uuid = household.kobo_submission_uuid

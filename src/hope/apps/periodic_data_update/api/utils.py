@@ -1,9 +1,11 @@
+from typing import Any
+
 from rest_framework import serializers
 
 from hope.models import FlexibleAttribute, Program
 
 
-def add_round_names_to_rounds_data(rounds_data: list[dict[str, object]], program: Program) -> None:
+def add_round_names_to_rounds_data(rounds_data: list[dict[str, Any]], program: Program) -> None:
     """Add round_name to each element in rounds_data by fetching it from FlexibleAttribute."""
     for round_data in rounds_data:
         field_name = round_data.get("field")

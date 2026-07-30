@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import models
 
 from hope.models.sanction_list import SanctionList
@@ -19,7 +21,7 @@ class SanctionListIndividualQuerySet(models.QuerySet):
 
 
 class ActiveIndividualsManager(models.Manager):
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.alive_only = kwargs.pop("active_only", True)
         super().__init__(*args, **kwargs)
 

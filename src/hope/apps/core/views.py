@@ -61,5 +61,5 @@ class UploadFile(UploadFilePermissionMixin, View):
         return "core/upload_file.html"
 
     @staticmethod
-    def format_form_error(form: forms.Form) -> object:
+    def format_form_error(form: forms.Form) -> str:
         return form.errors.get_json_data()["__all__"][0]["message"]

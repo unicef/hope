@@ -1526,7 +1526,7 @@ class CheckRapidProVerificationTask:
             except Exception as e:
                 logger.exception(e)
 
-    def _verify_cashplan_payment_verification(self, payment_verification_plan: object) -> None:
+    def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         from hope.models import PaymentVerification
 
         payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(

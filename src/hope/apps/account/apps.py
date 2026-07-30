@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.apps import AppConfig
 from django.contrib.admin.options import get_content_type_for_model
 from django.db.models import Model
@@ -18,13 +20,13 @@ class AccountConfig(AppConfig):
 
 # TODO: LogEntry model is not available at this point, use narrower type
 def log_impersonate(
-    sender: type[Model], request: HttpRequest, hijacker: object, hijacked: object, *args: object, **kwargs: object
+    sender: type[Model], request: HttpRequest, hijacker: object, hijacked: object, *args: Any, **kwargs: Any
 ) -> object:
     from django.contrib.admin.models import LogEntry
 
     return LogEntry.objects.log_action(
         user_id=hijacker.pk,
-        content_type_id=get_content_type_for_model(hijacked).pk,
+        content_type_id=get_content_type_for_model(hijacked).pk,  # type: ignore[arg-type]
         object_id=hijacked.pk,
         object_repr=str(hijacked),
         action_flag=0,

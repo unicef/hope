@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from constance import config
 from django import forms
@@ -92,7 +92,7 @@ class GenericImportForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={"accept": ".xlsx,.xls"}),
     )
 
-    def __init__(self, user: AbstractUser, *args: object, **kwargs: object) -> None:
+    def __init__(self, user: AbstractUser, *args: Any, **kwargs: Any) -> None:
         """Initialize form with user-specific querysets.
 
         Args:
@@ -215,7 +215,7 @@ class GenericImportForm(forms.Form):
 
         return file
 
-    def clean(self) -> dict[str, object] | None:
+    def clean(self) -> dict[str, Any] | None:
         """Validate that program belongs to selected business area."""
         cleaned_data = super().clean()
         business_area = cleaned_data.get("business_area")

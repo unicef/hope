@@ -2,6 +2,7 @@ import csv
 import logging
 from typing import (
     TYPE_CHECKING,
+    Any,
     Generator,
     Union,
 )
@@ -114,13 +115,13 @@ class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEMode
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field: models.Field, request: "HttpRequest", **kwargs: object) -> None:
+    def formfield_for_dbfield(self, db_field: models.Field, request: "HttpRequest", **kwargs: Any) -> Any:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(self, request: "HttpRequest") -> object:
+    def get_list_display(self, request: "HttpRequest") -> Any:
         return super().get_list_display(request)
 
 

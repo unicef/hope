@@ -1,7 +1,7 @@
 import difflib
 from difflib import _mdiff
 import json
-from typing import Sequence
+from typing import Any, Sequence
 
 from django import template
 from pygments import highlight, lexers
@@ -119,7 +119,7 @@ class HtmlDiff(difflib.HtmlDiff):
 
 
 @register.filter(name="getattr")
-def get_attr(d: object, v: object) -> object:
+def get_attr(d: object, v: str) -> Any:
     return getattr(d, v)
 
 

@@ -1,7 +1,7 @@
 from io import BytesIO
 import logging
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 import zipfile
 
 from django.db.models import Q, QuerySet
@@ -115,7 +115,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         if not payments_ids:
             return
 
-        payments: list[Payment] = list(qs.only("id", "order_number", "token_number"))
+        payments: list[Payment] = list(qs.only("id", "order_number", "token_number"))  # type: ignore[arg-type]
         if not payments:  # pragma: no cover
             return
 
@@ -267,8 +267,8 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         self.header_list = column_list
         return self.header_list
 
-    def get_payment_row(self, payment: Payment) -> list[str]:
-        payment_row = [
+    def get_payment_row(self, payment: Payment) -> list[Any]:
+        payment_row: list[Any] = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
                 payment, column_name, self.admin_areas_dict, self.all_document_types
             )

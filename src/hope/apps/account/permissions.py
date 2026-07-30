@@ -1,6 +1,6 @@
 from enum import Enum, auto, unique
 import logging
-from typing import TYPE_CHECKING, Iterable, Union
+from typing import TYPE_CHECKING, Any, Iterable, Union
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 @unique
 class Permissions(Enum):
     @staticmethod
-    def _generate_next_value_(name: str, start: int, count: int, last_values: list[object]) -> object:
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[object]) -> str:
         return name
 
     # RDI
@@ -322,7 +322,7 @@ DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER = (
 DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [str(perm.value) for perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER]
 
 
-def check_permissions(user: object, permissions: Iterable[Permissions], **kwargs: object) -> bool:
+def check_permissions(user: object, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     from hope.models import BusinessArea, Program
 
     if not user.is_authenticated:

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.db.models import Count, F, Func, Q, QuerySet, Window
 from django_filters import (
@@ -27,7 +28,7 @@ class IsNull(Func):
 
 
 class GrievanceOrderingFilter(OrderingFilter):
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.extra["choices"] += [
             ("linked_tickets", "Linked tickets"),

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.request import Request
@@ -45,7 +47,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             }
         )
 
-    def post(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = PaymentPlanCallbackRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return self._error_response(serializer)

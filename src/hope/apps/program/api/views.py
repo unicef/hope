@@ -1,5 +1,6 @@
 import copy
 import logging
+from typing import Any
 
 from django.db import transaction
 from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
@@ -162,11 +163,11 @@ class ProgramViewSet(
 
     @etag_decorator(ProgramListKeyConstructor)
     @cached_response(key_func=ProgramListKeyConstructor())
-    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["post"])
-    def activate(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def activate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         old_program = copy.deepcopy(program)
 
@@ -188,7 +189,7 @@ class ProgramViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Program Activated."})
 
     @action(detail=True, methods=["post"])
-    def finish(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         old_program = copy.deepcopy(program)
 
@@ -315,7 +316,7 @@ class ProgramViewSet(
 
     @transaction.atomic
     @action(detail=True, methods=["post"])
-    def update_partner_access(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def update_partner_access(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         old_program = copy.deepcopy(program)
         old_partner_access = old_program.partner_access
@@ -351,7 +352,7 @@ class ProgramViewSet(
 
     @transaction.atomic
     @action(detail=True, methods=["post"])
-    def copy(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         old_program = copy.deepcopy(program)
 
@@ -407,11 +408,11 @@ class ProgramViewSet(
         )
 
     @action(detail=False, methods=["get"])
-    def choices(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
+    def choices(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Response:
         return Response(data=self.get_serializer(instance={}).data)
 
     @action(detail=True, methods=["get"])
-    def deduplication_flags(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def deduplication_flags(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
 
         # deduplication engine in progress
@@ -454,7 +455,7 @@ class ProgramViewSet(
         },
     )
     @action(detail=True, methods=["get"])
-    def payments(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
         filterset = PaymentSearchFilter(
@@ -486,7 +487,7 @@ class ProgramViewSet(
         methods=["get"],
         url_path="payments/count",
     )
-    def payments_count(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
         payments = Payment.objects.filter(parent__program_cycle__program=program)
         filterset = PaymentSearchFilter(
@@ -530,7 +531,7 @@ class ProgramCycleViewSet(
 
     @etag_decorator(ProgramCycleKeyConstructor)
     @cached_response(key_func=ProgramCycleKeyConstructor())
-    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     def perform_update(self, serializer: BaseSerializer) -> None:
@@ -564,7 +565,7 @@ class ProgramCycleViewSet(
         detail=True,
         methods=["post"],
     )
-    def finish(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
         program_cycle.set_finish()
         return Response(status=status.HTTP_200_OK, data={"message": "Programme Cycle Finished"})
@@ -573,7 +574,7 @@ class ProgramCycleViewSet(
         detail=True,
         methods=["post"],
     )
-    def reactivate(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def reactivate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
         program_cycle.set_active()
         return Response(status=status.HTTP_200_OK, data={"message": "Programme Cycle Reactivated"})
@@ -592,5 +593,5 @@ class BeneficiaryGroupViewSet(
 
     @etag_decorator(BeneficiaryGroupKeyConstructor)
     @cached_response(key_func=BeneficiaryGroupKeyConstructor())
-    def list(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)

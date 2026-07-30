@@ -1,3 +1,5 @@
+from typing import Any
+
 from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict_if_exists,
@@ -84,7 +86,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         self,
         head_of_household_info: dict,
         registration_data_import: RegistrationDataImport | None = None,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> dict:
         flex_fields_dict = build_flex_arg_dict_from_list_if_exists(
             head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_FLEX_FIELDS

@@ -1,3 +1,5 @@
+from typing import Any
+
 from constance import config
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -34,7 +36,7 @@ class HOPEAPIView(APIView):
     permission = Grant.API_READ_ONLY
     log_http_methods = ["POST", "PUT", "DELETE"]
 
-    def dispatch(self, request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseBase:
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         ret = super().dispatch(request, *args, **kwargs)
         if (
             request.method.upper() in self.log_http_methods
@@ -51,7 +53,7 @@ class HOPEAPIView(APIView):
 
         return ret
 
-    def handle_exception(self, exc: Exception) -> object:
+    def handle_exception(self, exc: Exception) -> Response:
         if isinstance(exc, PermissionDenied):
             perm_name = self.permission.name if self.permission else ""
             exc = PermissionDenied("%s %s" % (exc.detail, perm_name))
@@ -73,7 +75,7 @@ class HOPEAPIBusinessAreaViewSet(SelectedBusinessAreaMixin, HOPEAPIViewSet):
 
 class ConstanceSettingsAPIView(HOPEAPIView):
     def get(self, request: HttpRequest) -> Response:
-        rest_settings: dict[str, object] = {}
+        rest_settings: dict[str, Any] = {}
         for setting_name in dir(config):
             if setting_name.startswith("REST_"):
                 setting_value = getattr(config, setting_name)

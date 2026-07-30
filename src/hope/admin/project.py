@@ -1,3 +1,5 @@
+from typing import Any
+
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django import forms
@@ -21,7 +23,7 @@ class ProjectAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAd
     search_fields = ("name",)
 
     def get_form(
-        self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: object
+        self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: Any
     ) -> type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
         if obj is not None:

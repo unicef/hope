@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 import logging
+from typing import Any
 
 from constance import config
 from django.conf import settings
@@ -86,7 +87,7 @@ class RapidProAPI:
             raise
         return response.json()
 
-    def _parse_json_urns_error(self, e: object, phone_numbers: list[str]) -> dict[str, object] | None:
+    def _parse_json_urns_error(self, e: object, phone_numbers: list[str]) -> dict[str, Any] | None:
         if not getattr(e, "response", None) or e.response.status_code != 400:
             return None
         try:

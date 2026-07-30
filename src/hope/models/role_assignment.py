@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -124,7 +126,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         if errors:
             raise ValidationError(errors)
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         super().save(*args, **kwargs)
 

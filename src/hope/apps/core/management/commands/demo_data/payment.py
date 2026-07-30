@@ -1,5 +1,6 @@
 from datetime import timedelta
 from random import randint
+from typing import Any
 from uuid import UUID
 
 from django.utils import timezone
@@ -87,7 +88,7 @@ def generate_delivery_mechanisms() -> None:
             },
         )
     account_types = {at.key: at for at in AccountType.objects.all()}
-    delivery_mechanisms_data: list[object] = [
+    delivery_mechanisms_data: list[dict[str, Any]] = [
         {
             "code": "cardless_cash_withdrawal",
             "name": "Cardless cash withdrawal",
@@ -451,7 +452,7 @@ def create_payment_verification_plan_with_status(
     business_area: BusinessArea,
     program: Program,
     status: str,
-    **kwargs: object,
+    **kwargs: Any,
 ) -> PaymentVerificationPlan:
     verification_channel = (kwargs.get("verification_channel"),)
     create_failed_payments = kwargs.get("create_failed_payments", False)

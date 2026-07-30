@@ -1,4 +1,5 @@
 from smtplib import SMTPException
+from typing import Any
 
 from django.http import HttpRequest, HttpResponse
 from smart_admin.console.email import (
@@ -19,7 +20,7 @@ def masker(value: object, request: HttpRequest) -> object | str:
     return "****"
 
 
-def email(self, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
+def email(self: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
     context = self.each_context(request)
     context["title"] = "Test Email"
     context["smtp"] = {

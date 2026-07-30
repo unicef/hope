@@ -1,5 +1,5 @@
 import base64
-from typing import Generator
+from typing import Any, Generator, cast
 from uuid import UUID
 
 from admin_extra_buttons.decorators import button
@@ -88,13 +88,13 @@ class BaseRDIForm(forms.Form):
     )
     status = forms.ChoiceField(label="Record status", required=True, choices=STATUSES_CHOICES)
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         request = kwargs.pop("request")
         if request and is_root(request):
             self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
-    def clean_filters(self) -> tuple[dict[str, object], dict[str, object]]:
+    def clean_filters(self) -> tuple[dict[str, Any], dict[str, Any]]:
         qs_filter = QueryStringFilter(None, {}, Record, None)
         return qs_filter.get_filters(self.cleaned_data["filters"])
 
@@ -159,7 +159,7 @@ class RecordAdmin(HOPEModelAdminBase):
     )
     change_form_template = "registration_data/admin/record/change_form.html"
 
-    actions: list[object] = [
+    actions: list[Any] = [
         mass_update,
         "extract",
         "async_extract",
@@ -369,7 +369,7 @@ class RecordAdmin(HOPEModelAdminBase):
         response = TemplateResponse(request, "registration_data/admin/record/fetch.html", ctx)
         if cookies:
             for k, v in cookies.items():
-                response.set_cookie(k, v)
+                response.set_cookie(k, cast("str", v))
         return response
 
 
@@ -401,5 +401,5 @@ class FetchForm(RemeberDataForm):
     start = forms.IntegerField()
     end = forms.IntegerField()
 
-    def clean(self) -> dict[str, object] | None:
+    def clean(self) -> dict[str, Any] | None:
         return super().clean()

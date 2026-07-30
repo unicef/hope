@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from datetime import date, datetime
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.transaction import atomic
 from django.urls import reverse
@@ -121,7 +121,7 @@ class AccountSerializerUpload(serializers.ModelSerializer):
         model = PendingAccount
         fields = ["type", "number", "financial_institution", "data"]
 
-    def validate(self, attrs: dict[str, object]) -> dict[str, object]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if not attrs.get("financial_institution"):
             account_type = attrs["account_type"]
@@ -253,7 +253,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
         model = RegistrationDataImport
         fields = ("name", "households", "program")
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.business_area = kwargs.pop("business_area", None)
         super().__init__(*args, **kwargs)
 

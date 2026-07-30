@@ -32,7 +32,7 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> Iterable[tuple[object, str]] | None:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> Iterable[tuple[str, str]] | None:
         return Permissions.choices()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:

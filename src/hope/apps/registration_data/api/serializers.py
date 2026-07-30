@@ -1,5 +1,6 @@
 import contextlib
 import json
+from typing import Any
 
 from django.db.models import Count, Q
 from rest_framework import serializers
@@ -224,7 +225,7 @@ class ImportDataSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-    def get_xlsx_validation_errors(self, obj: ImportData) -> list[dict[str, object]]:
+    def get_xlsx_validation_errors(self, obj: ImportData) -> list[dict[str, Any]]:
         """Parse validation errors JSON into structured format."""
         errors = []
         if obj.validation_errors:
@@ -262,7 +263,7 @@ class KoboImportDataSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-    def get_kobo_validation_errors(self, obj: KoboImportData) -> list[dict[str, object]]:
+    def get_kobo_validation_errors(self, obj: KoboImportData) -> list[dict[str, Any]]:
         """Parse kobo validation errors JSON into structured format."""
         if not obj.validation_errors:
             return []

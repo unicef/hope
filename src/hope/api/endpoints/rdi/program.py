@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -52,7 +52,7 @@ class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSe
         serializer_class.save(business_area=self.selected_business_area)
 
     @extend_schema(request=ProgramAPISerializer)
-    def create(self, request: "Request", *args: object, **kwargs: object) -> Response:
+    def create(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if Grant.API_PROGRAM_CREATE.name not in request.auth.grants:

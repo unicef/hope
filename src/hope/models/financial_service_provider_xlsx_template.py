@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 from django import forms
 from django.conf import settings
@@ -23,12 +24,12 @@ from hope.models.utils import TimeStampedUUIDModel
 
 @dataclass
 class SnapshotContext:
-    household_data: dict[str, object]
-    primary_collector: dict[str, object]
-    alternate_collector: dict[str, object]
-    collector_data: dict[str, object] | None
-    admin_areas_dict: dict[str, dict[str, object]]
-    countries_dict: dict[str, dict[str, object]]
+    household_data: dict[str, Any]
+    primary_collector: dict[str, Any]
+    alternate_collector: dict[str, Any]
+    collector_data: dict[str, Any] | None
+    admin_areas_dict: dict[str, dict[str, Any]]
+    countries_dict: dict[str, dict[str, Any]]
 
 
 class FlexFieldArrayField(ArrayField):
@@ -36,7 +37,7 @@ class FlexFieldArrayField(ArrayField):
         self,
         form_class: type[FormField] | None = None,
         choices_form_class: type[forms.ChoiceField] | None = None,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         # TODO exclude PDU here
@@ -179,10 +180,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @staticmethod
     def get_data_from_payment_snapshot(
-        household_data: dict[str, object],
-        core_field: dict[str, object],
-        admin_areas_dict: dict[str, dict[str, object]],
-        countries_dict: dict[str, dict[str, object]],
+        household_data: dict[str, Any],
+        core_field: dict[str, Any],
+        admin_areas_dict: dict[str, dict[str, Any]],
+        countries_dict: dict[str, dict[str, Any]],
         collector_type: str = ROLE_PRIMARY,
     ) -> str | None:
         collector_data = household_data.get(f"{collector_type}_collector".lower()) or {}
@@ -216,8 +217,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     def get_column_from_core_field(
         payment: "Payment",
         core_field_name: str,
-        admin_areas_dict: dict[str, dict[str, object]],
-        countries_dict: dict[str, dict[str, object]],
+        admin_areas_dict: dict[str, dict[str, Any]],
+        countries_dict: dict[str, dict[str, Any]],
     ) -> object:
         core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
         core_field = core_fields_attributes.get(core_field_name)
@@ -338,7 +339,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return account_data.get(key_name, "")
 
     @staticmethod
-    def get_document_number_by_doc_type_key(snapshot_data: dict[str, object], document_type_key: str) -> str:
+    def get_document_number_by_doc_type_key(snapshot_data: dict[str, Any], document_type_key: str) -> str:
         collector_data = (
             snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
         )
@@ -347,14 +348,14 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return documents_dict.get(document_type_key, {}).get("document_number", "")
 
     @staticmethod
-    def get_alternate_collector_doc_numbers(snapshot_data: dict[str, object]) -> str:
+    def get_alternate_collector_doc_numbers(snapshot_data: dict[str, Any]) -> str:
         alternate_collector_data = snapshot_data.get("alternate_collector", {}) or {}
         doc_list = alternate_collector_data.get("documents", [])
         doc_numbers = [doc.get("document_number", "") for doc in doc_list]
         return ", ".join(doc_numbers)
 
     @classmethod
-    def get_admin_level_2(cls, snapshot_data: dict[str, object], areas_dict: dict) -> str:
+    def get_admin_level_2(cls, snapshot_data: dict[str, Any], areas_dict: dict) -> str:
         area = areas_dict.get(snapshot_data.get("admin2_id"))
         return area["name"] if area else ""
 

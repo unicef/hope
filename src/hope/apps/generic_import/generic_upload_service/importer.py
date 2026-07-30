@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.forms import modelform_factory
 
@@ -78,7 +78,7 @@ class Importer:
     def __init__(
         self,
         registration_data_import: RegistrationDataImport,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> None:
         self.registration_data_import = registration_data_import
         self.households_data = kwargs.get("households_data", [])
@@ -111,7 +111,7 @@ class Importer:
         # Dictionary to store individual instances by their parser ID (for FK linking)
         self._individual_instances = {}
 
-    def import_data(self) -> list[dict[str, object]]:
+    def import_data(self) -> list[dict[str, Any]]:
         """Import all data types in sequence."""
         self._import_households()
         self._import_individuals()
@@ -142,7 +142,7 @@ class Importer:
         for identity_data in self.identities_data:
             self._import_identity(identity_data)
 
-    def _import_individual(self, individual_data: dict[str, object]) -> None:
+    def _import_individual(self, individual_data: dict[str, Any]) -> None:
         exclude = [
             "individual_collection",
             "household",
@@ -185,7 +185,7 @@ class Importer:
                     return
             self.individuals_to_create.append(individual_instance)
 
-    def _import_household(self, household_data: dict[str, object]) -> None:
+    def _import_household(self, household_data: dict[str, Any]) -> None:
         exclude = [
             "household_collection",
             "consent_sharing",
@@ -225,7 +225,7 @@ class Importer:
                 self._household_instances[household_data["id"]] = household_instance
             self.households_to_create.append(household_instance)
 
-    def _import_document(self, document_data: dict[str, object]) -> None:
+    def _import_document(self, document_data: dict[str, Any]) -> None:
         exclude = ["individual"]
 
         # Resolve type_key string to DocumentType ID if needed
@@ -282,7 +282,7 @@ class Importer:
                     return
             self.documents_to_create.append(document_instance)
 
-    def _import_account(self, account_data: dict[str, object]) -> None:
+    def _import_account(self, account_data: dict[str, Any]) -> None:
         exclude = ["individual", "financial_institution"]
         account_type_key = None
 
@@ -333,7 +333,7 @@ class Importer:
 
             self.accounts_to_create.append(account_instance)
 
-    def _import_identity(self, identity_data: dict[str, object]) -> None:
+    def _import_identity(self, identity_data: dict[str, Any]) -> None:
         exclude = ["individual", "partner"]
 
         identity_instance, errors = self._build_unsaved_instance(
@@ -447,10 +447,10 @@ class Importer:
     def _build_unsaved_instance(
         self,
         model_cls: type[Model],
-        data: dict[str, object],
+        data: dict[str, Any],
         files: MultiValueDict[str, UploadedFile] | None = None,
         exclude: list[str] | None = None,
-    ) -> tuple[Model | None, dict[str, object] | None]:
+    ) -> tuple[Model | None, dict[str, Any] | None]:
         from django.core.exceptions import ValidationError as DjangoValidationError
 
         if exclude is None:

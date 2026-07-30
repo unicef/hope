@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db import transaction
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -53,7 +55,7 @@ class GenericImportUploadViewSet(
         parser_classes=[DictDrfNestedParser],
     )
     @transaction.atomic
-    def upload(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def upload(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Upload Excel file for generic import."""
         from hope.apps.generic_import.celery_tasks import process_generic_import_async_task
 

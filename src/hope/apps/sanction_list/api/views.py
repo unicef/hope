@@ -1,3 +1,5 @@
+from typing import Any
+
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -58,7 +60,7 @@ class SanctionListIndividualViewSet(
         responses={202: CheckAgainstSanctionListSerializer},
     )
     @action(detail=False, methods=["post"], url_path="check-against-sanction-list")
-    def check_against_sanction_list(self, request: Request, *args: object, **kwargs: object) -> Response:
+    def check_against_sanction_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         file = serializer.validated_data["file"]

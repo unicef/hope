@@ -41,7 +41,7 @@ class PDUOnlineEditGenerateDataService(PDUDataExtractionService, PDURoundValueMi
                     )
 
                 round_number = round_info["round"]
-                round_value = self._get_round_value(individual, pdu_field_name, round_number)
+                round_value = self._get_round_value(individual, pdu_field_name, round_number)  # type: ignore[arg-type]
                 if round_value is None:
                     is_individual_allowed = True
                 pdu_fields[pdu_field_name] = {

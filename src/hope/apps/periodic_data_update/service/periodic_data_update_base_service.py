@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from django.db.models import QuerySet
 
 from hope.apps.core.attributes_qet_queries import age_to_birth_date_query
@@ -51,7 +53,7 @@ class PDUDataExtractionService:
 
     @staticmethod
     def _apply_boolean_filter(
-        queryset: QuerySet[Individual], filter_value: object, filter_fn: object
+        queryset: QuerySet[Individual], filter_value: object, filter_fn: Callable[..., QuerySet[Individual]]
     ) -> QuerySet[Individual]:
         if filter_value:
             return filter_fn(queryset)

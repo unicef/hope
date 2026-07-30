@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+from typing import Any
 
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
@@ -38,7 +39,7 @@ def age_to_birth_date_range_query(
     return Q(**query_dict)
 
 
-def age_to_birth_date_query(comparison_method: str, args: object, is_social_worker_query: bool = False) -> Q:
+def age_to_birth_date_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
     field_name = "birth_date"
     comparison_method_args_count = {
         "RANGE": 2,
@@ -80,7 +81,7 @@ def age_to_birth_date_query(comparison_method: str, args: object, is_social_work
     raise ValidationError(f"Age filter query don't supports {comparison_method} type")  # pragma: no cover
 
 
-def get_birth_certificate_document_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_birth_certificate_document_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
         IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         args[0],
@@ -88,7 +89,7 @@ def get_birth_certificate_document_number_query(_: object, args: object, is_soci
     )
 
 
-def get_tax_id_document_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_tax_id_document_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
         IDENTIFICATION_TYPE_TAX_ID,
         args[0],
@@ -96,7 +97,7 @@ def get_tax_id_document_number_query(_: object, args: object, is_social_worker_q
     )
 
 
-def get_drivers_license_document_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_drivers_license_document_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
         IDENTIFICATION_TYPE_DRIVERS_LICENSE,
         args[0],
@@ -104,7 +105,7 @@ def get_drivers_license_document_number_query(_: object, args: object, is_social
     )
 
 
-def get_national_id_document_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_national_id_document_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
         IDENTIFICATION_TYPE_NATIONAL_ID,
         args[0],
@@ -112,7 +113,7 @@ def get_national_id_document_number_query(_: object, args: object, is_social_wor
     )
 
 
-def get_national_passport_document_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_national_passport_document_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
         IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         args[0],
@@ -120,7 +121,7 @@ def get_national_passport_document_number_query(_: object, args: object, is_soci
     )
 
 
-def get_electoral_card_document_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_electoral_card_document_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
         IDENTIFICATION_TYPE_ELECTORAL_CARD,
         args[0],
@@ -128,7 +129,7 @@ def get_electoral_card_document_number_query(_: object, args: object, is_social_
     )
 
 
-def get_other_document_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_other_document_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_number_query(
         IDENTIFICATION_TYPE_OTHER,
         args[0],
@@ -146,7 +147,7 @@ def get_documents_number_query(document_type: str, number: str, is_social_worker
     )
 
 
-def get_birth_certificate_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_birth_certificate_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         args[0],
@@ -154,7 +155,7 @@ def get_birth_certificate_issuer_query(_: object, args: object, is_social_worker
     )
 
 
-def get_tax_id_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_tax_id_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_TAX_ID,
         args[0],
@@ -162,7 +163,7 @@ def get_tax_id_issuer_query(_: object, args: object, is_social_worker_query: boo
     )
 
 
-def get_drivers_licensee_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_drivers_licensee_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_DRIVERS_LICENSE,
         args[0],
@@ -170,7 +171,7 @@ def get_drivers_licensee_issuer_query(_: object, args: object, is_social_worker_
     )
 
 
-def get_national_id_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_national_id_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_NATIONAL_ID,
         args[0],
@@ -178,7 +179,7 @@ def get_national_id_issuer_query(_: object, args: object, is_social_worker_query
     )
 
 
-def get_national_passport_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_national_passport_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         args[0],
@@ -186,7 +187,7 @@ def get_national_passport_issuer_query(_: object, args: object, is_social_worker
     )
 
 
-def get_electoral_card_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_electoral_card_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_ELECTORAL_CARD,
         args[0],
@@ -194,7 +195,7 @@ def get_electoral_card_issuer_query(_: object, args: object, is_social_worker_qu
     )
 
 
-def get_other_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_other_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     return get_documents_issuer_query(
         IDENTIFICATION_TYPE_OTHER,
         args[0],
@@ -212,7 +213,7 @@ def get_documents_issuer_query(document_type: str, country_alpha3: str, is_socia
     )
 
 
-def get_role_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_role_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     role_value = args[0]
 
@@ -223,7 +224,7 @@ def get_role_query(_: object, args: object, is_social_worker_query: bool = False
     return Q(**{f"{lookup_prefix}households_and_roles__role": role_value})
 
 
-def get_scope_id_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_scope_id_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{
@@ -233,7 +234,7 @@ def get_scope_id_number_query(_: object, args: object, is_social_worker_query: b
     )
 
 
-def get_scope_id_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_scope_id_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{
@@ -243,7 +244,7 @@ def get_scope_id_issuer_query(_: object, args: object, is_social_worker_query: b
     )
 
 
-def get_unhcr_id_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_unhcr_id_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{
@@ -253,7 +254,7 @@ def get_unhcr_id_number_query(_: object, args: object, is_social_worker_query: b
     )
 
 
-def get_unhcr_id_issuer_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_unhcr_id_issuer_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return Q(
         **{
@@ -263,14 +264,14 @@ def get_unhcr_id_issuer_query(_: object, args: object, is_social_worker_query: b
     )
 
 
-def get_has_phone_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_has_phone_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     has_phone_no = args[0] in [True, "True"]
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return ~Q(**{f"{lookup_prefix}phone_no": ""}) if has_phone_no else Q(**{f"{lookup_prefix}phone_no": ""})
 
 
 def get_collector_has_valid_phone_no_query(
-    comparison_method: object, args: object, is_social_worker_query: bool = False
+    comparison_method: object, args: Any, is_social_worker_query: bool = False
 ) -> Q:
     """Households filtered by whether a collector has a valid phone number."""
     from hope.models import IndividualRoleInHousehold
@@ -286,7 +287,7 @@ def get_collector_has_valid_phone_no_query(
     return has_valid_collector_phone if wants_valid else ~has_valid_collector_phone
 
 
-def get_has_bank_account_number_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_has_bank_account_number_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     has_bank_account_number = args[0] in [True, "True"]
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     if has_bank_account_number:  # Individual can have related object bank_account, but empty number
@@ -294,7 +295,7 @@ def get_has_bank_account_number_query(_: object, args: object, is_social_worker_
     return ~Q(**{f"{lookup_prefix}accounts__account_type__key": "bank"})
 
 
-def get_has_tax_id_query(_: object, args: object, is_social_worker_query: bool = False) -> Q:
+def get_has_tax_id_query(_: object, args: Any, is_social_worker_query: bool = False) -> Q:
     has_tax_id = args[0] in [True, "True"]
     lookup_prefix = "individuals__" if is_social_worker_query else ""
     return (
@@ -304,13 +305,13 @@ def get_has_tax_id_query(_: object, args: object, is_social_worker_query: bool =
     )
 
 
-def registration_data_import_query(comparison_method: str, args: object, is_social_worker_query: bool = False) -> Q:
+def registration_data_import_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
     from django.db.models import Q
 
     return Q(registration_data_import__pk__in=args)
 
 
-def extra_rdis_query(comparison_method: str, args: object, is_social_worker_query: bool = False) -> Q:
+def extra_rdis_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
     from django.db.models import Q
 
     return Q(extra_rdis__in=args)

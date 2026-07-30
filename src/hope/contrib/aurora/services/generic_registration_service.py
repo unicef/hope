@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.exceptions import ValidationError
 
 from hope.apps.household.const import (
@@ -111,7 +113,7 @@ class GenericRegistrationService(BaseRegistrationService):
             return True
         if value in ["no", "NO", "N", "n", "0", 0, False]:
             return False
-        return value
+        return bool(value)
 
     @staticmethod
     def get_sex(value: str) -> str:
@@ -145,7 +147,7 @@ class GenericRegistrationService(BaseRegistrationService):
         return None
 
     @classmethod
-    def _create_household_dict(cls, data_dict: dict, mapping_dict: dict) -> dict:
+    def _create_household_dict(cls, data_dict: dict, mapping_dict: dict) -> dict[str, Any]:
         """Create household dictionary ready to be build."""
         my_dict = {}
         for key, value in mapping_dict.items():
@@ -155,7 +157,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     retrieved_value = cls.get(data_dict, key)
                     if retrieved_value:
                         if field == "flex_fields":
-                            my_dict.setdefault("flex_fields", {})[key] = retrieved_value
+                            my_dict.setdefault("flex_fields", {})[key] = retrieved_value  # type: ignore[index]
                         else:
                             my_dict[field] = retrieved_value
             elif isinstance(value, dict):

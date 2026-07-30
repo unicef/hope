@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Any
 
 from rest_framework.pagination import (
     LimitOffsetPagination,
@@ -14,7 +15,7 @@ from rest_framework.utils.urls import remove_query_param, replace_query_param
 class NoCountLimitOffsetPagination(LimitOffsetPagination):
     """Override LimitOffsetPagination to remove count query from response."""
 
-    def paginate_queryset(self, queryset: object, request: Request, view: object | None = None) -> list[object] | None:
+    def paginate_queryset(self, queryset: Any, request: Request, view: object | None = None) -> list[Any] | None:
         self.limit = self.get_limit(request)
         if self.limit is None:
             return None
@@ -35,7 +36,7 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
             )
         )
 
-    def get_paginated_response_schema(self, schema: dict[str, object]) -> dict[str, object]:
+    def get_paginated_response_schema(self, schema: dict[str, Any]) -> dict[str, Any]:
         paginated_schema = super().get_paginated_response_schema(schema)
         paginated_schema["properties"].pop("count", None)
         return paginated_schema
@@ -47,7 +48,7 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
         offset = self.offset + self.limit  # type: ignore
         return replace_query_param(url, self.offset_query_param, offset)
 
-    def get_html_context(self) -> object:
+    def get_html_context(self) -> Any:
         base_url = self.request.build_absolute_uri()
 
         if self.limit:

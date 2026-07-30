@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_base_export_service import (
     XlsxFollowUpInstructionBaseExportService,
@@ -33,7 +33,7 @@ class XlsxFollowUpInstructionDeliveryExportService(XlsxFollowUpInstructionBaseEx
             raise ValueError("FSP XLSX template not found for child Payment Plan delivery export.")
         return self.payment_plan_delivery_export_service.prepare_headers(fsp_xlsx_template)
 
-    def get_payment_row_data(self, payment: Payment) -> dict[str, object]:
+    def get_payment_row_data(self, payment: Payment) -> dict[str, Any]:
         if self.payment_plan_delivery_export_service is None:
             raise ValueError("Payment Plan delivery export service is not initialized.")
         return dict(

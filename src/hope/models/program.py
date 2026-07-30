@@ -1,7 +1,7 @@
 from decimal import Decimal
 import secrets
 import string
-from typing import Collection
+from typing import Any, Collection
 
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -291,7 +291,7 @@ class Program(
         ):
             raise ValidationError("All Payment Plan Purposes must be available for this program's business area.")
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         if not self.code:
             self.code = self.generate_code()

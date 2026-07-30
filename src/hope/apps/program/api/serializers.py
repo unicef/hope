@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Exists, F, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
@@ -97,7 +97,7 @@ def validate_data_collecting_type_and_beneficiary_group_combination(
         )
 
 
-def validate_partners_data(partners: list[dict[str, object]], partner_access: str, user_partner: Partner) -> None:
+def validate_partners_data(partners: list[dict[str, Any]], partner_access: str, user_partner: Partner) -> None:
     partners_ids = [int(partner["partner"]) for partner in partners]
     if (
         partner_access == Program.SELECTED_PARTNERS_ACCESS
@@ -206,7 +206,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
                 {"end_date": "Programme Cycle end date must be between programme start and end dates."}
             )
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         request = self.context["request"]
         program = self.get_program()
         start_date = data["start_date"]
@@ -294,7 +294,7 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
         if end_date < self.instance.start_date:
             raise serializers.ValidationError({"start_date": "Programme Cycle end date must be after the start date."})
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         program = self.instance.program
         start_date = data.get("start_date")
         end_date = data.get("end_date")
@@ -557,7 +557,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("All Payment Plan Purposes must be available for this business area.")
         return value
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         # validate start_date and end_date
         end_date = data.get("end_date")
         if end_date:
@@ -708,7 +708,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("All Payment Plan Purposes must be available for this business area.")
         return value
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         end_date = data.get("end_date")
         start_date = data["start_date"]
         if end_date:
@@ -781,7 +781,7 @@ class ProgramUpdatePartnerAccessSerializer(serializers.ModelSerializer):
         check_concurrency_version_in_mutation(value, self.instance)
         return value
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         # validate partners and partner_access
         partners = data.get("partners", [])
         partner_access = data["partner_access"]
@@ -830,7 +830,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         validate_data_collecting_type(data_collecting_type, self.instance.business_area.slug)
         return value
 
-    def validate(self, data: dict[str, object]) -> dict[str, object]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         original_program = self.instance
 
         # validate DCT against original program
@@ -871,19 +871,19 @@ class ProgramChoicesSerializer(serializers.Serializer):
     pdu_subtype_choices = serializers.SerializerMethodField()
     program_cycle_status_choices = serializers.SerializerMethodField()
 
-    def get_status_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
 
-    def get_frequency_of_payments_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_frequency_of_payments_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
 
-    def get_sector_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_sector_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.SECTOR_CHOICE)
 
-    def get_scope_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_scope_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.SCOPE_CHOICE)
 
-    def get_data_collecting_type_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         request = self.context.get("request", {})
         return [
             dict(row)
@@ -904,13 +904,13 @@ class ProgramChoicesSerializer(serializers.Serializer):
             .order_by("name")
         ]
 
-    def get_partner_access_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.PARTNER_ACCESS_CHOICE)
 
-    def get_pdu_subtype_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_pdu_subtype_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PeriodicFieldData.TYPE_CHOICES)
 
-    def get_program_cycle_status_choices(self, *args: object, **kwargs: object) -> list[dict[str, object]]:
+    def get_program_cycle_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
 

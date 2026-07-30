@@ -124,7 +124,7 @@ class IndividualXlsxUpdate:
     def _row_report_data(self, row: Row) -> object:
         return row[0].row
 
-    def _get_matching_report_for_single_row(self, row: Row) -> object:
+    def _get_matching_report_for_single_row(self, row: Row) -> tuple:
         # TODO: refactor the output of this function
         q_object = Q()
         for match_col in self.xlsx_match_columns:

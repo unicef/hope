@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 from django.core.management import BaseCommand, call_command
 from rest_framework.request import Request
@@ -23,7 +24,7 @@ class Command(BaseCommand):
             help=f"Directory to write openapi.yml and choices.json into (default: {DEFAULT_OUTPUT_DIR}).",
         )
 
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: Any) -> None:
         output_dir = Path(options["output_dir"])
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -39,12 +40,12 @@ class Command(BaseCommand):
         choices_path.write_text(json.dumps(choices, indent=2, ensure_ascii=False))
         self.stdout.write(self.style.SUCCESS(f"  wrote {choices_path} ({len(choices)} choice endpoints)"))
 
-    def _collect_choices(self) -> dict[str, object]:
+    def _collect_choices(self) -> dict[str, Any]:
         viewset = ChoicesViewSet()
         viewset.request = Request(APIRequestFactory().get("/"))
         viewset.format_kwarg = None
 
-        result: dict[str, object] = {}
+        result: dict[str, Any] = {}
 
         for action in ChoicesViewSet.get_extra_actions():
             if action.detail or "get" not in action.mapping:

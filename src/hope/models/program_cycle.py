@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -80,7 +81,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         if self._state.adding and self.program.cycles.exclude(pk=self.pk).filter(end_date__gte=start_date).exists():
             raise ValidationError("Start date must be after the latest cycle.")
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         super().save(*args, **kwargs)
 

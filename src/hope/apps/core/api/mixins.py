@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import TYPE_CHECKING, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -18,6 +18,7 @@ from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.apps.account.api.permissions import BaseRestPermission
+from hope.apps.account.permissions import Permissions
 
 if TYPE_CHECKING:
     from hope.models import BusinessArea, Program
@@ -101,7 +102,7 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
-    def _get_paginated(self, url: str, params: Mapping[str, object] | str | None = None) -> list[dict]:
+    def _get_paginated(self, url: str, params: Mapping[str, Any] | str | None = None) -> list[dict]:
         next_url = url
         results: list = []
 
@@ -112,7 +113,7 @@ class BaseAPI:
             params = None  # pass params only in the first call
         return results
 
-    def _get(self, url: str, params: Mapping[str, object] | str | None = None) -> tuple[dict, int]:
+    def _get(self, url: str, params: Mapping[str, Any] | str | None = None) -> tuple[dict, int]:
         response = self._client.get(url, params=params)
         response = self.validate_response(response)
         return response.json(), response.status_code
@@ -264,7 +265,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
 class PermissionActionMixin:
     permission_classes_by_action = {}
 
-    def get_permissions(self) -> object:
+    def get_permissions(self) -> list[BasePermission]:
         if self.action in self.permission_classes_by_action:
             return [permission() for permission in self.permission_classes_by_action[self.action]]
         return super().get_permissions()  # pragma: no cover
@@ -273,7 +274,7 @@ class PermissionActionMixin:
 class SerializerActionMixin:
     serializer_classes_by_action = {}
 
-    def get_serializer_class(self) -> object:
+    def get_serializer_class(self) -> type[serializers.BaseSerializer]:
         if self.action in self.serializer_classes_by_action:
             return self.serializer_classes_by_action[self.action]
         return super().get_serializer_class()  # pragma: no cover
@@ -286,7 +287,8 @@ class ActionMixin(PermissionActionMixin, SerializerActionMixin):
 class CustomSerializerMixin:
     serializer_classes = {}
 
-    def get_serializer_class(self) -> None:
+    def get_serializer_class(self) -> type[serializers.BaseSerializer]:
+
         if self.action in ["retrieve", "list"] and (
             serializer_class := self.serializer_classes.get(self.request.GET.get("serializer"))
         ):
@@ -298,7 +300,7 @@ class BaseViewSet(GenericViewSet):
     permission_classes: list = [BaseRestPermission]
     PERMISSIONS: list = []
 
-    def get_permissions_for_action(self) -> object:
+    def get_permissions_for_action(self) -> list[Permissions]:
         if hasattr(self, "permissions_by_action"):
             if self.action in self.permissions_by_action:
                 return self.permissions_by_action[self.action]
@@ -334,7 +336,7 @@ class CountActionMixin:
         detail=False,
         methods=["get"],
     )
-    def count(self, request: HttpRequest, *args: object, **kwargs: object) -> object:
+    def count(self, request: HttpRequest, *args: Any, **kwargs: Any) -> DRFResponse:
         queryset = self.filter_queryset(self.get_count_queryset()).order_by()
         queryset_count = queryset.count()
         return DRFResponse({"count": queryset_count})
@@ -366,7 +368,7 @@ class PermissionsMixin:
             self.authentication_classes = [HOPEAuthentication]
         return super().get_authenticators()  # pragma: no cover
 
-    def get_permissions(self) -> object:
+    def get_permissions(self) -> list[BasePermission]:
         if self.is_external_request():
             self.permission_classes = [HOPEPermission]
             self.permission = self.token_permission

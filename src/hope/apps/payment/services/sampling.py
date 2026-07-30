@@ -1,6 +1,6 @@
 import abc
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
@@ -41,7 +41,7 @@ class Sampling:
         payment_verification_plan.excluded_admin_areas_filter = sampling.excluded_admin_areas
         payment_verification_plan.sample_size = sampling.sample_size
 
-        self.payment_records = sampling.payment_records
+        self.payment_records = cast("QuerySet[Payment]", sampling.payment_records)
 
         return payment_verification_plan, self.payment_records
 
@@ -71,7 +71,7 @@ class BaseSampling(abc.ABC):
         self.age = self.arguments.get("age")
         self.excluded_admin_areas = self.arguments.get("excluded_admin_areas", [])
         self.sample_size = 0
-        self.payment_records: object = None
+        self.payment_records: "QuerySet[Payment] | None" = None
 
     def calc_sample_size(self, sample_count: int) -> int:
         if self.sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:

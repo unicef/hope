@@ -1,7 +1,7 @@
 import copy
 from functools import reduce
 import logging
-from typing import Iterable
+from typing import Any, Iterable
 
 from hope.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
@@ -2369,17 +2369,17 @@ CORE_FIELDS_ATTRIBUTES = [
 ]
 
 
-def get_core_fields_attributes() -> list[dict[str, object]]:
+def get_core_fields_attributes() -> list[dict[str, Any]]:
     return CORE_FIELDS_ATTRIBUTES
 
 
 class FieldFactory(list):
     def __init__(
         self,
-        fields: object | None = None,
+        fields: Iterable[dict] | None = None,
         scopes: set[Scope] | None = None,
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.scopes: set = scopes or set()

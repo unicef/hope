@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from typing import Callable
+from typing import Any, Callable
 from uuid import UUID
 
 from django.core.paginator import Paginator
@@ -83,8 +83,8 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_household_snapshot(household: Household, payment: Payment | None = None) -> dict[object, object]:
-    household_data = {}
+def get_household_snapshot(household: Household, payment: Payment | None = None) -> dict[str, Any]:
+    household_data: dict[str, Any] = {}
     all_household_data_dict = household.__dict__
     keys = [key for key in all_household_data_dict if key not in excluded_household_fields]
     household_data["individuals"] = []
@@ -93,7 +93,7 @@ def get_household_snapshot(household: Household, payment: Payment | None = None)
         value = all_household_data_dict[key]
         household_data[key] = handle_type_mapping(value)
     household_data["needs_adjudication_tickets_count"] = 0
-    individuals_dict = {}
+    individuals_dict: dict[str, Any] = {}
     for individual in household.individuals.all():
         individual_data = get_individual_snapshot(individual, payment)
         individuals_dict[str(individual.id)] = individual_data
@@ -125,7 +125,7 @@ def get_household_snapshot(household: Household, payment: Payment | None = None)
     return household_data
 
 
-def get_individual_snapshot(individual: Individual, payment: Payment | None = None) -> dict:
+def get_individual_snapshot(individual: Individual, payment: Payment | None = None) -> dict[str, Any]:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict if key not in excluded_individual_fields]
     individual_data = {}

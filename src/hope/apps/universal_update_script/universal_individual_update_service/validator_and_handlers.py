@@ -39,7 +39,7 @@ def handle_integer_field(
 ) -> int | None:
     if value is None or value == "":
         return None
-    return int(value)
+    return int(str(value))
 
 
 def handle_admin_field(
@@ -163,7 +163,7 @@ def validate_integer(
     if value is None or value == "":
         return None
     try:
-        int(value)
+        int(str(value))
     except (ValueError, TypeError):
         return f"{value} for column {name} is not a valid integer"
     return None
@@ -194,7 +194,7 @@ def _get_field_choices_values(model_class: type[Model], field_name: str) -> list
 def validate_choices(
     value: object,
     name: str,
-    model_class: object,
+    model_class: type[Model],
     business_area: BusinessArea,
     program: Program,
 ) -> str | None:

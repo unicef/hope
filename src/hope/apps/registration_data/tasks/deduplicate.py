@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 import itertools
 import logging
-from typing import Iterable
+from typing import Any, Iterable
 
 from constance import config
 from django.db import transaction
@@ -75,7 +75,17 @@ class Thresholds:
 class TicketData:
     ticket: GrievanceTicket
     ticket_details: TicketNeedsAdjudicationDetails
-    possible_duplicates_throughs: list[object]
+    possible_duplicates_throughs: list[Any]
+
+    def __init__(
+        self,
+        ticket: GrievanceTicket,
+        ticket_details: TicketNeedsAdjudicationDetails,
+        possible_duplicates_throughs: list[Any],
+    ) -> None:
+        self.ticket = ticket
+        self.ticket_details = ticket_details
+        self.possible_duplicates_throughs = possible_duplicates_throughs
 
 
 @dataclass
@@ -84,7 +94,7 @@ class DeduplicationResult:
     possible_duplicates: list
     original_individuals_ids_duplicates: list
     original_individuals_ids_possible_duplicates: list
-    results_data: dict[str, object]
+    results_data: dict[str, Any]
 
 
 class DeduplicateTask:
@@ -127,7 +137,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
-            deduplication_result = self._deduplicate_single_individual(individual)
+            deduplication_result = self._deduplicate_single_individual(individual)  # type: ignore[arg-type]
             if index % 100 == 0:
                 log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -176,7 +186,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
-            deduplication_result = self._deduplicate_single_individual(individual)
+            deduplication_result = self._deduplicate_single_individual(individual)  # type: ignore[arg-type]
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
@@ -435,8 +445,8 @@ class DeduplicateTask:
         self,
         individual: Individual | PendingIndividual,
         fields_names: tuple[str, ...],
-        dict_fields: dict[str, object],
-    ) -> dict[str, object]:
+        dict_fields: dict[str, Any],
+    ) -> dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
             fields["phone_no"] = fields["phone_no"].raw_input
@@ -446,7 +456,7 @@ class DeduplicateTask:
 
     def _prepare_query_dict(
         self, individual_id: str, individual_fields: dict, min_score: int | float
-    ) -> dict[str, object]:
+    ) -> dict[str, Any]:
         fields_meta = {
             "birth_date": {"boost": 2},
             "phone_no": {"boost": 2},
@@ -814,7 +824,7 @@ class HardDocumentDeduplication:
                 all_matching_number_documents_dict,
                 all_matching_number_documents_signatures,  # type: ignore[arg-type]
                 already_processed_signatures,
-                documents_to_dedup,
+                documents_to_dedup,  # type: ignore[arg-type]
                 new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
                 new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
                 new_documents=new_documents,
@@ -926,21 +936,21 @@ class HardDocumentDeduplication:
 
     def _deduplication_documents(
         self,
-        all_matching_number_documents_dict: dict[str, object],
+        all_matching_number_documents_dict: dict[str, Any],
         all_matching_number_documents_signatures: set[str],
         already_processed_signatures: set[str],
         documents_to_dedup: Iterable[Document],
-        **kwargs: object,
+        **kwargs: Any,
     ) -> None:
-        new_document_signatures_duplicated_in_batch: list[object] = kwargs.get(  # type: ignore[assignment]
-            "new_document_signatures_duplicated_in_batch"
+        new_document_signatures_duplicated_in_batch: list[str] = kwargs.get(
+            "new_document_signatures_duplicated_in_batch", []
         )
-        new_document_signatures_in_batch_per_individual_dict: defaultdict[object, list] = kwargs.get(  # type: ignore[assignment]
-            "new_document_signatures_in_batch_per_individual_dict"
+        new_document_signatures_in_batch_per_individual_dict: defaultdict[str, list] = kwargs.get(
+            "new_document_signatures_in_batch_per_individual_dict", defaultdict(list)
         )
-        new_documents: QuerySet[Document, Document] = kwargs.get("new_documents")  # type: ignore[assignment]
-        possible_duplicates_individuals_id_set: set[object] = kwargs.get("possible_duplicates_individuals_id_set")  # type: ignore[assignment]
-        ticket_data_dict: dict[object, object] = kwargs.get("ticket_data_dict")  # type: ignore[assignment]
+        new_documents: QuerySet[Document] = kwargs.get("new_documents", Document.objects.none())
+        possible_duplicates_individuals_id_set: set[str] = kwargs.get("possible_duplicates_individuals_id_set", set())
+        ticket_data_dict: dict[str, dict[str, Any]] = kwargs.get("ticket_data_dict", {})
         for new_document in documents_to_dedup:
             new_document_signature = self._generate_signature(new_document)
 

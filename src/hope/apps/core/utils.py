@@ -12,6 +12,7 @@ import logging
 import string
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Generator,
     Iterable,
@@ -45,14 +46,14 @@ logger = logging.getLogger(__name__)
 
 class CaseInsensitiveTuple(tuple):
     def __contains__(  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
-        self, key: str, *args: object, **kwargs: object
+        self, key: str, *args: Any, **kwargs: Any
     ) -> bool:
         return key.casefold() in (element.casefold() for element in self)
 
 
 def unique_slugify(
     instance: "Model",
-    value: object,
+    value: Any,
     slug_field_name: str = "slug",
     queryset: Optional["QuerySet"] = None,
     slug_separator: str = "-",
@@ -101,7 +102,7 @@ def unique_slugify(
     setattr(instance, slug_field.attname, slug)
 
 
-def _slug_strip(value: object, separator: str = "-") -> str:
+def _slug_strip(value: str, separator: str = "-") -> str:
     import re
 
     """
@@ -129,7 +130,7 @@ def _slug_strip(value: object, separator: str = "-") -> str:
     return value
 
 
-def serialize_flex_attributes() -> dict[str, dict[str, object]]:
+def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
     """Flexible Attributes objects to dict mapping.
 
     "individuals": {
@@ -230,7 +231,7 @@ def get_attr_value(name: str, obj: object, default: object | None = None) -> obj
     return getattr(obj, name, default)
 
 
-def to_choice_object(choices: Iterable) -> list[dict[str, object]]:
+def to_choice_object(choices: Iterable) -> list[dict[str, Any]]:
     return sorted(
         [{"name": name, "value": value} for value, name in choices],
         key=lambda choice: choice["name"],
@@ -259,7 +260,7 @@ def nested_getattr(obj: object, attr: object, default: object = raise_attribute_
         raise
 
 
-def nested_dict_get(dictionary: dict[str, object], path: str) -> object:
+def nested_dict_get(dictionary: dict[str, Any], path: str) -> object:
     result: object = dictionary
     for key in path.split("."):
         if isinstance(result, dict):
@@ -275,7 +276,7 @@ def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, 
     return {"count": count, "percentage": percentage}
 
 
-def _apply_dict_fields(data: dict[str, object], instance: object, dict_fields: dict[str, list[str]]) -> None:
+def _apply_dict_fields(data: dict[str, Any], instance: object, dict_fields: dict[str, list[str]]) -> None:
     for main_field_key, nested_fields in dict_fields.items():
         main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
         if main_field == "__NOT_EXIST__":
@@ -301,7 +302,7 @@ def to_dict(
     instance: "Model",
     fields: list | tuple | None = None,
     dict_fields: dict | None = None,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     from django.forms import model_to_dict
 
     if fields is None:
@@ -320,7 +321,7 @@ def to_dict(
     return data
 
 
-def _process_nested_fields(instance_data_dict: dict[str, object], nested_fields: list[str], obj: object) -> None:
+def _process_nested_fields(instance_data_dict: dict[str, Any], nested_fields: list[str], obj: object) -> None:
     for nested_field in nested_fields:
         attrs_to_get = nested_field.split(".")
         value = None
@@ -550,17 +551,16 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
     return excluded_household_ids_array
 
 
-def timezone_datetime(value: object) -> datetime:
+def timezone_datetime(value: Any) -> datetime:
     if not value:
         return value
-    datetime_value = value
-    if isinstance(value, date):
-        datetime_value = datetime.combine(datetime_value, datetime.min.time())
+    if isinstance(value, date) and not isinstance(value, datetime):
+        value = datetime.combine(value, datetime.min.time())
     if isinstance(value, str):
-        datetime_value = timezone.make_aware(datetime.fromisoformat(value))
-    if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
-        return datetime_value.replace(tzinfo=pytz.utc)
-    return datetime_value
+        value = timezone.make_aware(datetime.fromisoformat(value))
+    if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+        return value.replace(tzinfo=pytz.utc)
+    return value
 
 
 def clear_cache_for_key(key: str) -> None:
@@ -636,7 +636,7 @@ def send_email_notification(
 # https://github.com/saxix/django-adminfilters/blob/676765e3bf25038595a29756014c01e11c5a5d39/src/adminfilters/autocomplete.py#L55
 # not working with .all_objects()
 class AutoCompleteFilterTemp(AutoCompleteFilter):
-    def choices(self, changelist: object) -> list[object]:
+    def choices(self, changelist: object) -> list[str]:
         self.query_string = changelist.get_query_string(remove=[self.lookup_kwarg, self.lookup_kwarg_isnull])
         if self.lookup_val:
             get_kwargs = {self.field.target_field.name: self.lookup_val}
@@ -662,11 +662,11 @@ class JSONBSet(Func):
 
     def __init__(
         self,
-        expression: object,
-        path: object,
-        new_value: object,
+        expression: Any,
+        path: Any,
+        new_value: Any,
         create_missing: bool = True,
-        **extra: object,
+        **extra: Any,
     ) -> None:
         super().__init__(expression, path, Cast(new_value, JSONField()), Value(create_missing), **extra)
 

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -16,7 +17,7 @@ def _map_disability_value(value: object) -> str | None:
     return None
 
 
-def _fix_disability_fields_for_ba(ba: BusinessArea, **kwargs: object) -> None:
+def _fix_disability_fields_for_ba(ba: BusinessArea, **kwargs: Any) -> None:
     logging.info(f"Fixing disability fields for {ba}")
     tickets = GrievanceTicket.objects.filter(
         business_area=ba,
@@ -55,7 +56,7 @@ def _fix_disability_fields_for_ba(ba: BusinessArea, **kwargs: object) -> None:
 # there's this business_area filter
 # additional kwargs go to GrievanceTicket filter
 @transaction.atomic
-def fix_disability_fields(business_area: BusinessArea | None = None, **kwargs: object) -> None:
+def fix_disability_fields(business_area: BusinessArea | None = None, **kwargs: Any) -> None:
     if business_area:
         return _fix_disability_fields_for_ba(business_area, **kwargs)
 
@@ -70,5 +71,5 @@ def fix_disability_fields(business_area: BusinessArea | None = None, **kwargs: o
 class Command(BaseCommand):
     help = "Go through all grievance tickets, look for wrongly formatted data and fix it"
 
-    def handle(self, *args: object, **options: object) -> None:
+    def handle(self, *args: Any, **options: object) -> None:
         fix_disability_fields()  # PR #1608

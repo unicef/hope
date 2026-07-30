@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db import models
 
@@ -18,7 +18,7 @@ class TargetingIndividualRuleFilterBlock(
         on_delete=models.CASCADE,
         related_name="individuals_filters_blocks",
     )
-    target_only_hoh = models.BooleanField(default=False)
+    target_only_hoh: Any = models.BooleanField(default=False)
 
     class Meta:
         app_label = "targeting"

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from hope.models import Household, Payment, PaymentPlan
 from hope.models.utils import MergeStatusModel
@@ -39,7 +39,7 @@ def get_household_info(
     household: Household | None,
     individual: Optional["Individual"] = None,
     tax_id: str | None = None,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     status, date = get_household_status(household)
     output: dict = {"status": status, "date": date}
     if individual:

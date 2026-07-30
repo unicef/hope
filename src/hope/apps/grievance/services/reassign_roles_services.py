@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
 from django.shortcuts import get_object_or_404
@@ -130,7 +130,7 @@ def _handle_collector_reassignment(
 
 def _proccesing_role_reassign_data(
     duplicated_individuals_ids: list[str],
-    role_reassign_data: dict[str, object],
+    role_reassign_data: dict[str, Any],
     roles_to_bulk_update: list[IndividualRoleInHousehold],
     roles_to_delete: list[IndividualRoleInHousehold],
     user: AbstractUser,
@@ -217,7 +217,7 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
 
 
 def _process_disable_role_reassignment(
-    role_data: dict[str, object],
+    role_data: dict[str, Any],
     individual_to_remove: Individual,
     user: AbstractUser,
     program_or_qs: Program | QuerySet[Program],
@@ -268,7 +268,7 @@ def _process_disable_role_reassignment(
 
 
 def _validate_all_roles_reassigned(
-    individual_to_remove: Individual, role_reassign_data: dict[str, object]
+    individual_to_remove: Individual, role_reassign_data: dict[str, Any]
 ) -> Household | None:
     household_to_remove = individual_to_remove.household
     is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False

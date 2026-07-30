@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Count, F, Q, Sum
 from django.urls import reverse
@@ -48,7 +48,7 @@ class PaymentPlanPDFExportService:
             "title": "Payment Plan Payment List files generated",
         }
 
-    def generate_pdf_summary(self) -> object:
+    def generate_pdf_summary(self) -> tuple[Any, str]:
         self.generate_web_links()
         template_name = "payment/payment_plan_summary_pdf_template.html"
         filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"

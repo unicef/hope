@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, TypeVar
+from typing import Any, Callable, TypeVar
 
 from django.conf import settings
 
@@ -8,7 +8,7 @@ F = TypeVar("F", bound=Callable[..., object])
 
 def do_nothing_decorator[F: Callable[..., object]](func: F) -> F:
     @wraps(func)
-    def wrapped(*args: object, **kwargs: object) -> object:
+    def wrapped(*args: Any, **kwargs: Any) -> object:
         return func(*args, **kwargs)
 
     return wrapped  # type: ignore[return-value]

@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Collection
+from typing import Any, Collection
 from uuid import UUID
 
 from admin_extra_buttons.api import button
@@ -71,7 +71,7 @@ class AutocompleteWidget(forms.Widget):
             url += f"?business_area={self.business_area}"
         return url
 
-    def get_context(self, name: str, value: object, attrs: dict[str, object] | None) -> dict:
+    def get_context(self, name: str, value: object, attrs: dict[str, Any] | None) -> dict:
         return {
             "widget": {
                 "query_string": f"business_area__exact={self.business_area}" if self.business_area else "",

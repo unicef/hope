@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.test import TestCase
 
@@ -41,7 +41,7 @@ class BaseTestCase(TestCase):
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> RoleAssignment:
         """Create Partner Role with permissions.
 
@@ -73,7 +73,7 @@ class BaseTestCase(TestCase):
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: list["Area"] | None = None,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> RoleAssignment:
         """Create User Role with related permissions.
 

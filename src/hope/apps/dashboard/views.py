@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -113,7 +114,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
 
     template_name = "dashboard/dashboard.html"
 
-    def get_context_data(self, **kwargs: object) -> dict[str, object]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
         slug = business_area_slug.lower()

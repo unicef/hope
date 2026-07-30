@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -75,7 +75,7 @@ class APITokenForm(forms.ModelForm):
         model = APIToken
         fields = ("id", "user", "grants", "valid_from", "valid_to", "valid_for")
 
-    def __init__(self, *args: object, instance: object | None = None, **kwargs: object) -> None:
+    def __init__(self, *args: Any, instance: object | None = None, **kwargs: Any) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
             self.fields["valid_for"].queryset = BusinessArea.objects.filter(
@@ -122,7 +122,7 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             return "user", "valid_from"
         return ()
 
-    def _get_email_context(self, request: HttpRequest, obj: object) -> dict[str, object]:
+    def _get_email_context(self, request: HttpRequest, obj: object) -> dict[str, Any]:
         return {
             "obj": obj,
             "friendly_name": obj.user.first_name or obj.user.username,

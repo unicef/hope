@@ -1,5 +1,5 @@
 import logging
-from typing import TypeVar, cast
+from typing import Any, TypeVar, cast
 
 from concurrency.api import concurrency_disable_increment
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -62,7 +62,7 @@ class BaseAsyncJob(AsyncJobModel):
         instance: models.Model,
         *,
         job_name: str | None = None,
-        **kwargs: object,
+        **kwargs: Any,
     ) -> AsyncJobT:
         if instance.pk is None:
             raise ValueError("Cannot create an async job for an unsaved instance.")
@@ -189,7 +189,7 @@ class BaseAsyncJob(AsyncJobModel):
             self.save(update_fields=["last_async_result_id", "curr_async_result_id", "datetime_queued"])
             task_queued.send(sender=self.__class__, task=self)
 
-    def save(self, *args: object, **kwargs: object) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.job_name:
             self.job_name = self.default_job_name(self.action)
         super().save(*args, **kwargs)

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q, QuerySet
@@ -112,7 +112,7 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
 
     selected_duplicates = ticket_details.selected_individuals.all()
     traverse_sibling_tickets(grievance_ticket, selected_duplicates)
-    close_needs_adjudication_new_ticket(ticket_details, user)
+    close_needs_adjudication_new_ticket(ticket_details, user)  # type: ignore[arg-type]
 
 
 def _has_other_open_needs_adjudication_ticket(ticket_details: TicketNeedsAdjudicationDetails) -> bool:
@@ -198,7 +198,7 @@ def create_grievance_ticket_with_details(
     possible_duplicate: Individual | None,
     business_area: BusinessArea,
     issue_type: int,
-    **kwargs: object,
+    **kwargs: Any,
 ) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
     """Create GRV ticket with details.
 
@@ -314,8 +314,8 @@ def create_needs_adjudication_tickets(
 
         if possible_duplicates and not (possible_duplicate in possible_duplicates and len(possible_duplicates) == 1):
             ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=possible_duplicate,
-                possible_duplicate=possible_duplicate,  # for backward compatibility
+                main_individual=possible_duplicate,  # type: ignore[arg-type]
+                possible_duplicate=possible_duplicate,  # type: ignore[arg-type]  # for backward compatibility
                 business_area=business_area,
                 registration_data_import=registration_data_import,
                 possible_duplicates=possible_duplicates,

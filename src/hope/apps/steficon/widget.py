@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from django.forms.widgets import Widget
 from django.templatetags.static import static
 
 if TYPE_CHECKING:
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 class FormatterEditor(forms.Textarea):
     template_name = "steficon/widgets/codewidget.html"
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         theme = kwargs.pop("theme", "midnight")
         super().__init__(*args, **kwargs)
         self.attrs["class"] = "formatter-editor"
@@ -40,7 +41,7 @@ class FormatterEditor(forms.Textarea):
 
 
 class PythonFormatterEditor(FormatterEditor):
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.attrs["class"] = "python-editor"
 
@@ -57,13 +58,13 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
         *,
         empty_label: str = "---------",
         required: bool = True,
-        widget: object | None = None,
-        label: object | None = None,
+        widget: Widget | type[Widget] | None = None,
+        label: str | None = None,
         initial: object | None = None,
         help_text: str = "",
         to_field_name: str | None = None,
-        limit_choices_to: Union[Q | dict[str, object], "_ChoicesCallable", None] = None,
-        **kwargs: object,
+        limit_choices_to: Union[Q | dict[str, Any], "_ChoicesCallable", None] = None,
+        **kwargs: Any,
     ) -> None:
         queryset = ContentType.objects.order_by("model", "app_label")
         super().__init__(
