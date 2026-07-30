@@ -138,11 +138,10 @@ module.exports = defineConfig([
       '@tanstack/query/stable-query-client': 'error',
 
       // Query keys must be derived from the fetcher via restQueryKey (utils/queryKeys.ts)
-      // so reader and invalidator keys cannot drift. `warn` while readers are still being
-      // migrated (lint has no --max-warnings, so CI stays green); flip to `error` once the
-      // full migration lands.
+      // so reader and invalidator keys cannot drift. The migration is complete, so this is
+      // an error — a hand-written key silently stops matching its invalidator.
       'no-restricted-syntax': [
-        'warn',
+        'error',
         {
           selector: "Property[key.name='queryKey'] > ArrayExpression",
           message:
