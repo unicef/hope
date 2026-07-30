@@ -13,6 +13,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Box, IconButton, TableCell, Tooltip } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -92,7 +93,10 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
   const { data: templateCountData } = useQuery({
-    queryKey: ['periodicDataUpdateTemplatesCount', businessAreaSlug, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesCountRetrieve,
+      { businessAreaSlug, programCode: programId },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesCountRetrieve(
         {
@@ -159,12 +163,14 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     isFetching,
     error,
   } = useQuery<PaginatedPDUXlsxTemplateListList>({
-    queryKey: [
-      'periodicDataUpdateTemplates',
-      queryVariables,
-      businessAreaSlug,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList,
+      createApiParams(
+        { businessAreaSlug, programCode: programId },
+        queryVariables,
+        { withPagination: true },
+      ),
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
         createApiParams(

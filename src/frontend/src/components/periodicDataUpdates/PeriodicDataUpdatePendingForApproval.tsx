@@ -16,6 +16,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import {
   periodicDataUpdatesOnlineEditsStatusToColor,
@@ -114,16 +115,12 @@ const PeriodicDataUpdatePendingForApproval = () => {
     onSuccess: () => {
       showMessage(t('Templates approved successfully.'));
       setSelected([]);
+      // Refresh every online-edit list (approved items move between them);
+      // the bare prefix matches all status-filtered variants.
       queryClient.invalidateQueries({
-        queryKey: [
-          'periodicDataUpdatePendingForApproval',
-          queryVariables,
-          businessAreaSlug,
-          programId,
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['periodicDataUpdatePendingForMerge'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,
+        ),
       });
     },
     onError: (error: any) => {
@@ -137,12 +134,15 @@ const PeriodicDataUpdatePendingForApproval = () => {
   };
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
-    queryKey: [
-      'periodicDataUpdatePendingForApproval',
-      queryVariables,
-      businessAreaSlug,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,
+      {
+        businessAreaSlug,
+        programCode: programId,
+        ordering: queryVariables.ordering,
+        status: queryVariables.status,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,

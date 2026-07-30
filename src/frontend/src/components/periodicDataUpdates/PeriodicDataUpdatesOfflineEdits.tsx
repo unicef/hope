@@ -12,6 +12,7 @@ import { PaginatedPDUXlsxUploadListList } from '@restgenerated/models/PaginatedP
 import { PDUXlsxUploadList } from '@restgenerated/models/PDUXlsxUploadList';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -88,13 +89,14 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
     isFetching,
     error,
   } = useQuery<PaginatedPDUXlsxUploadListList>({
-    queryKey: [
-      'periodicDataUpdateUploads',
-      queryVariables,
-      businessAreaSlug,
-      programId,
-      page,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList,
+      createApiParams(
+        { businessAreaSlug, programCode: programId },
+        queryVariables,
+        { withPagination: true, rowsPerPage: 5 },
+      ),
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
         createApiParams(
@@ -108,7 +110,10 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
   });
 
   const { data: uploadsCountData } = useQuery({
-    queryKey: ['periodicDataUpdateUploadsCount', businessAreaSlug, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve,
+      { businessAreaSlug, programCode: programId },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve(
         {

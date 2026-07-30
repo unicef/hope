@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 
 export const useExportPeriodicDataUpdateTemplate = () => {
   const queryClient = useQueryClient();
@@ -22,7 +23,9 @@ export const useExportPeriodicDataUpdateTemplate = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['periodicDataUpdateTemplates'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList,
+        ),
       });
     },
   });
@@ -47,7 +50,9 @@ export const useUploadPeriodicDataUpdateTemplate = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['periodicDataUpdateUploads'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList,
+        ),
       });
     },
   });

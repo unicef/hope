@@ -126,10 +126,6 @@ export const ProgramCyclesTablePaymentModule = ({
           queryKey: ['programCycles', businessArea, program.code],
           exact: false,
         });
-        await queryClient.invalidateQueries({
-          queryKey: ['programCycles', queryVariables, businessArea, programId],
-          exact: false,
-        });
       },
       mutationKey: ['finishProgramCycle', businessArea, program.id],
     });
@@ -153,10 +149,6 @@ export const ProgramCyclesTablePaymentModule = ({
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.code],
-          exact: false,
-        });
-        await queryClient.invalidateQueries({
-          queryKey: ['programCycles', queryVariables, businessArea, programId],
           exact: false,
         });
       },
