@@ -60,12 +60,15 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-      programCycleId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      {
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        status: 'DRAFT',
+        programCycle: programCycleId,
+      },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,

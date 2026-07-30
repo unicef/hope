@@ -8,6 +8,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
@@ -24,7 +25,14 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
-    queryKey: ['targetPopulation', businessAreaSlug, id, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+      {
+        businessAreaSlug: businessAreaSlug,
+        id: id,
+        programCode,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
         businessAreaSlug: businessAreaSlug,

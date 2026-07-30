@@ -2,6 +2,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { createApiParams } from '@utils/apiUtils';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -80,44 +81,42 @@ export function LookUpTargetPopulationTableSurveys({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const targetPopulationsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentPlansData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      targetPopulationsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        targetPopulationsListParams,
       );
     },
     placeholderData: keepPreviousData,
   });
 
   // Count query, enabled only on page 0
+  const targetPopulationsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsCount',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve,
+      targetPopulationsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        targetPopulationsCountParams,
       ),
     enabled: page === 0,
   });

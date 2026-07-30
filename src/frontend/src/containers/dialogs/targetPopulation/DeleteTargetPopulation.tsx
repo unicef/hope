@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,7 +51,9 @@ export const DeleteTargetPopulation = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
       });
     },
   });

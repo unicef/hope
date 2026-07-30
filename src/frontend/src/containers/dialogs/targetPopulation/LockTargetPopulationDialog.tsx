@@ -3,6 +3,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, DialogContent, DialogTitle } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -49,15 +50,14 @@ export const LockTargetPopulationDialog = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'targetPopulation',
-          businessArea,
-          targetPopulationId,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
       });
       showMessage(t('Payment Plan has been locked.'));
     },

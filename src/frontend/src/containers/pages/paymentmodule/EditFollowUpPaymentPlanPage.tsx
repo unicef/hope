@@ -65,11 +65,14 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      {
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        status: 'DRAFT',
+      },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,

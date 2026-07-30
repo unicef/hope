@@ -5,6 +5,7 @@ import { PaginatedTargetPopulationListList } from '@restgenerated/models/Paginat
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -74,22 +75,21 @@ export function TargetPopulationTable({
   }, [initialQueryVariables]);
 
   // Count query (enabled only on page 0)
+  const targetPopulationsCountParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+    },
+    queryVariables,
+  );
   const { data: countData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsCount',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve,
+      targetPopulationsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-          },
-          queryVariables,
-        ),
+        targetPopulationsCountParams,
       ),
     enabled: page === 0,
   });
@@ -97,29 +97,27 @@ export function TargetPopulationTable({
   const persistedCount = usePersistedCount(page, countData);
 
   // Main data query
+  const targetPopulationsListParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: targetPopulationsData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-      queryVariables,
-      page,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      targetPopulationsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
+        targetPopulationsListParams,
       );
     },
     placeholderData: keepPreviousData,

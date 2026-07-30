@@ -7,6 +7,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
@@ -84,7 +85,9 @@ export const DuplicateTargetPopulation = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
       });
     },
   });

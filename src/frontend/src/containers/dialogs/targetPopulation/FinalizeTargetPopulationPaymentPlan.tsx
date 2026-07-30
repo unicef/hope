@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 
@@ -45,15 +46,14 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       setOpen(false);
 
       queryClient.invalidateQueries({
-        queryKey: [
-          'targetPopulation',
-          businessArea,
-          targetPopulationId,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
       });
       navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
     },

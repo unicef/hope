@@ -9,6 +9,7 @@ import { LookUpTargetPopulationTableRowCommunication } from './LookUpTargetPopul
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
@@ -78,25 +79,24 @@ const LookUpTargetPopulationTableCommunication = ({
 
   const [page, setPage] = useState(0);
 
+  const targetPopulationsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentPlansData,
     isLoading,
     isFetching,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      targetPopulationsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        targetPopulationsListParams,
       );
     },
     placeholderData: keepPreviousData,
