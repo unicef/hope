@@ -287,7 +287,7 @@ function PaymentDetails({
       </Overview>
       <Overview>
         <Title>
-          <Typography variant="h6">{t('Extra fields')}</Typography>
+          <Typography variant="h6">{t('Reconciliation Information: Extra Info')}</Typography>
         </Title>
         <Grid container spacing={3}>
           {Object.entries(payment.extraFields || {}).map(([key, value]) => (
