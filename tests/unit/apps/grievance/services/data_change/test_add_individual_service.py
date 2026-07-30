@@ -154,6 +154,48 @@ def head_add_individual_context(program: Program) -> dict[str, Any]:
     }
 
 
+@pytest.fixture
+def kab_add_individual_context() -> dict[str, Any]:
+    program = ProgramFactory()
+    dct = program.data_collecting_type
+    dct.recalculate_composition = False
+    dct.collects_individual_data = True
+    dct.save()
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketAddIndividualDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        individual_data={
+            "given_name": "Test",
+            "full_name": "Test Example",
+            "family_name": "Example",
+            "sex": "MALE",
+            "birth_date": date(year=1980, month=2, day=1).isoformat(),
+            "marital_status": SINGLE,
+            "documents": [],
+        },
+        approve_status=True,
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return {"household": household, "ticket": ticket}
+
+
+def test_add_individual_populates_kab_for_non_recalculating_dct(
+    kab_add_individual_context: dict[str, Any],
+) -> None:
+    # recalculate_composition=False but collects_individual_data=True -> KAB counts individuals.
+    household = kab_add_individual_context["household"]
+    ticket = kab_add_individual_context["ticket"]
+    assert household.kab_size is None
+
+    AddIndividualService(ticket, {}).close(UserFactory())
+
+    household.refresh_from_db()
+    assert household.kab_size is not None
+
+
 def test_increase_household_size_on_close_ticket(add_individual_context: dict[str, Any]) -> None:
     household = add_individual_context["household"]
     ticket = add_individual_context["ticket"]

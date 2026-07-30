@@ -24,6 +24,7 @@ class DataCollectingTypeAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, ad
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",
+        "collects_individual_data",
         "weight",
     )
     list_filter = (
@@ -33,6 +34,7 @@ class DataCollectingTypeAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, ad
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",
+        "collects_individual_data",
     )
     filter_horizontal = ("compatible_types", "limit_to")
     search_fields = (
