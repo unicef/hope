@@ -10,6 +10,7 @@ import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVeri
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -48,17 +49,14 @@ export const ImportXlsx = ({
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasProgramsPaymentVerificationsVerificationsList',
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList,
+        ),
       });
       setOpenImport(false);
       showMessage(t('Your import was successful!'));
