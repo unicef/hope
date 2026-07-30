@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { restQueryKey } from './queryKeys';
 
-// Stand-ins for RestService static methods — only their `.name` matters to the factory.
+// Stand-ins for RestService methods — only `.name` matters.
 function restBusinessAreasProgramsList(): void {}
 function restBusinessAreasProgramsRetrieve(): void {}
 function hhStatusRetrieve(): void {}
@@ -27,7 +27,7 @@ describe('restQueryKey', () => {
     const params = { businessAreaSlug: 'afghanistan', limit: 20 };
     const key = restQueryKey(restBusinessAreasProgramsRetrieve, params);
     expect(key).toEqual(['businessAreasProgramsRetrieve', params]);
-    // The params object is embedded as-is, not cloned — cache identity relies on this.
+    // Embedded by identity, not cloned — cache identity relies on this.
     expect(key[1]).toBe(params);
   });
 

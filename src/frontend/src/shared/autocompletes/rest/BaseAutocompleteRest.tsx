@@ -14,6 +14,7 @@ export function BaseAutocompleteRest({
   label,
   dataCy,
   fetchFunction,
+  queryKeyMethod,
   businessArea,
   programId,
   queryParams,
@@ -37,6 +38,9 @@ export function BaseAutocompleteRest({
     programId: string,
     queryParams?: Record<string, any>,
   ) => Promise<any>;
+  // The RestService method `fetchFunction` calls, used only for its `.name`. Deriving the
+  // root from `fetchFunction` would yield 'fetchFunction' for every inline-arrow caller.
+  queryKeyMethod: (...args: any[]) => unknown;
   businessArea: string;
   programId: string;
   queryParams?: Record<string, any>;
@@ -55,8 +59,10 @@ export function BaseAutocompleteRest({
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [open, setOpen] = useState(false);
+  // `fetchFunction` is a fresh arrow each render; everything it reads is already in the key.
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data, isLoading } = useQuery({
-    queryKey: restQueryKey(fetchFunction, {
+    queryKey: restQueryKey(queryKeyMethod, {
       businessArea,
       programId,
       ...queryParams,

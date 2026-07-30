@@ -146,7 +146,6 @@ const EditTargetPopulation = ({
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate the target population detail and the list so edits are reflected.
         queryClient.invalidateQueries({
           queryKey: restQueryKey(
             RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,

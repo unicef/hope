@@ -66,7 +66,6 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
           queryKey: restQueryKey(
             RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve,
           ),
-          refetchType: 'active',
         });
         setOpenImport(false);
         setFileToImport(null);

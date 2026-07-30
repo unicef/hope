@@ -20,10 +20,9 @@ interface ProvidersProps {
   children: ReactNode[];
 }
 
-// After any successful mutation, mark active non-static queries stale (refetchType: 'none' =
-// mark without refetching). Targeted per-flow invalidations do the immediate on-screen refresh;
-// this net only guarantees eventual freshness and avoids re-firing a GET on a just-deleted
-// resource. Static reference data (see isStaticReferenceQuery) is exempt to keep its long staleTime.
+// Safety net for eventual freshness only: `refetchType: 'none'` marks queries stale without
+// refetching, so it never re-fires a GET on a just-deleted resource. Targeted per-flow
+// invalidations still do the immediate on-screen refresh.
 const queryClient: QueryClient = new QueryClient({
   mutationCache: new MutationCache({
     onSuccess: () => {
@@ -35,10 +34,10 @@ const queryClient: QueryClient = new QueryClient({
   }),
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // Data is considered fresh for 60 seconds
-      gcTime: 10 * 60 * 1000, // Keep unused data in cache for 10 minutes
-      refetchOnWindowFocus: false, // Don't refetch when window regains focus
-      retry: 1, // Retry a failed query once (down from the default of 3)
+      staleTime: 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });

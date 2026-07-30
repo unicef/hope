@@ -2,9 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { isStaticReferenceQuery } from './queryCacheUtils';
 
 describe('isStaticReferenceQuery', () => {
-  // Reference data must stay exempt so the blanket post-mutation invalidation does not
-  // needlessly refetch it and discard its long staleTime.
-  // Roots are the ones restQueryKey derives from the fetcher, not hand-written strings.
+  // Exempt so the blanket post-mutation invalidation does not discard their long staleTime.
   it('returns true for known static reference roots', () => {
     expect(
       isStaticReferenceQuery([
@@ -27,7 +25,6 @@ describe('isStaticReferenceQuery', () => {
     expect(isStaticReferenceQuery(['beneficiaryGroupsList'])).toBe(true);
   });
 
-  // The pre-migration hand-written roots are gone; nothing should still match them.
   it('returns false for the retired hand-written roots', () => {
     expect(isStaticReferenceQuery(['profile', 'afghanistan'])).toBe(false);
     expect(isStaticReferenceQuery(['businessArea', 'afghanistan'])).toBe(false);
@@ -42,9 +39,8 @@ describe('isStaticReferenceQuery', () => {
     expect(
       isStaticReferenceQuery(['businessAreasGrievanceTicketsChoices', 'afg']),
     ).toBe(true);
-    // Dropped from the STATIC_QUERY_KEY_ROOTS set but still matched by the choices heuristic.
+    // Matched by the heuristic, not the explicit set.
     expect(isStaticReferenceQuery(['restChoicesCountriesList'])).toBe(true);
-    // A derived (normalized) choices retrieve root is exempt too.
     expect(
       isStaticReferenceQuery([
         'businessAreasGrievanceTicketsChoicesRetrieve',
@@ -53,8 +49,6 @@ describe('isStaticReferenceQuery', () => {
     ).toBe(true);
   });
 
-  // Mutable data MUST NOT be exempt — these are exactly the readers that go stale after a
-  // create/edit/status-change and need to refetch.
   it('returns false for mutable data readers that must refetch after a write', () => {
     expect(isStaticReferenceQuery(['program', 'afghanistan', 'prog-1'])).toBe(false);
     expect(
@@ -66,7 +60,6 @@ describe('isStaticReferenceQuery', () => {
     expect(
       isStaticReferenceQuery(['businessAreaProgram', 'afghanistan', 'prog-1']),
     ).toBe(false);
-    // Derived (normalized) mutable-data roots must not be exempt.
     expect(
       isStaticReferenceQuery(['businessAreasProgramsList', { limit: 20 }]),
     ).toBe(false);
@@ -78,7 +71,6 @@ describe('isStaticReferenceQuery', () => {
     ).toBe(false);
   });
 
-  // The exact-match guard must not treat `businessArea`-prefixed data keys as static.
   it('does not treat businessArea-prefixed data keys as static via prefix', () => {
     expect(
       isStaticReferenceQuery(['businessAreasProgramsTargetPopulationsList', {}]),

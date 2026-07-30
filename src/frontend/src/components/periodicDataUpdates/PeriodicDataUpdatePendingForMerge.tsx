@@ -109,8 +109,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
     onSuccess: () => {
       showMessage('Templates merged successfully.');
       setSelected([]);
-      // Refresh every online-edit list (merged items move between them);
-      // the bare prefix matches all status-filtered variants.
+      // Merged items move between the status-filtered lists.
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,

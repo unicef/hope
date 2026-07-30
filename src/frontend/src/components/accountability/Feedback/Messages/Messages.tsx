@@ -80,9 +80,6 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
         requestBody: { description },
       });
 
-      // Refresh the feedback detail. Both the details page (via
-      // useHopeDetailsQuery) and the edit page derive their key from the same
-      // fetcher, so the bare prefix invalidates every cached variant.
       queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksRetrieve),
       });

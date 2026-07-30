@@ -39,6 +39,7 @@ export const BeneficiaryGroupAutocompleteRest = ({
       label={t('Beneficiary Group')}
       dataCy="filters-beneficiary-group-autocomplete"
       fetchFunction={() => RestService.restBeneficiaryGroupsList({})}
+      queryKeyMethod={RestService.restBeneficiaryGroupsList}
       businessArea={businessArea}
       handleChange={(_, selectedValue) => {
         onChange(selectedValue);

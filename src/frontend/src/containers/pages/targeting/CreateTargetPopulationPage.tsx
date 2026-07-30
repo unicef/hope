@@ -69,9 +69,6 @@ const CreateTargetPopulationPage = (): ReactElement => {
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate the list and detail queries for target populations and program.
-        // Both the table and the autocomplete read under
-        // `businessAreasProgramsTargetPopulationsList`, so the bare prefix covers both.
         queryClient.invalidateQueries({
           queryKey: restQueryKey(
             RestService.restBusinessAreasProgramsTargetPopulationsList,

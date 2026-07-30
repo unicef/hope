@@ -263,9 +263,8 @@ export function TableRestComponent<T>({
     body = <>{data.map((row) => renderRow(row))}</>;
   }
 
-  // A background refetch while previous rows stay visible (keepPreviousData) — show a
-  // thin progress bar over the existing rows. `position: relative` is only applied when the
-  // bar is present so tables render identically (and snapshots stay stable) when idle.
+  // Background refetch with previous rows still visible (keepPreviousData). `position:
+  // relative` is applied only when the bar is present, so idle tables render unchanged.
   const showFetchingProgress = isFetching && !loadingProp;
 
   const table = (

@@ -10,7 +10,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
@@ -73,11 +73,18 @@ function PeopleRegistrationDataImportPage(): ReactElement {
     setShouldScroll(false),
   );
 
+  const queryClient = useQueryClient();
+
   const { mutateAsync } = useMutation({
     mutationFn: async () =>
       runDeduplicationDataImports(businessArea, programId),
     onSuccess: () => {
       showMessage('Deduplication process started');
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsRegistrationDataImportsList,
+        ),
+      });
     },
   });
 

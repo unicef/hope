@@ -86,10 +86,8 @@ const _restServiceMethods = vi.hoisted(() => {
     restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
     restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
   };
-  // restQueryKey (utils/queryKeys.ts) derives the key root from `fn.name`. Bare spies are
-  // all named 'spy', so without this every mocked fetcher would share one root and two
-  // queries with equal params would collapse into a single cache entry — the second
-  // queryFn then never runs.
+  // restQueryKey derives the key root from `fn.name`, and every bare spy is named 'spy'.
+  // Without this, all mocked fetchers share one root and collapse into one cache entry.
   for (const [name, fn] of Object.entries(methods)) {
     Object.defineProperty(fn, 'name', { value: name, configurable: true });
   }
