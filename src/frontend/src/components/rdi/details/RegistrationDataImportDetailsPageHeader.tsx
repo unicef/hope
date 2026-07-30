@@ -71,10 +71,9 @@ const RegistrationDataImportDetailsPageHeader = ({
     useActionMutation(
       registration.id,
       RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
-      [
-        RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve
-          .name,
-      ],
+      restQueryKey(
+        RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+      ),
     );
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
 

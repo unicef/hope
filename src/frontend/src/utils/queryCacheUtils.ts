@@ -1,11 +1,17 @@
 // Exempts static reference data (choices, geo areas, permissions) from the blanket
 // post-mutation invalidation in providers.tsx, so it keeps its long staleTime. Query
 // keys are derived from the fetcher via restQueryKey (see utils/queryKeys.ts).
+// Roots are what restQueryKey derives from the fetcher name, so they must be updated
+// alongside the readers — a hand-written root here silently stops matching.
 const STATIC_QUERY_KEY_ROOTS = new Set<string>([
-  'profile', // permissions / current-user profile (usePermissions, AppBar)
-  'businessArea', // business-area details
-  'allAreasTree', // geo areas
-  'beneficiaryGroups',
+  // restBusinessAreasUsersProfileRetrieve — permissions / current-user profile
+  'businessAreasUsersProfileRetrieve',
+  // restBusinessAreasRetrieve — business-area details
+  'businessAreasRetrieve',
+  // restBusinessAreasGeoAreasList — geo areas
+  'businessAreasGeoAreasList',
+  // restBeneficiaryGroupsList
+  'beneficiaryGroupsList',
   // restChoicesCountriesList / any *choices* root is covered by the heuristic below.
 ]);
 

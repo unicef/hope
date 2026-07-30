@@ -4,11 +4,35 @@ import { isStaticReferenceQuery } from './queryCacheUtils';
 describe('isStaticReferenceQuery', () => {
   // Reference data must stay exempt so the blanket post-mutation invalidation does not
   // needlessly refetch it and discard its long staleTime.
+  // Roots are the ones restQueryKey derives from the fetcher, not hand-written strings.
   it('returns true for known static reference roots', () => {
-    expect(isStaticReferenceQuery(['profile', 'afghanistan', 'prog'])).toBe(true);
-    expect(isStaticReferenceQuery(['businessArea', 'afghanistan'])).toBe(true);
-    expect(isStaticReferenceQuery(['allAreasTree', 'afghanistan'])).toBe(true);
-    expect(isStaticReferenceQuery(['beneficiaryGroups'])).toBe(true);
+    expect(
+      isStaticReferenceQuery([
+        'businessAreasUsersProfileRetrieve',
+        { businessAreaSlug: 'afghanistan', programCode: 'prog' },
+      ]),
+    ).toBe(true);
+    expect(
+      isStaticReferenceQuery([
+        'businessAreasRetrieve',
+        { businessAreaSlug: 'afghanistan' },
+      ]),
+    ).toBe(true);
+    expect(
+      isStaticReferenceQuery([
+        'businessAreasGeoAreasList',
+        { businessAreaSlug: 'afghanistan', level: 2 },
+      ]),
+    ).toBe(true);
+    expect(isStaticReferenceQuery(['beneficiaryGroupsList'])).toBe(true);
+  });
+
+  // The pre-migration hand-written roots are gone; nothing should still match them.
+  it('returns false for the retired hand-written roots', () => {
+    expect(isStaticReferenceQuery(['profile', 'afghanistan'])).toBe(false);
+    expect(isStaticReferenceQuery(['businessArea', 'afghanistan'])).toBe(false);
+    expect(isStaticReferenceQuery(['allAreasTree', 'afghanistan'])).toBe(false);
+    expect(isStaticReferenceQuery(['beneficiaryGroups'])).toBe(false);
   });
 
   it('returns true for any choices endpoint key', () => {
