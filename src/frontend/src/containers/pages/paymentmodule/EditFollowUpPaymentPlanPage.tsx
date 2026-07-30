@@ -12,6 +12,7 @@ import { PaginatedTargetPopulationListList } from '@restgenerated/models/Paginat
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
@@ -51,7 +52,7 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
 
   const { data: paymentPlan, isLoading: loadingPaymentPlan } =
     useQuery<PaymentPlanDetail>({
-      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
           businessAreaSlug: businessArea,

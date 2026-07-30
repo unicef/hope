@@ -11,6 +11,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { format, parseISO } from 'date-fns';
 import { Form, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -47,7 +48,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasProgramsPaymentPlansList'],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
         });
         queryClient.invalidateQueries({
           queryKey: ['businessAreasPaymentPlans'],

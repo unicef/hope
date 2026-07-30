@@ -28,6 +28,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -139,7 +140,7 @@ function Entitlement({
       onSuccess: () => {
         showMessage(t('Formula is executing, please wait until completed'));
         queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
         });
       },
       onError: (error: any) => {
@@ -173,7 +174,7 @@ function Entitlement({
           t('Flat amount is being applied, please wait until completed'),
         );
         queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
         });
       },
       onError: (error: any) => {
@@ -213,7 +214,7 @@ function Entitlement({
     onSuccess: async () => {
       showMessage(t('Exporting XLSX started. Please check your email.'));
       await queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
       });
     },
     onError: (error: any) => {

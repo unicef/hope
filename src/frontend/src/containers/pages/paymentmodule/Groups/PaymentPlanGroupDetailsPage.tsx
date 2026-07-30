@@ -13,6 +13,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -60,7 +61,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         queryKey: ['businessAreasPaymentPlans'],
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsPaymentPlansList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     }
     wasBusy.current = isBusy;

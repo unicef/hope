@@ -19,6 +19,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,10 +63,10 @@ export function AuthorizePaymentPlan({
       showMessage(t('Payment Plan has been authorized.'));
       setAuthorizeDialogOpen(false);
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsPaymentPlansList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
       queryClient.invalidateQueries({
         queryKey: ['businessAreasPaymentPlans'],

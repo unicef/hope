@@ -19,6 +19,7 @@ import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,10 +63,10 @@ export function RejectPaymentPlan({
       showMessage(t('Payment Plan has been rejected.'));
       setRejectDialogOpen(false);
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsPaymentPlansList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
       queryClient.invalidateQueries({
         queryKey: ['businessAreasPaymentPlans'],

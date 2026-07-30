@@ -17,6 +17,7 @@ import {
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +55,7 @@ export function DeletePaymentPlan({
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasProgramsPaymentPlansList'],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
         });
         queryClient.invalidateQueries({
           queryKey: ['businessAreasPaymentPlans'],
