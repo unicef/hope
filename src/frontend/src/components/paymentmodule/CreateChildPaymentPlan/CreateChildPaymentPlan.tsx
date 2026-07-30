@@ -374,7 +374,7 @@ export function CreateChildPaymentPlan({
                             <Box sx={{ mt: 1 }}>
                               <Typography data-cy="top-up-funded-rows">
                                 {variant === 'amendment'
-                                  ? t('New Amendment will be created for')
+                                  ? t('New Top-Up Amendment will be created for')
                                   : t('New Top-Up will be created for')}{' '}
                                 {fundedRows}{' '}
                                 {fundedRows === 1
@@ -386,7 +386,7 @@ export function CreateChildPaymentPlan({
                           <GreyText>
                             {variant === 'amendment'
                               ? t(
-                                  'Beneficiaries left empty or at zero are not part of this Amendment and stay available for a later one.',
+                                  'Beneficiaries left empty or at zero are not part of this Top-Up Amendment and stay available for a later one.',
                                 )
                               : t(
                                   'Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',

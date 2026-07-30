@@ -1208,9 +1208,7 @@ class PaymentPlanService:
         Amounts are stringified because the job config is JSON, and JSON has no decimal type —
         a float would round the money on the way through.
         """
-        # Resolved amounts ride along in the job config as {unicef_id: "12.34"}. Fine for the plan
-        # sizes we see; if a Top-Up ever spans tens of thousands of beneficiaries, persist the
-        # uploaded file against the plan and re-parse it in the job instead.
+        # Amounts ride in the job config (~40 B of jsonb per beneficiary) — no practical size limit.
         extra_config: dict[str, Any] = {}
         if amounts is not None:
             extra_config["amounts"] = {unicef_id: str(amount) for unicef_id, amount in amounts.items()}
