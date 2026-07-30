@@ -9,6 +9,7 @@ import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { MessageCreate } from '@restgenerated/models/MessageCreate';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -130,7 +131,9 @@ const CreateCommunicationPage = (): ReactElement => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsMessagesList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsMessagesList,
+        ),
       });
     },
   });

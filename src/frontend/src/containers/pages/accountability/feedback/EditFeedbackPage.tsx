@@ -22,6 +22,7 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -67,7 +68,10 @@ const EditFeedbackPage = (): ReactElement => {
 
   const { data: feedbackData, isLoading: feedbackDataLoading } =
     useQuery<FeedbackDetail>({
-      queryKey: ['businessAreasFeedbacksRetrieve', businessArea, id],
+      queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksRetrieve, {
+        businessAreaSlug: businessArea,
+        id: id,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasFeedbacksRetrieve({
           businessAreaSlug: businessArea,
@@ -111,13 +115,15 @@ const EditFeedbackPage = (): ReactElement => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasFeedbacksRetrieve', businessArea, id],
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksRetrieve),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsFeedbacksList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFeedbacksList,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasFeedbacksList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksList),
       });
     },
   });

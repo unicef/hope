@@ -34,6 +34,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
@@ -110,7 +111,9 @@ const CreateSurveyPage = (): ReactElement => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsSurveysList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsSurveysList,
+        ),
       });
     },
   });

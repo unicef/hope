@@ -30,6 +30,7 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
@@ -162,10 +163,12 @@ function CreateFeedbackPage(): ReactElement {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsFeedbacksList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFeedbacksList,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasFeedbacksList'],
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksList),
       });
     },
   });

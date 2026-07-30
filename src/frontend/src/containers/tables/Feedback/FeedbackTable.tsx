@@ -10,6 +10,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { PaginatedFeedbackListList } from '@restgenerated/models/PaginatedFeedbackListList';
@@ -75,12 +76,14 @@ function FeedbackTable({
     isLoading: isLoadingSelectedProgram,
     isFetching: isFetchingSelectedProgram,
   } = useQuery<PaginatedFeedbackListList>({
-    queryKey: [
-      'businessAreasProgramsFeedbacksList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsFeedbacksList,
+      createApiParams(
+        { businessAreaSlug: businessArea, programCode: programId },
+        queryVariables,
+        { withPagination: true },
+      ),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsFeedbacksList(
         createApiParams(
@@ -95,12 +98,13 @@ function FeedbackTable({
 
   // Selected Program Count
   const { data: selectedProgramFeedbacksCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsFeedbacksCountRetrieve',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsFeedbacksCountRetrieve,
+      createApiParams(
+        { businessAreaSlug: businessArea, programCode: programId },
+        queryVariables,
+      ),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsFeedbacksCountRetrieve(
         createApiParams(
@@ -118,7 +122,12 @@ function FeedbackTable({
     isLoading: isLoadingAllPrograms,
     isFetching: isFetchingAllPrograms,
   } = useQuery<PaginatedFeedbackListList>({
-    queryKey: ['businessAreasFeedbacksList', queryVariables, businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasFeedbacksList,
+      createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
+        withPagination: true,
+      }),
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasFeedbacksList(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
@@ -132,11 +141,10 @@ function FeedbackTable({
 
   // All Programs Count
   const { data: allProgramsFeedbacksCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasFeedbacksCountRetrieve',
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasFeedbacksCountRetrieve,
+      createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasFeedbacksCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),

@@ -9,6 +9,7 @@ import { SurveysTableRow } from './SurveysTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { PaginatedSurveyList } from '@restgenerated/models/PaginatedSurveyList';
 import { Survey } from '@restgenerated/models/Survey';
@@ -67,7 +68,17 @@ function SurveysTable({
     isFetching: isFetchingSurveys,
     error: errorSurveys,
   } = useQuery<PaginatedSurveyList>({
-    queryKey: ['businessAreasProgramsSurveysList', queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysList,
+      createApiParams(
+        {
+          businessAreaSlug: queryVariables.businessAreaSlug,
+          programCode: queryVariables.programCode,
+        },
+        queryVariables,
+        { withPagination: true },
+      ),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysList(
         createApiParams(
@@ -84,12 +95,16 @@ function SurveysTable({
   });
 
   const { data: dataSurveysCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsSurveysCount',
-      businessAreaSlug,
-      programId,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysCountRetrieve,
+      createApiParams(
+        {
+          businessAreaSlug: queryVariables.businessAreaSlug,
+          programCode: queryVariables.programCode,
+        },
+        queryVariables,
+      ),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysCountRetrieve(
         createApiParams(
