@@ -926,7 +926,8 @@ class PaymentPlanViewSet(
                 f"The amount template is only available for an Accepted or Finished plan, got {payment_plan.status}"
             )
         if not payment_plan.eligible_payments_for_child_plan().exists():
-            raise ValidationError("Cannot create a top-up for a payment plan with no eligible payments")
+            child_plan = "top-up amendment" if payment_plan.plan_type == PaymentPlan.PlanType.TOP_UP else "top-up"
+            raise ValidationError(f"Cannot create a {child_plan} for a payment plan with no eligible payments")
 
         workbook = TopUpAmountTemplateService(payment_plan).generate_workbook()
         buffer = BytesIO()

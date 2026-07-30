@@ -28,6 +28,7 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
@@ -78,6 +79,8 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
 
     from hope.models import FollowUpInstruction
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentPlanService:
@@ -1004,14 +1007,21 @@ class PaymentPlanService:
         if not (split := self.payment_plan.splits.first()):
             split = PaymentPlanSplit.objects.create(payment_plan=self.payment_plan)
 
+        exchange_rate = Decimal(self.payment_plan.exchange_rate or 0)
+        # Without a rate on the plan, get_quantity_in_usd builds its own ExchangeRates — a full
+        # rates fetch and parse — on every single call. That is once per copied payment, inside the
+        # job holding the source-plan lock, so build one client up front and hand it over instead.
+        exchange_rates_client = ExchangeRates() if amounts and not exchange_rate else None
+
         def entitlement_of(payment: Payment) -> tuple[Decimal | None, Decimal | None]:
             if amounts is not None:
                 quantity = amounts[cast("str", payment.unicef_id)]
                 return quantity, get_quantity_in_usd(
                     amount=quantity,
                     currency=self.payment_plan.currency,
-                    exchange_rate=Decimal(self.payment_plan.exchange_rate or 0),
+                    exchange_rate=exchange_rate,
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
+                    exchange_rates_client=exchange_rates_client,
                 )
             if copy_entitlement:
                 return payment.entitlement_quantity, payment.entitlement_quantity_usd
@@ -1076,7 +1086,7 @@ class PaymentPlanService:
             # here — a concurrently created sibling plan may have claimed some beneficiaries since.
             # They are legitimately blocked now, but the shrink must not be invisible.
             if missing := set(amounts) - set(eligible.values_list("unicef_id", flat=True)):
-                logging.warning(
+                logger.warning(
                     "Payment plan %s: %d payment(s) from the amount file are no longer eligible "
                     "and will not be copied: %s",
                     self.payment_plan.unicef_id,

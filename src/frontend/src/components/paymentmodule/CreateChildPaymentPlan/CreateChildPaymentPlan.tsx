@@ -154,7 +154,15 @@ export function CreateChildPaymentPlan({
     // client-side keeps the error under the field instead of in a snackbar from the server.
     fixedAmount: Yup.string().when('file', ([file]: any[], schema: Yup.StringSchema) =>
       isTopUp && !file
-        ? schema.required(t('Enter a fixed amount or upload an amount file'))
+        ? schema
+            .required(t('Enter a fixed amount or upload an amount file'))
+            // Mirrors the serializer's min_value — a zero or negative amount would otherwise
+            // travel to the server and come back as a snackbar instead of a field error.
+            .test(
+              'min-amount',
+              t('Amount has to be at least 0.01'),
+              (value) => Number(value) >= 0.01,
+            )
         : schema,
     ),
     file: Yup.mixed().nullable(),

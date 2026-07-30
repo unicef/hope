@@ -132,6 +132,21 @@ def test_parse_top_up_amount_file_arrange_duplicate_payment_row_act_parse_assert
         parse_top_up_amount_file(source_pp, _as_file(workbook))
 
 
+def test_parse_top_up_amount_file_arrange_duplicate_with_blank_row_first_act_parse_assert_raises(
+    source_pp: PaymentPlan,
+) -> None:
+    """The blank row must count as an occurrence, or the same file passes or fails by row order."""
+    workbook = _template(source_pp)
+    worksheet = workbook.active
+    first_payment_id = worksheet.cell(row=2, column=1).value
+    _set_cell(worksheet, 3, PAYMENT_ID_COLUMN, first_payment_id)
+    _set_cell(worksheet, 2, AMOUNT_COLUMN, None)
+    _set_cell(worksheet, 3, AMOUNT_COLUMN, 20)
+
+    with pytest.raises(ValidationError, match="appears more than once"):
+        parse_top_up_amount_file(source_pp, _as_file(workbook))
+
+
 def test_parse_top_up_amount_file_arrange_blank_payment_id_row_act_parse_assert_row_skipped(
     source_pp: PaymentPlan,
 ) -> None:

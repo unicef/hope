@@ -88,6 +88,10 @@ def parse_top_up_amount_file(source_payment_plan: "PaymentPlan", file: IO[bytes]
     eligible_ids = set(source_payment_plan.eligible_payments_for_child_plan().values_list("unicef_id", flat=True))
 
     amounts: dict[str, Decimal] = {}
+    # Duplicates are tracked separately from the amounts: a blank or zero row funds nobody and so
+    # never reaches ``amounts``, and checking there would make the same file pass or fail depending
+    # on whether the blank row happens to come before or after the funded one.
+    seen_payment_ids: set[str] = set()
     for row in worksheet.iter_rows(min_row=2):
         raw_payment_id = row[payment_id_index].value
         if raw_payment_id is None:
@@ -95,8 +99,9 @@ def parse_top_up_amount_file(source_payment_plan: "PaymentPlan", file: IO[bytes]
         payment_id = str(raw_payment_id).strip()
         if payment_id not in eligible_ids:
             raise ValidationError(f"Payment {payment_id} is not eligible for a Top-Up of this Payment Plan.")
-        if payment_id in amounts:
+        if payment_id in seen_payment_ids:
             raise ValidationError(f"Payment {payment_id} appears more than once in the amount file.")
+        seen_payment_ids.add(payment_id)
         if (amount := _row_amount(row[amount_index].value, payment_id)) is not None:
             amounts[payment_id] = amount
 

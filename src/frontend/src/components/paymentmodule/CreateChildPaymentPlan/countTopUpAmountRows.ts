@@ -27,8 +27,10 @@ export async function countTopUpAmountRows(file: File): Promise<number | null> {
   const amountColumn = headers?.indexOf(AMOUNT_HEADER) ?? -1;
   if (amountColumn === -1) return null;
 
-  // Blank, zero and non-numeric rows fund nobody — the same rule parse_top_up_amount_file
-  // applies server-side.
+  // Count only cells Excel stored as a positive number. This is a preview of how many rows carry
+  // an amount, not a validation: the server is stricter and rejects the whole file over a negative
+  // or non-numeric cell that is merely skipped here, and looser about a number stored as text,
+  // which it funds and this count misses.
   return dataRows.filter((row) => {
     const amount = row[amountColumn];
     return typeof amount === 'number' && amount > 0;
