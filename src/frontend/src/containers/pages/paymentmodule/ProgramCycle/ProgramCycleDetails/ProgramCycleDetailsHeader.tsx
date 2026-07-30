@@ -58,12 +58,9 @@ export const ProgramCycleDetailsHeader = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            programCycle.id,
-            programId,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesRetrieve,
+          ),
         });
         showMessage(t('Programme Cycle Finished'));
       },
@@ -90,12 +87,9 @@ export const ProgramCycleDetailsHeader = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            programCycle.id,
-            programId,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesRetrieve,
+          ),
         });
       },
     });

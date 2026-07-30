@@ -76,7 +76,14 @@ export function GroupExportXlsxDialog({
   const queryClient = useQueryClient();
 
   const { data: templatesData } = useQuery({
-    queryKey: ['fspXlsxTemplates', businessArea, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList,
+      {
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        limit: 200,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList({
         businessAreaSlug: businessArea,

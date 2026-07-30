@@ -11,6 +11,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +38,10 @@ function RegistrationDataImportPage(): ReactElement {
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { data: deduplicationFlags, isLoading: loading } = useQuery({
-    queryKey: ['deduplicationFlags', businessArea, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve,
+      { businessAreaSlug: businessArea, code: programId },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
         businessAreaSlug: businessArea,
@@ -45,7 +49,9 @@ function RegistrationDataImportPage(): ReactElement {
       }),
   });
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
         slug: businessArea,

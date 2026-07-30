@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { ActivityLogPageFilters } from '@components/core/ActivityLogPageFilters';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -69,29 +70,28 @@ export function ActivityLogPage(): ReactElement {
   );
 
   // Query for activity logs based on whether it's all programs or a specific program
-  const { data: logsData, isLoading: logsLoading } = useQuery({
-    queryKey: [
-      'activityLogs',
-      businessArea,
-      programId,
-      isAllPrograms,
-      page,
-      rowsPerPage,
-      appliedFilter,
-    ],
-    queryFn: () => {
-      const variables = {
-        businessAreaSlug: businessArea,
-        limit: rowsPerPage,
-        offset: page * rowsPerPage,
-        ...filtersToVariables(appliedFilter),
-      };
+  const activityLogsParams = {
+    businessAreaSlug: businessArea,
+    limit: rowsPerPage,
+    offset: page * rowsPerPage,
+    ...filtersToVariables(appliedFilter),
+  };
 
+  const { data: logsData, isLoading: logsLoading } = useQuery({
+    queryKey: restQueryKey(
+      isAllPrograms
+        ? RestService.restBusinessAreasActivityLogsList
+        : RestService.restBusinessAreasProgramsActivityLogsList,
+      isAllPrograms
+        ? activityLogsParams
+        : { ...activityLogsParams, programCode: programId },
+    ),
+    queryFn: () => {
       if (isAllPrograms) {
-        return RestService.restBusinessAreasActivityLogsList(variables);
+        return RestService.restBusinessAreasActivityLogsList(activityLogsParams);
       } else {
         return RestService.restBusinessAreasProgramsActivityLogsList({
-          ...variables,
+          ...activityLogsParams,
           programCode: programId,
         });
       }
@@ -104,7 +104,14 @@ export function ActivityLogPage(): ReactElement {
   });
 
   const { data: countData } = useQuery({
-    queryKey: ['activityLogsCount', businessArea, programId, isAllPrograms],
+    queryKey: restQueryKey(
+      isAllPrograms
+        ? RestService.restBusinessAreasActivityLogsCountRetrieve
+        : RestService.restBusinessAreasProgramsActivityLogsCountRetrieve,
+      isAllPrograms
+        ? { businessAreaSlug: businessArea }
+        : { businessAreaSlug: businessArea, programCode: programId },
+    ),
     queryFn: () => {
       if (isAllPrograms) {
         return RestService.restBusinessAreasActivityLogsCountRetrieve({

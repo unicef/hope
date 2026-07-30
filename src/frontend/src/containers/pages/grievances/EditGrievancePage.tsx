@@ -110,14 +110,18 @@ const EditGrievancePage = (): ReactElement => {
       }),
   });
 
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programCode],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        profileParams,
+      ),
       queryFn: () => {
-        return RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug,
-          program: programCode === 'all' ? undefined : programCode,
-        });
+        return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
       gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
@@ -126,7 +130,10 @@ const EditGrievancePage = (): ReactElement => {
   );
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,
@@ -170,7 +177,10 @@ const EditGrievancePage = (): ReactElement => {
     data: allAddIndividualFieldsData,
     isLoading: allAddIndividualFieldsDataLoading,
   } = useQuery({
-    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -180,7 +190,10 @@ const EditGrievancePage = (): ReactElement => {
   });
   const { data: householdFieldsData, isLoading: householdFieldsLoading } =
     useQuery({
-      queryKey: ['householdFieldsAttributes', businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList,
+        { businessAreaSlug },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
           {
@@ -192,7 +205,10 @@ const EditGrievancePage = (): ReactElement => {
     data: allEditPeopleFieldsData,
     isLoading: allEditPeopleFieldsLoading,
   } = useQuery({
-    queryKey: ['editPeopleFieldsAttributes', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
         {
@@ -201,18 +217,20 @@ const EditGrievancePage = (): ReactElement => {
       ),
   });
 
+  const programsListParams = createApiParams(
+    { businessAreaSlug, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsListParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+        RestService.restBusinessAreasProgramsList(programsListParams),
     });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData,

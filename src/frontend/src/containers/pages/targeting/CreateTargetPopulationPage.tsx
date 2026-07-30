@@ -70,15 +70,12 @@ const CreateTargetPopulationPage = (): ReactElement => {
         }),
       onSuccess: () => {
         // Invalidate the list and detail queries for target populations and program.
-        // The table reads under `businessAreasProgramsTargetPopulationsList`; the
-        // `targetPopulations` key only backs the autocomplete.
+        // Both the table and the autocomplete read under
+        // `businessAreasProgramsTargetPopulationsList`, so the bare prefix covers both.
         queryClient.invalidateQueries({
           queryKey: restQueryKey(
             RestService.restBusinessAreasProgramsTargetPopulationsList,
           ),
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['targetPopulations', businessAreaSlug, programCode],
         });
         queryClient.invalidateQueries({
           queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
@@ -90,7 +87,9 @@ const CreateTargetPopulationPage = (): ReactElement => {
   const navigate = useNavigate();
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessAreaSlug],
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessAreaSlug,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
         slug: businessAreaSlug,

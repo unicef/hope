@@ -69,14 +69,14 @@ const EditPaymentPlanForm = ({
         queryClient.invalidateQueries({
           queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
         });
-        queryClient.invalidateQueries({
-          queryKey: ['businessAreasPaymentPlans'],
-        });
       },
     });
 
   const { data: cyclesData } = useQuery<PaginatedProgramCycleListList>({
-    queryKey: ['programCycles', businessArea, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList, {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug: businessArea,

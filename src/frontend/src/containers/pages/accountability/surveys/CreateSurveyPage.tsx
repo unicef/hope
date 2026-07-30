@@ -160,7 +160,10 @@ const CreateSurveyPage = (): ReactElement => {
   const { data: adminAreasData, isLoading: adminAreasLoading } = useQuery<
     AreaList[]
   >({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,

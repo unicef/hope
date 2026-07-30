@@ -29,14 +29,18 @@ const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { businessAreaSlug, programCode } = useBaseUrl();
   const permissions = usePermissions();
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programCode],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        profileParams,
+      ),
       queryFn: () => {
-        return RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug: businessAreaSlug,
-          program: programCode === 'all' ? undefined : programCode,
-        });
+        return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
       gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
@@ -64,7 +68,10 @@ const GrievancesDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug,

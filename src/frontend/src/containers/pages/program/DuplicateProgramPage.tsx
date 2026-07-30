@@ -64,7 +64,9 @@ const DuplicateProgramPage = (): ReactElement => {
   });
 
   const { data: treeData, isLoading: treeLoading } = useQuery<AreaTree[]>({
-    queryKey: ['allAreasTree', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -84,7 +86,9 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: ['userChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -93,7 +97,9 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: ['programChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,

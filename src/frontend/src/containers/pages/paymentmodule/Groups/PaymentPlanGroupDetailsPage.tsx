@@ -65,9 +65,6 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
     const isBusy = isGroupBackgroundActionBusy(group ?? null);
     if (wasBusy.current && !isBusy) {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasPaymentPlans'],
-      });
-      queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     }

@@ -82,7 +82,9 @@ function ProgramDetailsPage(): ReactElement {
 
   const { data: businessAreaData, isLoading: businessAreaDataLoading } =
     useQuery<BusinessArea>({
-      queryKey: ['businessArea', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+        slug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasRetrieve({
           slug: businessArea,
@@ -91,7 +93,9 @@ function ProgramDetailsPage(): ReactElement {
 
   const { data: choices, isLoading: choicesLoading } = useQuery<ProgramChoices>(
     {
-      queryKey: ['programChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,

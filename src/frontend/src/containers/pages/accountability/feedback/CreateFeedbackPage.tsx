@@ -130,22 +130,24 @@ function CreateFeedbackPage(): ReactElement {
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['choicesFeedbackIssueTypeList', businessArea],
+    queryKey: restQueryKey(RestService.restChoicesFeedbackIssueTypeList),
     queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 
+  const programsParams = createApiParams(
+    { businessAreaSlug: businessArea, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
+
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsParams,
+      ),
+      queryFn: () => RestService.restBusinessAreasProgramsList(programsParams),
     });
 
   const queryClient = useQueryClient();

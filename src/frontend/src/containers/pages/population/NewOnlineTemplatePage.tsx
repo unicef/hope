@@ -48,7 +48,9 @@ const NewOnlineTemplatePage = (): ReactElement => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['periodicFields', businessArea, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        ),
       });
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
@@ -94,7 +96,10 @@ const NewOnlineTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        { businessAreaSlug: businessArea, programCode: programId },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,

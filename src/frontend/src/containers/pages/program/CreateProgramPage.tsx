@@ -47,7 +47,9 @@ export const CreateProgramPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: treeData } = useQuery<AreaTree[]>({
-    queryKey: ['allAreasTree', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -56,7 +58,9 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: ['userChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -65,7 +69,9 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: ['programChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -92,7 +98,9 @@ export const CreateProgramPage = (): ReactElement => {
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       await queryClient.invalidateQueries({
-        queryKey: ['programChoices', businessArea],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsChoicesRetrieve,
+        ),
       });
     },
   });
