@@ -395,6 +395,8 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             )
             individual.phone_no = phone_no
             individual.detail_id = record.source_id
+            if image_flex_fields := self._prepare_wallet_image_flex_fields(individual_dict):
+                individual.flex_fields = image_flex_fields
             individual.save()
         except ValidationError as e:
             raise ValidationError({"individual nr 1": [str(e)]}) from e
@@ -412,14 +414,16 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
     ) -> dict:
         individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
         individual_data["estimated_birth_date"] = False
-        flex_fields = {}
+        return individual_data
+
+    def _prepare_wallet_image_flex_fields(self, individual_dict: dict) -> dict:
+        # Decode every blob before writing any to storage, and only after the individual has
+        # validated, so a validation failure or a malformed second image leaves no orphan files.
+        images = {}
         for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
             if image_base64 := individual_dict.get(field_name):
-                image = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
-                flex_fields[field_name] = default_storage.save(image.name, image)
-        if flex_fields:
-            individual_data["flex_fields"] = flex_fields
-        return individual_data
+                images[field_name] = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
+        return {field_name: default_storage.save(image.name, image) for field_name, image in images.items()}
 
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()

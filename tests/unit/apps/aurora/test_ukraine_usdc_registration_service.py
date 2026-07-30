@@ -625,3 +625,46 @@ def test_reimporting_same_record_does_not_duplicate_household(
     service.process_records(rdi.id, [usdc_record.id])
 
     assert PendingHousehold.objects.filter(registration_data_import=rdi).count() == 1
+
+
+def test_malformed_wallet_image_rejects_record_without_killing_batch(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    usdc_record.fields["individual_details"][0]["wallet_num_image_i_f"] = "abcde"
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    usdc_record.refresh_from_db()
+    assert usdc_record.status == Record.STATUS_ERROR
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
+
+
+def test_failed_individual_validation_leaves_no_orphan_images(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+    settings: Any,
+    tmp_path: Any,
+) -> None:
+    settings.MEDIA_ROOT = str(tmp_path)
+    usdc_record.fields["individual_details"][0]["birth_date"] = "1990-99-99"
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    usdc_record.refresh_from_db()
+    assert usdc_record.status == Record.STATUS_ERROR
+    assert list(tmp_path.iterdir()) == []
