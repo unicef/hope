@@ -1,6 +1,7 @@
 import CircularProgress from '@mui/material/CircularProgress';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';
 import { useDebounce } from '@hooks/useDebounce';
 import { FormHelperText } from '@mui/material';
@@ -54,9 +55,12 @@ export function BaseAutocompleteRest({
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [open, setOpen] = useState(false);
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data, isLoading } = useQuery({
-    queryKey: [label, businessArea, programId, queryParams],
+    queryKey: restQueryKey(fetchFunction, {
+      businessArea,
+      programId,
+      ...queryParams,
+    }),
     queryFn: () => fetchFunction(businessArea, programId, { ...queryParams }),
   });
   useEffect(

@@ -3,6 +3,7 @@ import { useDebounce } from '@hooks/useDebounce';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import { PaginatedPaymentPlanPurposeList } from '@restgenerated/models/PaginatedPaymentPlanPurposeList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { FieldInputProps, FormikProps } from 'formik';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useState } from 'react';
@@ -34,13 +35,17 @@ export function PaymentPlanPurposesAutocomplete({
   const debouncedSearch = useDebounce(inputValue, 800);
   const [knownOptions, setKnownOptions] = useState<Choice[]>([]);
 
+  const purposesParams = {
+    businessAreaSlug: businessArea,
+    search: debouncedSearch || undefined,
+  };
   const { data: fetchedOptions = [], isLoading } = useQuery({
-    queryKey: ['paymentPlanPurposes', businessArea, debouncedSearch],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentPlanPurposesList,
+      purposesParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasPaymentPlanPurposesList({
-        businessAreaSlug: businessArea,
-        search: debouncedSearch || undefined,
-      }),
+      RestService.restBusinessAreasPaymentPlanPurposesList(purposesParams),
     select: (data: PaginatedPaymentPlanPurposeList): Choice[] =>
       (data?.results ?? []).map((p) => ({ value: p.id, name: p.name })),
   });
