@@ -445,3 +445,16 @@ def test_create_household_with_existing_admin_areas_fails_on_p_code_assignment(
 
     with pytest.raises(ValidationError, match="is not a valid UUID"):
         service.create_household_for_rdi_household(record, rdi)
+
+
+def test_phone_number_validity_reflects_number(czech_context: dict) -> None:
+    registration = czech_context["registration"]
+    record = czech_context["record"]
+    user = czech_context["user"]
+
+    service = CzechRepublicFlexRegistration(registration)
+    rdi = service.create_rdi(user, f"czech_republic rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    assert PendingIndividual.objects.get(full_name="Tetiana Symkanych").phone_no_valid is True
+    assert PendingIndividual.objects.get(full_name="Ivan Drago").phone_no_valid is False

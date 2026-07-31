@@ -687,7 +687,7 @@ class Individual(
         calculate_phone_numbers_validity(self)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        recalculate_phone_numbers_validity(self, Individual)
+        recalculate_phone_numbers_validity(self)
         super().save(*args, **kwargs)
 
 

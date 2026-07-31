@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 import phonenumbers
 
@@ -21,12 +21,13 @@ def calculate_phone_numbers_validity(obj: Any) -> Any:
     return obj
 
 
-def recalculate_phone_numbers_validity(obj: Any, model: type) -> Any:
+def recalculate_phone_numbers_validity(obj: Any) -> Any:
+    from hope.models import Individual
+
     if obj._state.adding is True:
         # create
         obj = calculate_phone_numbers_validity(obj)
-    # Used like this and not as an abstract class because Individual has indexes and ImportedIndividual does not
-    elif current := model.objects.filter(pk=obj.pk).first():
+    elif current := cast("Individual | None", Individual.all_merge_status_objects.filter(pk=obj.pk).first()):
         # update
         if current.phone_no_valid is None or current.phone_no != obj.phone_no:
             obj.phone_no_valid = is_valid_phone_number(str(obj.phone_no))

@@ -44,6 +44,18 @@ const SubHeading = styled(Typography)`
   }
 `;
 
+const Paragraph = styled(Typography)`
+  && {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 300;
+    margin-top: 0;
+    margin-bottom: 16px;
+    opacity: 0.9;
+    padding: 0 16px;
+  }
+`;
+
 const Photo = styled.img`
   width: 100vw;
   max-height: 70vh;
@@ -71,15 +83,24 @@ export function SurprisePage(): ReactElement {
   const [imageSrc, setImageSrc] = useState<string>(surpriseFallback);
   const [heading, setHeading] = useState<string>(DEFAULT_HEADING);
   const [subheading, setSubheading] = useState<string>(DEFAULT_SUBHEADING);
+  const [paragraphs, setParagraphs] = useState<string[]>([]);
 
   useEffect(() => {
     fetch('/api/rest/surprise/')
       .then((res) => res.json())
-      .then((data: { image: string | null; heading: string; subheading: string }) => {
-        if (data.image) setImageSrc(data.image);
-        if (data.heading) setHeading(data.heading);
-        if (data.subheading) setSubheading(data.subheading);
-      })
+      .then(
+        (data: {
+          image: string | null;
+          heading: string;
+          subheading: string;
+          paragraphs?: string[];
+        }) => {
+          if (data.image) setImageSrc(data.image);
+          if (data.heading) setHeading(data.heading);
+          if (data.subheading) setSubheading(data.subheading);
+          if (data.paragraphs) setParagraphs(data.paragraphs);
+        },
+      )
       .catch(() => {
         // keep defaults
       });
@@ -91,6 +112,9 @@ export function SurprisePage(): ReactElement {
         <Logo transparent={false} displayLogoWithoutSubtitle={false} height={160} />
         <Heading>{heading}</Heading>
         <SubHeading>{subheading}</SubHeading>
+        {paragraphs.map((paragraph, index) => (
+          <Paragraph key={index}>{paragraph}</Paragraph>
+        ))}
         <Photo src={imageSrc} alt="A surprise for you" />
         <BackLink to="/login">← Back to login</BackLink>
       </Card>
