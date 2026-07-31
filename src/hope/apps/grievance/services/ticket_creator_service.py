@@ -1,14 +1,23 @@
 import abc
+from functools import partial
 
 from django.contrib.auth.models import AbstractUser
+from django.db import transaction
 from django.utils import timezone
 
+from hope.apps.grievance.events import (
+    grievance_assignment_changed,
+    grievance_deduplication_created,
+    grievance_payment_verification_created,
+    grievance_sensitive_created,
+    grievance_system_flagging_created,
+)
 from hope.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketSensitiveDetails,
 )
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.apps.grievance.services.data_change_services import save_data_change_extras
 from hope.apps.grievance.services.payment_verification_services import (
     update_payment_verification_service,
@@ -94,6 +103,45 @@ class TicketCreatorService:
         self._create_documents(documents, grievance_ticket, user)
 
         grievances = self._create_details(extras, grievance_ticket)
+
+        if grievance_ticket.assigned_to:
+            transaction.on_commit(
+                partial(
+                    send_grievance_notification_event,
+                    grievance_assignment_changed,
+                    grievance_ticket,
+                    GrievanceNotification.ACTION_ASSIGNMENT_CHANGED,
+                )
+            )
+
+        category_event = {
+            GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: (
+                grievance_system_flagging_created,
+                GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED,
+            ),
+            GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: (
+                grievance_deduplication_created,
+                GrievanceNotification.ACTION_DEDUPLICATION_CREATED,
+            ),
+            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: (
+                grievance_payment_verification_created,
+                GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED,
+            ),
+            GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: (
+                grievance_sensitive_created,
+                GrievanceNotification.ACTION_SENSITIVE_CREATED,
+            ),
+        }.get(grievance_ticket.category)
+        if category_event:
+            event, action = category_event
+            transaction.on_commit(
+                partial(
+                    send_grievance_notification_event,
+                    event,
+                    grievance_ticket,
+                    action,
+                )
+            )
 
         GrievanceNotification.send_all_notifications(
             GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)

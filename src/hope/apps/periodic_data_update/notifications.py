@@ -110,8 +110,9 @@ class PDUOnlineEditNotification:
         if config.SEND_PDU_ONLINE_EDIT_NOTIFICATION and self.enable_email_notification:
             try:
                 self.email.send_email()
-            except Exception:  # pragma: no cover
+            except Exception:
                 logger.exception("Failed to send PDU Online Edit notification")
+                return
 
     def _prepare_body_variables(self) -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"

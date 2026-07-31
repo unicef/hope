@@ -213,6 +213,8 @@ def test_bulk_approve_success(
     pdu_edit_ready_2: PDUOnlineEdit,
     url_bulk_approve: str,
     create_user_role_with_permissions: Any,
+    django_capture_on_commit_callbacks: Any,
+    mocker: Any,
 ) -> None:
     create_user_role_with_permissions(
         user=user,
@@ -222,7 +224,9 @@ def test_bulk_approve_success(
     )
 
     data = {"ids": [pdu_edit_ready_1.id, pdu_edit_ready_2.id]}
-    response = authenticated_client.post(url_bulk_approve, data=data)
+    mock_event = mocker.patch("hope.apps.periodic_data_update.api.views.pdu_online_edit_approved.send_robust")
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url_bulk_approve, data=data)
 
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
@@ -238,6 +242,8 @@ def test_bulk_approve_success(
 
     assert pdu_edit_ready_2.status == PDUOnlineEdit.Status.APPROVED
     assert pdu_edit_ready_2.approved_by == user
+    assert mock_event.call_count == 2
+    assert all(call.kwargs["sender"] is PDUOnlineEdit for call in mock_event.call_args_list)
     assert pdu_edit_ready_2.approved_at is not None
 
 

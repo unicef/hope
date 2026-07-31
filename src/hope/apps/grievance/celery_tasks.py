@@ -7,8 +7,9 @@ from django.utils import timezone
 from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionError, RequestError
 
 from hope.apps.core.celery import app
+from hope.apps.grievance.events import grievance_overdue, grievance_sensitive_overdue
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncJob, AsyncRetryJob, Individual, PeriodicAsyncJob
 
@@ -91,6 +92,11 @@ def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
     )
     for ticket in sensitive_tickets_to_notify:
         set_sentry_business_area_tag(ticket.business_area.name)
+        send_grievance_notification_event(
+            grievance_sensitive_overdue,
+            ticket,
+            GrievanceNotification.ACTION_SENSITIVE_REMINDER,
+        )
         if ticket.business_area.enable_email_notification:
             notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
             notification.send_email_notification()
@@ -99,6 +105,11 @@ def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
 
     for ticket in other_tickets_to_notify:
         set_sentry_business_area_tag(ticket.business_area.name)
+        send_grievance_notification_event(
+            grievance_overdue,
+            ticket,
+            GrievanceNotification.ACTION_OVERDUE,
+        )
         if ticket.business_area.enable_email_notification:
             notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
             notification.send_email_notification()

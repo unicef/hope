@@ -368,6 +368,52 @@ def test_send_email_notification(
     assert mock_send.call_count == 1
 
 
+@override_config(
+    SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
+)
+def test_send_email_notification_returns_when_email_send_fails(
+    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, mocker: Any
+) -> None:
+    mocker.patch(
+        "hope.apps.periodic_data_update.notifications.MailjetClient.send_email",
+        side_effect=RuntimeError("send failed"),
+    )
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_with_authorized_users,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        user_action_user,
+        "1 January 2025",
+    )
+
+    pdu_notification.send_email_notification()
+
+
+@override_config(
+    SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION=123456,
+)
+def test_send_email_notification_uses_resolved_recipients(
+    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, mocker: Any
+) -> None:
+    mock_send = mocker.patch("hope.apps.periodic_data_update.notifications.MailjetClient.send_email")
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_with_authorized_users,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        user_action_user,
+        "1 January 2025",
+    )
+
+    pdu_notification.send_email_notification()
+
+    mock_send.assert_called_once()
+    assert pdu_notification.email.recipients
+    assert pdu_notification.email.variables
+    assert pdu_notification.email.ccs
+
+
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=False)
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 def test_send_email_notification_disabled_by_config(

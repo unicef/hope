@@ -741,6 +741,18 @@ def test_send_email_notification_on_commit_schedules_callback(mocker):
     assert callable(on_commit.call_args[0][0])
 
 
+def test_send_email_notification_on_commit_preserves_arguments(mocker):
+    on_commit = mocker.patch("hope.apps.core.utils.transaction.on_commit")
+    mock_send = mocker.patch("hope.apps.core.utils.send_email_notification")
+    service = MagicMock()
+    user = MagicMock()
+
+    send_email_notification_on_commit(service, user=user)
+    on_commit.call_args.args[0]()
+
+    mock_send.assert_called_once_with(service, user, None)
+
+
 def test_autocomplete_filter_temp_choices_returns_label_when_lookup_val_present():
     target_obj = MagicMock(__str__=lambda self: "Resolved Label")
     target_qs = MagicMock()

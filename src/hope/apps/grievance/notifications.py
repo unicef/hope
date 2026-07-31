@@ -7,6 +7,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import RoleAssignment, User
@@ -15,6 +16,8 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
+
+type PreparedEmailPayload = tuple[EmailPayload, str]
 
 
 class GrievanceNotification:
@@ -34,7 +37,7 @@ class GrievanceNotification:
         self.action = action
         self.extra_data = kwargs
         self.user_recipients = self._prepare_user_recipients()
-        self.emails = self._prepare_emails()
+        self.emails, self.rendered_email_notifications = self._prepare_emails()
         self.enable_email_notification = grievance_ticket.business_area.enable_email_notification
 
     def _prepare_default_context(self, user_recipient: "User") -> dict[str, Any]:
@@ -52,36 +55,64 @@ class GrievanceNotification:
         func: Callable = GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action]
         return func(self)
 
-    def _prepare_emails(self) -> list[MailjetClient]:
-        return [self._prepare_email(user) for user in self.user_recipients]
+    def _prepare_emails(self) -> tuple[list[MailjetClient], list[PreparedEmailPayload]]:
+        emails = []
+        rendered_email_notifications = []
+        if not self.user_recipients:
+            return emails, rendered_email_notifications
+        for user in self.user_recipients:
+            email, rendered_email_notification = self._prepare_email(user)
+            emails.append(email)
+            rendered_email_notifications.append(rendered_email_notification)
+        return emails, rendered_email_notifications
 
-    def _prepare_email(self, user_recipient: "User") -> MailjetClient:
-        prepare_bodies_method = GrievanceNotification.ACTION_PREPARE_BODIES_DICT[self.action]
-        text_body, html_body, subject = prepare_bodies_method(self, user_recipient)
-        return MailjetClient(
+    def _prepare_email(self, user_recipient: "User") -> tuple[MailjetClient, PreparedEmailPayload]:
+        text_body, html_body, subject, context = self._prepare_rendered_email_data(user_recipient)
+        email = MailjetClient(
             subject=subject,
             recipients=[user_recipient.email],
             html_body=html_body,
             text_body=text_body,
         )
+        return (
+            email,
+            (
+                EmailPayload(
+                    recipients=[user_recipient.email],
+                    context=context,
+                ),
+                self._prepare_correlation_id(user_recipient),
+            ),
+        )
+
+    def _prepare_correlation_id(self, user_recipient: "User") -> str:
+        parts = ["grievance-ticket", str(self.grievance_ticket.id), str(self.action), str(user_recipient.id)]
+        if self.action == GrievanceNotification.ACTION_NOTES_ADDED:
+            ticket_note = self.extra_data.get("ticket_note")
+            if ticket_note is not None:
+                parts.append(str(ticket_note.id))
+        return ":".join(parts)
 
     def send_email_notification(self) -> None:
         if config.SEND_GRIEVANCES_NOTIFICATION and self.enable_email_notification:
             try:
                 for email in self.emails:
                     email.send_email()
-            except Exception as e:  # pragma: no cover
+            except Exception as e:
                 logger.exception(e)
 
+    def _prepare_rendered_email_data(self, user_recipient: "User") -> tuple[str, str, str, dict[str, Any]]:
+        prepare_context_method = GrievanceNotification.ACTION_PREPARE_CONTEXT_DICT[self.action]
+        prepare_subject_method = GrievanceNotification.ACTION_PREPARE_SUBJECT_DICT[self.action]
+        text_template, html_template = GrievanceNotification.ACTION_EMAIL_TEMPLATE_DICT[self.action]
+        context = prepare_context_method(self, user_recipient)
+        text_body = render_to_string(text_template, context=context)
+        html_body = render_to_string(html_template, context=context)
+        return text_body, html_body, prepare_subject_method(self), context
+
     def _prepare_universal_category_created_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("universal_category_created_notification_email.txt", context=context)
-        html_body = render_to_string("universal_category_created_notification_email.html", context=context)
-        return (
-            text_body,
-            html_body,
-            f"A Grievance & Feedback ticket for {self.grievance_ticket.get_category_display()}",
-        )
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        return text_body, html_body, subject
 
     def _prepare_universal_category_created_recipients(self) -> "QuerySet":
         action_roles_dict = {
@@ -110,71 +141,76 @@ class GrievanceNotification:
         return queryset.all()
 
     def _prepare_sensitive_reminder_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        context["hours_ago"] = (timezone.now() - self.grievance_ticket.created_at).days * 24
-        text_body = render_to_string("sensitive_reminder_notification_email.txt", context=context)
-        html_body = render_to_string("sensitive_reminder_notification_email.html", context=context)
-        return (
-            text_body,
-            html_body,
-            f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}",
-        )
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        return text_body, html_body, subject
 
     def _prepare_overdue_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        context["days_ago"] = (timezone.now() - self.grievance_ticket.created_at).days
-        text_body = render_to_string("overdue_notification_email.txt", context=context)
-        html_body = render_to_string("overdue_notification_email.html", context=context)
-        return (
-            text_body,
-            html_body,
-            f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}",
-        )
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        return text_body, html_body, subject
 
     def _prepare_add_note_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        created_by = self.extra_data.get("created_by")
-        context["created_by"] = f"{created_by.first_name} {created_by.last_name}"
-        context["ticket_note"] = self.extra_data.get("ticket_note")
-        text_body = render_to_string("note_added_notification_email.txt", context=context)
-        html_body = render_to_string("note_added_notification_email.html", context=context)
-        return (
-            text_body,
-            html_body,
-            f"New note in Grievance & Feedback ticket has been left {self.grievance_ticket.unicef_id}",
-        )
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        return text_body, html_body, subject
 
     def _prepare_send_back_to_in_progress_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        return text_body, html_body, subject
+
+    def _prepare_for_approval_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        return text_body, html_body, subject
+
+    def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
+        text_body, html_body, subject, _context = self._prepare_rendered_email_data(user_recipient)
+        return text_body, html_body, subject
+
+    def _prepare_default_rendered_email_context(self, user_recipient: "User") -> dict[str, Any]:
+        return self._prepare_default_context(user_recipient)
+
+    def _prepare_sensitive_reminder_context(self, user_recipient: "User") -> dict[str, Any]:
+        context = self._prepare_default_context(user_recipient)
+        context["hours_ago"] = (timezone.now() - self.grievance_ticket.created_at).days * 24
+        return context
+
+    def _prepare_overdue_context(self, user_recipient: "User") -> dict[str, Any]:
+        context = self._prepare_default_context(user_recipient)
+        context["days_ago"] = (timezone.now() - self.grievance_ticket.created_at).days
+        return context
+
+    def _prepare_add_note_context(self, user_recipient: "User") -> dict[str, Any]:
+        context = self._prepare_default_context(user_recipient)
+        created_by = self.extra_data.get("created_by")
+        ticket_note = self.extra_data.get("ticket_note")
+        context["created_by"] = f"{created_by.first_name} {created_by.last_name}"
+        context["ticket_note_description"] = getattr(ticket_note, "description", "")
+        return context
+
+    def _prepare_send_back_to_in_progress_context(self, user_recipient: "User") -> dict[str, Any]:
         context = self._prepare_default_context(user_recipient)
         approver = self.extra_data.get("approver")
         context["approver"] = f"{approver.first_name} {approver.last_name}"
-        text_body = render_to_string("send_back_to_in_progress_notification_email.txt", context=context)
-        html_body = render_to_string("send_back_to_in_progress_notification_email.html", context=context)
-        return (
-            text_body,
-            html_body,
-            f"Review of Grievance & Feedback ticket {self.grievance_ticket.unicef_id}",
-        )
+        return context
 
-    def _prepare_for_approval_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("send_for_approve_notification_email.txt", context=context)
-        html_body = render_to_string("send_for_approve_notification_email.html", context=context)
-        return (
-            text_body,
-            html_body,
-            f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}",
-        )
+    def _prepare_universal_category_created_subject(self) -> str:
+        return f"A Grievance & Feedback ticket for {self.grievance_ticket.get_category_display()}"
 
-    def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("assignment_change_notification_email.txt", context=context)
-        html_body = render_to_string("assignment_change_notification_email.html", context=context)
-        return (
-            text_body,
-            html_body,
-            f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}",
-        )
+    def _prepare_sensitive_reminder_subject(self) -> str:
+        return f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
+
+    def _prepare_overdue_subject(self) -> str:
+        return f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
+
+    def _prepare_add_note_subject(self) -> str:
+        return f"New note in Grievance & Feedback ticket has been left {self.grievance_ticket.unicef_id}"
+
+    def _prepare_send_back_to_in_progress_subject(self) -> str:
+        return f"Review of Grievance & Feedback ticket {self.grievance_ticket.unicef_id}"
+
+    def _prepare_for_approval_subject(self) -> str:
+        return f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}"
+
+    def _prepare_assignment_changed_subject(self) -> str:
+        return f"Grievance & Feedback ticket assigned {self.grievance_ticket.unicef_id}"
 
     def _prepare_assigned_to_recipient(self) -> "list[User] | None":
         if self.grievance_ticket.assigned_to is None:
@@ -192,6 +228,69 @@ class GrievanceNotification:
         ACTION_NOTES_ADDED: _prepare_add_note_bodies,
         ACTION_OVERDUE: _prepare_overdue_bodies,
         ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_bodies,
+    }
+
+    ACTION_PREPARE_CONTEXT_DICT = {
+        ACTION_ASSIGNMENT_CHANGED: _prepare_default_rendered_email_context,
+        ACTION_SYSTEM_FLAGGING_CREATED: _prepare_default_rendered_email_context,
+        ACTION_DEDUPLICATION_CREATED: _prepare_default_rendered_email_context,
+        ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_default_rendered_email_context,
+        ACTION_SENSITIVE_CREATED: _prepare_default_rendered_email_context,
+        ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_send_back_to_in_progress_context,
+        ACTION_SEND_TO_APPROVAL: _prepare_default_rendered_email_context,
+        ACTION_NOTES_ADDED: _prepare_add_note_context,
+        ACTION_OVERDUE: _prepare_overdue_context,
+        ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_context,
+    }
+
+    ACTION_PREPARE_SUBJECT_DICT = {
+        ACTION_ASSIGNMENT_CHANGED: _prepare_assignment_changed_subject,
+        ACTION_SYSTEM_FLAGGING_CREATED: _prepare_universal_category_created_subject,
+        ACTION_DEDUPLICATION_CREATED: _prepare_universal_category_created_subject,
+        ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_universal_category_created_subject,
+        ACTION_SENSITIVE_CREATED: _prepare_universal_category_created_subject,
+        ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_send_back_to_in_progress_subject,
+        ACTION_SEND_TO_APPROVAL: _prepare_for_approval_subject,
+        ACTION_NOTES_ADDED: _prepare_add_note_subject,
+        ACTION_OVERDUE: _prepare_overdue_subject,
+        ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_subject,
+    }
+
+    ACTION_EMAIL_TEMPLATE_DICT = {
+        ACTION_ASSIGNMENT_CHANGED: (
+            "assignment_change_notification_email.txt",
+            "assignment_change_notification_email.html",
+        ),
+        ACTION_SYSTEM_FLAGGING_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_DEDUPLICATION_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_PAYMENT_VERIFICATION_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_SENSITIVE_CREATED: (
+            "universal_category_created_notification_email.txt",
+            "universal_category_created_notification_email.html",
+        ),
+        ACTION_SEND_BACK_TO_IN_PROGRESS: (
+            "send_back_to_in_progress_notification_email.txt",
+            "send_back_to_in_progress_notification_email.html",
+        ),
+        ACTION_SEND_TO_APPROVAL: (
+            "send_for_approve_notification_email.txt",
+            "send_for_approve_notification_email.html",
+        ),
+        ACTION_NOTES_ADDED: ("note_added_notification_email.txt", "note_added_notification_email.html"),
+        ACTION_OVERDUE: ("overdue_notification_email.txt", "overdue_notification_email.html"),
+        ACTION_SENSITIVE_REMINDER: (
+            "sensitive_reminder_notification_email.txt",
+            "sensitive_reminder_notification_email.html",
+        ),
     }
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {
@@ -232,3 +331,21 @@ class GrievanceNotification:
     def send_all_notifications(cls, notifications: list) -> None:
         for notification in notifications:
             notification.send_email_notification()
+
+
+def send_grievance_notification_event(
+    event: Any,
+    grievance_ticket: GrievanceTicket,
+    action: Any,
+    **kwargs: Any,
+) -> None:
+    notification = GrievanceNotification(grievance_ticket, action, **kwargs)
+    for payload, correlation_id in notification.rendered_email_notifications:
+        event.send_robust(
+            sender=GrievanceTicket,
+            instance=grievance_ticket,
+            business_area=grievance_ticket.business_area,
+            payload=payload,
+            correlation_id=correlation_id,
+            send_notification=config.SEND_GRIEVANCES_NOTIFICATION,
+        )

@@ -674,8 +674,18 @@ def test_set_status_based_on_assigned_to(user: Any) -> None:
         assigned_to=user,
     )
 
-    mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_1, messages=[])
-    mixin._set_status_based_on_assigned_to(approver=user, grievance_ticket=grievance_ticket_2, messages=[])
+    mixin._set_status_based_on_assigned_to(
+        approver=user,
+        grievance_ticket=grievance_ticket_1,
+        messages=[],
+        events=[],
+    )
+    mixin._set_status_based_on_assigned_to(
+        approver=user,
+        grievance_ticket=grievance_ticket_2,
+        messages=[],
+        events=[],
+    )
 
     assert grievance_ticket_1.status == GrievanceTicket.STATUS_ASSIGNED
     assert grievance_ticket_2.status == GrievanceTicket.STATUS_IN_PROGRESS

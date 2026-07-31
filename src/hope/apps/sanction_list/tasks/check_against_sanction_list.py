@@ -14,6 +14,8 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
+from hope.apps.core.notifications.payloads import EmailPayload
+from hope.apps.sanction_list.events import sanction_list_check_results_generated
 from hope.apps.utils.mailjet import MailjetClient
 from hope.models import SanctionListIndividual, UploadedXLSXFile
 
@@ -138,6 +140,8 @@ class CheckAgainstSanctionListTask:
         subject = f"Sanction List Check - file: {original_file_name}, date: {today.strftime('%Y-%m-%d %I:%M %p')}"
 
         base64_encoded_content = self._create_results_attachment(results_dict)
+        attachment_filename = f"{subject}.xlsx"
+        attachment_content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
         email = MailjetClient(
             subject=subject,
@@ -148,8 +152,23 @@ class CheckAgainstSanctionListTask:
         )
         email.attach_file(
             attachment=base64_encoded_content,
-            filename=f"{subject}.xlsx",
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            filename=attachment_filename,
+            mimetype=attachment_content_type,
+        )
+        sanction_list_check_results_generated.send_robust(
+            sender=UploadedXLSXFile,
+            instance=uploaded_file,
+            payload=EmailPayload(
+                recipients=[uploaded_file.associated_email],
+                cc=[settings.SANCTION_LIST_CC_MAIL],
+                context={
+                    "results_count": len(results_dict),
+                    "file_name": original_file_name,
+                    "today_date": timezone.now().isoformat(),
+                    "title": "Sanction List Check",
+                },
+            ),
+            correlation_id=f"sanction-list-check-results:{uploaded_file.id}",
         )
         email.send_email()
 

@@ -124,7 +124,7 @@ def test_build_notifications_no_matching_status(mock_clear_cache, mock_user, moc
 
 
 @patch("hope.apps.grievance.api.views.clear_cache")
-@patch.object(GrievanceNotification, "_prepare_emails", return_value=[])
+@patch.object(GrievanceNotification, "_prepare_emails", return_value=([], []))
 @patch.object(GrievanceNotification, "_prepare_user_recipients", return_value=[])
 def test_build_notifications_for_approval(
     mock_recipients, mock_emails, mock_clear_cache, mock_user, mock_ticket, mock_old_ticket

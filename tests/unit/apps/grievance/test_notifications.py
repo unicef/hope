@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 from unittest.mock import patch
 
 from constance.test import override_config
@@ -14,8 +15,8 @@ from extras.test_utils.factories import (
     UserFactory,
     UserRoleAssignmentFactory,
 )
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.models import BusinessArea, User
 
 pytestmark = pytest.mark.django_db
@@ -36,6 +37,16 @@ def assigned_ticket(business_area: BusinessArea, assignee: User) -> GrievanceTic
     return GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
 
 
+@pytest.fixture
+def ticket_notes(assigned_ticket: GrievanceTicket) -> tuple[TicketNote, TicketNote]:
+    return TicketNoteFactory(ticket=assigned_ticket), TicketNoteFactory(ticket=assigned_ticket)
+
+
+@pytest.fixture
+def note_author() -> User:
+    return UserFactory(first_name="Note", last_name="Author")
+
+
 def test_init_builds_recipients_and_emails_for_assignment_changed(
     assigned_ticket: GrievanceTicket, assignee: User
 ) -> None:
@@ -44,7 +55,36 @@ def test_init_builds_recipients_and_emails_for_assignment_changed(
     assert notification.user_recipients == [assignee]
     assert len(notification.emails) == 1
     assert notification.emails[0].recipients == [assignee.email]
+    assert len(notification.rendered_email_notifications) == 1
+    payload, correlation_id = notification.rendered_email_notifications[0]
+    assert correlation_id == f"grievance-ticket:{assigned_ticket.id}:{notification.action}:{assignee.id}"
+    assert payload.recipients == [assignee.email]
     assert notification.enable_email_notification is True
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_send_grievance_notification_event_emits_rendered_payload(
+    assigned_ticket: GrievanceTicket,
+    assignee: User,
+    mocker: Any,
+) -> None:
+    event = mocker.Mock()
+
+    send_grievance_notification_event(
+        event,
+        assigned_ticket,
+        GrievanceNotification.ACTION_ASSIGNMENT_CHANGED,
+    )
+
+    event.send_robust.assert_called_once()
+    assert event.send_robust.call_args.kwargs["sender"] is GrievanceTicket
+    assert event.send_robust.call_args.kwargs["instance"] == assigned_ticket
+    assert event.send_robust.call_args.kwargs["business_area"] == assigned_ticket.business_area
+    assert event.send_robust.call_args.kwargs["payload"].recipients == [assignee.email]
+    assert event.send_robust.call_args.kwargs["correlation_id"] == (
+        f"grievance-ticket:{assigned_ticket.id}:{GrievanceNotification.ACTION_ASSIGNMENT_CHANGED}:{assignee.id}"
+    )
+    assert event.send_robust.call_args.kwargs["send_notification"] is True
 
 
 def test_assigned_to_recipient_returns_empty_when_unassigned(business_area: BusinessArea) -> None:
@@ -54,6 +94,7 @@ def test_assigned_to_recipient_returns_empty_when_unassigned(business_area: Busi
 
     assert notification.user_recipients == []
     assert notification.emails == []
+    assert notification.rendered_email_notifications == []
 
 
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=True)
@@ -191,6 +232,90 @@ def test_add_note_body_uses_created_by_and_note(assigned_ticket: GrievanceTicket
     assert "Please review the attached documents" in html_body
 
 
+def test_rendered_email_notification_context_uses_action_specific_context(
+    assigned_ticket: GrievanceTicket, assignee: User
+) -> None:
+    author = UserFactory(first_name="Note", last_name="Author")
+    ticket_note = TicketNoteFactory(ticket=assigned_ticket, description="Please review the attached documents")
+
+    notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=author,
+        ticket_note=ticket_note,
+    )
+
+    payload, _correlation_id = notification.rendered_email_notifications[0]
+    assert payload.context["created_by"] == "Note Author"
+    assert payload.context["ticket_note_description"] == ticket_note.description
+
+
+def test_note_notification_tolerates_missing_ticket_note(
+    assigned_ticket: GrievanceTicket,
+    assignee: User,
+    note_author: User,
+) -> None:
+    notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+    )
+
+    payload, correlation_id = notification.rendered_email_notifications[0]
+    assert payload.context["ticket_note_description"] == ""
+    assert correlation_id == f"grievance-ticket:{assigned_ticket.id}:{notification.action}:{assignee.id}"
+
+
+def test_different_notes_have_different_correlation_ids(
+    assigned_ticket: GrievanceTicket,
+    ticket_notes: tuple[TicketNote, TicketNote],
+    note_author: User,
+) -> None:
+    first_note, second_note = ticket_notes
+
+    first_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=first_note,
+    )
+    second_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=second_note,
+    )
+
+    first_correlation_id = first_notification.rendered_email_notifications[0][1]
+    second_correlation_id = second_notification.rendered_email_notifications[0][1]
+    assert first_correlation_id != second_correlation_id
+
+
+def test_same_note_has_stable_correlation_id(
+    assigned_ticket: GrievanceTicket,
+    ticket_notes: tuple[TicketNote, TicketNote],
+    note_author: User,
+) -> None:
+    ticket_note = ticket_notes[0]
+
+    first_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=ticket_note,
+    )
+    retried_notification = GrievanceNotification(
+        assigned_ticket,
+        GrievanceNotification.ACTION_NOTES_ADDED,
+        created_by=note_author,
+        ticket_note=ticket_note,
+    )
+
+    first_correlation_id = first_notification.rendered_email_notifications[0][1]
+    retried_correlation_id = retried_notification.rendered_email_notifications[0][1]
+    assert first_correlation_id == retried_correlation_id
+
+
 def test_send_back_to_in_progress_body_uses_approver(assigned_ticket: GrievanceTicket, assignee: User) -> None:
     approver = UserFactory(first_name="Ap", last_name="Prover")
 
@@ -216,11 +341,41 @@ def test_for_approval_body(assigned_ticket: GrievanceTicket, assignee: User) -> 
     assert html_body
 
 
+def test_universal_category_created_body(assigned_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
+
+    text_body, html_body, subject = notification._prepare_universal_category_created_bodies(assignee)
+
+    assert assigned_ticket.get_category_display() in subject
+    assert text_body
+    assert html_body
+
+
+def test_assignment_changed_body(assigned_ticket: GrievanceTicket, assignee: User) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    text_body, html_body, subject = notification._prepare_assignment_changed_bodies(assignee)
+
+    assert assigned_ticket.unicef_id in subject
+    assert text_body
+    assert html_body
+
+
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTicket) -> None:
     notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
+        notification.send_email_notification()
+
+    mock_send.assert_called_once()
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_send_email_notification_swallows_send_error(assigned_ticket: GrievanceTicket) -> None:
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+
+    with patch.object(notification.emails[0], "send_email", side_effect=RuntimeError("send failed")) as mock_send:
         notification.send_email_notification()
 
     mock_send.assert_called_once()

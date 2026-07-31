@@ -135,6 +135,8 @@ def test_send_for_approval_success(
     program: Program,
     pdu_edit_new_authorized: PDUOnlineEdit,
     create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Any,
+    mocker: Any,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -144,7 +146,9 @@ def test_send_for_approval_success(
     )
 
     url = get_send_for_approval_url(afghanistan, program, pdu_edit_new_authorized.id)
-    response = authenticated_client.post(url)
+    mock_event = mocker.patch("hope.apps.periodic_data_update.api.views.pdu_online_edit_sent_for_approval.send_robust")
+    with django_capture_on_commit_callbacks(execute=True):
+        response = authenticated_client.post(url)
 
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
@@ -153,6 +157,8 @@ def test_send_for_approval_success(
     # Verify edit status changed from NEW to READY
     pdu_edit_new_authorized.refresh_from_db()
     assert pdu_edit_new_authorized.status == PDUOnlineEdit.Status.READY
+    assert mock_event.call_args.kwargs["sender"] is PDUOnlineEdit
+    assert mock_event.call_args.kwargs["instance"] == pdu_edit_new_authorized
 
 
 def test_send_for_approval_not_authorized_user(

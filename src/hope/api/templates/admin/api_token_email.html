@@ -1,0 +1,15 @@
+<p>Dear {{ friendly_name }},</p>
+
+<p>{{ message }}</p>
+
+<p>
+    Name: {{ token_name }}<br>
+    {% if show_token_key %}Key: {{ token_key }}<br>{% endif %}
+    Grants: {{ grants }}<br>
+    Expires: {{ expire }}<br>
+    Business Areas: {{ areas }}
+</p>
+
+<p>Regards</p>
+
+<p>The HOPE Team</p>

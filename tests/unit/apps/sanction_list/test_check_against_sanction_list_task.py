@@ -233,6 +233,9 @@ def test_execute_matches_two_name_row_with_date_cell(
     django_assert_num_queries: Any,
 ) -> None:
     mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    mocker.patch(
+        "hope.apps.sanction_list.tasks.check_against_sanction_list.sanction_list_check_results_generated.send_robust"
+    )
     uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
 
     with django_assert_num_queries(7):
@@ -247,6 +250,32 @@ def test_execute_matches_two_name_row_with_date_cell(
     assert mailjet_mock.call_args.kwargs["recipients"] == ["checker@example.com"]
     assert mailjet_mock.call_args.kwargs["ccs"] == [settings.SANCTION_LIST_CC_MAIL]
     mailjet_mock.return_value.send_email.assert_called_once_with()
+
+
+def test_execute_emits_results_event_without_attachment_context(
+    make_uploaded_file: Any,
+    john_doe: SanctionListIndividual,
+    mocker: Any,
+) -> None:
+    mailjet_mock = mocker.patch("hope.apps.sanction_list.tasks.check_against_sanction_list.MailjetClient")
+    mock_event = mocker.patch(
+        "hope.apps.sanction_list.tasks.check_against_sanction_list.sanction_list_check_results_generated.send_robust"
+    )
+    uploaded = make_uploaded_file([("john", "doe", None, None, datetime.date(1980, 1, 1))])
+
+    CheckAgainstSanctionListTask().execute(uploaded.id, "check.xlsx")
+
+    mock_event.assert_called_once()
+    assert mock_event.call_args.kwargs["sender"] is UploadedXLSXFile
+    assert mock_event.call_args.kwargs["instance"] == uploaded
+    assert mock_event.call_args.kwargs["correlation_id"] == f"sanction-list-check-results:{uploaded.id}"
+    notification = mock_event.call_args.kwargs["payload"]
+    assert notification.recipients == ["checker@example.com"]
+    assert notification.cc == [settings.SANCTION_LIST_CC_MAIL]
+    assert notification.context["results_count"] == 1
+    assert notification.context["file_name"] == "check.xlsx"
+    assert "attachments" not in notification.context
+    mailjet_mock.return_value.attach_file.assert_called_once()
 
 
 def test_execute_matches_single_name_row_by_first_name(

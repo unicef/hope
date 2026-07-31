@@ -11,63 +11,32 @@ from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hope.admin.utils import AutocompleteForeignKeyMixin
+from hope.api.events import api_credential_created, api_credential_info_requested, api_credential_updated
 from hope.apps.account.fields import ChoiceArrayField
+from hope.apps.core.notifications.payloads import EmailPayload
 from hope.apps.utils.security import is_root
 from hope.models import APIToken, BusinessArea
 
 if TYPE_CHECKING:
     from uuid import UUID
 
-TOKEN_INFO_EMAIL = """
-Dear {friendly_name},
+EMAIL_ACTION_INFO = "info"
+EMAIL_ACTION_CREATED = "created"
+EMAIL_ACTION_UPDATED = "updated"
 
-please find below API token infos
+API_TOKEN_ACTION_TO_EVENT = {
+    EMAIL_ACTION_INFO: api_credential_info_requested,
+    EMAIL_ACTION_CREATED: api_credential_created,
+    EMAIL_ACTION_UPDATED: api_credential_updated,
+}
 
-Name: {obj}
-Key: {obj.key}
-Grants: {obj.grants}
-Expires: {expire}
-Business Areas: {areas}
-
-Regards
-
-The HOPE Team
-"""  # noqa
-
-TOKEN_CREATED_EMAIL = """
-Dear {friendly_name},
-
-you have been assigned a new API token.
-
-Name: {obj}
-Key: {obj.key}
-Grants: {obj.grants}
-Expires: {expire}
-Business Areas: {areas}
-
-Regards
-
-The HOPE Team
-"""  # noqa
-
-TOKEN_UPDATED_EMAIL = """
-Dear {friendly_name},
-
-your assigned API token {obj} has been updated.
-
-Grants: {obj.grants}
-Expires: {expire}
-Business Areas: {areas}
-
-
-Regards
-
-The HOPE Team
-"""  # noqa
+API_CREDENTIAL_EMAIL_HTML_TEMPLATE = "admin/api_token_email.html"
+API_CREDENTIAL_EMAIL_TEXT_TEMPLATE = "admin/api_token_email.txt"
 
 
 class APITokenForm(forms.ModelForm):
@@ -130,12 +99,45 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _send_token_email(self, request: HttpRequest, obj: Any, template: str) -> None:
+    def _get_template_message(self, action: str) -> str:
+        if action == EMAIL_ACTION_CREATED:
+            return "you have been assigned a new API token."
+        if action == EMAIL_ACTION_UPDATED:
+            return "your assigned API token {token_name} has been updated."
+        return "please find below API token infos"
+
+    def _send_token_email(self, request: HttpRequest, obj: Any, action: str) -> None:
         try:
             user = obj.user
+            context = self._get_email_context(request, obj)
+            show_token_key = action != EMAIL_ACTION_UPDATED
+            notification_context = {
+                "friendly_name": context["friendly_name"],
+                "message": self._get_template_message(action).format(token_name=str(obj)),
+                "token_name": str(obj),
+                "grants": obj.grants,
+                "expire": context["expire"],
+                "areas": context["areas"],
+                "title": f"HOPE API Token {obj} infos",
+                "show_token_key": show_token_key,
+            }
+            if show_token_key:
+                notification_context["token_key"] = obj.key
+            text_body = render_to_string(API_CREDENTIAL_EMAIL_TEXT_TEMPLATE, context=notification_context)
+            html_body = render_to_string(API_CREDENTIAL_EMAIL_HTML_TEMPLATE, context=notification_context)
+            API_TOKEN_ACTION_TO_EVENT[action].send_robust(
+                sender=APIToken,
+                instance=obj,
+                payload=EmailPayload(
+                    recipients=[user.email],
+                    context=notification_context,
+                ),
+                correlation_id=f"api-token:{obj.id}:{action}",
+            )
             user.email_user(
-                subject=f"HOPE API Token {obj} infos",
-                text_body=template.format(**self._get_email_context(request, obj)),
+                subject=notification_context["title"],
+                html_body=html_body,
+                text_body=text_body,
             )
             self.message_user(request, f"Email sent to {obj.user.email}", messages.SUCCESS)
         except OSError:
@@ -152,7 +154,7 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
     )
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, str(pk))
-        self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
+        self._send_token_email(request, obj, EMAIL_ACTION_INFO)
 
     def changeform_view(
         self,
@@ -180,6 +182,6 @@ class APITokenAdmin(AutocompleteForeignKeyMixin, SmartModelAdmin):
         obj.valid_for.set(BusinessArea.objects.filter(role_assignments__user=obj.user))
         obj.save()
         if change:
-            self._send_token_email(request, obj, TOKEN_UPDATED_EMAIL)
+            self._send_token_email(request, obj, EMAIL_ACTION_UPDATED)
         else:
-            self._send_token_email(request, obj, TOKEN_CREATED_EMAIL)
+            self._send_token_email(request, obj, EMAIL_ACTION_CREATED)

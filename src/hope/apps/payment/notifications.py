@@ -123,8 +123,9 @@ class PaymentNotification:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
             try:
                 self.email.send_email()
-            except Exception:  # pragma: no cover
+            except Exception:
                 logger.exception("Failed to send payment plan notification")
+                return
 
     def _prepare_body_variables(self) -> dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"

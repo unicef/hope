@@ -1,0 +1,13 @@
+Dear {{ friendly_name }},
+
+{{ message }}
+
+Name: {{ token_name }}
+{% if show_token_key %}Key: {{ token_key }}
+{% endif %}Grants: {{ grants }}
+Expires: {{ expire }}
+Business Areas: {{ areas }}
+
+Regards
+
+The HOPE Team

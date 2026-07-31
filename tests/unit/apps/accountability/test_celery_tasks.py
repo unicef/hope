@@ -202,6 +202,7 @@ def test_export_survey_sample_task_schedules_async_job(
 def test_export_survey_sample_task_action_success(
     mock_service_cls: Mock,
     mock_send_email_notification: Mock,
+    mocker: Any,
     survey,
     user,
 ) -> None:
@@ -212,12 +213,14 @@ def test_export_survey_sample_task_action_success(
         {"survey_id": str(survey.id), "user_id": str(user.id)},
     )
     service = mock_service_cls.return_value
+    mock_event = mocker.patch("hope.apps.accountability.celery_tasks.survey_sample_xlsx_generated.send_robust")
 
     export_survey_sample_async_task_action(job)
 
     mock_service_cls.assert_called_once_with(survey, user)
     service.export_sample.assert_called_once_with()
     mock_send_email_notification.assert_called_once_with(service, user)
+    assert mock_event.call_args.kwargs["business_area"] == survey.business_area
     assert job.errors == {}
 
 
@@ -226,6 +229,7 @@ def test_export_survey_sample_task_action_success(
 def test_export_survey_sample_task_action_success_without_email_notification(
     mock_service_cls: Mock,
     mock_send_email_notification: Mock,
+    mocker: Any,
     survey,
     user,
 ) -> None:
@@ -235,11 +239,13 @@ def test_export_survey_sample_task_action_success_without_email_notification(
         "hope.apps.accountability.celery_tasks.export_survey_sample_async_task_action",
         {"survey_id": str(survey.id), "user_id": str(user.id)},
     )
+    mock_event = mocker.patch("hope.apps.accountability.celery_tasks.survey_sample_xlsx_generated.send_robust")
 
     export_survey_sample_async_task_action(job)
 
     mock_service_cls.assert_called_once_with(survey, user)
     mock_send_email_notification.assert_not_called()
+    mock_event.assert_called_once()
 
 
 @patch.object(AsyncJob, "queue")

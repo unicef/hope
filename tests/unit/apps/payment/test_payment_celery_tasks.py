@@ -1488,7 +1488,12 @@ def test_send_password_action_sends_passwords_when_plan_found(
 
     send_payment_plan_group_delivery_xlsx_password_async_task_action(job)
 
-    mock_send.assert_called_once_with(user, file_temp, f"Payment Plan Group {group.unicef_id} Batch 1 Payment List")
+    mock_send.assert_called_once_with(
+        user,
+        file_temp,
+        f"Payment Plan Group {group.unicef_id} Batch 1 Payment List",
+        group.cycle.program.business_area,
+    )
 
 
 def test_send_password_action_raises_when_no_exported_plan_found(user: Any) -> None:

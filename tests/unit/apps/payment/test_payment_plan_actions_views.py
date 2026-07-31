@@ -934,6 +934,8 @@ def test_send_for_approval(
     permissions: list,
     expected_status: int,
     create_user_role_with_permissions: Any,
+    django_capture_on_commit_callbacks: Any,
+    mocker: Any,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -943,11 +945,17 @@ def test_send_for_approval(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED_FSP
     payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_send_for_approval"])
+    mock_event = mocker.patch(
+        "hope.apps.payment.services.payment_plan_services.payment_plan_sent_for_approval.send_robust"
+    )
+    with django_capture_on_commit_callbacks(execute=True):
+        response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_send_for_approval"])
 
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
         assert response.json()["status"] == "IN_APPROVAL"
+        assert mock_event.call_args.kwargs["sender"] is PaymentPlan
+        assert mock_event.call_args.kwargs["instance"] == payment_plan_actions_context["pp"]
 
 
 @pytest.mark.parametrize(

@@ -796,6 +796,45 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
     assert mock_send.call_count == 1
 
 
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
+def test_send_email_notification_returns_when_email_send_fails(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email", side_effect=RuntimeError("send failed"))
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=123456,
+)
+def test_send_email_notification_uses_resolved_recipients(notification_setup: dict, mocker: Any) -> None:
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    payment_notification.send_email_notification()
+
+    mock_send.assert_called_once()
+    assert payment_notification.email.recipients
+    assert payment_notification.email.variables
+    assert payment_notification.email.ccs
+
+
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
 @override_settings(EMAIL_SUBJECT_PREFIX="test")
 def test_send_email_notification_subject_test_env(notification_setup: dict, mocker: Any) -> None:

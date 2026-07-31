@@ -1,12 +1,15 @@
+from functools import partial
 import logging
 from typing import TYPE_CHECKING, Any, Sequence
 
 from django.contrib.auth.models import AbstractUser
+from django.db import transaction
 from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.grievance.events import grievance_deduplication_created
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.notifications import GrievanceNotification, send_grievance_notification_event
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
@@ -284,6 +287,14 @@ def create_grievance_ticket_with_details(
         ticket_details.possible_duplicates.add(*possible_duplicates)
     ticket_details.populate_cross_area_flag()
 
+    transaction.on_commit(
+        partial(
+            send_grievance_notification_event,
+            grievance_deduplication_created,
+            ticket,
+            GrievanceNotification.ACTION_DEDUPLICATION_CREATED,
+        )
+    )
     GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
 
     return ticket, ticket_details
