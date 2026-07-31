@@ -34,6 +34,7 @@ import {
   periodicDataUpdatesOnlineEditsStatusToColor,
   showApiErrorMessages,
 } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -110,12 +111,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     onSuccess: () => {
       showMessage(t('Template approved successfully.'));
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     },
     onError: (error: any) => {
@@ -142,12 +140,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       setSendBackDialogOpen(false);
       setSendBackComment('');
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     } catch (e) {
       showApiErrorMessages(
@@ -172,12 +167,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       );
       showMessage(t('Periodic data update sent for approval.'));
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     } catch (e) {
       showApiErrorMessages(e, showMessage, t('Failed to send for approval.'));
@@ -199,12 +191,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     onSuccess: () => {
       showMessage('Template merged successfully.');
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     },
     onError: (error: any) => {
@@ -221,12 +210,10 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: [
-      'onlineEditsTemplateDetails',
-      businessArea,
-      programId,
-      numericId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+      { businessAreaSlug: businessArea, programCode: programId, id: numericId },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
         {

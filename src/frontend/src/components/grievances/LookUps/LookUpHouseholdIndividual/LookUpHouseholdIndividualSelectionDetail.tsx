@@ -8,6 +8,7 @@ import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { GRIEVANCE_ISSUE_TYPES, PROGRAM_STATE_FILTER } from '@utils/constants';
@@ -53,7 +54,10 @@ export function LookUpHouseholdIndividualSelectionDetail({
 
   const { data: householdChoicesData, isLoading: householdChoicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasHouseholdsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -62,7 +66,10 @@ export function LookUpHouseholdIndividualSelectionDetail({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -115,18 +122,20 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const programsListParams = createApiParams(
+    { businessAreaSlug: businessArea, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
   const { data: programsData, isLoading: programsLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsListParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+        RestService.restBusinessAreasProgramsList(programsListParams),
     });
 
   if (householdChoicesLoading || individualChoicesLoading || programsLoading)

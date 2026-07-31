@@ -5,6 +5,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Button } from '@mui/material';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,20 +27,21 @@ export function CreatePaymentPlanHeader({
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();
 
+  const programCycleParams = {
+    businessAreaSlug: businessArea,
+    id: programCycleId,
+    programCode: programId,
+  };
   const { data: programCycleData, isLoading: isLoadingProgramCycle } =
     useQuery<ProgramCycleList>({
-      queryKey: [
-        'programCyclesDetails',
-        businessArea,
-        programCycleId,
-        programId,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsCyclesRetrieve,
+        programCycleParams,
+      ),
       queryFn: () => {
-        return RestService.restBusinessAreasProgramsCyclesRetrieve({
-          businessAreaSlug: businessArea,
-          id: programCycleId,
-          programCode: programId,
-        });
+        return RestService.restBusinessAreasProgramsCyclesRetrieve(
+          programCycleParams,
+        );
       },
     });
 

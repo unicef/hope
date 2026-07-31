@@ -14,6 +14,7 @@ import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { PDUOnlineEditCreate } from '@restgenerated/models/PDUOnlineEditCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
 import moment from 'moment';
@@ -47,7 +48,14 @@ const NewOnlineTemplatePage = (): ReactElement => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['periodicFields', businessArea, programId, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,
+        ),
       });
       showMessage(t('Template created successfully.'));
       navigate(
@@ -88,7 +96,10 @@ const NewOnlineTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        { businessAreaSlug: businessArea, programCode: programId },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,

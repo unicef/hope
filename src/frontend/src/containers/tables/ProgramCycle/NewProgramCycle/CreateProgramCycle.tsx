@@ -19,6 +19,7 @@ import {
 import { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import type { DefaultError } from '@tanstack/query-core';
@@ -106,7 +107,7 @@ const CreateProgramCycle = ({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles'],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList),
         exact: false,
       });
       onSubmit();

@@ -6,6 +6,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { BulkUpdateGrievanceTicketsPriority } from '@restgenerated/models/BulkUpdateGrievanceTicketsPriority';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
@@ -31,12 +32,15 @@ export const BulkSetPriorityModal = ({
 }: BulkSetPriorityModalProps): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const [value, setValue] = useState<number>(0);
   const queryClient = useQueryClient();
 
   const { data: choices } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,
@@ -55,14 +59,15 @@ export const BulkSetPriorityModal = ({
     onSuccess: () => {
       if (isAllPrograms) {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasGrievanceTickets'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+          ),
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+          ),
         });
       }
       setSelected([]);

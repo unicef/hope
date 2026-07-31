@@ -7,6 +7,7 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { Choice } from '@restgenerated/models/Choice';
 
@@ -48,7 +49,7 @@ export function VerificationRecordsFilters({
     clearFilter();
   };
   const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
-    queryKey: ['verificationStatusChoices'],
+    queryKey: restQueryKey(RestService.restChoicesPaymentVerificationStatusList),
     queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
   });
 

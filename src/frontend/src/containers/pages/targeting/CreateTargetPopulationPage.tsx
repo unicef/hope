@@ -17,6 +17,7 @@ import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/Fo
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   getTargetingCriteriaVariables,
   HhIndIdValidation,
@@ -68,12 +69,13 @@ const CreateTargetPopulationPage = (): ReactElement => {
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate the list and detail queries for target populations and program
         queryClient.invalidateQueries({
-          queryKey: ['targetPopulations', businessAreaSlug, programCode],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsTargetPopulationsList,
+          ),
         });
         queryClient.invalidateQueries({
-          queryKey: ['program', businessAreaSlug, programCode],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
         });
       },
     });
@@ -82,14 +84,19 @@ const CreateTargetPopulationPage = (): ReactElement => {
   const navigate = useNavigate();
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessAreaSlug],
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessAreaSlug,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
         slug: businessAreaSlug,
       }),
   });
   const { data: program } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessAreaSlug, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug,
+      code: programCode,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug,

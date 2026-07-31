@@ -24,6 +24,7 @@ import { useProgramContext } from 'src/programContext';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 
 const Text = styled(ListItemText)`
@@ -68,7 +69,9 @@ export const DrawerItems = ({
   const permissions = usePermissions();
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
         slug: businessArea,

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { ActivityLogTable } from '@components/core/ActivityLogTable/ActivityLogTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from 'src/restgenerated';
+import { restQueryKey } from '@utils/queryKeys';
 import { ActivityLogEntry } from '@components/core/ActivityLogTable/types';
 import { useQuery } from '@tanstack/react-query';
 
@@ -25,24 +26,32 @@ export function UniversalActivityLogTable({
   const { businessAreaSlug } = useBaseUrl();
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const activityLogsParams = {
+    businessAreaSlug,
+    objectId: objectId,
+    limit: rowsPerPage,
+    offset: page * rowsPerPage,
+  };
   const { data: logsData } = useQuery({
-    queryKey: ['activityLogs', businessAreaSlug, objectId, page, rowsPerPage],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasActivityLogsList,
+      activityLogsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasActivityLogsList({
-        businessAreaSlug,
-        objectId: objectId,
-        limit: rowsPerPage,
-        offset: page * rowsPerPage,
-      }),
+      RestService.restBusinessAreasActivityLogsList(activityLogsParams),
     enabled: !!(businessAreaSlug && objectId),
   });
 
+  const activityLogsCountParams = { businessAreaSlug };
   const { data: countData } = useQuery({
-    queryKey: ['activityLogsCount', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasActivityLogsCountRetrieve,
+      activityLogsCountParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasActivityLogsCountRetrieve({
-        businessAreaSlug,
-      }),
+      RestService.restBusinessAreasActivityLogsCountRetrieve(
+        activityLogsCountParams,
+      ),
     enabled: !!businessAreaSlug,
   });
 

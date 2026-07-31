@@ -8,6 +8,7 @@ import { Title } from '@core/Title';
 import { ReactElement } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
@@ -36,14 +37,20 @@ export function RegistrationDetails({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
+  const rdiParams = {
+    businessAreaSlug: businessArea,
+    id: hctId,
+    programCode: programId,
+  };
   const { data, isLoading } = useQuery({
-    queryKey: ['registrationDataImport', businessArea, programId, hctId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+      rdiParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve({
-        businessAreaSlug: businessArea,
-        id: hctId,
-        programCode: programId,
-      }),
+      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve(
+        rdiParams,
+      ),
     enabled: !!businessArea && !!programId && !!hctId,
   });
 

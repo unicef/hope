@@ -5,6 +5,7 @@ import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -47,7 +48,7 @@ export const DeleteProgram = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const { mutateAsync: deleteProgram, isPending: isPendingDelete } =
@@ -59,7 +60,7 @@ export const DeleteProgram = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['businessAreasProgramsList', businessArea, programId],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
         });
         showMessage(t('Programme removed'));
         navigate(`/${businessArea}/programs/all/list`);
