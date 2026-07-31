@@ -150,6 +150,24 @@ def cross_household_collector_setup(
     return payment_plan, member_household_payment, collector_household_payment, external_collector
 
 
+@pytest.fixture
+def payment_without_primary_collector(
+    payment_plan,
+    delivery_mechanism,
+    financial_service_provider,
+):
+    household = HouseholdFactory(create_role=False)
+    payment = PaymentFactory(
+        parent=payment_plan,
+        household=household,
+        head_of_household=household.head_of_household,
+        collector=household.head_of_household,
+        financial_service_provider=financial_service_provider,
+        delivery_type=delivery_mechanism,
+    )
+    return payment_plan, payment
+
+
 def test_build_snapshot(payment_plan, payments, household_one, household_two) -> None:
     create_payment_plan_snapshot_data(payment_plan)
 
@@ -210,3 +228,12 @@ def test_create_payment_snapshot_data_uses_single_collector_fallback(payments) -
     snapshot = create_payment_snapshot_data(payments[0])
 
     assert snapshot.snapshot_data["primary_collector"]["account_data"]["number"] == "123"
+
+
+def test_build_snapshot_without_primary_collector(payment_without_primary_collector) -> None:
+    payment_plan, payment = payment_without_primary_collector
+
+    create_payment_plan_snapshot_data(payment_plan)
+
+    payment.refresh_from_db()
+    assert "primary_collector" not in payment.household_snapshot.snapshot_data
