@@ -148,7 +148,7 @@ class PaymentDataCollector(Account):
         financial_institution_ids: set[int] = {
             account.financial_institution_id
             for account in accounts_by_individual_id.values()
-            if account.financial_institution_id and not account.financial_institution.is_generic
+            if account.financial_institution_id and account.financial_institution.country_id is not None
         }
         financial_institution_codes: dict[int, str] = (
             dict(

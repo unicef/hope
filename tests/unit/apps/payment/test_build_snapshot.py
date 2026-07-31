@@ -6,9 +6,12 @@ from extras.test_utils.factories import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
+from hope.apps.household.const import ROLE_ALTERNATE
 from hope.apps.payment.services import payment_household_snapshot_service
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import MergeStatusModel
@@ -99,6 +102,46 @@ def batch_payments(batch_payment_plan):
     return [PaymentFactory(parent=batch_payment_plan) for _ in range(20)]
 
 
+@pytest.fixture
+def cross_household_collector_setup(
+    account_type,
+    delivery_mechanism,
+    financial_service_provider,
+    payment_plan,
+):
+    member_household = HouseholdFactory()
+    collector_household = HouseholdFactory()
+    external_collector = IndividualFactory(household=member_household)
+    IndividualRoleInHouseholdFactory(
+        household=collector_household,
+        individual=external_collector,
+        role=ROLE_ALTERNATE,
+    )
+    AccountFactory(
+        individual=external_collector,
+        account_type=account_type,
+        number="external-collector-account",
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    member_household_payment = PaymentFactory(
+        parent=payment_plan,
+        household=member_household,
+        head_of_household=member_household.head_of_household,
+        collector=member_household.head_of_household,
+        financial_service_provider=financial_service_provider,
+        delivery_type=delivery_mechanism,
+    )
+    collector_household_payment = PaymentFactory(
+        parent=payment_plan,
+        household=collector_household,
+        head_of_household=collector_household.head_of_household,
+        collector=external_collector,
+        financial_service_provider=financial_service_provider,
+        delivery_type=delivery_mechanism,
+    )
+    return payment_plan, member_household_payment, collector_household_payment, external_collector
+
+
 def test_build_snapshot(payment_plan, payments, household_one, household_two) -> None:
     create_payment_plan_snapshot_data(payment_plan)
 
@@ -131,3 +174,25 @@ def test_batching(batch_payment_plan, batch_payments, monkeypatch) -> None:
     create_payment_plan_snapshot_data(batch_payment_plan)
 
     assert batch_payment_plan.payment_items.filter(household_snapshot__isnull=False).count() == len(batch_payments)
+
+
+def test_collector_account_data_is_scoped_to_role_household(cross_household_collector_setup) -> None:
+    payment_plan, member_household_payment, collector_household_payment, external_collector = (
+        cross_household_collector_setup
+    )
+
+    create_payment_plan_snapshot_data(payment_plan)
+
+    member_household_payment.refresh_from_db()
+    collector_household_payment.refresh_from_db()
+    member_snapshot = next(
+        filter(
+            lambda individual: individual["id"] == str(external_collector.id),
+            member_household_payment.household_snapshot.snapshot_data["individuals"],
+        )
+    )
+    assert "account_data" not in member_snapshot
+    assert (
+        collector_household_payment.household_snapshot.snapshot_data["alternate_collector"]["account_data"]["number"]
+        == "external-collector-account"
+    )

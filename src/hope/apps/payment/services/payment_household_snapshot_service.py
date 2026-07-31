@@ -99,13 +99,16 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
 
         individuals_by_id: dict[UUID, Individual] = {}
         collector_ids: set[UUID] = set()
+        collector_ids_by_household_id: dict[UUID, set[UUID]] = {}
         for payment in payments:
             for individual in payment.household.individuals.all():
                 individuals_by_id[individual.id] = individual
+            household_collector_ids = collector_ids_by_household_id.setdefault(payment.household_id, set())
             for role in payment.household.individuals_and_roles.all():
                 individuals_by_id.setdefault(role.individual_id, role.individual)
                 if role.role in [ROLE_PRIMARY, ROLE_ALTERNATE]:
                     collector_ids.add(role.individual_id)
+                    household_collector_ids.add(role.individual_id)
 
         collectors = [
             individuals_by_id[collector_id] for collector_id in collector_ids if collector_id in individuals_by_id
@@ -126,7 +129,7 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
             create_payment_snapshot_data(
                 payment,
                 delivery_data_by_payment_key.get((payment.financial_service_provider_id, payment.delivery_type_id)),
-                collector_ids,
+                collector_ids_by_household_id.get(payment.household_id, set()),
                 needs_adjudication_counts,
             )
             for payment in payments

@@ -86,6 +86,26 @@ def account_setup():
     }
 
 
+@pytest.fixture
+def non_generic_accounts_setup(account_setup):
+    financial_institution = account_setup["financial_institution"]
+    financial_institution.country = CountryFactory()
+    financial_institution.save(update_fields=["country"])
+    AccountFactory(
+        individual=account_setup["individual"],
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    AccountFactory(
+        individual=account_setup["individual_2"],
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    return account_setup
+
+
 def test_get_associated_object(account_setup):
     dmd = AccountFactory(
         data={"test": "test"},
@@ -335,6 +355,22 @@ def test_validate_accounts_uses_constant_number_of_queries(account_setup, django
         )
 
     assert validation_results == {collector.id: True, collector_2.id: True}
+
+
+def test_delivery_data_for_collectors_does_not_load_financial_institution_countries_per_account(
+    non_generic_accounts_setup,
+    django_assert_num_queries,
+):
+    collector = non_generic_accounts_setup["individual"]
+    collector_2 = non_generic_accounts_setup["individual_2"]
+    with django_assert_num_queries(4):
+        delivery_data = PaymentDataCollector.delivery_data_for_collectors(
+            non_generic_accounts_setup["fsp"],
+            non_generic_accounts_setup["dm_atm_card"],
+            [collector, collector_2],
+        )
+
+    assert set(delivery_data) == {collector.id, collector_2.id}
 
 
 def test_validate_account_resolves_service_provider_code_from_financial_institution(account_setup):
