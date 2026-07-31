@@ -324,6 +324,19 @@ def test_validate_account(account_setup):
     assert PaymentDataCollector.validate_account(fsp, account_setup["dm_atm_card"], collector) is False
 
 
+def test_validate_accounts_uses_constant_number_of_queries(account_setup, django_assert_num_queries):
+    collector = account_setup["individual"]
+    collector_2 = account_setup["individual_2"]
+    with django_assert_num_queries(3):
+        validation_results = PaymentDataCollector.validate_accounts(
+            account_setup["fsp"],
+            account_setup["dm_atm_card"],
+            [collector, collector_2],
+        )
+
+    assert validation_results == {collector.id: True, collector_2.id: True}
+
+
 def test_validate_account_resolves_service_provider_code_from_financial_institution(account_setup):
     fsp = account_setup["fsp"]
     collector = account_setup["individual"]
