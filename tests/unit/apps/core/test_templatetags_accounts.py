@@ -77,3 +77,9 @@ def test_is_root_false_for_non_superuser(user: User) -> None:
     request.user = user
 
     assert _is_root(request) is False
+
+
+def test_is_root_false_when_request_has_no_user() -> None:
+    request = RequestFactory().get("/")
+
+    assert _is_root(request) is False
