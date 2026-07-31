@@ -10,7 +10,8 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { format, parseISO } from 'date-fns';
 import { Form, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -27,6 +28,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
   const { programCycleId } = useParams();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: createPaymentPlan, isPending: loadingCreate } =
     useMutation({
@@ -44,18 +46,26 @@ export const CreatePaymentPlanPage = (): ReactElement => {
           programCode,
           requestBody,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        });
+      },
     });
 
   const {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-      programCycleId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      {
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        status: 'DRAFT',
+        programCycle: programCycleId,
+      },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,

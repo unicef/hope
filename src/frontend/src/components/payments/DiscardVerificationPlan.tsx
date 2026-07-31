@@ -15,6 +15,7 @@ import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
 import { showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -45,12 +46,9 @@ export function DiscardVerificationPlan({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });

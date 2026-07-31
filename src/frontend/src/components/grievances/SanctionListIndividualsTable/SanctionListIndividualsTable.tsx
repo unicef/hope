@@ -1,5 +1,6 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { SanctionListIndividualsTableRow } from './SanctionListIndividualsTableRow';
 import { headCells } from './SanctionListIndividualsHeadCells';
@@ -38,7 +39,10 @@ export function SanctionListIndividualsTable({
 
   const { data, isLoading, error } =
     useQuery<PaginatedSanctionListIndividualList>({
-      queryKey: ['restSanctionListList', queryVariables],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasSanctionListList,
+        queryVariables,
+      ),
       queryFn: () =>
         RestService.restBusinessAreasSanctionListList({ ...queryVariables }),
     });

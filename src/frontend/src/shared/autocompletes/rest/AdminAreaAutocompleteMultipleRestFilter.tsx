@@ -9,6 +9,7 @@ import {
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { AreaList } from '@restgenerated/models/AreaList';
 
@@ -59,7 +60,11 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     isLoading,
     refetch,
   } = useQuery<AreaList[]>({
-    queryKey: ['areas', businessArea, queryVariables],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: queryVariables.level,
+      name: queryVariables.search,
+    }),
     queryFn: async () => {
       try {
         return RestService.restBusinessAreasGeoAreasList({

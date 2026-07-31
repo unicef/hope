@@ -53,6 +53,7 @@ export const PaymentPlanGroupAutocompleteRest = ({
           ...params,
         })
       }
+      queryKeyMethod={RestService.restBusinessAreasProgramsPaymentPlanGroupsList}
       businessArea={businessArea}
       programId={programId}
       handleChange={(_, selectedValue) => {

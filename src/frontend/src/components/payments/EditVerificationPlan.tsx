@@ -43,6 +43,7 @@ import { AreaList } from '@restgenerated/models/AreaList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
+import { restQueryKey } from '@utils/queryKeys';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
@@ -187,12 +188,9 @@ export const EditVerificationPlan = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -229,7 +227,10 @@ export const EditVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList,
+      { businessAreaSlug: businessArea, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
@@ -244,7 +245,10 @@ export const EditVerificationPlan = ({
   const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,

@@ -21,6 +21,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import camelCase from 'lodash/camelCase';
 import { PERMISSIONS } from 'src/config/permissions';
@@ -33,11 +34,14 @@ function AddIndividualGrievanceDetails({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, businessAreaSlug } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['addIndividualFieldsAttributes', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -64,11 +68,9 @@ function AddIndividualGrievanceDetails({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });

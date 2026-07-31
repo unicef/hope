@@ -8,6 +8,7 @@ import { BulkBaseModal } from './BulkBaseModal';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { User } from '@restgenerated/models/User';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -32,7 +33,7 @@ export function BulkAssignModal({
 }: BulkAssignModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const [value, setValue] = useState<User | null>(null);
   const [inputValue, setInputValue] = useState('');
   const queryClient = useQueryClient();
@@ -49,14 +50,15 @@ export function BulkAssignModal({
     onSuccess: () => {
       if (isAllPrograms) {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasGrievanceTickets'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+          ),
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+          ),
         });
       }
       setSelected([]);
@@ -66,15 +68,17 @@ export function BulkAssignModal({
     },
   });
 
+  // `satisfies` keeps the orderBy string literals narrowed to the fetcher's enum, which a
+  // bare object literal loses once it is hoisted out of the call.
+  const usersParams = {
+    businessAreaSlug: businessAreaSlug,
+    limit: 20,
+    orderBy: ['first_name', 'last_name', 'email'],
+    search: inputValue,
+  } satisfies Parameters<typeof RestService.restBusinessAreasUsersList>[0];
   const { data: usersData } = useQuery({
-    queryKey: ['users', businessAreaSlug, inputValue],
-    queryFn: () =>
-      RestService.restBusinessAreasUsersList({
-        businessAreaSlug: businessAreaSlug,
-        limit: 20,
-        orderBy: ['first_name', 'last_name', 'email'],
-        search: inputValue,
-      }),
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, usersParams),
+    queryFn: () => RestService.restBusinessAreasUsersList(usersParams),
   });
 
   const optionsData: User[] = usersData?.results || [];

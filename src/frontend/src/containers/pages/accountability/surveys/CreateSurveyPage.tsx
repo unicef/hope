@@ -33,7 +33,8 @@ import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
@@ -92,6 +93,7 @@ function prepareSampleSizeRequest(selectedSampleSizeType, values) {
 const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -107,6 +109,13 @@ const CreateSurveyPage = (): ReactElement => {
         programCode,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsSurveysList,
+        ),
+      });
+    },
   });
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -151,7 +160,10 @@ const CreateSurveyPage = (): ReactElement => {
   const { data: adminAreasData, isLoading: adminAreasLoading } = useQuery<
     AreaList[]
   >({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,

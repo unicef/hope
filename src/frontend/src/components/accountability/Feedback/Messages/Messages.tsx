@@ -14,6 +14,7 @@ import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { renderUserName, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -49,7 +50,10 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { businessAreaSlug, programCode } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessAreaSlug, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersProfileRetrieve, {
+      businessAreaSlug,
+      program: programCode,
+    }),
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug,
@@ -77,7 +81,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
       });
 
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasFeedbacksRetrieve', id],
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksRetrieve),
       });
     } catch (error) {
       showApiErrorMessages(error, showMessage);

@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { useParams } from 'react-router-dom';
 
 interface AuthorizedUsersOnlineListEditProps {
@@ -56,7 +57,10 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     isLoading: isEditLoading,
     error: editError,
   } = useQuery({
-    queryKey: ['onlineEdit', businessAreaSlug, programCode, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+      { businessAreaSlug, programCode, id: id ? Number(id) : undefined },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
         {
@@ -74,7 +78,10 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     isLoading: isAvailableLoading,
     error: availableError,
   } = useQuery({
-    queryKey: ['availableUsers', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList,
+      { businessAreaSlug, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
         {
