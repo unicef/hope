@@ -284,6 +284,21 @@ def payment_gateway_setup(
     }
 
 
+@pytest.fixture
+def unmatched_payment_gateway_record():
+    return PaymentRecordData(
+        id=999,
+        remote_id="missing-payment",
+        created="2023-10-10",
+        modified="2023-10-11",
+        record_code="missing",
+        parent="missing",
+        status="PENDING",
+        auth_code="missing",
+        fsp_code="missing",
+    )
+
+
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
@@ -491,6 +506,31 @@ def test_sync_records_error_messages(
     assert change_payment_instruction_status_mock.call_count == 2
 
 
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+def test_sync_records_ignores_unmatched_gateway_records(
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    payment_gateway_setup: dict,
+    unmatched_payment_gateway_record: PaymentRecordData,
+) -> None:
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    split_1.sent_to_payment_gateway = True
+    split_2.sent_to_payment_gateway = True
+    split_1.save(update_fields=["sent_to_payment_gateway"])
+    split_2.save(update_fields=["sent_to_payment_gateway"])
+    get_records_for_payment_instruction_mock.return_value = [unmatched_payment_gateway_record]
+
+    PaymentGatewayService().sync_records()
+
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    assert get_records_for_payment_instruction_mock.call_count == 2
+    assert payment_1.status == Payment.STATUS_PENDING
+    assert payment_2.status == Payment.STATUS_PENDING
+
+
 def test_bulk_update_payments_uses_one_query_and_persists_signatures(
     payment_gateway_setup: dict,
     django_assert_num_queries: Any,
@@ -599,6 +639,31 @@ def test_sync_payment_plan(
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
+
+
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+def test_sync_payment_plan_ignores_unmatched_gateway_records(
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    payment_gateway_setup: dict,
+    unmatched_payment_gateway_record: PaymentRecordData,
+) -> None:
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    split_1.sent_to_payment_gateway = True
+    split_2.sent_to_payment_gateway = True
+    split_1.save(update_fields=["sent_to_payment_gateway"])
+    split_2.save(update_fields=["sent_to_payment_gateway"])
+    get_records_for_payment_instruction_mock.return_value = [unmatched_payment_gateway_record]
+
+    PaymentGatewayService().sync_payment_plan(payment_gateway_setup["payment_plan"])
+
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    assert get_records_for_payment_instruction_mock.call_count == 2
+    assert payment_1.status == Payment.STATUS_PENDING
+    assert payment_2.status == Payment.STATUS_PENDING
 
 
 @pytest.mark.enable_activity_log
@@ -740,6 +805,24 @@ def test_sync_record(
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
     assert change_payment_instruction_status_mock.call_count == 2
+
+
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+def test_sync_record_ignores_unmatched_gateway_record(
+    get_record_mock: Any,
+    get_exchange_rate_mock: Any,
+    payment_gateway_setup: dict,
+    unmatched_payment_gateway_record: PaymentRecordData,
+) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    get_record_mock.return_value = unmatched_payment_gateway_record
+
+    PaymentGatewayService().sync_record(payment)
+
+    payment.refresh_from_db()
+    assert get_record_mock.call_count == 1
+    assert payment.status == Payment.STATUS_PENDING
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")

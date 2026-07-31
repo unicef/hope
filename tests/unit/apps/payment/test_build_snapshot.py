@@ -11,9 +11,12 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-from hope.apps.household.const import ROLE_ALTERNATE
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.services import payment_household_snapshot_service
-from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
+from hope.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+    create_payment_snapshot_data,
+)
 from hope.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -110,12 +113,17 @@ def cross_household_collector_setup(
     payment_plan,
 ):
     member_household = HouseholdFactory()
-    collector_household = HouseholdFactory()
+    collector_household = HouseholdFactory(create_role=False)
     external_collector = IndividualFactory(household=member_household)
     IndividualRoleInHouseholdFactory(
         household=collector_household,
         individual=external_collector,
-        role=ROLE_ALTERNATE,
+        role=ROLE_PRIMARY,
+    )
+    IndividualRoleInHouseholdFactory(
+        household=member_household,
+        individual=IndividualFactory(household=member_household),
+        role="",
     )
     AccountFactory(
         individual=external_collector,
@@ -193,6 +201,12 @@ def test_collector_account_data_is_scoped_to_role_household(cross_household_coll
     )
     assert "account_data" not in member_snapshot
     assert (
-        collector_household_payment.household_snapshot.snapshot_data["alternate_collector"]["account_data"]["number"]
+        collector_household_payment.household_snapshot.snapshot_data["primary_collector"]["account_data"]["number"]
         == "external-collector-account"
     )
+
+
+def test_create_payment_snapshot_data_uses_single_collector_fallback(payments) -> None:
+    snapshot = create_payment_snapshot_data(payments[0])
+
+    assert snapshot.snapshot_data["primary_collector"]["account_data"]["number"] == "123"

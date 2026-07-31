@@ -106,6 +106,39 @@ def non_generic_accounts_setup(account_setup):
     return account_setup
 
 
+@pytest.fixture
+def bulk_required_fields_setup(account_setup):
+    fsp = account_setup["fsp"]
+    collector = account_setup["individual"]
+    financial_institution = account_setup["financial_institution"]
+    financial_institution.country = CountryFactory()
+    financial_institution.save(update_fields=["country"])
+    collector.phone_no = "+48111222333"
+    collector.save(update_fields=["phone_no"])
+    account_setup["dm_config"].required_fields = ["provider", "phone", "service_provider_code", "missing"]
+    account_setup["dm_config"].save(update_fields=["required_fields"])
+    FspNameMapping.objects.create(
+        external_name="phone",
+        hope_name="phone_no",
+        source=FspNameMapping.SourceModel.INDIVIDUAL,
+        fsp=fsp,
+    )
+    FinancialInstitutionMappingFactory(
+        financial_institution=financial_institution,
+        financial_service_provider=fsp,
+        code="BANK-CODE",
+    )
+    account = AccountFactory(
+        individual=collector,
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        number="123456",
+        data={"provider": "Provider", "service_provider_code": "STALE-CODE"},
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    return account_setup, account
+
+
 def test_get_associated_object(account_setup):
     dmd = AccountFactory(
         data={"test": "test"},
@@ -371,6 +404,33 @@ def test_delivery_data_for_collectors_does_not_load_financial_institution_countr
         )
 
     assert set(delivery_data) == {collector.id, collector_2.id}
+
+
+def test_bulk_collector_processing_resolves_required_fields_and_validity(bulk_required_fields_setup):
+    account_setup, account = bulk_required_fields_setup
+    collector = account_setup["individual"]
+
+    delivery_data = PaymentDataCollector.delivery_data_for_collectors(
+        account_setup["fsp"],
+        account_setup["dm_atm_card"],
+        [collector],
+    )
+    validity = PaymentDataCollector.validate_accounts(
+        account_setup["fsp"],
+        account_setup["dm_atm_card"],
+        [collector],
+    )
+
+    assert delivery_data[collector.id] == {
+        "provider": "Provider",
+        "phone": str(collector.phone_no),
+        "service_provider_code": "BANK-CODE",
+        "missing": None,
+        "number": "123456",
+        "financial_institution_name": account.financial_institution.name,
+        "financial_institution_pk": str(account.financial_institution_id),
+    }
+    assert validity == {collector.id: False}
 
 
 def test_validate_account_resolves_service_provider_code_from_financial_institution(account_setup):
