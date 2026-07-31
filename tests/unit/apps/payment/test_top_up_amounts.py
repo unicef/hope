@@ -248,12 +248,16 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_query_count(
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
+    django_assert_max_num_queries: Any,
 ) -> None:
     start = source_pp.dispersion_start_date + timedelta(days=1)
     end = source_pp.dispersion_end_date + timedelta(days=1)
 
-    with django_assert_num_queries(111), django_capture_on_commit_callbacks(execute=True):
+    # A ceiling rather than an exact count. queue_task resolves the PaymentPlan ContentType, and
+    # ContentTypeManager caches that per process — a cache no db rollback clears. Whether this test
+    # pays for the lookup depends on what xdist ran before it in the same worker, so the exact
+    # number is 108 or 109 depending on the machine.
+    with django_assert_max_num_queries(109), django_capture_on_commit_callbacks(execute=True):
         PaymentPlanService(source_pp).create_top_up(user, start, end, fixed_amount=Decimal("25.00"))
 
 

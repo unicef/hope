@@ -1044,7 +1044,7 @@ class PaymentPlanService:
                     head_of_household_id=payment.head_of_household_id,
                     collector_id=payment.collector_id,
                     collector_type=payment.collector_type,
-                    currency=payment.currency,
+                    currency_id=payment.currency_id,
                     entitlement_quantity=entitlement_quantity,
                     entitlement_quantity_usd=entitlement_quantity_usd,
                     entitlement_date=timezone.now() if amounts is not None else None,

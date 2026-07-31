@@ -134,7 +134,7 @@ export function CreateChildPaymentPlan({
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        ([dispersionStartDate]: any[], schema: Yup.DateSchema) =>
+        ([dispersionStartDate]: [Date | null | undefined], schema: Yup.DateSchema) =>
           dispersionStartDate
             ? schema.min(
                 new Date(dispersionStartDate),
@@ -146,7 +146,7 @@ export function CreateChildPaymentPlan({
       ),
     // Only "neither" is checked: picking a file clears the fixed amount, so the two
     // funding modes can never both be set.
-    fixedAmount: Yup.string().when('file', ([file]: any[], schema: Yup.StringSchema) =>
+    fixedAmount: Yup.string().when('file', ([file]: [File | null], schema: Yup.StringSchema) =>
       isTopUp && !file
         ? schema
             .required(t('Enter a fixed amount or upload an amount file'))
@@ -210,7 +210,6 @@ export function CreateChildPaymentPlan({
       {({ submitForm, values, setValues, resetForm }) => {
         const closeDialog = (): void => {
           setDialogOpen(false);
-          // A file picked and abandoned earlier would otherwise still be attached on reopen.
           resetForm();
           selectedFile.current = null;
           setFundedRows(null);
@@ -437,7 +436,9 @@ export function CreateChildPaymentPlan({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={closeDialog}>{t('Cancel')}</Button>
+                <Button onClick={closeDialog} data-cy="button-cancel">
+                {t('Cancel')}
+              </Button>
                 <LoadingButton
                   loading={loadingCreate}
                   type="submit"
