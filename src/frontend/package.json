@@ -69,7 +69,7 @@
     "@babel/plugin-transform-object-rest-spread": "^8.0.1",
     "@babel/plugin-transform-typescript": "^8.0.1",
     "@babel/preset-env": "7.29.0",
-    "@babel/preset-react": "^7.29.7",
+    "@babel/preset-react": "^8.0.1",
     "@babel/preset-typescript": "^8.0.1",
     "@emotion/babel-plugin": "^11.13.5",
     "@eslint/compat": "2.1.0",
