@@ -592,3 +592,33 @@ def test_payment_detail_serializer_separates_extra_field_namespaces(payments):
         "keep": "keep-existing",
         "reference": "old-reference",
     }
+
+
+def test_payment_extra_field_setters_replace_namespaces_without_mutating_previous_dictionary(payments):
+    payment = payments[0]
+    previous_extras = payment.extras
+
+    payment.set_extra_fields({"new_reconciliation": "REC-NEW"})
+    payment.set_fsp_extra_fields({"new_fsp": "FSP-NEW"})
+
+    assert previous_extras == {
+        "extra_fields": {"reconciliation_code": "REC-001"},
+        "fsp_extra_fields": {
+            "empty_field": "keep-empty",
+            "keep": "keep-existing",
+            "reference": "old-reference",
+        },
+    }
+    assert payment.extras == {
+        "extra_fields": {"new_reconciliation": "REC-NEW"},
+        "fsp_extra_fields": {"new_fsp": "FSP-NEW"},
+    }
+
+
+def test_payment_extra_field_setters_remove_empty_namespaces(payments):
+    payment = payments[0]
+
+    payment.set_extra_fields({})
+    payment.set_fsp_extra_fields({})
+
+    assert payment.extras == {}

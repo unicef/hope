@@ -301,10 +301,20 @@ class Payment(
         return self.extras.get(self.FSP_EXTRA_FIELDS_KEY, {})
 
     def set_extra_fields(self, values: dict[str, object]) -> None:
+        extras = {**self.extras}
         if values:
-            self.extras[self.EXTRA_FIELDS_KEY] = values
+            extras[self.EXTRA_FIELDS_KEY] = values
         else:
-            self.extras.pop(self.EXTRA_FIELDS_KEY, None)
+            extras.pop(self.EXTRA_FIELDS_KEY, None)
+        self.extras = extras
+
+    def set_fsp_extra_fields(self, values: dict[str, object]) -> None:
+        extras = {**self.extras}
+        if values:
+            extras[self.FSP_EXTRA_FIELDS_KEY] = values
+        else:
+            extras.pop(self.FSP_EXTRA_FIELDS_KEY, None)
+        self.extras = extras
 
     def mark_as_failed(self) -> None:  # pragma: no cover
         if self.status is self.STATUS_FORCE_FAILED:

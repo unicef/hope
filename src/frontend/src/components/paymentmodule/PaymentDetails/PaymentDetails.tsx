@@ -53,6 +53,8 @@ function PaymentDetails({
   ].includes(payment.status);
 
   const collectorAccountData = payment?.snapshotCollectorAccountData ?? {};
+  const extraFields = Object.entries(payment.extraFields ?? {});
+  const fspExtraFields = Object.entries(payment.fspExtraFields ?? {});
 
   return (
     <>
@@ -285,36 +287,42 @@ function PaymentDetails({
           )}
         </Grid>
       </Overview>
-      <Overview>
-        <Title>
-          <Typography variant="h6">{t('Reconciliation Information: Extra Info')}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          {Object.entries(payment.extraFields || {}).map(([key, value]) => (
-            <Grid key={key} size={{ xs: 3 }}>
-              <LabelizedField
-                label={formatNormalCaseValue(key)}
-                value={safeStringify(value)}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      </Overview>
-      <Overview>
-        <Title>
-          <Typography variant="h6">{t('FSP extra fields')}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          {Object.entries(payment.fspExtraFields || {}).map(([key, value]) => (
-            <Grid key={key} size={{ xs: 3 }}>
-              <LabelizedField
-                label={formatNormalCaseValue(key)}
-                value={safeStringify(value)}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      </Overview>
+      {extraFields.length > 0 && (
+        <Overview>
+          <Title>
+            <Typography variant="h6">
+              {t('Reconciliation Information: Extra Info')}
+            </Typography>
+          </Title>
+          <Grid container spacing={3}>
+            {extraFields.map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Overview>
+      )}
+      {fspExtraFields.length > 0 && (
+        <Overview>
+          <Title>
+            <Typography variant="h6">{t('FSP extra fields')}</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            {fspExtraFields.map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Overview>
+      )}
       {canViewActivityLog && (
         <UniversalActivityLogTable objectId={payment.id} />
       )}

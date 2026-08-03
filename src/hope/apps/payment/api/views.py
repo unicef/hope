@@ -1245,6 +1245,7 @@ class PaymentPlanViewSet(
             created_by=request.user,
             file=file,
         )
+        old_payment_plan = copy_model_object(payment_plan)
         flow = PaymentPlanFlow(payment_plan)
         flow.background_action_status_xlsx_importing_fsp_extra_fields()
         payment_plan.save(update_fields=["background_action_status", "updated_at"])
@@ -1255,6 +1256,14 @@ class PaymentPlanViewSet(
                 str(file_temp.id),
                 user_id,
             )
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
         )
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,

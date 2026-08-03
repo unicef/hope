@@ -43,6 +43,7 @@ from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsE
 from hope.models import (
     FileTemp,
     FinancialServiceProvider,
+    LogEntry,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -266,6 +267,7 @@ def test_fsp_extra_fields_template_is_not_available_for_locked(
 
 
 @patch("hope.apps.payment.api.views.import_payment_plan_fsp_extra_fields_from_xlsx_async_task")
+@pytest.mark.enable_activity_log
 def test_fsp_extra_fields_import_is_available_for_locked_fsp(
     mock_import_task: Mock,
     fsp_extra_fields_actions_context: dict[str, Any],
@@ -293,6 +295,16 @@ def test_fsp_extra_fields_import_is_available_for_locked_fsp(
         str(file_temp.id),
         str(fsp_extra_fields_actions_context["user"].pk),
     )
+    log = LogEntry.objects.get(
+        content_type=get_content_type_for_model(fsp_extra_fields_actions_context["pp"]),
+        object_id=fsp_extra_fields_actions_context["pp"].pk,
+    )
+    assert log.user == fsp_extra_fields_actions_context["user"]
+    assert log.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    }
+    assert list(log.programs.values_list("pk", flat=True)) == [fsp_extra_fields_actions_context["pp"].program_id]
 
 
 def test_fsp_extra_fields_import_can_retry_after_error(
