@@ -24,6 +24,7 @@ import Paper from '@mui/material/Paper';
 import { Theme } from '@mui/material/styles';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -81,7 +82,10 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   );
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
-    queryKey: ['fieldsAttributes', businessArea, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList,
+      { businessAreaSlug: businessArea, programCode: programId },
+    ),
     queryFn: async () => {
       const data =
         await RestService.restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList(
@@ -96,7 +100,10 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -105,7 +112,10 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug: businessArea,

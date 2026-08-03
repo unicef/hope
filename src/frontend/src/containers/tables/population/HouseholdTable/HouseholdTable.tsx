@@ -12,7 +12,8 @@ import { createApiParams } from '@utils/apiUtils';
 import { TableCell } from '@mui/material';
 import { Box } from '@mui/system';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   adjustHeadCells,
   formatCurrencyWithSymbol,
@@ -111,36 +112,36 @@ export const HouseholdTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+  const householdsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedHouseholdListList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsHouseholdsList,
+        householdsListParams,
       ),
-  });
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsHouseholdsList(
+          householdsListParams,
+        ),
+      placeholderData: keepPreviousData,
+    });
 
+  const householdsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve,
+      householdsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        householdsCountParams,
       ),
     enabled: page === 0,
   });
@@ -254,6 +255,7 @@ export const HouseholdTable = ({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={itemsCount}

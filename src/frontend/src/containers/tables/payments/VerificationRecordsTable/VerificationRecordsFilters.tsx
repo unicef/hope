@@ -6,6 +6,7 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
 import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 
@@ -46,12 +47,20 @@ export function VerificationRecordsFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-  const { data: verificationStatusChoices } = useVerificationStatusChoices();
-  const verificationChannelChoices = useVerificationChannelChoices();
+  const {
+    data: verificationStatusChoices = [],
+    isError: isStatusChoicesError,
+    error: statusChoicesError,
+  } = useVerificationStatusChoices();
+  const {
+    data: verificationChannelChoices = [],
+    isError: isChannelChoicesError,
+    error: channelChoicesError,
+  } = useVerificationChannelChoices();
 
-  if (!verificationStatusChoices || !verificationChannelChoices.length) {
-    return null;
-  }
+  // A failed lookup must not hide the filter bar — surface it and keep filtering usable.
+  useApiErrorSnackbar(isStatusChoicesError, statusChoicesError);
+  useApiErrorSnackbar(isChannelChoicesError, channelChoicesError);
 
   const verificationPlanOptions = verifications.map((item) => (
     <MenuItem key={item.unicefId} value={item.id}>

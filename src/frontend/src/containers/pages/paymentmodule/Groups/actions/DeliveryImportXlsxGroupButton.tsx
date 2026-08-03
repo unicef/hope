@@ -3,6 +3,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
@@ -37,12 +38,9 @@ export function DeliveryImportXlsxGroupButton({
           },
         )
       }
-      invalidateQueryKey={[
-        'paymentPlanGroup',
-        businessArea,
-        programId,
-        group?.id,
-      ]}
+      invalidateQueryKey={restQueryKey(
+        RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+      )}
       successMessage={t('Delivery reconciliation import started')}
       errorFallback={t('Import failed')}
       buttonLabel={t('Upload Reconciliation')}

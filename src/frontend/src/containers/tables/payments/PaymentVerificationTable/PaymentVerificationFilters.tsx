@@ -7,6 +7,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { Grid, MenuItem } from '@mui/material';
 import { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -47,12 +48,14 @@ const PaymentVerificationFilters = ({
   };
 
   const { data: statusChoicesData } = useQuery<Array<Choice>>({
-    queryKey: ['choicesPaymentVerificationSummaryStatusList'],
+    queryKey: restQueryKey(
+      RestService.restChoicesPaymentVerificationSummaryStatusList,
+    ),
     queryFn: () =>
       RestService.restChoicesPaymentVerificationSummaryStatusList(),
   });
   const { data: deliveryTypeChoicesData } = useQuery<Array<Choice>>({
-    queryKey: ['choicesPaymentRecordDeliveryTypeList'],
+    queryKey: restQueryKey(RestService.restChoicesPaymentRecordDeliveryTypeList),
     queryFn: () => RestService.restChoicesPaymentRecordDeliveryTypeList(),
   });
 

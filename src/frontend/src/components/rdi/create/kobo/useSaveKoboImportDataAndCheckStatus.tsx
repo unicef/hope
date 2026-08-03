@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { KoboImportData } from '@restgenerated/models/KoboImportData';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -44,7 +45,10 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
 
   // Query for polling kobo import data status
   const { data: koboImportData } = useQuery({
-    queryKey: ['koboImportData', importDataId, businessAreaSlug],
+    queryKey: restQueryKey(RestService.restBusinessAreasKoboImportDataRetrieve, {
+      businessAreaSlug,
+      id: importDataId,
+    }),
     queryFn: async () => {
       if (!importDataId || !businessAreaSlug) return null;
       return RestService.restBusinessAreasKoboImportDataRetrieve({

@@ -4,6 +4,7 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -14,9 +15,10 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface Props {
@@ -36,7 +38,6 @@ export function VerifyManual({
   receivedAmount,
   verificationPlanId,
   paymentId,
-  paymentPlanId,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
@@ -44,30 +45,22 @@ export function VerifyManual({
   const queryClient = useQueryClient();
   const { programCode, businessAreaSlug } = useBaseUrl();
   const {
-    data: verificationStatusChoices,
+    data: verificationStatusChoices = [],
     isLoading: isStatusChoicesLoading,
     isError: isStatusChoicesError,
     error: statusChoicesError,
   } = useVerificationStatusChoices();
-  useEffect(() => {
-    if (isStatusChoicesError) {
-      showApiErrorMessages(statusChoicesError, showMessage);
-    }
-  }, [isStatusChoicesError, statusChoicesError, showMessage]);
+  useApiErrorSnackbar(isStatusChoicesError, statusChoicesError);
   // Manual verification only allows marking a payment received / not received.
-  const statusChoices = (verificationStatusChoices ?? [])
+  const statusChoices = verificationStatusChoices
     .filter((choice) => ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value))
     .map((choice) => ({
       ...choice,
       dataCy: `choice-${choice.value.toLowerCase().replace(/_/g, '-')}`,
     }));
-  const paymentQueryKey = [
-    'payment',
-    businessAreaSlug,
-    paymentId,
-    programCode,
-    paymentPlanId,
-  ];
+  const paymentQueryKey = restQueryKey(
+    RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve,
+  );
   const formId = `verify-manual-form-${paymentId}`;
   const updateVerificationMutation = useMutation({
     mutationFn: (data: PatchedPaymentVerificationUpdate) =>
@@ -81,8 +74,7 @@ export function VerifyManual({
         },
       ),
 
-    onSuccess: async (data) => {
-      queryClient.setQueryData(paymentQueryKey, data);
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: paymentQueryKey,
       });

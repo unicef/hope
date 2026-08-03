@@ -32,6 +32,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { FormikEffect } from '@core/FormikEffect';
@@ -42,8 +43,10 @@ import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { AreaList } from '@restgenerated/models/AreaList';
 import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
 import { RestService } from '@restgenerated/services/RestService';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useSexChoices } from '@hooks/useSexChoices';
 import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -166,8 +169,20 @@ export const CreateVerificationPlan = ({
   const { businessArea, baseUrl, programId: programCode } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const queryClient = useQueryClient();
-  const sexChoices = useSexChoices();
-  const channelChoices = useVerificationChannelChoices();
+  const {
+    data: sexChoices = [],
+    isLoading: isSexChoicesLoading,
+    isError: isSexChoicesError,
+    error: sexChoicesError,
+  } = useSexChoices();
+  const {
+    data: channelChoices = [],
+    isLoading: isChannelChoicesLoading,
+    isError: isChannelChoicesError,
+    error: channelChoicesError,
+  } = useVerificationChannelChoices();
+  useApiErrorSnackbar(isSexChoicesError, sexChoicesError);
+  useApiErrorSnackbar(isChannelChoicesError, channelChoicesError);
 
   const createVerificationPlanMutation = useMutation({
     mutationFn: (data: PaymentVerificationPlanCreate) =>
@@ -182,12 +197,9 @@ export const CreateVerificationPlan = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -195,7 +207,10 @@ export const CreateVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList,
+      { businessAreaSlug: businessArea, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
@@ -211,7 +226,10 @@ export const CreateVerificationPlan = ({
   const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
@@ -450,15 +468,19 @@ export const CreateVerificationPlan = ({
                         >
                           {t('This option is recommended for RapidPro')}
                         </Box>
-                        <Field
-                          name="verificationChannel"
-                          label={t('Verification Channel')}
-                          style={{ flexDirection: 'row' }}
-                          data-cy="checkbox-verification-channel"
-                          choices={channelChoices}
-                          component={FormikRadioGroup}
-                          alignItems="center"
-                        />
+                        {isChannelChoicesLoading ? (
+                          <LoadingComponent />
+                        ) : (
+                          <Field
+                            name="verificationChannel"
+                            label={t('Verification Channel')}
+                            style={{ flexDirection: 'row' }}
+                            data-cy="checkbox-verification-channel"
+                            choices={channelChoices}
+                            component={FormikRadioGroup}
+                            alignItems="center"
+                          />
+                        )}
                         {values.verificationChannel === 'RAPIDPRO' && (
                           <Field
                             name="rapidProFlow"
@@ -580,13 +602,17 @@ export const CreateVerificationPlan = ({
                                   mt: 6,
                                 }}
                               >
-                                <Field
-                                  name="filterSex"
-                                  label={t('Gender')}
-                                  color="primary"
-                                  choices={sexChoices}
-                                  component={FormikSelectField}
-                                />
+                                {isSexChoicesLoading ? (
+                                  <LoadingComponent />
+                                ) : (
+                                  <Field
+                                    name="filterSex"
+                                    label={t('Gender')}
+                                    color="primary"
+                                    choices={sexChoices}
+                                    component={FormikSelectField}
+                                  />
+                                )}
                               </Box>
                             </Grid>
                           )}
@@ -605,14 +631,18 @@ export const CreateVerificationPlan = ({
                         out of {sampleSizesData?.sampleSize?.paymentRecordCount}
                         {getSampleSizePercentage()}
                       </Box>
-                      <Field
-                        name="verificationChannel"
-                        label={t('Verification Channel')}
-                        style={{ flexDirection: 'row' }}
-                        alignItems="center"
-                        choices={channelChoices}
-                        component={FormikRadioGroup}
-                      />
+                      {isChannelChoicesLoading ? (
+                        <LoadingComponent />
+                      ) : (
+                        <Field
+                          name="verificationChannel"
+                          label={t('Verification Channel')}
+                          style={{ flexDirection: 'row' }}
+                          alignItems="center"
+                          choices={channelChoices}
+                          component={FormikRadioGroup}
+                        />
+                      )}
                       {values.verificationChannel === 'RAPIDPRO' && (
                         <Field
                           name="rapidProFlow"

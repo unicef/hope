@@ -8,6 +8,8 @@ import { Dialog } from '@mui/material';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +36,7 @@ const AddNewProgramCycle = ({
 
   const handleClose = async () => {
     await queryClient.invalidateQueries({
-      queryKey: ['programCycles'],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList),
       exact: false,
     });
     setOpen(false);

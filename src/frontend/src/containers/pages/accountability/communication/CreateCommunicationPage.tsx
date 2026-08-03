@@ -8,11 +8,14 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { MessageCreate } from '@restgenerated/models/MessageCreate';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useSexChoices } from '@hooks/useSexChoices';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
@@ -121,7 +124,14 @@ function prepareSampleSizeRequest(
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId } = useBaseUrl();
-  const sexChoices = useSexChoices();
+  const {
+    data: sexChoices = [],
+    isLoading: isSexChoicesLoading,
+    isError: isSexChoicesError,
+    error: sexChoicesError,
+  } = useSexChoices();
+  useApiErrorSnackbar(isSexChoicesError, sexChoicesError);
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: (data: MessageCreate) =>
       RestService.restBusinessAreasProgramsMessagesCreate({
@@ -129,6 +139,13 @@ const CreateCommunicationPage = (): ReactElement => {
         programCode: programId,
         requestBody: data,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsMessagesList,
+        ),
+      });
+    },
   });
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
@@ -148,7 +165,10 @@ const CreateCommunicationPage = (): ReactElement => {
   const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
 
   const { data: adminAreasData } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
@@ -669,13 +689,17 @@ const CreateCommunicationPage = (): ReactElement => {
                             )}
                             {values.sexCheckbox && (
                               <Grid size={{ xs: 5 }}>
-                                <Field
-                                  name="filterSex"
-                                  label={t('Gender')}
-                                  color="primary"
-                                  choices={sexChoices}
-                                  component={FormikSelectField}
-                                />
+                                {isSexChoicesLoading ? (
+                                  <LoadingComponent />
+                                ) : (
+                                  <Field
+                                    name="filterSex"
+                                    label={t('Gender')}
+                                    color="primary"
+                                    choices={sexChoices}
+                                    component={FormikSelectField}
+                                  />
+                                )}
                               </Grid>
                             )}
                           </Grid>

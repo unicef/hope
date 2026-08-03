@@ -10,6 +10,7 @@ import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useSexChoices } from '@hooks/useSexChoices';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -34,7 +35,8 @@ import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
@@ -93,6 +95,7 @@ function prepareSampleSizeRequest(selectedSampleSizeType, values) {
 const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -108,10 +111,23 @@ const CreateSurveyPage = (): ReactElement => {
         programCode,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsSurveysList,
+        ),
+      });
+    },
   });
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
-  const sexChoices = useSexChoices();
+  const {
+    data: sexChoices = [],
+    isLoading: isSexChoicesLoading,
+    isError: isSexChoicesError,
+    error: sexChoicesError,
+  } = useSexChoices();
+  useApiErrorSnackbar(isSexChoicesError, sexChoicesError);
   const permissions = usePermissions();
   const confirm = useConfirmation();
   const { pathname } = location;
@@ -153,7 +169,10 @@ const CreateSurveyPage = (): ReactElement => {
   const { data: adminAreasData, isLoading: adminAreasLoading } = useQuery<
     AreaList[]
   >({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
@@ -700,13 +719,17 @@ const CreateSurveyPage = (): ReactElement => {
                             )}
                             {values.sexCheckbox && (
                               <Grid size={{ xs: 5 }}>
-                                <Field
-                                  name="filterSex"
-                                  label={t('Gender')}
-                                  color="primary"
-                                  choices={sexChoices}
-                                  component={FormikSelectField}
-                                />
+                                {isSexChoicesLoading ? (
+                                  <LoadingComponent />
+                                ) : (
+                                  <Field
+                                    name="filterSex"
+                                    label={t('Gender')}
+                                    color="primary"
+                                    choices={sexChoices}
+                                    component={FormikSelectField}
+                                  />
+                                )}
                               </Grid>
                             )}
                           </Grid>

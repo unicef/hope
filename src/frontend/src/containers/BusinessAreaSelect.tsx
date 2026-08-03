@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { RestService } from '@restgenerated/index';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 
 const CountrySelect = styled(Select)`
   && {
@@ -70,16 +71,21 @@ export function BusinessAreaSelect(): ReactElement {
     }
   }, [businessAreaSlug, selectedBusinessArea]);
 
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
+
   const { data } = useQuery({
-    queryKey: ['businessAreasProfile', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersProfileRetrieve,
+      profileParams,
+    ),
     queryFn: () => {
-      return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug,
-        program: programCode === 'all' ? undefined : programCode,
-      });
+      return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
     },
-    staleTime: 15 * 60 * 1000, // Data is considered fresh for 15 minutes (business areas don't change often)
-    gcTime: 60 * 60 * 1000, // Keep unused data in cache for 1 hour
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 

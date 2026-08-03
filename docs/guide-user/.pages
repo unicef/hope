@@ -4,6 +4,7 @@ nav:
   - Beneficiary Group: beneficiary-group.md
   - Beneficiary Management: beneficiary.md
   - Population Management: population.md
+  - Known Affected Beneficiaries: known-affected-beneficiaries.md
   - Targeting: targeting.md
   - Payment Module: payment.md
   - Payment Verification: payment_verification.md

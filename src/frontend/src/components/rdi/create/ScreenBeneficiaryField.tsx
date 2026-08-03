@@ -5,13 +5,17 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export function ScreenBeneficiaryField(): ReactElement {
   const { t } = useTranslation();
   const { programCode, businessAreaSlug } = useBaseUrl();
   const { data: program, isLoading } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessAreaSlug, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessAreaSlug,
+      code: programCode,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessAreaSlug,

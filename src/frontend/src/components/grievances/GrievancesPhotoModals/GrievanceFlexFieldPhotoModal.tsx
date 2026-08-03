@@ -4,6 +4,7 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
+import { restQueryKey } from '@utils/queryKeys';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery } from '@tanstack/react-query';
 
@@ -22,7 +23,10 @@ export function GrievanceFlexFieldPhotoModal({
   const { businessAreaSlug } = useBaseUrl();
 
   const { data } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,

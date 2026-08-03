@@ -1,6 +1,6 @@
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -9,6 +9,7 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
@@ -18,6 +19,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 
 export interface VerifyPaymentGrievanceProps {
@@ -32,18 +34,14 @@ export function VerifyPaymentGrievance({
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
   const {
-    data: verificationStatusChoices,
+    data: verificationStatusChoices = [],
     isLoading: isStatusChoicesLoading,
     isError: isStatusChoicesError,
     error: statusChoicesError,
   } = useVerificationStatusChoices();
-  useEffect(() => {
-    if (isStatusChoicesError) {
-      showApiErrorMessages(statusChoicesError, showMessage);
-    }
-  }, [isStatusChoicesError, statusChoicesError, showMessage]);
+  useApiErrorSnackbar(isStatusChoicesError, statusChoicesError);
   // Grievance verification only allows marking a payment received / not received.
-  const statusChoices = (verificationStatusChoices ?? []).filter((choice) =>
+  const statusChoices = verificationStatusChoices.filter((choice) =>
     ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value),
   );
 
@@ -68,7 +66,9 @@ export function VerifyPaymentGrievance({
       setVerifyManualDialogOpen(false);
       showMessage(t('Payment has been verified.'));
       queryClient.invalidateQueries({
-        queryKey: ['GrievanceTicketDetail', ticket.id],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
     onError: (error: any) => {

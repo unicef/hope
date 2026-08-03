@@ -14,6 +14,7 @@ from hope.apps.household.const import (
 )
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.apps.utils.age_at_registration import calculate_age_at_registration
+from hope.apps.utils.phone import calculate_phone_numbers_validity
 from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
@@ -221,7 +222,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
                     },
                 )
             )
-
+        for individual in individuals_to_create:
+            calculate_phone_numbers_validity(individual)
         PendingIndividual.objects.bulk_create(individuals_to_create)
         for individual_data_dict, imported_individual in zip(individuals_list, individuals_to_create, strict=True):
             self._prepare_birth_certificate(individual_data_dict, imported_individual)

@@ -2,6 +2,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { Formik } from 'formik';
@@ -37,20 +38,21 @@ export function LookUpReassignRole({
   );
   const { businessArea, programId } = useBaseUrl();
 
+  const individualParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    id: selectedIndividualId,
+  };
   const { data: individual, isLoading: loadingIndividual } =
     useQuery<IndividualDetail>({
-      queryKey: [
-        'businessAreaProgramIndividual',
-        businessArea,
-        programId,
-        selectedIndividualId,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsRetrieve,
+        individualParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsIndividualsRetrieve({
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          id: selectedIndividualId,
-        }),
+        RestService.restBusinessAreasProgramsIndividualsRetrieve(
+          individualParams,
+        ),
       enabled: !!selectedIndividualId,
     });
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);

@@ -27,6 +27,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
 import { AUTHORIZED_USER_ROLE_CHOICES } from '@utils/constants';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface AuthorizedUsersOnlineListCreateProps {
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
@@ -50,7 +51,10 @@ export const AuthorizedUsersOnlineListCreate: React.FC<
   const [permission, setPermission] = React.useState<string[]>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['availableUsers', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList,
+      { businessAreaSlug, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
         {

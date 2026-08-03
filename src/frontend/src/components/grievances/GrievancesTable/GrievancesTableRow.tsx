@@ -3,6 +3,7 @@ import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -54,7 +55,7 @@ export function GrievancesTableRow({
   optionsData,
   setInputValue,
 }: GrievancesTableRowProps): ReactElement {
-  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
@@ -78,13 +79,9 @@ export function GrievancesTableRow({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsGrievanceTickets'],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasProgramsGrievanceTickets',
-          { program: programId },
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsList,
+        ),
       });
     },
     onError: (error: any) => {

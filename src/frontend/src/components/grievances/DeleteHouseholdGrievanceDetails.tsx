@@ -15,6 +15,7 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
@@ -37,7 +38,10 @@ export function DeleteHouseholdGrievanceDetails({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasHouseholdsChoicesRetrieve({
           businessAreaSlug: businessArea,
