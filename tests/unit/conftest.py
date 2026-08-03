@@ -177,6 +177,7 @@ def mock_elasticsearch(mocker: Any) -> Any:
     mocker.patch("hope.apps.household.services.index_management.delete_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.populate_program_indexes")
     mocker.patch("hope.apps.household.services.index_management.rebuild_program_indexes")
+    mocker.patch("hope.apps.household.services.index_management.ensure_program_indexes")
     # Also patch at usage locations (for modules that use `from X import Y`)
     mocker.patch(
         "hope.apps.grievance.services.needs_adjudication_ticket_services.remove_elasticsearch_documents_by_matching_ids"

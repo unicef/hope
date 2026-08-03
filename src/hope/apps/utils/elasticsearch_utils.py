@@ -23,12 +23,14 @@ def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk
     doc().update(qs, parallel=parallel)
 
 
-def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document: "type[Document]") -> None:
+def remove_elasticsearch_documents_by_matching_ids(
+    id_list: list[str], document: "type[Document]", using: str | None = None
+) -> None:
     if not config.IS_ELASTICSEARCH_ENABLED or not id_list:
         return
     try:
         query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
-        document.search().params(search_type="dfs_query_then_fetch", conflicts="proceed").update_from_dict(
+        document.search(using=using).params(search_type="dfs_query_then_fetch", conflicts="proceed").update_from_dict(
             query_dict
         ).delete()
     except NotFoundError:
@@ -56,6 +58,10 @@ def ensure_index_ready(index_name: str) -> None:
 
 
 def rebuild_search_index(models: None = None, options: dict | None = None) -> None:
+    # DESTRUCTIVE (delete -> create -> populate) on purpose, like the per-program admin
+    # "Rebuild Index" button: it must also recover from a junk index auto-created by a doc
+    # write that raced index creation (dynamic mapping, no analyzers). Explicit console/dev
+    # entrypoints only - AUTOMATIC paths (signals) use ensure_program_indexes instead.
     from hope.apps.household.services.index_management import rebuild_program_indexes
     from hope.models import Program
 

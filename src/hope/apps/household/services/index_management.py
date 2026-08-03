@@ -4,6 +4,7 @@ Simple utilities for managing per-program Elasticsearch indexes.
 """
 
 import logging
+import re
 
 from constance import config
 from elasticsearch import Elasticsearch
@@ -27,19 +28,43 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
         es.options(ignore_status=[400, 404]).indices.delete(index=concrete)
 
 
+def create_versioned_index(es: Elasticsearch, doc_class: type) -> None:
+    """Create ``<name>_vN`` (next unused version) with the alias attached in the same call.
+
+    Blue-green convention: the app addresses the suffix-less name, which is an ALIAS onto the
+    physical ``_vN``. Creating both in one call means the index is born on the alias scheme —
+    there is never a bare physical index squatting on the logical name. The version is
+    ``max(existing) + 1`` rather than a hardcoded ``_v1`` so a rebuild during a blue-green
+    sanity window (old ``_vN`` still lingering unaliased) cannot collide and strand the
+    program without an index.
+    """
+    index = doc_class._index
+    name = index._name
+    existing = es.indices.get(index=f"{name}_v*", ignore_unavailable=True)
+    versions = [int(m.group(1)) for i in existing for m in [re.match(rf"^{re.escape(name)}_v(\d+)$", i)] if m]
+    body = index.to_dict()
+    es.indices.create(
+        index=f"{name}_v{max(versions, default=0) + 1}",
+        settings=body.get("settings"),
+        mappings=body.get("mappings"),
+        aliases={name: {}},
+    )
+
+
 def create_program_indexes(program_id: str, using: str = "default") -> tuple[bool, str]:
-    """Create Elasticsearch indexes for a program."""
+    """Create Elasticsearch indexes for a program (physical ``_v1`` + suffix-less alias)."""
     try:
         individual_doc_class = get_individual_doc(program_id)
         household_doc_class = get_household_doc(program_id)
 
         es: Elasticsearch = connections.get_connection(using)
 
+        # exists() also matches aliases, so bootstrapped and newly-created programs both skip
         if not es.indices.exists(index=individual_doc_class._index._name):
-            individual_doc_class._index.create()
+            create_versioned_index(es, individual_doc_class)
 
         if not es.indices.exists(index=household_doc_class._index._name):
-            household_doc_class._index.create()
+            create_versioned_index(es, household_doc_class)
 
         return True, ""
     except Exception as e:  # pragma: no cover  # noqa
@@ -87,6 +112,32 @@ def populate_program_indexes(
         return False, str(e)
 
 
+def ensure_program_indexes(
+    program_id: str,
+    batch_size: int = 2000,
+    parallel: bool = False,
+    thread_count: int = 4,
+    using: str = "default",
+) -> tuple[bool, str]:
+    """Create missing indexes (``_v1`` + alias) and upsert-populate. Never deletes anything.
+
+    The safe choice for every AUTOMATIC path (signals, bulk console actions): an existing live
+    index keeps serving while populate upserts into it. Stale-document cleanup is the job of an
+    explicit blue-green reindex, not of this function.
+    """
+    success, msg = create_program_indexes(program_id, using=using)
+    if not success:
+        return False, f"Create failed: {msg}"
+
+    success, msg = populate_program_indexes(
+        program_id, batch_size, parallel=parallel, thread_count=thread_count, using=using
+    )
+    if not success:
+        return False, f"Populate failed: {msg}"
+
+    return True, f"Ensured indexes for program {program_id}"
+
+
 def rebuild_program_indexes(
     program_id: str,
     batch_size: int = 2000,
@@ -94,7 +145,13 @@ def rebuild_program_indexes(
     thread_count: int = 4,
     using: str = "default",
 ) -> tuple[bool, str]:
-    """Rebuild Elasticsearch indexes for a program (delete, create, populate)."""
+    """Rebuild Elasticsearch indexes for a program (delete, create, populate).
+
+    DESTRUCTIVE: deletes the live index first, so search/dedup see an empty index until populate
+    finishes. Reserved for the explicit admin "Rebuild Index" button as a recovery tool — automatic
+    paths must use ``ensure_program_indexes`` instead. The end state is alias-consistent (the
+    rebuilt index is ``_v1`` behind the suffix-less alias).
+    """
     success, msg = delete_program_indexes(program_id, using=using)
     if not success:  # pragma: no cover
         return False, f"Delete failed: {msg}"
