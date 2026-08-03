@@ -90,12 +90,12 @@ export const api = {
     const response = await fetch(`${this.baseURL}${url}`, fetchOptions);
 
     if (!response.ok) {
-      const error = Error(`Error posting data to ${url}`);
+      const error = Error(`Error posting data to ${url}`) as Error & {
+        data?: unknown;
+      };
       try {
-        // @ts-ignore
         error.data = await response.json();
       } catch {
-        // @ts-ignore
         error.data = null;
       }
       throw error;
@@ -120,12 +120,12 @@ export const api = {
     });
 
     if (!response.ok) {
-      const error = Error(`Error puting data to ${url}`);
+      const error = Error(`Error puting data to ${url}`) as Error & {
+        data?: unknown;
+      };
       try {
-        // @ts-ignore
         error.data = await response.json();
       } catch {
-        // @ts-ignore
         error.data = null;
       }
       throw error;
@@ -154,23 +154,27 @@ export const api = {
   },
 };
 
-export const handleApiResponse = async (apiCall) => {
+export const handleApiResponse = async <T>(apiCall: Promise<T>): Promise<T> => {
   try {
     const response = await apiCall;
     return response;
-  } catch (error: any) {
-    console.error('API call failed:', error.message || error);
-    const err = new Error(
-      `API call failed: ${error.message || 'Unknown error'}`,
-    );
-    (err as any).cause = error;
+  } catch (error: unknown) {
+    const message = (error as { message?: string })?.message;
+    console.error('API call failed:', message || error);
+    const err = new Error(`API call failed: ${message || 'Unknown error'}`) as Error & {
+      cause?: unknown;
+    };
+    err.cause = error;
     throw err;
   }
 };
 
-export const handleMutationError = (error: any, action: string): never => {
-  const errorMessage = error?.message || 'An unknown error occurred';
-  const err = new Error(`Failed to ${action}: ${errorMessage}`);
-  (err as any).cause = error;
+export const handleMutationError = (error: unknown, action: string): never => {
+  const errorMessage =
+    (error as { message?: string })?.message || 'An unknown error occurred';
+  const err = new Error(`Failed to ${action}: ${errorMessage}`) as Error & {
+    cause?: unknown;
+  };
+  err.cause = error;
   throw err;
 };
