@@ -158,9 +158,12 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
             if not updates or not any(payment.fsp_extra_fields.get(key) != value for key, value in updates.items()):
                 continue
             old_payment = cast("Payment", copy_model_object(payment))
-            payment.extras[Payment.FSP_EXTRA_FIELDS_KEY] = {
-                **payment.fsp_extra_fields,
-                **updates,
+            payment.extras = {
+                **payment.extras,
+                Payment.FSP_EXTRA_FIELDS_KEY: {
+                    **payment.fsp_extra_fields,
+                    **updates,
+                },
             }
             payment.update_signature_hash()
             payments_to_update.append(payment)

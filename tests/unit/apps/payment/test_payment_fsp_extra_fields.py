@@ -3,6 +3,7 @@ from decimal import Decimal
 from io import BytesIO
 from uuid import UUID
 
+from django.contrib.contenttypes.models import ContentType
 import openpyxl
 import pytest
 
@@ -26,7 +27,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service im
 from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service import (
     XlsxPaymentPlanFspExtraFieldsImportService,
 )
-from hope.models import PaymentPlan
+from hope.models import LogEntry, Payment, PaymentPlan
 from hope.one_time_scripts.migrate_payment_extras import migrate_payment_extras
 
 pytestmark = pytest.mark.django_db
@@ -210,7 +211,40 @@ def migration_payments(payment_plan):
         program=payment_plan.program,
         extras={"fsp_extra_fields": {"already": "namespaced"}},
     )
-    return flat_payment, empty_payment, namespaced_payment
+    mixed_fsp_payment = PaymentFactory(
+        parent=payment_plan,
+        program=payment_plan.program,
+        extras={
+            "legacy": "value",
+            "fsp_extra_fields": {"bank": "existing"},
+        },
+    )
+    mixed_extra_fields_payment = PaymentFactory(
+        parent=payment_plan,
+        program=payment_plan.program,
+        extras={
+            "legacy": "value",
+            "extra_fields": {"existing": "reconciliation"},
+        },
+    )
+    mixed_namespaces_payment = PaymentFactory(
+        parent=payment_plan,
+        program=payment_plan.program,
+        extras={
+            "legacy": "value",
+            "conflict": "legacy",
+            "extra_fields": {"conflict": "namespaced"},
+            "fsp_extra_fields": {"bank": "existing"},
+        },
+    )
+    return (
+        flat_payment,
+        empty_payment,
+        namespaced_payment,
+        mixed_fsp_payment,
+        mixed_extra_fields_payment,
+        mixed_namespaces_payment,
+    )
 
 
 @pytest.fixture
@@ -224,10 +258,39 @@ def test_post_deployment_script_migrates_flat_extras_and_preserves_other_values(
     migration_payments[0].refresh_from_db()
     migration_payments[1].refresh_from_db()
     migration_payments[2].refresh_from_db()
+    migration_payments[3].refresh_from_db()
+    migration_payments[4].refresh_from_db()
+    migration_payments[5].refresh_from_db()
     assert migration_payments[0].extras == {"extra_fields": {"legacy": "value"}}
     assert migration_payments[1].extras == {}
     assert migration_payments[2].extras == {"fsp_extra_fields": {"already": "namespaced"}}
+    assert migration_payments[3].extras == {
+        "extra_fields": {"legacy": "value"},
+        "fsp_extra_fields": {"bank": "existing"},
+    }
+    assert migration_payments[4].extras == {
+        "extra_fields": {
+            "existing": "reconciliation",
+            "legacy": "value",
+        }
+    }
+    assert migration_payments[5].extras == {
+        "extra_fields": {
+            "conflict": "namespaced",
+            "legacy": "value",
+        },
+        "fsp_extra_fields": {"bank": "existing"},
+    }
     assert "Remaining legacy Payment.extras rows: 0." in capsys.readouterr().out
+
+
+def test_post_deployment_script_is_idempotent(migration_payments, capsys):
+    migrate_payment_extras(blocks_per_batch=1_000_000, sleep_seconds=0)
+    capsys.readouterr()
+
+    migrate_payment_extras(blocks_per_batch=1_000_000, sleep_seconds=0)
+
+    assert "Done. Migrated 0 rows. Remaining legacy Payment.extras rows: 0." in capsys.readouterr().out
 
 
 def test_fsp_extra_fields_template_contains_only_fsp_fields(
@@ -294,6 +357,36 @@ def test_fsp_extra_fields_import_merges_non_empty_values(
     }
     assert payments[0].signature_hash != old_signature
     assert payments[1].fsp_extra_fields == {"other": "second-payment"}
+
+
+@pytest.mark.enable_activity_log
+def test_fsp_extra_fields_import_logs_previous_and_updated_values(
+    payment_plan,
+    payments,
+    fsp_extra_fields_import_file,
+    django_assert_num_queries,
+):
+    service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, fsp_extra_fields_import_file)
+    service.open_workbook()
+    service.validate()
+    content_type = ContentType.objects.get_for_model(Payment)
+
+    with django_assert_num_queries(4):
+        updated_count = service.import_payment_list(str(payment_plan.created_by_id))
+
+    log = LogEntry.objects.get(content_type=content_type, object_id=payments[0].pk)
+    assert updated_count == 1
+    assert log.user_id == payment_plan.created_by_id
+    assert log.changes == {
+        "fsp_extra_fields": {
+            "from": "{'empty_field': 'keep-empty', 'keep': 'keep-existing', 'reference': 'old-reference'}",
+            "to": (
+                "{'empty_field': 'keep-empty', 'keep': 'keep-existing', 'reference': 'new-reference', "
+                "'date_field': '2026-07-23T00:00:00'}"
+            ),
+        }
+    }
+    assert list(log.programs.values_list("pk", flat=True)) == [payment_plan.program_id]
 
 
 def test_fsp_extra_fields_import_allows_payment_gateway_payload_header(

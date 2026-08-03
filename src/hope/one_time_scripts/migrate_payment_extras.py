@@ -9,8 +9,7 @@ ADVISORY_LOCK_NAME = "hope.migrate_payment_extras"
 DEFAULT_BLOCKS_PER_BATCH = 10_000
 DEFAULT_LOCK_TIMEOUT_MS = 5_000
 LEGACY_EXTRAS_PREDICATE = """
-extras <> '{}'::jsonb
-AND NOT (extras ? 'extra_fields' OR extras ? 'fsp_extra_fields')
+extras - ARRAY['extra_fields', 'fsp_extra_fields']::text[] <> '{}'::jsonb
 """
 
 
@@ -98,7 +97,17 @@ def migrate_payment_extras(
                     sql.SQL(
                         """
                         UPDATE {table}
-                        SET extras = jsonb_build_object('extra_fields', extras)
+                        SET extras =
+                            jsonb_build_object(
+                                'extra_fields',
+                                (extras - ARRAY['extra_fields', 'fsp_extra_fields']::text[])
+                                || COALESCE(extras->'extra_fields', '{}'::jsonb)
+                            )
+                            || CASE
+                                WHEN extras ? 'fsp_extra_fields'
+                                THEN jsonb_build_object('fsp_extra_fields', extras->'fsp_extra_fields')
+                                ELSE '{}'::jsonb
+                            END
                         WHERE ctid >= %s::tid
                           AND ctid < %s::tid
                           AND {predicate}
