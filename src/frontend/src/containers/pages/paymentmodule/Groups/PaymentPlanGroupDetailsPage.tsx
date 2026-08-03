@@ -130,7 +130,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         </ContainerColumnWithBorder>
       </Grid>
       {group?.batches && group.batches.length > 0 && (
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12 }} data-cy="batches-section">
           <ContainerColumnWithBorder>
             <Title>
               <Typography variant="h6">{t('Batches')}</Typography>
