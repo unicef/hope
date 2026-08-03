@@ -2,6 +2,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   createHandleApplyFilterChange,
   Filter,
@@ -67,18 +68,24 @@ export const TargetPopulationAutocompleteRestFilter = ({
   }, [debouncedInputText]);
 
   // Use the RestService function to fetch target population data
+  const targetPopulationsParams = {
+    businessAreaSlug: businessArea || '',
+    programCode: programId || '',
+    ...queryVariables,
+  };
   const {
     data: targetPopulationData,
     isLoading,
     refetch,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: ['targetPopulations', businessArea, programId, queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      targetPopulationsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsTargetPopulationsList({
-        businessAreaSlug: businessArea || '',
-        programCode: programId || '',
-        ...queryVariables,
-      }),
+      RestService.restBusinessAreasProgramsTargetPopulationsList(
+        targetPopulationsParams,
+      ),
     enabled: !!businessArea && !!programId,
   });
 

@@ -16,6 +16,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface RegistrationFiltersProps {
   filter;
@@ -58,12 +59,10 @@ const RegistrationFilters = ({
 
   const { t } = useTranslation();
   const { data: registrationChoicesData } = useQuery({
-    queryKey: [
-      RestService
-        .restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList.name,
-      businessAreaSlug,
-      programCode,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList,
+      { businessAreaSlug, programCode },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
         { businessAreaSlug, programCode },

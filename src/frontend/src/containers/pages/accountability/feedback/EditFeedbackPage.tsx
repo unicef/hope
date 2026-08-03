@@ -21,7 +21,8 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -59,6 +60,7 @@ const EditFeedbackPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const queryClient = useQueryClient();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -66,7 +68,10 @@ const EditFeedbackPage = (): ReactElement => {
 
   const { data: feedbackData, isLoading: feedbackDataLoading } =
     useQuery<FeedbackDetail>({
-      queryKey: ['businessAreasFeedbacksRetrieve', businessArea, id],
+      queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksRetrieve, {
+        businessAreaSlug: businessArea,
+        id: id,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasFeedbacksRetrieve({
           businessAreaSlug: businessArea,
@@ -75,22 +80,24 @@ const EditFeedbackPage = (): ReactElement => {
     });
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['choicesFeedbackIssueTypeList', businessArea],
+    queryKey: restQueryKey(RestService.restChoicesFeedbackIssueTypeList),
     queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 
+  const programsParams = createApiParams(
+    { businessAreaSlug: businessArea, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
+
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsParams,
+      ),
+      queryFn: () => RestService.restBusinessAreasProgramsList(programsParams),
     });
 
   const { mutateAsync: mutate, isPending: loading } = useMutation({
@@ -108,6 +115,19 @@ const EditFeedbackPage = (): ReactElement => {
         id: feedbackId,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFeedbacksList,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksList),
+      });
+    },
   });
 
   if (feedbackDataLoading || choicesLoading || programsDataLoading)

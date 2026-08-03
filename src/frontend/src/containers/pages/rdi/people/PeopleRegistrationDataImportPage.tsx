@@ -10,8 +10,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,7 +40,10 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   const { showMessage } = useSnackbar();
 
   const { data: deduplicationFlags, isLoading: loading } = useQuery({
-    queryKey: ['deduplicationFlags', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve,
+      { businessAreaSlug, code: programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
         businessAreaSlug,
@@ -48,7 +52,9 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   });
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessAreaSlug],
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessAreaSlug,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
         slug: businessAreaSlug,
@@ -67,11 +73,18 @@ function PeopleRegistrationDataImportPage(): ReactElement {
     setShouldScroll(false),
   );
 
+  const queryClient = useQueryClient();
+
   const { mutateAsync } = useMutation({
     mutationFn: async () =>
       runDeduplicationDataImports(businessArea, programId),
     onSuccess: () => {
       showMessage('Deduplication process started');
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsRegistrationDataImportsList,
+        ),
+      });
     },
   });
 

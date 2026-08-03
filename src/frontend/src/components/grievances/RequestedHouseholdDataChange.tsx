@@ -5,6 +5,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { Title } from '@core/Title';
@@ -65,11 +66,9 @@ export function RequestedHouseholdDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessArea,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
     onError: (error: ApiErrorShape) => {

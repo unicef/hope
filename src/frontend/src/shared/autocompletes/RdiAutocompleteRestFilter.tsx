@@ -6,6 +6,7 @@ import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   createHandleApplyFilterChange,
   Filter,
@@ -56,12 +57,10 @@ export function RdiAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedRegistrationDataImportListList>({
-    queryKey: [
-      'businessAreasProgramsRegistrationDataImportsList',
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsList,
       queryVariables,
-      businessArea,
-      programId,
-    ],
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsList(
         queryVariables,

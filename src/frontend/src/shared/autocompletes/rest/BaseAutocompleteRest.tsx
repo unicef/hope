@@ -1,6 +1,7 @@
 import CircularProgress from '@mui/material/CircularProgress';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';
 import { useDebounce } from '@hooks/useDebounce';
 import { FormHelperText } from '@mui/material';
@@ -13,6 +14,7 @@ export function BaseAutocompleteRest({
   label,
   dataCy,
   fetchFunction,
+  queryKeyMethod,
   businessArea,
   programId,
   queryParams,
@@ -36,6 +38,9 @@ export function BaseAutocompleteRest({
     programId: string,
     queryParams?: Record<string, any>,
   ) => Promise<any>;
+  // The RestService method `fetchFunction` calls, used only for its `.name`. Deriving the
+  // root from `fetchFunction` would yield 'fetchFunction' for every inline-arrow caller.
+  queryKeyMethod: (...args: any[]) => unknown;
   businessArea: string;
   programId: string;
   queryParams?: Record<string, any>;
@@ -54,9 +59,14 @@ export function BaseAutocompleteRest({
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [open, setOpen] = useState(false);
+  // `fetchFunction` is a fresh arrow each render; everything it reads is already in the key.
   // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data, isLoading } = useQuery({
-    queryKey: [label, businessArea, programId, queryParams],
+    queryKey: restQueryKey(queryKeyMethod, {
+      businessArea,
+      programId,
+      ...queryParams,
+    }),
     queryFn: () => fetchFunction(businessArea, programId, { ...queryParams }),
   });
   useEffect(

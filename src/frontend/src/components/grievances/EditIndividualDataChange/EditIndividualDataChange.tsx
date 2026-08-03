@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
@@ -66,7 +67,10 @@ function EditIndividualDataChange({
     data: addIndividualFieldsData,
     isLoading: addIndividualFieldsLoading,
   } = useQuery({
-    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -77,7 +81,10 @@ function EditIndividualDataChange({
   });
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['grievanceTicketsChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -87,7 +94,10 @@ function EditIndividualDataChange({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: ['individualsChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -96,25 +106,25 @@ function EditIndividualDataChange({
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
-    queryKey: ['countriesList'],
+    queryKey: restQueryKey(RestService.restChoicesCountriesList),
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
+  const fullIndividualParams = {
+    businessAreaSlug: businessArea,
+    id: individual?.id,
+    programCode: dynamicProgramCode,
+  };
   const { data: fullIndividual, isLoading: fullIndividualLoading } =
     useQuery<IndividualDetail>({
-      queryKey: [
-        'individual',
-        businessArea,
-        individual?.id,
-        dynamicProgramCode,
-        programId,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsRetrieve,
+        fullIndividualParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsIndividualsRetrieve({
-          businessAreaSlug: businessArea,
-          id: individual.id,
-          programCode: dynamicProgramCode,
-        }),
+        RestService.restBusinessAreasProgramsIndividualsRetrieve(
+          fullIndividualParams,
+        ),
       enabled: Boolean(individual && businessArea && dynamicProgramCode),
     });
 

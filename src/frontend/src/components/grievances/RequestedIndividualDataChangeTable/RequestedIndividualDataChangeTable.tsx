@@ -13,6 +13,7 @@ import { AccountTable } from './AccountTable';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface RequestedIndividualDataChangeTableProps {
@@ -31,7 +32,10 @@ export function RequestedIndividualDataChangeTable({
   const { businessAreaSlug } = useBaseUrl();
 
   const { data: addIndividualFieldsData, isLoading: loading } = useQuery({
-    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -42,7 +46,10 @@ export function RequestedIndividualDataChangeTable({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: ['individualChoices', businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug,
@@ -50,24 +57,25 @@ export function RequestedIndividualDataChangeTable({
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
-    queryKey: ['countriesList'],
+    queryKey: restQueryKey(RestService.restChoicesCountriesList),
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
+  const individualParams = {
+    businessAreaSlug,
+    programCode: ticket.individual.programCode,
+    id: ticket.individual.id,
+  };
   const { data: individual, isLoading: individualLoading } = useQuery({
-    queryKey: [
-      'individualChoices',
-      businessAreaSlug,
-      ticket.individual.id,
-      ticket.individual.programCode,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      individualParams,
+    ),
     queryFn: () => {
-      if (!ticket.individual.id) return null;
-      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        programCode: ticket.individual.programCode,
-        id: ticket.individual.id,
-      });
+      if (!individualParams.id) return null;
+      return RestService.restBusinessAreasProgramsIndividualsRetrieve(
+        individualParams,
+      );
     },
   });
 

@@ -2,7 +2,8 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './TargetPopulationPeopleHeadCells';
@@ -38,31 +39,31 @@ export function TargetPopulationPeopleTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const pendingPaymentsListParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      id,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: householdsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPendingPaymentList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsList',
-      businessArea,
-      programId,
-      queryVariables,
-      id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList,
+      pendingPaymentsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
+        pendingPaymentsListParams,
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   return (
@@ -72,6 +73,7 @@ export function TargetPopulationPeopleTable({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

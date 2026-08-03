@@ -16,6 +16,7 @@ import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/He
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 const initialFilter = {
@@ -48,7 +49,9 @@ export const ProgramCyclePage = (): ReactElement => {
   );
 
   const { data: programChoicesData } = useQuery<ProgramChoices>({
-    queryKey: ['programChoices', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsChoicesRetrieve({
         businessAreaSlug: businessArea,

@@ -10,6 +10,7 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { Box, Button, Tooltip } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   GRIEVANCE_CATEGORIES,
@@ -112,11 +113,9 @@ export const GrievanceDetailsToolbar = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessArea,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });
@@ -304,11 +303,9 @@ export const GrievanceDetailsToolbar = ({
             { businessAreaSlug: businessArea, id: linkedId, formData: {} },
           );
           queryClient.invalidateQueries({
-            queryKey: [
-              'businessAreasGrievanceTicketsRetrieve',
-              businessArea,
-              linkedId,
-            ],
+            queryKey: restQueryKey(
+              RestService.restBusinessAreasGrievanceTicketsRetrieve,
+            ),
           });
         } catch (e) {
           showApiErrorMessages(e, showMessage);

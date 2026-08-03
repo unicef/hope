@@ -37,6 +37,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
@@ -105,7 +106,10 @@ const EditTargetPopulation = ({
   };
 
   const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: programCode,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
@@ -142,9 +146,15 @@ const EditTargetPopulation = ({
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate and refetch the grievance ticket details
         queryClient.invalidateQueries({
-          queryKey: ['targetPopulation', businessArea, id, programCode],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+          ),
+        });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsTargetPopulationsList,
+          ),
         });
       },
     });

@@ -10,6 +10,7 @@ import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
 import { AutocompleteOption } from './types';
 
@@ -55,7 +56,7 @@ export function AssigneeAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedUserList>({
-    queryKey: ['businessAreasUsersList', queryVariables, businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, queryVariables),
     queryFn: () => RestService.restBusinessAreasUsersList(queryVariables),
   });
 

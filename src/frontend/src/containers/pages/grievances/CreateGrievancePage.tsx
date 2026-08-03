@@ -38,6 +38,7 @@ import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTick
 import { IndividualRoleInHouseholdForHousehold } from '@restgenerated/models/IndividualRoleInHouseholdForHousehold';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
@@ -120,19 +121,20 @@ function FormikSelectedEntitiesSync({
         individualForDelegate?.programCode)
       : undefined);
 
+  const householdForDelegateParams = {
+    businessAreaSlug: businessArea,
+    programCode: programCodeForDelegate,
+    id: String(householdIdForDelegate),
+  };
   const { data: householdForDelegate } = useQuery({
-    queryKey: [
-      'householdForDelegate',
-      businessArea,
-      programCodeForDelegate,
-      householdIdForDelegate,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+      householdForDelegateParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        programCode: programCodeForDelegate,
-        id: String(householdIdForDelegate),
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve(
+        householdForDelegateParams,
+      ),
     enabled: !!householdIdForDelegate && !!programCodeForDelegate,
   });
 
@@ -183,23 +185,28 @@ const CreateGrievancePage = (): ReactElement => {
   const selectedHousehold = location.state?.selectedHousehold;
   const feedbackProgramId = location.state?.feedbackProgramId;
 
+  const programsListParams = createApiParams(
+    { businessAreaSlug: businessArea, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsListParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+        RestService.restBusinessAreasProgramsList(programsListParams),
     });
 
   // Fetch linked ticket details when linked query param is provided
   const { data: linkedTicketData, isLoading: linkedTicketLoading } = useQuery({
-    queryKey: ['linkedTicket', businessArea, linkedTicketIdFromQuery],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug: businessArea, id: linkedTicketIdFromQuery },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug: businessArea,
@@ -223,20 +230,21 @@ const CreateGrievancePage = (): ReactElement => {
   const entityProgramCode =
     feedbackProgramCode || (programId !== 'all' ? programId : undefined);
 
+  const fetchedHouseholdParams = {
+    businessAreaSlug: businessArea,
+    programCode: entityProgramCode,
+    id: String(selectedHousehold),
+  };
   const { data: fetchedHousehold, isLoading: fetchedHouseholdLoading } =
     useQuery({
-      queryKey: [
-        'household',
-        businessArea,
-        entityProgramCode,
-        selectedHousehold,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+        fetchedHouseholdParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-          businessAreaSlug: businessArea,
-          programCode: entityProgramCode,
-          id: String(selectedHousehold),
-        }),
+        RestService.restBusinessAreasProgramsHouseholdsRetrieve(
+          fetchedHouseholdParams,
+        ),
       enabled: shouldFetchHousehold && !!entityProgramCode,
     });
   const selectedIndividual = location.state?.selectedIndividual;
@@ -248,20 +256,21 @@ const CreateGrievancePage = (): ReactElement => {
       typeof selectedIndividual === 'number'),
   );
 
+  const fetchedIndividualParams = {
+    businessAreaSlug: businessArea,
+    programCode: entityProgramCode,
+    id: String(selectedIndividual),
+  };
   const { data: fetchedIndividual, isLoading: fetchedIndividualLoading } =
     useQuery({
-      queryKey: [
-        'individual',
-        businessArea,
-        entityProgramCode,
-        selectedIndividual,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsRetrieve,
+        fetchedIndividualParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsIndividualsRetrieve({
-          businessAreaSlug: businessArea,
-          programCode: entityProgramCode,
-          id: String(selectedIndividual),
-        }),
+        RestService.restBusinessAreasProgramsIndividualsRetrieve(
+          fetchedIndividualParams,
+        ),
       enabled: shouldFetchIndividual && !!entityProgramCode,
     });
 
@@ -317,7 +326,10 @@ const CreateGrievancePage = (): ReactElement => {
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -337,7 +349,10 @@ const CreateGrievancePage = (): ReactElement => {
     data: allAddIndividualFieldsData,
     isLoading: allAddIndividualFieldsDataLoading,
   } = useQuery({
-    queryKey: ['addIndividualFieldsAttributes', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -348,7 +363,10 @@ const CreateGrievancePage = (): ReactElement => {
 
   const { data: householdFieldsData, isLoading: householdFieldsLoading } =
     useQuery({
-      queryKey: ['householdFieldsAttributes', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
           {
@@ -361,7 +379,10 @@ const CreateGrievancePage = (): ReactElement => {
     data: allEditPeopleFieldsData,
     isLoading: allEditPeopleFieldsLoading,
   } = useQuery({
-    queryKey: ['editPeopleFieldsAttributes', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
         {

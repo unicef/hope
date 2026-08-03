@@ -22,6 +22,7 @@ import { ReactElement } from 'react';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { GrievanceUpdateApproveStatus } from '@restgenerated/models/GrievanceUpdateApproveStatus';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { formatFigure, ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 
@@ -73,11 +74,9 @@ export function PaymentGrievanceDetails({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessArea,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
     onError: (error: ApiErrorShape) => {

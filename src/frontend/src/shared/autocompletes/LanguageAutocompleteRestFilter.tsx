@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   createHandleApplyFilterChange,
   Filter,
@@ -47,7 +48,7 @@ export function LanguageAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ['languagesList'],
+    queryKey: restQueryKey(RestService.restChoicesLanguagesList),
     queryFn: () => RestService.restChoicesLanguagesList(),
   });
 

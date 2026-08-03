@@ -12,6 +12,7 @@ import Grid from '@mui/material/Grid';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -28,14 +29,18 @@ const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { businessAreaSlug, programCode } = useBaseUrl();
   const permissions = usePermissions();
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programCode],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        profileParams,
+      ),
       queryFn: () => {
-        return RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug: businessAreaSlug,
-          program: programCode === 'all' ? undefined : programCode,
-        });
+        return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
       gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
@@ -48,7 +53,10 @@ const GrievancesDetailsPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
@@ -60,7 +68,10 @@ const GrievancesDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug,

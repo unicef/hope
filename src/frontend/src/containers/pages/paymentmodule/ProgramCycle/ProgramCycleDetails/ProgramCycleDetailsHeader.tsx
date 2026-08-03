@@ -18,6 +18,7 @@ import { PaymentPlanGroupCreate } from '@restgenerated/models/PaymentPlanGroupCr
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/index';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,12 +58,9 @@ export const ProgramCycleDetailsHeader = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            programCycle.id,
-            programId,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesRetrieve,
+          ),
         });
         showMessage(t('Programme Cycle Finished'));
       },
@@ -89,12 +87,9 @@ export const ProgramCycleDetailsHeader = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            programCycle.id,
-            programId,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesRetrieve,
+          ),
         });
       },
     });
@@ -115,7 +110,9 @@ export const ProgramCycleDetailsHeader = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroupsList', businessArea, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+        ),
       });
     },
   });

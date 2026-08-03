@@ -44,6 +44,7 @@ export const ProgramCycleAutocompleteRest = ({
           ...params,
         })
       }
+      queryKeyMethod={RestService.restBusinessAreasProgramsCyclesList}
       businessArea={businessArea}
       programId={programId}
       handleChange={(_, selectedValue) => {

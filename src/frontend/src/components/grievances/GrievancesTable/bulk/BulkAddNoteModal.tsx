@@ -6,6 +6,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { BulkGrievanceTicketsAddNote } from '@restgenerated/models/BulkGrievanceTicketsAddNote';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
@@ -32,7 +33,7 @@ export function BulkAddNoteModal({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = useState<string>('');
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
@@ -45,14 +46,15 @@ export function BulkAddNoteModal({
     onSuccess: () => {
       if (isAllPrograms) {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasGrievanceTickets'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+          ),
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+          ),
         });
       }
       setSelected([]);

@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { BlackLink } from '@core/BlackLink';
@@ -35,7 +36,7 @@ export const NeedsAdjudicationDetailsOld = ({
   canApprove: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
-  const { businessAreaSlug, baseUrl, isAllPrograms } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();
   const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
@@ -62,11 +63,9 @@ export const NeedsAdjudicationDetailsOld = ({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });

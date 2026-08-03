@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
 
 type ManagerialStatus =
@@ -74,7 +75,10 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchInApproval,
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInApproval', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'IN_APPROVAL' },
+    ),
     queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
   });
 
@@ -84,7 +88,10 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchInAuthorization,
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInAuthorization', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'IN_AUTHORIZATION' },
+    ),
     queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
   });
 
@@ -94,7 +101,10 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchInReview,
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInReview', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'IN_REVIEW' },
+    ),
     queryFn: () => fetchPaymentPlans('IN_REVIEW'),
   });
 
@@ -104,7 +114,10 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchReleased,
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansReleased', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'ACCEPTED' },
+    ),
     queryFn: () => fetchPaymentPlans('ACCEPTED'),
   });
 
