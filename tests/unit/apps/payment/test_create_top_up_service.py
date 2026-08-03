@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from typing import Any
 from unittest import mock
 
@@ -52,6 +53,7 @@ def regular_pp(business_area: Any, cycle: ProgramCycle, user: User, purpose: Any
         program_cycle=cycle,
         created_by=user,
         plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.ACCEPTED,
         name="Test Payment Plan",
         payment_plan_purposes=[purpose],
     )
@@ -87,7 +89,10 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
     assert top_up_pp.source_payment_plan == regular_pp
     assert top_up_pp.created_by == user
     assert top_up_pp.payment_plan_group == regular_pp.payment_plan_group
+    assert top_up_pp.program_cycle == regular_pp.program_cycle
     assert top_up_pp.currency == regular_pp.currency
+    assert top_up_pp.financial_service_provider == regular_pp.financial_service_provider
+    assert top_up_pp.delivery_mechanism == regular_pp.delivery_mechanism
     assert top_up_pp.dispersion_start_date == start
     assert top_up_pp.dispersion_end_date == end
     assert list(top_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
@@ -96,28 +101,27 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
 
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_create_top_up_arrange_eligible_payments_act_run_task_assert_copies_with_empty_entitlement(
+def test_create_top_up_arrange_eligible_payments_act_run_task_assert_copies_with_fixed_entitlement(
     get_exchange_rate_mock: Any,
     user: User,
     regular_pp: PaymentPlan,
     source_payments: dict[str, Payment],
     django_capture_on_commit_callbacks: Any,
 ) -> None:
+    """Every source payment is copied whatever its status, funded with the flat amount."""
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
-    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end)
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end, fixed_amount=Decimal("15.00"))
 
     with django_capture_on_commit_callbacks(execute=True):
-        prepare_child_payment_plan_async_task(top_up_pp)
+        prepare_child_payment_plan_async_task(top_up_pp, extra_config={"fixed_amount": "15.00"})
 
     top_up_pp.refresh_from_db()
-    assert top_up_pp.payment_items.count() == 2
-    assert {source_payments["delivered"].id, source_payments["pending"].id} == set(
-        top_up_pp.payment_items.values_list("source_payment_id", flat=True)
-    )
+    assert set(top_up_pp.payment_items.values_list("source_payment_id", flat=True)) == {
+        payment.id for payment in source_payments.values()
+    }
     copied = top_up_pp.payment_items.first()
-    assert copied.entitlement_quantity is None
-    assert copied.entitlement_quantity_usd is None
+    assert copied.entitlement_quantity == Decimal("15.00")
     assert copied.is_follow_up is False
     assert copied.status == Payment.STATUS_PENDING
 
@@ -158,11 +162,12 @@ def test_create_top_up_arrange_follow_up_origin_act_create_assert_raises(
 def test_create_top_up_arrange_no_eligible_payments_act_create_assert_raises(
     user: User, regular_pp: PaymentPlan
 ) -> None:
-    PaymentFactory(parent=regular_pp, status=Payment.STATUS_ERROR)
+    # Excluded payments are the remaining way to have none eligible; payment status no longer gates.
+    PaymentFactory(parent=regular_pp, status=Payment.STATUS_ERROR, excluded=True)
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(regular_pp).create_top_up(user, start, end)
+        PaymentPlanService(regular_pp).create_top_up(user, start, end, fixed_amount=Decimal("5.00"))
 
     assert "no eligible payments" in str(error.value.detail[0]).lower()

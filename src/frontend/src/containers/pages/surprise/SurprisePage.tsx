@@ -7,10 +7,10 @@ import surpriseFallback from '../../../images/surprise-fallback.jpg';
 
 const Container = styled.div`
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   display: flex;
   background-color: #003c8f;
 `;
@@ -112,10 +112,10 @@ export function SurprisePage(): ReactElement {
         <Logo transparent={false} displayLogoWithoutSubtitle={false} height={160} />
         <Heading>{heading}</Heading>
         <SubHeading>{subheading}</SubHeading>
+        <Photo src={imageSrc} alt="A surprise for you" />
         {paragraphs.map((paragraph, index) => (
           <Paragraph key={index}>{paragraph}</Paragraph>
         ))}
-        <Photo src={imageSrc} alt="A surprise for you" />
         <BackLink to="/login">← Back to login</BackLink>
       </Card>
     </Container>
