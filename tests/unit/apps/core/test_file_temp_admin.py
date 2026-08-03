@@ -1,6 +1,5 @@
 from django.contrib.admin import AdminSite
 from django.http import HttpRequest
-from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import FileTempFactory, UserFactory
@@ -13,16 +12,6 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def admin_instance() -> FileTempAdmin:
     return FileTempAdmin(FileTemp, AdminSite())
-
-
-@pytest.fixture(autouse=True)
-def enable_is_root():
-    FlagState.objects.get_or_create(
-        name="IS_ROOT",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
 
 
 @pytest.fixture
@@ -61,6 +50,8 @@ def test_non_root_cannot_see_encrypted_passwords(admin_instance: FileTempAdmin, 
     assert admin_instance.get_readonly_fields(non_root_request) == ("download_link",)
 
 
-def test_root_can_see_encrypted_passwords(admin_instance: FileTempAdmin, root_request: HttpRequest) -> None:
+def test_root_can_see_encrypted_passwords(
+    admin_instance: FileTempAdmin, root_request: HttpRequest, enable_is_root
+) -> None:
     assert admin_instance.get_exclude(root_request) is None
     assert admin_instance.get_readonly_fields(root_request) == ("download_link", "password", "xlsx_password")

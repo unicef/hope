@@ -6,7 +6,6 @@ from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import Client
 from django.urls import reverse
-from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import UserFactory
@@ -24,16 +23,6 @@ def superuser() -> User:
 def superuser_client(client: Client, superuser: User) -> Client:
     client.force_login(superuser, "django.contrib.auth.backends.ModelBackend")
     return client
-
-
-@pytest.fixture
-def enable_is_root():
-    FlagState.objects.get_or_create(
-        name="IS_ROOT",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
 
 
 def test_email_panel_get_masks_password_for_non_root(superuser_client: Client) -> None:

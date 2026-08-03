@@ -1,5 +1,4 @@
 from django.test import RequestFactory
-from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import RoleAssignmentFactory, StorageFileFactory, UserFactory
@@ -29,16 +28,6 @@ def storage_file(user: User) -> StorageFile:
     return StorageFileFactory(created_by=user)
 
 
-@pytest.fixture(autouse=True)
-def enable_is_root():
-    FlagState.objects.get_or_create(
-        name="IS_ROOT",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
-
-
 def test_get_related_uses_explicit_related_name_accessor(user: User, role_assignment: RoleAssignment) -> None:
     field = User._meta.get_field("role_assignments")
 
@@ -65,7 +54,7 @@ def test_get_admin_link_returns_admin_change_url(user: User) -> None:
     assert get_admin_link(user) == f"/api/unicorn/account/user/{user.pk}/change/"
 
 
-def test_is_root_true_for_superuser(superuser: User) -> None:
+def test_is_root_true_for_superuser(superuser: User, enable_is_root) -> None:
     request = RequestFactory().get("/")
     request.user = superuser
 

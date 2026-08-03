@@ -9,7 +9,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.test import Client
 from django.urls import reverse
-from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
@@ -86,16 +85,6 @@ def admin_client(admin_user: Any) -> Client:
     client = Client()
     client.login(username="root", password="password")
     return client
-
-
-@pytest.fixture(autouse=True)
-def enable_is_root():
-    FlagState.objects.get_or_create(
-        name="IS_ROOT",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
 
 
 @patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task")
@@ -285,6 +274,7 @@ def test_delete_rdi_merged(
     django_app: Any,
     afghanistan: BusinessArea,
     program: Program,
+    enable_is_root,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         name="RDI To Remove",

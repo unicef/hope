@@ -6,7 +6,6 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from flags.models import FlagState
 import pytest
 from rest_framework import status
 
@@ -71,16 +70,6 @@ def payment_plan_url(payment_plan):
     return reverse("admin:payment_paymentplan_change", args=[payment_plan.id])
 
 
-@pytest.fixture(autouse=True)
-def enable_is_root():
-    FlagState.objects.get_or_create(
-        name="IS_ROOT",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
-
-
 @pytest.mark.parametrize(
     ("pp_status", "background_action_status", "html_element"),
     [
@@ -119,7 +108,9 @@ def test_buttons_are_visible_according_to_status(
     assert html_element in response.rendered_content
 
 
-def test_restart_prepare_payment_plan_task_success(admin_client, admin_user, program_cycle, business_area) -> None:
+def test_restart_prepare_payment_plan_task_success(
+    admin_client, admin_user, program_cycle, business_area, enable_is_root
+) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
         program_cycle=program_cycle,
@@ -142,7 +133,7 @@ def test_restart_prepare_payment_plan_task_success(admin_client, admin_user, pro
 
 
 def test_restart_prepare_payment_plan_task_incorrect_status(
-    admin_client, admin_user, program_cycle, business_area
+    admin_client, admin_user, program_cycle, business_area, enable_is_root
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.LOCKED,
@@ -166,7 +157,7 @@ def test_restart_prepare_payment_plan_task_incorrect_status(
 
 
 def test_restart_prepare_payment_plan_task_already_running(
-    admin_client, admin_user, program_cycle, business_area
+    admin_client, admin_user, program_cycle, business_area, enable_is_root
 ) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,

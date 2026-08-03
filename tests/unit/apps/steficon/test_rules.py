@@ -1,4 +1,3 @@
-from typing import Tuple
 from unittest.mock import Mock
 
 from django.test import RequestFactory
@@ -32,23 +31,13 @@ s = s.upper()
 
 
 @pytest.fixture
-def basic_rule_setup() -> Tuple[User, Household]:
+def basic_rule_setup() -> tuple[User, Household]:
     BusinessAreaFactory()
     user = UserFactory(is_superuser=True, username="test")
     user.set_password("test")
     user.save()
     household = HouseholdFactory.build()
     return user, household
-
-
-@pytest.fixture
-def enable_is_root():
-    FlagState.objects.get_or_create(
-        name="IS_ROOT",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
 
 
 @pytest.mark.django_db
@@ -64,7 +53,7 @@ def test_rule() -> None:
 
 
 @pytest.mark.django_db
-def test_execution(basic_rule_setup: Tuple[User, Household]) -> None:
+def test_execution(basic_rule_setup: tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     rule = Rule(definition="result.value=101")
     result = rule.execute({"hh": household})
@@ -148,7 +137,7 @@ def test_release() -> None:
 
 
 @pytest.mark.django_db
-def test_nested_rule(basic_rule_setup: Tuple[User, Household]) -> None:
+def test_nested_rule(basic_rule_setup: tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
     rule2 = Rule.objects.create(
@@ -179,7 +168,7 @@ def test_modules() -> None:
 
 
 @pytest.mark.django_db
-def test_root_user_can_edit_version_and_rule(basic_rule_setup: Tuple[User, Household], enable_is_root) -> None:
+def test_root_user_can_edit_version_and_rule(basic_rule_setup: tuple[User, Household], enable_is_root) -> None:
     user, household = basic_rule_setup
     request = RequestFactory().get("/")
     request.user = user
@@ -198,7 +187,7 @@ def test_regular_user_cannot_edit_version_and_rule() -> None:
 
 
 @pytest.mark.django_db
-def test_get_readonly_fields(basic_rule_setup: Tuple[User, Household], enable_is_root) -> None:
+def test_get_readonly_fields(basic_rule_setup: tuple[User, Household], enable_is_root) -> None:
     user, household = basic_rule_setup
     # is_root
     request = RequestFactory().get("/")
