@@ -373,6 +373,12 @@ def test_fsp_extra_fields_import_logs_previous_and_updated_values(
     service.open_workbook()
     service.validate()
     content_type = ContentType.objects.get_for_model(Payment)
+    previous_fields = service.payments[payments[0].unicef_id].fsp_extra_fields
+    expected_fields = {
+        **previous_fields,
+        "reference": "new-reference",
+        "date_field": "2026-07-23T00:00:00",
+    }
 
     with django_assert_num_queries(4):
         updated_count = service.import_payment_list(str(payment_plan.created_by_id))
@@ -382,11 +388,8 @@ def test_fsp_extra_fields_import_logs_previous_and_updated_values(
     assert log.user_id == payment_plan.created_by_id
     assert log.changes == {
         "fsp_extra_fields": {
-            "from": "{'empty_field': 'keep-empty', 'keep': 'keep-existing', 'reference': 'old-reference'}",
-            "to": (
-                "{'empty_field': 'keep-empty', 'keep': 'keep-existing', 'reference': 'new-reference', "
-                "'date_field': '2026-07-23T00:00:00'}"
-            ),
+            "from": str(previous_fields),
+            "to": str(expected_fields),
         }
     }
     assert list(log.programs.values_list("pk", flat=True)) == [payment_plan.program_id]

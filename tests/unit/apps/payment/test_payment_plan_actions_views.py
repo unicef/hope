@@ -304,7 +304,7 @@ def test_fsp_extra_fields_import_is_available_for_locked_fsp(
         "from": None,
         "to": PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
     }
-    assert list(log.programs.values_list("pk", flat=True)) == [fsp_extra_fields_actions_context["pp"].program_id]
+    assert list(log.programs.values_list("pk", flat=True)) == [fsp_extra_fields_actions_context["pp"].program.pk]
 
 
 def test_fsp_extra_fields_import_can_retry_after_error(

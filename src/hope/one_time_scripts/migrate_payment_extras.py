@@ -101,12 +101,12 @@ def migrate_payment_extras(
                             jsonb_build_object(
                                 'extra_fields',
                                 (extras - ARRAY['extra_fields', 'fsp_extra_fields']::text[])
-                                || COALESCE(extras->'extra_fields', '{}'::jsonb)
+                                || COALESCE(extras->'extra_fields', '{{}}'::jsonb)
                             )
                             || CASE
                                 WHEN extras ? 'fsp_extra_fields'
                                 THEN jsonb_build_object('fsp_extra_fields', extras->'fsp_extra_fields')
-                                ELSE '{}'::jsonb
+                                ELSE '{{}}'::jsonb
                             END
                         WHERE ctid >= %s::tid
                           AND ctid < %s::tid
