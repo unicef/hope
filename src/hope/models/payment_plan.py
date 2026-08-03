@@ -159,6 +159,10 @@ class PaymentPlan(
         def get_choices() -> list[tuple[str, str]]:
             return PaymentPlan.Status.choices
 
+    # A child plan may be spun off a plan that is released but not yet closed: from Accepted, while
+    # money is still moving, and from Finished, once it is all reconciled.
+    CHILD_PLAN_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)
+
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
@@ -845,46 +849,66 @@ class PaymentPlan(
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
     def eligible_payments_for_top_up(self) -> "QuerySet":
-        """Select successful + pending payments eligible for top-up.
+        """Select payments eligible for top-up, whatever their delivery status.
 
-        Must be called on the source (Standard) Payment Plan. Excludes withdrawn
-        households and beneficiaries that already appear in another TopUp under
-        the same source plan (slide 10 "Not Allowed #1": one top-up per
-        beneficiary per cycle).
+        Must be called on the source (Standard) Payment Plan. Payment status is
+        deliberately not filtered: a beneficiary may be topped up whether their
+        original payment was delivered, is still pending, or failed.
+
+        Excludes withdrawn households and beneficiaries that already appear in
+        another TopUp under the same source plan (slide 10 "Not Allowed #1": one
+        top-up per beneficiary per cycle). Membership alone blocks: beneficiaries
+        left at zero in the amount file are never copied into the TopUp, so they
+        stay available for a later one.
         """
         top_up_households = Payment.objects.filter(
             parent__plan_type=PaymentPlan.PlanType.TOP_UP,
             parent__source_payment_plan=self,
-            excluded=False,
             household_id=OuterRef("household_id"),
         )
-        return (
-            self.eligible_payments.filter(
-                status__in=Payment.DELIVERED_STATUSES + Payment.PENDING_STATUSES,
-            )
-            .exclude(household__withdrawn=True)
-            .exclude(Exists(top_up_households))
-        )
+        return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(top_up_households))
 
     def eligible_payments_for_top_up_amendment(self) -> "QuerySet":
-        """Select reconciled (delivered) payments of a TopUp plan eligible for an amendment.
+        """Select payments of a TopUp plan eligible for an amendment, whatever their status.
 
-        Must be called on the source TopUp Payment Plan. Excludes withdrawn
-        households and beneficiaries already covered by another Amendment under
-        the same TopUp (one amendment per beneficiary). Unlike top-up eligibility,
-        only delivered/reconciled payments qualify — pending payments do not.
+        Must be called on the source TopUp Payment Plan. Mirrors top-up eligibility: payment
+        status does not gate an amendment either, so a beneficiary can be adjusted whether the
+        TopUp payment was delivered, is still pending, or failed. Excludes withdrawn households
+        and beneficiaries already covered by another Amendment under the same TopUp — membership
+        alone blocks, so excluding someone from an Amendment does not recycle them into the pool.
         """
         amended_households = Payment.objects.filter(
             parent__plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
             parent__source_payment_plan=self,
-            excluded=False,
             household_id=OuterRef("household_id"),
         )
+        return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(amended_households))
+
+    @property
+    def can_create_top_up(self) -> bool:
         return (
-            self.eligible_payments.filter(status__in=Payment.DELIVERED_STATUSES)
-            .exclude(household__withdrawn=True)
-            .exclude(Exists(amended_households))
+            self.plan_type == PaymentPlan.PlanType.REGULAR
+            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
+            and self.eligible_payments_for_top_up().exists()
         )
+
+    @property
+    def can_create_top_up_amendment(self) -> bool:
+        return (
+            self.plan_type == PaymentPlan.PlanType.TOP_UP
+            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
+            and self.eligible_payments_for_top_up_amendment().exists()
+        )
+
+    def eligible_payments_for_child_plan(self) -> "QuerySet":
+        """Payments eligible for the child plan this plan can spawn.
+
+        A Standard plan spawns a TopUp, a TopUp spawns an Amendment; both are funded the same
+        way, so the amount template and its parser only need to know which pool to work from.
+        """
+        if self.plan_type == PaymentPlan.PlanType.TOP_UP:
+            return self.eligible_payments_for_top_up_amendment()
+        return self.eligible_payments_for_top_up()
 
     def _get_last_approval_process_data(self) -> ModifiedData:
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()

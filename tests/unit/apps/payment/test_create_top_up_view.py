@@ -36,6 +36,7 @@ def top_up_view_context(api_client: Callable, business_area: Any) -> dict[str, A
         business_area=business_area,
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.ACCEPTED,
         currency=currency,
     )
     purpose = PaymentPlanPurposeFactory()
@@ -81,7 +82,7 @@ def test_create_top_up_view_arrange_permissions_act_post_assert_status(
 
     response = top_up_view_context["client"].post(
         top_up_view_context["url"],
-        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31"},
+        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31", "fixed_amount": "50.00"},
         format="json",
     )
 
@@ -101,7 +102,7 @@ def test_create_top_up_view_arrange_eligible_pp_act_post_assert_top_up_payload(
 
     response = top_up_view_context["client"].post(
         top_up_view_context["url"],
-        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31"},
+        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31", "fixed_amount": "50.00"},
         format="json",
     )
 
@@ -142,7 +143,7 @@ def test_create_top_up_view_arrange_end_date_before_start_act_post_assert_400(
 
     response = top_up_view_context["client"].post(
         top_up_view_context["url"],
-        {"dispersion_start_date": "2099-12-31", "dispersion_end_date": "2099-01-01"},
+        {"dispersion_start_date": "2099-12-31", "dispersion_end_date": "2099-01-01", "fixed_amount": "50.00"},
         format="json",
     )
 
@@ -162,7 +163,7 @@ def test_create_top_up_view_arrange_end_date_in_past_act_post_assert_400(
 
     response = top_up_view_context["client"].post(
         top_up_view_context["url"],
-        {"dispersion_start_date": "2020-01-01", "dispersion_end_date": "2020-06-01"},
+        {"dispersion_start_date": "2020-01-01", "dispersion_end_date": "2020-06-01", "fixed_amount": "50.00"},
         format="json",
     )
 

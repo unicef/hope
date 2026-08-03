@@ -67,6 +67,7 @@ def top_up_pp(
         program_cycle=cycle,
         created_by=user,
         plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.ACCEPTED,
         source_payment_plan=regular_pp,
         name="Test Plan Top Up",
         payment_plan_purposes=[purpose],
@@ -108,13 +109,14 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_create_assert_inh
 
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_copies_only_delivered(
+def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_copies_every_status(
     get_exchange_rate_mock: Any,
     user: User,
     top_up_pp: PaymentPlan,
     top_up_payments: dict[str, Payment],
     django_capture_on_commit_callbacks: Any,
 ) -> None:
+    """Delivered and pending alike are copied: payment status does not gate an amendment."""
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
     amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
@@ -123,9 +125,11 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_c
         prepare_child_payment_plan_async_task(amendment_pp)
 
     amendment_pp.refresh_from_db()
-    assert amendment_pp.payment_items.count() == 1
+    assert set(amendment_pp.payment_items.values_list("source_payment_id", flat=True)) == {
+        top_up_payments["delivered"].id,
+        top_up_payments["pending"].id,
+    }
     copied = amendment_pp.payment_items.first()
-    assert copied.source_payment == top_up_payments["delivered"]
     assert copied.entitlement_quantity is None
     assert copied.entitlement_quantity_usd is None
     assert copied.is_follow_up is False
@@ -158,7 +162,12 @@ def test_create_top_up_amendment_arrange_query_budget_act_create_assert_within_l
 def test_create_top_up_amendment_arrange_non_top_up_origin_act_create_assert_raises(
     user: User, business_area: Any, cycle: ProgramCycle, plan_type: str
 ) -> None:
-    source_pp = PaymentPlanFactory(business_area=business_area, program_cycle=cycle, plan_type=plan_type)
+    source_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=plan_type,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
     start = source_pp.dispersion_start_date + timedelta(days=1)
     end = source_pp.dispersion_end_date + timedelta(days=1)
 
@@ -171,7 +180,10 @@ def test_create_top_up_amendment_arrange_non_top_up_origin_act_create_assert_rai
 def test_create_top_up_amendment_arrange_no_eligible_payments_act_create_assert_raises(
     user: User, top_up_pp: PaymentPlan
 ) -> None:
-    PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
+    """A Top-Up with a withdrawn beneficiary and nothing else has nobody left to amend."""
+    payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
+    payment.household.withdrawn = True
+    payment.household.save()
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
 
@@ -179,3 +191,21 @@ def test_create_top_up_amendment_arrange_no_eligible_payments_act_create_assert_
         PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
 
     assert "no eligible payments" in str(error.value.detail[0]).lower()
+
+
+@pytest.mark.parametrize(
+    "status",
+    [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED, PaymentPlan.Status.CLOSED],
+)
+def test_create_top_up_amendment_arrange_source_outside_release_window_act_create_assert_raises(
+    user: User, top_up_pp: PaymentPlan, top_up_payments: dict[str, Payment], status: str
+) -> None:
+    top_up_pp.status = status
+    top_up_pp.save(update_fields=["status"])
+    start = top_up_pp.dispersion_start_date + timedelta(days=1)
+    end = top_up_pp.dispersion_end_date + timedelta(days=1)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
+
+    assert "Accepted or Finished" in str(error.value.detail[0])
