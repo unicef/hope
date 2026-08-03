@@ -16,6 +16,7 @@ import {
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -75,7 +76,14 @@ export function GroupExportXlsxDialog({
   const queryClient = useQueryClient();
 
   const { data: templatesData } = useQuery({
-    queryKey: ['fspXlsxTemplates', businessArea, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList,
+      {
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        limit: 200,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList({
         businessAreaSlug: businessArea,
@@ -106,7 +114,9 @@ export function GroupExportXlsxDialog({
     onSuccess: () => {
       showMessage(t('Export started'));
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+        ),
       });
       setOpen(false);
       setSelectedTemplate(null);

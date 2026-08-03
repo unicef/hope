@@ -4,6 +4,7 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
@@ -13,14 +14,19 @@ export function HouseholdFlexFieldPhotoModal({ field }): ReactElement {
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
+  const householdParams = {
+    businessAreaSlug: businessArea,
+    id: id,
+    programCode: programId || selectedProgram?.code || '',
+  };
+
   const { data } = useQuery<HouseholdDetail>({
-    queryKey: ['household', businessArea, id, programId, selectedProgram?.code],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+      householdParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        id: id,
-        programCode: programId || selectedProgram?.code || '',
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve(householdParams),
     enabled: !!businessArea && !!id && (!!programId || !!selectedProgram?.code),
   });
 

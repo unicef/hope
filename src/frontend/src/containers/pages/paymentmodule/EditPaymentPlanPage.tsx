@@ -12,7 +12,8 @@ import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedPr
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
@@ -40,6 +41,7 @@ const EditPaymentPlanForm = ({
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
     useMutation({
@@ -60,10 +62,21 @@ const EditPaymentPlanForm = ({
           programCode,
           requestBody,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        });
+      },
     });
 
   const { data: cyclesData } = useQuery<PaginatedProgramCycleListList>({
-    queryKey: ['programCycles', businessArea, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList, {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug: businessArea,
@@ -170,7 +183,7 @@ const EditPaymentPlanPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { data: paymentPlan, isLoading: loadingPaymentPlan } =
     useQuery<PaymentPlanDetail>({
-      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
           businessAreaSlug: businessArea,
@@ -183,11 +196,14 @@ const EditPaymentPlanPage = (): ReactElement => {
     data: allTargetPopulationsData,
     isLoading: loadingTargetPopulations,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      {
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        status: 'DRAFT',
+      },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,

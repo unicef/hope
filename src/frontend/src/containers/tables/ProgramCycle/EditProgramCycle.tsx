@@ -24,6 +24,7 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -61,7 +62,7 @@ const EditProgramCycle = ({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.code],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList),
       });
       setOpen(false);
     },

@@ -4,6 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import csp from 'vite-plugin-csp-guard';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
+import { fileURLToPath } from 'node:url';
 
 let cspReportUri = null;
 const sentryDsn = process.env.SENTRY_DSN;
@@ -88,6 +89,20 @@ export default defineConfig({
   ],
   resolve: {
     mainFields: [],
+    alias: [
+      // Vite 8 (Rolldown) no longer honors styled-components' object-form
+      // `browser` package.json remap, so it bundles the server build (which
+      // pulls in `stream` and white-screens the SPA). Force the browser build.
+      {
+        find: /^styled-components$/,
+        replacement: fileURLToPath(
+          new URL(
+            './node_modules/styled-components/dist/styled-components.browser.esm.js',
+            import.meta.url,
+          ),
+        ),
+      },
+    ],
   },
   optimizeDeps: {
     esbuildOptions: {

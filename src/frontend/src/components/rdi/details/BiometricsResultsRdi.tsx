@@ -8,6 +8,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import PersonIcon from '@mui/icons-material/Person';
 import {
   Box,
@@ -68,25 +69,33 @@ const BiometricsResultsRdi = ({
 
   const { businessAreaSlug, programCode } = useBaseUrl();
 
+  const individual1Params = {
+    businessAreaSlug,
+    id: individual1?.id,
+    programCode,
+  };
   const individual1Query = useQuery({
-    queryKey: ['individual', individual1?.id, businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      individual1Params,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        id: individual1?.id,
-        programCode,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(individual1Params),
     enabled: dialogOpen && !!individual1?.id,
   });
 
+  const individual2Params = {
+    businessAreaSlug,
+    id: individual2?.id,
+    programCode,
+  };
   const individual2Query = useQuery({
-    queryKey: ['individual', individual2?.id, businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      individual2Params,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        id: individual2?.id,
-        programCode,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(individual2Params),
     enabled: dialogOpen && !!individual2?.id,
   });
 

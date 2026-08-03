@@ -11,6 +11,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useQuery } from '@tanstack/react-query';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -26,23 +27,23 @@ function HouseholdQuestionnaire({
 
   const householdId = values.selectedHousehold?.id;
 
+  const householdParams = {
+    businessAreaSlug: businessArea,
+    id: householdId,
+    programCode: values.selectedHousehold?.program?.code,
+  };
+
   const {
     data: household,
     isLoading,
     error,
   } = useQuery<HouseholdDetail>({
-    queryKey: [
-      'household',
-      businessArea,
-      householdId,
-      values.selectedHousehold?.program?.code,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+      householdParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        id: householdId,
-        programCode: values.selectedHousehold?.program?.code,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve(householdParams),
     enabled: !!householdId && !isAllPrograms,
   });
 

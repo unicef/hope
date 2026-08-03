@@ -21,6 +21,7 @@ import { styled } from '@mui/material/styles';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { programStatusToColor } from '@utils/utils';
 import {
   ChangeEvent,
@@ -130,7 +131,10 @@ export const GlobalProgramSelect = () => {
     isLoading: loadingPrograms,
     refetch: refetchPrograms,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: ['businessAreaProgram', businessArea, queryParams],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsList, {
+      businessAreaSlug: businessArea,
+      ...queryParams,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsList({
         businessAreaSlug: businessArea,
@@ -147,7 +151,10 @@ export const GlobalProgramSelect = () => {
     isError: programError,
     error: programQueryError,
   } = useQuery<ProgramDetail>({
-    queryKey: ['businessAreaProgram', businessArea, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: programId,
+    }),
     queryFn: async () => {
       try {
         return await RestService.restBusinessAreasProgramsRetrieve({

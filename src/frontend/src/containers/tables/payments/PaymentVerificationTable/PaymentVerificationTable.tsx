@@ -4,7 +4,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
@@ -53,42 +54,42 @@ function PaymentVerificationTable({
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
+  const paymentVerificationsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentVerificationsCountRetrieve,
+      paymentVerificationsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        paymentVerificationsCountParams,
       ),
     enabled: !!businessArea && !!programId && page === 0,
   });
+  const paymentVerificationsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentPlansData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentVerificationPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentVerificationsList,
+      paymentVerificationsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        paymentVerificationsListParams,
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const itemsCount = usePersistedCount(page, countData);
@@ -99,6 +100,7 @@ function PaymentVerificationTable({
       headCells={headCells}
       data={paymentPlansData}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

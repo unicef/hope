@@ -9,8 +9,11 @@ import {
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { AreaList } from '@restgenerated/models/AreaList';
+
+type AdminAreaOption = { name: string; value: string };
 
 export function AdminAreaAutocompleteMultipleRestFilter({
   value,
@@ -59,7 +62,11 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     isLoading,
     refetch,
   } = useQuery<AreaList[]>({
-    queryKey: ['areas', businessArea, queryVariables],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: queryVariables.level,
+      name: queryVariables.search,
+    }),
     queryFn: async () => {
       try {
         return RestService.restBusinessAreasGeoAreasList({
@@ -165,7 +172,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
       filterOptions={(options1) => options1}
       onChange={handleChange}
       value={newValue}
-      getOptionLabel={(option: any) => option?.name || ''}
+      getOptionLabel={(option: AdminAreaOption) => option?.name || ''}
       open={open}
       onOpen={handleOpen}
       onClose={handleClose}
@@ -173,10 +180,10 @@ export function AdminAreaAutocompleteMultipleRestFilter({
       options={options}
       loading={isLoading}
       noOptionsText="No options available"
-      isOptionEqualToValue={(option: any, value1: any) =>
+      isOptionEqualToValue={(option: AdminAreaOption, value1: AdminAreaOption) =>
         option?.value === value1?.value
       }
-      renderOption={(props, option: any, { selected }) => (
+      renderOption={(props, option: AdminAreaOption, { selected }) => (
         <li {...props} key={option.value}>
           <Checkbox
             icon={<CheckBoxOutlineBlankIcon fontSize="small" />}

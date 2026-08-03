@@ -4,12 +4,13 @@ import {
   UseMutationResult,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { DefaultError } from '@tanstack/query-core';
+import type { DefaultError, QueryKey } from '@tanstack/query-core';
 
 export const useActionMutation = <TData, TOptions>(
   id: string,
   mutationFn: (data: TOptions) => Promise<TData>,
-  invalidateQuery: string[],
+  // Derive via restQueryKey (utils/queryKeys.ts) so this matches the reader's key.
+  invalidateQuery: QueryKey,
   options: any = null,
 ): UseMutationResult<TData, DefaultError, void> => {
   const { businessAreaSlug, programCode } = useBaseUrl();

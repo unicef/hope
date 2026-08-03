@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { decodeIdString } from '@utils/utils';
 import { ContentLink } from '@core/ContentLink';
@@ -34,27 +35,25 @@ export function TicketsAlreadyExist({ values }): ReactElement {
   const { baseUrl, businessAreaSlug } = useBaseUrl();
   const { t } = useTranslation();
 
+  const existingGrievanceTicketsParams = {
+    businessAreaSlug,
+    category: values.category,
+    issueType: values.issueType,
+    household: decodeIdString(values.selectedHousehold?.id),
+    individualId: decodeIdString(values.selectedIndividual?.id),
+    paymentRecordIds: Array.isArray(values.selectedPaymentRecords)
+      ? values.selectedPaymentRecords.map((r) => r.id).join(',')
+      : values.selectedPaymentRecords,
+  };
   const { data, isLoading: loading } = useQuery({
-    queryKey: [
-      'existingGrievanceTickets',
-      businessAreaSlug,
-      values.category,
-      values.issueType,
-      values.selectedHousehold?.id,
-      values.selectedIndividual?.id,
-      values.selectedPaymentRecords,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsList,
+      existingGrievanceTicketsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList({
-        businessAreaSlug,
-        category: values.category,
-        issueType: values.issueType,
-        household: decodeIdString(values.selectedHousehold?.id),
-        individualId: decodeIdString(values.selectedIndividual?.id),
-        paymentRecordIds: Array.isArray(values.selectedPaymentRecords)
-          ? values.selectedPaymentRecords.map((r) => r.id).join(',')
-          : values.selectedPaymentRecords,
-      }),
+      RestService.restBusinessAreasGrievanceTicketsList(
+        existingGrievanceTicketsParams,
+      ),
     enabled: !!(businessAreaSlug && values.category),
   });
 

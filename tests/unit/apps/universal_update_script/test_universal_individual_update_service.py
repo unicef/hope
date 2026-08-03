@@ -28,6 +28,7 @@ from hope.models import (
     AccountType,
     Area,
     AreaType,
+    AsyncJob,
     Country,
     Currency,
     Document,
@@ -1041,3 +1042,44 @@ def test_get_individual_row_raises_for_multiple_wallets(
     service = UniversalIndividualUpdateService(universal_update_with_accounts)
     with pytest.raises(ValueError, match="Multiple wallets found"):
         service.get_individual_row(individual)
+
+
+def test_schedule_population_recalculation_queues_single_deduplicated_job(
+    individual: Individual, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.schedule_population_recalculation([str(individual.id), str(individual.id)])
+
+    job = AsyncJob.objects.get(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    )
+    assert job.config["household_ids"] == [str(individual.household_id)]
+    assert job.config["program_id"] == str(program.id)
+
+
+def test_schedule_population_recalculation_skips_when_no_individuals_processed(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.schedule_population_recalculation([])
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    ).exists()
+
+
+def test_schedule_population_recalculation_skips_without_recalc_fields(
+    individual: Individual, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(
+        program=program, individual_fields=["given_name"], household_fields=["address"]
+    )
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.schedule_population_recalculation([str(individual.id)])
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    ).exists()

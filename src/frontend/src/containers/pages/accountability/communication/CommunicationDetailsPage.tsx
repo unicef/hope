@@ -10,6 +10,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { MessageDetail } from '@restgenerated/models/MessageDetail';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import RecipientsTable from '../../../tables/Communication/RecipientsTable/RecipientsTable';
@@ -30,12 +31,14 @@ function CommunicationDetailsPage(): ReactElement {
     isLoading,
     error,
   } = useQuery<MessageDetail>({
-    queryKey: [
-      'accountabilityCommunicationMessage',
-      businessArea,
-      id,
-      programCode,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsMessagesRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: id,
+        programCode,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsMessagesRetrieve({
         businessAreaSlug: businessArea,

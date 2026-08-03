@@ -10,6 +10,7 @@ import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocomplete
 import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { t } from 'i18next';
 import { FC } from 'react';
 
@@ -27,7 +28,9 @@ export const FilterIndividualsOnline: FC<FilterIndividualsOnlineProps> = ({
 }) => {
   const { businessArea } = useBaseUrl();
   const { data: individualChoicesData } = useQuery<IndividualChoices>({
-    queryKey: ['individualChoices', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasIndividualsChoicesRetrieve({
         businessAreaSlug: businessArea,

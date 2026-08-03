@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
@@ -101,12 +102,15 @@ const NewPeriodicDataUpdates = (): ReactElement => {
   }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
-    queryKey: [
-      'periodicDataUpdateOnlineEdits',
-      queryVariables,
-      businessAreaSlug,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,
+      {
+        businessAreaSlug,
+        programCode: programId,
+        ordering: queryVariables.ordering,
+        status: queryVariables.status,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,

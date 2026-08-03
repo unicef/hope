@@ -1,7 +1,8 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import type { MessageList } from '@restgenerated/models/MessageList';
 import type { PaginatedMessageListList } from '@restgenerated/models/PaginatedMessageListList';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
@@ -54,30 +55,35 @@ function CommunicationTable({
 
   const [page, setPage] = useState(0);
 
-  const { data, isLoading, error } = useQuery<PaginatedMessageListList>({
-    queryKey: [
-      'businessAreasProgramsMessagesList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsMessagesList(
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedMessageListList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsMessagesList,
         createApiParams(
           { businessAreaSlug: businessArea, programCode: programId },
           queryVariables,
           { withPagination: true },
         ),
       ),
-  });
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsMessagesList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
+        ),
+      placeholderData: keepPreviousData,
+    });
 
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsMessagesCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsMessagesCountRetrieve,
+      createApiParams(
+        { businessAreaSlug: businessArea, programCode: programId },
+        queryVariables,
+      ),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsMessagesCountRetrieve(
         createApiParams(
@@ -106,6 +112,7 @@ function CommunicationTable({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={itemsCount}

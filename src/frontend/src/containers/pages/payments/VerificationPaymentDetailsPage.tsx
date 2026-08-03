@@ -11,6 +11,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +29,15 @@ function VerificationPaymentDetailsPage(): ReactElement {
     isLoading: loading,
     error,
   } = useQuery<PaymentDetail>({
-    queryKey: ['payment', businessArea, id, programId, paymentPlanId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        paymentVerificationPk: paymentPlanId,
+        id,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve(
         {
