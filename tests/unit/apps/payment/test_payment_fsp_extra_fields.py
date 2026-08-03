@@ -357,6 +357,9 @@ def test_fsp_extra_fields_import_merges_non_empty_values(
     }
     assert payments[0].signature_hash != old_signature
     assert payments[1].fsp_extra_fields == {"other": "second-payment"}
+    imported_signature = payments[0].signature_hash
+    payments[0].update_signature_hash()
+    assert payments[0].signature_hash == imported_signature
 
 
 @pytest.mark.enable_activity_log

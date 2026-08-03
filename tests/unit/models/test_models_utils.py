@@ -27,6 +27,22 @@ def test_update_signature_hash_requires_signature_fields():
         SignatureMixin.update_signature_hash(SimpleNamespace())
 
 
+def test_signature_normalizes_nested_dictionaries_independently_of_key_order():
+    first = {
+        "outer": {"second": 2, "first": 1},
+        "value": "same",
+    }
+    second = {
+        "value": "same",
+        "outer": {"first": 1, "second": 2},
+    }
+
+    first_normalized = SignatureMixin._normalize(SimpleNamespace(), "data", first)
+    second_normalized = SignatureMixin._normalize(SimpleNamespace(), "data", second)
+
+    assert first_normalized == second_normalized
+
+
 def test_horizontal_choice_array_field_formfield_builds_multiple_choice_field():
     field = HorizontalChoiceArrayField(
         models.CharField(max_length=3, choices=[("A", "Letter A"), ("B", "Letter B")]),

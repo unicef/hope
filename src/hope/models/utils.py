@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
 
@@ -295,6 +296,8 @@ class SignatureMixin(models.Model):
         super().save(*args, **kwargs)
 
     def _normalize(self, name: str, value: Any) -> Any:
+        if isinstance(value, dict):
+            return json.dumps(value, sort_keys=True, default=str)
         if "." in name:
             return value
         try:
