@@ -110,6 +110,7 @@ export function FspExtraFields({
               download
               startIcon={<GetApp />}
               disabled={actionsDisabled}
+              data-cy="button-fsp-extra-fields-template"
               href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlan.id}/fsp-extra-fields-template/`}
             >
               {t('Download Template')}
@@ -119,6 +120,7 @@ export function FspExtraFields({
             <Button
               startIcon={<Publish />}
               disabled={actionsDisabled || !canImport}
+              data-cy="button-fsp-extra-fields-upload"
               data-perm={PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION}
               onClick={() => setOpen(true)}
             >
@@ -128,7 +130,7 @@ export function FspExtraFields({
         </Grid>
       </ContainerColumnWithBorder>
       <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
-        <DialogTitleWrapper>
+        <DialogTitleWrapper data-cy="dialog-fsp-extra-fields-import">
           <DialogTitle>{t('Select FSP Extra Fields File')}</DialogTitle>
           <DropzoneField
             dontShowFilename={false}
@@ -162,6 +164,7 @@ export function FspExtraFields({
               disabled={!file}
               variant="contained"
               onClick={handleImport}
+              data-cy="button-fsp-extra-fields-import-submit"
             >
               {t('Import')}
             </LoadingButton>
