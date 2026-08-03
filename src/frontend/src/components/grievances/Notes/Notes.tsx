@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { renderUserName, showApiErrorMessages } from '@utils/utils';
+import { renderUserName, ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -83,7 +83,7 @@ export function Notes({
         ),
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

@@ -376,16 +376,14 @@ export const TargetingCriteriaForm = ({
               </DialogTitleWrapper>
               <DialogContent>
                 {
-                  // @ts-ignore
-                  errors.nonFieldErrors && (
+                  (errors as { nonFieldErrors?: string[] }).nonFieldErrors && (
                     <DialogError>
                       <ul>
-                        {
-                          // @ts-ignore
-                          errors.nonFieldErrors.map((message) => (
-                            <li key={message}>{message}</li>
-                          ))
-                        }
+                        {(
+                          errors as { nonFieldErrors?: string[] }
+                        ).nonFieldErrors.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))}
                       </ul>
                     </DialogError>
                   )

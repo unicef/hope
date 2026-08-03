@@ -27,7 +27,7 @@ import {
   getGrievanceDetailsPath,
   getGrievanceEditPath,
 } from './utils/createGrievanceUtils';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 const Separator = styled.div`
@@ -108,7 +108,7 @@ export const GrievanceDetailsToolbar = ({
         formData: { status },
       });
     },
-    onError: (e: any) => {
+    onError: (e: ApiErrorShape) => {
       showApiErrorMessages(e, showMessage);
     },
     onSuccess: () => {

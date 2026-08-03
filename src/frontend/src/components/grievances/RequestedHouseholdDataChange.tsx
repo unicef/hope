@@ -15,7 +15,7 @@ import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export function RequestedHouseholdDataChange({
@@ -71,7 +71,7 @@ export function RequestedHouseholdDataChange({
         ),
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
@@ -179,7 +179,7 @@ export function RequestedHouseholdDataChange({
           val &&
           typeof val === 'object' &&
           'approve_status' in val &&
-          (val as any).approve_status === true,
+          (val as { approve_status?: boolean }).approve_status === true,
       )
       .map(([key]) => key);
 
@@ -191,7 +191,7 @@ export function RequestedHouseholdDataChange({
           val &&
           typeof val === 'object' &&
           'approve_status' in val &&
-          (val as any).approve_status === true,
+          (val as { approve_status?: boolean }).approve_status === true,
       )
       .map(([key]) => key);
 
