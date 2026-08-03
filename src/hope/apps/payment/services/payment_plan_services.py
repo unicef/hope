@@ -1028,8 +1028,7 @@ class PaymentPlanService:
 
         copied_payments = []
         for payment in source_payments:
-            # The queryset is typed, but iteration widens to Model under the pinned stubs.
-            entitlement_quantity, entitlement_quantity_usd = entitlement_of(cast("Payment", payment))
+            entitlement_quantity, entitlement_quantity_usd = entitlement_of(payment)
             copied_payments.append(
                 Payment(
                     parent=self.payment_plan,
