@@ -1,7 +1,8 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Button, Typography } from '@mui/material';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Button, Tooltip, Typography } from '@mui/material';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
@@ -16,7 +17,9 @@ import { useLocation } from 'react-router-dom';
 import { NaComparisonPanel } from './NaComparisonPanel';
 import { NaTicketsFilters } from './NaTicketsFilters';
 import { NaTicketsList } from './NaTicketsList';
-import { NaMark } from './naTypes';
+import { buildExecutePayload } from './naPayload';
+import { isDecisionResolved } from './naRoleUtils';
+import { NaTicketDecision } from './naTypes';
 
 // Needs Adjudication category id (see GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION = '8')
 const NEEDS_ADJUDICATION_CATEGORY = Number(
@@ -49,6 +52,7 @@ export const NaTicketsManagement = ({
 }: NaTicketsManagementProps): ReactElement => {
   const { t } = useTranslation();
   const { businessAreaSlug, isAllPrograms } = useBaseUrl();
+  const { showMessage } = useSnackbar();
   const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -59,20 +63,61 @@ export const NaTicketsManagement = ({
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  // Session-local adjudication marks per ticket id (not persisted).
-  const [marks, setMarks] = useState<Record<string, NaMark>>({});
+  // Session-local adjudication decisions per ticket id (not persisted).
+  const [decisions, setDecisions] = useState<Record<string, NaTicketDecision>>(
+    {},
+  );
 
-  const setMark = (ticketId: string, mark: NaMark): void =>
-    setMarks((prev) => ({ ...prev, [ticketId]: mark }));
+  const setDecision = (ticketId: string, decision: NaTicketDecision): void =>
+    setDecisions((prev) => ({ ...prev, [ticketId]: decision }));
 
-  const clearMark = (ticketId: string): void =>
-    setMarks((prev) => {
+  const clearDecision = (ticketId: string): void =>
+    setDecisions((prev) => {
       const next = { ...prev };
       delete next[ticketId];
       return next;
     });
 
-  const managedCount = Object.keys(marks).length;
+  // Records the operator's replacement pick for one required role.
+  const setReassignment = (
+    ticketId: string,
+    key: string,
+    newIndividual: { id: string; fullName?: string },
+  ): void =>
+    setDecisions((prev) => {
+      const decision = prev[ticketId];
+      const assignment = decision?.reassignments[key];
+      if (!assignment) return prev;
+      return {
+        ...prev,
+        [ticketId]: {
+          ...decision,
+          reassignments: {
+            ...decision.reassignments,
+            [key]: {
+              ...assignment,
+              newIndividual: newIndividual.id,
+              newIndividualName: newIndividual.fullName,
+            },
+          },
+        },
+      };
+    });
+
+  const managedCount = Object.keys(decisions).length;
+  const unresolvedCount = Object.values(decisions).filter(
+    (decision) => !isDecisionResolved(decision),
+  ).length;
+
+  // TODO: the bulk needs-adjudication execute endpoint is not published yet, so
+  // this only builds and discards the payload and shows a placeholder message.
+  // Replace both with a useMutation posting buildExecutePayload(decisions),
+  // reporting failures via showApiErrorMessages. An incomplete batch is rejected
+  // whole and nothing changes server-side, so do not clear decisions optimistically.
+  const handleFinalize = (): void => {
+    buildExecutePayload(decisions);
+    showMessage(t('Bulk execute is not available yet'));
+  };
 
   const queryVariables = useMemo(
     () => ({
@@ -169,15 +214,29 @@ export const NaTicketsManagement = ({
           <Typography variant="body2" data-cy="na-tickets-managed-count">
             {t('Tickets managed')}: {managedCount}
           </Typography>
-          {/* TODO: wire FINALIZE to the needs-adjudication resolution flow */}
-          <Button
-            variant="contained"
-            color="primary"
-            disabled
-            data-cy="button-na-finalize"
+          <Tooltip
+            title={
+              unresolvedCount > 0
+                ? t(
+                    '{{count}} ticket(s) need a role reassignment before finalizing',
+                    { count: unresolvedCount },
+                  )
+                : ''
+            }
+            data-cy="na-finalize-blocked-tooltip"
           >
-            {t('Finalize')}
-          </Button>
+            <span>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={managedCount === 0 || unresolvedCount > 0}
+                onClick={handleFinalize}
+                data-cy="button-na-finalize"
+              >
+                {t('Finalize')}
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
       </PageHeader>
       {choicesLoading ? (
@@ -202,7 +261,7 @@ export const NaTicketsManagement = ({
                 isLoading={listLoading}
                 choicesData={choicesData}
                 selectedTicketId={selectedTicketId}
-                marks={marks}
+                decisions={decisions}
                 onSelect={setSelectedTicketId}
                 page={page}
                 rowsPerPage={rowsPerPage}
@@ -217,12 +276,18 @@ export const NaTicketsManagement = ({
             <Box flex={1}>
               <NaComparisonPanel
                 ticketId={selectedTicketId}
-                mark={selectedTicketId ? marks[selectedTicketId] : undefined}
-                onMark={(mark) => {
-                  if (selectedTicketId) setMark(selectedTicketId, mark);
+                decision={
+                  selectedTicketId ? decisions[selectedTicketId] : undefined
+                }
+                onDecide={(decision) => {
+                  if (selectedTicketId) setDecision(selectedTicketId, decision);
+                }}
+                onReassign={(key, newIndividual) => {
+                  if (selectedTicketId)
+                    setReassignment(selectedTicketId, key, newIndividual);
                 }}
                 onClear={() => {
-                  if (selectedTicketId) clearMark(selectedTicketId);
+                  if (selectedTicketId) clearDecision(selectedTicketId);
                 }}
               />
             </Box>

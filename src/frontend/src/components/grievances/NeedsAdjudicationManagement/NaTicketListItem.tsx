@@ -1,5 +1,6 @@
 import { StatusBox } from '@core/StatusBox';
 import { UniversalMoment } from '@core/UniversalMoment';
+import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Typography } from '@mui/material';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { grievanceTicketBadgeColors } from '@utils/utils';
@@ -12,6 +13,7 @@ interface NaTicketListItemProps {
   urgencyChoices: Array<Record<string, any>>;
   selected: boolean;
   managed: boolean;
+  needsReassignment: boolean;
   onSelect: () => void;
 }
 
@@ -20,6 +22,7 @@ export const NaTicketListItem = ({
   urgencyChoices,
   selected,
   managed,
+  needsReassignment,
   onSelect,
 }: NaTicketListItemProps): ReactElement => {
   const { t } = useTranslation();
@@ -68,15 +71,28 @@ export const NaTicketListItem = ({
           status={urgencyLabel}
           statusToColor={grievanceTicketBadgeColors}
         />
-        {managed && (
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            fontStyle="italic"
-            data-cy="na-ticket-managed-label"
-          >
-            {t('Ticket managed')}
-          </Typography>
+        {needsReassignment ? (
+          <Box display="flex" alignItems="center" gap={1} color="warning.main">
+            <WarningIcon fontSize="small" />
+            <Typography
+              variant="body2"
+              fontStyle="italic"
+              data-cy="na-ticket-reassignment-required"
+            >
+              {t('Reassignment required')}
+            </Typography>
+          </Box>
+        ) : (
+          managed && (
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              fontStyle="italic"
+              data-cy="na-ticket-managed-label"
+            >
+              {t('Ticket managed')}
+            </Typography>
+          )
         )}
       </Box>
     </Box>

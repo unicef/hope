@@ -17,22 +17,34 @@ import {
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ApproveBox,
   StyledTable,
 } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
-import { NaMark } from './naTypes';
+import { NaReassignRoleModal } from './NaReassignRoleModal';
+import {
+  getRequiredReassignments,
+  keyReassignments,
+  NaIndividual,
+  reassignmentKey,
+  roleLabel,
+} from './naRoleUtils';
+import { NaMark, NaRoleAssignment, NaTicketDecision } from './naTypes';
 
 // Light red used to flag fields whose values differ between the two individuals.
 const DIFF_BACKGROUND = '#fdecea';
 
 interface NaComparisonPanelProps {
   ticketId: string | null;
-  mark?: NaMark;
-  onMark: (mark: NaMark) => void;
+  decision?: NaTicketDecision;
+  onDecide: (decision: NaTicketDecision) => void;
+  onReassign: (
+    key: string,
+    newIndividual: { id: string; fullName?: string },
+  ) => void;
   onClear: () => void;
 }
 
@@ -106,12 +118,16 @@ const findSimilarity = (records, individualId): number | undefined =>
 
 export const NaComparisonPanel = ({
   ticketId,
-  mark,
-  onMark,
+  decision,
+  onDecide,
+  onReassign,
   onClear,
 }: NaComparisonPanelProps): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl, businessAreaSlug } = useBaseUrl();
+  // Which reassignment row currently has its picker open.
+  const [openReassignKey, setOpenReassignKey] = useState<string | null>(null);
+  const mark = decision?.mark;
 
   const { data: ticket, isLoading } = useQuery<GrievanceTicketDetail>({
     queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, ticketId],
@@ -149,8 +165,41 @@ export const NaComparisonPanel = ({
 
   const details = ticket.ticketDetails;
   const person1 = details?.goldenRecordsIndividual;
-  const person2 =
-    details?.possibleDuplicate ?? details?.possibleDuplicates?.[0];
+  const person2 = details?.possibleDuplicate ?? details?.possibleDuplicates?.[0];
+
+  // Withdrawing a person marks them duplicate and the other one distinct; any
+  // HEAD/PRIMARY role they hold in a surviving household must be handed over
+  // before this ticket can be executed.
+  const withdraw = (mark: NaMark, duplicate: NaIndividual): void => {
+    const other = duplicate === person1 ? person2 : person1;
+    onDecide({
+      mark,
+      duplicateIndividualIds: [duplicate?.id].filter(Boolean),
+      distinctIndividualIds: [other?.id].filter(Boolean),
+      reassignments: keyReassignments(getRequiredReassignments(duplicate)),
+    });
+  };
+
+  const markNotDuplicates = (): void =>
+    onDecide({
+      mark: 'not_duplicates',
+      duplicateIndividualIds: [],
+      distinctIndividualIds: [person1?.id, person2?.id].filter(Boolean),
+      reassignments: {},
+    });
+
+  const reassignments: NaRoleAssignment[] = Object.values(
+    decision?.reassignments ?? {},
+  );
+  const openReassignment = openReassignKey
+    ? decision?.reassignments[openReassignKey]
+    : undefined;
+  const duplicateIndividual =
+    mark === 'person1_duplicate'
+      ? person1
+      : mark === 'person2_duplicate'
+        ? person2
+        : undefined;
 
   const similarity =
     findSimilarity(details?.extraData?.possibleDuplicate, person1?.id) ??
@@ -236,7 +285,7 @@ export const NaComparisonPanel = ({
                 color="primary"
                 fullWidth
                 data-cy="button-na-withdraw-person1"
-                onClick={() => onMark('person1_duplicate')}
+                onClick={() => withdraw('person1_duplicate', person1)}
               >
                 {t('Withdraw')}
               </Button>
@@ -249,7 +298,7 @@ export const NaComparisonPanel = ({
                 color="primary"
                 fullWidth
                 data-cy="button-na-withdraw-person2"
-                onClick={() => onMark('person2_duplicate')}
+                onClick={() => withdraw('person2_duplicate', person2)}
               >
                 {t('Withdraw')}
               </Button>
@@ -263,7 +312,7 @@ export const NaComparisonPanel = ({
                 color="primary"
                 fullWidth
                 data-cy="button-na-not-duplicates"
-                onClick={() => onMark('not_duplicates')}
+                onClick={markNotDuplicates}
               >
                 {t('Not Duplicates')}
               </Button>
@@ -284,6 +333,74 @@ export const NaComparisonPanel = ({
           </TableRow>
         </TableBody>
       </StyledTable>
+      {reassignments.length > 0 && (
+        <Box mt={4} data-cy="na-reassign-section">
+          <Typography variant="subtitle1">
+            {t('Reassign roles before finalizing')}
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            {t(
+              'The withdrawn individual holds a role that would leave their household without it.',
+            )}
+          </Typography>
+          {reassignments.map((assignment) => {
+            const key = reassignmentKey(
+              assignment.role,
+              assignment.household,
+            );
+            return (
+              <Box
+                key={key}
+                mt={2}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                gap={2}
+                data-cy={`na-reassign-row-${assignment.role}-${assignment.householdUnicefId}`}
+              >
+                <Typography variant="body2">
+                  {t(roleLabel(assignment.role))} —{' '}
+                  {assignment.householdUnicefId}
+                </Typography>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Typography
+                    variant="body2"
+                    color={
+                      assignment.newIndividualName
+                        ? 'textPrimary'
+                        : 'textSecondary'
+                    }
+                  >
+                    {assignment.newIndividualName ?? t('Not reassigned')}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => setOpenReassignKey(key)}
+                    data-cy={`button-na-reassign-${assignment.role}`}
+                  >
+                    {assignment.newIndividual ? t('Change') : t('Select')}
+                  </Button>
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+      {openReassignment && duplicateIndividual && (
+        <NaReassignRoleModal
+          open
+          onClose={() => setOpenReassignKey(null)}
+          role={openReassignment.role}
+          household={{
+            id: openReassignment.household,
+            unicefId: openReassignment.householdUnicefId,
+          }}
+          individualToReassign={duplicateIndividual}
+          onSelect={(individual) => onReassign(openReassignKey, individual)}
+        />
+      )}
     </ApproveBox>
   );
 };

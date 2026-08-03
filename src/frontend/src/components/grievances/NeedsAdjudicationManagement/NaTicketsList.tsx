@@ -6,14 +6,15 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NaTicketListItem } from './NaTicketListItem';
-import { NaMark } from './naTypes';
+import { isDecisionResolved } from './naRoleUtils';
+import { NaTicketDecision } from './naTypes';
 
 interface NaTicketsListProps {
   tickets: GrievanceTicketList[];
   isLoading: boolean;
   choicesData?: GrievanceChoices;
   selectedTicketId: string | null;
-  marks: Record<string, NaMark>;
+  decisions: Record<string, NaTicketDecision>;
   onSelect: (id: string) => void;
   page: number;
   rowsPerPage: number;
@@ -27,7 +28,7 @@ export const NaTicketsList = ({
   isLoading,
   choicesData,
   selectedTicketId,
-  marks,
+  decisions,
   onSelect,
   page,
   rowsPerPage,
@@ -63,16 +64,20 @@ export const NaTicketsList = ({
             </Typography>
           </Box>
         ) : (
-          tickets.map((ticket) => (
-            <NaTicketListItem
-              key={ticket.id}
-              ticket={ticket}
-              urgencyChoices={urgencyChoices}
-              selected={ticket.id === selectedTicketId}
-              managed={!!marks[ticket.id]}
-              onSelect={() => onSelect(ticket.id)}
-            />
-          ))
+          tickets.map((ticket) => {
+            const decision = decisions[ticket.id];
+            return (
+              <NaTicketListItem
+                key={ticket.id}
+                ticket={ticket}
+                urgencyChoices={urgencyChoices}
+                selected={ticket.id === selectedTicketId}
+                managed={!!decision}
+                needsReassignment={!!decision && !isDecisionResolved(decision)}
+                onSelect={() => onSelect(ticket.id)}
+              />
+            );
+          })
         )}
       </Box>
       <TablePagination
