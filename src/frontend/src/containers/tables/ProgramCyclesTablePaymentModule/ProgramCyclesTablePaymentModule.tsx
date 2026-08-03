@@ -11,7 +11,13 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
   programCycleStatusToColor,
@@ -57,42 +63,38 @@ export const ProgramCyclesTablePaymentModule = ({
     queryVariables && typeof queryVariables.limit === 'number'
       ? queryVariables.limit
       : 5;
-  const { data, refetch, error, isLoading } =
+  const programCyclesListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    { ...queryVariables, offset: page * rowsPerPage },
+    { withPagination: true },
+  );
+  const { data, refetch, error, isLoading, isFetching } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: [
-        'programCycles',
-        queryVariables,
-        businessArea,
-        programId,
-        page,
-        rowsPerPage,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsCyclesList,
+        programCyclesListParams,
+      ),
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            { ...queryVariables, offset: page * rowsPerPage },
-            { withPagination: true },
-          ),
+          programCyclesListParams,
         );
       },
+      placeholderData: keepPreviousData,
       enabled: shouldFetchData,
     });
 
+  const programCyclesCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsCyclesCountRetrieve',
-      programId,
-      businessArea,
-      queryVariables,
-      page,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve,
+      programCyclesCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        programCyclesCountParams,
       ),
     enabled: page === 0,
   });
@@ -117,11 +119,9 @@ export const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.code],
-          exact: false,
-        });
-        await queryClient.invalidateQueries({
-          queryKey: ['programCycles', queryVariables, businessArea, programId],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesList,
+          ),
           exact: false,
         });
       },
@@ -146,11 +146,9 @@ export const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.code],
-          exact: false,
-        });
-        await queryClient.invalidateQueries({
-          queryKey: ['programCycles', queryVariables, businessArea, programId],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesList,
+          ),
           exact: false,
         });
       },
@@ -255,6 +253,7 @@ export const ProgramCyclesTablePaymentModule = ({
       data={data}
       error={error}
       isLoading={isLoading}
+      isFetching={isFetching}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
       page={page}

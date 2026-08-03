@@ -13,6 +13,7 @@ import { ReactElement } from 'react';
 import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
 import { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 
 export type FilterProps = Partial<PaymentPlan>;
@@ -72,7 +73,7 @@ export function PaymentPlansFilters({
     clearFilter();
   };
   const { data: statusChoicesData } = useQuery<Array<Choice>>({
-    queryKey: ['choicesPaymentVerificationPlanStatusList'],
+    queryKey: restQueryKey(RestService.restChoicesPaymentPlanStatusList),
     queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
   });
 
@@ -82,7 +83,7 @@ export function PaymentPlansFilters({
     ) || [];
 
   const { data: planTypeChoicesData } = useQuery<Array<Choice>>({
-    queryKey: ['choicesPaymentPlanTypeList'],
+    queryKey: restQueryKey(RestService.restChoicesPaymentPlanTypeList),
     queryFn: () => RestService.restChoicesPaymentPlanTypeList(),
   });
 

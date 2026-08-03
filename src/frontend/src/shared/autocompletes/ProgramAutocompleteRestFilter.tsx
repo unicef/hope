@@ -11,6 +11,7 @@ import {
 } from '@utils/utils';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { BaseAutocompleteFilterRest } from '@shared/autocompletes/BaseAutocompleteFilterRest';
 
@@ -54,7 +55,7 @@ export function ProgramAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsList, queryVariables),
     queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
   });
 

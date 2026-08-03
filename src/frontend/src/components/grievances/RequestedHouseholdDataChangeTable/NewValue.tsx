@@ -2,6 +2,7 @@ import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/Grievance
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface NewValueProps {
@@ -20,7 +21,9 @@ export function NewValue({ field, value }: NewValueProps): ReactElement {
   const { businessArea } = useBaseUrl();
 
   const { data: areasData } = useQuery({
-    queryKey: ['adminAreas', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,

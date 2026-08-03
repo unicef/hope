@@ -2,7 +2,8 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -44,49 +45,47 @@ export function TargetPopulationHouseholdTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const pendingPaymentsListParams = createApiParams(
+    {
+      businessAreaSlug,
+      programCode,
+      id,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: householdsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPendingPaymentList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsList',
-      businessAreaSlug,
-      programCode,
-      queryVariables,
-      id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList,
+      pendingPaymentsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList(
-        createApiParams(
-          {
-            businessAreaSlug,
-            programCode,
-            id,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
+        pendingPaymentsListParams,
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   // Add count query for pending payments
+  const pendingPaymentsCountParams = {
+    businessAreaSlug,
+    programCode,
+    id,
+  };
   const { data: countData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsPendingPaymentsCount',
-      businessAreaSlug,
-      programCode,
-      id,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve,
+      pendingPaymentsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve(
-        {
-          businessAreaSlug,
-          programCode,
-          id,
-        },
+        pendingPaymentsCountParams,
       ),
     enabled: page === 0,
   });
@@ -118,6 +117,7 @@ export function TargetPopulationHouseholdTable({
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         isLoading={isLoading}
+        isFetching={isFetching}
         data={householdsData}
         error={error}
         queryVariables={queryVariables}

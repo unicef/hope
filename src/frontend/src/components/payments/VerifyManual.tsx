@@ -12,6 +12,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -34,20 +35,15 @@ export function VerifyManual({
   receivedAmount,
   verificationPlanId,
   paymentId,
-  paymentPlanId,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { programCode, businessAreaSlug } = useBaseUrl();
-  const paymentQueryKey = [
-    'payment',
-    businessAreaSlug,
-    paymentId,
-    programCode,
-    paymentPlanId,
-  ];
+  const paymentQueryKey = restQueryKey(
+    RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve,
+  );
   const formId = `verify-manual-form-${paymentId}`;
   const updateVerificationMutation = useMutation({
     mutationFn: (data: PatchedPaymentVerificationUpdate) =>
@@ -61,8 +57,7 @@ export function VerifyManual({
         },
       ),
 
-    onSuccess: async (data) => {
-      queryClient.setQueryData(paymentQueryKey, data);
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: paymentQueryKey,
       });

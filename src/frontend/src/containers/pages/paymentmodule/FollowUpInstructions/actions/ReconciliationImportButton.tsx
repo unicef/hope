@@ -3,6 +3,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -28,12 +29,9 @@ export function ReconciliationImportButton({
           },
         )
       }
-      invalidateQueryKey={[
-        'followUpInstruction',
-        businessArea,
-        instruction.id,
-        programId,
-      ]}
+      invalidateQueryKey={restQueryKey(
+        RestService.restBusinessAreasProgramsFollowUpInstructionsRetrieve,
+      )}
       successMessage={t('Reconciliation import started')}
       buttonLabel={t('Upload Reconciliation')}
       dataCySuffix="reconciliation-import"

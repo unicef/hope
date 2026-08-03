@@ -1,8 +1,9 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import type { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 import type { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
@@ -82,37 +83,36 @@ function LookUpRegistrationDataImportTableCommunication({
 
   const [page, setPage] = useState(0);
 
-  const { data, isLoading, error } =
+  const registrationDataImportsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
+  const { data, isLoading, isFetching, error } =
     useQuery<PaginatedRegistrationDataImportListList>({
-      queryKey: [
-        'businessAreasProgramsRegistrationDataImportsList',
-        queryVariables,
-        programId,
-        businessArea,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsRegistrationDataImportsList,
+        registrationDataImportsListParams,
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsRegistrationDataImportsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-            { withPagination: true },
-          ),
+          registrationDataImportsListParams,
         ),
+      placeholderData: keepPreviousData,
     });
 
+  const registrationDataImportsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsRegistrationDataImportsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve,
+      registrationDataImportsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        registrationDataImportsCountParams,
       ),
     enabled: !!businessArea && !!programId && page === 0,
   });
@@ -144,6 +144,7 @@ function LookUpRegistrationDataImportTableCommunication({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={itemsCount}

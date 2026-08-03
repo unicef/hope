@@ -18,6 +18,7 @@ import { RegistrationDataImportStatusEnum } from '@restgenerated/models/Registra
 import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 import { useActionMutation } from '@hooks/useActionMutation';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { RefuseRdi } from '@restgenerated/models/RefuseRdi';
 
@@ -60,10 +61,9 @@ const RegistrationDataImportDetailsPageHeader = ({
     },
     onSuccess: () => {
       client.invalidateQueries({
-        queryKey: [
-          RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve
-            .name,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+        ),
       });
     },
   });
@@ -71,10 +71,9 @@ const RegistrationDataImportDetailsPageHeader = ({
     useActionMutation(
       registration.id,
       RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
-      [
-        RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve
-          .name,
-      ],
+      restQueryKey(
+        RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+      ),
     );
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
 

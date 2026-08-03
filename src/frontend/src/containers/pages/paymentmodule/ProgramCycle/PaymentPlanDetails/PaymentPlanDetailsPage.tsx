@@ -19,6 +19,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
@@ -37,7 +38,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<PaymentPlanDetail>({
-    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
@@ -61,7 +62,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       }
       return false;
     },
-    refetchIntervalInBackground: true,
   });
 
   if (isLoading) return <LoadingComponent />;

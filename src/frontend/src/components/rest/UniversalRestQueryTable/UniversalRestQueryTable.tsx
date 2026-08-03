@@ -5,6 +5,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Order } from '@components/rest/TableRestComponent/TableRestComponent';
 import { isUndefined, omitBy } from 'lodash';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface UniversalRestQueryTableProps<T = any, K = any> {
   rowsPerPageOptions?: number[];
@@ -37,9 +38,12 @@ export const UniversalRestQueryTable = <T, K>(
   const { businessArea, programCode } = useBaseUrl();
   const { queryVariables } = props;
   const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const { data, isLoading, error } = useQuery({
-    queryKey: [query.name, cleanedQueryVariables, programCode, businessArea],
+    queryKey: restQueryKey(query, {
+      ...cleanedQueryVariables,
+      programCode,
+      businessArea,
+    }),
     queryFn: () =>
       query({
         businessAreaSlug: businessArea,
