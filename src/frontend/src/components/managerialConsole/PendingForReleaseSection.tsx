@@ -1,5 +1,11 @@
-import React, { FC, SetStateAction, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
+import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import {
+  BulkActionMutation,
+  SelectAllHandler,
+  SelectHandler,
+} from './types';
 import {
   Table,
   TableBody,
@@ -23,23 +29,12 @@ import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
 
 interface PendingForReleaseSectionProps {
-  selectedInReview: any[];
-  setSelectedInReview: (value: SetStateAction<any[]>) => void;
-  handleSelect: (
-    selected: any[],
-    setSelected: (value: SetStateAction<any[]>) => void,
-    id: any,
-  ) => void;
-  handleSelectAll: (
-    ids: any[],
-    selected: any[],
-    setSelected: {
-      (value: SetStateAction<any[]>): void;
-      (arg0: any[]): void;
-    },
-  ) => void;
-  inReviewData: any;
-  bulkAction: any;
+  selectedInReview: string[];
+  setSelectedInReview: Dispatch<SetStateAction<string[]>>;
+  handleSelect: SelectHandler;
+  handleSelectAll: SelectAllHandler;
+  inReviewData: PaginatedPaymentPlanList;
+  bulkAction: BulkActionMutation;
   enableSearch?: boolean;
 }
 
@@ -72,7 +67,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
     handleSelectAll(ids, selectedInReview, setSelectedInReview);
   };
 
-  const programs = inReviewData?.results?.reduce((acc, row) => {
+  const programs = inReviewData?.results?.reduce<string[]>((acc, row) => {
     if (!acc.includes(row.program)) {
       acc.push(row.program);
     }
