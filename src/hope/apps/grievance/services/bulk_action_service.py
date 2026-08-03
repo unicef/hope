@@ -11,6 +11,9 @@ from hope.apps.account.permissions import Permissions, check_creator_or_owner_pe
 from hope.apps.core.utils import clear_cache_for_key
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.services.needs_adjudication_ticket_services import (
+    close_needs_adjudication_ticket_service,
+)
 from hope.apps.grievance.services.ticket_status_changer_service import TicketStatusChangerService
 from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.models import User, log_create
@@ -148,6 +151,85 @@ class BulkActionService:
         # version cache is bumped by the post_save signal on save()
         self._clear_cache(business_area_slug)
         return tickets
+
+    @transaction.atomic
+    def bulk_resolve_needs_adjudication(
+        self,
+        user: User,
+        resolutions: Sequence[dict],
+        business_area_slug: str,
+    ) -> list[GrievanceTicket]:
+        """Resolve and auto-close the selected Needs Adjudication tickets in one all-or-nothing batch.
+
+        Each resolution marks individuals as duplicate/distinct and closes the ticket directly,
+        bypassing the FOR_APPROVAL step. If any ticket is missing, already closed, not a Needs Adjudication ticket,
+        or not resolvable by this user, nothing is committed.
+        """
+        resolutions_by_id = {str(resolution["ticket_id"]): resolution for resolution in resolutions}
+        ticket_ids = list(resolutions_by_id.keys())
+        tickets = list(
+            GrievanceTicket.objects.filter(
+                ~Q(status=GrievanceTicket.STATUS_CLOSED),
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                business_area__slug=business_area_slug,
+                id__in=ticket_ids,
+            )
+            .select_for_update(of=("self",))
+            .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
+            .prefetch_related("programs")
+        )
+        if len(tickets) != len(ticket_ids):
+            raise ValidationError(
+                "Some selected tickets do not exist, are closed, or are not Needs Adjudication tickets."
+            )
+
+        # every selected ticket must be resolvable by this user (general, or as creator/owner)
+        for ticket in tickets:
+            check_creator_or_owner_permission(
+                user,
+                [
+                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+                ],
+                ticket.business_area,
+                ticket,
+            )
+
+        for ticket in tickets:
+            old_ticket = copy.copy(ticket)
+            self._resolve_single_needs_adjudication(ticket, resolutions_by_id[str(ticket.id)], user)
+            log_create(
+                GrievanceTicket.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                user,
+                ticket.programs.all(),
+                old_object=old_ticket,
+                new_object=ticket,
+            )
+        self._clear_cache(business_area_slug)
+        return tickets
+
+    def _resolve_single_needs_adjudication(self, ticket: GrievanceTicket, resolution: dict, user: User) -> None:
+        ticket_details = ticket.ticket_details
+        ticket_individual_ids = {str(ticket_details.golden_records_individual_id)} | {
+            str(pk) for pk in ticket_details.possible_duplicates.values_list("id", flat=True)
+        }
+        duplicate_ids = [str(individual_id) for individual_id in resolution["duplicate_individual_ids"]]
+        distinct_ids = [str(individual_id) for individual_id in resolution["distinct_individual_ids"]]
+
+        unknown = (set(duplicate_ids) | set(distinct_ids)) - ticket_individual_ids
+        if unknown:
+            raise ValidationError(f"Individuals {sorted(unknown)} do not belong to ticket {ticket.unicef_id}.")
+
+        ticket_details.selected_individuals.set(duplicate_ids)  # type: ignore[arg-type]
+        ticket_details.selected_distinct.set(distinct_ids)  # type: ignore[arg-type]
+
+        # marks duplicates/distinct, reassigns roles, reports biometric false positives, traverses siblings
+        close_needs_adjudication_ticket_service(ticket, user)
+
+        ticket.status = GrievanceTicket.STATUS_CLOSED
+        ticket.save()
 
     @transaction.atomic
     def bulk_add_note(

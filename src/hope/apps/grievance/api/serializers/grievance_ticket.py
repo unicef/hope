@@ -813,3 +813,21 @@ class BulkCloseGrievanceTicketsSerializer(serializers.Serializer):
     grievance_ticket_ids = serializers.ListField(
         child=serializers.UUIDField(),
     )
+
+
+class NeedsAdjudicationResolutionSerializer(serializers.Serializer):
+    ticket_id = serializers.UUIDField()
+    duplicate_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+    distinct_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+
+    def validate(self, attrs: dict) -> dict:
+        if not attrs["duplicate_individual_ids"] and not attrs["distinct_individual_ids"]:
+            raise serializers.ValidationError("At least one individual must be marked as duplicate or distinct.")
+        overlap = set(attrs["duplicate_individual_ids"]) & set(attrs["distinct_individual_ids"])
+        if overlap:
+            raise serializers.ValidationError("An individual cannot be both duplicate and distinct.")
+        return attrs
+
+
+class BulkNeedsAdjudicationSerializer(serializers.Serializer):
+    tickets = NeedsAdjudicationResolutionSerializer(many=True, allow_empty=False)

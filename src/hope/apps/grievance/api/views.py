@@ -68,6 +68,7 @@ from hope.apps.grievance.api.serializers.dashboard import GrievanceDashboardSeri
 from hope.apps.grievance.api.serializers.grievance_ticket import (
     BulkCloseGrievanceTicketsSerializer,
     BulkGrievanceTicketsAddNoteSerializer,
+    BulkNeedsAdjudicationSerializer,
     BulkUpdateGrievanceTicketsAssigneesSerializer,
     BulkUpdateGrievanceTicketsPrioritySerializer,
     BulkUpdateGrievanceTicketsUrgencySerializer,
@@ -433,6 +434,7 @@ class GrievanceTicketGlobalViewSet(
         "bulk_update_urgency": BulkUpdateGrievanceTicketsUrgencySerializer,
         "bulk_add_note": BulkGrievanceTicketsAddNoteSerializer,
         "bulk_close": BulkCloseGrievanceTicketsSerializer,
+        "bulk_needs_adjudication": BulkNeedsAdjudicationSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -547,6 +549,11 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ],
+        "bulk_needs_adjudication": [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
         ],
         "all_edit_household_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "all_edit_people_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
@@ -1468,6 +1475,25 @@ class GrievanceTicketGlobalViewSet(
         tickets = BulkActionService().bulk_close(
             request.user,  # type: ignore
             serializer.validated_data["grievance_ticket_ids"],
+            self.business_area_slug,  # type: ignore
+        )
+        return Response(
+            GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @transaction.atomic
+    @extend_schema(
+        request=BulkNeedsAdjudicationSerializer,
+        responses={202: GrievanceTicketDetailSerializer(many=True)},
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-needs-adjudication")
+    def bulk_needs_adjudication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tickets = BulkActionService().bulk_resolve_needs_adjudication(
+            request.user,  # type: ignore
+            serializer.validated_data["tickets"],
             self.business_area_slug,  # type: ignore
         )
         return Response(
