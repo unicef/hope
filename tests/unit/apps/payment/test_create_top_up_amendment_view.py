@@ -35,6 +35,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         business_area=business_area,
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.ACCEPTED,
         currency=currency,
     )
     top_up_pp = PaymentPlanFactory(
@@ -42,6 +43,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         business_area=business_area,
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.ACCEPTED,
         source_payment_plan=regular_pp,
         currency=currency,
     )
@@ -88,7 +90,7 @@ def test_create_top_up_amendment_view_arrange_permissions_act_post_assert_status
 
     response = amendment_view_context["client"].post(
         amendment_view_context["url"],
-        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31"},
+        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31", "fixed_amount": "25.00"},
         format="json",
     )
 
@@ -108,7 +110,7 @@ def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_am
 
     response = amendment_view_context["client"].post(
         amendment_view_context["url"],
-        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31"},
+        {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2099-12-31", "fixed_amount": "25.00"},
         format="json",
     )
 
