@@ -62,6 +62,7 @@ from hope.apps.household.services.index_management import (
     check_program_indexes,
     create_program_indexes,
     populate_program_indexes,
+    versioned_doc,
 )
 
 
@@ -128,6 +129,15 @@ class Command(BaseCommand):
             help="Bulk chunk size.",
         )
         parser.add_argument(
+            "--target-suffix",
+            default=None,
+            help=(
+                "Version suffix, e.g. 'v2': write the delta into the DARK <index>_<suffix> physical "
+                "indexes instead of through the alias (blue-green pre-swap catch-up). The target must "
+                "already exist (es_reindex creates it) - a missing target is an error, never a create."
+            ),
+        )
+        parser.add_argument(
             "--dry-run",
             action="store_true",
             help="Print each program's delta (and full-populate/no-delta status) without writing.",
@@ -148,6 +158,9 @@ class Command(BaseCommand):
             )
         if not opts["since"] and not opts["reconcile"]:
             raise CommandError("Provide --since <timestamp> and/or --reconcile.")
+        if opts["target_suffix"] and (opts["reconcile"] or opts["verify"] or not opts["since"]):
+            # reconcile/verify compare through the ALIAS (the old index) - meaningless for a dark target
+            raise CommandError("--target-suffix requires --since and cannot be combined with --reconcile/--verify.")
 
         self._print_server_version(using)
 
@@ -215,12 +228,20 @@ class Command(BaseCommand):
 
         ind_doc = get_individual_doc(pid)
         hh_doc = get_household_doc(pid)
+        suffix = opts.get("target_suffix")
+        if suffix:
+            ind_doc = versioned_doc(ind_doc, suffix)
+            hh_doc = versioned_doc(hh_doc, suffix)
         es = connections.get_connection(using)
         ind_index = ind_doc._index._name
         hh_index = hh_doc._index._name
 
-        # New program: no index yet -> create + full populate (this is the ONLY full-populate path).
         if not es.indices.exists(index=ind_index) or not es.indices.exists(index=hh_index):
+            # Dark target missing: creating it is es_reindex's job (mapping must come from the
+            # deployed code, not from a delta side effect) - fail loudly instead.
+            if suffix:
+                return "failed", f"target index {ind_index} / {hh_index} missing - create it with es_reindex first"
+            # New program: no index yet -> create + full populate (this is the ONLY full-populate path).
             if opts["dry_run"]:
                 return "would-populate (no index)", f"index {ind_index} / {hh_index}"
             ok, msg = create_program_indexes(pid, using=using)

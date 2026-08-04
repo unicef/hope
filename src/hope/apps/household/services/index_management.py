@@ -28,27 +28,66 @@ def delete_es_index(es: Elasticsearch, index_name: str) -> None:
         es.options(ignore_status=[400, 404]).indices.delete(index=concrete)
 
 
-def create_versioned_index(es: Elasticsearch, doc_class: type) -> None:
-    """Create ``<name>_vN`` (next unused version) with the alias attached in the same call.
+def versioned_doc(doc_class: type, suffix: str) -> type:
+    """Subclass a per-program Document so every read/write targets ``<name>_<suffix>``.
+
+    Blue-green needs to populate/delta a DARK ``_vN`` physical index while the alias (the
+    suffix-less name every doc class addresses) still points at the old version. All ES
+    consumption goes through the class's ``_index``/``Index.name``, so one subclass with a
+    suffixed name redirects bulk writes, deletes-by-id and searches alike.
+    """
+
+    class VersionedDoc(doc_class):
+        class Index(doc_class.Index):  # type: ignore[name-defined]
+            name = f"{doc_class.Index.name}_{suffix}"
+
+    VersionedDoc.__name__ = f"{doc_class.__name__}_{suffix}"
+    return VersionedDoc
+
+
+def existing_version_numbers(es: Elasticsearch, name: str) -> list[int]:
+    """Numbers N of all physical ``<name>_vN`` indexes present in ES."""
+    existing = es.indices.get(index=f"{name}_v*", ignore_unavailable=True)
+    return [int(m.group(1)) for i in existing for m in [re.match(rf"^{re.escape(name)}_v(\d+)$", i)] if m]
+
+
+def next_version_suffix(es: Elasticsearch, doc_classes: list) -> str:
+    """Next unused ``vN`` across ALL given docs' versions.
+
+    Taking the max over the whole set keeps a program's individuals/households pair in
+    lockstep: both dark indexes get the SAME suffix, so a single delta ``--target-suffix``
+    pass covers the pair even if their version histories diverged.
+    """
+    versions = [n for doc_class in doc_classes for n in existing_version_numbers(es, doc_class._index._name)]
+    return f"v{max(versions, default=0) + 1}"
+
+
+def create_versioned_index(
+    es: Elasticsearch, doc_class: type, suffix: str | None = None, attach_alias: bool = True
+) -> str:
+    """Create ``<name>_<suffix>`` from the doc class's code mapping and return its name.
 
     Blue-green convention: the app addresses the suffix-less name, which is an ALIAS onto the
-    physical ``_vN``. Creating both in one call means the index is born on the alias scheme —
-    there is never a bare physical index squatting on the logical name. The version is
-    ``max(existing) + 1`` rather than a hardcoded ``_v1`` so a rebuild during a blue-green
-    sanity window (old ``_vN`` still lingering unaliased) cannot collide and strand the
-    program without an index.
+    physical ``_vN``. With ``attach_alias`` (new/rebuilt programs) index and alias are born in
+    one call — there is never a bare physical index squatting on the logical name. Without it
+    (reindex) the index is created DARK: the alias stays on the old version until the swap.
+    Default ``suffix`` is ``max(existing) + 1`` rather than a hardcoded ``_v1`` so a rebuild
+    during a blue-green sanity window (old ``_vN`` still lingering unaliased) cannot collide
+    and strand the program without an index.
     """
     index = doc_class._index
     name = index._name
-    existing = es.indices.get(index=f"{name}_v*", ignore_unavailable=True)
-    versions = [int(m.group(1)) for i in existing for m in [re.match(rf"^{re.escape(name)}_v(\d+)$", i)] if m]
+    if suffix is None:
+        suffix = f"v{max(existing_version_numbers(es, name), default=0) + 1}"
+    target = f"{name}_{suffix}"
     body = index.to_dict()
     es.indices.create(
-        index=f"{name}_v{max(versions, default=0) + 1}",
+        index=target,
         settings=body.get("settings"),
         mappings=body.get("mappings"),
-        aliases={name: {}},
+        aliases={name: {}} if attach_alias else None,
     )
+    return target
 
 
 def create_program_indexes(program_id: str, using: str = "default") -> tuple[bool, str]:

@@ -272,6 +272,41 @@ def test_process_program_dry_run_does_not_apply(mock_conn, mock_ind_doc, mock_hh
     mock_apply.assert_not_called()
 
 
+@patch(DELTA, return_value={"ind_present": set(), "ind_removed": set(), "hh_present": set(), "hh_removed": set()})
+@patch(f"{_MOD}.versioned_doc", side_effect=lambda doc, suffix: doc)
+@patch(GET_HH_DOC)
+@patch(GET_IND_DOC)
+@patch(GET_CONN)
+def test_process_program_target_suffix_wraps_both_docs(
+    mock_conn, mock_ind_doc, mock_hh_doc, mock_versioned, mock_delta
+) -> None:
+    mock_conn.return_value.indices.exists.return_value = True
+    opts = {**OPTS, "target_suffix": "v2"}
+
+    Command()._process_program(str(uuid.uuid4()), timezone.now(), "default", opts)
+
+    assert mock_versioned.call_count == 2
+    assert all(call.args[1] == "v2" for call in mock_versioned.call_args_list)
+
+
+@patch(CREATE)
+@patch(f"{_MOD}.versioned_doc", side_effect=lambda doc, suffix: doc)
+@patch(GET_HH_DOC)
+@patch(GET_IND_DOC)
+@patch(GET_CONN)
+def test_process_program_target_suffix_missing_target_fails_never_creates(
+    mock_conn, mock_ind_doc, mock_hh_doc, mock_versioned, mock_create
+) -> None:
+    mock_conn.return_value.indices.exists.return_value = False
+    opts = {**OPTS, "target_suffix": "v2"}
+
+    status, msg = Command()._process_program(str(uuid.uuid4()), timezone.now(), "default", opts)
+
+    assert status == "failed"
+    assert "es_reindex" in msg
+    mock_create.assert_not_called()
+
+
 # ── _apply_delta: upsert present, delete removed docs, never delete the index ──
 
 
@@ -310,6 +345,16 @@ def test_requires_since_or_reconcile() -> None:
 def test_unknown_using_alias_raises() -> None:
     with pytest.raises(CommandError):
         call_command(CMD, "--using", "does-not-exist", "--reconcile")
+
+
+def test_target_suffix_with_reconcile_raises() -> None:
+    with pytest.raises(CommandError, match="target-suffix"):
+        call_command(CMD, "--reconcile", "--target-suffix", "v2")
+
+
+def test_target_suffix_with_verify_raises() -> None:
+    with pytest.raises(CommandError, match="target-suffix"):
+        call_command(CMD, "--since", "2026-07-01T09:00:00Z", "--verify", "--target-suffix", "v2")
 
 
 @patch(GET_CONN)
