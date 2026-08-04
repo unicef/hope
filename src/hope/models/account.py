@@ -29,6 +29,7 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         blank=True,
     )
     number = models.CharField(max_length=256, blank=True, null=True, db_index=True)
+    wallet_qr_photo = models.ImageField(blank=True, null=True, help_text="Photo of the wallet QR code")
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)
     is_unique = models.BooleanField(default=True, db_index=True)

@@ -3,7 +3,6 @@ from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
-from django.core.files.storage import default_storage
 from django.forms import modelform_factory
 
 from hope.apps.core.utils import (
@@ -19,6 +18,7 @@ from hope.apps.household.const import (
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO,
     IDENTIFICATION_TYPE_TAX_ID,
     NOT_DISABLED,
@@ -352,9 +352,11 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             "tax_id_no_i_c",
             "tax_id_picture",
         ),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER]: (
+            None,
+            "id_wallet_image_i_f",
+        ),
     }
-
-    INDIVIDUAL_IMAGE_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         record_data_dict = record.get_data()
@@ -367,8 +369,12 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         household = self._build_household(record, registration_data_import)
         individual = self._build_head_of_household(individual_dict, household, record, registration_data_import)
 
-        PendingDocument.objects.bulk_create(self._prepare_documents(individual_dict, individual))
-        PendingAccount.objects.bulk_create(self._prepare_accounts(individual_dict, individual))
+        # Decode all image blobs (documents + account QR) before either bulk_create writes to
+        # storage, so a malformed blob raises without leaving orphan files behind.
+        documents = self._prepare_documents(individual_dict, individual)
+        accounts = self._prepare_accounts(individual_dict, individual)
+        PendingDocument.objects.bulk_create(documents)
+        PendingAccount.objects.bulk_create(accounts)
 
     def _build_household(self, record: Any, registration_data_import: RegistrationDataImport) -> PendingHousehold:
         household_data = self._prepare_household_data({}, record, registration_data_import)
@@ -395,8 +401,6 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             )
             individual.phone_no = phone_no
             individual.detail_id = record.source_id
-            if image_flex_fields := self._prepare_wallet_image_flex_fields(individual_dict):
-                individual.flex_fields = image_flex_fields
             individual.save()
         except ValidationError as e:
             raise ValidationError({"individual nr 1": [str(e)]}) from e
@@ -416,20 +420,14 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         individual_data["estimated_birth_date"] = False
         return individual_data
 
-    def _prepare_wallet_image_flex_fields(self, individual_dict: dict) -> dict:
-        # Decode every blob before writing any to storage, and only after the individual has
-        # validated, so a validation failure or a malformed second image leaves no orphan files.
-        images = {}
-        for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
-            if image_base64 := individual_dict.get(field_name):
-                images[field_name] = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
-        return {field_name: default_storage.save(image.name, image) for field_name, image in images.items()}
-
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()
         if not wallet_address:
             return []
         wallet_name = (individual_dict.get("wallet_name_i_c") or "").strip()
+        wallet_qr_photo = self._prepare_picture_from_base64(
+            individual_dict.get("wallet_num_image_i_f"), str(uuid.uuid4())
+        )
         return [
             PendingAccount(
                 individual=individual,
@@ -437,6 +435,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
                 number=wallet_address,
                 financial_institution=self._digital_wallet_financial_institution,
                 data={"wallet_address": wallet_address, "wallet_name": wallet_name},
+                wallet_qr_photo=wallet_qr_photo or "",
             )
         ]
 

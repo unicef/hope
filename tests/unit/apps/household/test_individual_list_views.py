@@ -1046,6 +1046,42 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
     assert data["payment_delivery_phone_no"] == ind1.payment_delivery_phone_no
 
 
+def test_individual_detail_account_wallet_qr_photo(
+    detail_context: dict, create_user_role_with_permissions: Callable
+) -> None:
+    ctx = detail_context
+    create_user_role_with_permissions(
+        user=ctx["user"],
+        permissions=[
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
+        ],
+        business_area=ctx["afghanistan"],
+        program=ctx["program"],
+    )
+    account = AccountFactory(
+        individual=ctx["individual1"],
+        data={},
+        wallet_qr_photo=ContentFile(b"qr", name="wallet_qr.png"),
+    )
+
+    response = ctx["client"].get(
+        reverse(
+            "api:households:individuals-detail",
+            kwargs={
+                "business_area_slug": ctx["afghanistan"].slug,
+                "program_code": ctx["program"].code,
+                "pk": str(ctx["individual1"].id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    accounts = response.json()["accounts"]
+    assert accounts[0]["id"] == str(account.id)
+    assert accounts[0]["wallet_qr_photo"] == account.wallet_qr_photo.url
+
+
 def test_individual_detail_admin_url(detail_context: dict) -> None:
     ctx = detail_context
     ctx["user"].is_staff = True

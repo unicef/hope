@@ -119,7 +119,16 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ("id", "name", "data_fields", "account_type", "number", "financial_institution", "account_type_key")
+        fields = (
+            "id",
+            "name",
+            "data_fields",
+            "account_type",
+            "number",
+            "financial_institution",
+            "account_type_key",
+            "wallet_qr_photo",
+        )
 
     def get_name(self, obj: Account) -> str:
         return obj.account_type.label

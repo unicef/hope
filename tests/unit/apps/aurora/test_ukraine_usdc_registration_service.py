@@ -11,7 +11,6 @@ from extras.test_utils.factories.aurora import OrganizationFactory, ProjectFacto
 from extras.test_utils.factories.core import (
     BusinessAreaFactory,
     DataCollectingTypeFactory,
-    FlexibleAttributeFactory,
 )
 from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
@@ -21,15 +20,14 @@ from extras.test_utils.factories.payment import (
     FinancialInstitutionFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING, resolve_flex_fields_choices_to_string
-from hope.apps.household.const import IDENTIFICATION_TYPE_TAX_ID, ROLE_PRIMARY
+from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.household.const import IDENTIFICATION_TYPE_OTHER, IDENTIFICATION_TYPE_TAX_ID, ROLE_PRIMARY
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.ukraine_flex_registration_service import UkraineUSDCRegistrationService
 from hope.models import (
     DataCollectingType,
     DeliveryMechanism,
     FinancialInstitution,
-    FlexibleAttribute,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -96,6 +94,14 @@ def tax_id_document_type() -> Any:
 
 
 @pytest.fixture
+def other_document_type() -> Any:
+    return DocumentTypeFactory(
+        key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
+        label=IDENTIFICATION_TYPE_OTHER,
+    )
+
+
+@pytest.fixture
 def generic_crypto_fi() -> FinancialInstitution:
     return FinancialInstitutionFactory(
         name="Generic Crypto",
@@ -153,6 +159,7 @@ def test_creates_household_in_ukraine_for_regular_programme(
     program: Program,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
     submission_timestamp: datetime.datetime,
@@ -176,6 +183,7 @@ def test_individual_full_name_concatenated_and_birth_date_not_estimated(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -195,6 +203,7 @@ def test_ukrainian_phone_number_normalized(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -212,6 +221,7 @@ def test_wallet_stored_on_account(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -225,11 +235,12 @@ def test_wallet_stored_on_account(
     assert account.data == {"wallet_address": "0xABCDEF0123456789", "wallet_name": "MetaMask"}
 
 
-def test_wallet_images_stored_as_saved_files(
+def test_wallet_number_image_stored_as_account_wallet_qr_photo(
     registration: Any,
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -239,40 +250,42 @@ def test_wallet_images_stored_as_saved_files(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    num_image_path = individual.flex_fields["wallet_num_image_i_f"]
-    id_image_path = individual.flex_fields["id_wallet_image_i_f"]
-    assert num_image_path.endswith(".jpg")
-    assert default_storage.exists(num_image_path)
-    assert default_storage.exists(id_image_path)
+    account = PendingAccount.objects.get(individual=individual)
+    assert account.wallet_qr_photo.name.endswith(".jpg")
+    assert default_storage.exists(account.wallet_qr_photo.name)
+    assert individual.flex_fields == {}
 
 
-def test_individual_detail_flex_image_resolves_to_url(
+def test_id_wallet_image_stored_as_other_document(
     registration: Any,
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
-    FlexibleAttributeFactory(name="wallet_num_image_i_f", type=FlexibleAttribute.IMAGE)
-    FlexibleAttributeFactory(name="id_wallet_image_i_f", type=FlexibleAttribute.IMAGE)
     service = UkraineUSDCRegistrationService(registration)
     rdi = service.create_rdi(user, "usdc rdi")
 
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    resolved = resolve_flex_fields_choices_to_string(individual)
+    other_document = PendingDocument.objects.get(
+        individual=individual,
+        type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
+    )
+    assert other_document.document_number.startswith("ONLY_PICTURE_")
+    assert other_document.photo.name.endswith(".jpg")
+    assert default_storage.exists(other_document.photo.name)
 
-    assert resolved["wallet_num_image_i_f"].endswith(".jpg")
-    assert resolved["id_wallet_image_i_f"].endswith(".jpg")
 
-
-def test_creates_only_tax_id_document(
+def test_creates_tax_id_and_other_documents(
     registration: Any,
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -283,9 +296,9 @@ def test_creates_only_tax_id_document(
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
     documents = PendingDocument.objects.filter(individual=individual)
-    assert documents.count() == 1
-    assert documents.first().document_number == "1234567890"
-    assert documents.first().type.key == IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+    assert documents.count() == 2
+    tax_id_document = documents.get(type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
+    assert tax_id_document.document_number == "1234567890"
 
 
 def test_wallet_account_created_for_collector(
@@ -293,6 +306,7 @@ def test_wallet_account_created_for_collector(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     generic_crypto_fi: FinancialInstitution,
     usdc_record: Record,
@@ -315,6 +329,7 @@ def test_single_individual_is_head_and_primary_collector(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -420,6 +435,7 @@ def test_import_errors_when_delivery_mechanism_not_configured(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     usdc_record: Record,
 ) -> None:
     service = UkraineUSDCRegistrationService(registration)
@@ -473,6 +489,7 @@ def test_head_of_household_phone_number_marked_valid(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -490,6 +507,7 @@ def test_head_of_household_phone_number_marked_invalid(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -504,7 +522,7 @@ def test_head_of_household_phone_number_marked_invalid(
     assert individual.phone_no_valid is False
 
 
-def test_no_flex_fields_when_wallet_images_missing(
+def test_no_qr_or_other_document_when_wallet_images_missing(
     registration: Any,
     user: Any,
     ukraine_country: Any,
@@ -521,10 +539,15 @@ def test_no_flex_fields_when_wallet_images_missing(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    account = PendingAccount.objects.get(individual=individual)
+    assert not account.wallet_qr_photo
     assert individual.flex_fields == {}
+    assert not PendingDocument.objects.filter(
+        individual=individual, type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER]
+    ).exists()
 
 
-def test_only_present_wallet_image_stored(
+def test_qr_stored_and_no_other_document_when_id_image_missing(
     registration: Any,
     user: Any,
     ukraine_country: Any,
@@ -540,9 +563,12 @@ def test_only_present_wallet_image_stored(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    assert "id_wallet_image_i_f" not in individual.flex_fields
-    assert individual.flex_fields["wallet_num_image_i_f"].endswith(".jpg")
-    assert default_storage.exists(individual.flex_fields["wallet_num_image_i_f"])
+    account = PendingAccount.objects.get(individual=individual)
+    assert account.wallet_qr_photo.name.endswith(".jpg")
+    assert default_storage.exists(account.wallet_qr_photo.name)
+    assert not PendingDocument.objects.filter(
+        individual=individual, type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER]
+    ).exists()
 
 
 def test_rejects_record_with_no_individuals(
@@ -575,6 +601,7 @@ def test_wallet_account_created_when_name_missing(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -596,6 +623,7 @@ def test_detail_id_links_household_and_individual_to_source_record(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -615,6 +643,7 @@ def test_reimporting_same_record_does_not_duplicate_household(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -632,6 +661,7 @@ def test_malformed_wallet_image_rejects_record_without_killing_batch(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
@@ -652,6 +682,7 @@ def test_failed_individual_validation_leaves_no_orphan_images(
     user: Any,
     ukraine_country: Any,
     tax_id_document_type: Any,
+    other_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
     settings: Any,
