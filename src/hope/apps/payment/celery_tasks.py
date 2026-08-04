@@ -1012,7 +1012,12 @@ def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
         if payment_plan.source_payment_plan_id:
             PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
 
-        PaymentPlanService(payment_plan=payment_plan).create_child_plan_payments()
+        fixed_amount = job.config.get("fixed_amount")
+        amounts = job.config.get("amounts")
+        PaymentPlanService(payment_plan=payment_plan).create_child_plan_payments(
+            amounts={unicef_id: Decimal(amount) for unicef_id, amount in amounts.items()} if amounts else None,
+            fixed_amount=Decimal(fixed_amount) if fixed_amount else None,
+        )
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
@@ -1029,10 +1034,16 @@ def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     return True
 
 
-def prepare_child_payment_plan_async_task(payment_plan: PaymentPlan) -> bool | None:
-    """Queue copying of payments for a child plan (follow-up / top-up / top-up amendment)."""
+def prepare_child_payment_plan_async_task(
+    payment_plan: PaymentPlan, extra_config: dict[str, Any] | None = None
+) -> bool | None:
+    """Queue copying of payments for a child plan (follow-up / top-up / top-up amendment).
+
+    ``extra_config`` carries the Top-Up entitlement decision made at creation time: either
+    ``{"fixed_amount": "50.00"}`` or ``{"amounts": {payment unicef_id: "50.00", ...}}``.
+    """
     payment_plan_id = str(payment_plan.id)
-    config = {"payment_plan_id": payment_plan_id}
+    config = {"payment_plan_id": payment_plan_id, **(extra_config or {})}
     AsyncRetryJob.queue_task(
         instance=payment_plan,
         job_name=prepare_child_payment_plan_async_task.__name__,

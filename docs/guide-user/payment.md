@@ -10,6 +10,8 @@ tags:
 
 The Payment module is the payment management tool within HOPE that facilitates the creation of payment lists using information from targeted households. This module is used to create payment plans with payees and entitlements, track approvals and authorizations, create and export payment lists for payment providers (FSPs or IPs) and perform reconciliation with reports from payment providers.
 
+Payment Plan Groups, Purposes, Follow-Up Instructions, Top-Ups and Top-Up Amendments are covered on their own page: [Payment Plan Groups, Purposes, Follow-Up Instructions & Top-Ups](payment-groups-and-purposes.md).
+
 ## HOPE and VISION Integration
 
 When payments are provided through an Implementing Partner and are included in the Direct Cash transfer to the Implementing Partner, HOPE Payment Module currently does not fetch data from Vision. It is the responsibility of UNICEF programme manager to ensure that the cash to be transferred to beneficiary by the IP in the Cash Plan does not exceed the agreed DCT amount. Cash plans using a UNICEF FSP need to receive up-to-date financial data (approved with sufficient fund commitments) from Vision to be approved and released. Vision either provides,
