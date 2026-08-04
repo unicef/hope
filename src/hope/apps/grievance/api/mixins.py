@@ -507,6 +507,7 @@ class GrievanceMutationMixin:
                     ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=approver,
+                    editor=approver,
                 )
             )
 
@@ -539,6 +540,7 @@ class GrievanceMutationMixin:
                     grievance_ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=approver,
+                    editor=approver,
                 )
             )
 

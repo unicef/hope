@@ -818,6 +818,7 @@ class GrievanceTicketGlobalViewSet(
                     ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=user,
+                    editor=user,
                 )
             )
 

@@ -435,6 +435,13 @@ def complaint_ticket_detail_url(afghanistan: BusinessArea, complaint_ticket: Gri
 
 
 @pytest.fixture
+def complaint_ticket_for_approval(complaint_ticket: GrievanceTicket) -> GrievanceTicket:
+    complaint_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+    complaint_ticket.save(update_fields=["status"])
+    return complaint_ticket
+
+
+@pytest.fixture
 def complaint_ticket_status_change_url(afghanistan: BusinessArea, complaint_ticket: GrievanceTicket) -> str:
     return reverse(
         "api:grievance-tickets:grievance-tickets-global-status-change",
@@ -1680,3 +1687,36 @@ def test_update_grievance_ticket_sends_notification_even_when_values_unchanged(
     assert response.status_code == status.HTTP_200_OK
     sent_actions = [notification.action for call in mock_send.call_args_list for notification in call.args[0]]
     assert GrievanceNotification.ACTION_TICKET_UPDATED in sent_actions
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_status_change_back_to_in_progress_does_not_notify_the_owner_who_sent_it_back(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket_for_approval: GrievanceTicket,
+    complaint_ticket_status_change_url: str,
+    create_user_role_with_permissions: Callable,
+    django_capture_on_commit_callbacks: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_SEND_BACK_AS_OWNER], afghanistan, program)
+
+    client = api_client(user)
+    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = client.post(
+                complaint_ticket_status_change_url,
+                {"status": GrievanceTicket.STATUS_IN_PROGRESS},
+                format="json",
+            )
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    send_back_recipients = [
+        recipient.id
+        for call in mock_send.call_args_list
+        for notification in call.args[0]
+        if notification.action == GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS
+        for recipient in notification.user_recipients
+    ]
+    assert send_back_recipients == []
