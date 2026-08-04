@@ -815,10 +815,20 @@ class BulkCloseGrievanceTicketsSerializer(serializers.Serializer):
     )
 
 
+class NeedsAdjudicationRoleReassignEntrySerializer(serializers.Serializer):
+    role = serializers.CharField()
+    household = serializers.CharField()
+    individual = serializers.CharField()
+    new_individual = serializers.CharField()
+
+
 class NeedsAdjudicationResolutionSerializer(serializers.Serializer):
     ticket_id = serializers.UUIDField()
     duplicate_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
     distinct_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+    role_reassign_data = serializers.DictField(
+        child=NeedsAdjudicationRoleReassignEntrySerializer(), required=False, default=dict
+    )
 
     def validate(self, attrs: dict) -> dict:
         if not attrs["duplicate_individual_ids"] and not attrs["distinct_individual_ids"]:

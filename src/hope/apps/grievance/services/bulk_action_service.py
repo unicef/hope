@@ -222,6 +222,8 @@ class BulkActionService:
         if unknown:
             raise ValidationError(f"Individuals {sorted(unknown)} do not belong to ticket {ticket.unicef_id}.")
 
+        ticket_details.role_reassign_data = resolution.get("role_reassign_data") or {}
+        ticket_details.save(update_fields=["role_reassign_data"])
         ticket_details.selected_individuals.set(duplicate_ids)
         ticket_details.selected_distinct.set(distinct_ids)
 

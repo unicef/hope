@@ -30,9 +30,10 @@ from hope.apps.household.api.serializers.individual import (
     IndividualForTicketSerializer,
     IndividualRoleInHouseholdSerializer,
 )
+from hope.apps.household.const import HEAD
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
 from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
-from hope.models import BusinessArea, Individual, Program
+from hope.models import BusinessArea, Household, Individual, Program
 
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
@@ -214,8 +215,24 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
         return {}
 
 
+class NaRoleHouseholdSerializer(serializers.ModelSerializer):
+    active_individuals_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Household
+        fields = ("id", "unicef_id", "withdrawn", "active_individuals_count")
+
+    def get_active_individuals_count(self, obj: Household) -> int:
+        return obj.active_individuals.count()
+
+
+class NaRoleInHouseholdSerializer(serializers.Serializer):
+    role = serializers.CharField()
+    household = NaRoleHouseholdSerializer()
+
+
 class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
-    household = HouseholdForTicketSerializer()
+    household = HouseholdForTicketSerializer()  # type: ignore[assignment]
     role = serializers.SerializerMethodField()
     roles_in_households = serializers.SerializerMethodField()
 
@@ -248,13 +265,42 @@ class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
         ).data
 
 
+class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
+    roles_in_households = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "household",
+            "full_name",
+            "birth_date",
+            "last_registration_date",
+            "sex",
+            "deduplication_golden_record_results",
+            "duplicate",
+            "documents",
+            "program_code",
+            "roles_in_households",
+        )
+
+    @extend_schema_field(NaRoleInHouseholdSerializer(many=True))
+    def get_roles_in_households(self, obj: Individual) -> list[dict]:
+        roles = NaRoleInHouseholdSerializer(obj.households_and_roles(manager="all_merge_status_objects"), many=True)
+        data = list(roles.data)
+        if obj.is_head():
+            data.append({"role": HEAD, "household": NaRoleHouseholdSerializer(obj.household).data})
+        return data
+
+
 class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     has_duplicated_document = serializers.SerializerMethodField()
     can_close_as_unique = serializers.SerializerMethodField()
-    golden_records_individual = IndividualForTicketSerializer()
+    golden_records_individual = IndividualForNaComparisonSerializer()
     extra_data = serializers.SerializerMethodField()
-    possible_duplicate = IndividualForTicketSerializer()
-    possible_duplicates = IndividualForTicketSerializer(many=True)
+    possible_duplicate = IndividualForNaComparisonSerializer()
+    possible_duplicates = IndividualForNaComparisonSerializer(many=True)
     selected_duplicates = IndividualForNeedsAdjudicationSerializer(source="selected_individuals", many=True)
     selected_individual = IndividualForTicketSerializer()
     selected_distinct = IndividualForTicketSerializer(many=True)

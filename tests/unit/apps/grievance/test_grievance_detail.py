@@ -1767,6 +1767,33 @@ def test_grievance_detail_needs_adjudication(
                 "photo": document.photo.url if document.photo else None,
             },
         ],
+        "roles_in_households": [
+            {
+                "role": role.role,
+                "household": {
+                    "id": str(role.household.id),
+                    "unicef_id": role.household.unicef_id,
+                    "withdrawn": role.household.withdrawn,
+                    "active_individuals_count": role.household.active_individuals.count(),
+                },
+            }
+            for role in golden_records_individual.households_and_roles(manager="all_merge_status_objects").all()
+        ]
+        + (
+            [
+                {
+                    "role": "HEAD",
+                    "household": {
+                        "id": str(golden_records_individual.household.id),
+                        "unicef_id": golden_records_individual.household.unicef_id,
+                        "withdrawn": golden_records_individual.household.withdrawn,
+                        "active_individuals_count": golden_records_individual.household.active_individuals.count(),
+                    },
+                }
+            ]
+            if golden_records_individual.is_head()
+            else []
+        ),
     }
     assert ticket_details_data["possible_duplicate"] == {
         "id": str(individuals2[0].id),
@@ -1813,6 +1840,33 @@ def test_grievance_detail_needs_adjudication(
         },
         "deduplication_golden_record_results": [],
         "documents": [],
+        "roles_in_households": [
+            {
+                "role": role.role,
+                "household": {
+                    "id": str(role.household.id),
+                    "unicef_id": role.household.unicef_id,
+                    "withdrawn": role.household.withdrawn,
+                    "active_individuals_count": role.household.active_individuals.count(),
+                },
+            }
+            for role in individuals2[0].households_and_roles(manager="all_merge_status_objects").all()
+        ]
+        + (
+            [
+                {
+                    "role": "HEAD",
+                    "household": {
+                        "id": str(individuals2[0].household.id),
+                        "unicef_id": individuals2[0].household.unicef_id,
+                        "withdrawn": individuals2[0].household.withdrawn,
+                        "active_individuals_count": individuals2[0].household.active_individuals.count(),
+                    },
+                }
+            ]
+            if individuals2[0].is_head()
+            else []
+        ),
     }
     assert ticket_details_data["possible_duplicates"] == [
         {
@@ -1860,6 +1914,33 @@ def test_grievance_detail_needs_adjudication(
             },
             "deduplication_golden_record_results": [],
             "documents": [],
+            "roles_in_households": [
+                {
+                    "role": role.role,
+                    "household": {
+                        "id": str(role.household.id),
+                        "unicef_id": role.household.unicef_id,
+                        "withdrawn": role.household.withdrawn,
+                        "active_individuals_count": role.household.active_individuals.count(),
+                    },
+                }
+                for role in individuals2[0].households_and_roles(manager="all_merge_status_objects").all()
+            ]
+            + (
+                [
+                    {
+                        "role": "HEAD",
+                        "household": {
+                            "id": str(individuals2[0].household.id),
+                            "unicef_id": individuals2[0].household.unicef_id,
+                            "withdrawn": individuals2[0].household.withdrawn,
+                            "active_individuals_count": individuals2[0].household.active_individuals.count(),
+                        },
+                    }
+                ]
+                if individuals2[0].is_head()
+                else []
+            ),
         },
     ]
     expected_duplicate_household = {
