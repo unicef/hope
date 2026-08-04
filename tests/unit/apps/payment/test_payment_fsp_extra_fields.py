@@ -392,7 +392,7 @@ def test_fsp_extra_fields_import_logs_previous_and_updated_values(
             "to": str(expected_fields),
         }
     }
-    assert list(log.programs.values_list("pk", flat=True)) == [payment_plan.program_id]
+    assert list(log.programs.values_list("pk", flat=True)) == [payment_plan.program.pk]
 
 
 def test_fsp_extra_fields_import_allows_payment_gateway_payload_header(
