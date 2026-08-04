@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 import zipfile
 
 from admin_extra_buttons.decorators import button, choice
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
@@ -386,13 +387,27 @@ class ProgramAdmin(
         return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
 
     @button(permission="account.can_reindex_programs", label="Rebuild Index", visible=False)
-    def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
+    def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponse:
         program = Program.objects.get(pk=pk)
-        ok, msg = rebuild_program_indexes(str(program.id))
-        level = messages.SUCCESS if ok else messages.ERROR
-        message = "Rebuild indexes for program successful." if ok else f"Failed to rebuild indexes: {msg}"
-        messages.add_message(request, level, message)
-        return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
+
+        def _rebuild(request: HttpRequest) -> HttpResponseRedirect:
+            ok, msg = rebuild_program_indexes(str(program.id))
+            level = messages.SUCCESS if ok else messages.ERROR
+            message = "Rebuild indexes for program successful." if ok else f"Failed to rebuild indexes: {msg}"
+            messages.add_message(request, level, message)
+            return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
+
+        return confirm_action(
+            self,
+            request,
+            _rebuild,
+            message="""<h1>DESTRUCTIVE: rebuilds the LIVE Elasticsearch indexes of this program</h1>
+            <h3>The current indexes are DELETED first — search and deduplication return empty results
+            until repopulation finishes. This does NOT touch aliases/versions; for mapping changes use
+            the blue-green reindex tooling instead.</h3>
+            """,
+            pk=pk,
+        )
 
     @button(label="Bulk Upload Individual Photos", permission="program.can_bulk_upload_individual_photos")
     def bulk_upload_individuals_photos(self, request: HttpRequest, pk: int) -> TemplateResponse:
