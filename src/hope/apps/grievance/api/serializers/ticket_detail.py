@@ -5,7 +5,9 @@ from typing import Any
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.core.files.storage import default_storage
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import (
@@ -22,9 +24,11 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     can_close_as_unique,
     find_open_unique_identifiers_ticket_for_individual,
 )
+from hope.apps.household.api.serializers.household import HouseholdForTicketSerializer
 from hope.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualForTicketSerializer,
+    IndividualRoleInHouseholdSerializer,
 )
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
 from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
@@ -210,6 +214,40 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
         return {}
 
 
+class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
+    household = HouseholdForTicketSerializer()
+    role = serializers.SerializerMethodField()
+    roles_in_households = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "household",
+            "full_name",
+            "birth_date",
+            "last_registration_date",
+            "sex",
+            "deduplication_golden_record_results",
+            "duplicate",
+            "documents",
+            "program_code",
+            "role",
+            "roles_in_households",
+        )
+
+    def get_role(self, obj: Individual) -> str | None:
+        role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
+        return role.role if role else None
+
+    @extend_schema_field(IndividualRoleInHouseholdSerializer(many=True))
+    def get_roles_in_households(self, obj: Individual) -> ReturnDict:
+        return IndividualRoleInHouseholdSerializer(
+            obj.households_and_roles(manager="all_merge_status_objects"), many=True
+        ).data
+
+
 class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     has_duplicated_document = serializers.SerializerMethodField()
     can_close_as_unique = serializers.SerializerMethodField()
@@ -217,7 +255,7 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     extra_data = serializers.SerializerMethodField()
     possible_duplicate = IndividualForTicketSerializer()
     possible_duplicates = IndividualForTicketSerializer(many=True)
-    selected_duplicates = IndividualForTicketSerializer(source="selected_individuals", many=True)
+    selected_duplicates = IndividualForNeedsAdjudicationSerializer(source="selected_individuals", many=True)
     selected_individual = IndividualForTicketSerializer()
     selected_distinct = IndividualForTicketSerializer(many=True)
 

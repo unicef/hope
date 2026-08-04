@@ -49,7 +49,8 @@ export function ReassignMultipleRoleBox({
   }
   const selectedIndividualsToReassign =
     ticket.ticketDetails.selectedDuplicates?.filter(
-      (el) => el.role === 'PRIMARY' || el.role === 'HEAD',
+      (el) =>
+        el.role === 'PRIMARY' || el.id === el.household?.headOfHousehold?.id,
     );
   const mappedReassignLookups = (): ReactElement => (
     <>

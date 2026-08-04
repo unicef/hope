@@ -1862,6 +1862,70 @@ def test_grievance_detail_needs_adjudication(
             "documents": [],
         },
     ]
+    expected_duplicate_household = {
+        "id": str(duplicate.household.id),
+        "unicef_id": duplicate.household.unicef_id,
+        "unhcr_id": duplicate.household.unhcr_id,
+        "village": duplicate.household.village,
+        "address": duplicate.household.address,
+        "admin1": {
+            "id": str(duplicate.household.admin1.id),
+            "name": duplicate.household.admin1.name,
+        },
+        "admin2": {
+            "id": str(duplicate.household.admin2.id),
+            "name": duplicate.household.admin2.name,
+        },
+        "country": duplicate.household.country.name,
+        "country_origin": duplicate.household.country_origin.name,
+        "geopoint": duplicate.household.geopoint,
+        "head_of_household": {
+            "id": str(duplicate.household.head_of_household.id),
+            "full_name": duplicate.household.head_of_household.full_name,
+        },
+        "residence_status": duplicate.household.get_residence_status_display(),
+        "size": duplicate.household.size,
+        "active_individuals_count": duplicate.household.active_individuals.count(),
+        "program_code": program.code,
+    }
+    # roles_in_households nests the household via IndividualRoleInHouseholdSerializer (HouseholdSimpleSerializer shape)
+    expected_role_household = {
+        "id": str(duplicate.household.id),
+        "unicef_id": duplicate.household.unicef_id,
+        "admin1": {
+            "id": str(duplicate.household.admin1.id),
+            "name": duplicate.household.admin1.name,
+        },
+        "admin2": {
+            "id": str(duplicate.household.admin2.id),
+            "name": duplicate.household.admin2.name,
+        },
+        "admin3": None,
+        "admin4": None,
+        "country": duplicate.household.country.name,
+        "country_origin": duplicate.household.country_origin.name,
+        "address": duplicate.household.address,
+        "village": duplicate.household.village,
+        "geopoint": duplicate.household.geopoint,
+        "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+        "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+        "total_cash_received": duplicate.household.total_cash_received,
+        "total_cash_received_usd": duplicate.household.total_cash_received_usd,
+        "delivered_quantities": [
+            {
+                "currency": "USD",
+                "total_delivered_quantity": "0.00",
+            }
+        ],
+        "start": f"{duplicate.household.start:%Y-%m-%dT%H:%M:%SZ}",
+        "zip_code": duplicate.household.zip_code,
+        "residence_status": duplicate.household.get_residence_status_display(),
+        "import_id": duplicate.household.unicef_id,
+        "program_code": program.code,
+    }
+    duplicate_role_obj = (
+        duplicate.households_and_roles(manager="all_objects").filter(household=duplicate.household).first()
+    )
     assert ticket_details_data["selected_duplicates"] == [
         {
             "id": str(duplicate.id),
@@ -1872,42 +1936,18 @@ def test_grievance_detail_needs_adjudication(
             "sex": duplicate.sex,
             "duplicate": duplicate.duplicate,
             "program_code": duplicate.program.code,
-            "household": {
-                "id": str(duplicate.household.id),
-                "unicef_id": duplicate.household.unicef_id,
-                "admin1": {
-                    "id": str(duplicate.household.admin1.id),
-                    "name": duplicate.household.admin1.name,
-                },
-                "admin2": {
-                    "id": str(duplicate.household.admin2.id),
-                    "name": duplicate.household.admin2.name,
-                },
-                "admin3": None,
-                "admin4": None,
-                "country": duplicate.household.country.name,
-                "country_origin": duplicate.household.country_origin.name,
-                "address": duplicate.household.address,
-                "village": duplicate.household.village,
-                "geopoint": duplicate.household.geopoint,
-                "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "total_cash_received": duplicate.household.total_cash_received,
-                "total_cash_received_usd": duplicate.household.total_cash_received_usd,
-                "delivered_quantities": [
-                    {
-                        "currency": "USD",
-                        "total_delivered_quantity": "0.00",
-                    }
-                ],
-                "start": f"{duplicate.household.start:%Y-%m-%dT%H:%M:%SZ}",
-                "zip_code": duplicate.household.zip_code,
-                "residence_status": duplicate.household.get_residence_status_display(),
-                "import_id": duplicate.household.unicef_id,
-                "program_code": program.code,
-            },
+            "household": expected_duplicate_household,
             "deduplication_golden_record_results": [],
             "documents": [],
+            "role": duplicate_role_obj.role if duplicate_role_obj else None,
+            "roles_in_households": [
+                {
+                    "id": str(role.id),
+                    "household": expected_role_household,
+                    "role": role.role,
+                }
+                for role in duplicate.households_and_roles(manager="all_merge_status_objects").all()
+            ],
         },
     ]
     assert ticket_details_data["selected_individual"] is None

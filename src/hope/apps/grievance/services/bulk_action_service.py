@@ -222,8 +222,8 @@ class BulkActionService:
         if unknown:
             raise ValidationError(f"Individuals {sorted(unknown)} do not belong to ticket {ticket.unicef_id}.")
 
-        ticket_details.selected_individuals.set(duplicate_ids)  # type: ignore[arg-type]
-        ticket_details.selected_distinct.set(distinct_ids)  # type: ignore[arg-type]
+        ticket_details.selected_individuals.set(duplicate_ids)
+        ticket_details.selected_distinct.set(distinct_ids)
 
         # marks duplicates/distinct, reassigns roles, reports biometric false positives, traverses siblings
         close_needs_adjudication_ticket_service(ticket, user)
