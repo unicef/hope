@@ -97,6 +97,15 @@ def grievance_context(business_area: BusinessArea, users: dict[str, User]) -> di
 
 
 @pytest.fixture
+def tickets_assigned_to_user_two(grievance_context: dict[str, Any]) -> list[GrievanceTicket]:
+    tickets = grievance_context["grievance_tickets"][:3]
+    GrievanceTicket.objects.filter(id__in=[ticket.id for ticket in tickets]).update(
+        assigned_to=grievance_context["users"]["user_two"]
+    )
+    return tickets
+
+
+@pytest.fixture
 def closed_ticket(business_area: BusinessArea, users: dict[str, User]) -> GrievanceTicket:
     user = users["user"]
     return GrievanceTicketFactory(
@@ -173,20 +182,19 @@ def test_bulk_update_assignee_skips_enqueue_when_assignee_unchanged(grievance_co
     mock_enqueue.assert_not_called()
 
 
+@pytest.mark.parametrize("action_user_name", ["user", None])
 def test_bulk_assign_notifications_task_action_builds_notification_for_new_assignee(
     grievance_context: dict[str, Any],
+    tickets_assigned_to_user_two: list[GrievanceTicket],
+    action_user_name: str | None,
 ) -> None:
-    user = grievance_context["users"]["user"]
+    action_user = grievance_context["users"].get(action_user_name)
     user_two = grievance_context["users"]["user_two"]
-    grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
-    grievance_ticket1.assigned_to = user_two
-    grievance_ticket1.save(update_fields=["assigned_to"])
-    grievance_ticket2.assigned_to = user_two
-    grievance_ticket2.save(update_fields=["assigned_to"])
+    grievance_ticket1, grievance_ticket2, _ = tickets_assigned_to_user_two
     job = SimpleNamespace(
         config={
             "ticket_ids": [str(grievance_ticket1.id), str(grievance_ticket2.id)],
-            "action_user_id": str(user.id),
+            "action_user_id": getattr(action_user, "id", None),
         }
     )
 
@@ -201,40 +209,16 @@ def test_bulk_assign_notifications_task_action_builds_notification_for_new_assig
         grievance_ticket1.id,
         grievance_ticket2.id,
     }
-    assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
-
-
-def test_bulk_assign_notifications_task_action_without_action_user(
-    grievance_context: dict[str, Any],
-) -> None:
-    user_two = grievance_context["users"]["user_two"]
-    grievance_ticket1, _, _, _ = grievance_context["grievance_tickets"]
-    grievance_ticket1.assigned_to = user_two
-    grievance_ticket1.save(update_fields=["assigned_to"])
-    job = SimpleNamespace(
-        config={
-            "ticket_ids": [str(grievance_ticket1.id)],
-            "action_user_id": None,
-        }
-    )
-
-    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        bulk_assign_notifications_async_task_action(job)
-
-    sent_notifications = mock_send.call_args.args[0]
-    assert all(notification.extra_data.get("editor") is None for notification in sent_notifications)
+    assert all(notification.extra_data.get("editor") == action_user for notification in sent_notifications)
     assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
 
 
 def test_bulk_assign_notifications_task_action_does_not_scale_queries_per_ticket(
     grievance_context: dict[str, Any],
+    tickets_assigned_to_user_two: list[GrievanceTicket],
 ) -> None:
     user = grievance_context["users"]["user"]
-    user_two = grievance_context["users"]["user_two"]
-    ticket1, ticket2, ticket3, _ = grievance_context["grievance_tickets"]
-    for ticket in (ticket1, ticket2, ticket3):
-        ticket.assigned_to = user_two
-        ticket.save(update_fields=["assigned_to"])
+    ticket1, ticket2, ticket3 = tickets_assigned_to_user_two
     single_job = SimpleNamespace(config={"ticket_ids": [str(ticket1.id)], "action_user_id": str(user.id)})
     many_job = SimpleNamespace(
         config={

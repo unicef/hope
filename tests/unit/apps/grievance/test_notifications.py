@@ -1238,6 +1238,24 @@ def test_for_approval_recipients_for_complaint_target_close_permission_holders(
     assert list(notification.user_recipients) == [closer]
 
 
+def test_for_approval_recipients_for_beneficiary_target_close_permission_holders(
+    business_area: BusinessArea, close_ticket_role: Role
+) -> None:
+    closer = UserFactory(email="beneficiary-closer@example.com")
+    UserRoleAssignmentFactory(user=closer, role=close_ticket_role, business_area=business_area)
+
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_BENEFICIARY,
+        issue_type=None,
+        assigned_to=None,
+    )
+
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
+
+    assert list(notification.user_recipients) == [closer]
+
+
 def test_for_approval_recipients_for_referral_target_feedback_close_permission_holders(
     business_area: BusinessArea, close_feedback_ticket_role: Role, close_ticket_role: Role
 ) -> None:

@@ -3,12 +3,12 @@ from typing import Any
 
 from constance import config
 from django.conf import settings
-from django.db.models import Q, QuerySet
-from django.utils import timezone
+from django.db.models import QuerySet
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.mailjet import MailjetClient
-from hope.models import PaymentPlan, RoleAssignment, User
+from hope.apps.utils.recipients import users_with_permissions
+from hope.models import PaymentPlan, User
 
 logger = logging.getLogger(__name__)
 
@@ -71,29 +71,12 @@ class PaymentNotification:
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
         permission = PaymentNotification.ACTION_TO_RECIPIENTS_PERMISSIONS_MAP[self.action]
-        business_area = self.payment_plan.business_area
-        program = self.payment_plan.program
-
-        role_assignments = (
-            RoleAssignment.objects.filter(
-                Q(role__permissions__contains=[permission])
-                & Q(business_area=business_area)
-                & (Q(program=None) | Q(program=program))
-            )
-            .exclude(expiry_date__lt=timezone.now())
-            .distinct()
-        )
-        users = (
-            User.objects.filter(
-                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-            )
-            .exclude(id=self.action_user.id)
-            .distinct()
-        )
-
-        if settings.ENV == "prod":
-            users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
-        return users
+        return users_with_permissions(
+            self.payment_plan.business_area,
+            [permission],
+            [self.payment_plan.program],
+            exclude_staff=True,
+        ).exclude(id=self.action_user.id)
 
     def _prepare_email(self) -> MailjetClient:
         body_variables = self._prepare_body_variables()

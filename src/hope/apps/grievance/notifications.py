@@ -12,7 +12,8 @@ from django.utils import timezone
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.utils.mailjet import MailjetClient
-from hope.models import RoleAssignment, User
+from hope.apps.utils.recipients import users_with_permissions
+from hope.models import User
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -50,6 +51,51 @@ class GrievanceNotification:
             Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
         ],
+    }
+
+    # Which permission lets a user act on a ticket waiting for approval, per category.
+    CATEGORY_APPROVE_PERMISSIONS = {
+        GrievanceTicket.CATEGORY_DATA_CHANGE: (
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        ),
+        GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: (
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        ),
+        GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: (
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        ),
+        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: (
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+        ),
+        GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: (
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ),
+        GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: (
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ),
+        GrievanceTicket.CATEGORY_BENEFICIARY: (
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ),
+        # Referral is a feedback-type ticket, so closing/approving is gated by the feedback permission.
+        GrievanceTicket.CATEGORY_REFERRAL: (
+            Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+        ),
     }
 
     def __init__(self, grievance_ticket: GrievanceTicket, action: Any, **kwargs: Any) -> None:
@@ -120,10 +166,6 @@ class GrievanceNotification:
         )
 
     @staticmethod
-    def _exclude_unmailable(queryset: "QuerySet[User]") -> "QuerySet[User]":
-        return queryset.filter(is_active=True).exclude(email="")
-
-    @staticmethod
     def _exclude_users(queryset: "QuerySet[User]", *users: "User | None") -> "QuerySet[User]":
         ids = [user.id for user in users if user is not None]
         return queryset.exclude(id__in=ids) if ids else queryset
@@ -134,29 +176,16 @@ class GrievanceNotification:
         return self.extra_data.get("editor")
 
     @cached_property
-    def _program_scope(self) -> Q:
-        program_ids = list(self.grievance_ticket.programs.values_list("pk", flat=True))
-        return Q() if not program_ids else Q(program__isnull=True) | Q(program__in=program_ids)
+    def _program_ids(self) -> list:
+        return list(self.grievance_ticket.programs.values_list("pk", flat=True))
 
     def _users_with_permissions(self, permissions: list[Permissions]) -> "QuerySet[User]":
-        perm_values = [permission.value for permission in permissions]
-        role_assignments = (
-            RoleAssignment.objects.filter(
-                self._program_scope,
-                role__permissions__overlap=perm_values,
-                business_area=self.grievance_ticket.business_area,
-            )
-            .exclude(expiry_date__lt=timezone.now())
-            .distinct()
+        return users_with_permissions(
+            self.grievance_ticket.business_area,
+            permissions,
+            self._program_ids,
+            exclude_staff=True,
         )
-        users = self._exclude_unmailable(
-            User.objects.filter(
-                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-            )
-        )
-        if settings.ENV == "prod":
-            users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
-        return users.distinct()
 
     def _prepare_permission_based_recipients(self) -> "QuerySet[User]":
         queryset = self._users_with_permissions(GrievanceNotification.ACTION_VIEW_PERMISSIONS[self.action])
@@ -188,46 +217,7 @@ class GrievanceNotification:
         return list(recipients.values())
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
-        # Approval permission depends on the ticket type
-        approve_permissions_by_category = {
-            GrievanceTicket.CATEGORY_DATA_CHANGE: (
-                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
-                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
-                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
-            ),
-            GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: (
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-            ),
-            GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: (
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-            ),
-            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: (
-                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
-                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
-                Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
-            ),
-            GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: (
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
-            ),
-            GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: (
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
-            ),
-            # Referral is a feedback-type ticket, so closing/approving is gated by the feedback permission.
-            GrievanceTicket.CATEGORY_REFERRAL: (
-                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
-                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
-                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
-            ),
-        }
-        permissions = approve_permissions_by_category.get(self.grievance_ticket.category)
+        permissions = GrievanceNotification.CATEGORY_APPROVE_PERMISSIONS.get(self.grievance_ticket.category)
         if permissions is None:
             return User.objects.none()
         base_permission, creator_permission, owner_permission = permissions
@@ -362,7 +352,7 @@ class GrievanceNotification:
     ) -> list["GrievanceNotification"]:
         notifications = []
         if grievance_ticket.assigned_to:
-            # Skip the assignment email when the creator assigns the ticket to themselves.
+            # The editor exclusion drops the recipient when the creator self-assigns.
             notifications.append(
                 GrievanceNotification(
                     grievance_ticket,
