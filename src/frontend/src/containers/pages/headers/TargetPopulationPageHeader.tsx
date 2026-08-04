@@ -7,6 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { paymentPlanBuildStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -54,7 +55,9 @@ export function TargetPopulationPageHeader({
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: businessAreaData, isLoading: businessAreaDataLoading } =
     useQuery<BusinessArea>({
-      queryKey: ['businessArea', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+        slug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasRetrieve({
           slug: businessArea,

@@ -7,6 +7,7 @@ import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -59,15 +60,14 @@ export function LockedTargetPopulationHeaderButtons({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'targetPopulation',
-          businessArea,
-          targetPopulation.id,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
       });
 
       showMessage(t('Target Population Unlocked'));

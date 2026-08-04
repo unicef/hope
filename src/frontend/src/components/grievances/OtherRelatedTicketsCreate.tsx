@@ -3,6 +3,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { decodeIdString } from '@utils/utils';
@@ -24,19 +25,19 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [show, setShow] = useState(false);
 
+  const grievanceTicketsParams = {
+    businessAreaSlug,
+    household:
+      decodeIdString(values?.selectedHousehold?.id) ||
+      '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
+  };
   const { data, isLoading } = useQuery({
-    queryKey: [
-      'grievanceTickets',
-      businessAreaSlug,
-      values?.selectedHousehold?.id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsList,
+      grievanceTicketsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList({
-        businessAreaSlug,
-        household:
-          decodeIdString(values?.selectedHousehold?.id) ||
-          '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
-      }),
+      RestService.restBusinessAreasGrievanceTicketsList(grievanceTicketsParams),
     enabled: !!businessAreaSlug,
   });
   if (isLoading) return <LoadingComponent />;

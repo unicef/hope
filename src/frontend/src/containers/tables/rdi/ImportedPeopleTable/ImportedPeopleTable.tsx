@@ -4,7 +4,8 @@ import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -60,36 +61,36 @@ export function ImportedPeopleTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasProgramsIndividualsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+  const individualsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedIndividualListList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsList,
+        individualsListParams,
       ),
-  });
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsList(
+          individualsListParams,
+        ),
+      placeholderData: keepPreviousData,
+    });
 
+  const individualsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsIndividualsCount',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve,
+      individualsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        individualsCountParams,
       ),
     enabled: page === 0,
   });
@@ -135,6 +136,7 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
+          isFetching={isFetching}
           rowsPerPageOptions={rowsPerPageOptions}
           isOnPaper={isOnPaper}
           itemsCount={itemsCount}
@@ -160,6 +162,7 @@ export function ImportedPeopleTable({
           data={data}
           error={error}
           isLoading={isLoading}
+          isFetching={isFetching}
           itemsCount={itemsCount}
           page={page}
           setPage={setPage}

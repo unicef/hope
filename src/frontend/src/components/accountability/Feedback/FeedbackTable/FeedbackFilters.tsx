@@ -8,6 +8,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
 import { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
 import { useQuery } from '@tanstack/react-query';
@@ -39,7 +40,7 @@ const FeedbackFilters = ({
   const { data: issueTypeChoices, isLoading: choicesLoading } = useQuery<
     Choice[]
   >({
-    queryKey: ['choicesFeedbackIssueType'],
+    queryKey: restQueryKey(RestService.restChoicesFeedbackIssueTypeList),
     queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 

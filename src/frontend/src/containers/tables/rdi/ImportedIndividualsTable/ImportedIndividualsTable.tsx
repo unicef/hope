@@ -5,6 +5,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
@@ -85,19 +86,18 @@ function ImportedIndividualsTable({
     replacements,
   );
 
+  const individualsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve,
+      individualsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        individualsCountParams,
       ),
     enabled: page === 0 && !notAllowedRdiShowPreviewStatuses.includes(rdi.status),
   });

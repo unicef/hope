@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { ImportData } from '@restgenerated/models/ImportData';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -41,7 +42,10 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
 
   // Query for polling import data status
   const { data: xlsxImportData } = useQuery({
-    queryKey: ['importData', importDataId, businessAreaSlug],
+    queryKey: restQueryKey(RestService.restBusinessAreasImportDataRetrieve, {
+      businessAreaSlug,
+      id: importDataId,
+    }),
     queryFn: async () => {
       if (!importDataId || !businessAreaSlug) return null;
       return RestService.restBusinessAreasImportDataRetrieve({

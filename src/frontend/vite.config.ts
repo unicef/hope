@@ -65,6 +65,8 @@ export default defineConfig({
           'https://excubo.unicef.io',
           'https://sentry.io',
         ],
+        // blob: keeps the xlsx row counter alive — read-excel-file inflates in a blob-URL worker.
+        'worker-src': ["'self'", 'blob:'],
       },
       build: {
         sri: true,

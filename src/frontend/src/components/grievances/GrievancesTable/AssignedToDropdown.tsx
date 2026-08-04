@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { ChangeEvent, FC, SyntheticEvent, useEffect, useState } from 'react';
 import { TextField, Autocomplete } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useProgramContext } from '../../../programContext';
@@ -24,11 +24,11 @@ const StyledAutocomplete = styled(Autocomplete<User, false, boolean, false>)<{
 
 interface AssignedToDropdownProps {
   fullWidth?: boolean;
-  onFilterChange?: (selectedValue: User | null, ids?: any) => void;
+  onFilterChange?: (selectedValue: User | null, ids?: string[]) => void;
   value?: User | null;
   optionsData: User[];
   setInputValue: (value: string) => void;
-  ids?: any;
+  ids?: string[];
   label?: string;
   disableClearable?: boolean;
 }
@@ -60,19 +60,19 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
       })
     : [];
 
-  const handleOpen = (e: any) => {
+  const handleOpen = (e: SyntheticEvent) => {
     e.stopPropagation();
     setOpen(true);
   };
 
-  const handleClose = (e: any, reason: string) => {
+  const handleClose = (e: SyntheticEvent, reason: string) => {
     e.preventDefault();
     e.stopPropagation();
     setOpen(false);
     if (reason !== 'select-option') setInputText('');
   };
 
-  const handleChange = (e: any, selectedValue: User | null) => {
+  const handleChange = (e: SyntheticEvent, selectedValue: User | null) => {
     e.preventDefault();
     e.stopPropagation();
     if (ids) {
@@ -82,7 +82,7 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
     }
   };
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setInputText(e.target.value);

@@ -20,6 +20,7 @@ import { ImportXlsx } from './ImportXlsx';
 import { ReactElement, useEffect, useRef } from 'react';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 
 const StyledLink = styled.a`
   text-decoration: none;
@@ -59,12 +60,9 @@ export function VerificationPlanActions({
 
       pollingIntervalRef.current = setInterval(() => {
         queryClient.invalidateQueries({
-          queryKey: [
-            'PaymentVerificationPlanDetails',
-            businessArea,
-            paymentPlanNode.id,
-            programCode,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+          ),
         });
       }, 2000);
     },
@@ -97,12 +95,9 @@ export function VerificationPlanActions({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanNode.id,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -252,12 +247,9 @@ export function VerificationPlanActions({
                       onClick={() => {
                         setTimeout(() => {
                           queryClient.invalidateQueries({
-                            queryKey: [
-                              'PaymentVerificationPlanDetails',
-                              businessArea,
-                              paymentPlanNode.id,
-                              programCode,
-                            ],
+                            queryKey: restQueryKey(
+                              RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+                            ),
                           });
                         }, 1000);
                       }}

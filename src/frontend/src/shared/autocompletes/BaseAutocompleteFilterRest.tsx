@@ -1,10 +1,15 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import { ReactElement, ReactNode, useEffect, useRef } from 'react';
+import {
+  ReactElement,
+  ReactNode,
+  SyntheticEvent,
+  useEffect,
+  useRef,
+} from 'react';
 import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
+import { AutocompleteOption } from './types';
 
-type OptionType = any;
-
-export function BaseAutocompleteFilterRest({
+export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
   value,
   disabled,
   label,
@@ -28,19 +33,19 @@ export function BaseAutocompleteFilterRest({
   disabled?: boolean;
   label: string;
   dataCy?: string;
-  loadData;
+  loadData: () => void;
   loading: boolean;
-  options;
-  handleChange: (event, newValue) => void;
+  options: TOption[];
+  handleChange: (event: SyntheticEvent, newValue: TOption | null) => void;
 
-  handleClose: (_: any, reason: string) => void;
-  handleOptionSelected: (option: OptionType, value: OptionType) => boolean;
-  handleOptionLabel: (option: OptionType) => string;
+  handleClose: (event: SyntheticEvent, reason: string) => void;
+  handleOptionSelected: (option: TOption | string, value: TOption | string) => boolean;
+  handleOptionLabel: (option: TOption | string) => string;
   handleOpen: () => void;
   open: boolean;
-  data;
+  data: unknown;
   inputValue: string;
-  onInputTextChange: (value) => void;
+  onInputTextChange: (value: string) => void;
   debouncedInputText: string;
   startAdornment?: ReactNode;
 }): ReactElement {
@@ -80,7 +85,10 @@ export function BaseAutocompleteFilterRest({
       onOpen={handleOpen}
       onClose={handleClose}
       isOptionEqualToValue={(option, selectedValue) =>
-        handleOptionSelected(option as any, selectedValue as any)
+        handleOptionSelected(
+          option as TOption | string,
+          selectedValue as TOption | string,
+        )
       }
       getOptionLabel={handleOptionLabel}
       disabled={disabled}

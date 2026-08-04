@@ -10,6 +10,7 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { Box, Button, Tooltip } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   GRIEVANCE_CATEGORIES,
@@ -26,7 +27,7 @@ import {
   getGrievanceDetailsPath,
   getGrievanceEditPath,
 } from './utils/createGrievanceUtils';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 const Separator = styled.div`
@@ -107,16 +108,14 @@ export const GrievanceDetailsToolbar = ({
         formData: { status },
       });
     },
-    onError: (e: any) => {
+    onError: (e: ApiErrorShape) => {
       showApiErrorMessages(e, showMessage);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessArea,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });
@@ -304,11 +303,9 @@ export const GrievanceDetailsToolbar = ({
             { businessAreaSlug: businessArea, id: linkedId, formData: {} },
           );
           queryClient.invalidateQueries({
-            queryKey: [
-              'businessAreasGrievanceTicketsRetrieve',
-              businessArea,
-              linkedId,
-            ],
+            queryKey: restQueryKey(
+              RestService.restBusinessAreasGrievanceTicketsRetrieve,
+            ),
           });
         } catch (e) {
           showApiErrorMessages(e, showMessage);

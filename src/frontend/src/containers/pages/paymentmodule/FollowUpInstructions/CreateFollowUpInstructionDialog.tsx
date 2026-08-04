@@ -21,6 +21,7 @@ import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/Paginat
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
@@ -61,14 +62,18 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  const groupsListParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    limit: 200,
+  };
   const { data: groupsData } = useQuery<PaginatedPaymentPlanGroupListList>({
-    queryKey: ['paymentPlanGroupsList', businessArea, programId, 'all'],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+      groupsListParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        limit: 200,
-      }),
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList(groupsListParams),
     enabled: open && !!businessArea && !!programId,
   });
 
@@ -103,7 +108,9 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
       };
       const created = await createInstruction(body);
       await queryClient.invalidateQueries({
-        queryKey: ['followUpInstructionsList', businessArea, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFollowUpInstructionsList,
+        ),
       });
       setOpen(false);
       showMessage(t('Follow-up Instruction created'));

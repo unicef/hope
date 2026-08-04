@@ -6,6 +6,7 @@ import { headCells } from './UsersTableHeadCells';
 import { UsersTableRow } from './UsersTableRow';
 import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -64,13 +65,19 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     isLoading: isLoadingUsers,
     error: errorUsers,
   } = useQuery<PaginatedUserList>({
-    queryKey: ['businessAreasUsersList', filteredQueryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersList,
+      filteredQueryVariables,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasUsersList(filteredQueryVariables),
   });
 
   const { data: dataUsersCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasUsersCount', businessArea, filteredQueryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersCountRetrieve,
+      filteredQueryVariables,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasUsersCountRetrieve(filteredQueryVariables),
     enabled: page === 0,

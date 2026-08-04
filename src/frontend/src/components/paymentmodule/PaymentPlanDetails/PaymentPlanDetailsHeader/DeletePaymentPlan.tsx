@@ -16,7 +16,8 @@ import {
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +36,7 @@ export function DeletePaymentPlan({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const { mutateAsync: deletePaymentPlan, isPending: loadingDelete } =
     useMutation({
       mutationFn: ({
@@ -51,6 +53,11 @@ export function DeletePaymentPlan({
           id,
           programCode,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        });
+      },
     });
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();

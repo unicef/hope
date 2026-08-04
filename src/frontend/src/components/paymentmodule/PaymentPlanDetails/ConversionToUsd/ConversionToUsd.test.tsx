@@ -30,6 +30,7 @@ vi.mock('@restgenerated/services/RestService', () => ({
     restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate: vi.fn(() =>
       Promise.resolve({}),
     ),
+    restBusinessAreasProgramsPaymentPlansRetrieve: vi.fn(),
   },
 }));
 
