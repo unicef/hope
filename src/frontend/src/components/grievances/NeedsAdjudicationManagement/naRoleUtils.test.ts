@@ -103,7 +103,7 @@ describe('getRequiredReassignments', () => {
 
 describe('isDecisionResolved', () => {
   const base: NaTicketDecision = {
-    mark: 'person1_duplicate',
+    marks: { 'ind-2': 'person1_duplicate' },
     duplicateIndividualIds: ['ind-1'],
     distinctIndividualIds: ['ind-2'],
     reassignments: {},
@@ -146,7 +146,7 @@ describe('isDecisionResolved', () => {
   it('passes for a not-duplicates decision, which never reassigns', () => {
     expect(
       isDecisionResolved({
-        mark: 'not_duplicates',
+        marks: { 'ind-2': 'not_duplicates' },
         duplicateIndividualIds: [],
         distinctIndividualIds: ['ind-1', 'ind-2'],
         reassignments: {},

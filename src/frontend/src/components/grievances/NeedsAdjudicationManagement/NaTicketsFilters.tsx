@@ -4,6 +4,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
@@ -12,6 +13,7 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { LanguageAutocompleteRestFilter } from '@shared/autocompletes/LanguageAutocompleteRestFilter';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
+import { GRIEVANCE_CATEGORIES } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -66,6 +68,23 @@ export const NaTicketsFilters = ({
       return item;
     });
   }, [choicesData.grievanceTicketPriorityChoices]);
+
+  // The Needs Adjudication issue types (Unique Identifiers / Biographical Data /
+  // Biometrics Similarity) come from the choices endpoint keyed by category.
+  const issueTypeDict = useArrayToDict(
+    choicesData?.grievanceTicketIssueTypeChoices,
+    'category',
+    '*',
+  );
+
+  const issueTypeChoices = useMemo(
+    () =>
+      Object.entries(
+        issueTypeDict?.[GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION]
+          ?.subCategories ?? {},
+      ).map(([value, name]) => ({ value, name })),
+    [issueTypeDict],
+  );
 
   const updatedUrgencyChoices = useMemo(() => {
     const urgencyChoices = choicesData.grievanceTicketUrgencyChoices;
@@ -196,10 +215,25 @@ export const NaTicketsFilters = ({
             ))}
           </SelectFilter>
         </Grid>
+        <Grid size={{ xs: 3 }}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('issueType', e.target.value)}
+            label={t('Ticket Type')}
+            value={filter.issueType}
+            data-cy="filters-issue-type"
+            fullWidth
+          >
+            {issueTypeChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name as string}
+              </MenuItem>
+            ))}
+          </SelectFilter>
+        </Grid>
         <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('areaScope', e.target.value)}
-            label={t('Ticket Type')}
+            label={t('Area Scope')}
             value={filter.areaScope}
             fullWidth
             disableClearable

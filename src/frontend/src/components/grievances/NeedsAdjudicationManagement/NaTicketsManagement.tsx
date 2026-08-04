@@ -40,6 +40,7 @@ const initialFilter = {
   program: '',
   admin1: '',
   admin2: '',
+  issueType: '',
   areaScope: 'all',
 };
 
@@ -134,6 +135,7 @@ export const NaTicketsManagement = ({
       urgency: appliedFilter.urgency === 'Not Set' ? 0 : appliedFilter.urgency,
       admin1: appliedFilter.admin1,
       admin2: appliedFilter.admin2,
+      issueType: appliedFilter.issueType,
       program: isAllPrograms ? appliedFilter.program : undefined,
       isCrossArea: appliedFilter.areaScope === 'cross-area' ? true : null,
     }),

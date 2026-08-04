@@ -8,7 +8,7 @@ describe('buildExecutePayload', () => {
     // is who takes it over; swapping them would withdraw the wrong person.
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-1': {
-        mark: 'person1_duplicate',
+        marks: { 'ind-2': 'person1_duplicate' },
         duplicateIndividualIds: ['ind-1'],
         distinctIndividualIds: ['ind-2'],
         reassignments: {
@@ -44,7 +44,7 @@ describe('buildExecutePayload', () => {
   it('emits empty role_reassign_data for a not-duplicates decision', () => {
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-2': {
-        mark: 'not_duplicates',
+        marks: { 'ind-2': 'not_duplicates' },
         duplicateIndividualIds: [],
         distinctIndividualIds: ['ind-1', 'ind-2'],
         reassignments: {},
@@ -62,7 +62,7 @@ describe('buildExecutePayload', () => {
   it('keys HEAD and PRIMARY separately for the same ticket', () => {
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-3': {
-        mark: 'person2_duplicate',
+        marks: { 'ind-2': 'person2_duplicate' },
         duplicateIndividualIds: ['ind-2'],
         distinctIndividualIds: ['ind-1'],
         reassignments: {
@@ -96,7 +96,7 @@ describe('buildExecutePayload', () => {
     // missing key is safer than new_individual: undefined.
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-4': {
-        mark: 'person1_duplicate',
+        marks: { 'ind-2': 'person1_duplicate' },
         duplicateIndividualIds: ['ind-1'],
         distinctIndividualIds: ['ind-2'],
         reassignments: {

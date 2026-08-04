@@ -21,7 +21,9 @@ export interface NaRoleAssignment {
 }
 
 export interface NaTicketDecision {
-  mark: NaMark;
+  // One mark per compared duplicate, keyed by that individual's id. A ticket can
+  // carry several possible duplicates and each pair is adjudicated separately.
+  marks: Record<string, NaMark>;
   duplicateIndividualIds: string[];
   distinctIndividualIds: string[];
   // Keyed by `${role}:${householdId}` so a duplicate holding the same role in
