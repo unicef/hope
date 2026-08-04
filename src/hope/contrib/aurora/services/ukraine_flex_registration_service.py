@@ -67,7 +67,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         "size": "size_h_c",
     }
 
-    DOCUMENT_MAPPING_KEY_DICT = {
+    DOCUMENT_MAPPING_KEY_DICT: dict[str, tuple[str | None, str]] = {
         IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]: (
             "national_id_no_i_c_1",
             "national_id_picture",
@@ -93,6 +93,14 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             "tax_id_picture",
         ),
     }
+
+    @cached_property
+    def _ukraine_country(self) -> Country:
+        return Country.objects.get(iso_code2="UA")
+
+    @cached_property
+    def _document_types_by_key(self) -> dict[str, DocumentType]:
+        return {dt.key: dt for dt in DocumentType.objects.filter(key__in=list(self.DOCUMENT_MAPPING_KEY_DICT))}
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         individuals: list[PendingIndividual] = []
@@ -177,8 +185,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             "program": registration_data_import.program,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
-            "country_origin": Country.objects.get(iso_code2="UA"),
-            "country": Country.objects.get(iso_code2="UA"),
+            "country_origin": self._ukraine_country,
+            "country": self._ukraine_country,
             "consent": True,
             "size": household_dict.get("size_h_c"),
             "business_area": registration_data_import.business_area,
@@ -257,7 +265,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             document_number_field_name,
             picture_field_name,
         ) in self.DOCUMENT_MAPPING_KEY_DICT.items():
-            document_number = individual_dict.get(document_number_field_name)
+            document_number = individual_dict.get(document_number_field_name) if document_number_field_name else None
             certificate_picture = individual_dict.get(picture_field_name, "")
 
             if not document_number and not certificate_picture:
@@ -267,9 +275,11 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
-            document_type = DocumentType.objects.get(key=document_key_string)
+            document_type = self._document_types_by_key.get(document_key_string)
+            if document_type is None:
+                raise DocumentType.DoesNotExist(f"DocumentType with key '{document_key_string}' is not configured")
             document_kwargs = {
-                "country": Country.objects.get(iso_code2="UA"),
+                "country": self._ukraine_country,
                 "type": document_type,
                 "document_number": document_number,
                 "individual": individual.pk,

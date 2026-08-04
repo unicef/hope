@@ -1,6 +1,7 @@
 import { DividerLine } from '@components/core/DividerLine';
 import React, { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
 import { Grid, Paper, Theme, Typography } from '@mui/material';
@@ -59,6 +60,13 @@ const AccountItem: FC<AccountItemProps> = ({
             {renderSomethingOrDash(account.number)}
           </LabelizedField>
         </Grid>
+        {account.walletQrPhoto && (
+          <Grid size={3}>
+            <LabelizedField label={t('Wallet QR')}>
+              <PhotoModal src={account.walletQrPhoto} title={t('Wallet QR')} />
+            </LabelizedField>
+          </Grid>
+        )}
         {dataFields.map((field, idx) => {
           return (
             <Grid key={idx} size={3}>

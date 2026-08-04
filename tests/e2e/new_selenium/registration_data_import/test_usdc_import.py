@@ -10,7 +10,6 @@ from extras.test_utils.factories.aurora import (
     RecordFactory,
     RegistrationFactory,
 )
-from extras.test_utils.factories.core import FlexibleAttributeFactory
 from extras.test_utils.factories.geo import CountryFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import (
@@ -22,7 +21,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hope.apps.household.const import IDENTIFICATION_TYPE_TAX_ID
+from hope.apps.household.const import IDENTIFICATION_TYPE_OTHER, IDENTIFICATION_TYPE_TAX_ID
 from hope.contrib.aurora.services.ukraine_flex_registration_service import UkraineUSDCRegistrationService
 from hope.models import (
     BeneficiaryGroup,
@@ -30,7 +29,6 @@ from hope.models import (
     DataCollectingType,
     DeliveryMechanism,
     FinancialInstitution,
-    FlexibleAttribute,
     PendingHousehold,
     PendingIndividual,
     Program,
@@ -50,6 +48,10 @@ def usdc_import(business_area: BusinessArea, create_super_user: User) -> Registr
         key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         label=IDENTIFICATION_TYPE_TAX_ID,
     )
+    DocumentTypeFactory(
+        key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
+        label=IDENTIFICATION_TYPE_OTHER,
+    )
     DeliveryMechanismFactory(
         code="transfer_to_digital_wallet",
         name="Transfer to Digital Wallet",
@@ -61,9 +63,6 @@ def usdc_import(business_area: BusinessArea, create_super_user: User) -> Registr
         type=FinancialInstitution.FinancialInstitutionType.OTHER,
         country=None,
     )
-    FlexibleAttributeFactory(name="wallet_num_image_i_f", type=FlexibleAttribute.IMAGE)
-    FlexibleAttributeFactory(name="id_wallet_image_i_f", type=FlexibleAttribute.IMAGE)
-
     program = ProgramFactory(
         name="USDC Program",
         code="USDC",
@@ -131,6 +130,7 @@ def test_usdc_import_detail_pages_render_and_rdi_merges(
         Permissions.RDI_MERGE_IMPORT,
         Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+        Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
         Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
@@ -141,6 +141,11 @@ def test_usdc_import_detail_pages_render_and_rdi_merges(
         browser.open(f"/{business_area.slug}/programs/{program.code}/population/individuals/{individual.id}")
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
         browser.assert_text(individual.full_name, 'div[data-cy="label-Full Name"]')
+        # Wallet-number image is stored on the account.
+        browser.wait_for_element_visible('div[data-cy="label-Wallet QR"]')
+        # ID-wallet image is imported as an "Other" document with a photo.
+        browser.wait_for_element_visible('div[data-cy="label-OTHER"]')
+        browser.wait_for_element_visible('a[data-cy="link-show-photo"]')
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/population/household/{household.id}")
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
