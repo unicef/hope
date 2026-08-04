@@ -32,6 +32,7 @@ class InvalidIssueTypeError(Exception):
 ISSUE_TYPE_SERVICE_MAP: dict[int, type[DataChangeService]] = {
     GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: AddIndividualService,
     GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: IndividualDataUpdateService,
+    GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO: IndividualDataUpdateService,
     GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: HouseholdDataUpdateService,
     GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: HouseholdDataUpdateService,
     GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: IndividualDeleteService,

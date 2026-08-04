@@ -2,6 +2,7 @@ import { useRoutes, Navigate } from 'react-router-dom';
 import EditFeedbackPage from '../pages/accountability/feedback/EditFeedbackPage';
 import CreateGrievancePage from '../pages/grievances/CreateGrievancePage';
 import EditGrievancePage from '../pages/grievances/EditGrievancePage';
+import PictureErrorEditPage from '../pages/grievances/PictureErrorEditPage';
 import GrievancesDetailsPage from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import GrievancesTablePage from '../pages/grievances/GrievancesTablePage';
 import { ReactElement } from 'react';
@@ -26,6 +27,10 @@ export const GrievanceRoutes = (): ReactElement => {
         {
           path: 'edit-ticket/system-generated/:id',
           element: <EditGrievancePage />,
+        },
+        {
+          path: 'edit-ticket/picture-error/:id',
+          element: <PictureErrorEditPage />,
         },
         {
           path: 'tickets/user-generated/:id',

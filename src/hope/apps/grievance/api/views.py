@@ -178,14 +178,16 @@ def display_value(choices: tuple, field: str, default_field: Any = None) -> Case
 
 
 def create_type_generated_queries() -> tuple[Q, Q]:
-    user_generated, system_generated = Q(), Q()
-    for category in GrievanceTicket.CATEGORY_CHOICES:
-        category_num, category_str = category
+    is_user_category, is_system_category = Q(), Q()
+    for category_num, category_str in GrievanceTicket.CATEGORY_CHOICES:
         if category_num in dict(GrievanceTicket.MANUAL_CATEGORIES):
-            user_generated |= Q(category_name=force_str(category_str))
+            is_user_category |= Q(category_name=force_str(category_str))
         else:
-            system_generated |= Q(category_name=force_str(category_str))
-    return user_generated, system_generated
+            is_system_category |= Q(category_name=force_str(category_str))
+    is_system_issue_type = Q(issue_type__in=GrievanceTicket.SYSTEM_ISSUE_TYPES)
+    is_user_generated = is_user_category & ~is_system_issue_type
+    is_system_generated = is_system_category | is_system_issue_type
+    return is_user_generated, is_system_generated
 
 
 class GrievanceDashboardMixin:

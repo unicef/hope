@@ -186,6 +186,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
     ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
     ISSUE_TYPE_UPDATE_DELEGATE = 26
+    ISSUE_TYPE_BIOMETRICS_PHOTO = 27
 
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
@@ -195,6 +196,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
             ISSUE_TYPE_UPDATE_DELEGATE: _("Update Delegate"),
+            ISSUE_TYPE_BIOMETRICS_PHOTO: _("Biometric Photo Error"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
@@ -248,6 +250,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
     SYSTEM_CATEGORY_CODES = frozenset(code for code, _label in SYSTEM_CATEGORIES)
+    SYSTEM_ISSUE_TYPES = frozenset({ISSUE_TYPE_BIOMETRICS_PHOTO})
     CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
     CREATE_CATEGORY_CHOICES = (
@@ -319,6 +322,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: "delete_household_ticket_details",
             ISSUE_TYPE_UPDATE_DELEGATE: "household_data_update_ticket_details",
+            ISSUE_TYPE_BIOMETRICS_PHOTO: "individual_data_update_ticket_details",
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
@@ -538,7 +542,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         # System-generated tickets always use the HOPE channel; users cannot set it to anything else.
-        if self.category in self.SYSTEM_CATEGORY_CODES:
+        if self.category in self.SYSTEM_CATEGORY_CODES or self.issue_type in self.SYSTEM_ISSUE_TYPES:
             self.submission_channel = SUBMISSION_CHANNEL_HOPE
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:

@@ -219,13 +219,14 @@ class GrievanceTicketFilter(FilterSet):
         return qs
 
     def filter_grievance_type(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
-        choices = dict(GrievanceTicket.CATEGORY_CHOICES)
-        user_generated = [value for value in choices if value in dict(GrievanceTicket.MANUAL_CATEGORIES)]
+        manual_category_codes = [code for code, _label in GrievanceTicket.MANUAL_CATEGORIES]
+        is_manual_category = Q(category__in=manual_category_codes)
+        is_system_issue_type = Q(issue_type__in=GrievanceTicket.SYSTEM_ISSUE_TYPES)
 
         if val == "system":
-            return qs.filter(~Q(category__in=user_generated))
+            return qs.filter(~is_manual_category | is_system_issue_type)
         if val == "user":
-            return qs.filter(category__in=user_generated)
+            return qs.filter(is_manual_category & ~is_system_issue_type)
         return qs
 
     def filter_grievance_status(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
