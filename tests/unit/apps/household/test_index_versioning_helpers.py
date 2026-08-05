@@ -13,7 +13,7 @@ from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.household.services.index_management import (
     create_versioned_index,
     existing_version_numbers,
-    next_version_suffix,
+    mapping_content_hash,
     versioned_doc,
 )
 from hope.models import Program
@@ -75,19 +75,20 @@ def test_existing_version_numbers_parses_only_matching(ind_doc: type) -> None:
     assert sorted(existing_version_numbers(es, name)) == [1, 7]
 
 
-def test_next_version_suffix_takes_max_across_the_pair(ind_doc: type, hh_doc: type) -> None:
-    es = _es_with_versions({ind_doc._index._name: [1, 2], hh_doc._index._name: [1]})
+def test_mapping_content_hash_ignores_meta() -> None:
+    base = {"properties": {"full_name": {"type": "text"}}}
 
-    assert next_version_suffix(es, [ind_doc, hh_doc]) == "v3"
-
-
-def test_next_version_suffix_defaults_to_v1(ind_doc: type, hh_doc: type) -> None:
-    es = _es_with_versions({})
-
-    assert next_version_suffix(es, [ind_doc, hh_doc]) == "v1"
+    assert mapping_content_hash(base) == mapping_content_hash({**base, "_meta": {"hope_mapping_hash": "x"}})
 
 
-def test_create_versioned_index_dark_has_no_alias(ind_doc: type) -> None:
+def test_mapping_content_hash_differs_on_content_change() -> None:
+    base = {"properties": {"full_name": {"type": "text"}}}
+    changed = {"properties": {"full_name": {"type": "keyword"}}}
+
+    assert mapping_content_hash(base) != mapping_content_hash(changed)
+
+
+def test_create_versioned_index_dark_has_no_alias_and_a_mapping_stamp(ind_doc: type) -> None:
     es = _es_with_versions({})
 
     target = create_versioned_index(es, ind_doc, suffix="v2", attach_alias=False)
@@ -96,7 +97,7 @@ def test_create_versioned_index_dark_has_no_alias(ind_doc: type) -> None:
     kwargs = es.indices.create.call_args.kwargs
     assert kwargs["index"] == target
     assert kwargs["aliases"] is None
-    assert kwargs["mappings"] is not None
+    assert kwargs["mappings"]["_meta"]["hope_mapping_hash"] == mapping_content_hash(kwargs["mappings"])
 
 
 def test_create_versioned_index_auto_suffix_attaches_alias(ind_doc: type) -> None:

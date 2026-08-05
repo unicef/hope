@@ -51,6 +51,7 @@ def _make_es(*, aliased: bool = True, alias_version: str = "v1", swap_flips_to: 
     es = MagicMock()
     state = {"swapped": False}
     es.indices.exists_alias.return_value = aliased
+    es.indices.exists.return_value = False  # no dark leftovers by default -> fresh create path
 
     def update_aliases(**kw: dict) -> MagicMock:
         state["swapped"] = True
@@ -61,6 +62,9 @@ def _make_es(*, aliased: bool = True, alias_version: str = "v1", swap_flips_to: 
         f"{kw['name']}_{swap_flips_to if state['swapped'] else alias_version}": {"aliases": {}}
     }
     es.indices.get.side_effect = lambda **kw: {kw["index"].replace("_v*", f"_{alias_version}"): {}}
+    es.indices.get_settings.side_effect = lambda **kw: {
+        kw["index"]: {"settings": {"index": {"creation_date": "1700000000000"}}}
+    }
     es.count.return_value = {"count": 0}
     return es
 
@@ -110,7 +114,7 @@ def es_diverged_versions(index_names: list[str]) -> MagicMock:
 
 @pytest.fixture
 def es_dark_wreck(index_names: list[str]) -> MagicMock:
-    """Alias on _v1; a dark _v2 wreck from a crashed run lingers. Deletes mutate the mock state."""
+    """Alias on _v1; a dark _v2 wreck lingers. Its mapping stamp is WRONG (older deployment)."""
     es = _make_es()
     physical = {name: {f"{name}_v1": {"aliases": {name: {}}}, f"{name}_v2": {"aliases": {}}} for name in index_names}
 
@@ -124,6 +128,25 @@ def es_dark_wreck(index_names: list[str]) -> MagicMock:
 
     es.indices.get.side_effect = get_indices
     es.indices.delete.side_effect = delete_index
+    es.indices.exists.side_effect = lambda **kw: any(kw["index"] in indices for indices in physical.values())
+    es.indices.get_mapping.side_effect = lambda **kw: {
+        kw["index"]: {"mappings": {"_meta": {"hope_mapping_hash": "stale-deployment-hash"}}}
+    }
+    return es
+
+
+@pytest.fixture
+def es_resumable(program: Program, index_names: list[str]) -> MagicMock:
+    """Alias on _v1; a dark _v2 leftover whose mapping stamp MATCHES the current code mapping."""
+    from hope.apps.household.services.index_management import mapping_content_hash
+
+    docs = [get_individual_doc(str(program.id)), get_household_doc(str(program.id))]
+    hashes = {f"{doc._index._name}_v2": mapping_content_hash(doc._index.to_dict().get("mappings")) for doc in docs}
+    es = _make_es()
+    es.indices.exists.side_effect = lambda **kw: kw["index"] in hashes
+    es.indices.get_mapping.side_effect = lambda **kw: {
+        kw["index"]: {"mappings": {"_meta": {"hope_mapping_hash": hashes[kw["index"]]}}}
+    }
     return es
 
 
@@ -298,11 +321,55 @@ def test_dry_run_flags_non_aliased_program(program: Program, es_not_aliased: Mag
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_dark_wreck_is_deleted_and_its_number_reused(
+def test_resume_reuses_matching_dark_pair_without_repopulating(
+    program: Program, index_names: list[str], es_resumable: MagicMock
+) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_resumable), patch(DELTA_CALL) as delta, patch(POPULATE) as populate:
+        call_command(CMD, program=str(program.id), stdout=out)
+
+    populate.assert_not_called()
+    assert _dark_creates(es_resumable) == []
+    es_resumable.indices.delete.assert_not_called()
+    assert es_resumable.indices.update_aliases.call_count == 1
+    assert delta.call_args_list[0].kwargs["target_suffix"] == "v2"
+    assert "resuming into existing dark" in out.getvalue()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_resumed_verify_failure_hints_sweep_wrecks(program: Program, es_resumable: MagicMock) -> None:
+    es_resumable.count.return_value = {"count": 5}
+    with (
+        patch(GET_CONN, return_value=es_resumable),
+        patch(DELTA_CALL),
+        patch(POPULATE),
+        pytest.raises(CommandError, match="sweep-wrecks"),
+    ):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    es_resumable.indices.update_aliases.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_stale_mapping_wreck_is_rebuilt_under_same_number(
+    program: Program, index_names: list[str], es_dark_wreck: MagicMock
+) -> None:
+    with patch(GET_CONN, return_value=es_dark_wreck), patch(DELTA_CALL), patch(POPULATE) as populate:
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    deleted = [kw["index"] for _, kw in es_dark_wreck.indices.delete.call_args_list if "index" in kw]
+    assert sorted(d for d in deleted if d.endswith("_v2")) == sorted(f"{n}_v2" for n in index_names)
+    created = _dark_creates(es_dark_wreck)
+    assert sorted(kw["index"] for kw in created) == sorted(f"{n}_v2" for n in index_names)
+    assert populate.call_count == 2
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_sweep_wrecks_flag_deletes_leftovers_upfront(
     program: Program, index_names: list[str], es_dark_wreck: MagicMock
 ) -> None:
     with patch(GET_CONN, return_value=es_dark_wreck), patch(DELTA_CALL), patch(POPULATE):
-        call_command(CMD, program=str(program.id), stdout=StringIO())
+        call_command(CMD, program=str(program.id), sweep_wrecks=True, stdout=StringIO())
 
     deleted = [kw["index"] for _, kw in es_dark_wreck.indices.delete.call_args_list if "index" in kw]
     assert sorted(d for d in deleted if d.endswith("_v2")) == sorted(f"{n}_v2" for n in index_names)

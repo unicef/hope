@@ -3,6 +3,8 @@
 Simple utilities for managing per-program Elasticsearch indexes.
 """
 
+import hashlib
+import json
 import logging
 import re
 
@@ -51,15 +53,17 @@ def existing_version_numbers(es: Elasticsearch, name: str) -> list[int]:
     return [int(m.group(1)) for i in existing for m in [re.match(rf"^{re.escape(name)}_v(\d+)$", i)] if m]
 
 
-def next_version_suffix(es: Elasticsearch, doc_classes: list) -> str:
-    """Next unused ``vN`` across ALL given docs' versions.
+def mapping_content_hash(mappings: dict | None) -> str:
+    """Deterministic hash of a mappings dict, ignoring ``_meta`` (where the hash itself is stored).
 
-    Taking the max over the whole set keeps a program's individuals/households pair in
-    lockstep: both dark indexes get the SAME suffix, so a single delta ``--target-suffix``
-    pass covers the pair even if their version histories diverged.
+    Every index created by ``create_versioned_index`` carries this stamp in
+    ``mappings._meta.hope_mapping_hash``. It lets a later run answer "was this dark leftover
+    created from the SAME code mapping I have now?" without diffing ES-normalized mappings
+    against raw code mappings (a false-mismatch minefield): the stamp was computed from the
+    code mapping at creation time, so equal stamps == equal code mappings.
     """
-    versions = [n for doc_class in doc_classes for n in existing_version_numbers(es, doc_class._index._name)]
-    return f"v{max(versions, default=0) + 1}"
+    content = {k: v for k, v in (mappings or {}).items() if k != "_meta"}
+    return hashlib.sha256(json.dumps(content, sort_keys=True, default=str).encode()).hexdigest()
 
 
 def create_versioned_index(
@@ -81,10 +85,12 @@ def create_versioned_index(
         suffix = f"v{max(existing_version_numbers(es, name), default=0) + 1}"
     target = f"{name}_{suffix}"
     body = index.to_dict()
+    mappings = dict(body.get("mappings") or {})
+    mappings["_meta"] = {**mappings.get("_meta", {}), "hope_mapping_hash": mapping_content_hash(mappings)}
     es.indices.create(
         index=target,
         settings=body.get("settings"),
-        mappings=body.get("mappings"),
+        mappings=mappings,
         aliases={name: {}} if attach_alias else None,
     )
     return target
