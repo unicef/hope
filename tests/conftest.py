@@ -1,9 +1,16 @@
 import os
+import shutil
+import tempfile
 
 from _pytest.config import Config
 import pytest
 
+# Uploads must not land in the real MEDIA_ROOT. One directory per process, so xdist workers
+# never share it.
+MEDIA_ROOT = tempfile.mkdtemp(prefix="hope-test-media-")
+
 COMMON_SETTINGS = {
+    "MEDIA_ROOT": MEDIA_ROOT,
     "DEBUG": True,
     "ALLOWED_HOSTS": [
         "localhost",
@@ -30,6 +37,10 @@ COMMON_SETTINGS = {
     "TESTS_ROOT": os.getenv("TESTS_ROOT"),
     "CONSTANCE_BACKEND": "constance.backends.memory.MemoryBackend",
 }
+
+
+def pytest_unconfigure(config: Config) -> None:
+    shutil.rmtree(MEDIA_ROOT, ignore_errors=True)
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:

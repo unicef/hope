@@ -1,7 +1,5 @@
 from datetime import timedelta
 from io import BytesIO
-from pathlib import Path
-from typing import Any
 
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -84,12 +82,6 @@ def country() -> Country:
 @pytest.fixture
 def individual(business_area: BusinessArea, program: Program) -> Individual:
     return HouseholdFactory(business_area=business_area, program=program).head_of_household
-
-
-@pytest.fixture
-def media_root(settings: Any, tmp_path: Path) -> Path:
-    settings.MEDIA_ROOT = str(tmp_path)
-    return tmp_path
 
 
 @pytest.fixture
@@ -285,7 +277,7 @@ def test_create_duplicated_documents_with_different_numbers_and_types_and_unique
     _make_document(individual, country, program, doc_type_2, "213124", rdi_merge_status=MergeStatusModel.MERGED)
 
 
-def test_bulk_create_writes_document_photo_to_storage(media_root, individual, country, program, document_type) -> None:
+def test_bulk_create_writes_document_photo_to_storage(individual, country, program, document_type) -> None:
     document = Document(
         document_number="213125",
         individual=individual,
@@ -304,7 +296,7 @@ def test_bulk_create_writes_document_photo_to_storage(media_root, individual, co
 
 
 def test_two_documents_with_the_same_photo_name_keep_separate_files(
-    media_root, individual, country, program, document_type
+    individual, country, program, document_type
 ) -> None:
     document = _make_document(individual, country, program, document_type, "213126")
     other_document = _make_document(individual, country, program, document_type, "213127")

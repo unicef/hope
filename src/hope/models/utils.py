@@ -10,7 +10,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.core.files import File
 from django.core.files.storage import default_storage
-from django.db import models
+from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
@@ -24,6 +24,7 @@ from hope.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+    from django.db.models.fields.files import FieldFile
 
 
 logger = logging.getLogger(__name__)
@@ -44,16 +45,23 @@ class UniqueUploadPath:
     def __call__(self, instance: models.Model | None, filename: str) -> str:
         return f"{self.prefix}/{timezone.now():%Y/%m}/{uuid4().hex}/{filename}"
 
-    def __eq__(self, other: Any) -> bool:
-        return isinstance(other, UniqueUploadPath) and self.prefix == other.prefix
-
-    def __hash__(self) -> int:
-        return hash((self.__class__, self.prefix))
-
 
 def upload_basename(name: str) -> str:
     """Drop the generated upload path, leaving the name only."""
     return name.rsplit("/", 1)[-1]
+
+
+def replace_upload(field_file: "FieldFile", filename: str, content: File) -> None:
+    """Store a file over the one a field already holds, dropping the file it replaces.
+
+    Use in places where new file should delete old one.
+    With transactional operation deletion is done on commit.
+    """
+    previous_name = field_file.name
+    field_file.save(filename, content)
+    if previous_name and previous_name != field_file.name:
+        storage = field_file.storage
+        transaction.on_commit(lambda: storage.delete(previous_name))
 
 
 def save_unique_upload(content: File, prefix: str, filename: str) -> str:

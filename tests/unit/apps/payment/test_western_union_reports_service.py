@@ -1852,7 +1852,7 @@ def test_send_notification_emails_sends_to_users_with_permission(
             "email": user.email,
             "message": f"Payment Plan: https://example.com/{report.payment_plan.business_area.slug}/programs/"
             f"{report.payment_plan.program.code}/payment-module/payment-plans/{report.payment_plan.id}",
-            "title": f"Payment Plan {report.report_file.file.name.rsplit('/', 1)[-1]} Western Union report",
+            "title": "Payment Plan qcf.xlsx Western Union report",
             "link": "https://example.com/download/report",
         },
     )

@@ -434,9 +434,9 @@ def handle_photo(
 ) -> str | None:
     """Save an uploaded photo and return the name to store on `field`.
 
-    The name is later assigned to `field` as a plain string, which bypasses upload_to, so
-    the path has to be built here. `field` is required: Document.photo and Individual.photo
-    have different upload paths and different column widths.
+    The caller assigns the result as a plain string, which skips upload_to, so the path has
+    to be built here from the target field. `instance` is None because the row it belongs to
+    may not exist yet.
     """
     if isinstance(photo, InMemoryUploadedFile):
         name = field.generate_filename(None, f"{generate_filename()}.jpg")

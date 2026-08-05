@@ -1,5 +1,4 @@
 from io import BytesIO
-from pathlib import Path
 import re
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -108,12 +107,6 @@ def adjudication_areas() -> dict[str, Any]:
     doshi = AreaFactory(name="Doshi", area_type=area_type_level_2, p_code="area2", parent=ghazni)
     area_other = AreaFactory(name="Other", area_type=area_type_level_2, p_code="area3")
     return {"doshi": doshi, "area_other": area_other}
-
-
-@pytest.fixture
-def media_root(settings: Any, tmp_path: Path) -> Path:
-    settings.MEDIA_ROOT = str(tmp_path)
-    return tmp_path
 
 
 @pytest.fixture
@@ -688,9 +681,7 @@ def test_handle_photo_saves_and_return() -> None:
     assert result.endswith(".jpg")
 
 
-def test_handle_photo_saves_into_the_document_photo_folder(
-    media_root: Path, photo_upload: InMemoryUploadedFile
-) -> None:
+def test_handle_photo_saves_into_the_document_photo_folder(photo_upload: InMemoryUploadedFile) -> None:
     with freeze_time("2026-07-28"):
         saved_name = handle_photo(photo_upload, photoraw=None, field=Document._meta.get_field("photo"))
 
@@ -699,28 +690,26 @@ def test_handle_photo_saves_into_the_document_photo_folder(
     assert saved_name.endswith(".jpg")
 
 
-def test_handle_photo_keeps_individual_photo_name_flat(media_root: Path, photo_upload: InMemoryUploadedFile) -> None:
+def test_handle_photo_keeps_individual_photo_name_flat(photo_upload: InMemoryUploadedFile) -> None:
     saved_name = handle_photo(photo_upload, photoraw=None, field=Individual._meta.get_field("photo"))
 
     assert "/" not in saved_name
     assert saved_name.endswith(".jpg")
 
 
-def test_handle_photo_does_not_truncate_the_individual_photo_name(
-    media_root: Path, photo_upload: InMemoryUploadedFile
-) -> None:
+def test_handle_photo_does_not_truncate_the_individual_photo_name(photo_upload: InMemoryUploadedFile) -> None:
     saved_name = handle_photo(photo_upload, photoraw=None, field=Individual._meta.get_field("photo"))
 
     assert re.fullmatch(r"[A-Z0-9]-[\w.-]+\.jpg", saved_name)
 
 
-def test_handle_photo_fits_the_individual_photo_column(media_root: Path, photo_upload: InMemoryUploadedFile) -> None:
+def test_handle_photo_fits_the_individual_photo_column(photo_upload: InMemoryUploadedFile) -> None:
     saved_name = handle_photo(photo_upload, photoraw=None, field=Individual._meta.get_field("photo"))
 
     assert len(saved_name) <= Individual._meta.get_field("photo").max_length
 
 
-def test_document_photo_field_saves_into_the_document_photo_folder(media_root: Path, document: Document) -> None:
+def test_document_photo_field_saves_into_the_document_photo_folder(document: Document) -> None:
     with freeze_time("2026-07-28"):
         document.photo.save("passport.jpg", ContentFile(b"123"), save=False)
 

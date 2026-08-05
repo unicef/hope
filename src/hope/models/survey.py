@@ -13,6 +13,7 @@ from hope.models.utils import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
     UniqueUploadPath,
+    replace_upload,
 )
 
 
@@ -124,6 +125,6 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         )
 
     def store_sample_file(self, filename: str, file: File) -> None:
-        self.sample_file.save(filename, file)
+        replace_upload(self.sample_file, filename, file)
         self.sample_file_generated_at = timezone.now()
         self.save()

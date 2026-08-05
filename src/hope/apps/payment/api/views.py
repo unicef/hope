@@ -2399,13 +2399,12 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
         document = self.get_object()
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
+            filename=upload_basename(file.name),
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={upload_basename(file.name)}"
-        return response
 
 
 class PaymentViewSet(
