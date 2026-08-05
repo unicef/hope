@@ -330,32 +330,38 @@ export const NaComparisonPanel = ({
           mb={4}
           display="flex"
           alignItems="center"
-          gap={2}
+          gap={3}
+          px={3}
+          py={2}
+          bgcolor="#f5f5f5"
+          borderRadius={2}
           data-cy="na-duplicate-selector"
         >
           <Button
-            size="small"
+            variant="outlined"
+            size="medium"
             disabled={activeIndex === 0}
             onClick={() => setActiveIndex((index) => index - 1)}
             data-cy="button-na-duplicate-prev"
           >
             {t('Previous')}
           </Button>
-          <Typography variant="body2">
+          <Typography variant="h6" component="span">
             {t('Duplicate {{current}} of {{total}}', {
               current: activeIndex + 1,
               total: candidates.length,
             })}
           </Typography>
           <Button
-            size="small"
+            variant="outlined"
+            size="medium"
             disabled={activeIndex >= candidates.length - 1}
             onClick={() => setActiveIndex((index) => index + 1)}
             data-cy="button-na-duplicate-next"
           >
             {t('Next')}
           </Button>
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body1" color="textSecondary">
             {t('{{count}} of {{total}} decided', {
               count: candidates.filter(
                 (candidate) => decision?.marks?.[candidate?.id],
