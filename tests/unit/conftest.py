@@ -23,7 +23,7 @@ from hope.models.currency import Currency
 
 @pytest.fixture
 def enable_is_root() -> None:
-    FlagStateFactory(name="IS_ROOT", condition="boolean", value="True", required=False)
+    FlagStateFactory.create(name="IS_ROOT", condition="boolean", value="True", required=False)
 
 
 @pytest.fixture(autouse=True)
