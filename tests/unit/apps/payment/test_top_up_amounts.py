@@ -256,7 +256,7 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_query_count(
     # Django never clears this between tests, so without it the count depends on what ran before.
     ContentType.objects.clear_cache()
 
-    with django_assert_num_queries(109), django_capture_on_commit_callbacks(execute=True):
+    with django_assert_num_queries(70), django_capture_on_commit_callbacks(execute=True):
         PaymentPlanService(source_pp).create_top_up(user, start, end, fixed_amount=Decimal("25.00"))
 
 
