@@ -26,6 +26,7 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
 )
 from hope.apps.household.api.serializers.household import HouseholdForTicketSerializer
 from hope.apps.household.api.serializers.individual import (
+    AccountSerializer,
     HouseholdSimpleSerializer,
     IndividualForTicketSerializer,
     IndividualRoleInHouseholdSerializer,
@@ -267,6 +268,7 @@ class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
 
 class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
     roles_in_households = serializers.SerializerMethodField()
+    accounts = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
@@ -275,15 +277,30 @@ class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
             "unicef_id",
             "household",
             "full_name",
+            "given_name",
+            "family_name",
+            "phone_no",
             "birth_date",
             "last_registration_date",
             "sex",
             "deduplication_golden_record_results",
             "duplicate",
             "documents",
+            "accounts",
             "program_code",
             "roles_in_households",
         )
+
+    @extend_schema_field(AccountSerializer(many=True))
+    def get_accounts(self, obj: Individual) -> ReturnDict:
+        if self.context["request"].user.has_perm(
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
+            obj.program,
+        ):
+            queryset = obj.accounts(manager="all_objects").all()
+        else:
+            queryset = obj.accounts.none()
+        return AccountSerializer(queryset, many=True).data
 
     @extend_schema_field(NaRoleInHouseholdSerializer(many=True))
     def get_roles_in_households(self, obj: Individual) -> list[dict]:
