@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import datetime
 from decimal import Decimal
 from typing import Any, Callable
@@ -24,6 +25,14 @@ from hope.models import (
     PaymentPlan,
 )
 from hope.models.payment_data_collector import DeliveryDataByCollector
+
+
+@dataclass(frozen=True)
+class PaymentSnapshotContext:
+    delivery_data_by_individual_id: DeliveryDataByCollector
+    collector_ids: set[UUID]
+    needs_adjudication_counts: dict[UUID, int]
+
 
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]
@@ -128,9 +137,14 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
         to_create = [
             create_payment_snapshot_data(
                 payment,
-                delivery_data_by_payment_key.get((payment.financial_service_provider_id, payment.delivery_type_id)),
-                collector_ids_by_household_id.get(payment.household_id, set()),
-                needs_adjudication_counts,
+                PaymentSnapshotContext(
+                    delivery_data_by_individual_id=delivery_data_by_payment_key.get(
+                        (payment.financial_service_provider_id, payment.delivery_type_id),
+                        {},
+                    ),
+                    collector_ids=collector_ids_by_household_id.get(payment.household_id, set()),
+                    needs_adjudication_counts=needs_adjudication_counts,
+                ),
             )
             for payment in payments
         ]
@@ -139,27 +153,17 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
 
 def create_payment_snapshot_data(
     payment: Payment,
-    delivery_data_by_individual_id: DeliveryDataByCollector | None = None,
-    collector_ids: set[UUID] | None = None,
-    needs_adjudication_counts: dict[UUID, int] | None = None,
+    context: PaymentSnapshotContext,
 ) -> PaymentHouseholdSnapshot:
     household = payment.household
-    household_data = get_household_snapshot(
-        household,
-        payment,
-        delivery_data_by_individual_id,
-        collector_ids,
-        needs_adjudication_counts,
-    )
+    household_data = get_household_snapshot(household, payment, context)
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
 def get_household_snapshot(
     household: Household,
     payment: Payment | None = None,
-    delivery_data_by_individual_id: DeliveryDataByCollector | None = None,
-    collector_ids: set[UUID] | None = None,
-    needs_adjudication_counts: dict[UUID, int] | None = None,
+    context: PaymentSnapshotContext | None = None,
 ) -> dict[Any, Any]:
     household_data = {}
     all_household_data_dict = household.__dict__
@@ -175,9 +179,7 @@ def get_household_snapshot(
         individual_data = get_individual_snapshot(
             individual,
             payment,
-            delivery_data_by_individual_id,
-            collector_ids,
-            needs_adjudication_counts,
+            context,
         )
         individuals_dict[str(individual.id)] = individual_data
         household_data["individuals"].append(individual_data)
@@ -193,9 +195,7 @@ def get_household_snapshot(
             household_data["primary_collector"] = get_individual_snapshot(
                 primary_collector,
                 payment,
-                delivery_data_by_individual_id,
-                collector_ids,
-                needs_adjudication_counts,
+                context,
             )
             household_data["needs_adjudication_tickets_count"] += household_data["primary_collector"][
                 "needs_adjudication_tickets_count"
@@ -207,9 +207,7 @@ def get_household_snapshot(
             household_data["alternate_collector"] = get_individual_snapshot(
                 alternate_collector,
                 payment,
-                delivery_data_by_individual_id,
-                collector_ids,
-                needs_adjudication_counts,
+                context,
             )
             household_data["needs_adjudication_tickets_count"] += household_data["alternate_collector"][
                 "needs_adjudication_tickets_count"
@@ -222,9 +220,7 @@ def get_household_snapshot(
                 or get_individual_snapshot(
                     role.individual,
                     payment,
-                    delivery_data_by_individual_id,
-                    collector_ids,
-                    needs_adjudication_counts,
+                    context,
                 ),
             }
         )
@@ -233,10 +229,8 @@ def get_household_snapshot(
 
 def get_individual_snapshot(
     individual: Individual,
-    payment: Payment | None = None,
-    delivery_data_by_individual_id: DeliveryDataByCollector | None = None,
-    collector_ids: set[UUID] | None = None,
-    needs_adjudication_counts: dict[UUID, int] | None = None,
+    payment: Payment | None,
+    context: PaymentSnapshotContext | None,
 ) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict if key not in excluded_individual_fields]
@@ -246,8 +240,8 @@ def get_individual_snapshot(
         individual_data[key] = handle_type_mapping(value)
     individual_data["documents"] = []
     individual_data["needs_adjudication_tickets_count"] = (
-        needs_adjudication_counts.get(individual.id, 0)
-        if needs_adjudication_counts is not None
+        context.needs_adjudication_counts.get(individual.id, 0)
+        if context is not None
         else get_needs_adjudication_tickets_count(individual)
     )
 
@@ -266,25 +260,14 @@ def get_individual_snapshot(
         }
         individual_data["documents"].append(document_data)
 
-    is_hh_collector = (
-        individual.id in collector_ids
-        if collector_ids is not None
-        else IndividualRoleInHousehold.objects.filter(
-            role__in=[ROLE_PRIMARY, ROLE_ALTERNATE],
-            household=individual.household,
-            individual=individual,
-        ).exists()
-    )
-
-    if is_hh_collector and payment and payment.delivery_type and payment.financial_service_provider:
-        if delivery_data_by_individual_id is not None:
-            individual_data["account_data"] = delivery_data_by_individual_id.get(individual.id, {})
-        else:
-            individual_data["account_data"] = PaymentDataCollector.delivery_data(
-                payment.financial_service_provider,
-                payment.delivery_type,
-                individual,
-            )
+    if (
+        payment
+        and context
+        and payment.delivery_type
+        and payment.financial_service_provider
+        and individual.id in context.collector_ids
+    ):
+        individual_data["account_data"] = context.delivery_data_by_individual_id.get(individual.id, {})
 
     return individual_data
 

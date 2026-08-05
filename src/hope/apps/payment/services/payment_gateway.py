@@ -672,15 +672,24 @@ class PaymentGatewayService:
             )
 
     @staticmethod
+    def _payment_records_by_remote_id(
+        payment_records: list[PaymentRecordData],
+    ) -> dict[str, PaymentRecordData]:
+        records_by_remote_id = {}
+        for payment_record in payment_records:
+            records_by_remote_id.setdefault(payment_record.remote_id, payment_record)
+        return records_by_remote_id
+
+    @staticmethod
     def update_payment(  # noqa: PLR0913
         payment: Payment,
-        pg_payment_records: list[PaymentRecordData],
+        payment_records_by_remote_id: dict[str, PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
         exchange_rate: Decimal | float | None,
         log_pairs: "list[tuple[Payment, Payment]]",
     ) -> tuple[str, ...] | None:
-        matching_pg_payment = next((p for p in pg_payment_records if p.remote_id == str(payment.id)), None)
+        matching_pg_payment = payment_records_by_remote_id.get(str(payment.id))
         if matching_pg_payment is None:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return None
@@ -761,11 +770,12 @@ class PaymentGatewayService:
                     pending_payments = getattr(instruction, "eligible_items", [])
                     if pending_payments:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+                        payment_records_by_remote_id = self._payment_records_by_remote_id(pg_payment_records)
                         payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
                         for payment in pending_payments:
                             update_fields = self.update_payment(
                                 payment,
-                                pg_payment_records,
+                                payment_records_by_remote_id,
                                 instruction,
                                 payment_plan,
                                 exchange_rate,
@@ -796,7 +806,7 @@ class PaymentGatewayService:
             payment_log_pairs: list = []
             update_fields = self.update_payment(
                 payment,
-                [pg_payment_record],
+                {pg_payment_record.remote_id: pg_payment_record},
                 payment.parent_split,  # type: ignore[arg-type]
                 payment_plan,
                 payment_plan.exchange_rate,
@@ -835,12 +845,13 @@ class PaymentGatewayService:
                 .select_related("household_snapshot", "delivery_type", "currency")
             )
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+            payment_records_by_remote_id = self._payment_records_by_remote_id(pg_payment_records)
             instruction_log_pairs: list = []
             payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
             for payment in payments:
                 update_fields = self.update_payment(
                     payment,
-                    pg_payment_records,
+                    payment_records_by_remote_id,
                     instruction,
                     payment_plan,
                     exchange_rate,

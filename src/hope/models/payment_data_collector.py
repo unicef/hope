@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -15,6 +16,13 @@ if TYPE_CHECKING:
 type PaymentDeliveryData = dict[str, object]
 type DeliveryDataByCollector = dict[UUID, PaymentDeliveryData]
 type AccountValidityByCollector = dict[UUID, bool]
+
+
+@dataclass(frozen=True)
+class CollectorFieldResolution:
+    account: Account | None
+    has_delivery_config: bool
+    required_field_values: PaymentDeliveryData
 
 
 class PaymentDataCollector(Account):
@@ -119,15 +127,13 @@ class PaymentDataCollector(Account):
         return value
 
     @classmethod
-    def _process_collectors(
+    def _resolve_collectors(
         cls,
         fsp: "FinancialServiceProvider",
         delivery_mechanism: "DeliveryMechanism",
         collectors: Iterable[Individual],
-    ) -> tuple[DeliveryDataByCollector, AccountValidityByCollector]:
+    ) -> dict[UUID, CollectorFieldResolution]:
         collectors = list(collectors)
-        delivery_data_by_collector: DeliveryDataByCollector = {}
-        validity_by_collector: AccountValidityByCollector = {}
 
         accounts_by_individual_id: dict[UUID, Account] = {}
         if delivery_mechanism.account_type_id:
@@ -161,6 +167,7 @@ class PaymentDataCollector(Account):
             else {}
         )
 
+        resolved_data_by_collector = {}
         for collector in collectors:
             account = accounts_by_individual_id.get(collector.id)
             country_id = collector.household.country_id if collector.household else None
@@ -169,8 +176,7 @@ class PaymentDataCollector(Account):
                 default_config,
             )
             if not config:
-                delivery_data_by_collector[collector.id] = account.account_data if account else {}
-                validity_by_collector[collector.id] = True
+                resolved_data_by_collector[collector.id] = CollectorFieldResolution(account, False, {})
                 continue
 
             resolved_fields: PaymentDeliveryData = {}
@@ -192,18 +198,21 @@ class PaymentDataCollector(Account):
                 )
                 resolved_fields[field] = value
 
-            validity_by_collector[collector.id] = all(value not in [None, ""] for value in resolved_fields.values())
-            delivery_data = {field: value and str(value) for field, value in resolved_fields.items()}
-            if account:
-                delivery_data.setdefault("number", account.number)
-                delivery_data.setdefault(
-                    "financial_institution_name", getattr(account.financial_institution, "name", "")
-                )
-                delivery_data.setdefault(
-                    "financial_institution_pk", str(getattr(account.financial_institution, "pk", ""))
-                )
-            delivery_data_by_collector[collector.id] = delivery_data
-        return delivery_data_by_collector, validity_by_collector
+            resolved_data_by_collector[collector.id] = CollectorFieldResolution(account, True, resolved_fields)
+        return resolved_data_by_collector
+
+    @staticmethod
+    def _build_delivery_data(resolution: CollectorFieldResolution) -> PaymentDeliveryData:
+        account = resolution.account
+        if not resolution.has_delivery_config:
+            return account.account_data if account else {}
+
+        delivery_data = {field: value and str(value) for field, value in resolution.required_field_values.items()}
+        if account:
+            delivery_data.setdefault("number", account.number)
+            delivery_data.setdefault("financial_institution_name", getattr(account.financial_institution, "name", ""))
+            delivery_data.setdefault("financial_institution_pk", str(getattr(account.financial_institution, "pk", "")))
+        return delivery_data
 
     @classmethod
     def delivery_data_for_collectors(
@@ -212,19 +221,38 @@ class PaymentDataCollector(Account):
         delivery_mechanism: "DeliveryMechanism",
         collectors: Iterable[Individual],
     ) -> DeliveryDataByCollector:
-        delivery_data_by_collector, _ = cls._process_collectors(fsp, delivery_mechanism, collectors)
-        return delivery_data_by_collector
+        resolved_data_by_collector = cls._resolve_collectors(fsp, delivery_mechanism, collectors)
+        return {
+            collector_id: cls._build_delivery_data(resolution)
+            for collector_id, resolution in resolved_data_by_collector.items()
+        }
 
     @classmethod
     def validate_accounts(
         cls,
-        fsp: "FinancialServiceProvider",
-        delivery_mechanism: "DeliveryMechanism",
+        fsp: "FinancialServiceProvider | None",
+        delivery_mechanism: "DeliveryMechanism | None",
         collectors: Iterable[Individual],
     ) -> AccountValidityByCollector:
+        # Without an FSP or delivery mechanism, no account validation can be configured.
+        if not fsp or not delivery_mechanism:
+            return {collector.id: True for collector in collectors}
+
+        # Delivery mechanisms without an account type, such as cash, do not require account validation.
         if not delivery_mechanism.account_type_id:
             return {collector.id: True for collector in collectors}
-        _, validity_by_collector = cls._process_collectors(fsp, delivery_mechanism, collectors)
+
+        validity_by_collector = {}
+        for collector_id, resolution in cls._resolve_collectors(fsp, delivery_mechanism, collectors).items():
+            # Without an FSP delivery configuration, there are no required fields to validate.
+            if not resolution.has_delivery_config:
+                validity_by_collector[collector_id] = True
+                continue
+
+            # Every configured required field must resolve to a non-empty value.
+            validity_by_collector[collector_id] = all(
+                value not in [None, ""] for value in resolution.required_field_values.values()
+            )
         return validity_by_collector
 
     @classmethod
@@ -234,34 +262,7 @@ class PaymentDataCollector(Account):
         delivery_mechanism: "DeliveryMechanism",
         collector: "Individual",
     ) -> dict:
-        delivery_data = {}
-        account = (
-            collector.accounts.select_related("financial_institution")
-            .filter(account_type=delivery_mechanism.account_type)
-            .first()
-        )
-        dm_config = cls.get_delivery_mechanism_config(fsp, delivery_mechanism, collector)
-        if not dm_config:
-            return account.account_data if account else {}
-
-        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-
-        for field in dm_config.required_fields:
-            value = cls.resolve_required_field(
-                fsp,
-                collector,
-                account,
-                field,
-                fsp_names_mappings.get(field),
-            )
-            delivery_data[field] = value and str(value)
-
-        if account:
-            delivery_data.setdefault("number", account.number)
-            delivery_data.setdefault("financial_institution_name", getattr(account.financial_institution, "name", ""))
-            delivery_data.setdefault("financial_institution_pk", str(getattr(account.financial_institution, "pk", "")))
-
-        return delivery_data
+        return cls.delivery_data_for_collectors(fsp, delivery_mechanism, [collector])[collector.id]
 
     @classmethod
     def validate_account(
@@ -270,33 +271,7 @@ class PaymentDataCollector(Account):
         delivery_mechanism: "DeliveryMechanism",
         collector: Individual,
     ) -> bool:
-        if not delivery_mechanism.account_type:
-            # ex. "cash" - doesn't need any validation
-            return True
-
-        account = (
-            collector.accounts.select_related("financial_institution")
-            .filter(account_type=delivery_mechanism.account_type)
-            .first()
-        )
-        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_config = cls.get_delivery_mechanism_config(fsp, delivery_mechanism, collector)
-        if not dm_config:
-            return True
-
-        for field_value in dm_config.required_fields:
-            value = cls.resolve_required_field(
-                fsp,
-                collector,
-                account,
-                field_value,
-                fsp_names_mappings.get(field_value),
-            )
-
-            if value in [None, ""]:
-                return False
-
-        return True
+        return cls.validate_accounts(fsp, delivery_mechanism, [collector])[collector.id]
 
     class Meta:
         app_label = "payment"

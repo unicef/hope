@@ -1755,6 +1755,8 @@ def test_sync_fsps(
     fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
     assert fsp_new.payment_gateway_id == "33"
     assert fsp_new.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+    assert fsp_new.created_at is not None
+    assert fsp_new.updated_at is not None
     assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == [
         "cash_over_the_counter",
         "transfer",

@@ -13,10 +13,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.services import payment_household_snapshot_service
-from hope.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-    create_payment_snapshot_data,
-)
+from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -222,12 +219,6 @@ def test_collector_account_data_is_scoped_to_role_household(cross_household_coll
         collector_household_payment.household_snapshot.snapshot_data["primary_collector"]["account_data"]["number"]
         == "external-collector-account"
     )
-
-
-def test_create_payment_snapshot_data_uses_single_collector_fallback(payments) -> None:
-    snapshot = create_payment_snapshot_data(payments[0])
-
-    assert snapshot.snapshot_data["primary_collector"]["account_data"]["number"] == "123"
 
 
 def test_build_snapshot_without_primary_collector(payment_without_primary_collector) -> None:

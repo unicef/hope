@@ -501,22 +501,14 @@ class PaymentPlanService:
         }
         delivery_mechanism = payment_plan.delivery_mechanism
         financial_service_provider = payment_plan.financial_service_provider
-        wallet_validity_by_collector_id = (
-            PaymentDataCollector.validate_accounts(
-                financial_service_provider,
-                delivery_mechanism,
-                collectors_by_id.values(),
-            )
-            if delivery_mechanism and financial_service_provider
-            else None
+        wallet_validity_by_collector_id = PaymentDataCollector.validate_accounts(
+            financial_service_provider,
+            delivery_mechanism,
+            collectors_by_id.values(),
         )
 
         for household in household_rows:
             collector, collector_type = PaymentPlanService._get_collector(household, collectors_by_id)
-
-            has_valid_wallet = True
-            if delivery_mechanism and financial_service_provider:
-                has_valid_wallet = wallet_validity_by_collector_id.get(collector.id, True)
 
             payments_to_create.append(
                 Payment(
@@ -532,7 +524,7 @@ class PaymentPlanService:
                     collector_type=collector_type,
                     financial_service_provider=financial_service_provider,
                     delivery_type=delivery_mechanism,
-                    has_valid_wallet=has_valid_wallet,
+                    has_valid_wallet=wallet_validity_by_collector_id[collector.id],
                 )
             )
         try:
