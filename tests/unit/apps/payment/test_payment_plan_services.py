@@ -9,7 +9,6 @@ from aniso8601 import parse_date
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
-from django.test import override_settings
 from django.utils import timezone
 from django.utils.timezone import now
 from freezegun import freeze_time
@@ -1827,7 +1826,6 @@ def test_get_collector() -> None:
     assert collcector_type == "PRIMARY"
 
 
-@override_settings(ENV="prod")
 def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> None:
     partner_unicef = PartnerFactory(name="UNICEF")
     partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)

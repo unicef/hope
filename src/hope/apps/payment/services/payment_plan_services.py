@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Callable, Union, cast
 
 from constance import config
-from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -1549,12 +1548,13 @@ class PaymentPlanService:
             .exclude(expiry_date__lt=timezone.now())
             .distinct()
         )
-        users = User.objects.filter(
-            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-        ).distinct()
-
-        if settings.ENV == "prod":
-            users = users.exclude(is_superuser=True)
+        users = (
+            User.objects.filter(
+                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
+            )
+            .exclude(is_superuser=True)
+            .distinct()
+        )
 
         if users:
             text_template = "payment/pp_reconciliation_overdue_email.txt"

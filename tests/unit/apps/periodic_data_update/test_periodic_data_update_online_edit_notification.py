@@ -473,7 +473,6 @@ def test_send_email_notification_without_catch_all_email(
     assert mock_post.call_count == 1
 
 
-@override_settings(ENV="prod")
 def send_email_notification_exclude_superuser(
     pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
 ) -> None:

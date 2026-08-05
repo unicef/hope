@@ -875,7 +875,6 @@ def test_send_email_notification_without_catch_all_email(notification_setup: dic
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
 )
-@override_settings(ENV="prod")
 def test_send_email_notification_exclude_superuser(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     users = notification_setup["users"]
@@ -923,7 +922,6 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
 )
-@override_settings(ENV="prod")
 def test_send_email_notification_exclude_staff_user(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     users = notification_setup["users"]

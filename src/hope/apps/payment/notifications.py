@@ -97,17 +97,14 @@ class PaymentNotification:
             .exclude(expiry_date__lt=timezone.now())
             .distinct()
         )
-        users = (
+        return (
             User.objects.filter(
                 Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
             )
             .exclude(id=self.action_user.id)
+            .exclude(Q(is_superuser=True) | Q(is_staff=True))
             .distinct()
         )
-
-        if settings.ENV == "prod":
-            users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
-        return users
 
     def _prepare_email(self) -> MailjetClient:
         body_variables = self._prepare_body_variables()
