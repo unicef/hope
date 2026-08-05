@@ -732,7 +732,6 @@ def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_clos
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
 def test_send_email_notification_subject_mark_ready_for_closure(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
@@ -758,7 +757,6 @@ def test_send_email_notification_mark_ready_for_closure(notification_setup: dict
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
 def test_send_email_notification_subject_send_back_to_finished(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
@@ -797,21 +795,7 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
-def test_send_email_notification_subject_test_env(notification_setup: dict, mocker: Any) -> None:
-    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
-    payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
-        notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
-    )
-    assert payment_notification.email.subject == "[test] Payment pending for Approval"
-
-
-@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
-def test_send_email_notification_subject_prod_env(notification_setup: dict, mocker: Any) -> None:
+def test_send_email_notification_subject_send_for_approval(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],

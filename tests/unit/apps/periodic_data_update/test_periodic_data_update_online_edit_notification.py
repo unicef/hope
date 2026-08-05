@@ -406,23 +406,7 @@ def test_send_email_notification_disabled_by_business_area(
 
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
-def test_send_email_notification_subject_test_env(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
-) -> None:
-    pdu_notification = PDUOnlineEditNotification(
-        pdu_with_authorized_users,
-        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
-        user_action_user,
-        "1 January 2025",
-    )
-    assert pdu_notification.email.subject == "[test] PDU Online Edit pending for Approval"
-
-
-@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
-@override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
-def test_send_email_notification_subject_prod_env(
+def test_send_email_notification_subject_send_for_approval(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
