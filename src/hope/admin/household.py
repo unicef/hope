@@ -33,6 +33,7 @@ from hope.admin.utils import (
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
+    ViewOnSiteMixin,
 )
 from hope.apps.household.celery_tasks import (
     enroll_households_to_program_async_task,
@@ -317,6 +318,7 @@ class HouseholdAdmin(
     HouseholdWithdrawnMixin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
+    ViewOnSiteMixin,
 ):
     list_display = (
         "unicef_id",
@@ -487,6 +489,9 @@ class HouseholdAdmin(
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
+
+    def frontend_url(self, obj: Household) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/population/household/{obj.id}"
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "head_of_household":

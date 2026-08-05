@@ -15,7 +15,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
+from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnSiteMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm
@@ -140,7 +140,7 @@ def has_payment_instruction_download_permission(request: Any) -> bool:
 
 
 @admin.register(PaymentPlan)
-class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
+class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnSiteMixin):
     list_display = (
         "unicef_id",
         "name",
@@ -234,6 +234,9 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    def frontend_url(self, obj: PaymentPlan) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/payment-plans/{obj.id}"
 
     def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> Any:
         request._payment_plan_obj = obj
@@ -552,7 +555,7 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
 
 
 @admin.register(Payment)
-class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase, ViewOnSiteMixin):
     search_fields = ("unicef_id",)
     list_display = (
         "unicef_id",
@@ -668,6 +671,12 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
+
+    def frontend_url(self, obj: Payment) -> str | None:
+        program = obj.program
+        if program is None:
+            return None
+        return f"/{obj.business_area.slug}/programs/{program.code}/payment-module/payments/{obj.id}"
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),

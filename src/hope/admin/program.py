@@ -29,6 +29,7 @@ from hope.admin.utils import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
+    ViewOnSiteMixin,
 )
 from hope.apps.household.forms import CreateTargetPopulationTextForm
 from hope.apps.household.services.index_management import check_program_indexes, rebuild_program_indexes
@@ -211,6 +212,7 @@ class ProgramAdmin(
     LastSyncDateResetMixin,
     AdminAutoCompleteSearchMixin,
     HOPEModelAdminBase,
+    ViewOnSiteMixin,
 ):
     form = ProgramAdminForm
     list_display = (
@@ -255,6 +257,9 @@ class ProgramAdmin(
             "QuerySet[Program]",
             super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
         )
+
+    def frontend_url(self, obj: Program) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.code}/details/{obj.code}"
 
     @button(
         permission="payment.add_paymentplan",

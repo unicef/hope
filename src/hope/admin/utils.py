@@ -2,7 +2,7 @@ from typing import Any, TypeVar
 from uuid import UUID
 
 from admin_extra_buttons.buttons import StandardButton
-from admin_extra_buttons.decorators import button
+from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.mixin import AdminFiltersMixin
@@ -165,6 +165,33 @@ class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONW
     def count_queryset(self, request: HttpRequest, queryset: QuerySet) -> None:
         count = queryset.count()
         self.message_user(request, f"Selection contains {count} records")
+
+
+class ViewOnSiteMixin:
+    """Add a "View on site" button that links to the object page on the frontend.
+
+    Subclasses must implement :meth:`frontend_url` returning the frontend path
+    (without protocol/host) for the given object, or ``None`` when not available.
+    """
+
+    @link(
+        label="View on site",
+        html_attrs={"target": "_blank", "class": "aeb-green"},
+        change_list=False,
+    )
+    def view_on_site(self, button: Any) -> None:
+        button.href = None
+        obj = button.original
+        if self is None or obj is None:
+            return
+        path = self.frontend_url(obj)  # type: ignore[attr-defined]
+        if not path:
+            return
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+        button.href = f"{protocol}://{settings.FRONTEND_HOST}{path}"
+
+    def frontend_url(self, obj: Any) -> str | None:
+        raise NotImplementedError
 
 
 class HUBBusinessAreaFilter(SimpleListFilter):

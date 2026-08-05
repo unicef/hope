@@ -27,6 +27,7 @@ from hope.admin.utils import (
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
+    ViewOnSiteMixin,
 )
 from hope.apps.household.celery_tasks import revalidate_phone_number_async_task
 from hope.apps.utils.security import is_root
@@ -71,6 +72,7 @@ class IndividualAdmin(
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
+    ViewOnSiteMixin,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
@@ -196,6 +198,9 @@ class IndividualAdmin(
                 "business_area",
             )
         )
+
+    def frontend_url(self, obj: Individual) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/population/individuals/{obj.id}"
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "household":
