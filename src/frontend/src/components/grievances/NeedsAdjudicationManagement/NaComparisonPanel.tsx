@@ -26,7 +26,6 @@ import {
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { NaReassignRoleModal } from './NaReassignRoleModal';
 import { applyMark, clearMark } from './naDecision';
-import { splitFullName } from './naName';
 import { reassignmentKey, roleLabel } from './naRoleUtils';
 import { NaMark, NaRoleAssignment, NaTicketDecision } from './naTypes';
 
@@ -68,14 +67,15 @@ interface ComparisonRow {
   neverHighlight?: boolean;
 }
 
-const familyNameOf = (i: any): string =>
-  i?.familyName ?? splitFullName(i?.fullName).familyName;
+const familyNameOf = (i: any): string => i?.familyName ?? '';
 
-const givenNameOf = (i: any): string =>
-  i?.givenName ?? splitFullName(i?.fullName).givenName;
+const givenNameOf = (i: any): string => i?.givenName ?? '';
 
 const addressOf = (i: any): string =>
-  i?.household?.address || i?.household?.village || i?.household?.admin2?.name || '';
+  i?.household?.address ||
+  i?.household?.village ||
+  i?.household?.admin2?.name ||
+  '';
 
 const documentsOf = (i: any): string =>
   (i?.documents ?? [])
@@ -136,9 +136,6 @@ const comparisonRows: ComparisonRow[] = [
     compare: addressOf,
   },
   {
-    // TODO: IndividualForTicketSerializer does not send `phone_no`, so both
-    // sides are empty and this row stays hidden. It starts working as soon as
-    // the serializer adds the field.
     label: 'Phone',
     render: (i) => i?.phoneNo || '-',
     compare: (i) => i?.phoneNo ?? '',
@@ -149,10 +146,8 @@ const comparisonRows: ComparisonRow[] = [
     compare: documentsOf,
   },
   {
-    // TODO: IndividualForTicketSerializer does not send `accounts` either, so
-    // this row stays hidden. When adding it, mirror the permission gate in
-    // IndividualDetailSerializer.get_accounts
-    // (POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION).
+    // Empty for users without POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION —
+    // IndividualForNaComparisonSerializer.get_accounts gates the field server-side.
     label: 'Account',
     render: (i) => accountsOf(i) || '-',
     compare: accountsOf,
@@ -186,7 +181,11 @@ export const NaComparisonPanel = ({
     isLoading,
     isError,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, ticketId],
+    queryKey: [
+      'businessAreasGrievanceTicketsRetrieve',
+      businessAreaSlug,
+      ticketId,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
@@ -262,11 +261,17 @@ export const NaComparisonPanel = ({
   // HEAD/PRIMARY role they hold in a surviving household must be handed over
   // before this ticket can be executed.
   const withdraw = (newMark: NaMark): void =>
-    onDecide(applyMark(decision, { person1, person2, mark: newMark }, candidates));
+    onDecide(
+      applyMark(decision, { person1, person2, mark: newMark }, candidates),
+    );
 
   const markNotDuplicates = (): void =>
     onDecide(
-      applyMark(decision, { person1, person2, mark: 'not_duplicates' }, candidates),
+      applyMark(
+        decision,
+        { person1, person2, mark: 'not_duplicates' },
+        candidates,
+      ),
     );
 
   const clearActiveMark = (): void => {
@@ -488,10 +493,7 @@ export const NaComparisonPanel = ({
             )}
           </Typography>
           {reassignments.map((assignment) => {
-            const key = reassignmentKey(
-              assignment.role,
-              assignment.household,
-            );
+            const key = reassignmentKey(assignment.role, assignment.household);
             return (
               <Box
                 key={key}

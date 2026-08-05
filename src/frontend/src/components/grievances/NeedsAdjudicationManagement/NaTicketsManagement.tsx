@@ -1,3 +1,4 @@
+import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -7,10 +8,10 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { GRIEVANCE_CATEGORIES } from '@utils/constants';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -54,6 +55,8 @@ export const NaTicketsManagement = ({
   const { t } = useTranslation();
   const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const confirm = useConfirmation();
+  const queryClient = useQueryClient();
   const location = useLocation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -110,14 +113,39 @@ export const NaTicketsManagement = ({
     (decision) => !isDecisionResolved(decision),
   ).length;
 
-  // TODO: the bulk needs-adjudication execute endpoint is not published yet, so
-  // this only builds and discards the payload and shows a placeholder message.
-  // Replace both with a useMutation posting buildExecutePayload(decisions),
-  // reporting failures via showApiErrorMessages. An incomplete batch is rejected
-  // whole and nothing changes server-side, so do not clear decisions optimistically.
+  const { mutate: executeBatch, isPending: isFinalizing } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsBulkNeedsAdjudicationCreate({
+        businessAreaSlug,
+        formData: { tickets: buildExecutePayload(decisions) },
+      }),
+    onSuccess: () => {
+      showMessage(t('{{count}} ticket(s) finalized', { count: managedCount }));
+      setDecisions({});
+      queryClient.invalidateQueries({ queryKey: ['naTicketsManagementList'] });
+      queryClient.invalidateQueries({ queryKey: ['naTicketsManagementCount'] });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasGrievanceTicketsRetrieve'],
+      });
+    },
+    // The batch is rejected whole and nothing changes server-side, so keep the
+    // decisions on screen for the operator to fix and retry.
+    onError: (error: any) => {
+      showApiErrorMessages(error, showMessage);
+    },
+  });
+
   const handleFinalize = (): void => {
-    buildExecutePayload(decisions);
-    showMessage(t('Bulk execute is not available yet'));
+    confirm({
+      title: t('Finalize'),
+      content: t(
+        'You are about to finalize {{count}} ticket(s). They will be closed and this cannot be undone.',
+        { count: managedCount },
+      ),
+    }).then(
+      () => executeBatch(),
+      () => undefined,
+    );
   };
 
   const queryVariables = useMemo(
@@ -231,7 +259,9 @@ export const NaTicketsManagement = ({
               <Button
                 variant="contained"
                 color="primary"
-                disabled={managedCount === 0 || unresolvedCount > 0}
+                disabled={
+                  managedCount === 0 || unresolvedCount > 0 || isFinalizing
+                }
                 onClick={handleFinalize}
                 data-cy="button-na-finalize"
               >

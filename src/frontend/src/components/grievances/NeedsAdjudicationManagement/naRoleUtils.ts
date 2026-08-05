@@ -1,21 +1,11 @@
-import {
-  NaRequiredRole,
-  NaRoleAssignment,
-  NaTicketDecision,
-} from './naTypes';
+import { NaRequiredRole, NaRoleAssignment, NaTicketDecision } from './naTypes';
 
-// Shape of `rolesInHouseholds` on individuals in the NA comparison payload.
+// Shape of `rolesInHouseholds` on individuals in the NA comparison payload,
+// as sent by IndividualForNaComparisonSerializer.get_roles_in_households — the
+// PRIMARY/ALTERNATE roles plus a synthetic HEAD entry, since
+// IndividualRoleInHousehold does not model HEAD.
 // `ticketDetails` is typed as Record<string, any> in restgenerated, so this
 // describes the contract rather than deriving from a generated type.
-//
-// TODO: the backend does not send this yet. IndividualForTicketSerializer has
-// no roles, so getRequiredReassignments currently always returns [] and no
-// reassignment is ever requested. Blocked on BE adding, per NA individual:
-//   - roles_in_households, including a synthetic HEAD entry when the individual
-//     is household.head_of_household (IndividualRoleInHousehold only models
-//     PRIMARY/ALTERNATE, so HEAD cannot be derived from it),
-//   - household.withdrawn and household.active_individuals_count, needed for
-//     the surviving-household and sole-member skip rules below.
 export interface NaRoleInHousehold {
   role: string;
   household: {
@@ -51,21 +41,23 @@ export const getRequiredReassignments = (
 ): NaRoleAssignment[] => {
   if (!duplicate?.rolesInHouseholds) return [];
 
-  return duplicate.rolesInHouseholds
-    .filter((entry): entry is NaRoleInHousehold & { role: NaRequiredRole } =>
-      REQUIRED_ROLES.includes(entry?.role as NaRequiredRole),
-    )
-    .filter((entry) => Boolean(entry.household?.id))
-    // A withdrawn household has nothing left to reassign.
-    .filter((entry) => !entry.household.withdrawn)
-    // Sole member: withdrawing them withdraws the household automatically.
-    .filter((entry) => (entry.household.activeIndividualsCount ?? 0) > 1)
-    .map((entry) => ({
-      role: entry.role,
-      household: entry.household.id,
-      householdUnicefId: entry.household.unicefId,
-      individual: duplicate.id,
-    }));
+  return (
+    duplicate.rolesInHouseholds
+      .filter((entry): entry is NaRoleInHousehold & { role: NaRequiredRole } =>
+        REQUIRED_ROLES.includes(entry?.role as NaRequiredRole),
+      )
+      .filter((entry) => Boolean(entry.household?.id))
+      // A withdrawn household has nothing left to reassign.
+      .filter((entry) => !entry.household.withdrawn)
+      // Sole member: withdrawing them withdraws the household automatically.
+      .filter((entry) => (entry.household.activeIndividualsCount ?? 0) > 1)
+      .map((entry) => ({
+        role: entry.role,
+        household: entry.household.id,
+        householdUnicefId: entry.household.unicefId,
+        individual: duplicate.id,
+      }))
+  );
 };
 
 export const keyReassignments = (

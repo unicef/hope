@@ -1,49 +1,37 @@
+import { NeedsAdjudicationResolution } from '@restgenerated/models/NeedsAdjudicationResolution';
+import { NeedsAdjudicationRoleReassignEntry } from '@restgenerated/models/NeedsAdjudicationRoleReassignEntry';
 import { NaTicketDecision } from './naTypes';
 
-export interface NaRoleReassignEntry {
-  role: string;
-  household: string;
-  individual: string;
-  new_individual: string;
-}
-
-export interface NaExecuteTicketPayload {
-  ticket_id: string;
-  duplicate_individual_ids: string[];
-  distinct_individual_ids: string[];
-  role_reassign_data: Record<string, NaRoleReassignEntry>;
-}
-
 /**
- * Flattens session decisions into the bulk execute payload. `role_reassign_data`
- * is keyed by role name and uses snake_case inner fields, matching the shape the
- * backend's reassign service consumes. Hand-typed on purpose — this endpoint is
- * not in restgenerated yet.
+ * Key for one `roleReassignData` entry. The backend ignores these keys —
+ * `_proccesing_role_reassign_data` iterates `role_reassign_data.values()` — so
+ * they only need to stay unique within a ticket, hence the household id: a
+ * duplicate can hold PRIMARY in more than one household.
  *
- * TODO: confirm the key format with BE. The existing /reassign-role/ action
- * keys collector roles by IndividualRoleInHousehold id rather than by role name;
- * reassign_roles_on_marking_as_duplicate_individual_service iterates values and
- * ignores keys, so role names are safe today, but that is not contractual.
- * TODO: role-name keys collide if one duplicate holds PRIMARY in two households.
- * Session state keys by `role:householdId` and keeps both, so only the
- * serialization loses one — revisit if BE keys by role id instead.
+ * The body is sent as multipart (`processFormData` in restgenerated/core) and
+ * reassembled by DictDrfNestedParser, so the key must avoid the `.` and `[`
+ * characters that parser uses for nesting.
  */
+const payloadReassignKey = (role: string, householdId: string): string =>
+  `${role}-${householdId}`;
+
+/** Flattens session decisions into the bulk needs-adjudication request body. */
 export const buildExecutePayload = (
   decisions: Record<string, NaTicketDecision>,
-): NaExecuteTicketPayload[] =>
+): NeedsAdjudicationResolution[] =>
   Object.entries(decisions).map(([ticketId, decision]) => ({
-    ticket_id: ticketId,
-    duplicate_individual_ids: decision.duplicateIndividualIds,
-    distinct_individual_ids: decision.distinctIndividualIds,
-    role_reassign_data: Object.values(decision.reassignments).reduce<
-      Record<string, NaRoleReassignEntry>
+    ticketId,
+    duplicateIndividualIds: decision.duplicateIndividualIds,
+    distinctIndividualIds: decision.distinctIndividualIds,
+    roleReassignData: Object.values(decision.reassignments).reduce<
+      Record<string, NeedsAdjudicationRoleReassignEntry>
     >((acc, assignment) => {
       if (!assignment.newIndividual) return acc;
-      acc[assignment.role] = {
+      acc[payloadReassignKey(assignment.role, assignment.household)] = {
         role: assignment.role,
         household: assignment.household,
         individual: assignment.individual,
-        new_individual: assignment.newIndividual,
+        newIndividual: assignment.newIndividual,
       };
       return acc;
     }, {}),
