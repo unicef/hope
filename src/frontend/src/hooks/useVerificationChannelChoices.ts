@@ -2,6 +2,7 @@ import { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { fieldNameToLabel } from '@utils/utils';
 
 export function useVerificationChannelChoices(): UseQueryResult<Array<Choice>> {
   return useQuery<Array<Choice>>({
@@ -14,6 +15,7 @@ export function useVerificationChannelChoices(): UseQueryResult<Array<Choice>> {
     select: (choices) =>
       choices.map((choice) => ({
         ...choice,
+        name: fieldNameToLabel(choice.name),
         dataCy: `radio-${choice.value.toLowerCase()}`,
       })),
   });
