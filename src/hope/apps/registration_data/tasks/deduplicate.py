@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 import itertools
 import logging
-from typing import Any, Iterable, cast
+from typing import Any, Iterable
 
 from constance import config
 from django.db import transaction
@@ -128,7 +128,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
-            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
+            deduplication_result = self._deduplicate_single_individual(individual)
             if index % 100 == 0:
                 log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -177,7 +177,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
-            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
+            deduplication_result = self._deduplicate_single_individual(individual)
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
@@ -815,7 +815,7 @@ class HardDocumentDeduplication:
                 all_matching_number_documents_dict,
                 all_matching_number_documents_signatures,  # type: ignore[arg-type]
                 already_processed_signatures,
-                documents_to_dedup,  # type: ignore[arg-type]
+                documents_to_dedup,
                 new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
                 new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
                 new_documents=new_documents,

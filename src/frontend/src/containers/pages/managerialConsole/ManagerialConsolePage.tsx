@@ -11,42 +11,46 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { FC, SetStateAction, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+
+type ManagerialStatus =
+  | 'IN_APPROVAL'
+  | 'IN_AUTHORIZATION'
+  | 'IN_REVIEW'
+  | 'ACCEPTED';
 
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
   const { businessAreaSlug } = useBaseUrl();
-  const [selectedApproved, setSelectedApproved] = useState([]);
-  const [selectedAuthorized, setSelectedAuthorized] = useState([]);
-  const [selectedInReview, setSelectedInReview] = useState([]);
+  const [selectedApproved, setSelectedApproved] = useState<string[]>([]);
+  const [selectedAuthorized, setSelectedAuthorized] = useState<string[]>([]);
+  const [selectedInReview, setSelectedInReview] = useState<string[]>([]);
   const { showMessage } = useSnackbar();
 
   const handleSelect = (
-    selected: any[],
-    setSelected: {
-      (value: SetStateAction<any[]>): void;
-      (arg0: any[]): void;
-    },
-    id: any,
+    selected: string[],
+    setSelected: Dispatch<SetStateAction<string[]>>,
+    id: string,
   ) => {
     if (selected.includes(id)) {
-      setSelected(selected.filter((item: any) => item !== id));
+      setSelected(selected.filter((item) => item !== id));
     } else {
       setSelected([...selected, id]);
     }
   };
 
   const handleSelectAll = (
-    ids: any[],
-    selected: any[],
-    setSelected: (value: SetStateAction<any[]>) => void,
+    ids: string[],
+    selected: string[],
+    setSelected: Dispatch<SetStateAction<string[]>>,
   ) => {
-    let newSelected;
+    let newSelected: string[];
     if (ids.every((id) => selected.includes(id))) {
       newSelected = [];
     } else {
@@ -56,12 +60,11 @@ export const ManagerialConsolePage: FC = () => {
   };
 
   const permissions = usePermissions();
-  const fetchPaymentPlans = (status: string) => {
+  const fetchPaymentPlans = (status: ManagerialStatus) => {
     return RestService.restBusinessAreasPaymentsPaymentPlansManagerialList({
       businessAreaSlug,
       limit: 10000,
       offset: 0,
-      //@ts-ignore
       status,
     });
   };
@@ -70,9 +73,12 @@ export const ManagerialConsolePage: FC = () => {
     data: inApprovalData,
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInApproval', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'IN_APPROVAL' },
+    ),
     queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
   });
 
@@ -82,7 +88,10 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchInAuthorization,
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInAuthorization', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'IN_AUTHORIZATION' },
+    ),
     queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
   });
 
@@ -92,7 +101,10 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchInReview,
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansInReview', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'IN_REVIEW' },
+    ),
     queryFn: () => fetchPaymentPlans('IN_REVIEW'),
   });
 
@@ -102,7 +114,10 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchReleased,
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
   } = useQuery<PaginatedPaymentPlanList>({
-    queryKey: ['paymentPlansReleased', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsPaymentPlansManagerialList,
+      { businessAreaSlug, limit: 10000, offset: 0, status: 'ACCEPTED' },
+    ),
     queryFn: () => fetchPaymentPlans('ACCEPTED'),
   });
 
@@ -160,9 +175,17 @@ export const ManagerialConsolePage: FC = () => {
     <>
       <PageHeader title={t('Managerial Console')} />
       {canApprove && (
-        <Box mb={6}>
+        <Box
+          sx={{
+            mb: 6,
+          }}
+        >
           {canApprove && (
-            <Box mb={6}>
+            <Box
+              sx={{
+                mb: 6,
+              }}
+            >
               <ApprovalSection
                 selectedApproved={selectedApproved}
                 setSelectedApproved={setSelectedApproved}
@@ -176,7 +199,11 @@ export const ManagerialConsolePage: FC = () => {
         </Box>
       )}
       {canAuthorize && (
-        <Box mb={6}>
+        <Box
+          sx={{
+            mb: 6,
+          }}
+        >
           <AuthorizationSection
             selectedAuthorized={selectedAuthorized}
             setSelectedAuthorized={setSelectedAuthorized}
@@ -188,7 +215,11 @@ export const ManagerialConsolePage: FC = () => {
         </Box>
       )}
       {canReview && (
-        <Box mb={6}>
+        <Box
+          sx={{
+            mb: 6,
+          }}
+        >
           <PendingForReleaseSection
             selectedInReview={selectedInReview}
             setSelectedInReview={setSelectedInReview}

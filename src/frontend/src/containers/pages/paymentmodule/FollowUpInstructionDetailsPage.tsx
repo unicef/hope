@@ -12,6 +12,7 @@ import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/Pay
 import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
@@ -32,7 +33,14 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<FollowUpInstructionDetail>({
-    queryKey: ['followUpInstruction', businessArea, instructionId, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsFollowUpInstructionsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: instructionId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsFollowUpInstructionsRetrieve({
         businessAreaSlug: businessArea,
@@ -79,7 +87,12 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
   }
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <FollowUpInstructionDetailsHeader
         instruction={instruction}
         permissions={permissions}

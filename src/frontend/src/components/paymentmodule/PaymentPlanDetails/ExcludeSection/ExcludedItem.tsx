@@ -37,14 +37,16 @@ export function ExcludedItem({
 
   return (
     <StyledBox
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      pl={8}
-      pr={8}
-      pt={4}
-      pb={4}
-      mt={2}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        pl: 8,
+        pr: 8,
+        pt: 4,
+        pb: 4,
+        mt: 2,
+      }}
     >
       <IdDiv isDeleted={isDeleted}>{id}</IdDiv>
       {isEdit &&

@@ -3,6 +3,7 @@ import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -11,7 +12,7 @@ import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
-  showApiErrorMessages,
+  ApiErrorShape, showApiErrorMessages,
 } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
@@ -54,7 +55,7 @@ export function GrievancesTableRow({
   optionsData,
   setInputValue,
 }: GrievancesTableRowProps): ReactElement {
-  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
@@ -79,16 +80,12 @@ export function GrievancesTableRow({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsGrievanceTickets'],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasProgramsGrievanceTickets',
-          { program: programId },
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsList,
+        ),
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
@@ -151,7 +148,7 @@ export function GrievancesTableRow({
           }}
           checked={isSelected}
           disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
-          inputProps={{ 'aria-labelledby': ticket.unicefId }}
+          slotProps={{ input: { 'aria-labelledby': ticket.unicefId } }}
         />
       </TableCell>
       <TableCell align="left">

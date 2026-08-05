@@ -1,4 +1,5 @@
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -68,7 +69,7 @@ const DeleteProgramCycle = ({
       }
     }
     await queryClient.invalidateQueries({
-      queryKey: ['programCycles', businessArea, program.code],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList),
       exact: false,
     });
     setOpen(false);

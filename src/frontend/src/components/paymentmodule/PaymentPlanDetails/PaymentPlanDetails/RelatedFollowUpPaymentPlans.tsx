@@ -38,7 +38,12 @@ export function RelatedFollowUpPaymentPlans({
 
   return (
     <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {followUpLinks || '-'}
         {followUps?.length > 5 && (
           <Button

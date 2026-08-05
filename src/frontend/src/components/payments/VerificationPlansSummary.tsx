@@ -26,7 +26,12 @@ export function VerificationPlansSummary({
         </Title>
         <Grid container>
           <Grid size={{ xs: 3 }}>
-            <Box pt={2} pb={2}>
+            <Box
+              sx={{
+                pt: 2,
+                pb: 2,
+              }}
+            >
               <LabelizedField label={t('Status')}>
                 <StatusBox
                   dataCy="verification-plans-summary-status"
@@ -37,7 +42,12 @@ export function VerificationPlansSummary({
             </Box>
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <Box pt={2} pb={2}>
+            <Box
+              sx={{
+                pt: 2,
+                pb: 2,
+              }}
+            >
               <LabelizedField
                 dataCy="summary-activation-date"
                 label={t('Activation Date')}
@@ -49,7 +59,12 @@ export function VerificationPlansSummary({
             </Box>
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <Box pt={2} pb={2}>
+            <Box
+              sx={{
+                pt: 2,
+                pb: 2,
+              }}
+            >
               <LabelizedField
                 dataCy="summary-completion-date"
                 label={t('Completion Date')}
@@ -61,7 +76,12 @@ export function VerificationPlansSummary({
             </Box>
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <Box pt={2} pb={2}>
+            <Box
+              sx={{
+                pt: 2,
+                pb: 2,
+              }}
+            >
               <LabelizedField
                 dataCy="summary-number-of-plans"
                 label={t('Number of Verification Plans')}

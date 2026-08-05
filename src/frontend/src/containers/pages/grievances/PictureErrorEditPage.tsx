@@ -15,6 +15,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError, showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -39,7 +40,10 @@ const PictureErrorEditPage = (): ReactElement => {
     isLoading: ticketLoading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
@@ -47,14 +51,17 @@ const PictureErrorEditPage = (): ReactElement => {
       }),
   });
 
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programCode],
-      queryFn: () =>
-        RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug,
-          program: programCode === 'all' ? undefined : programCode,
-        }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        profileParams,
+      ),
+      queryFn: () => RestService.restBusinessAreasUsersProfileRetrieve(profileParams),
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,
@@ -71,11 +78,9 @@ const PictureErrorEditPage = (): ReactElement => {
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasGrievanceTicketsRetrieve',
-            businessAreaSlug,
-            id,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsRetrieve,
+          ),
         });
       },
     });
@@ -157,8 +162,8 @@ const PictureErrorEditPage = (): ReactElement => {
             title={`${t('Edit Ticket')} #${ticket.unicefId}`}
             breadCrumbs={breadCrumbsItems}
           >
-            <Box display="flex" alignContent="center">
-              <Box mr={3}>
+            <Box sx={{ display: 'flex', alignContent: 'center' }}>
+              <Box sx={{ mr: 3 }}>
                 <Button component={Link} to={grievanceDetailsPath}>
                   {t('Cancel')}
                 </Button>
@@ -175,7 +180,7 @@ const PictureErrorEditPage = (): ReactElement => {
               </LoadingButton>
             </Box>
           </PageHeader>
-          <Box p={5}>
+          <Box sx={{ p: 5 }}>
             <ContainerColumnWithBorder>
               <Title>
                 <Typography variant="h6">{t('Photo')}</Typography>

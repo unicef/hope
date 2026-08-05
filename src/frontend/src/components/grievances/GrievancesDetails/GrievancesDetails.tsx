@@ -69,7 +69,12 @@ function GrievancesDetails({
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
   const mappedDocumentation = (): ReactElement => (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {ticket.documentation?.length
         ? ticket.documentation.map((doc) => {
             if (doc.contentType.includes('image')) {
@@ -136,7 +141,12 @@ function GrievancesDetails({
       return <>-</>;
     }
     return (
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {ticket.programs.map((program) => (
           <ContentLink
             key={program.id}

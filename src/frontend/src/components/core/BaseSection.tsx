@@ -61,13 +61,27 @@ export const BaseSection = ({
 
   return (
     <Container sx={containerSx}>
-      <Box p={p}>
-        {stepper && <Box mb={2}>{stepper}</Box>}
+      <Box
+        sx={{
+          p: p,
+        }}
+      >
+        {stepper && (
+          <Box
+            sx={{
+              mb: 2,
+            }}
+          >
+            {stepper}
+          </Box>
+        )}
         <Box
-          p={p}
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
+          sx={{
+            p: p,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
         >
           <Box>
             {typeof title === 'string' ? (
@@ -80,9 +94,22 @@ export const BaseSection = ({
           </Box>
           {buttons}
         </Box>
-        {tabs && <Box mb={2}>{tabs}</Box>}
+        {tabs && (
+          <Box
+            sx={{
+              mb: 2,
+            }}
+          >
+            {tabs}
+          </Box>
+        )}
         {description && (
-          <Box pl={p} mb={2}>
+          <Box
+            sx={{
+              pl: p,
+              mb: 2,
+            }}
+          >
             <GreyText data-cy="description">{description}</GreyText>
           </Box>
         )}

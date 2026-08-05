@@ -19,7 +19,13 @@ export const ResultsForHouseholds = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <Grid size={{ xs: 4 }}>
-      <Grid container spacing={0} justifyContent="flex-end">
+      <Grid
+        container
+        spacing={0}
+        sx={{
+          justifyContent: 'flex-end',
+        }}
+      >
         <Grid size={{ xs: 6 }}>
           <SummaryBorder>
             <LabelizedField

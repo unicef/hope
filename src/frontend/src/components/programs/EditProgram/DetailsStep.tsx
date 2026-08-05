@@ -25,7 +25,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
 
-  const handleNextClick = async(): Promise<void> => {
+  const handleNextClick = async (): Promise<void> => {
     if (handleNext) {
       await handleNext();
     }
@@ -33,8 +33,17 @@ export const DetailsStep: FC<DetailsStepProps> = ({
 
   return (
     <>
-      <ProgramForm values={values} programHasRdi={programHasRdi} lockedPurposeIds={lockedPurposeIds} />
-      <Box display="flex" justifyContent="space-between">
+      <ProgramForm
+        values={values}
+        programHasRdi={programHasRdi}
+        lockedPurposeIds={lockedPurposeIds}
+      />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <Button
           data-cy="button-cancel"
           component={Link}

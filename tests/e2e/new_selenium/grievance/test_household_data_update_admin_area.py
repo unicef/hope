@@ -44,7 +44,7 @@ def test_household_data_update_admin_area_resolves_pcode_to_label(
     admin_area_input = '[data-cy="input-householdDataUpdateFields[0].fieldValue"]'
     browser.wait_for_element_visible(admin_area_input).click()
     browser.type(admin_area_input, "Dehsabz")
-    browser.select_listbox_element(ADMIN_AREA_OPTION)
+    browser.select_listbox_element(ADMIN_AREA_OPTION, timeout=30)
 
     browser.click('button[data-cy="button-submit"]')
 

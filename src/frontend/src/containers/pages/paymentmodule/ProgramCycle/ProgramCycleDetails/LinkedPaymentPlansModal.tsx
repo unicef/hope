@@ -1,5 +1,4 @@
 import { ReactElement, useState } from 'react';
-import styled from 'styled-components';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -30,10 +29,6 @@ interface LinkedPaymentPlansModalProps {
   paymentPlan: PaymentPlanList;
   canViewDetails: boolean;
 }
-
-const BlackEyeIcon = styled(VisibilityIcon)`
-  color: #000;
-`;
 
 export const LinkedPaymentPlansModal = ({
   paymentPlan,
@@ -72,23 +67,41 @@ export const LinkedPaymentPlansModal = ({
 
   return (
     <>
-      <Box display="flex" alignItems="center" gap={0.5}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+        }}
+      >
         <span>{linkedPlans.length}</span>
         <IconButton
           color="primary"
-          onClick={() => setOpen(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
           data-cy="button-eye-linked-plans"
         >
-          <BlackEyeIcon />
+          <VisibilityIcon />
         </IconButton>
       </Box>
-      <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onClick={(e) => e.stopPropagation()}
+        scroll="paper"
+      >
         <DialogTitleWrapper>
           <DialogTitle>{t('Linked Payment Plans')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            <Box mb={2}>
+            <Box
+              sx={{
+                mb: 2,
+              }}
+            >
               <LabelizedField label={t('Original Payment Plan')}>
                 {canViewDetails ? (
                   <BlackLink
@@ -124,7 +137,13 @@ export const LinkedPaymentPlansModal = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button data-cy="button-close" onClick={() => setOpen(false)}>
+            <Button
+              data-cy="button-close"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+              }}
+            >
               {t('Close')}
             </Button>
           </DialogActions>

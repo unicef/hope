@@ -2,7 +2,8 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
@@ -101,22 +102,23 @@ function LookUpHouseholdTableCommunication({
 
   const [page, setPage] = useState(0);
 
-  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+  const householdsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedHouseholdListList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsHouseholdsList,
+        householdsListParams,
       ),
-  });
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsHouseholdsList(
+          householdsListParams,
+        ),
+      placeholderData: keepPreviousData,
+    });
 
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
@@ -204,6 +206,7 @@ function LookUpHouseholdTableCommunication({
       setQueryVariables={setQueryVariables}
       data={data}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       page={page}
       setPage={setPage}

@@ -45,7 +45,7 @@ export function LookUpPaymentRecordTableRow({
           color="primary"
           onClick={(event) => checkboxClickHandler(event, paymentRecord)}
           checked={paymentRecordIsSelected}
-          inputProps={{ 'aria-labelledby': paymentRecord.id }}
+          slotProps={{ input: { 'aria-labelledby': paymentRecord.id } }}
         />
       </TableCell>
       <TableCell align="left">

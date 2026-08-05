@@ -4,13 +4,16 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { DownloadBatchButton } from './actions/DownloadBatchButton';
 import { ExportBatchButton } from './actions/ExportBatchButton';
 import { SendXlsxPasswordBatchButton } from './actions/SendXlsxPasswordBatchButton';
+import { batchPlanTypeLabel } from './utils';
 
 interface BatchDetailsHeaderProps {
   groupId: string;
   tag: string;
+  planType?: PlanTypeEnum;
   hasExportFile: boolean;
   hasPassword: boolean;
   isBusy: boolean;
@@ -19,6 +22,7 @@ interface BatchDetailsHeaderProps {
 export function BatchDetailsHeader({
   groupId,
   tag,
+  planType,
   hasExportFile,
   hasPassword,
   isBusy,
@@ -44,22 +48,49 @@ export function BatchDetailsHeader({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="baseline" gap={1}>
-          <Box>{t('Batch')}</Box>
-          <Box color="text.secondary" fontSize="0.85em">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 1,
+          }}
+        >
+          <Box>
+            {t('Batch')}
+            {batchPlanTypeLabel(planType) &&
+              ` ${t(batchPlanTypeLabel(planType))}`}
+          </Box>
+          <Box
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.85em',
+            }}
+          >
             {tag}
           </Box>
         </Box>
       }
       breadCrumbs={breadCrumbsItems}
     >
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {hasExportFile ? (
           <DownloadBatchButton groupId={groupId} tag={tag} />
         ) : (
-          <ExportBatchButton groupId={groupId} tag={tag} isBusy={isBusy} />
+          <ExportBatchButton
+            groupId={groupId}
+            tag={tag}
+            planType={planType}
+            isBusy={isBusy}
+          />
         )}
-        {hasPassword && <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />}
+        {hasPassword && (
+          <SendXlsxPasswordBatchButton groupId={groupId} tag={tag} />
+        )}
       </Box>
     </PageHeader>
   );

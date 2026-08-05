@@ -47,7 +47,9 @@ export function EditPaymentPlanHeader({
     {
       title: t('Payment Module'),
       to: `/${baseUrl}/payment-module/${
-        planType === PlanTypeEnum.FOLLOW_UP ? 'followup-payment-plans' : 'payment-plans'
+        planType === PlanTypeEnum.FOLLOW_UP
+          ? 'followup-payment-plans'
+          : 'payment-plans'
       }/${id}`,
     },
   ];
@@ -55,8 +57,14 @@ export function EditPaymentPlanHeader({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="center">
-          {planTypeLabel}{t('Payment Plan')} ID {paymentPlan.unicefId}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          {planTypeLabel}
+          {t('Payment Plan')} ID {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
@@ -79,8 +87,18 @@ export function EditPaymentPlanHeader({
           : null
       }
     >
-      <Box display="flex" mt={2} mb={2}>
-        <Box mr={3}>
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 2,
+          mb: 2,
+        }}
+      >
+        <Box
+          sx={{
+            mr: 3,
+          }}
+        >
           <Button
             component={Link}
             to={`/${baseUrl}/payment-module/${planType === PlanTypeEnum.FOLLOW_UP ? 'followup-payment-plans' : 'payment-plans'}/${id}`}

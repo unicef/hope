@@ -222,13 +222,27 @@ export const SupportingDocumentsSection = ({
 
   return (
     <PaperContainer>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Typography variant="h6" data-cy="supporting-documents-title">
           {t('Supporting Documents')}
         </Typography>
-        <Box display="flex">
+        <Box
+          sx={{
+            display: 'flex',
+          }}
+        >
           {canUploadFile && (
-            <Box mr={1}>
+            <Box
+              sx={{
+                mr: 1,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -249,25 +263,39 @@ export const SupportingDocumentsSection = ({
           </Box>
         </Box>
       </Box>
-
       {documents.length === 0 && (
         <GreyText data-cy="supporting-documents-empty">
           {t('No documents uploaded')}
         </GreyText>
       )}
-
       <Collapse in={isExpanded}>
-        <Box mt={2}>
+        <Box
+          sx={{
+            mt: 2,
+          }}
+        >
           <Grid container spacing={3}>
             {documents.map((doc) => (
               <Grid size={3} key={doc.id}>
-                <GreyBox p={3} data-cy="document-item">
+                <GreyBox
+                  data-cy="document-item"
+                  sx={{
+                    p: 3,
+                  }}
+                >
                   <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
                   >
-                    <Box display="flex" flexDirection="column">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
                       <StyledBox>
                         <BlueText>{doc.title}</BlueText>
                       </StyledBox>
@@ -328,7 +356,11 @@ export const SupportingDocumentsSection = ({
             <DialogTitle>{t('Select File to Upload')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
-            <Box pb={2}>
+            <Box
+              sx={{
+                pb: 2,
+              }}
+            >
               <GreyText>
                 {t(
                   'The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.',

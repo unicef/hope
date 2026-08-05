@@ -13,6 +13,7 @@ import { Box } from '@mui/material';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -59,7 +60,10 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -67,7 +71,10 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     });
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
-    queryKey: ['fieldsAttributes', businessArea, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList,
+      { businessAreaSlug: businessArea, programCode: programId },
+    ),
     queryFn: async () => {
       const data =
         await RestService.restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList(
@@ -82,7 +89,10 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -91,7 +101,10 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        { businessAreaSlug: businessArea, programCode: programId, limit: 1000 },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
@@ -172,7 +185,11 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
           </>
         }
       >
-        <Box mr={2}>
+        <Box
+          sx={{
+            mr: 2,
+          }}
+        >
           {individual?.photo ? (
             <IndividualPhotoModal individual={individual} />
           ) : null}

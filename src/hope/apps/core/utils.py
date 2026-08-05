@@ -250,9 +250,10 @@ raise_attribute_error = object()
 
 
 def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error) -> Any:
+    # ObjectDoesNotExist: a FK may point at a row deleted earlier in the same transaction
     try:
         return functools.reduce(getattr, attr.split("."), obj)
-    except AttributeError as e:
+    except (AttributeError, ObjectDoesNotExist) as e:
         if default != raise_attribute_error:
             return default
         logger.warning(e)

@@ -56,7 +56,11 @@ const EditTargetPopulationHeader = ({
       hasInputComponent
     >
       <>
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             variant="outlined"
             color="primary"
@@ -67,7 +71,11 @@ const EditTargetPopulationHeader = ({
             {t('Cancel')}
           </Button>
         </Box>
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LoadingButton
             variant="contained"
             color="primary"

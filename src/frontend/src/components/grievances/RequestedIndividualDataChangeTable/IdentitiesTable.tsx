@@ -77,7 +77,12 @@ export function IdentitiesTable({
   return (
     <>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Identities to be added')}</Typography>
         </Box>
       </TableTitle>
@@ -97,7 +102,7 @@ export function IdentitiesTable({
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                     }
                     checked={selectedIdentities.includes(index)}
-                    inputProps={{ 'aria-labelledby': 'selected' }}
+                    slotProps={{ input: { 'aria-labelledby': 'selected' } }}
                     data-cy="checkbox-identity"
                   />
                 ) : (

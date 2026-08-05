@@ -7,13 +7,16 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
+  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { BaseAutocompleteFilterRest } from '@shared/autocompletes/BaseAutocompleteFilterRest';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { AutocompleteOption } from '@shared/autocompletes/types';
 
 export function ProgramAutocompleteRestFilter({
   disabled,
@@ -29,12 +32,12 @@ export function ProgramAutocompleteRestFilter({
 }: {
   disabled?: boolean;
   name: string;
-  filter?: any;
+  filter?: Filter;
   value?: string;
-  initialFilter: any;
-  appliedFilter: any;
-  setAppliedFilter: (filter: any) => void;
-  setFilter: (filter: any) => void;
+  initialFilter: Filter;
+  appliedFilter: Filter;
+  setAppliedFilter: (filter: Filter) => void;
+  setFilter: (filter: Filter) => void;
   status?: Array<ProgramStatusEnum>;
   dataCy?: string;
 }): ReactElement {
@@ -58,7 +61,7 @@ export function ProgramAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsList, queryVariables),
     queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
   });
 
@@ -92,14 +95,17 @@ export function ProgramAutocompleteRestFilter({
     name: program.name,
   }));
 
-  const handleOptionSelected = (option: any, selectedValue: any) => {
+  const handleOptionSelected = (
+    option: AutocompleteOption,
+    selectedValue: AutocompleteOption | string,
+  ) => {
     if (typeof selectedValue === 'string') {
       return option?.id === selectedValue;
     }
     return option?.id === selectedValue?.id;
   };
 
-  const handleOptionLabel = (option: any) => {
+  const handleOptionLabel = (option: AutocompleteOption | string) => {
     if (typeof option === 'string') {
       const matchingProgram = programs.find((program) => program.id === option);
       return matchingProgram?.name || option;

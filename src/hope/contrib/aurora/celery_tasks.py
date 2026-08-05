@@ -72,7 +72,7 @@ def extract_records_async_task(max_records: int = 500) -> None:
 def fresh_extract_records_async_task_action(job: AsyncJob) -> None:
     records_ids = job.config.get("records_ids")
     if not records_ids:
-        records_ids = list(Record.objects.all().only("pk").values_list("pk", flat=True)[:5000])
+        records_ids = list(Record.objects.all().only("pk").order_by("pk").values_list("pk", flat=True)[:5000])
     extract(records_ids)
 
 

@@ -54,7 +54,7 @@ export function PictureErrorEditField({
         <Typography variant="caption" color="textSecondary">
           {t('Current photo')}
         </Typography>
-        <Box mt={2}>
+        <Box sx={{ mt: 2 }}>
           {currentPhotoSrc ? (
             <PhotoModal
               src={currentPhotoSrc}
@@ -78,7 +78,7 @@ export function PictureErrorEditField({
         <Typography variant="caption" color="textSecondary">
           {t('Upload replacement')}
         </Typography>
-        <Box mt={2} display="flex" alignItems="center">
+        <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
           <input
             ref={inputRef}
             type="file"

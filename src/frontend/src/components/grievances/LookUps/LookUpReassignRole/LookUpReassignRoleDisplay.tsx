@@ -27,7 +27,12 @@ export function LookUpReassignRoleDisplay({
     <StyledBox>
       <Grid container>
         <Grid>
-          <Box display="flex" flexDirection="column">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <span>
               {`${beneficiaryGroup?.groupLabel} ID: `}
               {selectedHousehold?.unicefId ? (
@@ -55,8 +60,18 @@ export function LookUpReassignRoleDisplay({
           </Box>
         </Grid>
         <Grid>
-          <Box p={2}>
-            <Grid container justifyContent="center" alignItems="center">
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <Grid
+              container
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
               <Grid>
                 {disabled ? null : (
                   <LightGrey>

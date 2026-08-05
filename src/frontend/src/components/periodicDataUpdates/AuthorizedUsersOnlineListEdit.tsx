@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { useParams } from 'react-router-dom';
 
 interface AuthorizedUsersOnlineListEditProps {
@@ -56,7 +57,10 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     isLoading: isEditLoading,
     error: editError,
   } = useQuery({
-    queryKey: ['onlineEdit', businessAreaSlug, programCode, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+      { businessAreaSlug, programCode, id: id ? Number(id) : undefined },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
         {
@@ -74,7 +78,10 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
     isLoading: isAvailableLoading,
     error: availableError,
   } = useQuery({
-    queryKey: ['availableUsers', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList,
+      { businessAreaSlug, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
         {
@@ -154,7 +161,13 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
   if (editError || availableError) {
     return (
       <BaseSection title={t('Authorized Users Online')}>
-        <Box color="error.main">{t('Failed to load authorized users.')}</Box>
+        <Box
+          sx={{
+            color: 'error.main',
+          }}
+        >
+          {t('Failed to load authorized users.')}
+        </Box>
       </BaseSection>
     );
   }
@@ -256,7 +269,10 @@ export const AuthorizedUsersOnlineListEdit: React.FC<
               </TableHead>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id} data-cy={`authorized-user-row-${user.id}`}>
+                  <TableRow
+                    key={user.id}
+                    data-cy={`authorized-user-row-${user.id}`}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selected.includes(user.id)}

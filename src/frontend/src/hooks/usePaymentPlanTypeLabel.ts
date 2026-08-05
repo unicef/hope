@@ -1,5 +1,6 @@
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 
 /**
  * Resolves a PaymentPlan `planType` value to its human-readable label via the
@@ -10,7 +11,7 @@ export function usePaymentPlanTypeLabel(): (
   planType?: string | null,
 ) => string {
   const { data } = useQuery({
-    queryKey: ['paymentPlanTypeChoices'],
+    queryKey: restQueryKey(RestService.restChoicesPaymentPlanTypeList),
     queryFn: () => RestService.restChoicesPaymentPlanTypeList(),
   });
 

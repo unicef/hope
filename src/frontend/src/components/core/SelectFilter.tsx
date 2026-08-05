@@ -27,9 +27,12 @@ const SelectWrapper = styled.div`
   max-width: 100%;
 `;
 
-const StyledSelect = styled(Select)`
+const StyledSelect = styled(Select)<{ $borderRadius?: string }>`
   && .MuiOutlinedInput-input {
     padding-right: 10px !important;
+  }
+  && {
+    border-radius: ${(props) => props.$borderRadius};
   }
   flex: 1;
   max-width: 100%;
@@ -53,6 +56,7 @@ export const SelectFilter = ({
   fullWidth = true,
   disableClearable = false,
   dataCy = 'select-filter',
+  borderRadius = '4px',
   ...otherProps
 }): ReactElement => {
   const checkValue = (value): boolean => {
@@ -72,13 +76,19 @@ export const SelectFilter = ({
         size="small"
         data-cy={dataCy}
       >
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <InputLabel>{label}</InputLabel>
           <StyledSelect
             size="small"
             onChange={onChange}
             variant="outlined"
             label={label}
+            $borderRadius={borderRadius}
             MenuProps={{
               anchorOrigin: {
                 vertical: 'bottom',
@@ -97,11 +107,18 @@ export const SelectFilter = ({
               const selectedOptions = Children.toArray(children).filter(
                 (child): child is ReactElement<any> =>
                   isValidElement(child) &&
-                  selectedValues.includes((child as ReactElement<any>).props.value),
+                  selectedValues.includes(
+                    (child as ReactElement<any>).props.value,
+                  ),
               );
 
               return (
-                <Box display="flex" alignItems="center">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
                   {icon && (
                     <StartInputAdornment position="start">
                       {icon}

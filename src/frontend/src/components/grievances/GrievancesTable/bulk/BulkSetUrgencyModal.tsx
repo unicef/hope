@@ -5,8 +5,9 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { BulkUpdateGrievanceTicketsUrgency } from '@restgenerated/models/BulkUpdateGrievanceTicketsUrgency';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -31,7 +32,7 @@ export function BulkSetUrgencyModal({
 }: BulkSetUrgencyModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const [value, setValue] = useState<number>(0);
   const queryClient = useQueryClient();
 
@@ -47,24 +48,28 @@ export function BulkSetUrgencyModal({
     onSuccess: () => {
       if (isAllPrograms) {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasGrievanceTickets'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+          ),
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+          ),
         });
       }
       setSelected([]);
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
   const { data: choices } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,

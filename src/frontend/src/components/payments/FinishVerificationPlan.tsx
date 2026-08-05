@@ -14,6 +14,7 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -49,12 +50,9 @@ export function FinishVerificationPlan({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -101,7 +99,11 @@ export function FinishVerificationPlan({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <Button
           color="primary"
           variant="contained"

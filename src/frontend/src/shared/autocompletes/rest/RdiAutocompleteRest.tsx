@@ -4,6 +4,7 @@ import { handleOptionSelected } from '@utils/utils';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const RdiAutocompleteRest = ({
   disabled,
@@ -30,6 +31,9 @@ export const RdiAutocompleteRest = ({
       label={t('Registration Data Import')}
       dataCy="filters-registration-data-import"
       fetchFunction={fetchRegistrationDataImports}
+      queryKeyMethod={
+        RestService.restBusinessAreasProgramsRegistrationDataImportsList
+      }
       businessArea={businessArea}
       programId={programId}
       queryParams={queryParams}

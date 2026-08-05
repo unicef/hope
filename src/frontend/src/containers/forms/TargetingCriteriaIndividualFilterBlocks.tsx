@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { Fragment, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -137,11 +137,16 @@ export function TargetingCriteriaIndividualFilterBlocks({
                   </Fragment>
                 );
               })}
-              <Box display="flex" justifyContent="center">
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
                 <Button
                   color="primary"
                   variant="outlined"
-                  startIcon={<AddCircleOutline />}
+                  startIcon={<AddCircleOutlined />}
                   onClick={() =>
                     arrayHelpers.push({
                       fieldName: '',

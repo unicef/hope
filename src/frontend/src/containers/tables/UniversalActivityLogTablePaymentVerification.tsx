@@ -2,6 +2,7 @@ import { ReactElement, useState } from 'react';
 import { ActivityLogTablePaymentVerification } from '@components/core/ActivityLogTablePaymentVerification/ActivityLogTablePaymentVerification';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 
 interface UniversalActivityLogTablePaymentVerificationProps {
@@ -14,24 +15,32 @@ export function UniversalActivityLogTablePaymentVerification({
   const { businessAreaSlug } = useBaseUrl();
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const activityLogsParams = {
+    businessAreaSlug,
+    objectId: objectId,
+    limit: rowsPerPage,
+    offset: page * rowsPerPage,
+  };
   const { data: logData } = useQuery({
-    queryKey: ['activityLogs', businessAreaSlug, objectId, page, rowsPerPage],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasActivityLogsList,
+      activityLogsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasActivityLogsList({
-        businessAreaSlug,
-        objectId: objectId,
-        limit: rowsPerPage,
-        offset: page * rowsPerPage,
-      }),
+      RestService.restBusinessAreasActivityLogsList(activityLogsParams),
     enabled: !!(businessAreaSlug && objectId),
   });
 
+  const activityLogsCountParams = { businessAreaSlug };
   const { data: countData } = useQuery({
-    queryKey: ['activityLogsCount', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasActivityLogsCountRetrieve,
+      activityLogsCountParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasActivityLogsCountRetrieve({
-        businessAreaSlug,
-      }),
+      RestService.restBusinessAreasActivityLogsCountRetrieve(
+        activityLogsCountParams,
+      ),
     enabled: !!businessAreaSlug,
   });
 

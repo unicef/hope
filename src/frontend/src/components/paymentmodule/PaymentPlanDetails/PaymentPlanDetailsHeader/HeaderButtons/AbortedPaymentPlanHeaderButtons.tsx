@@ -6,6 +6,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -40,7 +41,10 @@ export function AbortedPaymentPlanHeaderButtons({
     onSuccess: () => {
       showMessage(t('Payment Plan has been reactivated.'));
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     },
     onError: () => {
@@ -53,9 +57,18 @@ export function AbortedPaymentPlanHeaderButtons({
   };
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canReactivate && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             variant="contained"
             color="primary"

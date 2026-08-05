@@ -16,14 +16,27 @@ export function FinishedProgramDetailsPageHeaderButtons({
   canDuplicate,
 }: FinishedProgramDetailsPageHeaderPropTypes): ReactElement {
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canActivate && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <ReactivateProgram program={program} />
         </Box>
       )}
       {canDuplicate && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <DuplicateProgramButtonLink program={program} />
         </Box>
       )}

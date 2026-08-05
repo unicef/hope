@@ -28,7 +28,7 @@
                 "relationship_display": "",
                 "birth_date": "1990-01-01",
                 "deduplication_batch_status": "UNIQUE_IN_BATCH",
-                "deduplication_batch_status_display": "Unique in batch",
+                "deduplication_batch_status_display": "Unique in RDI",
                 "biometric_deduplication_batch_status": "NOT_PROCESSED",
                 "biometric_deduplication_batch_status_display": "Not Processed",
                 "deduplication_batch_results": [],
