@@ -33,6 +33,7 @@ interface UniversalRestTableProps<T = any, K = any> {
   data: any;
   error;
   isLoading: boolean;
+  isFetching?: boolean;
   queryVariables: any;
   setQueryVariables: (variables: K) => void;
   itemsCount?: number;
@@ -62,6 +63,7 @@ export const UniversalRestTable = <T, K>({
   data,
   error,
   isLoading,
+  isFetching,
   queryVariables,
   setQueryVariables,
   itemsCount,
@@ -111,6 +113,8 @@ export const UniversalRestTable = <T, K>({
       newVariables.ordering = ordering;
     }
 
+    // newVariables is assembled dynamically; bridge it to the caller's query
+    // variables type K.
     const newState = newVariables as unknown as K;
 
     if (!isEqual(newState, queryVariables)) {
@@ -148,6 +152,7 @@ export const UniversalRestTable = <T, K>({
       actions={actions}
       data={typedResults}
       loading={isLoading}
+      isFetching={isFetching}
       renderRow={renderRow}
       isOnPaper={isOnPaper}
       headCells={headCells}

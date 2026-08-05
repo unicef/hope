@@ -28,6 +28,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -139,7 +140,7 @@ function Entitlement({
       onSuccess: () => {
         showMessage(t('Formula is executing, please wait until completed'));
         queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
         });
       },
       onError: (error: any) => {
@@ -173,7 +174,7 @@ function Entitlement({
           t('Flat amount is being applied, please wait until completed'),
         );
         queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
         });
       },
       onError: (error: any) => {
@@ -181,16 +182,16 @@ function Entitlement({
       },
     });
 
+  const engineRulesParams = {
+    type: 'PAYMENT_PLAN' as const,
+    deprecated: false,
+    enabled: true,
+    businessArea: businessArea,
+  };
   const { data: steficonData, isLoading: loading } =
     useQuery<PaginatedRuleList>({
-      queryKey: ['engineRules', businessArea],
-      queryFn: () =>
-        RestService.restEngineRulesList({
-          type: 'PAYMENT_PLAN',
-          deprecated: false,
-          enabled: true,
-          businessArea: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restEngineRulesList, engineRulesParams),
+      queryFn: () => RestService.restEngineRulesList(engineRulesParams),
     });
 
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
@@ -213,7 +214,7 @@ function Entitlement({
     onSuccess: async () => {
       showMessage(t('Exporting XLSX started. Please check your email.'));
       await queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
       });
     },
     onError: (error: any) => {
@@ -251,14 +252,28 @@ function Entitlement({
     !isActiveProgram;
 
   return (
-    <Box m={5}>
+    <Box
+      sx={{
+        m: 5,
+      }}
+    >
       <ContainerColumnWithBorder>
-        <Box mt={4}>
+        <Box
+          sx={{
+            mt: 4,
+          }}
+        >
           <Title>
             <Typography variant="h6">{t('Entitlement')}</Typography>
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid container spacing={2} alignItems="center">
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <Grid size={{ xs: 10 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box>
@@ -355,17 +370,33 @@ function Entitlement({
               </Button>
             </Grid>
           </Grid>
-          <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <OrDivider />
             <DividerLabel>Or</DividerLabel>
             <OrDivider />
           </Box>
-          <Box mt={3} mb={3}>
+          <Box
+            sx={{
+              mt: 3,
+              mb: 3,
+            }}
+          >
             <Typography variant="h6" gutterBottom>
               {t('Fixed Amount')}
             </Typography>
             <GreyText>{t('Entitlement Quantity')}</GreyText>
-            <Grid container spacing={2} alignItems="center">
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <Grid size={{ xs: 10 }}>
                 <TextField
                   size="small"
@@ -419,19 +450,34 @@ function Entitlement({
               {t('Set the same amount for all payment records')}
             </GreyTextSmall>
           </Box>
-          <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <OrDivider />
             <DividerLabel>Or</DividerLabel>
             <OrDivider />
           </Box>
         </Box>
-        <Box display="flex">
-          <Box width="50%">
+        <Box
+          sx={{
+            display: 'flex',
+          }}
+        >
+          <Box
+            sx={{
+              width: '50%',
+            }}
+          >
             <BoxWithBorderRight
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              flexDirection="column"
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+              }}
             >
               {paymentPlan.hasPaymentListExportFile ? (
                 <Button
@@ -471,12 +517,18 @@ function Entitlement({
               </GreyTextSmall>
             </BoxWithBorderRight>
           </Box>
-          <Box width="50%">
+          <Box
+            sx={{
+              width: '50%',
+            }}
+          >
             <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              flexDirection="column"
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+              }}
             >
               <Box>
                 <ImportXlsxPaymentPlanPaymentList
@@ -485,11 +537,20 @@ function Entitlement({
                 />
               </Box>
               {paymentPlan?.importedFileName ? (
-                <Box alignItems="center" display="flex">
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                  }}
+                >
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize="inherit" />
                   </SpinaczIconContainer>
-                  <Box mr={1}>
+                  <Box
+                    sx={{
+                      mr: 1,
+                    }}
+                  >
                     <GreyTextSmall data-cy="imported-file-name">
                       {paymentPlan?.importedFileName}
                     </GreyTextSmall>

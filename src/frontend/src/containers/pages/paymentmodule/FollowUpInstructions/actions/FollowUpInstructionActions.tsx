@@ -25,7 +25,13 @@ export function FollowUpInstructionActions({
   };
 
   return (
-    <Box display="flex" gap={1} flexWrap="wrap">
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        flexWrap: 'wrap',
+      }}
+    >
       {status === 'OPEN' && (
         <SimpleWorkflowButton
           label="Lock"
@@ -39,7 +45,6 @@ export function FollowUpInstructionActions({
           dataCy="button-lock"
         />
       )}
-
       {status === 'LOCKED' && (
         <>
           <SimpleWorkflowButton
@@ -84,7 +89,6 @@ export function FollowUpInstructionActions({
           />
         </>
       )}
-
       {status === 'LOCKED_FSP' && (
         <>
           <SimpleWorkflowButton
@@ -129,7 +133,6 @@ export function FollowUpInstructionActions({
           />
         </>
       )}
-
       {status === 'IN_APPROVAL' && (
         <>
           <ConfirmWorkflowButton
@@ -183,7 +186,6 @@ export function FollowUpInstructionActions({
           />
         </>
       )}
-
       {status === 'IN_AUTHORIZATION' && (
         <>
           <ConfirmWorkflowButton
@@ -237,7 +239,6 @@ export function FollowUpInstructionActions({
           />
         </>
       )}
-
       {status === 'IN_REVIEW' && (
         <>
           <ConfirmWorkflowButton
@@ -291,7 +292,6 @@ export function FollowUpInstructionActions({
           />
         </>
       )}
-
       {(status === 'ACCEPTED' || status === 'FINISHED') && (
         <>
           <SimpleWorkflowButton
@@ -309,7 +309,6 @@ export function FollowUpInstructionActions({
           <ReconciliationImportButton instruction={instruction} />
         </>
       )}
-
       {status === 'FINISHED' && (
         <SimpleWorkflowButton
           label="Close"
@@ -324,7 +323,6 @@ export function FollowUpInstructionActions({
           dataCy="button-close"
         />
       )}
-
       {status === 'ABORTED' && (
         <SimpleWorkflowButton
           label="Reactivate"

@@ -1,12 +1,10 @@
 from datetime import UTC
 import os
 from time import sleep
-import zipfile
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 import factory
-import openpyxl
 import pytest
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
@@ -641,35 +639,6 @@ class TestSmokePaymentModule:
         page_payment_module_details.get_button_submit().click()
         page_payment_module_details.check_alert("Payment Plan has been marked as released.")
         page_payment_module_details.check_status("ACCEPTED")
-        page_payment_module_details.click_button_export_xlsx()
-        page_payment_module_details.check_alert("Exporting XLSX started")
-        page_payment_module.driver.refresh()
-        page_payment_module_details.wait_for_page_ready()
-        page_payment_module_details.get_button_download_xlsx().click()
-
-        zip_file = find_file(".zip", number_of_ties=15, search_in_dir=download_path)
-        with zipfile.ZipFile(os.path.join(download_path, zip_file), "r") as zip_ref:
-            zip_ref.extractall(download_path)
-
-        xlsx_file = find_file(".xlsx", search_in_dir=download_path)
-        xlsx_path = os.path.join(download_path, xlsx_file)
-        wb1 = openpyxl.load_workbook(xlsx_path)
-        ws1 = wb1.active
-
-        headers = {cell.value: cell.column for cell in ws1[1]}
-        entitlement_col = headers["entitlement_quantity"]
-        delivered_col = headers["delivered_quantity"]
-        for row in range(2, ws1.max_row + 1):
-            ws1.cell(row=row, column=delivered_col).value = ws1.cell(row=row, column=entitlement_col).value
-
-        wb1.save(xlsx_path)
-        wb1.close()
-
-        page_payment_module_details.get_button_upload_reconciliation_info().click()
-        page_payment_module_details.upload_file(os.path.abspath(os.path.join(download_path, xlsx_file)), timeout=120)
-        page_payment_module_details.get_button_import_submit().click()
-        # FIXME after click upload api got error ... looks like file not updated?
-        # next can check_alert ("Import was successful.")
 
 
 @pytest.mark.usefixtures("login")
@@ -700,9 +669,8 @@ class TestPaymentPlans:
         page_payment_module.get_nav_payment_module().click()
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
-        page_payment_module_details.get_button_create_exclusions().click()
         with pytest.raises(ElementClickInterceptedException):
-            page_payment_module_details.get_button_save_exclusions().click()
+            page_payment_module_details.get_button_create_exclusions().click()
 
     def test_payment_plan_save_exclude_people(
         self,

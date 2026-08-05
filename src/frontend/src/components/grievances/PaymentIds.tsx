@@ -19,23 +19,29 @@ export function PaymentIds({ verifications }: PaymentIdsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
-  const mappedIds = verifications.map(
-    (verification): ReactElement => (
-      <Box key={verification.id} mb={1}>
-        <ContentLink
-          href={`/${baseUrl}/verification-records/${verification.id}`}
-        >
-          {verification.paymentId}
-        </ContentLink>
-      </Box>
-    ),
-  );
+  const mappedIds = verifications.map((verification): ReactElement => (
+    <Box
+      key={verification.id}
+      sx={{
+        mb: 1,
+      }}
+    >
+      <ContentLink href={`/${baseUrl}/verification-records/${verification.id}`}>
+        {verification.paymentId}
+      </ContentLink>
+    </Box>
+  ));
   return (
     <ApproveBox>
       <Title>
         <Typography variant="h6">{t('Payment Ids')}</Typography>
       </Title>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {mappedIds}
       </Box>
     </ApproveBox>

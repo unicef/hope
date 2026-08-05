@@ -3,6 +3,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { Grid, MenuItem } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
@@ -42,7 +43,12 @@ export const PaymentPlanGroupsFilters = ({
     );
 
   const { data: cycles } = useQuery({
-    queryKey: ['programCyclesList', businessArea, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesList, {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      limit: 100,
+      ordering: 'title',
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug: businessArea,
@@ -58,7 +64,13 @@ export const PaymentPlanGroupsFilters = ({
       clearHandler={clearFilter}
       applyHandler={applyFilterChanges}
     >
-      <Grid container spacing={3} alignItems="flex-end">
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={4}>
           <SearchTextField
             label={t('Search')}

@@ -2,6 +2,7 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
+import { restQueryKey } from '@utils/queryKeys';
 import { IndividualPhotoDetail } from '@restgenerated/models/IndividualPhotoDetail';
 import { useQuery } from '@tanstack/react-query';
 import { useProgramContext } from 'src/programContext';
@@ -20,19 +21,20 @@ export function GrievanceIndividualPhotoModal({
   const { businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
+  const individualPhotosParams = {
+    businessAreaSlug: businessArea,
+    programCode: selectedProgram?.code || '',
+    id: individualId || '',
+  };
   const { data } = useQuery<IndividualPhotoDetail>({
-    queryKey: [
-      'individualPhotos',
-      businessArea,
-      selectedProgram?.code,
-      individualId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve,
+      individualPhotosParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve({
-        businessAreaSlug: businessArea,
-        programCode: selectedProgram?.code || '',
-        id: individualId || '',
-      }),
+      RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve(
+        individualPhotosParams,
+      ),
     enabled:
       !!isCurrent &&
       !!businessArea &&

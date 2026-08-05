@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 
@@ -27,7 +28,10 @@ export function GrievanceFlexFieldPhotoModalEditable({
   const { businessArea } = useBaseUrl();
 
   const { data } = useQuery({
-    queryKey: ['grievanceTicket', id, businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug: businessArea, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug: businessArea,
@@ -51,9 +55,21 @@ export function GrievanceFlexFieldPhotoModalEditable({
     : flexFields[flexField.name]?.value;
 
   return (
-    <Box style={{ height: '100%' }} display="flex" alignItems="center">
+    <Box
+      style={{ height: '100%' }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display="flex" alignItems="center">
+        <Box
+          style={{ height: '100%' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <FormikFileField field={field} form={form} />
         </Box>
       ) : (

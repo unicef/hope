@@ -15,6 +15,7 @@ import { DATE_FORMAT } from '../../config';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { FlagTooltip } from '@core/FlagTooltip';
@@ -38,7 +39,7 @@ export const FlagDetails = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const confirm = useConfirmation();
-  const { businessArea, businessAreaSlug } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -59,11 +60,9 @@ export const FlagDetails = ({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });
@@ -77,7 +76,12 @@ export const FlagDetails = ({
   return (
     <ApproveBox>
       <Title>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Flag Details')}</Typography>
           <Box>
             <ViewSanctionList

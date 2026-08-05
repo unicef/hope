@@ -2,15 +2,25 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   createHandleApplyFilterChange,
+  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import {
+  ReactElement,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BaseAutocompleteFilterRest } from '../BaseAutocompleteFilterRest';
+
+type TargetPopulationOption = { name: string; value: string };
 
 export const TargetPopulationAutocompleteRestFilter = ({
   value,
@@ -24,16 +34,16 @@ export const TargetPopulationAutocompleteRestFilter = ({
   dataCy = 'filters-target-population-autocomplete',
   onChange,
 }: {
-  value?: any;
+  value?: string;
   name?: string;
-  filter?: any;
-  initialFilter?: any;
-  appliedFilter?: any;
-  setAppliedFilter?: (filter: any) => void;
-  setFilter?: (filter: any) => void;
+  filter?: Filter;
+  initialFilter?: Filter;
+  appliedFilter?: Filter;
+  setAppliedFilter?: (filter: Filter) => void;
+  setFilter?: (filter: Filter) => void;
   disabled?: boolean;
   dataCy?: string;
-  onChange?: (value: any) => void; // Added onChange prop type
+  onChange?: (value?: string) => void; // Added onChange prop type
 }): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
@@ -58,18 +68,24 @@ export const TargetPopulationAutocompleteRestFilter = ({
   }, [debouncedInputText]);
 
   // Use the RestService function to fetch target population data
+  const targetPopulationsParams = {
+    businessAreaSlug: businessArea || '',
+    programCode: programId || '',
+    ...queryVariables,
+  };
   const {
     data: targetPopulationData,
     isLoading,
     refetch,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: ['targetPopulations', businessArea, programId, queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      targetPopulationsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsTargetPopulationsList({
-        businessAreaSlug: businessArea || '',
-        programCode: programId || '',
-        ...queryVariables,
-      }),
+      RestService.restBusinessAreasProgramsTargetPopulationsList(
+        targetPopulationsParams,
+      ),
     enabled: !!businessArea && !!programId,
   });
 
@@ -102,7 +118,10 @@ export const TargetPopulationAutocompleteRestFilter = ({
     : [];
 
   // Handle change events for both filter and direct onChange patterns
-  const handleChangeWrapper = (_, selectedValue) => {
+  const handleChangeWrapper = (
+    _: SyntheticEvent,
+    selectedValue: TargetPopulationOption | null,
+  ) => {
     if (handleFilterChange && name) {
       handleAutocompleteChange(name, selectedValue?.value, handleFilterChange);
     }
@@ -129,12 +148,15 @@ export const TargetPopulationAutocompleteRestFilter = ({
         if (reason === 'select-option') return;
         setInputValue('');
       }}
-      handleOptionSelected={(option, selectedValue) =>
+      handleOptionSelected={(
+        option: TargetPopulationOption,
+        selectedValue: TargetPopulationOption | string,
+      ) =>
         typeof selectedValue === 'string'
           ? option?.value === selectedValue
           : option?.value === selectedValue?.value
       }
-      handleOptionLabel={(option) => {
+      handleOptionLabel={(option: TargetPopulationOption | string) => {
         if (typeof option === 'string') {
           const matchingOption = options.find((item) => item.value === option);
           return matchingOption ? matchingOption.name : option;

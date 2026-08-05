@@ -23,7 +23,13 @@ export const FormikSliderField = ({
   return (
     <StyledBox>
       <Typography variant="caption">{otherProps.label}</Typography>
-      <Grid container spacing={2} alignItems="center">
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Slider
           {...otherProps}
           data-cy={dataCy}

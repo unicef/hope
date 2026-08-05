@@ -12,6 +12,7 @@ import {
   TableCell as MuiTableCell,
   TableContainer as MuiTableContainer,
   TableRow as MuiTableRow,
+  LinearProgress,
   Skeleton,
   TablePagination,
 } from '@mui/material';
@@ -165,6 +166,7 @@ interface TableRestComponentProps<T extends { [key: string]: any }> {
   order: Order;
   title?: string;
   loading?: boolean;
+  isFetching?: boolean;
   allowSort?: boolean;
   isOnPaper?: boolean;
   actions?: Array<ReactElement>;
@@ -190,6 +192,7 @@ export function TableRestComponent<T>({
   orderBy,
   onSelectAllClick,
   loading: loadingProp = false,
+  isFetching = false,
   allowSort = true,
   isOnPaper = true,
   actions = [],
@@ -235,8 +238,18 @@ export function TableRestComponent<T>({
               <IconContainer>
                 <Icon fontSize="inherit" />
               </IconContainer>
-              <MuiBox mt={2}>{t('No results')}</MuiBox>
-              <SmallerText mt={2}>
+              <MuiBox
+                sx={{
+                  mt: 2,
+                }}
+              >
+                {t('No results')}
+              </MuiBox>
+              <SmallerText
+                sx={{
+                  mt: 2,
+                }}
+              >
                 {t(
                   'Try adjusting your search or your filters to find what you are looking for.',
                 )}
@@ -250,12 +263,36 @@ export function TableRestComponent<T>({
     body = <>{data.map((row) => renderRow(row))}</>;
   }
 
+  // Background refetch with previous rows still visible (keepPreviousData). `position:
+  // relative` is applied only when the bar is present, so idle tables render unchanged.
+  const showFetchingProgress = isFetching && !loadingProp;
+
   const table = (
     <>
-      <StyledTableContainer>
+      <StyledTableContainer
+        sx={showFetchingProgress ? { position: 'relative' } : undefined}
+      >
+        {showFetchingProgress && (
+          <LinearProgress
+            data-cy="table-fetching-progress"
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1,
+            }}
+          />
+        )}
         <StyledBox>
           {title ? <EnhancedTableToolbar title={title} /> : null}
-          <StyledBox p={5}>{actions || null}</StyledBox>
+          <StyledBox
+            sx={{
+              p: 5,
+            }}
+          >
+            {actions || null}
+          </StyledBox>
         </StyledBox>
 
         <StyledTable>

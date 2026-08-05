@@ -1,6 +1,11 @@
+from contextlib import suppress
 from time import sleep
 
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
@@ -537,18 +542,22 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.input_file)
 
     def get_input_questionnaire_size(self) -> WebElement:
-        # Questionnaire checkboxes only mount once the household detail query
-        # resolves (LoadingComponent renders until then). Wait for the spinner
-        # to clear before scrolling/clicking, otherwise the checkbox span isn't
-        # in the DOM yet and the wait below times out.
-        self.wait_for_disappear('div[data-cy="loading-container"]')
+        # Questionnaire checkboxes mount only after the household-detail query
+        # resolves; a LoadingComponent (data-cy="loading-container") shows while
+        # it is in flight. Waiting only for the spinner to disappear is racy --
+        # until_not() returns immediately when the spinner has not mounted yet --
+        # so block on the query lifecycle instead: let the spinner appear
+        # (tolerating an already-fast query), then wait for it to clear.
+        spinner = 'div[data-cy="loading-container"]'
+        with suppress(NoSuchElementException):
+            self.wait_for(spinner, timeout=5)
+        self.wait_for_disappear(spinner)
         self.driver.execute_script(
             """
             container = document.querySelector("div[data-cy='main-content']")
             container.scrollBy(0,-600)
             """
         )
-        sleep(2)
         return self.wait_for(self.input_questionnaire_size)
 
     def get_label_household_size(self) -> WebElement:

@@ -33,7 +33,7 @@ describe('IndividualsListTable', () => {
         status: 'ACTIVE',
         role: 'PRIMARY',
         relationshipDisplay: 'Head of household (self)',
-        deduplicationBatchStatusDisplay: 'Unique in batch',
+        deduplicationBatchStatusDisplay: 'Unique in RDI',
         biometricDeduplicationBatchStatusDisplay: 'Not processed',
         deduplicationGoldenRecordStatusDisplay: 'Unique',
         biometricDeduplicationGoldenRecordStatusDisplay: 'Not processed',

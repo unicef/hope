@@ -508,7 +508,9 @@ export function camelToUnderscore(key): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
-export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
+export function camelizeArrayObjects(
+  arr: Record<string, unknown>[],
+): Record<string, unknown>[] {
   if (!Array.isArray(arr)) {
     return arr;
   }
@@ -516,17 +518,21 @@ export function camelizeArrayObjects(arr: any[]): { [key: string]: any }[] {
   return arr.map(camelizeObjectKeys);
 }
 
-export function camelizeObjectKeys(obj): { [key: string]: any } {
+export function camelizeObjectKeys(
+  obj: Record<string, unknown>,
+): Record<string, unknown> {
   if (!obj) {
     return obj;
   }
-  return Object.keys(obj).reduce((acc, current) => {
+  return Object.keys(obj).reduce<Record<string, unknown>>((acc, current) => {
     if (obj[current] == null) {
       acc[camelCase(current)] = obj[current];
     } else if (Array.isArray(obj[current])) {
       acc[camelCase(current)] = camelizeArrayObjects(obj[current]);
     } else if (typeof obj[current] === 'object') {
-      acc[camelToUnderscore(current)] = camelizeObjectKeys(obj[current]);
+      acc[camelToUnderscore(current)] = camelizeObjectKeys(
+        obj[current] as Record<string, unknown>,
+      );
     } else {
       acc[camelCase(current)] = obj[current];
     }
@@ -871,8 +877,8 @@ export const round = (value: number, decimals = 2): number =>
   Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
 
 type Location = ReturnType<typeof useLocation>;
-type FilterValue = string | string[] | boolean | null | undefined;
-type Filter = { [key: string]: FilterValue };
+export type FilterValue = string | string[] | boolean | null | undefined;
+export type Filter = { [key: string]: FilterValue };
 
 export const getFilterFromQueryParams = (
   location: Location,
@@ -1155,8 +1161,13 @@ export const fieldNameToLabel = (fieldName: string): string => {
     .join(' ');
 };
 
+export interface ApiErrorShape {
+  body?: unknown;
+  message?: unknown;
+}
+
 export function showApiErrorMessages(
-  error: any,
+  error: ApiErrorShape,
   showMessage: (msg: string) => void,
   fallbackMsg: string = 'An error occurred',
 ): void {
@@ -1175,7 +1186,7 @@ export function showApiErrorMessages(
 
   // Collect errors per field
   function collectErrors(
-    obj: any,
+    obj: unknown,
     path: string = '',
     errors: Record<string, string[]> = {},
   ) {
@@ -1268,7 +1279,7 @@ export function showApiErrorMessages(
 }
 
 export function getApiErrorMessages(
-  error: any,
+  error: ApiErrorShape,
   fallbackMsg: string = 'An error occurred',
 ): string {
   function formatFieldLabel(field: string): string {
@@ -1284,7 +1295,7 @@ export function getApiErrorMessages(
   }
 
   function collectErrors(
-    obj: any,
+    obj: unknown,
     path: string = '',
     errors: Record<string, string[]> = {},
   ) {

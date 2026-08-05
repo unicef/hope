@@ -9,6 +9,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import { periodicDataUpdatesOnlineEditsStatusToColor } from '@utils/utils';
 import { useNavigate } from 'react-router-dom';
@@ -80,12 +81,15 @@ const OtherPeriodicDataUpdates = () => {
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
-    queryKey: [
-      'otherPeriodicDataUpdates',
-      queryVariables,
-      businessAreaSlug,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,
+      {
+        businessAreaSlug,
+        programCode: programId,
+        ordering: queryVariables.ordering,
+        status: [...queryVariables.status],
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,

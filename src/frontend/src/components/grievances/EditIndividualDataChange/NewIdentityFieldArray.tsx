@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +63,7 @@ export const NewIdentityFieldArray = ({
                     number: '',
                   });
                 }}
-                startIcon={<AddCircleOutline />}
+                startIcon={<AddCircleOutlined />}
                 disabled={isEditTicket}
               >
                 {t('Add Identity')}

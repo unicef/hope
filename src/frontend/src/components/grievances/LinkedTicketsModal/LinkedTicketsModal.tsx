@@ -24,6 +24,7 @@ import {
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { GrievanceTicketRelated } from '@restgenerated/models/GrievanceTicketRelated';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { grievanceTicketStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
@@ -71,11 +72,10 @@ function LinkedTicketsModal({
   const { data: relatedTickets = [], isLoading } = useQuery<
     GrievanceTicketRelated[]
   >({
-    queryKey: [
-      'businessAreasGrievanceTicketsRelatedTickets',
-      businessArea,
-      ticket.id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRelatedTicketsList,
+      { businessAreaSlug: businessArea, id: ticket.id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRelatedTicketsList({
         businessAreaSlug: businessArea,
@@ -156,7 +156,9 @@ function LinkedTicketsModal({
         </TableRow>
       );
     }
-    return <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>;
+    return (
+      <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>
+    );
   };
 
   return (
@@ -173,7 +175,12 @@ function LinkedTicketsModal({
           <DialogTitle>{t('Related Tickets')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box mt={2} mb={6}>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 6,
+            }}
+          >
             <Typography>
               <Bold>
                 Ticket ID

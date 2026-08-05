@@ -11,6 +11,7 @@ import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFi
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { getApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +61,7 @@ export function ImportXlsxPaymentPlanPaymentList({
       showMessage(t('Your import was successful!'));
       setXlsxError(null);
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', paymentPlan.id],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
       });
     },
     onError: (error: any) => {

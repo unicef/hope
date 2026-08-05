@@ -68,11 +68,25 @@ export function MessageDialog({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box display="flex" flexDirection="column">
-              <Box mt={2} display="flex">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <Box
+                sx={{
+                  mt: 2,
+                  display: 'flex',
+                }}
+              >
                 {author}{' '}
                 <GreyText>
-                  <Box ml={1}>
+                  <Box
+                    sx={{
+                      ml: 1,
+                    }}
+                  >
                     on <UniversalMoment>{date}</UniversalMoment>
                   </Box>
                 </GreyText>

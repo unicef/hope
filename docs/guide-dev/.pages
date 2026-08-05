@@ -5,6 +5,8 @@ nav:
   - testing.md
   - linting.md
   - stack.md
+  - child-payment-plans.md
+  - population-recalculation.md
   - contributing.md
 
 collapse: true

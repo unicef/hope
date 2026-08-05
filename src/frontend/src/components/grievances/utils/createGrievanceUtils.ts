@@ -19,7 +19,7 @@ export const replaceLabels = (text, _beneficiaryGroup) => {
     .replace(/Household/g, _beneficiaryGroup.groupLabel);
 };
 
-export function isShowIssueType(category: any): boolean {
+export function isShowIssueType(category: string | number): boolean {
   const cat = category?.toString();
   return (
     cat === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -66,8 +66,7 @@ export const selectedIssueType = (formValues, issueTypeDict): string => {
   return (
     (
       subcategories.find((el) => el.value === issueType) as
-        | { name: string; value: string }
-        | undefined
+        { name: string; value: string } | undefined
     )?.name || '-'
   );
 };
@@ -97,7 +96,7 @@ export const roleDisplayMap = {
 };
 
 export function prepareExistingAccountValues(
-  individualDataUpdateAccountsToEdit: any,
+  individualDataUpdateAccountsToEdit: Record<string, unknown>[] | null | undefined,
 ) {
   if (!individualDataUpdateAccountsToEdit) {
     return [];
@@ -130,6 +129,9 @@ function prepareDocumentPhotoFields(input) {
   return input;
 }
 
+// `values` is the full Formik grievance form bag (~40 dynamic field paths spanning
+// every category/issue-type branch) and `extras` is assembled dynamically per branch;
+// there is no single generated model for either, so both stay `any` intentionally.
 export function prepareRestVariables(values: any): CreateGrievanceTicket {
   const extras: any = {};
   const category = parseInt(values.category, 10);
@@ -462,6 +464,9 @@ export const categoriesAndColors = [
  *   (empty_arr is omitted)
  */
 
+// Recursive serializer over an arbitrary nested request object; `obj` is
+// intentionally `any` since it walks values of every shape (files, arrays,
+// nested objects, primitives) with no fixed schema.
 export function grievanceRequestToFormData(
   obj: any,
   form?: FormData,

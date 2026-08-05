@@ -27,8 +27,8 @@ import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdateP
 import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
-  decodeIdString,
   deepUnderscore,
   isPartnerVisible,
   mapPartnerChoicesFromChoicesWithoutUnicef,
@@ -54,7 +54,9 @@ const EditProgramPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: treeData } = useQuery<AreaTree[]>({
-    queryKey: ['allAreasTree', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -62,7 +64,10 @@ const EditProgramPage = (): ReactElement => {
   });
 
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
-    queryKey: ['businessAreaProgram', businessArea, id],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
@@ -72,7 +77,9 @@ const EditProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: ['programChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -83,7 +90,9 @@ const EditProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: ['userChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -103,10 +112,10 @@ const EditProgramPage = (): ReactElement => {
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['businessAreaProgram', businessArea, id],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
         });
         await queryClient.invalidateQueries({
-          queryKey: ['businessAreaPrograms', businessArea],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
         });
       },
     });
@@ -124,14 +133,14 @@ const EditProgramPage = (): ReactElement => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['businessAreaProgram', businessArea, id],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
       });
       await queryClient.invalidateQueries({
-        queryKey: ['businessAreaPrograms', businessArea],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       // Invalidate activity logs cache
       await queryClient.invalidateQueries({
-        queryKey: ['activityLogs', businessArea, decodeIdString(id)],
+        queryKey: restQueryKey(RestService.restBusinessAreasActivityLogsList),
       });
     },
   });
@@ -426,7 +435,11 @@ const EditProgramPage = (): ReactElement => {
                   />
                 }
               >
-                <Box p={3}>
+                <Box
+                  sx={{
+                    p: 3,
+                  }}
+                >
                   <>
                     <Fade in={step === 0} timeout={600}>
                       <div>
@@ -437,7 +450,11 @@ const EditProgramPage = (): ReactElement => {
                             programId={id}
                             errors={errors}
                             programHasRdi={programHasRdi}
-                            lockedPurposeIds={(program.paymentPlanPurposes ?? []).filter((p) => p.isUsedInPp).map((p) => p.id)}
+                            lockedPurposeIds={(
+                              program.paymentPlanPurposes ?? []
+                            )
+                              .filter((p) => p.isUsedInPp)
+                              .map((p) => p.id)}
                           />
                         )}
                       </div>

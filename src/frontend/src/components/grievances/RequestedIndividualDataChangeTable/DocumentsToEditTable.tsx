@@ -79,7 +79,12 @@ export function DocumentsToEditTable({
   return (
     <div key={document.previousValue.number}>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Document to be edited')}</Typography>
         </Box>
       </TableTitle>
@@ -98,7 +103,7 @@ export function DocumentsToEditTable({
                     ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                   }
                   checked={selectedDocumentsToEdit.includes(index)}
-                  inputProps={{ 'aria-labelledby': 'selected' }}
+                  slotProps={{ input: { 'aria-labelledby': 'selected' } }}
                 />
               ) : (
                 selectedDocumentsToEdit.includes(index) && (

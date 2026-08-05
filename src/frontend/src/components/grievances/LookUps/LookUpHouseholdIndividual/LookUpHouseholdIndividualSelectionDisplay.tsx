@@ -52,9 +52,19 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
       {!isSocialDctType && (
         <Grid size={{ xs: 4 }}>
           <StyledBox disabled={disableUnselectHousehold}>
-            <Grid container alignItems="center" justifyContent="space-between">
+            <Grid
+              container
+              sx={{
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Grid>
-                <Box display="flex">
+                <Box
+                  sx={{
+                    display: 'flex',
+                  }}
+                >
                   {`${beneficiaryGroup?.groupLabel} ID`}:
                   <BlueText>
                     &ensp;
@@ -81,9 +91,19 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
       )}
       <Grid size={{ xs: 4 }}>
         <StyledBox disabled={disableUnselectIndividual}>
-          <Grid container alignItems="center" justifyContent="space-between">
+          <Grid
+            container
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             <Grid>
-              <Box display="flex">
+              <Box
+                sx={{
+                  display: 'flex',
+                }}
+              >
                 {`${beneficiaryGroup?.memberLabel} ID`}:
                 <BlueText>
                   &ensp;

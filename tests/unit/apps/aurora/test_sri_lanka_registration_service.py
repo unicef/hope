@@ -240,3 +240,39 @@ def test_import_record_twice(
     service.process_records(rdi.id, [sri_lanka_records[0].id])
     sri_lanka_records[0].refresh_from_db()
     assert PendingHousehold.objects.count() == 1
+
+
+def test_collector_phone_number_marked_valid(
+    registration: Any,
+    user: Any,
+    program: Program,
+    sri_lanka_country: Any,
+    national_id_document_type: Any,
+    sri_lanka_records: list[Record],
+) -> None:
+    service = SriLankaRegistrationService(registration)
+    rdi = service.create_rdi(user, f"sri_lanka rdi {datetime.datetime.now()}")
+    records_ids = [record.id for record in sri_lanka_records]
+    service.process_records(rdi.id, records_ids)
+
+    assert PendingIndividual.objects.get(full_name="Dome").phone_no_valid is True
+
+
+def test_child_phone_number_marked_invalid(
+    registration: Any,
+    user: Any,
+    program: Program,
+    sri_lanka_country: Any,
+    national_id_document_type: Any,
+    sri_lanka_records: list[Record],
+) -> None:
+    record = sri_lanka_records[0]
+    record.fields["children-info"][0]["full_name_i_c"] = "Nevalidova"
+    record.fields["children-info"][0]["phone_no_i_c"] = "123"
+    record.save(update_fields=["fields"])
+
+    service = SriLankaRegistrationService(registration)
+    rdi = service.create_rdi(user, f"sri_lanka rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    assert PendingIndividual.objects.get(full_name="Nevalidova").phone_no_valid is False

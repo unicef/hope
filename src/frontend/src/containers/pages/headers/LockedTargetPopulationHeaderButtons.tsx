@@ -7,6 +7,7 @@ import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -59,15 +60,14 @@ export function LockedTargetPopulationHeaderButtons({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'targetPopulation',
-          businessArea,
-          targetPopulation.id,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
       });
 
       showMessage(t('Target Population Unlocked'));
@@ -78,7 +78,12 @@ export function LockedTargetPopulationHeaderButtons({
   });
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canDuplicate && (
         <IconContainer>
           <Button
@@ -90,7 +95,11 @@ export function LockedTargetPopulationHeaderButtons({
         </IconContainer>
       )}
       {canUnlock && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LoadingButton
             loading={loadingUnlock}
             color="primary"
@@ -104,7 +113,11 @@ export function LockedTargetPopulationHeaderButtons({
         </Box>
       )}
       {canSend && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Tooltip
             title={
               targetPopulation.program.status !== ProgramStatusEnum.ACTIVE

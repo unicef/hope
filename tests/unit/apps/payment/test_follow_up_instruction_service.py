@@ -1,6 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from typing import Any
+from unittest.mock import patch
 import uuid
 
 import pytest
@@ -11,6 +12,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
@@ -750,6 +752,36 @@ def test_reactivate_abort_transitions_child_payment_plans_to_open(
     child_plan.refresh_from_db()
     assert result == instruction
     assert child_plan.status == PaymentPlan.Status.OPEN
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_close_transitions_child_payment_plans_to_closed_without_notification(
+    mock_notify: Any,
+    user: Any,
+    program: Any,
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+    fsp: Any,
+) -> None:
+    instruction = FollowUpInstructionFactory(program=program, created_by=user)
+    child_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    result = FollowUpInstructionService(instruction=instruction).close(user=user)
+
+    child_plan.refresh_from_db()
+    assert result == instruction
+    assert child_plan.status == PaymentPlan.Status.CLOSED
+    mock_notify.assert_not_called()
 
 
 def test_status_returns_first_status_when_no_precedence_match(user, program, business_area, cycle) -> None:

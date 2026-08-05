@@ -12,6 +12,7 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +41,7 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
     isLoading: flexFieldsDataLoading,
     error,
   } = useQuery({
-    queryKey: ['fieldsAttributes'],
+    queryKey: restQueryKey(FieldsAttributesService.fieldsAttributesRetrieve),
     queryFn: async () => {
       const data = await FieldsAttributesService.fieldsAttributesRetrieve();
       return { allIndividualsFlexFieldsAttributes: data };
@@ -48,7 +49,10 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
   });
   const { data: individual, isLoading: loadingIndividual } =
     useQuery<IndividualDetail>({
-      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsRetrieve,
+        { businessAreaSlug: businessArea, programCode: programId, id },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsIndividualsRetrieve({
           businessAreaSlug: businessArea,
@@ -59,7 +63,9 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,

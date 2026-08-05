@@ -12,6 +12,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../../programContext';
@@ -46,7 +47,10 @@ export function ReactivateProgram({
         status: ProgramStatusEnum.ACTIVE,
       });
       queryClient.invalidateQueries({
-        queryKey: ['program', businessAreaSlug, program.code],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       showMessage(t('Programme reactivated.'));
       setOpen(false);

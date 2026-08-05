@@ -357,3 +357,36 @@ def test_registration_2024_import_data_to_datahub(
         "low_income_hh_h_f": True,
         "single_headed_hh_h_f": False,
     }
+
+
+def test_head_of_household_phone_number_marked_valid(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    ukraine_admin_areas: dict[str, Any],
+    tax_id_document_type: Any,
+    ukraine_records: dict[str, list[Record]],
+) -> None:
+    service = UkraineBaseRegistrationService(registration)
+    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [ukraine_records["records"][0].id])
+
+    assert PendingIndividual.objects.get(family_name="Romaniak").phone_no_valid is True
+
+
+def test_head_of_household_phone_number_marked_invalid(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    ukraine_admin_areas: dict[str, Any],
+    tax_id_document_type: Any,
+    ukraine_records: dict[str, list[Record]],
+) -> None:
+    record = ukraine_records["records"][1]
+    record.fields["individuals"][0]["phone_no_i_c"] = "123"
+    record.save(update_fields=["fields"])
+    service = UkraineBaseRegistrationService(registration)
+    rdi = service.create_rdi(user, f"ukraine rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    assert PendingIndividual.objects.get(family_name="Lamiący").phone_no_valid is False

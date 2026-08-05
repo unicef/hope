@@ -14,6 +14,7 @@ import { Box } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
@@ -29,7 +30,15 @@ function PaymentDetailsPage(): ReactElement {
   const { businessArea, programId } = useBaseUrl();
 
   const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
-    queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        paymentId: paymentId,
+        programCode: programId,
+        paymentPlanPk: paymentPlanId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug: businessArea,
@@ -93,7 +102,12 @@ function PaymentDetailsPage(): ReactElement {
       >
         {renderButton()}
       </PageHeader>
-      <Box display="flex" flexDirection="column">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <PaymentDetails
           payment={payment}
           canViewActivityLog={hasPermissions(

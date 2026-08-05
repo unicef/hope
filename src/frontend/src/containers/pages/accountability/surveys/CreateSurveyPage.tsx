@@ -33,7 +33,8 @@ import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
@@ -92,6 +93,7 @@ function prepareSampleSizeRequest(selectedSampleSizeType, values) {
 const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -107,6 +109,13 @@ const CreateSurveyPage = (): ReactElement => {
         programCode,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsSurveysList,
+        ),
+      });
+    },
   });
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -151,7 +160,10 @@ const CreateSurveyPage = (): ReactElement => {
   const { data: adminAreasData, isLoading: adminAreasLoading } = useQuery<
     AreaList[]
   >({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
@@ -491,7 +503,12 @@ const CreateSurveyPage = (): ReactElement => {
                   onChange={() => setFormValues(values)}
                 />
                 {activeStep === SurveySteps.LookUp && (
-                  <Box display="flex" flexDirection="column">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
                     <LookUpSelectionSurveys
                       values={values}
                       setValues={setValues}
@@ -501,17 +518,37 @@ const CreateSurveyPage = (): ReactElement => {
                   </Box>
                 )}
                 {activeStep === SurveySteps.SampleSize && (
-                  <Box px={8}>
+                  <Box
+                    sx={{
+                      px: 8,
+                    }}
+                  >
                     {sampleSizeError && (
-                      <Box mb={3}>
+                      <Box
+                        sx={{
+                          mb: 3,
+                        }}
+                      >
                         <Typography color="error">
                           {t('Error loading sample size data')}:{' '}
                           {sampleSizeError.message}
                         </Typography>
                       </Box>
                     )}
-                    <Box display="flex" alignItems="center">
-                      <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          pl: 5,
+                          pr: 5,
+                          fontWeight: '500',
+                          fontSize: 'medium',
+                        }}
+                      >
                         {t('Sample Size')}:
                       </Box>
                       <RadioGroup
@@ -536,7 +573,11 @@ const CreateSurveyPage = (): ReactElement => {
                       </RadioGroup>
                     </Box>
                     <TabPanel value={selectedSampleSizeType} index={0}>
-                      <Box pt={6}>
+                      <Box
+                        sx={{
+                          pt: 6,
+                        }}
+                      >
                         {mappedAdminAreas && (
                           <Field
                             name="excludedAdminAreasFull"
@@ -546,12 +587,18 @@ const CreateSurveyPage = (): ReactElement => {
                             component={FormikMultiSelectField}
                           />
                         )}
-                        <Box pt={3}>
+                        <Box
+                          sx={{
+                            pt: 3,
+                          }}
+                        >
                           <Box
-                            pb={3}
-                            pt={3}
-                            fontSize={16}
-                            fontWeight="fontWeightBold"
+                            sx={{
+                              pb: 3,
+                              pt: 3,
+                              fontSize: 16,
+                              fontWeight: 'fontWeightBold',
+                            }}
                           >
                             Sample size:{' '}
                             {sampleSizeLoading ? (
@@ -575,7 +622,11 @@ const CreateSurveyPage = (): ReactElement => {
                       </Box>
                     </TabPanel>
                     <TabPanel value={selectedSampleSizeType} index={1}>
-                      <Box pt={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                        }}
+                      >
                         <Field
                           name="confidenceInterval"
                           label={t('Confidence Interval')}
@@ -595,8 +646,17 @@ const CreateSurveyPage = (): ReactElement => {
                         <Typography variant="caption">
                           {t('Cluster Filters')}
                         </Typography>
-                        <Box flexDirection="column" display="flex">
-                          <Box display="flex">
+                        <Box
+                          sx={{
+                            flexDirection: 'column',
+                            display: 'flex',
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                            }}
+                          >
                             <Field
                               name="adminCheckbox"
                               label={t('Administrative Level')}
@@ -674,10 +734,12 @@ const CreateSurveyPage = (): ReactElement => {
                           </Grid>
                         </Box>
                         <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight="fontWeightBold"
+                          sx={{
+                            pb: 3,
+                            pt: 3,
+                            fontSize: 16,
+                            fontWeight: 'fontWeightBold',
+                          }}
                         >
                           Sample size:{' '}
                           {sampleSizeLoading ? (
@@ -704,7 +766,11 @@ const CreateSurveyPage = (): ReactElement => {
                 {activeStep === SurveySteps.Details && (
                   <>
                     <Border />
-                    <Box my={3}>
+                    <Box
+                      sx={{
+                        my: 3,
+                      }}
+                    >
                       <Grid size={12}>
                         {category === SurveyCategoryEnum.RAPID_PRO ? (
                           <Field
@@ -730,7 +796,11 @@ const CreateSurveyPage = (): ReactElement => {
                       </Grid>
                     </Box>
                     {category === SurveyCategoryEnum.SMS && (
-                      <Box my={3}>
+                      <Box
+                        sx={{
+                          my: 3,
+                        }}
+                      >
                         <Grid size={12}>
                           <Field
                             name="body"
@@ -747,10 +817,12 @@ const CreateSurveyPage = (): ReactElement => {
                     )}
                     <Grid size={12}>
                       <Box
-                        pb={3}
-                        pt={3}
-                        fontSize={16}
-                        fontWeight="fontWeightBold"
+                        sx={{
+                          pb: 3,
+                          pt: 3,
+                          fontSize: 16,
+                          fontWeight: 'fontWeightBold',
+                        }}
                       >
                         {t('Number of selected recipients')}:{' '}
                         {sampleSizeLoading ? (
@@ -767,7 +839,12 @@ const CreateSurveyPage = (): ReactElement => {
                           sampleSizesData?.excludedRecipientsCount) &&
                         (sampleSizesData.excluded_recipients_count > 0 ||
                           sampleSizesData.excludedRecipientsCount > 0) && (
-                          <Box mt={1} color="text.secondary">
+                          <Box
+                            sx={{
+                              mt: 1,
+                              color: 'text.secondary',
+                            }}
+                          >
                             <Typography variant="body2">
                               {t(
                                 'Excluded due to missing/invalid phone number',
@@ -783,8 +860,18 @@ const CreateSurveyPage = (): ReactElement => {
                 )}
                 {dataChangeErrors(errors)}
               </Form>
-              <Box pt={3} display="flex" flexDirection="row">
-                <Box mr={3}>
+              <Box
+                sx={{
+                  pt: 3,
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+              >
+                <Box
+                  sx={{
+                    mr: 3,
+                  }}
+                >
                   <Button
                     component={Link}
                     data-cy="button-cancel"
@@ -793,7 +880,12 @@ const CreateSurveyPage = (): ReactElement => {
                     {t('Cancel')}
                   </Button>
                 </Box>
-                <Box display="flex" ml="auto">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    ml: 'auto',
+                  }}
+                >
                   <Button
                     disabled={activeStep === SurveySteps.LookUp}
                     onClick={handleBack}

@@ -8,6 +8,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import PersonIcon from '@mui/icons-material/Person';
 import {
   Box,
@@ -31,13 +32,15 @@ export interface BiometricsResultsProps {
 
 const Placeholder: FC = () => (
   <Box
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-    width="45%"
-    height="200px"
-    border="1px solid #ccc"
     data-cy="placeholder"
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '45%',
+      height: '200px',
+      border: '1px solid #ccc',
+    }}
   >
     <PersonIcon color="primary" style={{ fontSize: 100 }} />
   </Box>
@@ -66,25 +69,33 @@ const BiometricsResultsRdi = ({
 
   const { businessAreaSlug, programCode } = useBaseUrl();
 
+  const individual1Params = {
+    businessAreaSlug,
+    id: individual1?.id,
+    programCode,
+  };
   const individual1Query = useQuery({
-    queryKey: ['individual', individual1?.id, businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      individual1Params,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        id: individual1?.id,
-        programCode,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(individual1Params),
     enabled: dialogOpen && !!individual1?.id,
   });
 
+  const individual2Params = {
+    businessAreaSlug,
+    id: individual2?.id,
+    programCode,
+  };
   const individual2Query = useQuery({
-    queryKey: ['individual', individual2?.id, businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      individual2Params,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        id: individual2?.id,
-        programCode,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(individual2Params),
     enabled: dialogOpen && !!individual2?.id,
   });
 
@@ -102,7 +113,11 @@ const BiometricsResultsRdi = ({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         {canViewBiometricsResults && (
           <Button
             onClick={(e) => {
@@ -129,8 +144,19 @@ const BiometricsResultsRdi = ({
         </DialogTitleWrapper>
         <DialogContent data-cy="dialog-content">
           <DialogContainer>
-            <Box display="flex" justifyContent="space-between" p={5}>
-              <Box display="flex" flexDirection="column">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                p: 5,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 {individual1Data?.photo ? (
                   <img
                     src={individual1Data?.photo}
@@ -150,7 +176,12 @@ const BiometricsResultsRdi = ({
                   {individual1Data?.fullName}
                 </Typography>
               </Box>
-              <Box display="flex" flexDirection="column">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 {individual2Data?.photo ? (
                   <img
                     src={individual2Data?.photo}
@@ -171,7 +202,12 @@ const BiometricsResultsRdi = ({
                 </Typography>
               </Box>
             </Box>
-            <Box p={5} data-cy="results-info">
+            <Box
+              data-cy="results-info"
+              sx={{
+                p: 5,
+              }}
+            >
               <div>
                 <strong>
                   {t('Algorithm similarity score:')} {similarityScore}

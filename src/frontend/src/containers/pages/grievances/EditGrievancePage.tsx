@@ -36,6 +36,7 @@ import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -99,7 +100,10 @@ const EditGrievancePage = (): ReactElement => {
     isLoading: ticketLoading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
@@ -107,14 +111,18 @@ const EditGrievancePage = (): ReactElement => {
       }),
   });
 
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programCode],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        profileParams,
+      ),
       queryFn: () => {
-        return RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug,
-          program: programCode === 'all' ? undefined : programCode,
-        });
+        return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
       gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
@@ -123,7 +131,10 @@ const EditGrievancePage = (): ReactElement => {
   );
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,
@@ -138,6 +149,13 @@ const EditGrievancePage = (): ReactElement => {
           id: data.id,
           formData: data.formData,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsRetrieve,
+          ),
+        });
+      },
     });
 
   const { mutateAsync: changeTicketStatus } = useMutation({
@@ -149,11 +167,9 @@ const EditGrievancePage = (): ReactElement => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });
@@ -162,7 +178,10 @@ const EditGrievancePage = (): ReactElement => {
     data: allAddIndividualFieldsData,
     isLoading: allAddIndividualFieldsDataLoading,
   } = useQuery({
-    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -172,7 +191,10 @@ const EditGrievancePage = (): ReactElement => {
   });
   const { data: householdFieldsData, isLoading: householdFieldsLoading } =
     useQuery({
-      queryKey: ['householdFieldsAttributes', businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList,
+        { businessAreaSlug },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
           {
@@ -184,7 +206,10 @@ const EditGrievancePage = (): ReactElement => {
     data: allEditPeopleFieldsData,
     isLoading: allEditPeopleFieldsLoading,
   } = useQuery({
-    queryKey: ['editPeopleFieldsAttributes', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
         {
@@ -193,18 +218,20 @@ const EditGrievancePage = (): ReactElement => {
       ),
   });
 
+  const programsListParams = createApiParams(
+    { businessAreaSlug, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsListParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+        RestService.restBusinessAreasProgramsList(programsListParams),
     });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData,
@@ -414,8 +441,17 @@ const EditGrievancePage = (): ReactElement => {
               title={`${t('Edit Ticket')} #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}
             >
-              <Box display="flex" alignContent="center">
-                <Box mr={3}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignContent: 'center',
+                }}
+              >
+                <Box
+                  sx={{
+                    mr: 3,
+                  }}
+                >
                   <Button component={Link} to={grievanceDetailsPath}>
                     {t('Cancel')}
                   </Button>
@@ -628,7 +664,11 @@ const EditGrievancePage = (): ReactElement => {
                         </Grid>
                       </Grid>
                       {canAddDocumentation && (
-                        <Box mt={3}>
+                        <Box
+                          sx={{
+                            mt: 3,
+                          }}
+                        >
                           <Title>
                             <Typography variant="h6">
                               {t(
@@ -652,7 +692,11 @@ const EditGrievancePage = (): ReactElement => {
                     </BoxPadding>
                     <BoxPadding>
                       <Grid size={{ xs: 6 }}>
-                        <Box py={3}>
+                        <Box
+                          sx={{
+                            py: 3,
+                          }}
+                        >
                           <LookUpLinkedTickets
                             values={values}
                             onValueChange={setFieldValue}
@@ -666,7 +710,11 @@ const EditGrievancePage = (): ReactElement => {
                           GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                         <BoxWithBottomBorders>
                           <Grid size={{ xs: 6 }}>
-                            <Box py={3}>
+                            <Box
+                              sx={{
+                                py: 3,
+                              }}
+                            >
                               <LookUpPaymentRecord
                                 values={values}
                                 disabled={Boolean(ticket.paymentRecord)}

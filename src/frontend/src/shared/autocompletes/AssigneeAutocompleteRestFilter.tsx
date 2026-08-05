@@ -1,5 +1,6 @@
 import {
   createHandleApplyFilterChange,
+  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { ReactElement, useCallback, useEffect, useState } from 'react';
@@ -9,7 +10,9 @@ import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
+import { AutocompleteOption } from './types';
 
 export function AssigneeAutocompleteRestFilter({
   disabled,
@@ -25,13 +28,13 @@ export function AssigneeAutocompleteRestFilter({
 }: {
   disabled?: boolean;
   name: string;
-  filter: any;
+  filter: Filter;
   value: string;
   label: string;
-  initialFilter: any;
-  appliedFilter: any;
-  setAppliedFilter: (filter: any) => void;
-  setFilter: (filter: any) => void;
+  initialFilter: Filter;
+  appliedFilter: Filter;
+  setAppliedFilter: (filter: Filter) => void;
+  setFilter: (filter: Filter) => void;
   dataCy?: string;
 }): ReactElement {
   const { businessArea } = useBaseUrl();
@@ -53,7 +56,7 @@ export function AssigneeAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedUserList>({
-    queryKey: ['businessAreasUsersList', queryVariables, businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, queryVariables),
     queryFn: () => RestService.restBusinessAreasUsersList(queryVariables),
   });
 
@@ -87,14 +90,17 @@ export function AssigneeAutocompleteRestFilter({
     name: `${user.firstName} ${user.lastName}`.trim() || user.email,
   }));
 
-  const handleOptionSelected = (option: any, selectedValue: any) => {
+  const handleOptionSelected = (
+    option: AutocompleteOption,
+    selectedValue: AutocompleteOption | string,
+  ) => {
     if (typeof selectedValue === 'string') {
       return option?.id === selectedValue;
     }
     return option?.id === selectedValue?.id;
   };
 
-  const handleOptionLabel = (option: any) => {
+  const handleOptionLabel = (option: AutocompleteOption | string) => {
     if (typeof option === 'string') {
       const matchingUser = users.find((user) => user.id === option);
       return matchingUser

@@ -174,6 +174,61 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "export_pdf_file_summary",
         "reconciliation_import_file",
     )
+    readonly_fields = (
+        "is_removed",
+        "id",
+        "created_at",
+        "updated_at",
+        "version",
+        "unicef_id",
+        "internal_data",
+        "business_area",
+        "program_cycle",
+        "steficon_rule",
+        "steficon_rule_targeting",
+        "created_by",
+        "closed_by",
+        "closure_comment",
+        "source_payment_plan",
+        "follow_up_instruction",
+        "name",
+        "start_date",
+        "end_date",
+        "currency",
+        "dispersion_start_date",
+        "dispersion_end_date",
+        "excluded_ids",
+        "exclusion_reason",
+        "vulnerability_score_min",
+        "vulnerability_score_max",
+        "abort_comment",
+        "flat_amount_value",
+        "built_at",
+        "exchange_rate",
+        "custom_exchange_rate",
+        "custom_exchange_rate_set_by",
+        "female_children_count",
+        "male_children_count",
+        "female_adults_count",
+        "male_adults_count",
+        "total_households_count",
+        "total_individuals_count",
+        "imported_file_date",
+        "total_entitled_quantity",
+        "total_entitled_quantity_usd",
+        "total_entitled_quantity_revised",
+        "total_entitled_quantity_revised_usd",
+        "total_delivered_quantity",
+        "total_delivered_quantity_usd",
+        "total_undelivered_quantity",
+        "total_undelivered_quantity_usd",
+        "steficon_targeting_applied_date",
+        "steficon_applied_date",
+        "plan_type",
+        "export_tag",
+        "exclude_household_error",
+        "status_date",
+    )
 
     @button(permission="payment.view_paymentplan")
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -334,12 +389,24 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             message="Do you confirm to send this payment plan to Vision?",
         )
 
+    def has_add_permission(self: Any, request: Any) -> bool:
+        return False
+
 
 @admin.register(PaymentPlanGroup)
 class PaymentPlanGroupAdmin(HOPEModelAdminBase):
     list_display = ("unicef_id", "name", "cycle")
     search_fields = ("name", "unicef_id")
     list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
+
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+        "unicef_id",
+        "cycle",
+        "name",
+    )
 
     @button(permission="payment.view_paymentplan")
     def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -418,6 +485,7 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
                     user_id,
                     config.get("fsp_xlsx_template_id"),
                     config.get("export_tag"),
+                    config.get("plan_type"),
                 )
 
             messages.success(request, "Successfully restarted delivery XLSX export.")
@@ -474,10 +542,13 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
             message="Do you confirm to restart importing reconciliation XLSX file task?",
         )
 
+    def has_add_permission(self: Any, request: Any) -> bool:
+        return False
+
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot
-    readonly_fields = ("snapshot_data", "household_id")
+    readonly_fields = ("snapshot_data", "household_id", "payment")
 
 
 @admin.register(Payment)
@@ -518,22 +589,49 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     inlines = [PaymentHouseholdSnapshotInline]
     exclude = ("delivery_type_choice",)
     readonly_fields = (
+        "is_removed",
+        "id",
+        "created_at",
+        "updated_at",
+        "unicef_id",
+        "signature_hash",
+        "internal_data",
+        "parent",
+        "parent_split",
+        "business_area",
+        "program",
+        "household",
+        "head_of_household",
+        "delivery_type",
+        "financial_service_provider",
+        "collector",
         "collector_type",
+        "source_payment",
+        "is_follow_up",
+        "status_date",
         "currency",
         "entitlement_quantity",
         "entitlement_quantity_usd",
+        "entitlement_date",
         "delivered_quantity",
         "delivered_quantity_usd",
         "delivery_date",
-        "entitlement_date",
-        "sent_to_fsp_date",
-        "vulnerability_score",
-        "status_date",
-        "order_number",
-        "token_number",
+        "transaction_reference_id",
+        "transaction_status_blockchain_link",
         "conflicted",
         "excluded",
         "has_valid_wallet",
+        "reason_for_unsuccessful_payment",
+        "order_number",
+        "token_number",
+        "additional_collector_name",
+        "additional_document_type",
+        "additional_document_number",
+        "fsp_auth_code",
+        "extras",
+        "vulnerability_score",
+        "is_cash_assist",
+        "sent_to_fsp_date",
     )
 
     show_full_result_count = False
@@ -590,9 +688,20 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
             message="Do you confirm to Sync with Payment Gateway?",
         )
 
+    def has_add_permission(self: Any, request: Any) -> bool:
+        return False
+
 
 @admin.register(PaymentPlanSupportingDocument)
 class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
     search_fields = ("title",)
     list_display = ("title", "payment_plan", "created_by", "uploaded_at")
     list_filter = (("created_by", AutoCompleteFilter),)
+    readonly_fields = (
+        "uploaded_at",
+        "created_by",
+        "payment_plan",
+    )
+
+    def has_add_permission(self: Any, request: Any) -> bool:
+        return False

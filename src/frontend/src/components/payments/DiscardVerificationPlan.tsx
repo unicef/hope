@@ -15,6 +15,7 @@ import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
 import { showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -45,12 +46,9 @@ export function DiscardVerificationPlan({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -66,7 +64,11 @@ export function DiscardVerificationPlan({
   };
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setDiscardDialogOpen(true)}
@@ -88,7 +90,11 @@ export function DiscardVerificationPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               <div>
                 {t(
                   'Are you sure you would like to remove payment verification records',
