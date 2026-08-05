@@ -61,9 +61,16 @@ def mapping_content_hash(mappings: dict | None) -> str:
     created from the SAME code mapping I have now?" without diffing ES-normalized mappings
     against raw code mappings (a false-mismatch minefield): the stamp was computed from the
     code mapping at creation time, so equal stamps == equal code mappings.
+
+    ACCEPTED GAP: the stamp covers mappings only, not settings - an analyzer/similarity-only
+    change (identical mappings) is invisible to it, so a leftover from before such a change
+    would be resumed with the old analyzers. Decided risk; when a deploy touched analyzers,
+    reindex with ``--sweep-wrecks``.
     """
     content = {k: v for k, v in (mappings or {}).items() if k != "_meta"}
-    return hashlib.sha256(json.dumps(content, sort_keys=True, default=str).encode()).hexdigest()
+    # no default=str: a non-JSON value must raise loudly, a repr-based hash would silently
+    # never match and kill resume forever
+    return hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
 
 
 def create_versioned_index(

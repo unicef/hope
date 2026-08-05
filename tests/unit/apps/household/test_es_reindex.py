@@ -312,6 +312,17 @@ def test_dry_run_touches_nothing(program: Program, es_aliased: MagicMock) -> Non
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_dry_run_survives_alias_outside_version_scheme(program: Program, es_aliased: MagicMock) -> None:
+    es_aliased.indices.get_alias.side_effect = lambda **kw: {f"{kw['name']}-hand-mangled": {"aliases": {}}}
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_aliased):
+        call_command(CMD, program=str(program.id), dry_run=True, stdout=out)
+
+    assert "SKIP" in out.getvalue()
+    assert "outside the _vN scheme" in out.getvalue()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_dry_run_flags_non_aliased_program(program: Program, es_not_aliased: MagicMock) -> None:
     out = StringIO()
     with patch(GET_CONN, return_value=es_not_aliased):

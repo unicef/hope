@@ -110,7 +110,8 @@ class Command(BaseCommand):
             action="store_true",
             help=(
                 "Delete dark leftovers newer than the alias target before starting (clean rebuild "
-                "instead of the default resume). Use when a resumed pair failed the verify gate."
+                "instead of the default resume). Use when a resumed pair failed the verify gate, "
+                "or after a deploy that changed only analyzers/settings (invisible to the mapping stamp)."
             ),
         )
         parser.add_argument(
@@ -201,7 +202,12 @@ class Command(BaseCommand):
                 self.stdout.write(f"{code}: SKIP - not an alias yet: {not_aliased} (run es_bootstrap_aliases)")
                 continue
             current = {n: self._alias_target(es, n) for n in names}
-            suffix = self._pair_suffix(current)
+            try:
+                suffix = self._pair_suffix(current)
+            except CommandError as exc:
+                # one hand-mangled alias must not kill the whole plan for --all
+                self.stdout.write(self.style.WARNING(f"{code}: SKIP - {exc}"))
+                continue
             resume_note = (
                 " (will RESUME an existing dark leftover)"
                 if any(self._resumable(es, doc, f"{doc._index._name}_{suffix}") for doc in docs)
