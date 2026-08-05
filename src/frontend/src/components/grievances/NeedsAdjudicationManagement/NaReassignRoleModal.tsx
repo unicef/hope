@@ -15,6 +15,7 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -54,7 +55,10 @@ export const NaReassignRoleModal = ({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -143,8 +147,8 @@ export const NaReassignRoleModal = ({
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Box display="flex">
-                <Box mr={1}>
+              <Box sx={{ display: 'flex' }}>
+                <Box sx={{ mr: 1 }}>
                   <Field
                     name="identityVerified"
                     label="Identity Verified*"

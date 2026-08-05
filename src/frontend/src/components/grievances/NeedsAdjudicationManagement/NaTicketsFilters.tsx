@@ -105,7 +105,7 @@ export const NaTicketsFilters = ({
       withHideShowButton
       initialExpanded={false}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             value={filter.search}

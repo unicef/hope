@@ -17,6 +17,7 @@ import {
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -181,11 +182,10 @@ export const NaComparisonPanel = ({
     isLoading,
     isError,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: [
-      'businessAreasGrievanceTicketsRetrieve',
+    queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsRetrieve, {
       businessAreaSlug,
-      ticketId,
-    ],
+      id: ticketId,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
@@ -318,7 +318,7 @@ export const NaComparisonPanel = ({
 
   return (
     <ApproveBox>
-      <Box mb={4}>
+      <Box sx={{ mb: 4 }}>
         <Typography variant="h6">
           Ticket ID:{' '}
           {detailsPath ? (
@@ -332,14 +332,16 @@ export const NaComparisonPanel = ({
       </Box>
       {candidates.length > 1 && (
         <Box
-          mb={4}
-          display="flex"
-          alignItems="center"
-          gap={3}
-          px={3}
-          py={2}
-          bgcolor="#f5f5f5"
-          borderRadius={2}
+          sx={{
+            mb: 4,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
+            px: 3,
+            py: 2,
+            bgcolor: '#f5f5f5',
+            borderRadius: 2,
+          }}
           data-cy="na-duplicate-selector"
         >
           <Button
@@ -381,13 +383,13 @@ export const NaComparisonPanel = ({
           <TableRow>
             <TableCell />
             <TableCell align="left">
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {t('Person 1')}
                 <PersonMarkIcon role={person1Role} />
               </Box>
             </TableCell>
             <TableCell align="left">
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {t('Person 2')}
                 <PersonMarkIcon role={person2Role} />
               </Box>
@@ -483,7 +485,7 @@ export const NaComparisonPanel = ({
         </TableBody>
       </StyledTable>
       {reassignments.length > 0 && (
-        <Box mt={4} data-cy="na-reassign-section">
+        <Box sx={{ mt: 4 }} data-cy="na-reassign-section">
           <Typography variant="subtitle1">
             {t('Reassign roles before finalizing')}
           </Typography>
@@ -497,18 +499,20 @@ export const NaComparisonPanel = ({
             return (
               <Box
                 key={key}
-                mt={2}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                gap={2}
+                sx={{
+                  mt: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 2,
+                }}
                 data-cy={`na-reassign-row-${assignment.role}-${assignment.householdUnicefId}`}
               >
                 <Typography variant="body2">
                   {t(roleLabel(assignment.role))} —{' '}
                   {assignment.householdUnicefId}
                 </Typography>
-                <Box display="flex" alignItems="center" gap={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography
                     variant="body2"
                     color={

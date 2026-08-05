@@ -35,12 +35,12 @@ export const NaTicketListItem = ({
     <Box
       onClick={onSelect}
       data-cy={`na-ticket-list-item-${ticket.unicefId}`}
-      p={4}
-      borderBottom="1px solid rgba(0, 0, 0, 0.08)"
-      display="flex"
-      justifyContent="space-between"
-      alignItems="stretch"
       sx={{
+        p: 4,
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'stretch',
         cursor: 'pointer',
         backgroundColor: selected ? 'rgba(0, 0, 0, 0.06)' : 'transparent',
         '&:hover': {
@@ -62,21 +62,30 @@ export const NaTicketListItem = ({
         </Typography>
       </Box>
       <Box
-        display="flex"
-        flexDirection="column"
-        justifyContent="space-between"
-        alignItems="flex-end"
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+        }}
       >
         <StatusBox
           status={urgencyLabel}
           statusToColor={grievanceTicketBadgeColors}
         />
         {needsReassignment ? (
-          <Box display="flex" alignItems="center" gap={1} color="warning.main">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              color: 'warning.main',
+            }}
+          >
             <WarningIcon fontSize="small" />
             <Typography
               variant="body2"
-              fontStyle="italic"
+              sx={{ fontStyle: 'italic' }}
               data-cy="na-ticket-reassignment-required"
             >
               {t('Reassignment required')}
@@ -87,7 +96,7 @@ export const NaTicketListItem = ({
             <Typography
               variant="body2"
               color="textSecondary"
-              fontStyle="italic"
+              sx={{ fontStyle: 'italic' }}
               data-cy="na-ticket-managed-label"
             >
               {t('Ticket managed')}

@@ -9,6 +9,7 @@ import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { GRIEVANCE_CATEGORIES } from '@utils/constants';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
@@ -122,10 +123,18 @@ export const NaTicketsManagement = ({
     onSuccess: () => {
       showMessage(t('{{count}} ticket(s) finalized', { count: managedCount }));
       setDecisions({});
-      queryClient.invalidateQueries({ queryKey: ['naTicketsManagementList'] });
-      queryClient.invalidateQueries({ queryKey: ['naTicketsManagementCount'] });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasGrievanceTicketsRetrieve'],
+        queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsList),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
     // The batch is rejected whole and nothing changes server-side, so keep the
@@ -172,13 +181,13 @@ export const NaTicketsManagement = ({
 
   const { data: listData, isLoading: listLoading } =
     useQuery<PaginatedGrievanceTicketListList>({
-      queryKey: [
-        'naTicketsManagementList',
+      queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsList, {
         businessAreaSlug,
+        category: NEEDS_ADJUDICATION_CATEGORY,
         page,
         rowsPerPage,
         queryVariables,
-      ],
+      }),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsList(
           createApiParams(
@@ -195,7 +204,14 @@ export const NaTicketsManagement = ({
     });
 
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: ['naTicketsManagementCount', businessAreaSlug, queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+      {
+        businessAreaSlug,
+        category: NEEDS_ADJUDICATION_CATEGORY,
+        queryVariables,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
         createApiParams(
@@ -210,7 +226,10 @@ export const NaTicketsManagement = ({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug,
@@ -240,7 +259,7 @@ export const NaTicketsManagement = ({
         ]}
         handleBack={onBack}
       >
-        <Box display="flex" alignItems="center" gap={4}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <Typography variant="body2" data-cy="na-tickets-managed-count">
             {t('Tickets managed')}: {managedCount}
           </Typography>
@@ -286,8 +305,10 @@ export const NaTicketsManagement = ({
               setPage(0);
             }}
           />
-          <Box display="flex" alignItems="stretch" p={5} gap={5}>
-            <Box width="40%" minWidth={360}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'stretch', p: 5, gap: 5 }}
+          >
+            <Box sx={{ width: '40%', minWidth: 360 }}>
               <NaTicketsList
                 tickets={results}
                 isLoading={listLoading}
@@ -305,7 +326,7 @@ export const NaTicketsManagement = ({
                 }}
               />
             </Box>
-            <Box flex={1}>
+            <Box sx={{ flex: 1 }}>
               <NaComparisonPanel
                 ticketId={selectedTicketId}
                 decision={

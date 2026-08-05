@@ -54,11 +54,11 @@ export const NaTicketsList = ({
 
   return (
     <Paper>
-      <Box maxHeight="60vh" overflow="auto">
+      <Box sx={{ maxHeight: '60vh', overflow: 'auto' }}>
         {isLoading ? (
           <LoadingComponent />
         ) : tickets.length === 0 ? (
-          <Box p={5}>
+          <Box sx={{ p: 5 }}>
             <Typography variant="body2" color="textSecondary">
               {t('No Needs Adjudication tickets')}
             </Typography>
