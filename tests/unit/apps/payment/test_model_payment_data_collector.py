@@ -139,6 +139,18 @@ def bulk_required_fields_setup(account_setup):
     return account_setup, account
 
 
+@pytest.fixture
+def mapped_service_provider_field_setup(bulk_required_fields_setup):
+    account_setup, account = bulk_required_fields_setup
+    mapping = FspNameMapping.objects.create(
+        external_name="bank_code",
+        hope_name=PaymentDataCollector.SERVICE_PROVIDER_CODE,
+        source=FspNameMapping.SourceModel.ACCOUNT,
+        fsp=account_setup["fsp"],
+    )
+    return account_setup, account, mapping
+
+
 def test_get_associated_object(account_setup):
     dmd = AccountFactory(
         data={"test": "test"},
@@ -294,6 +306,20 @@ def test_resolve_financial_institution_code_returns_none_without_account_or_fina
 
     assert PaymentDataCollector.resolve_financial_institution_code(account_setup["fsp"], None) is None
     assert PaymentDataCollector.resolve_financial_institution_code(account_setup["fsp"], account) is None
+
+
+def test_resolve_required_field_uses_mapped_financial_institution_code(mapped_service_provider_field_setup):
+    account_setup, account, mapping = mapped_service_provider_field_setup
+
+    value = PaymentDataCollector.resolve_required_field(
+        account_setup["fsp"],
+        account_setup["individual"],
+        account,
+        mapping.external_name,
+        mapping,
+    )
+
+    assert value == "BANK-CODE"
 
 
 def test_delivery_data_without_account_does_not_add_account_defaults(account_setup):
