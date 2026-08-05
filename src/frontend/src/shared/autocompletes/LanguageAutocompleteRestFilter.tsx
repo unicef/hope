@@ -7,9 +7,13 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import {
   createHandleApplyFilterChange,
+  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
+import { AutocompleteOption } from './types';
+
+type LanguageOption = AutocompleteOption & { code: string };
 
 export function LanguageAutocompleteRestFilter({
   disabled,
@@ -24,12 +28,12 @@ export function LanguageAutocompleteRestFilter({
 }: {
   disabled?: boolean;
   name: string;
-  filter?: any;
+  filter?: Filter;
   value?: string;
-  initialFilter: any;
-  appliedFilter: any;
-  setAppliedFilter: (filter: any) => void;
-  setFilter: (filter: any) => void;
+  initialFilter: Filter;
+  appliedFilter: Filter;
+  setAppliedFilter: (filter: Filter) => void;
+  setFilter: (filter: Filter) => void;
   dataCy?: string;
 }): ReactElement {
   const { t } = useTranslation();
@@ -72,14 +76,17 @@ export function LanguageAutocompleteRestFilter({
     name: lang.name,
   }));
 
-  const handleOptionSelected = (option: any, selectedValue: any) => {
+  const handleOptionSelected = (
+    option: LanguageOption,
+    selectedValue: LanguageOption | string,
+  ) => {
     if (typeof selectedValue === 'string') {
       return option?.code === selectedValue;
     }
     return option?.code === selectedValue?.code;
   };
 
-  const handleOptionLabel = (option: any) => {
+  const handleOptionLabel = (option: LanguageOption | string) => {
     if (typeof option === 'string') {
       const matchingLanguage = options.find((lang) => lang.code === option);
       return matchingLanguage ? matchingLanguage.name : option;

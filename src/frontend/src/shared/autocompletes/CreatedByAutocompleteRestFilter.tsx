@@ -9,9 +9,11 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import {
   createHandleApplyFilterChange,
+  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
+import { AutocompleteOption } from './types';
 
 export const CreatedByAutocompleteRestFilter = ({
   disabled,
@@ -27,14 +29,14 @@ export const CreatedByAutocompleteRestFilter = ({
 }: {
   disabled?: boolean;
   name: string;
-  filter: any;
+  filter: Filter;
   value: string;
   label?: string;
-  initialFilter: any;
-  appliedFilter: any;
-  setAppliedFilter: (filter: any) => void;
-  setFilter: (filter: any) => void;
-  additionalVariables?: any;
+  initialFilter: Filter;
+  appliedFilter: Filter;
+  setAppliedFilter: (filter: Filter) => void;
+  setFilter: (filter: Filter) => void;
+  additionalVariables?: Record<string, unknown>;
 }): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -90,14 +92,17 @@ export const CreatedByAutocompleteRestFilter = ({
     name: `${user.firstName} ${user.lastName}`.trim() || user.email,
   }));
 
-  const handleOptionSelected = (option: any, selectedValue: any) => {
+  const handleOptionSelected = (
+    option: AutocompleteOption,
+    selectedValue: AutocompleteOption | string,
+  ) => {
     if (typeof selectedValue === 'string') {
       return option?.id === selectedValue;
     }
     return option?.id === selectedValue?.id;
   };
 
-  const handleOptionLabel = (option: any) => {
+  const handleOptionLabel = (option: AutocompleteOption | string) => {
     if (typeof option === 'string') {
       const matchingUser = users.find((user) => user.id === option);
       return matchingUser

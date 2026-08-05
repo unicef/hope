@@ -17,7 +17,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketDetail;
@@ -57,7 +57,7 @@ export function VerifyPaymentGrievance({
         ),
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

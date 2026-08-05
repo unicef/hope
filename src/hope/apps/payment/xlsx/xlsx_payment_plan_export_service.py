@@ -36,8 +36,8 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         else:
             self.headers.remove("individual_id")
 
-    def _add_payment_row(self, payment: Payment) -> None:
-        payment_row = [
+    def _payment_row(self, payment: Payment) -> list:
+        return [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
                 payment,
                 column_name,
@@ -46,7 +46,9 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
             )
             for column_name in self.headers
         ]
-        self.ws_export_list.append(payment_row)
+
+    def _add_payment_row(self, payment: Payment) -> None:
+        self.ws_export_list.append(self._payment_row(payment))
 
     def _add_payment_list(self) -> None:
         qs = (

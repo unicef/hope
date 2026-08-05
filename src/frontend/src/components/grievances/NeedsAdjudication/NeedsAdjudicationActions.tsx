@@ -12,7 +12,7 @@ import { BiometricsResults } from './BiometricsResults';
 import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 interface NeedsAdjudicationActionsProps {
@@ -58,7 +58,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
       showMessage(t('Action successful'));
       setSelectedIndividualIds([]);
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
