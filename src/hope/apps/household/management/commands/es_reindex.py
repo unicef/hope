@@ -21,11 +21,15 @@ individuals+households pair is reindexed as ONE unit:
 The old ``_vN`` stays in place unaliased = instant rollback target (flip the alias back by hand,
 see the runbook) until ``es_drop_old_index_versions`` removes it after the 24-72h sanity window.
 
-Crash/resume: state never needs reconstructing - a dark leftover from a killed run is simply
-abandoned (the next run picks a higher version; ``es_drop_old_index_versions`` sweeps unaliased
-leftovers) and an already-swapped program shows its new version in ``--status``. Re-running the
-command is always safe; it reindexes every in-scope program again (there is deliberately no
-"mapping unchanged, skip" detection - the operator decides when a reindex is due).
+Crash/resume: state never needs reconstructing. A dark leftover of a killed or verify-failed run
+is never trusted (it may be half-populated, provably drifted, or carry an older deployment's
+mapping) - the next run DELETES dark versions newer than the alias target and reuses their
+number, then rebuilds from scratch. The populate cost cannot be skipped either way: the retry
+cases are exactly the ones where the leftover's contents are unreliable. Versions BELOW the
+alias target (the rollback safety net during a sanity window) are never touched; those are
+``es_drop_old_index_versions``' job, days later. Re-running the command is always safe; it
+reindexes every in-scope program again (there is deliberately no "mapping unchanged, skip"
+detection - the operator decides when a reindex is due).
 
 Examples
 --------
@@ -45,6 +49,7 @@ Read-only state report::
 
 """
 
+import re
 from typing import Any
 import uuid
 
@@ -194,6 +199,28 @@ class Command(BaseCommand):
     def _release_lock(self, es: Elasticsearch) -> None:
         es.options(ignore_status=[404]).indices.delete(index=self.LOCK_INDEX)
 
+    def _sweep_wrecks(self, es: Elasticsearch, name: str, old_target: str) -> None:
+        """Delete unaliased versions NEWER than the current alias target, so their number is reused.
+
+        Only wrecks live above the alias target: dark leftovers of crashed runs and versions the
+        alias was rolled back FROM. Deleting them here (instead of abandoning them to a later
+        sweep) keeps the version counter tight and guarantees the recreated index carries the
+        CURRENT code mapping - a wreck may have been created by an older deployment. Versions
+        BELOW the target are the rollback safety net of a sanity window and are never touched.
+        """
+        match = re.match(rf"^{re.escape(name)}_v(\d+)$", old_target)
+        if not match:  # alias points at something outside the _vN scheme - nothing provably a wreck
+            return
+        target_version = int(match.group(1))
+        for index, info in es.indices.get(index=f"{name}_v*", ignore_unavailable=True).items():
+            version_match = re.match(rf"^{re.escape(name)}_v(\d+)$", index)
+            if not version_match or int(version_match.group(1)) <= target_version:
+                continue
+            if info.get("aliases"):
+                continue
+            es.indices.delete(index=index)
+            self.stdout.write(self.style.WARNING(f"  swept wreck {index} (dark, newer than {old_target})"))
+
     def _reindex_programs(self, es: Elasticsearch, code_by_id: dict, opts: dict) -> list:
         total = len(code_by_id)
         failed: list = []
@@ -217,6 +244,8 @@ class Command(BaseCommand):
                 raise CommandError(f"{name} is not an alias - run es_bootstrap_aliases first")
             old[name] = target
 
+        for name, old_target in old.items():
+            self._sweep_wrecks(es, name, old_target)
         suffix = next_version_suffix(es, docs)
         vdocs = [versioned_doc(d, suffix) for d in docs]
 

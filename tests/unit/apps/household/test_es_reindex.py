@@ -109,6 +109,36 @@ def es_diverged_versions(index_names: list[str]) -> MagicMock:
 
 
 @pytest.fixture
+def es_dark_wreck(index_names: list[str]) -> MagicMock:
+    """Alias on _v1; a dark _v2 wreck from a crashed run lingers. Deletes mutate the mock state."""
+    es = _make_es()
+    physical = {name: {f"{name}_v1": {"aliases": {name: {}}}, f"{name}_v2": {"aliases": {}}} for name in index_names}
+
+    def get_indices(**kw: dict) -> dict:
+        name = kw["index"].removesuffix("_v*")
+        return dict(physical.get(name, {}))
+
+    def delete_index(**kw: dict) -> None:
+        for indices in physical.values():
+            indices.pop(kw["index"], None)
+
+    es.indices.get.side_effect = get_indices
+    es.indices.delete.side_effect = delete_index
+    return es
+
+
+@pytest.fixture
+def es_sanity_window(index_names: list[str]) -> MagicMock:
+    """Alias already on _v2; the old _v1 lingers unaliased as the rollback safety net."""
+    es = _make_es(alias_version="v2", swap_flips_to="v3")
+    es.indices.get.side_effect = lambda **kw: {
+        kw["index"].replace("_v*", "_v1"): {"aliases": {}},
+        kw["index"].replace("_v*", "_v2"): {"aliases": {kw["index"].removesuffix("_v*"): {}}},
+    }
+    return es
+
+
+@pytest.fixture
 def es_locked() -> MagicMock:
     es = _make_es()
     es.indices.create.side_effect = BadRequestError("resource_already_exists_exception", MagicMock(), None)
@@ -265,6 +295,32 @@ def test_dry_run_flags_non_aliased_program(program: Program, es_not_aliased: Mag
         call_command(CMD, program=str(program.id), dry_run=True, stdout=out)
 
     assert "es_bootstrap_aliases" in out.getvalue()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_dark_wreck_is_deleted_and_its_number_reused(
+    program: Program, index_names: list[str], es_dark_wreck: MagicMock
+) -> None:
+    with patch(GET_CONN, return_value=es_dark_wreck), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    deleted = [kw["index"] for _, kw in es_dark_wreck.indices.delete.call_args_list if "index" in kw]
+    assert sorted(d for d in deleted if d.endswith("_v2")) == sorted(f"{n}_v2" for n in index_names)
+    created = _dark_creates(es_dark_wreck)
+    assert sorted(kw["index"] for kw in created) == sorted(f"{n}_v2" for n in index_names)
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_sanity_window_old_version_is_not_swept(
+    program: Program, index_names: list[str], es_sanity_window: MagicMock
+) -> None:
+    with patch(GET_CONN, return_value=es_sanity_window), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    deleted = [kw["index"] for _, kw in es_sanity_window.indices.delete.call_args_list if "index" in kw]
+    assert not any(d.endswith("_v1") for d in deleted)
+    created = _dark_creates(es_sanity_window)
+    assert sorted(kw["index"] for kw in created) == sorted(f"{n}_v3" for n in index_names)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
