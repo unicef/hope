@@ -7,6 +7,7 @@ from unittest import mock
 from unittest.mock import patch
 
 from django.core.files import File
+from django.core.files.storage import default_storage
 from django.forms import model_to_dict
 from django.utils.dateparse import parse_datetime
 from django_countries.fields import Country
@@ -895,6 +896,17 @@ def test_misc_handlers_coverage() -> None:
     ind.birth_date = datetime.datetime.now() + datetime.timedelta(days=100)
     task._validate_birth_date(ind)
     assert ind.estimated_birth_date is True
+
+
+def test_handle_image_field_stores_a_flex_field_image_under_a_unique_path() -> None:
+    task = RdiXlsxCreateTask()
+    task.image_loader = ImageLoaderMock()
+
+    name = task._handle_image_field(CellMock("image.jpg", "A1"), is_flex_field=True)
+
+    assert name.startswith("flex_field_image/")
+    assert name.endswith(".jpg")
+    assert default_storage.exists(name)
 
 
 def test_process_lookup_field() -> None:

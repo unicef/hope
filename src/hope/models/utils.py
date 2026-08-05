@@ -46,9 +46,9 @@ class UniqueUploadPath:
         return f"{self.prefix}/{timezone.now():%Y/%m}/{uuid4().hex}/{filename}"
 
 
-def upload_basename(name: str) -> str:
+def upload_basename(name: str | None) -> str:
     """Drop the generated upload path, leaving the name only."""
-    return name.rsplit("/", 1)[-1]
+    return name.rsplit("/", 1)[-1] if name else ""
 
 
 def replace_upload(field_file: "FieldFile", filename: str, content: File) -> None:

@@ -69,17 +69,17 @@ def test_handle_image_field_attachment_not_found(mock_find, kobo_task_pull_pictu
     assert result is None
 
 
-@patch("hope.apps.registration_data.tasks.rdi_kobo_create.default_storage")
+@patch("hope.apps.registration_data.tasks.rdi_kobo_create.save_flex_field_image")
 @patch("hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI")
 @patch("hope.apps.registration_data.tasks.rdi_kobo_create.find_attachment_in_kobo")
-def test_handle_image_field_success_flex_field(mock_find, mock_api_cls, mock_storage, kobo_task_pull_pictures):
+def test_handle_image_field_success_flex_field(mock_find, mock_api_cls, mock_save, kobo_task_pull_pictures):
     mock_find.return_value = {"download_url": "http://example.com/img.png?format=json"}
     mock_api_cls.return_value.get_attached_file.return_value = b"image_bytes"
-    mock_storage.save.return_value = "stored/path.png"
+    mock_save.return_value = "stored/path.png"
     kobo_task_pull_pictures.attachments = [{"filename": "img.png"}]
     result = kobo_task_pull_pictures._handle_image_field("img.png", True)
     assert result == "stored/path.png"
-    mock_storage.save.assert_called_once()
+    mock_save.assert_called_once()
 
 
 @patch("hope.apps.registration_data.tasks.rdi_kobo_create.KoboAPI")
