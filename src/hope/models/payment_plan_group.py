@@ -4,7 +4,9 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Exists, OuterRef, Q
 from django.utils.translation import gettext_lazy as _
+from flags.state import flag_state
 
+from hope.contrib.vision.choices import VisionStatus
 from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 if TYPE_CHECKING:
@@ -104,11 +106,12 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
 
         A plan qualifies when it is ACCEPTED, has an FSP routed through the payment gateway
         (use_payment_gateway is True or the FSP communication_channel is API), still has splits
-        not yet sent to the gateway, and is not already being sent.
+        not yet sent to the gateway, and is not already being sent. When both Vision feature flags
+        are active, plans already managed by Vision are also excluded.
         """
         from hope.models import FinancialServiceProvider, PaymentPlan, PaymentPlanSplit
 
-        return self.payment_plans.annotate(
+        payment_plans = self.payment_plans.annotate(
             has_unsent_splits=Exists(
                 PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=False)
             )
@@ -124,3 +127,12 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             & Q(has_unsent_splits=True)
             & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
         )
+        if flag_state("VISION_INTEGRATION_ACTIVE"):
+            # TODO(Vision decision): Confirm whether disabling either flag should return existing Vision workflows to
+            # manual group PG sending.
+            active_vision_statuses = [status.value for status in VisionStatus if status != VisionStatus.NOT_SENT]
+            payment_plans = payment_plans.exclude(
+                business_area__vision_integration_active=True,
+                internal_data__vision__status__in=active_vision_statuses,
+            )
+        return payment_plans

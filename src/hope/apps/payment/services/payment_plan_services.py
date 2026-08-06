@@ -28,6 +28,7 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
@@ -69,6 +70,7 @@ from hope.models import (
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
     User,
+    log_create,
 )
 
 if TYPE_CHECKING:
@@ -181,6 +183,7 @@ class PaymentPlanService:
         return self.payment_plan
 
     def send_to_payment_gateway(self) -> PaymentPlan:
+        # TODO(Vision decision): Confirm whether an FSP delivery comment is required and where it should be stored.
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
 
@@ -196,6 +199,50 @@ class PaymentPlanService:
             transaction.on_commit(lambda: send_to_payment_gateway_async_task(payment_plan, str(self.user.pk)))
 
         self.payment_plan = payment_plan
+        return self.payment_plan
+
+    def release_from_vision(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.IN_REVIEW:
+            raise ValidationError("Only an in-review Payment Plan can be released by Vision")
+
+        old_payment_plan = copy_model_object(self.payment_plan)
+        approval_process = self.payment_plan.approval_process.first()
+        if not approval_process:
+            raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
+
+        # TODO(Vision decision): The creator is a provisional actor for this automated action. This automatic release
+        # also bypasses the configured finance reviewer count until the business confirms how it should be represented.
+        release_actor = self.payment_plan.created_by
+        Approval.objects.create(
+            approval_process=approval_process,
+            created_by=release_actor,
+            type=Approval.FINANCE_RELEASE,
+            comment=None,
+        )
+        log_payment_plan_approval(self.payment_plan, release_actor, Approval.FINANCE_RELEASE, None)
+
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_mark_as_reviewed()
+        self.payment_plan.save()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=release_actor,
+            programs=self.payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=self.payment_plan,
+        )
+
+        release_user_id = str(release_actor.pk)
+        transaction.on_commit(
+            lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
+        )
+        send_payment_notification_emails_async_task(
+            self.payment_plan,
+            PaymentPlan.Action.REVIEW.value,
+            release_user_id,
+            f"{timezone.now():%-d %B %Y}",
+        )
         return self.payment_plan
 
     def tp_lock(self) -> PaymentPlan:
@@ -328,6 +375,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def acceptance_process(self) -> PaymentPlan | None:
+        if self.action == PaymentPlan.Action.REVIEW.value and self.payment_plan.vision_managed:
+            raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
         self.validate_payment_plan_status_to_acceptance_process_approval_type()
 
         # every time we will create Approval for first created AcceptanceProcess
@@ -415,6 +464,7 @@ class PaymentPlanService:
                 approval_process.save()
                 notification_action = PaymentPlan.Action.APPROVE
 
+            send_to_vision = False
             if approval_type == Approval.AUTHORIZATION:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_authorize()
@@ -422,6 +472,7 @@ class PaymentPlanService:
                 approval_process.sent_for_finance_release_date = timezone.now()
                 approval_process.save()
                 notification_action = PaymentPlan.Action.AUTHORIZE
+                send_to_vision = self.payment_plan.vision_integration_enabled
 
             if approval_type == Approval.FINANCE_RELEASE:
                 flow = PaymentPlanFlow(self.payment_plan)
@@ -434,6 +485,13 @@ class PaymentPlanService:
                 )
 
             if approval_type == Approval.REJECT:
+                if self.payment_plan.vision_managed:
+                    from hope.contrib.vision.services import VisionService
+
+                    # TODO(Vision decision): Abort/reject invalidates the current attempt. A callback from that attempt
+                    # is ignored unless it arrives after a later attempt has already started; cross-attempt correlation
+                    # requires a Vision-provided identifier and remains intentionally unsupported for now.
+                    VisionService.invalidate_attempt(self.payment_plan)
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_reject()
 
@@ -446,6 +504,12 @@ class PaymentPlanService:
                 )
 
             self.payment_plan.save()
+            if send_to_vision:
+                from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
+
+                payment_plan = self.payment_plan
+                user_id = str(payment_plan.created_by_id)
+                transaction.on_commit(lambda: send_payment_plan_to_vision_async_task(payment_plan, user_id))
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
@@ -1489,11 +1553,18 @@ class PaymentPlanService:
 
         if self.payment_plan.status not in allowed_statuses:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
+        if self.payment_plan.vision_managed:
+            from hope.contrib.vision.services import VisionService
+
+            # TODO(Vision decision): See the rejection path for the accepted cross-attempt callback limitation.
+            VisionService.invalidate_attempt(self.payment_plan)
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
         self.payment_plan.abort_comment = abort_comment or ""
-        self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
-        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment", "internal_data"))
+        self.payment_plan.refresh_from_db(
+            fields=["status", "status_date", "updated_at", "abort_comment", "internal_data"]
+        )
         return self.payment_plan
 
     def reactivate_abort(self) -> PaymentPlan:

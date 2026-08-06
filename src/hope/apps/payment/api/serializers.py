@@ -43,6 +43,7 @@ from hope.apps.program.api.serializers import (
 from hope.apps.steficon.api.serializers import RuleCommitSerializer
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
+from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models import (
     Approval,
@@ -869,6 +870,13 @@ class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
         fields = FollowUpInstructionListSerializer.Meta.fields + ("payment_plans",)  # type: ignore[assignment]
 
 
+class VisionStateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=[status.value for status in VisionStatus])
+    vision_id = serializers.CharField(allow_null=True)
+    fc_num = serializers.CharField(allow_null=True)
+    error_code = serializers.CharField(allow_null=True)
+
+
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
@@ -892,8 +900,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    can_send_to_payment_gateway = serializers.BooleanField()
+    can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
     can_send_to_vision = serializers.BooleanField()
+    vision_integration_enabled = serializers.BooleanField(read_only=True)
+    vision_managed = serializers.BooleanField(read_only=True)
+    vision = serializers.SerializerMethodField()
     can_split = serializers.SerializerMethodField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
@@ -944,6 +955,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "unsuccessful_payments_count",
             "can_send_to_payment_gateway",
             "can_send_to_vision",
+            "vision_integration_enabled",
+            "vision_managed",
+            "vision",
             "can_split",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
@@ -1163,6 +1177,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         ).data
 
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+        if obj.vision_managed:
+            return []
+
         available_items_qs = FundsCommitmentItem.objects.filter(
             Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
         )
@@ -1188,6 +1205,16 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             ).data
             for group in groups
         ]
+
+    @extend_schema_field(VisionStateSerializer)
+    def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:
+        vision_data = obj.vision_data
+        return {
+            "status": obj.vision_status,
+            "vision_id": vision_data.get("vision_id"),
+            "fc_num": vision_data.get("fc_num"),
+            "error_code": vision_data.get("error_code"),
+        }
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):

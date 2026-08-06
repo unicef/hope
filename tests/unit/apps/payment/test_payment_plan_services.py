@@ -12,6 +12,7 @@ from django.db import IntegrityError, transaction
 from django.test import override_settings
 from django.utils import timezone
 from django.utils.timezone import now
+from flags.models import FlagState
 from freezegun import freeze_time
 import pytest
 from rest_framework.exceptions import ValidationError
@@ -20,6 +21,8 @@ from viewflow.fsm import TransitionNotAllowed
 from extras.test_utils.factories import (
     AccountFactory,
     AccountTypeFactory,
+    ApprovalFactory,
+    ApprovalProcessFactory,
     AreaFactory,
     AreaTypeFactory,
     BusinessAreaFactory,
@@ -1965,6 +1968,52 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
         service.check_payment_plan_and_update_status(approval_process)
 
     mock_flow_cls.return_value.status_approve.assert_called_once()
+
+
+@pytest.fixture
+def vision_authorization_context():
+    business_area = BusinessAreaFactory(vision_integration_active=True)
+    payment_plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle__program__business_area=business_area,
+        status=PaymentPlan.Status.IN_AUTHORIZATION,
+    )
+    approval_process = ApprovalProcessFactory(
+        payment_plan=payment_plan,
+        authorization_number_required=1,
+    )
+    ApprovalFactory(
+        approval_process=approval_process,
+        type="AUTHORIZATION",
+        created_by=payment_plan.created_by,
+    )
+    return payment_plan, approval_process
+
+
+@patch("hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_authorization_queues_vision_send_after_commit(
+    mock_notification,
+    mock_send_to_vision,
+    vision_authorization_context,
+    django_capture_on_commit_callbacks,
+) -> None:
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+    )
+    payment_plan, approval_process = vision_authorization_context
+    service = PaymentPlanService(payment_plan)
+    service.action = PaymentPlan.Action.AUTHORIZE.value
+    service.user = payment_plan.created_by
+
+    with django_capture_on_commit_callbacks(execute=True):
+        service.check_payment_plan_and_update_status(approval_process)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    mock_send_to_vision.assert_called_once_with(payment_plan, str(payment_plan.created_by_id))
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")

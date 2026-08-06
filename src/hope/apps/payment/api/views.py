@@ -15,7 +15,6 @@ from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
-from flags.state import flag_enabled
 from rest_framework import mixins, serializers, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -155,8 +154,9 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
-from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
+from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 from hope.models import (
     BusinessArea,
     DeliveryMechanism,
@@ -1420,6 +1420,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.vision_managed:
+            raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
         old_payment_plan = copy_model_object(payment_plan)
         data = dict(request.data)
         data["action"] = PaymentPlan.Action.REVIEW
@@ -1441,6 +1443,8 @@ class PaymentPlanViewSet(
     @transaction.atomic
     def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
+        if payment_plan.vision_managed:
+            raise ValidationError("Vision-managed Payment Plans can only be sent to Payment Gateway automatically")
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
@@ -1461,23 +1465,17 @@ class PaymentPlanViewSet(
 
     @action(detail=True, methods=["post"], url_path="send-to-vision")
     def send_to_vision(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        if not bool(flag_enabled("VISION_INTEGRATION_ACTIVE", request=request)):
-            raise PermissionDenied("Send to Vision feature is not enabled")
-
         payment_plan = self.get_object()
+        if payment_plan.vision_status == VisionStatus.SEND_FAILED.value:
+            raise PermissionDenied("Failed Vision sends can only be retried in Django admin")
         if not payment_plan.can_send_to_vision:
             raise PermissionDenied("Payment plan cannot be sent to Vision")
 
-        try:
-            response = VisionAPI().send_payment_plan(payment_plan)
-            return Response(
-                {"message": f"Payment plan sent to Vision successfully: {response.get('messageId', '')}"},
-                status=status.HTTP_200_OK,
-            )
-        except VisionAPIError as e:
-            raise ValidationError(f"Failed to send to Vision: {e}")
-        except VisionAPIMissingCredentialsError as e:
-            raise ValidationError(f"Vision API not configured: {e}")
+        send_payment_plan_to_vision_async_task(payment_plan, str(request.user.pk))
+        return Response(
+            {"message": "Sending Payment Plan to Vision started"},
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @action(detail=True, methods=["post"])
     @transaction.atomic
@@ -1548,6 +1546,8 @@ class PaymentPlanViewSet(
         fund_commitment_items_ids = serializer.validated_data["fund_commitment_items_ids"]
 
         payment_plan = self.get_object()
+        if payment_plan.vision_managed:
+            raise ValidationError("Funds Commitments are assigned automatically for Vision-managed Payment Plans")
         if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
             raise ValidationError("Payment plan must be in review")
 
@@ -2650,6 +2650,7 @@ class PaymentPlanGroupViewSet(
     )
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
     def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        # TODO(Vision decision): Confirm whether an FSP delivery comment is required and where it should be stored.
         payment_plan_group = self.get_object()
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")

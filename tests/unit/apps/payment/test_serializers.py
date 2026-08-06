@@ -376,7 +376,9 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     )
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
-    payment_plan.status = PaymentPlan.Status.ACCEPTED
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
     payment_plan.save(update_fields=["status"])
 
     serializer = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)})
@@ -392,6 +394,14 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
     assert data["can_send_to_vision"] is True
+    assert data["vision_integration_enabled"] is True
+    assert data["vision_managed"] is True
+    assert data["vision"] == {
+        "status": "NOT_SENT",
+        "vision_id": None,
+        "fc_num": None,
+        "error_code": None,
+    }
     assert data["status_date"] is not None
 
 

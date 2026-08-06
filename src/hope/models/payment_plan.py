@@ -30,6 +30,7 @@ from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.contrib.vision.choices import VisionStatus
 from hope.models.approval import Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
@@ -1220,10 +1221,41 @@ class PaymentPlan(
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
 
     @property
+    def vision_integration_enabled(self) -> bool:
+        # TODO(Vision decision): Instruction-managed Follow-Up plans currently use instruction-level FSP delivery,
+        # which cannot invoke the automatic per-plan PG flow. Keep them outside Vision until that flow is defined.
+        if self.is_instruction_managed:
+            return False
+        return bool(flag_state("VISION_INTEGRATION_ACTIVE")) and self.business_area.vision_integration_active
+
+    @property
+    def vision_status(self) -> str:
+        vision_data = (self.internal_data or {}).get("vision", {})
+        if not isinstance(vision_data, dict):
+            return VisionStatus.NOT_SENT.value
+        return str(vision_data.get("status") or VisionStatus.NOT_SENT.value)
+
+    @property
+    def vision_data(self) -> dict[str, Any]:
+        vision_data = (self.internal_data or {}).get("vision", {})
+        return vision_data if isinstance(vision_data, dict) else {}
+
+    @property
+    def vision_managed(self) -> bool:
+        return self.vision_integration_enabled and (
+            self.status == PaymentPlan.Status.IN_REVIEW or self.vision_status != VisionStatus.NOT_SENT.value
+        )
+
+    @property
+    def can_manually_send_to_payment_gateway(self) -> bool:
+        return self.can_send_to_payment_gateway and not self.vision_managed
+
+    @property
     def can_send_to_vision(self) -> bool:
         return (
-            self.status == PaymentPlan.Status.ACCEPTED
-            and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
+            self.status == PaymentPlan.Status.IN_REVIEW
+            and self.vision_integration_enabled
+            and self.vision_status in {VisionStatus.NOT_SENT.value, VisionStatus.SEND_FAILED.value}
             and not self.sent_to_vision
         )
 

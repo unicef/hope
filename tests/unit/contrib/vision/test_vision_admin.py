@@ -7,7 +7,6 @@ from django.urls import reverse
 from flags.models import FlagState
 import pytest
 
-from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -40,9 +39,11 @@ def admin_client(admin_user: Any) -> Client:
     return client
 
 
-def _create_payment_plan(afghanistan, admin_user, program_cycle, status=PaymentPlan.Status.ACCEPTED):
+def _create_payment_plan(afghanistan, admin_user, program_cycle, status=PaymentPlan.Status.IN_REVIEW):
     from extras.test_utils.factories.payment import PaymentPlanFactory
 
+    afghanistan.vision_integration_active = True
+    afghanistan.save(update_fields=["vision_integration_active"])
     return PaymentPlanFactory(
         status=status,
         program_cycle=program_cycle,
@@ -51,13 +52,13 @@ def _create_payment_plan(afghanistan, admin_user, program_cycle, status=PaymentP
     )
 
 
-def test_send_to_vision_button_visible_when_accepted(afghanistan, admin_user, program_cycle, admin_client) -> None:
+def test_send_to_vision_button_visible_when_in_review(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
-    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.ACCEPTED)
+    pp = _create_payment_plan(afghanistan, admin_user, program_cycle)
     change_url = reverse("admin:payment_paymentplan_change", args=[pp.pk])
     response = admin_client.get(change_url)
     assert response.status_code == 200
@@ -83,7 +84,7 @@ def test_send_to_vision_button_hidden_when_already_sent(afghanistan, admin_user,
         condition="boolean",
         value="True",
     )
-    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.ACCEPTED)
+    pp = _create_payment_plan(afghanistan, admin_user, program_cycle)
     pp.internal_data = {"vision": {"sent": True}}
     pp.save(update_fields=["internal_data"])
     change_url = reverse("admin:payment_paymentplan_change", args=[pp.pk])
@@ -98,45 +99,17 @@ def test_send_to_vision_get_returns_confirmation(afghanistan, admin_user, progra
         condition="boolean",
         value="True",
     )
-    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.ACCEPTED)
+    pp = _create_payment_plan(afghanistan, admin_user, program_cycle)
     url = reverse("admin:payment_paymentplan_send_to_vision", args=[pp.pk])
     response = admin_client.get(url)
     assert response.status_code == 200
     assert "confirm" in response.content.decode().lower()
 
 
-@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
-def test_send_to_vision_calls_api(mock_send, afghanistan, admin_user, program_cycle, admin_client, settings) -> None:
-    mock_send.return_value = {"status": "ok", "messageId": "test-msg-id"}
-    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.ACCEPTED)
+@patch("hope.admin.payment_plan.send_payment_plan_to_vision_async_task")
+def test_send_to_vision_queues_task(mock_send, afghanistan, admin_user, program_cycle, admin_client) -> None:
+    pp = _create_payment_plan(afghanistan, admin_user, program_cycle)
     url = reverse("admin:payment_paymentplan_send_to_vision", args=[pp.pk])
-    settings.VISION_API_URL = "http://fake.vision.test/"
     response = admin_client.post(url)
     assert response.status_code == 302, response.content[:500]
-    mock_send.assert_called_once_with(pp)
-
-
-@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
-def test_send_to_vision_handles_api_error(
-    mock_send, afghanistan, admin_user, program_cycle, admin_client, settings
-) -> None:
-    mock_send.side_effect = VisionAPIError("boom")
-    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.ACCEPTED)
-    url = reverse("admin:payment_paymentplan_send_to_vision", args=[pp.pk])
-    settings.VISION_API_URL = "http://fake.vision.test/"
-    response = admin_client.post(url)
-    assert response.status_code == 302
-    mock_send.assert_called_once_with(pp)
-
-
-@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
-def test_send_to_vision_handles_missing_creds(
-    mock_send, afghanistan, admin_user, program_cycle, admin_client, settings
-) -> None:
-    mock_send.side_effect = VisionAPIMissingCredentialsError("no creds")
-    pp = _create_payment_plan(afghanistan, admin_user, program_cycle, PaymentPlan.Status.ACCEPTED)
-    url = reverse("admin:payment_paymentplan_send_to_vision", args=[pp.pk])
-    settings.VISION_API_URL = "http://fake.vision.test/"
-    response = admin_client.post(url)
-    assert response.status_code == 302
-    mock_send.assert_called_once_with(pp)
+    mock_send.assert_called_once_with(pp, str(admin_user.pk))

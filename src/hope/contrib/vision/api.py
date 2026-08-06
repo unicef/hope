@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 import requests
 
 from hope.apps.core.api.mixins import BaseAPI
 from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
-from hope.contrib.vision.choices import VisionLogEntryType
+from hope.contrib.vision.choices import VISION_SEND_MUTABLE_STATUSES, VisionLogEntryType, VisionStatus
+from hope.contrib.vision.services import VisionService
 from hope.models import PaymentPlan
 
 
@@ -23,6 +25,7 @@ class VisionAPI(BaseAPI):
     API_AUTHENTICATION_REQUIRED = False
     API_EXCEPTION_CLASS = VisionAPIError
     API_MISSING_CREDENTIALS_EXCEPTION_CLASS = VisionAPIMissingCredentialsError
+    SEND_MUTABLE_STATUSES = VISION_SEND_MUTABLE_STATUSES
 
     def __init__(self) -> None:
         super().__init__()
@@ -67,16 +70,39 @@ class VisionAPI(BaseAPI):
     def _vision_data(payment_plan: PaymentPlan) -> dict:
         return payment_plan.internal_data.setdefault("vision", {})
 
-    def _append_log(self, payment_plan: PaymentPlan, entry: dict) -> dict:
-        vision_data = self._vision_data(payment_plan)
-        vision_data.setdefault("log", []).append(entry)
-        return vision_data
+    @classmethod
+    def _persist_send_result(
+        cls,
+        payment_plan: PaymentPlan,
+        entry: dict,
+        send_status: VisionStatus,
+        *,
+        sent: bool = False,
+    ) -> None:
+        with transaction.atomic():
+            locked_payment_plan = PaymentPlan.objects.select_for_update().get(pk=payment_plan.pk)
+            vision_data = cls._vision_data(locked_payment_plan)
+            vision_data.setdefault("log", []).append(entry)
+
+            current_status = str(vision_data.get("status") or VisionStatus.NOT_SENT.value)
+            if (
+                locked_payment_plan.status == PaymentPlan.Status.IN_REVIEW
+                and current_status in cls.SEND_MUTABLE_STATUSES
+            ):
+                if sent:
+                    vision_data["sent"] = True
+                VisionService.set_status(locked_payment_plan, send_status)
+
+            locked_payment_plan.save(update_fields=["internal_data"])
+
+        # Keep the caller's instance aligned with the row merged under lock. In particular, do not leave the async
+        # task holding the stale pre-callback JSON after a callback wins the race with the outbound response.
+        payment_plan.internal_data = locked_payment_plan.internal_data
 
     def send_payment_plan(self, payment_plan: PaymentPlan) -> dict:
         if getattr(payment_plan, "sent_to_vision", False) is True:
             raise VisionAPIError("Payment plan has already been sent to Vision")
 
-        self._ensure_token()
         payload = PaymentPlanPayloadSerializer(payment_plan).data
         entry = {
             "timestamp": timezone.now().isoformat(),
@@ -85,14 +111,21 @@ class VisionAPI(BaseAPI):
             "response": {},
         }
         try:
+            self._ensure_token()
             response, _ = self._post(self.payment_plan_creation_url, payload)
             entry["response"] = response
-        except (BaseAPI.APIError, VisionAPIError) as e:
+        except VisionAPIMissingCredentialsError:
+            entry["response"] = {"error": "Vision API credentials are not configured"}
+            self._persist_send_result(payment_plan, entry, VisionStatus.SEND_FAILED)
+            raise
+        except (BaseAPI.APIError, VisionAPIError, requests.RequestException) as e:
             entry["response"] = {"error": str(e)}
-            self._append_log(payment_plan, entry)
-            payment_plan.save(update_fields=["internal_data"])
+            self._persist_send_result(payment_plan, entry, VisionStatus.SEND_FAILED)
             raise VisionAPIError(str(e)) from e
-        vision_data = self._append_log(payment_plan, entry)
-        vision_data["sent"] = True
-        payment_plan.save(update_fields=["internal_data"])
+        self._persist_send_result(
+            payment_plan,
+            entry,
+            VisionStatus.WAITING_FOR_CALLBACK,
+            sent=True,
+        )
         return response

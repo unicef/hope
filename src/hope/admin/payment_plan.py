@@ -20,10 +20,11 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
-from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 from hope.models import (
     AsyncJob,
     Payment,
@@ -125,6 +126,13 @@ def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
         PaymentPlan.Status.ACCEPTED,
         PaymentPlan.Status.FINISHED,
     ]
+
+
+def can_retry_payment_gateway_send(payment_plan: PaymentPlan) -> bool:
+    return (
+        payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR
+        and payment_plan.can_send_to_payment_gateway
+    )
 
 
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
@@ -370,23 +378,34 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            try:
-                response = VisionAPI().send_payment_plan(payment_plan)
-                self.message_user(
-                    request,
-                    f"Payment plan sent to Vision successfully: {response.get('messageId', '')}",
-                    level="success",
-                )
-            except VisionAPIError as e:
-                self.message_user(request, f"Failed to send to Vision: {e}", level="warning")
-            except VisionAPIMissingCredentialsError as e:
-                self.message_user(request, f"Vision API not configured: {e}", level="error")
+            send_payment_plan_to_vision_async_task(payment_plan, str(request.user.pk))
+            self.message_user(request, "Sending Payment Plan to Vision started", level="success")
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         return confirm_action(
             modeladmin=self,
             request=request,
             action=self.send_to_vision,
             message="Do you confirm to send this payment plan to Vision?",
+        )
+
+    @button(
+        visible=lambda btn: can_retry_payment_gateway_send(btn.original),
+        permission="payment.pm_sync_payment_plan_with_pg",
+    )
+    def retry_payment_gateway_send(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            PaymentPlanService(payment_plan).execute_update_status_action(
+                input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
+                user=request.user,
+            )
+            self.message_user(request, "Payment Gateway send retry started", level="success")
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.retry_payment_gateway_send,
+            message="Do you confirm retrying the Payment Gateway send for this Payment Plan?",
         )
 
     def has_add_permission(self: Any, request: Any) -> bool:
