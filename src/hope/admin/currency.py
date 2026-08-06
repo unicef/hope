@@ -15,7 +15,7 @@ class CurrencyAdmin(HOPEModelAdminBase):
     ordering = ("code", "vision_code")
     actions = ("deprecate_currency",)
 
-    @admin.action(description="Deprecate: swap the active currency for this code")
+    @admin.action(description="Deprecate: swap the active currency for this code", permissions=["change"])
     def deprecate_currency(self, request: HttpRequest, queryset: QuerySet[Currency]) -> None:
         active = [c for c in queryset if c.active]
         inactive = [c for c in queryset if not c.active]
