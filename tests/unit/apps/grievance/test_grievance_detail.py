@@ -1702,6 +1702,7 @@ def test_grievance_detail_needs_adjudication(
         "sex": golden_records_individual.sex,
         "duplicate": golden_records_individual.duplicate,
         "program_code": golden_records_individual.program.code,
+        "similarity_score": None,
         "household": {
             "id": str(golden_records_individual.household.id),
             "unicef_id": golden_records_individual.household.unicef_id,
@@ -1812,6 +1813,7 @@ def test_grievance_detail_needs_adjudication(
         "sex": individuals2[0].sex,
         "duplicate": individuals2[0].duplicate,
         "program_code": individuals2[0].program.code,
+        "similarity_score": None,
         "household": {
             "id": str(individuals2[0].household.id),
             "unicef_id": individuals2[0].household.unicef_id,
@@ -1890,6 +1892,7 @@ def test_grievance_detail_needs_adjudication(
             "sex": individuals2[0].sex,
             "duplicate": individuals2[0].duplicate,
             "program_code": individuals2[0].program.code,
+            "similarity_score": None,
             "household": {
                 "id": str(individuals2[0].household.id),
                 "unicef_id": individuals2[0].household.unicef_id,

@@ -115,7 +115,6 @@ const comparisonRows: ComparisonRow[] = [
     label: 'Sex',
     render: (i) => i?.sex || '-',
     compare: (i) => i?.sex ?? '',
-    alwaysVisible: true,
   },
   {
     label: 'Photo',
@@ -154,9 +153,6 @@ const comparisonRows: ComparisonRow[] = [
     compare: accountsOf,
   },
 ];
-
-const findSimilarity = (records, individualId): number | undefined =>
-  records?.find((record) => record.hitId === individualId)?.score;
 
 export const NaComparisonPanel = ({
   ticketId,
@@ -297,10 +293,7 @@ export const NaComparisonPanel = ({
       )
     : undefined;
 
-  const similarity =
-    findSimilarity(details?.extraData?.possibleDuplicate, person1?.id) ??
-    findSimilarity(person2?.deduplicationGoldenRecordResults, person1?.id) ??
-    findSimilarity(details?.extraData?.goldenRecords, person2?.id);
+  const similarity = person2?.similarityScore;
 
   // Which header icon each person shows, derived from the current mark.
   const person1Role =

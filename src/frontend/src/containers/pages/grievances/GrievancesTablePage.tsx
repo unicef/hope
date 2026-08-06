@@ -159,18 +159,26 @@ export const GrievancesTablePage = (): ReactElement => {
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* //TODO: add permission */}
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() =>
-              navigate(`/${baseUrl}/grievance/na-tickets-management`)
-            }
-            data-cy="button-na-tickets-management"
-            sx={{ whiteSpace: 'nowrap', px: 4, flexShrink: 0 }}
-          >
-            {t('NA Tickets Management')}
-          </Button>
+          {hasPermissions(
+            [
+              PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+              PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+              PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            ],
+            permissions,
+          ) && (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() =>
+                navigate(`/${baseUrl}/grievance/na-tickets-management`)
+              }
+              data-cy="button-na-tickets-management"
+              sx={{ whiteSpace: 'nowrap', px: 4, flexShrink: 0 }}
+            >
+              {t('NA Tickets Management')}
+            </Button>
+          )}
           {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
             <ButtonTooltip
               variant="contained"
