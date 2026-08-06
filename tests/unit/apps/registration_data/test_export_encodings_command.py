@@ -1,5 +1,4 @@
-import base64
-import gzip
+from datetime import UTC, datetime, timedelta
 import json
 from unittest import mock
 from unittest.mock import patch
@@ -25,7 +24,11 @@ def mock_client() -> mock.MagicMock:
         client = client_class.return_value
         client.create_set.side_effect = lambda reference_pk, name: {"id": str(uuid.uuid4())}
         client.get_set.return_value = {"state": "Encoded"}
-        client.get_encodings_page.return_value = {"results": [], "next": None}
+        client.create_export.side_effect = lambda reference_pk, set_ids, export_format: {
+            "key": f"exports/1/{reference_pk}/{reference_pk}-{uuid.uuid4().hex[:6]}.{export_format}.zip",
+            "state": "pending",
+        }
+        client.export_status.return_value = {"state": "pending"}
         yield client
 
 
@@ -39,11 +42,6 @@ def state_key() -> str:
     return f"export-encodings-tests/{uuid.uuid4().hex}/state.json"
 
 
-@pytest.fixture
-def output_prefix() -> str:
-    return f"export-encodings-tests/{uuid.uuid4().hex}/out"
-
-
 def read_state(state_key: str) -> dict:
     with default_storage.open(state_key, "rb") as f:
         return json.load(f)
@@ -53,11 +51,6 @@ def write_state(state_key: str, state: dict) -> None:
     if default_storage.exists(state_key):
         default_storage.delete(state_key)
     default_storage.save(state_key, ContentFile(json.dumps(state).encode()))
-
-
-def read_gzip_lines(name: str) -> list[dict]:
-    with default_storage.open(name, "rb") as f, gzip.GzipFile(fileobj=f) as gz:
-        return [json.loads(line) for line in gz]
 
 
 def submit(state_key: str, extra: list[str] | None = None) -> None:
@@ -74,17 +67,8 @@ def submit(state_key: str, extra: list[str] | None = None) -> None:
     )
 
 
-def collect(state_key: str, output_prefix: str) -> None:
-    call_command(
-        "export_encodings",
-        "--mode",
-        "collect",
-        "--state-file",
-        state_key,
-        "--output-dir",
-        output_prefix,
-        *COMMON_ARGS,
-    )
+def export(state_key: str, extra: list[str] | None = None) -> None:
+    call_command("export_encodings", "--mode", "export", "--state-file", state_key, *COMMON_ARGS, *(extra or []))
 
 
 def test_submit_chunks_deterministically_and_processes_each_chunk(
@@ -96,10 +80,9 @@ def test_submit_chunks_deterministically_and_processes_each_chunk(
     IndividualFactory(business_area=afghanistan, photo="w.jpg", withdrawn=True)
     IndividualFactory(business_area=afghanistan, photo="d.jpg", duplicate=True)
 
-    submit(state_key, ["--chunk-size", "2", "--image-transfer", "filename"])
+    submit(state_key, ["--chunk-size", "2"])
 
     state = read_state(state_key)
-    assert state["image_transfer"] == "filename"
     assert state["upload_batch_size"] == 5000
     assert len(state["chunks"]) == 3  # 5 individuals / chunk size 2
     assert [chunk["index"] for chunk in state["chunks"]] == [0, 1, 2]
@@ -113,29 +96,11 @@ def test_submit_chunks_deterministically_and_processes_each_chunk(
     assert mock_client.process.call_count == 3
     mock_client.process.assert_called_with(state["chunks"][2]["set_id"], encode_only=True)
 
-    # Chunk membership is deterministic: ordered by individual id.
-    uploaded_pks = [
-        item["reference_pk"] for call_args in mock_client.register_images.call_args_list for item in call_args.args[1]
-    ]
-    assert uploaded_pks == sorted(str(individual.id) for individual in individuals)
-
-
-def test_submit_base64_sends_image_content_and_records_missing_files(
-    mock_client: mock.MagicMock, afghanistan: object, state_key: str
-) -> None:
-    with_file = IndividualFactory(business_area=afghanistan, photo=ContentFile(b"image-bytes", name="ok.png"))
-    without_file = IndividualFactory(business_area=afghanistan, photo="does_not_exist.jpg")
-
-    submit(state_key, ["--image-transfer", "base64"])
-
+    # Filename-mode payload: reference_pk + storage key only, no image content.
     items = [item for call_args in mock_client.register_images.call_args_list for item in call_args.args[1]]
-    assert len(items) == 1
-    assert items[0]["reference_pk"] == str(with_file.id)
-    assert base64.b64decode(items[0]["image"]) == b"image-bytes"
-
-    state = read_state(state_key)
-    assert state["chunks"][0]["missing_files"] == [str(without_file.id)]
-    assert state["chunks"][0]["image_count"] == 1
+    assert all(set(item) == {"reference_pk", "filename"} for item in items)
+    # Chunk membership is deterministic: ordered by individual id.
+    assert [item["reference_pk"] for item in items] == sorted(str(individual.id) for individual in individuals)
 
 
 def test_submit_resume_skips_already_uploaded_batches_and_processed_chunks(
@@ -144,7 +109,7 @@ def test_submit_resume_skips_already_uploaded_batches_and_processed_chunks(
     for i in range(4):
         IndividualFactory(business_area=afghanistan, photo=f"photo_{i}.jpg")
 
-    submit(state_key, ["--chunk-size", "4", "--image-transfer", "filename", "--upload-batch-size", "2"])
+    submit(state_key, ["--chunk-size", "4", "--upload-batch-size", "2"])
     assert mock_client.register_images.call_count == 2
 
     # Simulate a crash after the first of two batches was uploaded.
@@ -156,7 +121,7 @@ def test_submit_resume_skips_already_uploaded_batches_and_processed_chunks(
     mock_client.register_images.reset_mock()
     mock_client.create_set.reset_mock()
 
-    submit(state_key, ["--chunk-size", "4", "--image-transfer", "filename", "--upload-batch-size", "2"])
+    submit(state_key, ["--chunk-size", "4", "--upload-batch-size", "2"])
 
     mock_client.create_set.assert_not_called()  # set already exists
     assert mock_client.register_images.call_count == 1  # only the second batch
@@ -166,7 +131,7 @@ def test_submit_resume_skips_already_uploaded_batches_and_processed_chunks(
 
     # A fully processed state file is a no-op on re-run.
     mock_client.register_images.reset_mock()
-    submit(state_key, ["--chunk-size", "4", "--image-transfer", "filename", "--upload-batch-size", "2"])
+    submit(state_key, ["--chunk-size", "4", "--upload-batch-size", "2"])
     mock_client.register_images.assert_not_called()
 
 
@@ -174,10 +139,10 @@ def test_submit_rejects_conflicting_pinned_parameters(
     mock_client: mock.MagicMock, afghanistan: object, state_key: str
 ) -> None:
     IndividualFactory(business_area=afghanistan, photo="photo.jpg")
-    submit(state_key, ["--image-transfer", "filename"])
+    submit(state_key, ["--upload-batch-size", "1000"])
 
-    with pytest.raises(CommandError, match="image_transfer"):
-        submit(state_key, ["--image-transfer", "base64"])
+    with pytest.raises(CommandError, match="upload_batch_size"):
+        submit(state_key, ["--upload-batch-size", "2000"])
 
 
 def test_submit_rejects_unknown_business_area(mock_client: mock.MagicMock, state_key: str) -> None:
@@ -196,7 +161,7 @@ def test_submit_rejects_unknown_business_area(mock_client: mock.MagicMock, state
 
 def test_status_updates_engine_state(mock_client: mock.MagicMock, afghanistan: object, state_key: str) -> None:
     IndividualFactory(business_area=afghanistan, photo="photo.jpg")
-    submit(state_key, ["--image-transfer", "filename"])
+    submit(state_key)
 
     mock_client.get_set.return_value = {"state": "Encoding"}
     call_command("export_encodings", "--mode", "status", "--state-file", state_key, *COMMON_ARGS)
@@ -205,106 +170,180 @@ def test_status_updates_engine_state(mock_client: mock.MagicMock, afghanistan: o
     assert state["chunks"][0]["engine_state"] == "Encoding"
 
 
-def test_collect_writes_embeddings_file_and_manifest(
-    mock_client: mock.MagicMock, afghanistan: object, state_key: str, output_prefix: str
+def test_export_requests_export_when_all_chunks_encoded(
+    mock_client: mock.MagicMock, afghanistan: object, state_key: str
 ) -> None:
-    individual = IndividualFactory(business_area=afghanistan, photo="photo.jpg")
-    submit(state_key, ["--image-transfer", "filename"])
+    for i in range(3):
+        IndividualFactory(business_area=afghanistan, photo=f"photo_{i}.jpg")
+    submit(state_key, ["--chunk-size", "2"])
 
     mock_client.get_set.return_value = {"state": "Encoded"}
-    mock_client.get_encodings_page.return_value = {
-        "results": [
-            {
-                "reference_pk": str(individual.id),
-                "filename": "photo.jpg",
-                "embedding": [0.1, 0.2],
-                "status_code": 200,
-                "model_version": "model-v1",
-            },
-            {
-                "reference_pk": str(uuid.uuid4()),
-                "filename": "other.jpg",
-                "embedding": None,
-                "status_code": 412,
-                "model_version": "model-v1",
-            },
-        ],
-        "next": None,
-    }
-
-    collect(state_key, output_prefix)
+    export(state_key)
 
     state = read_state(state_key)
-    chunk = state["chunks"][0]
-    assert chunk["collected"] is True
-    assert chunk["status_counts"] == {"200": 1, "412": 1}
-    assert chunk["model_version"] == "model-v1"
+    export_entry = state["exports"]["afghanistan:npy"]
+    assert export_entry["state"] == "pending"
+    assert export_entry["key"].startswith("exports/1/afghanistan/")
+    assert export_entry["format"] == "npy"  # default format
+    assert export_entry["requested_at"]
 
-    lines = read_gzip_lines(f"{output_prefix}/{chunk['embeddings_file']}")
-    assert lines[0]["individual_id"] == str(individual.id)
-    assert lines[0]["embedding"] == [0.1, 0.2]
-    assert lines[1]["status_code"] == 412
-    assert lines[1]["embedding"] is None
-
-    with default_storage.open(f"{output_prefix}/manifest.json", "rb") as f:
-        manifest = json.load(f)
-    assert manifest["run_id"] == state["run_id"]
-    assert manifest["model_versions"] == ["model-v1"]
-    assert manifest["status_counts"] == {"200": 1, "412": 1}
-    assert manifest["files"][0]["name"] == chunk["embeddings_file"]
-    assert manifest["failed_chunks"] == []
-
-    # Collect is idempotent: a second run does not refetch collected chunks.
-    mock_client.get_encodings_page.reset_mock()
-    collect(state_key, output_prefix)
-    mock_client.get_encodings_page.assert_not_called()
+    # Sets are passed in chunk-index order.
+    expected_set_ids = [chunk["set_id"] for chunk in state["chunks"]]
+    mock_client.create_export.assert_called_once_with(
+        reference_pk="afghanistan", set_ids=expected_set_ids, export_format="npy"
+    )
 
 
-def test_collect_skips_sets_that_are_not_encoded_yet_and_defers_manifest(
-    mock_client: mock.MagicMock, afghanistan: object, state_key: str, output_prefix: str
+def test_export_format_flag_is_passed_and_recorded(
+    mock_client: mock.MagicMock, afghanistan: object, state_key: str
 ) -> None:
     IndividualFactory(business_area=afghanistan, photo="photo.jpg")
-    submit(state_key, ["--image-transfer", "filename"])
+    submit(state_key)
+
+    export(state_key, ["--export-format", "jsonl"])
+
+    state = read_state(state_key)
+    export_entry = state["exports"]["afghanistan:jsonl"]
+    assert export_entry["format"] == "jsonl"
+    assert ".jsonl.zip" in export_entry["key"]
+    assert mock_client.create_export.call_args.kwargs["export_format"] == "jsonl"
+
+
+def test_both_export_formats_coexist_for_one_co(
+    mock_client: mock.MagicMock, afghanistan: object, state_key: str
+) -> None:
+    IndividualFactory(business_area=afghanistan, photo="photo.jpg")
+    submit(state_key)
+
+    export(state_key, ["--export-format", "jsonl"])  # requests jsonl export
+    mock_client.export_status.return_value = {
+        "state": "ready",
+        "url": "https://blob/a.jsonl.zip?sig=x",
+        "expires_at": "2026-08-13T12:00:00Z",
+    }
+    export(state_key, ["--export-format", "jsonl"])  # polls jsonl -> ready
+
+    # Requesting npy afterwards creates a second, independent export slot.
+    export(state_key, ["--export-format", "npy"])
+
+    state = read_state(state_key)
+    assert state["exports"]["afghanistan:jsonl"]["state"] == "ready"
+    assert state["exports"]["afghanistan:npy"]["state"] == "pending"
+    assert ".npy.zip" in state["exports"]["afghanistan:npy"]["key"]
+    assert mock_client.create_export.call_count == 2  # one per format
+    # The ready jsonl entry was untouched by the npy request.
+    assert state["exports"]["afghanistan:jsonl"]["url"].endswith("sig=x")
+
+
+def test_export_skips_co_with_unencoded_chunks(
+    mock_client: mock.MagicMock, afghanistan: object, state_key: str
+) -> None:
+    IndividualFactory(business_area=afghanistan, photo="photo.jpg")
+    submit(state_key)
 
     mock_client.get_set.return_value = {"state": "Encoding"}
-    collect(state_key, output_prefix)
+    export(state_key)
 
-    mock_client.get_encodings_page.assert_not_called()
-    assert not default_storage.exists(f"{output_prefix}/manifest.json")
-    state = read_state(state_key)
-    assert state["chunks"][0]["collected"] is False
+    mock_client.create_export.assert_not_called()
+    assert read_state(state_key)["exports"] == {}
 
 
-def test_collect_paginates_through_all_encoding_pages(
-    mock_client: mock.MagicMock, afghanistan: object, state_key: str, output_prefix: str
+def test_export_poll_stores_signed_url_and_renews_it_on_repoll(
+    mock_client: mock.MagicMock, afghanistan: object, state_key: str
 ) -> None:
     IndividualFactory(business_area=afghanistan, photo="photo.jpg")
-    submit(state_key, ["--image-transfer", "filename"])
+    submit(state_key)
+    export(state_key)  # requests the export, stores the key
 
-    def make_item() -> dict:
-        return {
-            "reference_pk": str(uuid.uuid4()),
-            "filename": "x.jpg",
-            "embedding": [0.5],
-            "status_code": 200,
-            "model_version": "model-v1",
-        }
+    mock_client.export_status.return_value = {
+        "state": "ready",
+        "url": "https://blob/exports/1/afghanistan/a.zip?sig=first",
+        "expires_at": "2026-08-13T12:00:00Z",
+    }
+    export(state_key)  # polls -> ready
 
-    mock_client.get_encodings_page.side_effect = [
-        {"results": [make_item(), make_item()], "next": "http://next"},
-        {"results": [make_item()], "next": None},
-    ]
-
-    collect(state_key, output_prefix)
-
-    assert mock_client.get_encodings_page.call_count == 2
     state = read_state(state_key)
-    assert len(read_gzip_lines(f"{output_prefix}/{state['chunks'][0]['embeddings_file']}")) == 3
+    export_entry = state["exports"]["afghanistan:npy"]
+    assert export_entry["state"] == "ready"
+    assert export_entry["url"].endswith("sig=first")
+    assert export_entry["expires_at"] == "2026-08-13T12:00:00Z"
+    mock_client.export_status.assert_called_once_with(export_entry["key"])
+
+    # Re-running export on a ready CO re-polls the same key and renews the URL.
+    mock_client.export_status.return_value = {
+        "state": "ready",
+        "url": "https://blob/exports/1/afghanistan/a.zip?sig=renewed",
+        "expires_at": "2026-08-20T12:00:00Z",
+    }
+    export(state_key)
+    state = read_state(state_key)
+    assert state["exports"]["afghanistan:npy"]["url"].endswith("sig=renewed")
+    mock_client.create_export.assert_called_once()  # never re-requested
 
 
-def test_status_and_collect_require_submitted_state(mock_client: mock.MagicMock, state_key: str) -> None:
+def test_export_failed_clears_key_and_next_run_rerequests(
+    mock_client: mock.MagicMock, afghanistan: object, state_key: str
+) -> None:
+    IndividualFactory(business_area=afghanistan, photo="photo.jpg")
+    submit(state_key)
+    export(state_key)
+
+    mock_client.export_status.return_value = {"state": "failed", "error": "boom"}
+    export(state_key)
+
+    state = read_state(state_key)
+    export_entry = state["exports"]["afghanistan:npy"]
+    assert export_entry["state"] == "failed"
+    assert export_entry["key"] is None
+    assert export_entry["error"] == "boom"
+
+    # Next run re-POSTs under a fresh key.
+    export(state_key)
+    assert mock_client.create_export.call_count == 2
+    state = read_state(state_key)
+    assert state["exports"]["afghanistan:npy"]["state"] == "pending"
+    assert state["exports"]["afghanistan:npy"]["key"]
+
+
+def test_export_reposts_after_pending_timeout(mock_client: mock.MagicMock, afghanistan: object, state_key: str) -> None:
+    IndividualFactory(business_area=afghanistan, photo="photo.jpg")
+    submit(state_key)
+    export(state_key)
+
+    state = read_state(state_key)
+    old_key = state["exports"]["afghanistan:npy"]["key"]
+    state["exports"]["afghanistan:npy"]["requested_at"] = (datetime.now(UTC) - timedelta(hours=3)).isoformat()
+    write_state(state_key, state)
+
+    mock_client.export_status.return_value = {"state": "pending"}
+    export(state_key)
+
+    assert mock_client.create_export.call_count == 2
+    state = read_state(state_key)
+    assert state["exports"]["afghanistan:npy"]["key"] != old_key
+    assert state["exports"]["afghanistan:npy"]["state"] == "pending"
+
+
+def test_export_still_pending_within_timeout_does_not_repost(
+    mock_client: mock.MagicMock, afghanistan: object, state_key: str
+) -> None:
+    IndividualFactory(business_area=afghanistan, photo="photo.jpg")
+    submit(state_key)
+    export(state_key)
+    old_key = read_state(state_key)["exports"]["afghanistan:npy"]["key"]
+
+    mock_client.export_status.return_value = {"state": "pending"}
+    export(state_key)
+
+    assert mock_client.create_export.call_count == 1
+    assert read_state(state_key)["exports"]["afghanistan:npy"]["key"] == old_key
+
+
+def test_status_and_export_require_submitted_state(mock_client: mock.MagicMock, state_key: str) -> None:
     with pytest.raises(CommandError, match="submit"):
         call_command("export_encodings", "--mode", "status", "--state-file", state_key, *COMMON_ARGS)
+    with pytest.raises(CommandError, match="submit"):
+        export(state_key)
 
 
 def test_missing_credentials_raise_command_error(state_key: str, monkeypatch: pytest.MonkeyPatch) -> None:

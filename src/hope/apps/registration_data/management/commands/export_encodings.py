@@ -1,28 +1,26 @@
-"""One-shot tool to encode CO images via the Deduplication Engine and collect embeddings.
+"""One-shot tool to encode CO images via the Deduplication Engine and export the embeddings.
 
 Splits individuals of the given business areas into deterministic chunks, submits each
-chunk as its own deduplication set group (so engine workers process chunks in parallel),
-runs encode-only processing, and later collects the embeddings into shareable
-``.jsonl.gz`` files plus a ``manifest.json``.
+chunk as its own deduplication set group (so engine workers process chunks in parallel)
+and runs encode-only processing. Once all chunks of a CO are encoded, the export mode
+asks the engine to zip that CO's embeddings onto its dedicated Azure storage and stores
+the resulting signed URL — the shareable deliverable — in the state file.
 
-All progress is tracked in a JSON state file, so every mode is idempotent and safe to
-re-run after a crash or interruption.
+All progress is tracked in a JSON state file kept in Django default storage, so every
+mode is idempotent and safe to re-run after a crash, interruption, or pod restart.
 
 Usage:
 
-    manage.py export_encodings --mode submit --state-file run1.json \
+    manage.py export_encodings --mode submit --state-file encodings/run1.json \
         --business-areas afghanistan,ukraine --dedup-url https://... --dedup-token ...
 
-    manage.py export_encodings --mode status --state-file run1.json ...
+    manage.py export_encodings --mode status --state-file encodings/run1.json ...
 
-    manage.py export_encodings --mode collect --state-file run1.json --output-dir out/ ...
+    manage.py export_encodings --mode export --state-file encodings/run1.json ...
 """
 
 from argparse import ArgumentParser
-import base64
-import gzip
-import hashlib
-import io
+from datetime import UTC, datetime
 import json
 import os
 import time
@@ -37,11 +35,13 @@ import requests
 
 from hope.models import BusinessArea, Individual
 
-DEFAULT_UPLOAD_BATCH_SIZES = {"base64": 200, "filename": 5000}
-ENCODINGS_PAGE_SIZE = 1000
-# Engine set states in which embeddings are retrievable.
-COLLECTIBLE_STATES = {"Encoded", "Deduplicated", "Approved"}
+DEFAULT_UPLOAD_BATCH_SIZE = 5000
+# Engine set states in which embeddings exist and the set can be exported.
+EXPORTABLE_STATES = {"Encoded", "Deduplicated", "Approved"}
 FAILED_STATES = {"Encoding failed", "Deduplication failed", "Failed"}
+# A pending export older than this is assumed dead (task crashed before writing
+# its error blob) and is re-requested under a fresh key.
+EXPORT_PENDING_TIMEOUT_SECONDS = 2 * 60 * 60
 
 
 class DedupEngineClient:
@@ -101,20 +101,23 @@ class DedupEngineClient:
     def get_set(self, set_id: str) -> dict:
         return self._request("GET", f"deduplication_sets/{set_id}/").json()
 
-    def get_encodings_page(self, set_id: str, page: int, page_size: int) -> dict:
+    def create_export(self, reference_pk: str, set_ids: list[str], export_format: str) -> dict:
         response = self._request(
-            "GET",
-            f"deduplication_sets/{set_id}/encodings/",
-            params={"page": page, "page_size": page_size},
+            "POST",
+            "encodings_exports/",
+            json={"reference_pk": reference_pk, "deduplication_set_ids": set_ids, "format": export_format},
         )
         return response.json()
 
+    def export_status(self, key: str) -> dict:
+        return self._request("GET", "encodings_exports/status/", params={"key": key}).json()
+
 
 class Command(BaseCommand):
-    help = "Encode CO images via the Deduplication Engine (encode_only) and collect embeddings for sharing."
+    help = "Encode CO images via the Deduplication Engine (encode_only) and export embeddings as signed zip URLs."
 
     def add_arguments(self, parser: ArgumentParser) -> None:
-        parser.add_argument("--mode", required=True, choices=["submit", "status", "collect"])
+        parser.add_argument("--mode", required=True, choices=["submit", "status", "export"])
         parser.add_argument(
             "--state-file",
             required=True,
@@ -128,21 +131,16 @@ class Command(BaseCommand):
         parser.add_argument("--dedup-token", default=os.environ.get("DEDUPLICATION_ENGINE_API_KEY"))
         parser.add_argument("--chunk-size", type=int, default=10000)
         parser.add_argument(
-            "--image-transfer",
-            choices=["base64", "filename"],
-            default="base64",
-            help="base64: image content in the payload (current engine). "
-            "filename: storage path only (requires the shared-blob-storage engine build).",
-        )
-        parser.add_argument(
             "--upload-batch-size",
             type=int,
-            default=None,
-            help="Images per registration request. Defaults: 200 (base64) / 5000 (filename).",
+            default=DEFAULT_UPLOAD_BATCH_SIZE,
+            help="Images per registration request.",
         )
         parser.add_argument(
-            "--output-dir",
-            help="Default-storage prefix for embedding files and manifest (required for collect).",
+            "--export-format",
+            choices=["npy", "jsonl"],
+            default="npy",
+            help="Export zip format: npy (float32 matrix + index, ~4-5x smaller) or jsonl (self-describing).",
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
@@ -161,7 +159,7 @@ class Command(BaseCommand):
         elif mode == "status":
             self._run_status()
         else:
-            self._run_collect(options)
+            self._run_export(options["export_format"])
 
     # ----- state file (kept in Django default storage so it survives pod restarts) -----
 
@@ -172,14 +170,11 @@ class Command(BaseCommand):
         return {}
 
     def _save_state(self) -> None:
-        self._save_to_storage(self.state_key, json.dumps(self.state, indent=2).encode())
-
-    @staticmethod
-    def _save_to_storage(name: str, data: bytes) -> None:
+        data = json.dumps(self.state, indent=2).encode()
         # Storage.save() mangles existing names instead of overwriting, so delete first.
-        if default_storage.exists(name):
-            default_storage.delete(name)
-        default_storage.save(name, ContentFile(data))
+        if default_storage.exists(self.state_key):
+            default_storage.delete(self.state_key)
+        default_storage.save(self.state_key, ContentFile(data))
 
     # ----- submit -----
 
@@ -199,23 +194,21 @@ class Command(BaseCommand):
         if missing := set(slugs) - existing:
             raise CommandError(f"Unknown business area slug(s): {', '.join(sorted(missing))}")
 
-        upload_batch_size = options["upload_batch_size"] or DEFAULT_UPLOAD_BATCH_SIZES[options["image_transfer"]]
         if not self.state:
             self.state = {
                 "run_id": uuid.uuid4().hex[:8],
                 "chunk_size": options["chunk_size"],
-                "image_transfer": options["image_transfer"],
-                "upload_batch_size": upload_batch_size,
+                "upload_batch_size": options["upload_batch_size"],
                 "business_areas": slugs,
                 "chunks": [],
+                "exports": {},
             }
             self._save_state()
         else:
             # Resume: pinned parameters must match, otherwise batch-offset resume would corrupt uploads.
             for key, value in (
                 ("chunk_size", options["chunk_size"]),
-                ("image_transfer", options["image_transfer"]),
-                ("upload_batch_size", upload_batch_size),
+                ("upload_batch_size", options["upload_batch_size"]),
             ):
                 if self.state[key] != value:
                     raise CommandError(
@@ -249,10 +242,7 @@ class Command(BaseCommand):
                         "last_individual_id": None,
                         "step": "pending",
                         "uploaded_batches": 0,
-                        "missing_files": [],
                         "engine_state": None,
-                        "collected": False,
-                        "status_counts": {},
                     }
                     self.state["chunks"].append(chunk)
                     chunks_by_reference[reference_id] = chunk
@@ -286,11 +276,11 @@ class Command(BaseCommand):
             for batch_index, batch in enumerate(batches):
                 if batch_index < chunk["uploaded_batches"]:
                     continue
-                items, missing = self._build_image_items(batch)
-                if items:
-                    self.client.register_images(chunk["set_id"], items)
+                items = [
+                    {"reference_pk": str(individual.id), "filename": individual.photo.name} for individual in batch
+                ]
+                self.client.register_images(chunk["set_id"], items)
                 chunk["image_count"] += len(items)
-                chunk["missing_files"].extend(missing)
                 chunk["uploaded_batches"] = batch_index + 1
                 self._save_state()
             chunk["step"] = "uploaded"
@@ -309,134 +299,88 @@ class Command(BaseCommand):
 
         self.stdout.write(f"  {reference_id}: submitted {chunk['image_count']} images (set {chunk['set_id']})")
 
-    def _build_image_items(self, individuals: list[Individual]) -> tuple[list[dict], list[str]]:
-        items = []
-        missing = []
-        use_base64 = self.state["image_transfer"] == "base64"
-        for individual in individuals:
-            item = {"reference_pk": str(individual.id), "filename": individual.photo.name}
-            if use_base64:
-                try:
-                    with individual.photo.open("rb") as f:
-                        item["image"] = base64.b64encode(f.read()).decode("ascii")
-                except OSError:
-                    missing.append(str(individual.id))
-                    continue
-            items.append(item)
-        return items, missing
-
     # ----- status -----
 
     def _run_status(self) -> None:
         self._require_chunks()
         for chunk in self.state["chunks"]:
-            if chunk["set_id"] and not chunk["collected"]:
+            if chunk["set_id"] and chunk["engine_state"] not in EXPORTABLE_STATES:
                 chunk["engine_state"] = self.client.get_set(chunk["set_id"])["state"]
         self._save_state()
         self._print_summary()
 
-    # ----- collect -----
+    # ----- export -----
 
-    def _run_collect(self, options: dict) -> None:
+    def _run_export(self, export_format: str) -> None:
         self._require_chunks()
-        if not options["output_dir"]:
-            raise CommandError("--output-dir is required for collect mode.")
-        output_prefix = options["output_dir"].rstrip("/")
+        exports = self.state.setdefault("exports", {})
 
-        for chunk in self.state["chunks"]:
-            if chunk["collected"] or not chunk["set_id"]:
+        for slug in self.state["business_areas"]:
+            chunks = [chunk for chunk in self.state["chunks"] if chunk["business_area"] == slug]
+            not_ready = self._refresh_and_find_not_exportable(chunks)
+            if not_ready:
+                self.stdout.write(
+                    f"{slug}: skipped, {len(not_ready)} chunk(s) not encoded yet "
+                    f"(e.g. {not_ready[0]['reference_id']}: {not_ready[0]['engine_state'] or not_ready[0]['step']})"
+                )
                 continue
-            chunk["engine_state"] = self.client.get_set(chunk["set_id"])["state"]
-            self._save_state()
-            if chunk["engine_state"] not in COLLECTIBLE_STATES:
-                continue
-            self._collect_chunk(chunk, output_prefix)
+
+            # One export slot per CO and format: both npy and jsonl can coexist for a CO.
+            export = exports.get(f"{slug}:{export_format}")
+            if not export or not export.get("key"):
+                self._request_export(slug, chunks, export_format)
+            else:
+                self._poll_export(slug, export, export_format)
 
         self._print_summary()
-        self._maybe_write_manifest(output_prefix)
 
-    def _collect_chunk(self, chunk: dict, output_prefix: str) -> None:
-        file_name = f"{chunk['reference_id']}.jsonl.gz"
-        status_counts: dict[str, int] = {}
-        digest = hashlib.sha256()
-        lines_written = 0
-        model_version = None
-
-        buffer = io.BytesIO()
-        with gzip.GzipFile(fileobj=buffer, mode="wb") as out:
-            page = 1
-            while True:
-                data = self.client.get_encodings_page(chunk["set_id"], page, ENCODINGS_PAGE_SIZE)
-                for item in data["results"]:
-                    model_version = item.get("model_version") or model_version
-                    status_code = str(item.get("status_code", ""))
-                    status_counts[status_code] = status_counts.get(status_code, 0) + 1
-                    line = json.dumps(
-                        {
-                            "individual_id": item["reference_pk"],
-                            "filename": item.get("filename"),
-                            "embedding": item.get("embedding"),
-                            "status_code": item.get("status_code"),
-                            "model_version": item.get("model_version"),
-                        }
-                    )
-                    out.write(line.encode() + b"\n")
-                    digest.update(line.encode())
-                    lines_written += 1
-                if not data.get("next"):
-                    break
-                page += 1
-
-        # The file lands in storage atomically only after all pages were fetched.
-        self._save_to_storage(f"{output_prefix}/{file_name}", buffer.getvalue())
-        chunk["collected"] = True
-        chunk["status_counts"] = status_counts
-        chunk["embeddings_file"] = file_name
-        chunk["embeddings_sha256"] = digest.hexdigest()
-        chunk["model_version"] = model_version
-        self._save_state()
-        self.stdout.write(
-            f"  {chunk['reference_id']}: collected {lines_written} encodings -> {output_prefix}/{file_name}"
-        )
-
-    def _maybe_write_manifest(self, output_prefix: str) -> None:
-        chunks = self.state["chunks"]
-        pending = [
-            chunk for chunk in chunks if not chunk["collected"] and (chunk["engine_state"] or "") not in FAILED_STATES
-        ]
-        if pending:
-            self.stdout.write(f"{len(pending)} chunk(s) not yet collected; manifest not written. Re-run later.")
-            return
-
-        totals: dict[str, int] = {}
+    def _refresh_and_find_not_exportable(self, chunks: list[dict]) -> list[dict]:
+        not_ready = []
         for chunk in chunks:
-            for code, count in chunk["status_counts"].items():
-                totals[code] = totals.get(code, 0) + count
-        manifest = {
-            "run_id": self.state["run_id"],
-            "business_areas": self.state["business_areas"],
-            "chunk_size": self.state["chunk_size"],
-            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "model_versions": sorted({c["model_version"] for c in chunks if c.get("model_version")}),
-            "total_images": sum(chunk["image_count"] for chunk in chunks),
-            "status_counts": totals,
-            "missing_files_count": sum(len(chunk["missing_files"]) for chunk in chunks),
-            "files": [
-                {
-                    "name": chunk["embeddings_file"],
-                    "sha256": chunk["embeddings_sha256"],
-                    "business_area": chunk["business_area"],
-                    "reference_id": chunk["reference_id"],
-                    "status_counts": chunk["status_counts"],
-                }
-                for chunk in chunks
-                if chunk["collected"]
-            ],
-            "failed_chunks": [chunk["reference_id"] for chunk in chunks if not chunk["collected"]],
+            if chunk["step"] != "processed":
+                not_ready.append(chunk)
+                continue
+            if chunk["engine_state"] not in EXPORTABLE_STATES:
+                chunk["engine_state"] = self.client.get_set(chunk["set_id"])["state"]
+                self._save_state()
+            if chunk["engine_state"] not in EXPORTABLE_STATES:
+                not_ready.append(chunk)
+        return not_ready
+
+    def _request_export(self, slug: str, chunks: list[dict], export_format: str) -> None:
+        set_ids = [chunk["set_id"] for chunk in sorted(chunks, key=lambda c: c["index"])]
+        response = self.client.create_export(reference_pk=slug, set_ids=set_ids, export_format=export_format)
+        self.state["exports"][f"{slug}:{export_format}"] = {
+            "key": response["key"],
+            "format": export_format,
+            "state": "pending",
+            "requested_at": datetime.now(UTC).isoformat(),
         }
-        manifest_key = f"{output_prefix}/manifest.json"
-        self._save_to_storage(manifest_key, json.dumps(manifest, indent=2).encode())
-        self.stdout.write(self.style.SUCCESS(f"Manifest written to {manifest_key}"))
+        self._save_state()
+        self.stdout.write(f"{slug}: export requested ({export_format}), key {response['key']}")
+
+    def _poll_export(self, slug: str, export: dict, export_format: str) -> None:
+        status = self.client.export_status(export["key"])
+        if status["state"] == "ready":
+            # Re-polling a ready export renews the signed URL (the engine re-signs on every call).
+            export.update(state="ready", url=status["url"], expires_at=status.get("expires_at"))
+            self._save_state()
+            self.stdout.write(self.style.SUCCESS(f"{slug}: export ready, url valid until {export['expires_at']}"))
+        elif status["state"] == "failed":
+            self.stdout.write(
+                self.style.ERROR(f"{slug}: export failed ({status.get('error')}); key cleared, re-run export to retry.")
+            )
+            export.update(key=None, state="failed", error=status.get("error"))
+            self._save_state()
+        else:  # pending
+            requested_at = datetime.fromisoformat(export["requested_at"])
+            age = (datetime.now(UTC) - requested_at).total_seconds()
+            if age > EXPORT_PENDING_TIMEOUT_SECONDS:
+                self.stdout.write(f"{slug}: export pending for {age / 3600:.1f}h, assuming dead; re-requesting.")
+                chunks = [chunk for chunk in self.state["chunks"] if chunk["business_area"] == slug]
+                self._request_export(slug, chunks, export_format)
+            else:
+                self.stdout.write(f"{slug}: export still pending (key {export['key']}); re-run later.")
 
     # ----- helpers -----
 
@@ -448,9 +392,7 @@ class Command(BaseCommand):
         by_area: dict[str, dict[str, int]] = {}
         for chunk in self.state.get("chunks", []):
             area_stats = by_area.setdefault(chunk["business_area"], {})
-            if chunk["collected"]:
-                status = "collected"
-            elif chunk["step"] != "processed":
+            if chunk["step"] != "processed":
                 status = f"submit:{chunk['step']}"
             else:
                 status = chunk["engine_state"] or "unknown"
@@ -458,4 +400,10 @@ class Command(BaseCommand):
         self.stdout.write("Summary:")
         for area, stats in sorted(by_area.items()):
             parts = ", ".join(f"{status}={count}" for status, count in sorted(stats.items()))
-            self.stdout.write(f"  {area}: {parts}")
+            export_infos = [
+                f"export {export['format']}: {export['state']}"
+                for entry_key, export in sorted(self.state.get("exports", {}).items())
+                if entry_key.startswith(f"{area}:")
+            ]
+            export_info = f"; {', '.join(export_infos)}" if export_infos else ""
+            self.stdout.write(f"  {area}: {parts}{export_info}")
