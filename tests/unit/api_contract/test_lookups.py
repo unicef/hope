@@ -188,6 +188,16 @@ def test_choices_payment_verification_summary_status(superuser):
     recorder.assertGET("/api/rest/choices/payment-verification-summary-status/")
 
 
+def test_choices_payment_verification_plan_channel(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/payment-verification-plan-channel/")
+
+
+def test_choices_sex(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/sex/")
+
+
 def test_choices_payment_verification_plan_sampling(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/payment-verification-plan-sampling/")

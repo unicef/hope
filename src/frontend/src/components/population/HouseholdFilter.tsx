@@ -14,7 +14,7 @@ import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomple
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import {
   generateTableOrderOptionsGroup,
-  PROGRAM_STATE_FILTER,
+  PROGRAM_STATE_CHOICES,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -216,12 +216,11 @@ export function HouseholdFilters({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>
-                {t('Active Programmes')}
-              </MenuItem>
-              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>
-                {t('All Programmes')}
-              </MenuItem>
+              {PROGRAM_STATE_CHOICES.map((choice) => (
+                <MenuItem key={choice.value} value={choice.value}>
+                  {t(choice.label)}
+                </MenuItem>
+              ))}
             </SelectFilter>
           </Grid>
         )}
