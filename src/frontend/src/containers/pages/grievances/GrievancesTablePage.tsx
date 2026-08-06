@@ -12,6 +12,7 @@ import {
   GRIEVANCES_VIEW_LIST_PERMISSIONS,
   PERMISSIONS,
   GRIEVANCES_NA_MANAGE_PERMISSIONS,
+  canManageNeedsAdjudication,
   hasPermissions,
 } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -160,7 +161,7 @@ export const GrievancesTablePage = (): ReactElement => {
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {hasPermissions(GRIEVANCES_NA_MANAGE_PERMISSIONS, permissions) && (
+          {canManageNeedsAdjudication(permissions) && (
             <Button
               variant="outlined"
               color="primary"

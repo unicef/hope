@@ -189,7 +189,10 @@ def test_bulk_needs_adjudication_marks_person_duplicate_and_closes(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -231,7 +234,10 @@ def test_bulk_needs_adjudication_not_duplicates_marks_both_distinct_and_closes(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -312,7 +318,10 @@ def test_bulk_needs_adjudication_all_or_nothing_when_one_ticket_closed(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -362,7 +371,10 @@ def test_bulk_needs_adjudication_rejects_individual_not_on_ticket(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -398,7 +410,10 @@ def test_bulk_needs_adjudication_rejects_non_na_ticket(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -438,7 +453,10 @@ def test_bulk_needs_adjudication_rejects_empty_marks(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -474,7 +492,10 @@ def test_bulk_needs_adjudication_rejects_overlapping_duplicate_and_distinct(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -510,7 +531,10 @@ def test_bulk_needs_adjudication_rejects_empty_tickets_list(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -531,7 +555,10 @@ def test_bulk_needs_adjudication_reassigns_head_and_closes(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -581,7 +608,10 @@ def test_bulk_needs_adjudication_rejects_head_withdrawal_without_reassignment(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -622,7 +652,10 @@ def test_bulk_needs_adjudication_reassigns_primary_collector_and_closes(
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -672,7 +705,10 @@ def test_bulk_needs_adjudication_rejects_primary_collector_withdrawal_without_re
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -713,7 +749,10 @@ def test_bulk_needs_adjudication_closes_alternate_collector_without_reassignment
 ) -> None:
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         whole_business_area_access=True,
     )
@@ -742,7 +781,7 @@ def test_bulk_needs_adjudication_closes_alternate_collector_without_reassignment
     assert IndividualRoleInHousehold.objects.filter(household=golden.household, role=ROLE_PRIMARY).exists()
 
 
-def test_bulk_needs_adjudication_forbidden_without_manage_permission(
+def test_bulk_needs_adjudication_forbidden_without_close_permission(
     api_client: Any,
     user: User,
     business_area: BusinessArea,
@@ -780,7 +819,45 @@ def test_bulk_needs_adjudication_forbidden_without_manage_permission(
     assert na_ticket.ticket.status == GrievanceTicket.STATUS_NEW
 
 
-def test_bulk_needs_adjudication_forbidden_when_manage_granted_in_another_program(
+def test_bulk_needs_adjudication_forbidden_without_approve_permission(
+    api_client: Any,
+    user: User,
+    business_area: BusinessArea,
+    na_ticket: TicketNeedsAdjudicationDetails,
+    bulk_na_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+        business_area,
+        whole_business_area_access=True,
+    )
+    golden = na_ticket.golden_records_individual
+    duplicate = na_ticket.possible_duplicates.first()
+
+    client = api_client(user)
+    response = client.post(
+        bulk_na_url,
+        {
+            "tickets": [
+                {
+                    "ticket_id": str(na_ticket.ticket.id),
+                    "duplicate_individual_ids": [str(golden.id)],
+                    "distinct_individual_ids": [str(duplicate.id)],
+                }
+            ]
+        },
+        format="json",
+    )
+
+    na_ticket.ticket.refresh_from_db()
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert na_ticket.ticket.status == GrievanceTicket.STATUS_NEW
+
+
+def test_bulk_needs_adjudication_forbidden_when_granted_in_another_program(
     api_client: Any,
     user: User,
     business_area: BusinessArea,
@@ -791,7 +868,10 @@ def test_bulk_needs_adjudication_forbidden_when_manage_granted_in_another_progra
     other_program = ProgramFactory(business_area=business_area, name="program without the ticket")
     create_user_role_with_permissions(
         user,
-        [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
         business_area,
         program=other_program,
     )

@@ -3,7 +3,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import {
   GRIEVANCES_NA_MANAGE_PERMISSIONS,
-  hasPermissions,
+  canManageNeedsAdjudication,
 } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -16,7 +16,7 @@ const NaTicketsManagementPage = (): ReactElement => {
   const permissions = usePermissions();
 
   if (permissions === null) return null;
-  if (!hasPermissions(GRIEVANCES_NA_MANAGE_PERMISSIONS, permissions))
+  if (!canManageNeedsAdjudication(permissions))
     return <PermissionDenied permission={GRIEVANCES_NA_MANAGE_PERMISSIONS} />;
 
   return (

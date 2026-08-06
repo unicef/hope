@@ -183,12 +183,14 @@ class BulkActionService:
                 "Some selected tickets do not exist, are closed, or are not Needs Adjudication tickets."
             )
 
+        required = [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE.value,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK.value,
+        ]
         for ticket in tickets:
             scope = ticket.programs.first() or ticket.business_area
-            if not user.has_perm(Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE.value, scope):
-                raise PermissionDenied(
-                    detail={"required_permissions": [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE.value]}
-                )
+            if not all(user.has_perm(permission, scope) for permission in required):
+                raise PermissionDenied(detail={"required_permissions": required})
 
         for ticket in tickets:
             old_ticket = copy.copy(ticket)
