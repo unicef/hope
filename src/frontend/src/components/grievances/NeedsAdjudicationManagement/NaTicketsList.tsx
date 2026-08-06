@@ -41,13 +41,21 @@ export const NaTicketsList = ({
 
   const urgencyChoices = choicesData?.grievanceTicketUrgencyChoices ?? [];
 
-  // Requirement: changing the page opens a confirmation modal first.
-  // TODO: replace the placeholder copy once the resolution flow is defined.
+  const managedCount = Object.keys(decisions).length;
+
+  // Changing the page only needs a confirmation when the operator is carrying
+  // decisions that have not been finalized yet.
   const confirmPageChange = (apply: () => void): void => {
+    if (managedCount === 0) {
+      apply();
+      return;
+    }
     confirm({
+      catchOnCancel: true,
       title: t('Change page'),
       content: t(
-        'TODO: placeholder — you are about to leave the current page. Continue?',
+        'You have {{count}} ticket(s) managed but not finalized. Your decisions are kept when you change page, but nothing is saved until you click Finalize. Continue?',
+        { count: managedCount },
       ),
     }).then(apply, () => undefined);
   };

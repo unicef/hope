@@ -313,7 +313,7 @@ export const NaComparisonPanel = ({
     <ApproveBox>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6">
-          Ticket ID:{' '}
+          {t('Ticket ID')}:{' '}
           {detailsPath ? (
             <BlackLink to={detailsPath}>
               <u>{ticket.unicefId}</u>

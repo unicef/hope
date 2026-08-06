@@ -52,7 +52,7 @@ export const NaTicketListItem = ({
     >
       <Box>
         <Typography variant="subtitle1">
-          {`Ticket ID: ${ticket.unicefId}`}
+          {t('Ticket ID')}: {ticket.unicefId}
         </Typography>
         <Typography variant="body2" color="textSecondary">
           {issueTypeToDisplay}
