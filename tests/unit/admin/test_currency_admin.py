@@ -1,10 +1,13 @@
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import RequestFactory
 import pytest
 
-from extras.test_utils.factories import CurrencyFactory
+from extras.test_utils.factories import CurrencyFactory, UserFactory
 from hope.admin.currency import CurrencyAdmin
 from hope.models import Currency
 
@@ -19,6 +22,7 @@ def admin_instance() -> CurrencyAdmin:
 @pytest.fixture
 def request_with_messages():
     request = RequestFactory().post("/")
+    request.user = UserFactory()
     request.session = {}
     request._messages = FallbackStorage(request)
     return request
@@ -94,8 +98,10 @@ def test_deprecate_swaps_active_flag(
     django_assert_num_queries,
 ) -> None:
     old, new = syp_awaiting_deprecation
+    # Warm the ContentType cache so the LogEntry writes cost a fixed number of queries.
+    ContentType.objects.get_for_model(Currency)
 
-    with django_assert_num_queries(5):
+    with django_assert_num_queries(7):
         admin_instance.deprecate_currency(request_with_messages, Currency.objects.filter(code="SYP"))
 
     old.refresh_from_db()
@@ -115,3 +121,36 @@ def test_deprecate_leaves_rows_untouched_when_selection_is_invalid(
     new.refresh_from_db()
     assert old.active is False
     assert new.active is False
+
+
+def test_deprecate_logs_the_swap_on_both_rows(
+    admin_instance: CurrencyAdmin,
+    request_with_messages,
+    syp_awaiting_deprecation: tuple[Currency, Currency],
+) -> None:
+    old, new = syp_awaiting_deprecation
+
+    admin_instance.deprecate_currency(request_with_messages, Currency.objects.filter(code="SYP"))
+
+    entries = LogEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(Currency), user=request_with_messages.user
+    )
+    assert {(e.object_id, e.action_flag, e.change_message) for e in entries} == {
+        (str(old.pk), CHANGE, "Deprecated in favour of 'SYP01'."),
+        (str(new.pk), CHANGE, "Activated in place of 'SYP'."),
+    }
+
+
+def test_deprecate_action_is_hidden_without_change_permission(admin_instance: CurrencyAdmin) -> None:
+    request = RequestFactory().get("/")
+    request.user = UserFactory()
+
+    assert "deprecate_currency" not in admin_instance.get_actions(request)
+
+
+def test_deprecate_action_is_offered_with_change_permission(admin_instance: CurrencyAdmin) -> None:
+    request = RequestFactory().get("/")
+    request.user = UserFactory()
+    request.user.user_permissions.add(Permission.objects.get(codename="change_currency"))
+
+    assert "deprecate_currency" in admin_instance.get_actions(request)

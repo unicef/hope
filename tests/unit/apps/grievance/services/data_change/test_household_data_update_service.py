@@ -9,6 +9,7 @@ from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     CountryFactory,
+    CurrencyFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -703,9 +704,17 @@ def test_close_resolves_currency_from_code(all_currencies) -> None:
     assert household.currency == usd_currency
 
 
-def test_close_resolves_active_currency_for_shared_code() -> None:
-    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-    new_syp = Currency.objects.create(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+@pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def current_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+
+
+def test_close_resolves_active_currency_for_shared_code(deprecated_syp: Currency, current_syp: Currency) -> None:
     household = HouseholdFactory(create_role=False, currency=None)
     ticket_details = TicketHouseholdDataUpdateDetailsFactory(
         household=household,
@@ -720,4 +729,4 @@ def test_close_resolves_active_currency_for_shared_code() -> None:
     service.close(UserFactory())
     household.refresh_from_db()
 
-    assert household.currency == new_syp
+    assert household.currency == current_syp
