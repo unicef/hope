@@ -27,6 +27,7 @@ from hope.contrib.aurora.services.ukraine_flex_registration_service import Ukrai
 from hope.models import (
     DataCollectingType,
     DeliveryMechanism,
+    DocumentType,
     FinancialInstitution,
     PendingAccount,
     PendingDocument,
@@ -675,6 +676,24 @@ def test_malformed_wallet_image_rejects_record_without_killing_batch(
     usdc_record.refresh_from_db()
     assert usdc_record.status == Record.STATUS_ERROR
     assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
+
+
+def test_unconfigured_document_type_fails_import(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    with pytest.raises(DocumentType.DoesNotExist, match="DocumentType with key 'other_id' is not configured"):
+        service.process_records(rdi.id, [usdc_record.id])
+
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()
+    assert not PendingIndividual.objects.filter(registration_data_import=rdi).exists()
 
 
 def test_failed_individual_validation_leaves_no_orphan_images(
