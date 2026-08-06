@@ -3,6 +3,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from constance import config
+from django.db import transaction
 from elasticsearch import NotFoundError
 from elasticsearch.dsl import connections
 
@@ -19,8 +20,12 @@ if TYPE_CHECKING:
 def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
     if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
-    qs = queryset.iterator(chunk_size=chunk_size)
-    doc().update(qs, parallel=parallel)
+    # atomic() so iterator() opens a plain (lazy) server-side cursor: outside a transaction
+    # Django declares it WITH HOLD, which materializes the ENTIRE result set on DECLARE
+    # before the first row arrives - minutes-to-hours on big programs under IO pressure
+    with transaction.atomic():
+        qs = queryset.iterator(chunk_size=chunk_size)
+        doc().update(qs, parallel=parallel)
 
 
 def remove_elasticsearch_documents_by_matching_ids(
