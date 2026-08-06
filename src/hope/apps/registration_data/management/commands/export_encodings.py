@@ -9,20 +9,26 @@ the resulting signed URL — the shareable deliverable — in the state file.
 All progress is tracked in a JSON state file kept in Django default storage, so every
 mode is idempotent and safe to re-run after a crash, interruption, or pod restart.
 
+Export mode: POST /encodings_exports/ when the state file has no key for that CO+format;
+GET /encodings_exports/status/?key=… when a key is already stored (poll / renew URL).
+
+Full usage instructions: docs/guide-dev/export-encodings.md
+
 Usage:
 
     manage.py export_encodings --mode submit --state-file encodings/run1.json \
         --business-areas afghanistan,ukraine --dedup-url https://... --dedup-token ...
 
-    manage.py export_encodings --mode status --state-file encodings/run1.json ...
+    manage.py export_encodings --mode status --state-file encodings/run1.json \
+        --dedup-url https://... --dedup-token ...
 
-    manage.py export_encodings --mode export --state-file encodings/run1.json ...
+    manage.py export_encodings --mode export --state-file encodings/run1.json \
+        --dedup-url https://... --dedup-token ...
 """
 
 from argparse import ArgumentParser
 from datetime import UTC, datetime
 import json
-import os
 import time
 from typing import Any
 import uuid
@@ -127,8 +133,8 @@ class Command(BaseCommand):
             "--business-areas",
             help="Comma-separated business area slugs to encode (required for submit).",
         )
-        parser.add_argument("--dedup-url", default=os.environ.get("DEDUPLICATION_ENGINE_API_URL"))
-        parser.add_argument("--dedup-token", default=os.environ.get("DEDUPLICATION_ENGINE_API_KEY"))
+        parser.add_argument("--dedup-url")
+        parser.add_argument("--dedup-token")
         parser.add_argument("--chunk-size", type=int, default=10000)
         parser.add_argument(
             "--upload-batch-size",
@@ -145,10 +151,7 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         if not options["dedup_url"] or not options["dedup_token"]:
-            raise CommandError(
-                "Deduplication engine URL/token missing: pass --dedup-url/--dedup-token or set "
-                "DEDUPLICATION_ENGINE_API_URL/DEDUPLICATION_ENGINE_API_KEY."
-            )
+            raise CommandError("Deduplication engine URL/token missing: pass --dedup-url and --dedup-token.")
         self.client = DedupEngineClient(options["dedup_url"], options["dedup_token"])
         self.state_key = options["state_file"]
         self.state = self._load_state()
