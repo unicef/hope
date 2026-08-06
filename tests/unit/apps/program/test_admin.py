@@ -471,13 +471,25 @@ def test_check_index_button_no_permission(django_app: Any, program: Program) -> 
     assert response.status_code == 403
 
 
-def test_reindex_program_button(django_app: Any, program: Program) -> None:
+def test_reindex_program_button_get_asks_for_confirmation(django_app: Any, program: Program) -> None:
     user_with_perm = UserFactory(is_staff=True, is_superuser=False)
     perm = Permission.objects.get(codename="can_reindex_programs")
     user_with_perm.user_permissions.add(perm)
     url = reverse("admin:program_program_reindex_program", args=[program.pk])
     with patch("hope.admin.program.rebuild_program_indexes", return_value=(True, "ok")) as mock_rebuild:
         response = django_app.get(url, user=user_with_perm, expect_errors=True)
+    mock_rebuild.assert_not_called()
+    assert response.status_code == 200
+    assert "DESTRUCTIVE" in response.text
+
+
+def test_reindex_program_button_confirmed_rebuilds(django_app_no_csrf: Any, program: Program) -> None:
+    user_with_perm = UserFactory(is_staff=True, is_superuser=False)
+    perm = Permission.objects.get(codename="can_reindex_programs")
+    user_with_perm.user_permissions.add(perm)
+    url = reverse("admin:program_program_reindex_program", args=[program.pk])
+    with patch("hope.admin.program.rebuild_program_indexes", return_value=(True, "ok")) as mock_rebuild:
+        response = django_app_no_csrf.post(url, user=user_with_perm, expect_errors=True)
     mock_rebuild.assert_called_once_with(str(program.id))
     assert response.status_code == 302
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
