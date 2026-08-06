@@ -1548,13 +1548,12 @@ class PaymentPlanService:
             .exclude(expiry_date__lt=timezone.now())
             .distinct()
         )
-        users = (
-            User.objects.filter(
-                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-            )
-            .exclude(is_superuser=True)
-            .distinct()
-        )
+        users = User.objects.filter(
+            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
+        ).distinct()
+
+        if not config.NOTIFY_INTERNAL_USERS:
+            users = users.exclude(is_superuser=True)
 
         if users:
             text_template = "payment/pp_reconciliation_overdue_email.txt"

@@ -492,6 +492,23 @@ def send_email_notification_exclude_superuser(
     assert authorized_users["unicef_hq_authorized"] not in actual_recipients
 
 
+@override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True, NOTIFY_INTERNAL_USERS=True)
+def test_send_email_notification_include_internal_users(
+    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
+) -> None:
+    authorized_users["unicef_hq_authorized"].is_superuser = True
+    authorized_users["unicef_hq_authorized"].save()
+
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_with_authorized_users,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        user_action_user,
+        "1 January 2025",
+    )
+
+    assert authorized_users["unicef_hq_authorized"] in pdu_notification.user_recipients
+
+
 @override_config(
     SEND_PDU_ONLINE_EDIT_NOTIFICATION=True,
     ENABLE_MAILJET=True,

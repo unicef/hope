@@ -962,3 +962,27 @@ def test_send_email_notification_exclude_staff_user(notification_setup: dict, mo
         assert users[key].email in payment_notification.email.recipients
 
     assert mock_post.call_count == 1
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
+    NOTIFY_INTERNAL_USERS=True,
+)
+def test_send_email_notification_include_internal_users(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.utils.celery_tasks.requests.post")
+    users = notification_setup["users"]
+    users["user_with_partner_unicef_hq"].is_superuser = True
+    users["user_with_partner_unicef_hq"].is_staff = True
+    users["user_with_partner_unicef_hq"].save()
+
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    payment_notification.send_email_notification()
+
+    assert users["user_with_partner_unicef_hq"].email in payment_notification.email.recipients

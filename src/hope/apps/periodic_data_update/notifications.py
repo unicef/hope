@@ -83,15 +83,17 @@ class PDUOnlineEditNotification:
             .distinct()
         )
 
-        return (
+        users = (
             User.objects.filter(
                 Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
             )
             .filter(id__in=authorized_user_ids)  # Only authorized users
             .exclude(id=self.action_user.id)
-            .exclude(is_superuser=True)
             .distinct()
         )
+        if not config.NOTIFY_INTERNAL_USERS:
+            users = users.exclude(is_superuser=True)
+        return users
 
     def _prepare_email(self) -> MailjetClient:
         body_variables = self._prepare_body_variables()
