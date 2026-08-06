@@ -1,6 +1,20 @@
 from typing import Any
 
+from django.utils.encoding import smart_str
+from rest_framework import serializers
 from rest_framework.authentication import SessionAuthentication
+
+
+class CurrencySlugRelatedField(serializers.SlugRelatedField):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(slug_field="code", **kwargs)
+
+    def to_internal_value(self, data: Any) -> Any:
+        queryset = self.get_queryset()
+        try:
+            return queryset.resolve_code(data)
+        except queryset.model.DoesNotExist:
+            self.fail("does_not_exist", slug_name=self.slug_field, value=smart_str(data))
 
 
 def humanize_errors(errors: dict) -> dict:

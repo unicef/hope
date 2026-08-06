@@ -1,93 +1,118 @@
 import pytest
 
+from extras.test_utils.factories import CurrencyFactory
+from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    handle_currency_field,
+    validate_currency,
+)
 from hope.models.currency import Currency
 
+pytestmark = pytest.mark.django_db
 
-@pytest.mark.django_db
-class TestCurrencyQueryChanges:
-    """Tests for changed query patterns across the codebase."""
 
-    def test_filter_code_first_returns_none_when_no_match(self):
-        assert Currency.objects.filter(code="MISSING").first() is None
+@pytest.fixture
+def active_currency() -> Currency:
+    return CurrencyFactory(code="TST", name="Test", vision_code="TST", active=True)
 
-    def test_filter_code_first_returns_match_when_single(self):
-        c = Currency.objects.create(code="TST", name="Test")
-        assert Currency.objects.filter(code="TST").first() == c
 
-    def test_filter_code_first_returns_match_with_duplicate_codes(self):
-        c1 = Currency.objects.create(code="XYC", name="A", vision_code="XYC")
-        Currency.objects.create(code="XYC", name="B", vision_code="XYCO")
+@pytest.fixture
+def inactive_currency() -> Currency:
+    return CurrencyFactory(code="INA", name="Inactive", vision_code="INA", active=False)
 
-        result = Currency.objects.filter(code="XYC").first()
-        assert result is not None
-        assert result.id == c1.id
 
-    def test_filter_code_exists_with_single(self):
-        Currency.objects.create(code="TST", name="Test")
-        assert Currency.objects.filter(code="TST").exists()
+@pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
 
-    def test_filter_code_exists_with_duplicate_codes(self):
-        Currency.objects.create(code="XYC", name="A", vision_code="XYC")
-        Currency.objects.create(code="XYC", name="B", vision_code="XYCO")
-        assert Currency.objects.filter(code="XYC").exists()
 
-    def test_filter_code_exists_with_no_match(self):
-        assert not Currency.objects.filter(code="MISSING").exists()
+@pytest.fixture
+def current_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
 
-    def test_handle_currency_field_returns_none_for_none(self):
-        from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-            handle_currency_field,
-        )
 
+def test_handle_currency_field_returns_none_for_none(django_assert_num_queries) -> None:
+    with django_assert_num_queries(0):
         assert handle_currency_field(None, "currency", None, None, None) is None
 
-    def test_handle_currency_field_returns_none_for_empty(self):
-        from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-            handle_currency_field,
-        )
 
+def test_handle_currency_field_returns_none_for_empty(django_assert_num_queries) -> None:
+    with django_assert_num_queries(0):
         assert handle_currency_field("", "currency", None, None, None) is None
 
-    def test_handle_currency_field_returns_currency(self):
-        from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-            handle_currency_field,
-        )
 
-        c = Currency.objects.create(code="TST", name="Test")
+def test_handle_currency_field_returns_active_currency(active_currency: Currency, django_assert_num_queries) -> None:
+    with django_assert_num_queries(1):
         result = handle_currency_field("TST", "currency", None, None, None)
-        assert result == c
 
-    def test_handle_currency_field_returns_first_with_duplicate_codes(self):
-        from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-            handle_currency_field,
-        )
+    assert result == active_currency
 
-        c1 = Currency.objects.create(code="XYC", name="A", vision_code="XYC")
-        Currency.objects.create(code="XYC", name="B", vision_code="XYCO")
 
-        result = handle_currency_field("XYC", "currency", None, None, None)
-        assert result == c1
+def test_handle_currency_field_resolves_active_row_for_shared_code(
+    deprecated_syp: Currency, current_syp: Currency, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(1):
+        result = handle_currency_field("SYP", "currency", None, None, None)
 
-    def test_validate_currency_returns_none_for_valid(self):
-        from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-            validate_currency,
-        )
+    assert result == current_syp
 
-        Currency.objects.create(code="TST", name="Test")
+
+def test_handle_currency_field_returns_none_for_unknown_code(django_assert_num_queries) -> None:
+    with django_assert_num_queries(1):
+        assert handle_currency_field("MISSING", "currency", None, None, None) is None
+
+
+def test_handle_currency_field_returns_none_when_only_deprecated_row_exists(
+    deprecated_syp: Currency, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(1):
+        assert handle_currency_field("SYP", "currency", None, None, None) is None
+
+
+def test_validate_currency_returns_none_for_active_code(active_currency: Currency, django_assert_num_queries) -> None:
+    with django_assert_num_queries(1):
         assert validate_currency("TST", "currency", None, None, None) is None
 
-    def test_validate_currency_returns_error_for_invalid(self):
-        from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-            validate_currency,
-        )
 
+def test_validate_currency_returns_error_for_unknown_code(django_assert_num_queries) -> None:
+    with django_assert_num_queries(1):
         result = validate_currency("MISSING", "currency", None, None, None)
-        assert result is not None
-        assert "Invalid currency code" in result
 
-    def test_validate_currency_returns_none_for_none(self):
-        from hope.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-            validate_currency,
-        )
+    assert result is not None
+    assert "Invalid currency code" in result
 
+
+def test_validate_currency_returns_error_for_inactive_only_code(
+    deprecated_syp: Currency, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(1):
+        result = validate_currency("SYP", "currency", None, None, None)
+
+    assert result is not None
+    assert "Invalid currency code" in result
+
+
+def test_validate_currency_returns_none_for_none(django_assert_num_queries) -> None:
+    with django_assert_num_queries(0):
         assert validate_currency(None, "currency", None, None, None) is None
+
+
+def test_active_excludes_inactive_currencies(
+    active_currency: Currency, inactive_currency: Currency, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(1):
+        result = list(Currency.objects.active())
+
+    assert result == [active_currency]
+
+
+def test_active_returns_only_active_row_for_shared_code(
+    deprecated_syp: Currency, current_syp: Currency, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(1):
+        result = list(Currency.objects.active())
+
+    assert result == [current_syp]
+
+
+def test_active_is_chainable(active_currency: Currency, inactive_currency: Currency) -> None:
+    assert Currency.objects.active().filter(code="INA").exists() is False

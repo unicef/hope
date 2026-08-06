@@ -953,7 +953,7 @@ class PaymentPlan(
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(
-            self.currency.code, self.currency_exchange_date
+            self.currency.vision_code, self.currency_exchange_date
         )
 
     def available_payment_records(

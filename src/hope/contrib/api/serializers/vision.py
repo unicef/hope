@@ -106,7 +106,7 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     vendor_number = serializers.CharField(source="financial_service_provider.vision_vendor_number")
     payplan_sno = serializers.CharField(source="unicef_id")
     payplan_desc = serializers.CharField(source="name")
-    currency = serializers.CharField(source="currency.code")
+    currency = serializers.CharField(source="currency.vision_code")
     auth_amt = serializers.CharField(source="total_entitled_quantity")
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
     status = serializers.CharField()

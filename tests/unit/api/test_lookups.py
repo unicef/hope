@@ -305,6 +305,17 @@ def test_get_currencies(api_client_read: APIClient) -> None:
     assert "next" in response.json()
 
 
+def test_get_currencies_lists_only_the_active_row_for_a_deprecated_code(api_client_read: APIClient) -> None:
+    CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    new_syp = CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+
+    url = reverse("api:currency-list")
+    response = api_client_read.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == [_currency_response("SYP", "Syrian pound", False, new_syp.id)]
+
+
 def test_get_currencies_search(api_client_read: APIClient) -> None:
     CurrencyFactory(code="AFN", name="Afghani")
     CurrencyFactory(code="USD", name="United States Dollar")

@@ -52,7 +52,7 @@ class CountryAPIView(HOPEAPIView, ListAPIView):
 
 
 class CurrencyAPIView(HOPEAPIView, ListAPIView):
-    queryset = Currency.objects.all().order_by("code")
+    queryset = Currency.objects.active().order_by("code")
     serializer_class = CurrencySerializer
     filter_backends = (OrderingFilter, SearchFilter)
     search_fields = (
