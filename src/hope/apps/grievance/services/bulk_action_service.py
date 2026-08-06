@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from hope.apps.account.permissions import Permissions, check_creator_or_owner_permission
 from hope.apps.core.utils import clear_cache_for_key
@@ -183,18 +183,12 @@ class BulkActionService:
                 "Some selected tickets do not exist, are closed, or are not Needs Adjudication tickets."
             )
 
-        # every selected ticket must be resolvable by this user (general, or as creator/owner)
         for ticket in tickets:
-            check_creator_or_owner_permission(
-                user,
-                [
-                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-                    Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-                ],
-                ticket.business_area,
-                ticket,
-            )
+            scope = ticket.programs.first() or ticket.business_area
+            if not user.has_perm(Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE.value, scope):
+                raise PermissionDenied(
+                    detail={"required_permissions": [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE.value]}
+                )
 
         for ticket in tickets:
             old_ticket = copy.copy(ticket)

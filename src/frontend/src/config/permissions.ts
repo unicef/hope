@@ -32,6 +32,10 @@ export const GRIEVANCES_VIEW_DETAILS_PERMISSIONS: string[] = [
   PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
 ];
 
+export const GRIEVANCES_NA_MANAGE_PERMISSIONS: string[] = [
+  PERMISSIONS.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE,
+];
+
 export function hasPermissions(
   permission: string | string[],
   allowedPermissions: string[] | null,

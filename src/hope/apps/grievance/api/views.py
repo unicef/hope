@@ -550,11 +550,7 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
         ],
-        "bulk_needs_adjudication": [
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-        ],
+        "bulk_needs_adjudication": [Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE],
         "all_edit_household_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "all_edit_people_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "all_add_individuals_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],

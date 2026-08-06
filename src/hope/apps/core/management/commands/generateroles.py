@@ -258,6 +258,7 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_SEND_BACK,
                     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
                     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                    Permissions.GRIEVANCES_NEEDS_ADJUDICATION_MANAGE,
                     Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
                     Permissions.PM_VIEW_PAYMENT_LIST,
                 ],

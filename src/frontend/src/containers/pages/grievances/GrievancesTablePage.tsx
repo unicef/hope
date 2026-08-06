@@ -11,6 +11,7 @@ import {
   GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
   GRIEVANCES_VIEW_LIST_PERMISSIONS,
   PERMISSIONS,
+  GRIEVANCES_NA_MANAGE_PERMISSIONS,
   hasPermissions,
 } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -159,14 +160,7 @@ export const GrievancesTablePage = (): ReactElement => {
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {hasPermissions(
-            [
-              PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-              PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-              PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-            ],
-            permissions,
-          ) && (
+          {hasPermissions(GRIEVANCES_NA_MANAGE_PERMISSIONS, permissions) && (
             <Button
               variant="outlined"
               color="primary"
