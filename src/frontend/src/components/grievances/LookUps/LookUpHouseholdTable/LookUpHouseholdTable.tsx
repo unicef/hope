@@ -6,7 +6,8 @@ import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
@@ -103,36 +104,37 @@ export function LookUpHouseholdTable({
   // Add page state for pagination
   const [page, setPage] = useState(0);
 
+  const programsHouseholdsParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
+
   //selectedProgram
   const {
     data: dataHouseholdsProgram,
     isLoading: isLoadingHouseholdsProgram,
+    isFetching: isFetchingHouseholdsProgram,
     error: errorHouseholdsProgram,
   } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsList,
+      programsHouseholdsParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        programsHouseholdsParams,
       ),
     enabled: !!businessArea && !isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   //selectedProgram
   const { data: dataHouseholdsProgramCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCountRetrieve',
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve,
+      { businessAreaSlug: businessArea, programCode: programId },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
         businessAreaSlug: businessArea,
@@ -142,42 +144,44 @@ export function LookUpHouseholdTable({
   });
 
   //allPrograms
+  const restQueryVariables = Object.fromEntries(
+    Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
+  );
+  const allProgramsHouseholdsParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    restQueryVariables,
+    { withPagination: true },
+  );
+  const allProgramsHouseholdsCountParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    restQueryVariables,
+  );
   const {
     data: dataHouseholdsAllPrograms,
     isLoading: isLoadingHouseholdsAllPrograms,
+    isFetching: isFetchingHouseholdsAllPrograms,
     error: errorHouseholdsAllPrograms,
   } = useQuery<PaginatedHouseholdListList>({
-    queryKey: ['businessAreasHouseholdsList', queryVariables, businessArea],
-    queryFn: () => {
-      const restQueryVariables = Object.fromEntries(
-        Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
-      );
-      return RestService.restBusinessAreasHouseholdsList(
-        createApiParams(
-          { businessAreaSlug: businessArea },
-          restQueryVariables,
-          { withPagination: true },
-        ),
-      );
-    },
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasHouseholdsList,
+      allProgramsHouseholdsParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasHouseholdsList(allProgramsHouseholdsParams),
     enabled: isAllPrograms,
+    placeholderData: keepPreviousData,
   });
   //allPrograms
 
   const { data: dataHouseholdsAllProgramsCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasHouseholdsCountRetrieve',
-      businessArea,
-      queryVariables,
-    ],
-    queryFn: () => {
-      const restQueryVariables = Object.fromEntries(
-        Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
-      );
-      return RestService.restBusinessAreasHouseholdsCountRetrieve(
-        createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),
-      );
-    },
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasHouseholdsCountRetrieve,
+      allProgramsHouseholdsCountParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasHouseholdsCountRetrieve(
+        allProgramsHouseholdsCountParams,
+      ),
     enabled: isAllPrograms && page === 0,
   });
 
@@ -297,6 +301,11 @@ export function LookUpHouseholdTable({
         isAllPrograms
           ? isLoadingHouseholdsAllPrograms
           : isLoadingHouseholdsProgram
+      }
+      isFetching={
+        isAllPrograms
+          ? isFetchingHouseholdsAllPrograms
+          : isFetchingHouseholdsProgram
       }
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

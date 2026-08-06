@@ -1,7 +1,6 @@
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { LoadingButton } from '@core/LoadingButton';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Button,
@@ -13,6 +12,8 @@ import {
 } from '@mui/material';
 import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +32,6 @@ interface ConfirmWorkflowButtonProps {
 
 export function ConfirmWorkflowButton({
   label,
-  instruction,
   mutationFn,
   successMessage,
   withComment = false,
@@ -43,7 +43,6 @@ export function ConfirmWorkflowButton({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [comment, setComment] = useState('');
-  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
@@ -51,15 +50,14 @@ export function ConfirmWorkflowButton({
     mutationFn: () => mutationFn(comment || undefined),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: [
-          'followUpInstruction',
-          businessArea,
-          instruction.id,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFollowUpInstructionsRetrieve,
+        ),
       });
       await queryClient.invalidateQueries({
-        queryKey: ['followUpInstructionsList', businessArea, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFollowUpInstructionsList,
+        ),
       });
       setOpen(false);
       setComment('');

@@ -12,6 +12,7 @@ import { LookUpTargetPopulationFiltersCommunication } from './LookUpTargetPopula
 import { useProgramContext } from 'src/programContext';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 
@@ -79,7 +80,10 @@ export function LookUpSelectionCommunication({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasHouseholdsChoicesRetrieve({
           businessAreaSlug: businessArea,

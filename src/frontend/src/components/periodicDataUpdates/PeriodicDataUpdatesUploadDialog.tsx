@@ -15,6 +15,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { GreyText } from '@components/core/GreyText';
 import { useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -57,21 +58,14 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
         );
         showMessage(t('File uploaded successfully'));
         queryClient.invalidateQueries({
-          queryKey: [
-            'periodicDataUpdateUploads',
-            {
-              ordering: 'created_at',
-              businessAreaSlug: businessArea,
-              programCode: programId,
-            },
-            businessArea,
-            programId,
-            0,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList,
+          ),
         });
         queryClient.invalidateQueries({
-          queryKey: ['periodicDataUpdateUploadsCount'],
-          refetchType: 'active',
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsCountRetrieve,
+          ),
         });
         setOpenImport(false);
         setFileToImport(null);

@@ -51,6 +51,7 @@ import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FspChoices } from '@restgenerated/models/FspChoices';
+import { restQueryKey } from '@utils/queryKeys';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -209,21 +210,20 @@ export const TargetingCriteriaForm = ({
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
   >({
-    queryKey: [
-      'businessAreasAvailableFspsForDeliveryMechanismsList',
-      businessArea,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
         businessAreaSlug: businessArea,
       }),
   });
   const { data, isLoading: loading } = useQuery({
-    queryKey: [
-      'businessAreasAllFieldsAttributesList',
-      businessArea,
-      selectedProgram?.id,
-    ],
+    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
+      slug: businessArea,
+      programId: selectedProgram?.id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
@@ -255,7 +255,6 @@ export const TargetingCriteriaForm = ({
   const filteredIndividualData = useMemo(
     () => ({
       allFieldsAttributes: data
-        //@ts-ignore
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     }),
@@ -264,7 +263,6 @@ export const TargetingCriteriaForm = ({
 
   const filteredHouseholdData = useMemo(
     () => ({
-      //@ts-ignore
       allFieldsAttributes: data?.filter(associatedWith('Household')),
     }),
     [data],
@@ -272,7 +270,6 @@ export const TargetingCriteriaForm = ({
 
   const allDataChoicesDictTmp = useMemo(
     () =>
-      // @ts-ignore
       data?.reduce((acc, item) => {
         acc[item.name] = item.choices;
         return acc;
@@ -379,16 +376,14 @@ export const TargetingCriteriaForm = ({
               </DialogTitleWrapper>
               <DialogContent>
                 {
-                  // @ts-ignore
-                  errors.nonFieldErrors && (
+                  (errors as { nonFieldErrors?: string[] }).nonFieldErrors && (
                     <DialogError>
                       <ul>
-                        {
-                          // @ts-ignore
-                          errors.nonFieldErrors.map((message) => (
-                            <li key={message}>{message}</li>
-                          ))
-                        }
+                        {(
+                          errors as { nonFieldErrors?: string[] }
+                        ).nonFieldErrors.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))}
                       </ul>
                     </DialogError>
                   )

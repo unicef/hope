@@ -10,7 +10,8 @@ import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 
@@ -81,27 +82,37 @@ export function LookUpProgrammesTableSurveys({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const programsListParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
+    isFetching: isFetchingPrograms,
     error: errorPrograms,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsList(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
-          withPagination: true,
-        }),
-      ),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsList,
+      programsListParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasProgramsList(programsListParams),
+    placeholderData: keepPreviousData,
     enabled: !!queryVariables.businessAreaSlug,
   });
 
+  const programsCountParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    queryVariables,
+  );
   const { data: countData } = useQuery({
-    queryKey: ['businessAreasProgramsCount', queryVariables, businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCountRetrieve,
+      programsCountParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCountRetrieve(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
-      ),
+      RestService.restBusinessAreasProgramsCountRetrieve(programsCountParams),
     enabled: page === 0,
   });
 
@@ -133,6 +144,7 @@ export function LookUpProgrammesTableSurveys({
           defaultOrderBy="startDate"
           data={dataPrograms}
           isLoading={isLoadingPrograms}
+          isFetching={isFetchingPrograms}
           error={errorPrograms}
           itemsCount={itemsCount}
           page={page}

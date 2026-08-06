@@ -3,6 +3,7 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
@@ -22,20 +23,18 @@ export function GrievanceFlexFieldPhotoModalNewHousehold({
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
+  const householdParams = {
+    businessAreaSlug: businessArea,
+    id: householdId,
+    programCode: programId || selectedProgram?.code || '',
+  };
   const { data } = useQuery<HouseholdDetail>({
-    queryKey: [
-      'household',
-      businessArea,
-      householdId,
-      programId,
-      selectedProgram?.code,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+      householdParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        id: householdId,
-        programCode: programId || selectedProgram?.code || '',
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve(householdParams),
     enabled:
       !!businessArea &&
       !!householdId &&

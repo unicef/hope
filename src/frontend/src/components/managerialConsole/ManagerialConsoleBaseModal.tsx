@@ -36,7 +36,7 @@ interface ManagerialConsoleBaseModalProps {
   dialogTitle: string;
   title: string;
   children?: ReactNode;
-  onSave: (plans, comment) => Promise<void>;
+  onSave: (plans: string[], comment: string) => Promise<void>;
   disabledSave?: boolean;
 }
 

@@ -108,7 +108,7 @@ class BusinessAreaViewSet(
             200: FieldAttributeSerializer(many=True),
         },
     )
-    @action(detail=True, methods=["get"], url_path="all-fields-attributes")
+    @action(detail=True, methods=["get"], url_path="all-fields-attributes", pagination_class=None)
     def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_id = request.query_params.get("program_id", None)
         business_area_slug = self.kwargs["slug"]

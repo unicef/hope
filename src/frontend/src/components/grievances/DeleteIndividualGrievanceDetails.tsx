@@ -5,6 +5,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
@@ -35,7 +36,6 @@ export function DeleteIndividualGrievanceDetails({
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug } = useBaseUrl();
   const confirm = useConfirmation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -70,7 +70,10 @@ export function DeleteIndividualGrievanceDetails({
   const queryClient = useQueryClient();
 
   const { data: addIndividualFieldsData, isLoading } = useQuery({
-    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -97,11 +100,9 @@ export function DeleteIndividualGrievanceDetails({
     onSuccess: () => {
       // Invalidate and refetch the grievance ticket details
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });

@@ -27,6 +27,7 @@ import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FspChoices } from '@restgenerated/models/FspChoices';
@@ -291,10 +292,10 @@ export function Criteria({
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
   >({
-    queryKey: [
-      'businessAreasAvailableFspsForDeliveryMechanismsList',
-      businessArea,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
         businessAreaSlug: businessArea,

@@ -10,6 +10,7 @@ import { Box } from '@mui/system';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createHandleApplyFilterChange, formatFigure } from '@utils/utils';
 import moment from 'moment';
 import { ReactElement } from 'react';
@@ -55,7 +56,7 @@ export const PaymentPlansFilters = ({
   };
 
   const { data: statusChoicesData } = useQuery({
-    queryKey: ['choicesPaymentPlanStatusList'],
+    queryKey: restQueryKey(RestService.restChoicesPaymentPlanStatusList),
     queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
   });
 

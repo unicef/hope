@@ -11,6 +11,7 @@ import { styled } from '@mui/system';
 import { ReactElement } from 'react';
 import { theme as muiTheme } from 'src/theme';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -65,13 +66,18 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   const { businessArea, programCode } = useBaseUrl();
 
+  const profileParams = {
+    businessAreaSlug: businessArea,
+    program: programCode === 'all' ? undefined : programCode,
+  };
+
   const { data: meData } = useQuery({
-    queryKey: ['profile', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersProfileRetrieve,
+      profileParams,
+    ),
     queryFn: () => {
-      return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
-        program: programCode === 'all' ? undefined : programCode,
-      });
+      return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
     gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes

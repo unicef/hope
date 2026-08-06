@@ -29,7 +29,8 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
@@ -129,24 +130,27 @@ function CreateFeedbackPage(): ReactElement {
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['choicesFeedbackIssueTypeList', businessArea],
+    queryKey: restQueryKey(RestService.restChoicesFeedbackIssueTypeList),
     queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 
+  const programsParams = createApiParams(
+    { businessAreaSlug: businessArea, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
+
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsParams,
+      ),
+      queryFn: () => RestService.restBusinessAreasProgramsList(programsParams),
     });
 
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -159,6 +163,16 @@ function CreateFeedbackPage(): ReactElement {
         businessAreaSlug,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFeedbacksList,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksList),
+      });
+    },
   });
 
   if (choicesLoading || programsDataLoading) return <LoadingComponent />;

@@ -22,6 +22,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { BaseSection } from '@components/core/BaseSection';
 import { RestService } from '@restgenerated/index';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
@@ -144,119 +145,110 @@ const OfficeSearchPage = (): ReactElement => {
   // Query variables for Payment Plans and Payments
 
   // Households query
+  const hhParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    hhQueryVariables,
+    {
+      withPagination: false,
+    },
+  );
+
   const {
     data: hhData,
     isLoading: isLoadingHouseholds,
     error: errorHouseholds,
   } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasHouseholdsList',
-      hhQueryVariables,
-      businessArea,
-      appliedFilter.officeSearch,
-      appliedFilter.activePrograms,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasHouseholdsList(
-        createApiParams({ businessAreaSlug: businessArea }, hhQueryVariables, {
-          withPagination: false,
-        }),
-      ),
+    queryKey: restQueryKey(RestService.restBusinessAreasHouseholdsList, hhParams),
+    queryFn: () => RestService.restBusinessAreasHouseholdsList(hhParams),
     enabled: appliedFilter.searchFor === 'HH' && !!appliedFilter.officeSearch,
   });
 
   // Individuals query
+  const indParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    indQueryVariables,
+    {
+      withPagination: false,
+    },
+  );
+
   const {
     data: indData,
     isLoading: isLoadingIndividuals,
     error: errorIndividuals,
   } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasIndividualsList',
-      indQueryVariables,
-      businessArea,
-      appliedFilter.officeSearch,
-      appliedFilter.activePrograms,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasIndividualsList(
-        createApiParams({ businessAreaSlug: businessArea }, indQueryVariables, {
-          withPagination: false,
-        }),
-      ),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasIndividualsList,
+      indParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasIndividualsList(indParams),
     enabled: appliedFilter.searchFor === 'IND' && !!appliedFilter.officeSearch,
   });
 
   // Grievances query (if needed)
+  const grvParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    grvQueryVariables,
+    {
+      withPagination: false,
+    },
+  );
+
   const {
     data: grvData,
     isLoading: isLoadingGrievances,
     error: errorGrievances,
   } = useQuery({
-    queryKey: [
-      'businessAreasGrievancesList',
-      grvQueryVariables,
-      businessArea,
-      appliedFilter.searchFor,
-      appliedFilter.officeSearch,
-      appliedFilter.activePrograms,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList(
-        createApiParams({ businessAreaSlug: businessArea }, grvQueryVariables, {
-          withPagination: false,
-        }),
-      ),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsList,
+      grvParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasGrievanceTicketsList(grvParams),
     enabled: appliedFilter.searchFor === 'GRV' && !!appliedFilter.officeSearch,
   });
 
   // Payment Plans query (for 'PP' search)
+  const ppParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    ppQueryVariables,
+    {
+      withPagination: false,
+    },
+  );
+
   const {
     data: ppData,
     isLoading: isLoadingPaymentPlans,
     error: errorPaymentPlans,
   } = useQuery({
-    queryKey: [
-      'businessAreasPaymentPlansList',
-      ppQueryVariables,
-      businessArea,
-      appliedFilter.officeSearch,
-      appliedFilter.searchFor,
-      appliedFilter.activePrograms,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasPaymentPlansList(
-        createApiParams({ businessAreaSlug: businessArea }, ppQueryVariables, {
-          withPagination: false,
-        }),
-      ),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentPlansList,
+      ppParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasPaymentPlansList(ppParams),
     enabled: appliedFilter.searchFor === 'PP' && !!appliedFilter.officeSearch,
   });
 
   // Payments query (for 'RCPT' search)
+
+  const paymentsParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    paymentsQueryVariables,
+    {
+      withPagination: false,
+    },
+  );
 
   const {
     data: paymentsData,
     isLoading: isLoadingPayments,
     error: errorPayments,
   } = useQuery({
-    queryKey: [
-      'businessAreasPaymentsList',
-      paymentsQueryVariables,
-      businessArea,
-      appliedFilter.officeSearch,
-      appliedFilter.activePrograms,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasPaymentsList(
-        createApiParams(
-          { businessAreaSlug: businessArea },
-          paymentsQueryVariables,
-          {
-            withPagination: false,
-          },
-        ),
-      ),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsList,
+      paymentsParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasPaymentsList(paymentsParams),
     enabled: appliedFilter.searchFor === 'RCPT' && !!appliedFilter.officeSearch,
   });
 

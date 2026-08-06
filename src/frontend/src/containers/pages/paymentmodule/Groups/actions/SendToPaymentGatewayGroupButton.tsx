@@ -4,6 +4,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
@@ -37,7 +38,9 @@ export function SendToPaymentGatewayGroupButton({
       onSuccess: () => {
         showMessage(t('Sending to Payment Gateway started'));
         queryClient.invalidateQueries({
-          queryKey: ['paymentPlanGroup', businessArea, programId, group.id],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+          ),
         });
       },
       onError: (error) => {

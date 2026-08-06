@@ -25,7 +25,8 @@ import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, grievanceTicketStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useState } from 'react';
@@ -68,33 +69,29 @@ export function LinkedGrievancesModal({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: grievances } = useQuery<PaginatedGrievanceTicketListList>({
-    queryKey: [
-      'linkedGrievanceTickets',
-      businessArea,
-      selectedProgram?.id,
-      selectedProgram?.code,
-      household.unicefId,
-    ],
-    queryFn: () => {
-      const queryParams = {
-        household: household.unicefId,
-        limit: 1000, // Get all tickets for this household
-      };
-
-      if (selectedProgram?.id && selectedProgram.id !== 'all') {
-        return RestService.restBusinessAreasProgramsGrievanceTicketsList(
-          createApiParams(
-            {
-              businessAreaSlug: businessArea,
-              programCode: selectedProgram.code,
-            },
-            queryParams,
-            { withPagination: true },
-          ),
-        );
-      }
+  const linkedGrievancesParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: selectedProgram?.code,
     },
+    {
+      household: household.unicefId,
+      limit: 1000, // Get all tickets for this household
+    },
+    { withPagination: true },
+  );
+
+  const { data: grievances } = useQuery<PaginatedGrievanceTicketListList>({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsGrievanceTicketsList,
+      linkedGrievancesParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsGrievanceTicketsList(
+        linkedGrievancesParams,
+      ),
+    enabled: !!selectedProgram?.id && selectedProgram.id !== 'all',
+    placeholderData: keepPreviousData,
     refetchOnWindowFocus: false,
   });
 
