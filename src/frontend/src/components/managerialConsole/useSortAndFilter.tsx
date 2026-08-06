@@ -97,6 +97,10 @@ export const useSortAndFilter = ({
     setSelectedProgram(event.target.value);
   };
 
+  // NOTE: `rows`/`columns` stay `any[]` on purpose. These helpers mix typed
+  // access (row.id) with dynamic column access (row[column.field]) and render
+  // the dynamic values as ReactNode; typing them precisely would push casts
+  // into every consuming section for no real safety gain.
   const sortRows = (rows: any[]) => {
     return [...rows].sort((a, b) => {
       if (a[sortField] < b[sortField]) {

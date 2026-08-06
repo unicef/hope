@@ -9,18 +9,23 @@ const StyledTableRow = styled(TableRow)`
     overflow: auto;
   }
 `;
+// Legacy IE-only `document.selection` API, absent from the standard DOM lib.
+type LegacyDocument = Document & {
+  selection?: { type: string; createRange: () => { text: string } };
+};
+
 function getSelectedText(): string {
   let text = '';
   if (window.getSelection !== undefined) {
     text = window.getSelection().toString();
-  } else if (
-    // @ts-ignore
-    document.selection !== undefined &&
-    // @ts-ignore
-    document.selection.type === 'Text'
-  ) {
-    // @ts-ignore
-    text = document.selection.createRange().text;
+  } else {
+    const legacyDocument = document as LegacyDocument;
+    if (
+      legacyDocument.selection !== undefined &&
+      legacyDocument.selection.type === 'Text'
+    ) {
+      text = legacyDocument.selection.createRange().text;
+    }
   }
   return text;
 }

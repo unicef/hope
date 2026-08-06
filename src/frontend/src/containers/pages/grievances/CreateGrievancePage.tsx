@@ -35,6 +35,7 @@ import Button from '@mui/material/Button';
 import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
 import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import { IndividualRoleInHouseholdForHousehold } from '@restgenerated/models/IndividualRoleInHouseholdForHousehold';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -139,9 +140,9 @@ function FormikSelectedEntitiesSync({
 
   React.useEffect(() => {
     if (householdForDelegate) {
-      const alternateRole = (
-        householdForDelegate.rolesInHousehold as any[]
-      )?.find((r) => r.role === 'ALTERNATE');
+      const alternateRole = householdForDelegate.rolesInHousehold?.find(
+        (r) => r.role === 'ALTERNATE',
+      );
       const delegate = alternateRole?.individual ?? null;
       setFieldValue('selectedDelegate', delegate);
       setFieldValue('originalDelegate', delegate);
@@ -292,7 +293,7 @@ const CreateGrievancePage = (): ReactElement => {
         : null;
 
     const alternateRole = (
-      indObject?.household?.rolesInHousehold as any[]
+      indObject?.household?.rolesInHousehold as IndividualRoleInHouseholdForHousehold[]
     )?.find((r) => r.role === 'ALTERNATE');
     return alternateRole?.individual ?? null;
   })();
