@@ -13,6 +13,9 @@ import { restQueryKey } from '@utils/queryKeys';
 import { MessageCreate } from '@restgenerated/models/MessageCreate';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
+import { useSexChoices } from '@hooks/useSexChoices';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
@@ -121,6 +124,13 @@ function prepareSampleSizeRequest(
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const {
+    data: sexChoices = [],
+    isLoading: isSexChoicesLoading,
+    isError: isSexChoicesError,
+    error: sexChoicesError,
+  } = useSexChoices();
+  useApiErrorSnackbar(isSexChoicesError, sexChoicesError);
   const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: (data: MessageCreate) =>
@@ -679,25 +689,17 @@ const CreateCommunicationPage = (): ReactElement => {
                             )}
                             {values.sexCheckbox && (
                               <Grid size={{ xs: 5 }}>
-                                <Field
-                                  name="filterSex"
-                                  label={t('Gender')}
-                                  color="primary"
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                    { value: 'OTHER', name: t('Other') },
-                                    {
-                                      value: 'NOT_COLLECTED',
-                                      name: t('Not Collected'),
-                                    },
-                                    {
-                                      value: 'NOT_ANSWERED',
-                                      name: t('Not Answered'),
-                                    },
-                                  ]}
-                                  component={FormikSelectField}
-                                />
+                                {isSexChoicesLoading ? (
+                                  <LoadingComponent />
+                                ) : (
+                                  <Field
+                                    name="filterSex"
+                                    label={t('Gender')}
+                                    color="primary"
+                                    choices={sexChoices}
+                                    component={FormikSelectField}
+                                  />
+                                )}
                               </Grid>
                             )}
                           </Grid>
