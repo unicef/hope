@@ -37,6 +37,9 @@ class CurrencyAdmin(HOPEModelAdminBase):
         with transaction.atomic():
             Currency.objects.filter(pk=old.pk).update(active=False)
             Currency.objects.filter(pk=new.pk).update(active=True)
+            old.active, new.active = False, True
+            self.log_change(request, old, f"Deprecated in favour of '{new.vision_code}'.")
+            self.log_change(request, new, f"Activated in place of '{old.vision_code}'.")
 
         self.message_user(
             request,
