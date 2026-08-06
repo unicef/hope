@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from single_source import get_version
 
 from hope.config.env import env
+from hope.config.process_role import get_process_role
 
 DEBUG: bool = env("DEBUG")
 IS_TEST = False
@@ -91,6 +92,8 @@ ENV = env("ENV")
 
 DB_ZOMBIE_TIMEOUT_MS = 4 * 60 * 60 * 1000
 
+PROCESS_ROLE = get_process_role()
+
 # prefix all non-production emails
 if ENV != "prod":
     EMAIL_SUBJECT_PREFIX = f"{ENV}"
@@ -105,6 +108,7 @@ RO_CONN.update(
         "OPTIONS": {
             "options": (
                 "-c default_transaction_read_only=on "
+                f"-c application_name={PROCESS_ROLE}-ro "
                 f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
                 f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
             )
@@ -124,6 +128,7 @@ DATABASES["default"].update(
         "CONN_MAX_AGE": 60,
         "OPTIONS": {
             "options": (
+                f"-c application_name={PROCESS_ROLE} "
                 f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
                 f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
             )
