@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { YES_NO_CHOICES } from '@utils/constants';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
@@ -132,12 +133,11 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
             value={filter.hasGrievanceTicket}
             data-cy="ind-filters-grievance-ticket"
           >
-            <MenuItem key="yes" value="YES">
-              {t('Yes')}
-            </MenuItem>
-            <MenuItem key="no" value="NO">
-              {t('No')}
-            </MenuItem>
+            {YES_NO_CHOICES.map((choice) => (
+              <MenuItem key={choice.value} value={choice.value}>
+                {t(choice.label)}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={3}>
@@ -171,12 +171,11 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
             value={filter.receivedAssistance}
             data-cy="ind-filters-received-assistance"
           >
-            <MenuItem key="yes" value="YES">
-              {t('Yes')}
-            </MenuItem>
-            <MenuItem key="no" value="NO">
-              {t('No')}
-            </MenuItem>
+            {YES_NO_CHOICES.map((choice) => (
+              <MenuItem key={choice.value} value={choice.value}>
+                {t(choice.label)}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
       </Grid>

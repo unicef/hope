@@ -1512,6 +1512,7 @@ class TestTargeting:
         page_targeting_details.get_elements(page_targeting_details.button_delete)[1].click()
         page_targeting.get_nav_targeting().click()
         page_targeting.disappear_loading_rows()
+        page_targeting.count_target_populations(1)
         new_list = page_targeting.get_target_populations_rows()
         assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text

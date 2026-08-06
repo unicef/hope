@@ -7,6 +7,22 @@ export const PROGRAM_STATE_FILTER = {
   ALL: 'all',
 } as const;
 
+export const YES_NO_CHOICES = [
+  { value: 'YES', label: 'Yes' },
+  { value: 'NO', label: 'No' },
+] as const;
+
+export const PROGRAM_STATE_CHOICES = [
+  { value: PROGRAM_STATE_FILTER.ACTIVE, label: 'Active Programmes' },
+  { value: PROGRAM_STATE_FILTER.ALL, label: 'All Programmes' },
+] as const;
+
+export const AUTHORIZED_USER_ROLE_CHOICES = [
+  { value: 'canEdit', label: 'Authorized for Edit' },
+  { value: 'canApprove', label: 'Authorized for Approve' },
+  { value: 'canMerge', label: 'Authorized for Merge' },
+] as const;
+
 export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatusEnum.OPEN]: 'Open',
   [PaymentPlanStatusEnum.LOCKED]: 'Locked',
@@ -33,10 +49,10 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
     'XLSX Importing Entitlements',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
-  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
-    'XLSX Importing FSP Extra Fields',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
     'XLSX Import Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
+    'XLSX Importing FSP Extra Fields',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
     'Applying Custom Exchange Rate',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:

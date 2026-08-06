@@ -375,7 +375,11 @@ def test_validate_errors_when_no_actual_changes(group_two_plans_one_fsp):
     service.open_workbook()
     service.validate()
 
-    assert any("aren't any updates" in error.message for error in service.errors)
+    expected_message = (
+        "There aren't any updates in the imported file. Reconciliation data is either empty or has already been "
+        "uploaded and cannot be overwritten."
+    )
+    assert any(error.message == expected_message for error in service.errors)
 
 
 def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_one_fsp):
