@@ -3,9 +3,9 @@ import { ManagerialConsoleBaseModal } from './ManagerialConsoleBaseModal';
 import { useTranslation } from 'react-i18next';
 
 interface AuthorizePaymentPlansModalProps {
-  selectedPlansIds: any[];
+  selectedPlansIds: string[];
   selectedPlansUnicefIds: string[];
-  onAuthorize: (plans: any[], comment: string) => Promise<void>;
+  onAuthorize: (plans: string[], comment: string) => Promise<void>;
 }
 
 export const AuthorizePaymentPlansModal = ({

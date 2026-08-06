@@ -19,7 +19,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import { RestService } from 'src/restgenerated';
 import { useMutation } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 export interface Individual {
@@ -78,7 +78,7 @@ export const BiometricsResults = ({
         businessAreaSlug,
         id: ticketId,
       }),
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });

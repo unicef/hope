@@ -33,6 +33,7 @@ from hope.apps.household.const import (
     STATUS_INACTIVE,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.program.api.serializers import (
     PaymentPlanPurposeSerializer,
@@ -658,6 +659,28 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
         return attrs
 
 
+class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
+    """Top-Up and Top-Up Amendment creation: dispersion dates plus the amount, given one of two ways.
+
+    ``fixed_amount`` tops every eligible beneficiary up by the same value. ``file`` is the filled-in
+    amount template and decides both the amounts and who is in — beneficiaries left empty or at zero
+    are not part of the child plan and stay eligible for a later one. Exactly one of the two is
+    required.
+    """
+
+    fixed_amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, min_value=Decimal("0.01"))
+    file = serializers.FileField(required=False)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        fixed_amount, file = attrs.get("fixed_amount"), attrs.get("file")
+        if (fixed_amount is None) == (file is None):
+            raise serializers.ValidationError("Provide either a fixed amount or an amount file, not both.")
+        if file is not None:
+            attrs["amounts"] = parse_top_up_amount_file(self.context["payment_plan"], file)
+        return attrs
+
+
 class FollowUpInstructionCreateSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
@@ -865,8 +888,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_households = serializers.SerializerMethodField()
     excluded_individuals = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
-    can_create_top_up = serializers.SerializerMethodField()
-    can_create_top_up_amendment = serializers.SerializerMethodField()
+    can_create_top_up = serializers.BooleanField()
+    can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField()
@@ -1067,12 +1090,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
             qs.values_list("id", flat=True)
         )
-
-    def get_can_create_top_up(self, obj: PaymentPlan) -> bool:
-        return obj.plan_type == PaymentPlan.PlanType.REGULAR and obj.eligible_payments_for_top_up().exists()
-
-    def get_can_create_top_up_amendment(self, obj: PaymentPlan) -> bool:
-        return obj.plan_type == PaymentPlan.PlanType.TOP_UP and obj.eligible_payments_for_top_up_amendment().exists()
 
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(

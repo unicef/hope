@@ -1,5 +1,11 @@
-import React, { FC, SetStateAction, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
+import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import {
+  BulkActionMutation,
+  SelectAllHandler,
+  SelectHandler,
+} from './types';
 import {
   Table,
   TableCell,
@@ -23,23 +29,12 @@ import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
 
 interface AuthorizationSectionProps {
-  selectedAuthorized: any[];
-  setSelectedAuthorized: (value: SetStateAction<any[]>) => void;
-  handleSelect: (
-    selected: any[],
-    setSelected: (value: SetStateAction<any[]>) => void,
-    id: any,
-  ) => void;
-  handleSelectAll: (
-    ids: any[],
-    selected: any[],
-    setSelected: {
-      (value: SetStateAction<any[]>): void;
-      (arg0: any[]): void;
-    },
-  ) => void;
-  inAuthorizationData: any;
-  bulkAction: any;
+  selectedAuthorized: string[];
+  setSelectedAuthorized: Dispatch<SetStateAction<string[]>>;
+  handleSelect: SelectHandler;
+  handleSelectAll: SelectAllHandler;
+  inAuthorizationData: PaginatedPaymentPlanList;
+  bulkAction: BulkActionMutation;
   enableSearch?: boolean;
 }
 
@@ -72,12 +67,15 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
     handleSelectAll(ids, selectedAuthorized, setSelectedAuthorized);
   };
 
-  const programs = inAuthorizationData?.results?.reduce((acc, row) => {
-    if (!acc.includes(row.program)) {
-      acc.push(row.program);
-    }
-    return acc;
-  }, []);
+  const programs = inAuthorizationData?.results?.reduce<string[]>(
+    (acc, row) => {
+      if (!acc.includes(row.program)) {
+        acc.push(row.program);
+      }
+      return acc;
+    },
+    [],
+  );
 
   const allSelected = inAuthorizationData?.results?.every((plan) =>
     selectedAuthorized.includes(plan.id),
