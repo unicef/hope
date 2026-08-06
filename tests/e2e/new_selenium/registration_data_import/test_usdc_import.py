@@ -11,7 +11,6 @@ from extras.test_utils.factories.aurora import (
     RegistrationFactory,
 )
 from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import (
     AccountTypeFactory,
     DeliveryMechanismFactory,
@@ -28,6 +27,7 @@ from hope.models import (
     BusinessArea,
     DataCollectingType,
     DeliveryMechanism,
+    DocumentType,
     FinancialInstitution,
     PendingHousehold,
     PendingIndividual,
@@ -44,13 +44,13 @@ def usdc_import(business_area: BusinessArea, create_super_user: User) -> Registr
     business_area.postpone_deduplication = True
     business_area.save(update_fields=["postpone_deduplication"])
     CountryFactory(name="Ukraine", short_name="Ukraine", iso_code2="UA", iso_code3="UKR", iso_num="0804")
-    DocumentTypeFactory(
+    DocumentType.objects.update_or_create(
         key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
-        label=IDENTIFICATION_TYPE_TAX_ID,
+        defaults={"label": "Tax Number Identification"},
     )
-    DocumentTypeFactory(
+    DocumentType.objects.update_or_create(
         key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-        label=IDENTIFICATION_TYPE_OTHER,
+        defaults={"label": "Other"},
     )
     DeliveryMechanismFactory(
         code="transfer_to_digital_wallet",
@@ -144,7 +144,7 @@ def test_usdc_import_detail_pages_render_and_rdi_merges(
         # Wallet-number image is stored on the account.
         browser.wait_for_element_visible('div[data-cy="label-Wallet QR"]')
         # ID-wallet image is imported as an "Other" document with a photo.
-        browser.wait_for_element_visible('div[data-cy="label-OTHER"]')
+        browser.wait_for_element_visible('div[data-cy="label-Other"]')
         browser.wait_for_element_visible('a[data-cy="link-show-photo"]')
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/population/household/{household.id}")
