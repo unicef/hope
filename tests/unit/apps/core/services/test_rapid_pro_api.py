@@ -20,6 +20,22 @@ def rapid_pro_api():
         return api
 
 
+@pytest.fixture
+def business_area_with_trailing_slash_host():
+    return BusinessAreaFactory(
+        rapid_pro_host="https://app.rapidpro.io/",
+        rapid_pro_payment_verification_token="secret-token",
+    )
+
+
+@pytest.fixture
+def business_area_without_host():
+    return BusinessAreaFactory(
+        rapid_pro_host="",
+        rapid_pro_payment_verification_token="secret-token",
+    )
+
+
 def test_broadcast_message_batches_phone_numbers_into_chunks(rapid_pro_api):
     """Verifies that phone numbers are split into batches of MAX_URNS_PER_REQUEST."""
     rapid_pro_api.MAX_URNS_PER_REQUEST = 2
@@ -175,6 +191,45 @@ def test_init_token_sets_authorization_header_and_host():
 
     assert api.url == "https://host.example"
     assert api._client.headers["Authorization"] == "Token secret-token"
+
+
+@pytest.mark.django_db
+def test_init_token_strips_trailing_slash_from_business_area_host(business_area_with_trailing_slash_host):
+    api = RapidProAPI.__new__(RapidProAPI)
+    api._client = requests.session()
+
+    api._init_token(business_area_with_trailing_slash_host.slug, RapidProAPI.MODE_VERIFICATION)
+
+    assert api.url == "https://app.rapidpro.io"
+
+
+@pytest.mark.django_db
+def test_init_token_strips_trailing_slash_from_settings_url(settings, business_area_without_host):
+    settings.RAPID_PRO_URL = "https://rapidpro.io/"
+    api = RapidProAPI.__new__(RapidProAPI)
+    api._client = requests.session()
+
+    api._init_token(business_area_without_host.slug, RapidProAPI.MODE_VERIFICATION)
+
+    assert api.url == "https://rapidpro.io"
+
+
+@pytest.mark.django_db
+def test_get_flow_runs_requests_url_without_double_slash(business_area_with_trailing_slash_host):
+    api = RapidProAPI.__new__(RapidProAPI)
+    api._client = MagicMock()
+    api._timeout = 30
+    api._init_token(business_area_with_trailing_slash_host.slug, RapidProAPI.MODE_VERIFICATION)
+    response = MagicMock()
+    response.json.return_value = {"next": None, "results": []}
+    api._client.get.return_value = response
+
+    api.get_flow_runs()
+
+    api._client.get.assert_called_once_with(
+        "https://app.rapidpro.io/api/v2/runs.json?responded=true",
+        timeout=30,
+    )
 
 
 @pytest.mark.django_db
