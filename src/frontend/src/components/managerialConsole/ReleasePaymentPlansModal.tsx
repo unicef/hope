@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 interface ReleasePaymentPlansModalProps {
   selectedPlansIds: string[];
   selectedPlansUnicefIds: string[];
-  onRelease: (plans: any[], comment: string) => Promise<void>;
+  onRelease: (plans: string[], comment: string) => Promise<void>;
 }
 
 export const ReleasePaymentPlansModal = ({

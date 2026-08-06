@@ -4,20 +4,25 @@ import PhotoModal from '@components/core/PhotoModal/PhotoModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 
 export function ImportedIndividualFlexFieldPhotoModal({ field }): ReactElement {
   const { id } = useParams();
   const { businessArea, programId } = useBaseUrl();
 
+  const individualParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    id: id,
+  };
   const { data } = useQuery<IndividualDetail>({
-    queryKey: ['individual', businessArea, programId, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      individualParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        id: id,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(individualParams),
     enabled: !!businessArea && !!programId && !!id,
   });
 

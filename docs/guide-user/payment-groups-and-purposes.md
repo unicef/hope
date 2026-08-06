@@ -157,11 +157,42 @@ Follow-Up Instructions support the same export / import reconciliation cycle as 
 
 ## Top-Up Payment Plans
 
-A **Top-Up Payment Plan** (`plan_type = TOP_UP`) is used to make an additional payment to households that were already successfully paid in a specific source Standard plan in the same Cycle. It can only contain households from that source plan that were delivered to.
+A **Top-Up Payment Plan** (`plan_type = TOP_UP`) is used to make an additional payment to households that are already in a specific source Standard plan in the same Cycle. It can contain any household from that source plan, whatever the status of their original payment — delivered, still pending, or failed.
 
 ### When can you create a Top-Up?
 
-The **"Create Top-Up"** button appears on a Payment Plan when at least one payment in the plan has been fully or partially delivered.
+The **"Create Top-Up"** button appears on a Standard Payment Plan in **Accepted** or **Finished** status that still has at least one beneficiary available to top up. Delivery is not required — a plan whose payments are all still pending can be topped up.
+
+A beneficiary is available unless their household has been withdrawn, or they are already part of another Top-Up of the same source plan: one Top-Up per beneficiary per source plan.
+
+!!! warning "Excluding a beneficiary does not free them"
+
+    Excluding a payment from a Top-Up (or a Top-Up Amendment) does not return the beneficiary to the eligible pool. Being part of one child plan of a source — excluded or not — blocks them from another one. Only beneficiaries who were never included stay available.
+
+A Top-Up that contains failed payments can itself be the source of a Follow-Up Payment Plan, exactly like a Standard plan.
+
+### Setting the Top-Up amount
+
+The amount is chosen while creating the Top-Up, in one of two ways:
+
+- **Fixed** — one amount for every eligible beneficiary. Nobody is left out.
+- **Custom / per beneficiary** — download the template, fill in an amount per beneficiary, and upload it. The file decides both the amounts and who is in: beneficiaries left empty or set to zero are not part of the Top-Up, and stay available for a later one.
+
+This is how a source plan is split across several Top-Ups — fund some beneficiaries now, leave the rest at zero, and create another Top-Up for them later.
+
+Before anything is submitted, the dialog reads the uploaded file in the browser and shows how many payments it would fund — for example *"New Top-Up will be created for 12 payments"*.
+
+```mermaid
+flowchart TD
+    A["Create Top-Up dialog"] --> B{"Amount mode"}
+    B -- Fixed --> C["Every eligible beneficiary included<br/>with the same amount"]
+    B -- Custom --> D["Download the amount template"]
+    D --> E["Fill in an amount per beneficiary"]
+    E --> F["Upload the file"]
+    F --> G{"Row amount"}
+    G -- Above zero --> H["Beneficiary included<br/>with that amount"]
+    G -- Zero or empty --> I["Not included — stays available<br/>for a later Top-Up"]
+```
 
 ![Creating a Top-Up](./_screenshots/groups-and-purposes/top-ups.png)
 
@@ -170,14 +201,20 @@ The **"Create Top-Up"** button appears on a Payment Plan when at least one payme
 ![Top-Up displayed in related](./_screenshots/groups-and-purposes/top-ups-displayed-related.png)
 
 
-### Purpose inheritance
+### What a Top-Up inherits
 
-A Top-Up Plan automatically inherits the **same Purposes** as its source plan. Users do not select Purposes when creating a Top-Up.
+A Top-Up Plan automatically inherits the source plan's **Programme Cycle, Purposes, currency, FSP and delivery mechanism**. Only the dispersion dates and the amount are chosen when creating it. Users do not select Purposes when creating a Top-Up.
 
 ### Top-Up Amendments
 
-A **Top-Up Amendment** (`plan_type = TOP_UP_AMENDMENT`) is a secondary correction layer on top of a Top-Up Plan. It is created from a Top-Up Plan (not from a Standard plan) and covers households within that Top-Up that still have outstanding payment amounts after partial delivery.
+A **Top-Up Amendment** (`plan_type = TOP_UP_AMENDMENT`) is a secondary correction layer on top of a Top-Up Plan. It is created from a Top-Up Plan (not from a Standard plan) and adjusts the amounts of households within that Top-Up.
 
-The **"Create Top-Up Amendment"** button appears on a Top-Up Payment Plan when at least one of its payments qualifies for amendment.
+The **"Create Top-Up Amendment"** button appears on a Top-Up Payment Plan in **Accepted** or **Finished** status when at least one of its payments is on a non-withdrawn household and is not yet covered by another Amendment. As with a Top-Up, the payment's delivery status does not matter — delivered, pending and failed payments can all be amended.
+
+The creation dialog is the same one used for a Top-Up: the amount is set either as a **Fixed** value for everyone, or per beneficiary by downloading the amount template and uploading it filled in. Beneficiaries left empty or at zero in the file are not part of the Amendment and stay available for a later one. Like a Top-Up, an Amendment inherits the source Top-Up's Programme Cycle, Purposes, currency, FSP and delivery mechanism.
+
+An Amendment that contains failed payments can be the source of a Follow-Up Payment Plan. An Amendment cannot itself be amended again.
 
 ![Top-Up Amendment](./_screenshots/groups-and-purposes/top-up-amendment.png)
+
+Creation-time funding of Top-Ups and Top-Up Amendments was introduced by [Change Request 332492: Improve the Top-Up Payment Plan workflow](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/332492).

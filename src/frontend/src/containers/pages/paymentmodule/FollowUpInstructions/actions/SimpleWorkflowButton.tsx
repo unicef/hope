@@ -1,8 +1,9 @@
 import { LoadingButton } from '@core/LoadingButton';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +20,6 @@ interface SimpleWorkflowButtonProps {
 
 export function SimpleWorkflowButton({
   label,
-  instruction,
   mutationFn,
   successMessage,
   color = 'primary',
@@ -27,7 +27,6 @@ export function SimpleWorkflowButton({
   dataCy,
 }: SimpleWorkflowButtonProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
@@ -35,15 +34,14 @@ export function SimpleWorkflowButton({
     mutationFn,
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: [
-          'followUpInstruction',
-          businessArea,
-          instruction.id,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFollowUpInstructionsRetrieve,
+        ),
       });
       await queryClient.invalidateQueries({
-        queryKey: ['followUpInstructionsList', businessArea, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFollowUpInstructionsList,
+        ),
       });
       showMessage(t(successMessage));
     },

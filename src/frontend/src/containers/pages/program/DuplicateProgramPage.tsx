@@ -23,6 +23,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   deepUnderscore,
   isPartnerVisible,
@@ -57,20 +58,25 @@ const DuplicateProgramPage = (): ReactElement => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['businessAreaPrograms', businessArea],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
     },
   });
 
   const { data: treeData, isLoading: treeLoading } = useQuery<AreaTree[]>({
-    queryKey: ['allAreasTree', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
       }),
   });
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
-    queryKey: ['businessAreaProgram', businessArea, id],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
@@ -80,7 +86,9 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: ['userChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -89,7 +97,9 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: ['programChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,

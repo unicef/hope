@@ -17,6 +17,7 @@ import { RegistrationDataImportDetail } from '@restgenerated/models/Registration
 import { useActionMutation } from '@hooks/useActionMutation';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface RerunDedupeProps {
   registration: RegistrationDataImportDetail;
@@ -32,7 +33,9 @@ export const RerunDedupe = ({
   const { mutateAsync: mutate, isPending: loading } = useActionMutation(
     registration.id,
     RestService.restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate,
-    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
+    restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+    ),
   );
   const rerunDedupe = async(): Promise<void> => {
     try {

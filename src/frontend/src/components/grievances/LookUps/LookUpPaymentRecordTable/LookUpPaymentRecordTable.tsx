@@ -7,8 +7,9 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 interface LookUpPaymentRecordTableProps {
   openInNewTab?: boolean;
@@ -50,19 +51,35 @@ export function LookUpPaymentRecordTable({
   const {
     data: paymentsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: [
+    queryKey:
       programId === 'all' || !programId
-        ? 'businessAreasPaymentsList'
-        : 'businessAreasProgramsPaymentsList',
-      queryVariables,
-      initialValues?.selectedHousehold?.unicefId,
-      initialValues?.selectedIndividual?.unicefId,
-      businessArea,
-      programId,
-      programId === 'all' || !programId ? globalPage : programPage,
-    ],
+        ? restQueryKey(
+            RestService.restBusinessAreasPaymentsList,
+            createApiParams(
+              {
+                businessAreaSlug: businessArea,
+              },
+              {},
+              { withPagination: true },
+            ),
+          )
+        : restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentsList,
+            createApiParams(
+              {
+                householdUnicefId: initialValues?.selectedHousehold?.unicefId,
+                individualUnicefId:
+                  initialValues?.selectedIndividual?.unicefId,
+                businessAreaSlug: businessArea,
+                code: programId,
+              },
+              {},
+              { withPagination: true },
+            ),
+          ),
     queryFn: () => {
       // Use global payments API when programId is 'all' or not available
       if (programId === 'all' || !programId) {
@@ -90,49 +107,45 @@ export function LookUpPaymentRecordTable({
         ),
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   // Count queries for global and program payments
+  const globalPaymentsCountParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+    },
+    {},
+  );
   const { data: globalCountData } = useQuery({
-    queryKey: [
-      'businessAreasPaymentsCount',
-      queryVariables,
-      businessArea,
-      globalPage,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasPaymentsCountRetrieve,
+      globalPaymentsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasPaymentsCountRetrieve(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-          },
-          {},
-        ),
+        globalPaymentsCountParams,
       ),
     enabled: (programId === 'all' || !programId) && globalPage === 0,
   });
 
+  const programPaymentsCountParams = createApiParams(
+    {
+      householdUnicefId: initialValues?.selectedHousehold?.unicefId,
+      individualUnicefId: initialValues?.selectedIndividual?.unicefId,
+      businessAreaSlug: businessArea,
+      code: programId,
+    },
+    {},
+  );
   const { data: programCountData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsPaymentsCount',
-      queryVariables,
-      initialValues?.selectedHousehold?.unicefId,
-      initialValues?.selectedIndividual?.unicefId,
-      businessArea,
-      programId,
-      programPage,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentsCountRetrieve,
+      programPaymentsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentsCountRetrieve(
-        createApiParams(
-          {
-            householdUnicefId: initialValues?.selectedHousehold?.unicefId,
-            individualUnicefId: initialValues?.selectedIndividual?.unicefId,
-            businessAreaSlug: businessArea,
-            code: programId,
-          },
-          {},
-        ),
+        programPaymentsCountParams,
       ),
     enabled: programId !== 'all' && !!programId && programPage === 0,
   });
@@ -174,6 +187,7 @@ export function LookUpPaymentRecordTable({
         headCells={headCells}
         data={paymentsData}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
@@ -205,6 +219,7 @@ export function LookUpPaymentRecordTable({
       numSelected={numSelected}
       data={paymentsData}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

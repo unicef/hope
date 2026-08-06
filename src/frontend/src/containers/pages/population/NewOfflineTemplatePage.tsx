@@ -12,6 +12,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
@@ -63,7 +64,10 @@ const NewOfflineTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        { businessAreaSlug: businessArea, programCode: programId },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,

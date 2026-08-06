@@ -5,10 +5,11 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete/FormikAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, FormikProvider, useFormik } from 'formik';
@@ -63,22 +64,16 @@ export const CreateImportFromProgramPopulationForm = ({
     limit: 100,
   };
 
+  const programsParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: [
-        'businessAreasProgramsList',
-        queryVariables,
-        businessArea,
-        programId,
-      ],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-            { withPagination: true },
-          ),
-        ),
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsList, programsParams),
+      queryFn: () => RestService.restBusinessAreasProgramsList(programsParams),
+      placeholderData: keepPreviousData,
     });
 
   const onSubmit = async (values): Promise<void> => {

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface PeriodicDataUpdatesUploadDetailsDialogProps {
   open: boolean;
@@ -71,12 +72,14 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { data: uploadDetailsData, isLoading } = useQuery({
-    queryKey: [
-      'periodicDataUpdateUploadDetails',
-      businessArea,
-      programId,
-      uploadId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: uploadId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
         businessAreaSlug: businessArea,

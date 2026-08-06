@@ -32,6 +32,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { FormikEffect } from '@core/FormikEffect';
@@ -178,12 +179,9 @@ export const CreateVerificationPlan = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -191,7 +189,10 @@ export const CreateVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList,
+      { businessAreaSlug: businessArea, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
@@ -207,7 +208,10 @@ export const CreateVerificationPlan = ({
   const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,

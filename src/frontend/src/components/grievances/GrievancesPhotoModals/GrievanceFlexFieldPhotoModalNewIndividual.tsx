@@ -3,6 +3,7 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
@@ -22,20 +23,18 @@ export function GrievanceFlexFieldPhotoModalNewIndividual({
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
+  const individualParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId || selectedProgram?.code || '',
+    id: individualId,
+  };
   const { data } = useQuery<IndividualDetail>({
-    queryKey: [
-      'individual',
-      businessArea,
-      programId,
-      individualId,
-      selectedProgram?.code,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      individualParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug: businessArea,
-        programCode: programId || selectedProgram?.code || '',
-        id: individualId,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(individualParams),
     enabled:
       !!businessArea &&
       !!individualId &&

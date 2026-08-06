@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 
@@ -29,27 +30,23 @@ export const AdminAreaFixedAutocomplete = ({
   const debouncedInputText = useDebounce(inputValue, 800);
   const [, setNewValue] = useState(null);
   const { businessArea } = useBaseUrl();
+  const geoAreasParams = {
+    businessAreaSlug: businessArea,
+    level: level === 1 ? 1 : 2,
+    name: debouncedInputText || undefined,
+    id: value || undefined,
+    parentId: parentId || undefined,
+  };
   const {
     data: areasData,
     isLoading,
     error,
   } = useQuery({
-    queryKey: [
-      'adminAreas',
-      debouncedInputText,
-      businessArea,
-      level,
-      parentId,
-      value,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasGeoAreasList({
-        businessAreaSlug: businessArea,
-        level: level === 1 ? 1 : 2,
-        name: debouncedInputText || undefined,
-        id: value || undefined,
-        parentId: parentId || undefined,
-      }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasList,
+      geoAreasParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasGeoAreasList(geoAreasParams),
     enabled: !!businessArea,
   });
 

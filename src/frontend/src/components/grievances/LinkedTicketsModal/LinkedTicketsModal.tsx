@@ -24,6 +24,7 @@ import {
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { GrievanceTicketRelated } from '@restgenerated/models/GrievanceTicketRelated';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { grievanceTicketStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
@@ -71,11 +72,10 @@ function LinkedTicketsModal({
   const { data: relatedTickets = [], isLoading } = useQuery<
     GrievanceTicketRelated[]
   >({
-    queryKey: [
-      'businessAreasGrievanceTicketsRelatedTickets',
-      businessArea,
-      ticket.id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRelatedTicketsList,
+      { businessAreaSlug: businessArea, id: ticket.id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRelatedTicketsList({
         businessAreaSlug: businessArea,

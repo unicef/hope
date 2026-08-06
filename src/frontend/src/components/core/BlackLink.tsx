@@ -97,8 +97,9 @@ export const BlackLink = (props: BlackLinkProps): ReactElement => {
           'fullWidth',
         ].includes(key)
       ) {
-        // @ts-ignore
-        anchorProps[key] = rest[key];
+        (anchorProps as Record<string, unknown>)[key] = (
+          rest as Record<string, unknown>
+        )[key];
       }
     });
     return (
@@ -140,8 +141,9 @@ export const BlackLink = (props: BlackLinkProps): ReactElement => {
         'fullWidth',
       ].includes(key)
     ) {
-      // @ts-ignore
-      linkProps[key] = rest[key];
+      (linkProps as Record<string, unknown>)[key] = (
+        rest as Record<string, unknown>
+      )[key];
     }
   });
   return (

@@ -17,6 +17,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
@@ -40,7 +41,11 @@ export const PaymentPlanDetailsHeader = ({
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({
-    queryKey: ['programCyclesDetails', businessArea, programCycleId, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesRetrieve, {
+      businessAreaSlug: businessArea,
+      id: programCycleId,
+      programCode: programId,
+    }),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,
