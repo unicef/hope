@@ -34,7 +34,7 @@ class EsForm(forms.Form):
     )
 
     def clean(self) -> dict:
-        cleaned = super().clean()
+        cleaned = super().clean() or {}
         if cleaned.get("action") in self.LIVE_INDEX_ACTIONS and not cleaned.get("confirm_live_index_write"):
             self.add_error("confirm_live_index_write", "Required for actions that write into live indexes.")
         return cleaned
