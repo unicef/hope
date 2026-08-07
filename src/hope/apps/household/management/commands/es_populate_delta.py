@@ -265,15 +265,16 @@ class Command(BaseCommand):
     @staticmethod
     def _apply_delta(delta: dict, ind_doc: type, hh_doc: type, using: str, opts: dict) -> None:
         from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
-        from hope.models import Household, Individual
 
         chunk = opts["chunk_size"]
         parallel = opts["parallel"]
+        # get_queryset() rather than raw model managers: same scope (program + merge status)
+        # plus the select/prefetch that keeps prepare() from doing per-row queries
         if delta["ind_present"]:
-            qs = Individual.all_merge_status_objects.filter(id__in=delta["ind_present"]).iterator(chunk_size=chunk)
+            qs = ind_doc().get_queryset().filter(id__in=delta["ind_present"]).iterator(chunk_size=chunk)
             ind_doc().update(qs, action="index", parallel=parallel, using=using)
         if delta["hh_present"]:
-            qs = Household.objects.filter(id__in=delta["hh_present"]).iterator(chunk_size=chunk)
+            qs = hh_doc().get_queryset().filter(id__in=delta["hh_present"]).iterator(chunk_size=chunk)
             hh_doc().update(qs, action="index", parallel=parallel, using=using)
         if delta["ind_removed"]:
             remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["ind_removed"]], ind_doc, using=using)
