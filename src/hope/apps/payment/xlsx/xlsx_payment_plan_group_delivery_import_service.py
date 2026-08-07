@@ -219,7 +219,8 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 XlsxError(
                     self.sheetname,
                     None,
-                    "There aren't any updates in imported file, please add changes and try again",
+                    "There aren't any updates in the imported file. Reconciliation data is either empty or has "
+                    "already been uploaded and cannot be overwritten.",
                 )
             )
 
