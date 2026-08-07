@@ -15,11 +15,9 @@ def admin_instance() -> FileTempAdmin:
 
 
 @pytest.fixture
-def root_request(settings) -> HttpRequest:
-    settings.ROOT_TOKEN = "root-token"
+def root_request() -> HttpRequest:
     request = HttpRequest()
     request.user = UserFactory(is_superuser=True)
-    request.META["HTTP_X_ROOT_TOKEN"] = "root-token"
     return request
 
 
@@ -52,6 +50,8 @@ def test_non_root_cannot_see_encrypted_passwords(admin_instance: FileTempAdmin, 
     assert admin_instance.get_readonly_fields(non_root_request) == ("download_link",)
 
 
-def test_root_can_see_encrypted_passwords(admin_instance: FileTempAdmin, root_request: HttpRequest) -> None:
+def test_root_can_see_encrypted_passwords(
+    admin_instance: FileTempAdmin, root_request: HttpRequest, enable_is_root
+) -> None:
     assert admin_instance.get_exclude(root_request) is None
     assert admin_instance.get_readonly_fields(root_request) == ("download_link", "password", "xlsx_password")
