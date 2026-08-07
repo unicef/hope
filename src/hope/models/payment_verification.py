@@ -28,10 +28,10 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"
     STATUS_RECEIVED_WITH_ISSUES = "RECEIVED_WITH_ISSUES"
     STATUS_CHOICES = (
-        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
-        (STATUS_PENDING, "PENDING"),
-        (STATUS_RECEIVED, "RECEIVED"),
-        (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
+        (STATUS_NOT_RECEIVED, "Not Received"),
+        (STATUS_PENDING, "Pending"),
+        (STATUS_RECEIVED, "Received"),
+        (STATUS_RECEIVED_WITH_ISSUES, "Received With Issues"),
     )
     payment = models.ForeignKey(
         "payment.Payment",

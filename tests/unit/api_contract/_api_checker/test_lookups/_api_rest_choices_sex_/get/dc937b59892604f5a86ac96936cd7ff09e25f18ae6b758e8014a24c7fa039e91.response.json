@@ -8,24 +8,28 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "187"
+        "Content-Length": "196"
     },
     "data": [
         {
-            "name": "Not Received",
-            "value": "NOT_RECEIVED"
+            "name": "Female",
+            "value": "FEMALE"
         },
         {
-            "name": "Pending",
-            "value": "PENDING"
+            "name": "Male",
+            "value": "MALE"
         },
         {
-            "name": "Received",
-            "value": "RECEIVED"
+            "name": "Not answered",
+            "value": "NOT_ANSWERED"
         },
         {
-            "name": "Received With Issues",
-            "value": "RECEIVED_WITH_ISSUES"
+            "name": "Not collected",
+            "value": "NOT_COLLECTED"
+        },
+        {
+            "name": "Other",
+            "value": "OTHER"
         }
     ],
     "content_type": "application/json"

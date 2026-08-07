@@ -8,24 +8,20 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "187"
+        "Content-Length": "106"
     },
     "data": [
         {
-            "name": "Not Received",
-            "value": "NOT_RECEIVED"
+            "name": "MANUAL",
+            "value": "MANUAL"
         },
         {
-            "name": "Pending",
-            "value": "PENDING"
+            "name": "RAPIDPRO",
+            "value": "RAPIDPRO"
         },
         {
-            "name": "Received",
-            "value": "RECEIVED"
-        },
-        {
-            "name": "Received With Issues",
-            "value": "RECEIVED_WITH_ISSUES"
+            "name": "XLSX",
+            "value": "XLSX"
         }
     ],
     "content_type": "application/json"
