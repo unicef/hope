@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import enum
 import logging
 from typing import TYPE_CHECKING, Any
@@ -17,15 +18,36 @@ if TYPE_CHECKING:
     from django_elasticsearch_dsl import Document
 
 
-def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False, chunk_size: int = 2000) -> None:
+PROGRESS_EVERY = 1_000
+
+
+def populate_index(
+    queryset: "QuerySet",
+    doc: Any,
+    parallel: bool = False,
+    chunk_size: int = 2000,
+    progress_cb: Callable[[int], None] | None = None,
+) -> None:
     if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
         return
     # atomic() so iterator() opens a plain (lazy) server-side cursor: outside a transaction
     # Django declares it WITH HOLD, which materializes the ENTIRE result set on DECLARE
     # before the first row arrives - minutes-to-hours on big programs under IO pressure
     with transaction.atomic():
-        qs = queryset.iterator(chunk_size=chunk_size)
+        qs: Any = queryset.iterator(chunk_size=chunk_size)
+        if progress_cb is not None:
+            qs = _reporting(qs, progress_cb)
         doc().update(qs, parallel=parallel)
+
+
+def _reporting(rows: Any, cb: Callable[[int], None]) -> Any:
+    n = 0
+    for row in rows:
+        yield row
+        n += 1
+        if n % PROGRESS_EVERY == 0:
+            cb(n)
+    cb(n)
 
 
 def remove_elasticsearch_documents_by_matching_ids(

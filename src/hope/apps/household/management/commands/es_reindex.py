@@ -60,7 +60,7 @@ Read-only state report::
 
 from datetime import UTC, datetime
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 import uuid
 
 from constance import config
@@ -79,6 +79,9 @@ from hope.apps.household.services.index_management import (
     versioned_doc,
 )
 from hope.apps.utils.elasticsearch_utils import populate_index
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 DELTA_SINCE_BUFFER_MINUTES = 5
 
@@ -294,7 +297,12 @@ class Command(BaseCommand):
                 es.indices.delete(index=target)
                 self.stdout.write(self.style.WARNING(f"  rebuilt {target} (mapping changed since it was created)"))
             create_versioned_index(es, doc_class, suffix=suffix, attach_alias=False)
-            populate_index(vdoc().get_queryset(), vdoc, chunk_size=opts["chunk_size"])
+            queryset = vdoc().get_queryset()
+            db_count = queryset.count()
+            self.stdout.write(f"  populating {target} ({db_count} docs from db)")
+            self.stdout.flush()
+            populate_index(queryset, vdoc, chunk_size=opts["chunk_size"], progress_cb=self._progress(target, db_count))
+            self.stdout.write(f"  populated {target}")
 
         # the delta anchor covers the oldest target: for a fresh index creation_date == this run's
         # populate start, for a resumed one it reaches back to everything the crashed run may have missed
@@ -320,6 +328,13 @@ class Command(BaseCommand):
         self._delta(pid, since=final_start)
         note = ", resumed dark pair" if resumed else ""
         return f"reindexed {list(old.values())} -> _{suffix}, aliases swapped (old kept for rollback){note}"
+
+    def _progress(self, target: str, db_count: int) -> "Callable[[int], None]":
+        def report(n: int) -> None:
+            self.stdout.write(f"    {target}: {n}/{db_count}")
+            self.stdout.flush()
+
+        return report
 
     @staticmethod
     def _pair_suffix(old: dict) -> str:
