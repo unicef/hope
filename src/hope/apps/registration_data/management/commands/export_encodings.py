@@ -30,7 +30,7 @@ from argparse import ArgumentParser
 from datetime import UTC, datetime
 import json
 import time
-from typing import Any
+from typing import Any, cast
 import uuid
 
 from django.core.files.base import ContentFile
@@ -181,12 +181,13 @@ class Command(BaseCommand):
 
     # ----- submit -----
 
-    def _individuals_queryset(self, business_area_slug: str) -> QuerySet[Individual]:
-        return (
+    def _individuals_queryset(self, business_area_slug: str) -> QuerySet[Individual, Individual]:
+        return cast(
+            "QuerySet[Individual, Individual]",
             Individual.all_objects.filter(is_removed=False, business_area__slug=business_area_slug)
             .exclude(Q(photo="") | Q(withdrawn=True) | Q(duplicate=True))
             .order_by("id")
-            .only("id", "photo")
+            .only("id", "photo"),
         )
 
     def _run_submit(self, options: dict) -> None:
