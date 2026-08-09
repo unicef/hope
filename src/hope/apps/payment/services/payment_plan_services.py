@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Callable, Union, cast
 from uuid import UUID
 
 from constance import config
-from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -1569,7 +1568,7 @@ class PaymentPlanService:
             Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
         ).distinct()
 
-        if settings.ENV == "prod":
+        if not config.NOTIFY_INTERNAL_USERS:
             users = users.exclude(is_superuser=True)
 
         if users:

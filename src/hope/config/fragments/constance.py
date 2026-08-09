@@ -146,6 +146,11 @@ CONSTANCE_CONFIG = {
         "Should send PDU Online Edit notification",
         bool,
     ),
+    "NOTIFY_INTERNAL_USERS": (
+        False,
+        "Should send notifications to internal users (superusers and staff)",
+        bool,
+    ),
     "ENABLE_MAILJET": (
         False,
         "Enable sending emails via Mailjet",
