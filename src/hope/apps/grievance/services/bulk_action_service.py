@@ -16,6 +16,7 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
 )
 from hope.apps.grievance.services.ticket_status_changer_service import TicketStatusChangerService
 from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
+from hope.apps.grievance.utils import validate_individual_for_need_adjudication
 from hope.models import User, log_create
 
 # prevent N+1 queries with Grievance Ticket queries in log_create
@@ -208,15 +209,24 @@ class BulkActionService:
 
     def _resolve_single_needs_adjudication(self, ticket: GrievanceTicket, resolution: dict, user: User) -> None:
         ticket_details = ticket.ticket_details
-        ticket_individual_ids = {str(ticket_details.golden_records_individual_id)} | {
-            str(pk) for pk in ticket_details.possible_duplicates.values_list("id", flat=True)
+        ticket_individuals = {
+            str(individual.id): individual
+            for individual in [
+                ticket_details.golden_records_individual,
+                ticket_details.possible_duplicate,
+                *ticket_details.possible_duplicates.all(),
+            ]
+            if individual is not None
         }
         duplicate_ids = [str(individual_id) for individual_id in resolution["duplicate_individual_ids"]]
         distinct_ids = [str(individual_id) for individual_id in resolution["distinct_individual_ids"]]
 
-        unknown = (set(duplicate_ids) | set(distinct_ids)) - ticket_individual_ids
+        unknown = (set(duplicate_ids) | set(distinct_ids)) - ticket_individuals.keys()
         if unknown:
             raise ValidationError(f"Individuals {sorted(unknown)} do not belong to ticket {ticket.unicef_id}.")
+
+        for individual_id in duplicate_ids + distinct_ids:
+            validate_individual_for_need_adjudication(user.partner, ticket_individuals[individual_id], ticket_details)
 
         ticket_details.role_reassign_data = resolution.get("role_reassign_data") or {}
         ticket_details.save(update_fields=["role_reassign_data"])

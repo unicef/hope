@@ -24,6 +24,10 @@ export interface NaTicketDecision {
   // One mark per compared duplicate, keyed by that individual's id. A ticket can
   // carry several possible duplicates and each pair is adjudicated separately.
   marks: Record<string, NaMark>;
+  // How many possible duplicates the ticket compares. The backend refuses to close
+  // a ticket while any of its individuals is still unflagged, so a decision is only
+  // executable once there is a mark for every one of them.
+  candidateCount: number;
   duplicateIndividualIds: string[];
   distinctIndividualIds: string[];
   // Keyed by `${role}:${householdId}` so a duplicate holding the same role in

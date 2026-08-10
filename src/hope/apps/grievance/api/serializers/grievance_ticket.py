@@ -841,3 +841,9 @@ class NeedsAdjudicationResolutionSerializer(serializers.Serializer):
 
 class BulkNeedsAdjudicationSerializer(serializers.Serializer):
     tickets = NeedsAdjudicationResolutionSerializer(many=True, allow_empty=False)
+
+    def validate_tickets(self, value: list[dict]) -> list[dict]:
+        ticket_ids = [resolution["ticket_id"] for resolution in value]
+        if len(set(ticket_ids)) != len(ticket_ids):
+            raise serializers.ValidationError("Each ticket can only be resolved once per request.")
+        return value

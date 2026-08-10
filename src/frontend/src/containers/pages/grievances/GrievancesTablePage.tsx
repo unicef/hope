@@ -11,7 +11,6 @@ import {
   GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
   GRIEVANCES_VIEW_LIST_PERMISSIONS,
   PERMISSIONS,
-  GRIEVANCES_NA_MANAGE_PERMISSIONS,
   canManageNeedsAdjudication,
   hasPermissions,
 } from '../../../config/permissions';

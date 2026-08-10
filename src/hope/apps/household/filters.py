@@ -452,7 +452,8 @@ class IndividualFilter(UpdatedAtFilter):
         return qs.filter(q_obj).distinct()
 
     def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        return qs.exclude(id=value)
+        excluded_ids = [item for item in str(value).split(",") if item]
+        return qs.exclude(id__in=excluded_ids)
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
         if value is True:

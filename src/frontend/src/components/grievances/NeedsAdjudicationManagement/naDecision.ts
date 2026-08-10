@@ -27,6 +27,7 @@ interface ApplyMarkArgs {
 
 const EMPTY_DECISION: NaTicketDecision = {
   marks: {},
+  candidateCount: 0,
   duplicateIndividualIds: [],
   distinctIndividualIds: [],
   reassignments: {},
@@ -79,6 +80,7 @@ const derive = (
 
   return {
     marks,
+    candidateCount: Object.keys(duplicatesById).length,
     duplicateIndividualIds: duplicateIds,
     distinctIndividualIds: distinctIds,
     reassignments,

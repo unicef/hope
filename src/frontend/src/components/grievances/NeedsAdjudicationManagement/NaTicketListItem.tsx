@@ -14,6 +14,7 @@ interface NaTicketListItemProps {
   selected: boolean;
   managed: boolean;
   needsReassignment: boolean;
+  incomplete: boolean;
   onSelect: () => void;
 }
 
@@ -23,6 +24,7 @@ export const NaTicketListItem = ({
   selected,
   managed,
   needsReassignment,
+  incomplete,
   onSelect,
 }: NaTicketListItemProps): ReactElement => {
   const { t } = useTranslation();
@@ -30,6 +32,19 @@ export const NaTicketListItem = ({
     urgencyChoices.find((choice) => choice.value === ticket.urgency)?.name ||
     '-';
   const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
+
+  let warning: { label: string; dataCy: string } | null = null;
+  if (incomplete) {
+    warning = {
+      label: t('Decision incomplete'),
+      dataCy: 'na-ticket-decision-incomplete',
+    };
+  } else if (needsReassignment) {
+    warning = {
+      label: t('Reassignment required'),
+      dataCy: 'na-ticket-reassignment-required',
+    };
+  }
 
   return (
     <Box
@@ -73,7 +88,7 @@ export const NaTicketListItem = ({
           status={urgencyLabel}
           statusToColor={grievanceTicketBadgeColors}
         />
-        {needsReassignment ? (
+        {warning ? (
           <Box
             sx={{
               display: 'flex',
@@ -86,9 +101,9 @@ export const NaTicketListItem = ({
             <Typography
               variant="body2"
               sx={{ fontStyle: 'italic' }}
-              data-cy="na-ticket-reassignment-required"
+              data-cy={warning.dataCy}
             >
-              {t('Reassignment required')}
+              {warning.label}
             </Typography>
           </Box>
         ) : (

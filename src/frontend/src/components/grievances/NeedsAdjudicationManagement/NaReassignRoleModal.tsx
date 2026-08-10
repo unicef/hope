@@ -32,6 +32,9 @@ interface NaReassignRoleModalProps {
   role: NaRequiredRole;
   household: { id: string; unicefId: string };
   individualToReassign: NaIndividual;
+  // Everyone this ticket withdraws. `_validate_role_reassignment` rejects a
+  // replacement that is itself marked as a duplicate.
+  duplicateIndividualIds: string[];
   onSelect: (individual: { id: string; fullName?: string }) => void;
 }
 
@@ -47,6 +50,7 @@ export const NaReassignRoleModal = ({
   role,
   household,
   individualToReassign,
+  duplicateIndividualIds,
   onSelect,
 }: NaReassignRoleModalProps): ReactElement => {
   const { t } = useTranslation();
@@ -89,6 +93,17 @@ export const NaReassignRoleModal = ({
   );
   const [selectedIndividual, setSelectedIndividual] = useState(null);
   const [selectedHousehold, setSelectedHousehold] = useState(null);
+
+  // In All Programmes the page filters can carry any programme, but the backend only
+  // accepts a replacement from the programme of the individual losing the role.
+  const programScopedFilter = {
+    ...appliedFilterIND,
+    program: individualToReassign.program ?? '',
+  };
+
+  const excludedIds = Array.from(
+    new Set([individualToReassign.id, ...duplicateIndividualIds]),
+  ).join(',');
 
   if (individualChoicesLoading) return <LoadingComponent />;
   if (!individualChoicesData) return null;
@@ -134,14 +149,14 @@ export const NaReassignRoleModal = ({
               isOnPaper={false}
             />
             <LookUpIndividualTable
-              filter={appliedFilterIND}
+              filter={programScopedFilter}
               setFieldValue={setFieldValue}
               valuesInner={values}
               selectedHousehold={selectedHousehold}
               setSelectedHousehold={setSelectedHousehold}
               selectedIndividual={selectedIndividual}
               setSelectedIndividual={setSelectedIndividual}
-              excludedId={individualToReassign.id}
+              excludedId={excludedIds}
               noTableStyling
             />
           </DialogContent>

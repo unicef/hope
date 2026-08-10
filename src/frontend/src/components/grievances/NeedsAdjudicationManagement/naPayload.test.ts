@@ -9,6 +9,7 @@ describe('buildExecutePayload', () => {
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-1': {
         marks: { 'ind-2': 'person1_duplicate' },
+        candidateCount: 1,
         duplicateIndividualIds: ['ind-1'],
         distinctIndividualIds: ['ind-2'],
         reassignments: {
@@ -45,6 +46,7 @@ describe('buildExecutePayload', () => {
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-2': {
         marks: { 'ind-2': 'not_duplicates' },
+        candidateCount: 1,
         duplicateIndividualIds: [],
         distinctIndividualIds: ['ind-1', 'ind-2'],
         reassignments: {},
@@ -63,6 +65,7 @@ describe('buildExecutePayload', () => {
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-3': {
         marks: { 'ind-2': 'person2_duplicate' },
+        candidateCount: 1,
         duplicateIndividualIds: ['ind-2'],
         distinctIndividualIds: ['ind-1'],
         reassignments: {
@@ -99,6 +102,7 @@ describe('buildExecutePayload', () => {
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-5': {
         marks: { 'ind-2': 'person2_duplicate' },
+        candidateCount: 1,
         duplicateIndividualIds: ['ind-2'],
         distinctIndividualIds: ['ind-1'],
         reassignments: {
@@ -136,6 +140,7 @@ describe('buildExecutePayload', () => {
     const decisions: Record<string, NaTicketDecision> = {
       'ticket-4': {
         marks: { 'ind-2': 'person1_duplicate' },
+        candidateCount: 1,
         duplicateIndividualIds: ['ind-1'],
         distinctIndividualIds: ['ind-2'],
         reassignments: {

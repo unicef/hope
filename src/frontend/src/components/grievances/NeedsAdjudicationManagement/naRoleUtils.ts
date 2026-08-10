@@ -19,6 +19,7 @@ export interface NaRoleInHousehold {
 export interface NaIndividual {
   id: string;
   fullName?: string;
+  program?: string;
   rolesInHouseholds?: NaRoleInHousehold[];
 }
 
@@ -73,3 +74,11 @@ export const isDecisionResolved = (decision: NaTicketDecision): boolean =>
   Object.values(decision.reassignments).every(
     (assignment) => !!assignment.newIndividual,
   );
+
+/**
+ * Every compared pair carries a mark. `validate_all_individuals_before_close_needs_adjudication`
+ * rejects a ticket that still has an unflagged individual, and the batch is all-or-nothing, so a
+ * half-adjudicated ticket would take the whole submission down with it.
+ */
+export const isDecisionComplete = (decision: NaTicketDecision): boolean =>
+  Object.keys(decision.marks).length >= decision.candidateCount;

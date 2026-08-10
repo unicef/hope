@@ -6,7 +6,7 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NaTicketListItem } from './NaTicketListItem';
-import { isDecisionResolved } from './naRoleUtils';
+import { isDecisionComplete, isDecisionResolved } from './naRoleUtils';
 import { NaTicketDecision } from './naTypes';
 
 interface NaTicketsListProps {
@@ -73,7 +73,7 @@ export const NaTicketsList = ({
         sx={{
           flex: 1,
           minHeight: 0,
-          maxHeight: { xs: '60vh', lg: 'none' },
+          maxHeight: { xs: '60vh', md: 'none' },
           overflow: 'auto',
         }}
       >
@@ -96,6 +96,7 @@ export const NaTicketsList = ({
                 selected={ticket.id === selectedTicketId}
                 managed={!!decision}
                 needsReassignment={!!decision && !isDecisionResolved(decision)}
+                incomplete={!!decision && !isDecisionComplete(decision)}
                 onSelect={() => onSelect(ticket.id)}
               />
             );

@@ -536,6 +536,7 @@ export const NaComparisonPanel = ({
             unicefId: openReassignment.householdUnicefId,
           }}
           individualToReassign={duplicateIndividual}
+          duplicateIndividualIds={decision?.duplicateIndividualIds ?? []}
           onSelect={(individual) => onReassign(openReassignKey, individual)}
         />
       )}

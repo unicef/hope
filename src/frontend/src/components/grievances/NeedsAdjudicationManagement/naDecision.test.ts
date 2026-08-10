@@ -83,6 +83,18 @@ describe('applyMark', () => {
     expect(decision.distinctIndividualIds).toEqual(['golden', 'dup-2']);
   });
 
+  it('records how many duplicates the ticket compares', () => {
+    // The Finalize gate needs the full candidate count to tell a finished ticket
+    // from one where only the first pair was marked.
+    const decision = applyMark(
+      undefined,
+      { person1, person2: dup1, mark: 'person2_duplicate' },
+      [dup1, dup2],
+    );
+
+    expect(decision.candidateCount).toBe(2);
+  });
+
   it('keeps a replacement the operator already picked when another pair is marked', () => {
     // Re-deriving must not silently discard a reassignment; losing it would let
     // an unresolved decision look finalizable.

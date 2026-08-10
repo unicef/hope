@@ -11,7 +11,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
-import { GRIEVANCE_CATEGORIES } from '@utils/constants';
+import { GRIEVANCE_CATEGORIES, GrievanceStatuses } from '@utils/constants';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,7 @@ import { NaComparisonPanel } from './NaComparisonPanel';
 import { NaTicketsFilters } from './NaTicketsFilters';
 import { NaTicketsList } from './NaTicketsList';
 import { buildExecutePayload } from './naPayload';
-import { isDecisionResolved } from './naRoleUtils';
+import { isDecisionComplete, isDecisionResolved } from './naRoleUtils';
 import { NaTicketDecision } from './naTypes';
 
 // Needs Adjudication category id (see GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION = '8')
@@ -113,6 +113,22 @@ export const NaTicketsManagement = ({
   const unresolvedCount = Object.values(decisions).filter(
     (decision) => !isDecisionResolved(decision),
   ).length;
+  const incompleteCount = Object.values(decisions).filter(
+    (decision) => !isDecisionComplete(decision),
+  ).length;
+
+  const finalizeBlockedReason = (): string => {
+    if (incompleteCount > 0)
+      return t(
+        '{{count}} ticket(s) still have a duplicate left to decide on before finalizing',
+        { count: incompleteCount },
+      );
+    if (unresolvedCount > 0)
+      return t('{{count}} ticket(s) need a role reassignment before finalizing', {
+        count: unresolvedCount,
+      });
+    return '';
+  };
 
   const { mutate: executeBatch, isPending: isFinalizing } = useMutation({
     mutationFn: () =>
@@ -144,6 +160,23 @@ export const NaTicketsManagement = ({
     },
   });
 
+  // Filtering can hide a ticket the operator has already decided on, and Finalize still
+  // closes it, so warn before the visible set changes.
+  const confirmFilterChange = (apply: () => void): void => {
+    if (managedCount === 0) {
+      apply();
+      return;
+    }
+    confirm({
+      catchOnCancel: true,
+      title: t('Change filters'),
+      content: t(
+        'You have {{count}} ticket(s) managed but not finalized. Your decisions are kept even when the new filters hide those tickets, and Finalize will still close them. Continue?',
+        { count: managedCount },
+      ),
+    }).then(apply, () => undefined);
+  };
+
   const handleFinalize = (): void => {
     confirm({
       title: t('Finalize'),
@@ -159,6 +192,9 @@ export const NaTicketsManagement = ({
 
   const queryVariables = useMemo(
     () => ({
+      // A closed ticket can no longer be resolved: the bulk endpoint rejects the whole
+      // batch if one is in it, so the queue must never offer them.
+      grievanceStatus: GrievanceStatuses.Active,
       search: (appliedFilter.search as string).trim(),
       documentType: appliedFilter.documentType,
       documentNumber: (appliedFilter.documentNumber as string).trim(),
@@ -264,14 +300,7 @@ export const NaTicketsManagement = ({
             {t('Tickets managed')}: {managedCount}
           </Typography>
           <Tooltip
-            title={
-              unresolvedCount > 0
-                ? t(
-                    '{{count}} ticket(s) need a role reassignment before finalizing',
-                    { count: unresolvedCount },
-                  )
-                : ''
-            }
+            title={finalizeBlockedReason()}
             data-cy="na-finalize-blocked-tooltip"
           >
             <span>
@@ -279,7 +308,10 @@ export const NaTicketsManagement = ({
                 variant="contained"
                 color="primary"
                 disabled={
-                  managedCount === 0 || unresolvedCount > 0 || isFinalizing
+                  managedCount === 0 ||
+                  unresolvedCount > 0 ||
+                  incompleteCount > 0 ||
+                  isFinalizing
                 }
                 onClick={handleFinalize}
                 data-cy="button-na-finalize"
@@ -300,26 +332,28 @@ export const NaTicketsManagement = ({
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
-            setAppliedFilter={(f) => {
-              setAppliedFilter(f);
-              setPage(0);
-            }}
+            setAppliedFilter={(f) =>
+              confirmFilterChange(() => {
+                setAppliedFilter(f);
+                setPage(0);
+              })
+            }
           />
           <Box
             sx={{
               display: 'flex',
-              flexDirection: { xs: 'column', lg: 'row' },
+              flexDirection: { xs: 'column', md: 'row' },
               alignItems: 'stretch',
-              height: { lg: 'calc(100vh - 320px)' },
-              minHeight: { lg: 420 },
+              height: { md: 'calc(100vh - 320px)' },
+              minHeight: { md: 420 },
               p: 5,
               gap: 5,
             }}
           >
             <Box
               sx={{
-                width: { xs: '100%', lg: '40%' },
-                minWidth: { lg: 360 },
+                width: { xs: '100%', md: '40%' },
+                minWidth: { md: 320 },
                 display: 'flex',
               }}
             >
