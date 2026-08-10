@@ -18,6 +18,8 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.models import Area, BusinessArea, Household, Individual, Program, RegistrationDataImport
 
+_SCENARIO_TAG = "[NA role reassignment]"
+
 
 class DemoContext(NamedTuple):
     program: Program
@@ -32,14 +34,23 @@ def _fake_photo(color: str) -> ContentFile:
     return ContentFile(buffer.getvalue(), name="photo.jpg")
 
 
-def _make_individual(ctx: DemoContext, attrs: dict) -> Individual:
-    """Create a household + individual with fully controlled fields.
+def _person(full_name: str, sex: str, birth_date: date) -> dict:
+    return {"full_name": full_name, "sex": sex, "birth_date": birth_date}
 
-    The Needs-Adjudication comparison panel highlights a row when the two
-    individuals' values differ, so callers set contrasting ``attrs`` to exercise it.
-    ``attrs`` keys: full_name, sex, birth_date, village, doc_key, doc_label,
-    doc_number, photo_color.
-    """
+
+def _identity(doc_key: str, doc_label: str, doc_number: str, photo_color: str) -> dict:
+    return {"doc_key": doc_key, "doc_label": doc_label, "doc_number": doc_number, "photo_color": photo_color}
+
+
+# Extra members that keep a household above the sole-member threshold and give the
+# reassign modal someone to hand the role to.
+_FILLERS = [
+    _person("Nadia Rahimi", "FEMALE", date(1991, 4, 2)),
+    _person("Bilal Sarwar", "MALE", date(1986, 9, 17)),
+]
+
+
+def _make_individual(ctx: DemoContext, attrs: dict) -> Individual:
     household = HouseholdFactory(
         program=ctx.program,
         business_area=ctx.ba,
@@ -62,24 +73,17 @@ def _make_individual(ctx: DemoContext, attrs: dict) -> Individual:
 
 
 def _attach_identity(ctx: DemoContext, individual: Individual, attrs: dict) -> None:
-    """Give the individual a document and a photo so the comparison panel has content."""
     doc_type = DocumentTypeFactory(key=attrs["doc_key"], label=attrs["doc_label"])
     DocumentFactory(individual=individual, program=ctx.program, type=doc_type, document_number=attrs["doc_number"])
     individual.photo.save(f"{attrs['doc_key']}.jpg", _fake_photo(attrs["photo_color"]), save=True)
 
 
-def _create_dedup_ticket(
+def _create_na_ticket_for_new_individuals(
     ctx: DemoContext,
     golden_attrs: dict,
     duplicate_attrs: dict,
     score: float = 8.5,
 ) -> None:
-    """Build a Needs-Adjudication ticket comparing two distinct individuals.
-
-    ``golden_attrs``/``duplicate_attrs`` are passed straight to
-    :func:`_make_individual`; set them to differing values so every comparison row
-    on the NA Tickets Management panel is flagged as different (highlighted).
-    """
     golden = _make_individual(ctx, golden_attrs)
     duplicate = _make_individual(ctx, duplicate_attrs)
     _create_na_ticket(ctx, golden, duplicate, score)
@@ -92,11 +96,6 @@ def _create_na_ticket(
     score: float = 8.5,
     description: str = "Test description",
 ) -> None:
-    """Wire two existing individuals into a Needs-Adjudication ticket.
-
-    ``unicef_id`` is deliberately not settable: a DB trigger assigns it on insert and
-    ``UnicefIdentifiedModel.save()`` refreshes the field, so any value passed in is discarded.
-    """
     grievance = GrievanceTicketFactory(
         status=1,
         category=8,
@@ -121,6 +120,8 @@ def _create_na_ticket(
         possible_duplicate=duplicate,
         selected_individual=None,
         role_reassign_data={},
+        # The score of a non-golden individual is looked up in ``golden_records``, so the duplicate's
+        # hit belongs there and the golden one in ``possible_duplicate``.
         extra_data={
             "golden_records": [
                 {
@@ -159,21 +160,16 @@ def _make_household_with_members(
     members: list[dict],
     head_index: int = 0,
 ) -> tuple[Household, list[Individual]]:
-    """Build a household whose roster is exactly ``members``, with no collector roles.
-
-    ``create_role=False`` keeps the factory from silently granting PRIMARY to the head —
-    every scenario below assigns roles explicitly. ``HouseholdFactory`` always generates
-    one member of its own, so that individual is reused as ``members[0]`` rather than
-    left in place, otherwise ``active_individuals_count`` would be off by one and the
-    sole-member scenario could not be built at all.
-    """
     household = HouseholdFactory(
         program=ctx.program,
         business_area=ctx.ba,
         registration_data_import=ctx.rdi,
         village=village,
+        # Without this the factory grants PRIMARY to the head; every scenario assigns roles explicitly.
         create_role=False,
     )
+    # The factory always generates one member, so reuse it as members[0] instead of adding another —
+    # otherwise active_individuals_count is off by one and the sole-member scenario cannot be built.
     individuals = [household.head_of_household]
     for field, value in members[0].items():
         setattr(individuals[0], field, value)
@@ -193,82 +189,35 @@ def _make_household_with_members(
     return household, individuals
 
 
-_SCENARIO_TAG = "[NA role reassignment]"
-
-
-def _person(full_name: str, sex: str, birth_date: date) -> dict:
-    return {"full_name": full_name, "sex": sex, "birth_date": birth_date}
-
-
-# Filler members exist only to keep a household above the sole-member threshold and to
-# give the reassign modal someone to hand the role to.
-_FILLERS = [
-    _person("Nadia Rahimi", "FEMALE", date(1991, 4, 2)),
-    _person("Bilal Sarwar", "MALE", date(1986, 9, 17)),
-]
-
-
-def _make_golden(ctx: DemoContext, attrs: dict) -> Individual:
-    """Person 1 of the comparison: always role-free, so only person 2 drives reassignment.
-
-    ``head_index=1`` hands headship to the filler — otherwise person 1 would pick up the
-    synthetic HEAD role and demand a reassignment of its own when withdrawn.
-    """
+def _make_golden(ctx: DemoContext, person: dict, identity: dict) -> Individual:
     _, individuals = _make_household_with_members(
         ctx,
         village="Kandahar",
-        members=[_person(attrs["full_name"], attrs["sex"], attrs["birth_date"]), _FILLERS[0]],
+        members=[person, _FILLERS[0]],
+        # Headship goes to the filler: a HEAD role on person 1 would demand a reassignment of its own.
         head_index=1,
     )
-    _attach_identity(ctx, individuals[0], attrs)
+    _attach_identity(ctx, individuals[0], identity)
     return individuals[0]
 
 
 def generate_role_reassignment_scenarios(ctx: DemoContext) -> None:
-    """Needs-Adjudication tickets covering every branch of ``getRequiredReassignments``.
-
-    In each ticket person 1 holds no roles and person 2 is the role holder, so the tester
-    always clicks *Withdraw person 2* and only the reassignment section differs. Expected
-    rows are noted per scenario; HEAD and PRIMARY require a handover, ALTERNATE does not,
-    and a household with a single active member is skipped because withdrawing its last
-    member withdraws the household outright.
-
-    ``GrievanceTicket.save()`` regenerates ``unicef_id`` from a per-business-area sequence,
-    so the ids passed below are labels only — the description carries the marker that makes
-    this function re-runnable and tells the tester what each ticket is for.
-    """
     if GrievanceTicket.objects.filter(description__startswith=_SCENARIO_TAG).exists():
         return
 
-    def duplicate_attrs(name: str, key: str, number: str, color: str) -> dict:
-        return {
-            "full_name": name,
-            "doc_key": key,
-            "doc_label": "Passport",
-            "doc_number": number,
-            "photo_color": color,
-        }
-
     # 1 row: HEAD. The replacement must come from the same household.
-    household, members = _make_household_with_members(
+    _, members = _make_household_with_members(
         ctx,
         village="Herat",
         members=[_person("Farid Ahmadzai", "MALE", date(1980, 3, 4)), *_FILLERS],
     )
-    _attach_identity(ctx, members[0], duplicate_attrs("Farid Ahmadzai", "na_head_doc", "PSP-5001", "indianred"))
+    _attach_identity(ctx, members[0], _identity("na_head_doc", "Passport", "PSP-5001", "indianred"))
     _create_na_ticket(
         ctx,
         _make_golden(
             ctx,
-            {
-                "full_name": "Zahra Karimi",
-                "sex": "FEMALE",
-                "birth_date": date(1984, 7, 21),
-                "doc_key": "na_head_golden_doc",
-                "doc_label": "National ID",
-                "doc_number": "NID-5001",
-                "photo_color": "steelblue",
-            },
+            _person("Zahra Karimi", "FEMALE", date(1984, 7, 21)),
+            _identity("na_head_golden_doc", "National ID", "NID-5001", "steelblue"),
         ),
         members[0],
         description=f"{_SCENARIO_TAG} HEAD only - expect 1 row; replacement must be in the same household",
@@ -282,20 +231,13 @@ def generate_role_reassignment_scenarios(ctx: DemoContext) -> None:
         head_index=0,
     )
     IndividualRoleInHouseholdFactory(household=household, individual=members[2], role=ROLE_PRIMARY)
-    _attach_identity(ctx, members[2], duplicate_attrs("Jamil Noorzai", "na_prim_doc", "PSP-5002", "goldenrod"))
+    _attach_identity(ctx, members[2], _identity("na_prim_doc", "Passport", "PSP-5002", "goldenrod"))
     _create_na_ticket(
         ctx,
         _make_golden(
             ctx,
-            {
-                "full_name": "Laila Sadat",
-                "sex": "FEMALE",
-                "birth_date": date(1990, 1, 15),
-                "doc_key": "na_prim_golden_doc",
-                "doc_label": "National ID",
-                "doc_number": "NID-5002",
-                "photo_color": "darkseagreen",
-            },
+            _person("Laila Sadat", "FEMALE", date(1990, 1, 15)),
+            _identity("na_prim_golden_doc", "National ID", "NID-5002", "darkseagreen"),
         ),
         members[2],
         description=f"{_SCENARIO_TAG} PRIMARY only - expect 1 row; replacement may be outside the household",
@@ -308,20 +250,13 @@ def generate_role_reassignment_scenarios(ctx: DemoContext) -> None:
         members=[_person("Rashid Wardak", "MALE", date(1975, 6, 30)), *_FILLERS],
     )
     IndividualRoleInHouseholdFactory(household=household, individual=members[0], role=ROLE_PRIMARY)
-    _attach_identity(ctx, members[0], duplicate_attrs("Rashid Wardak", "na_both_doc", "PSP-5003", "mediumpurple"))
+    _attach_identity(ctx, members[0], _identity("na_both_doc", "Passport", "PSP-5003", "mediumpurple"))
     _create_na_ticket(
         ctx,
         _make_golden(
             ctx,
-            {
-                "full_name": "Nasrin Popal",
-                "sex": "FEMALE",
-                "birth_date": date(1983, 10, 5),
-                "doc_key": "na_both_golden_doc",
-                "doc_label": "National ID",
-                "doc_number": "NID-5003",
-                "photo_color": "steelblue",
-            },
+            _person("Nasrin Popal", "FEMALE", date(1983, 10, 5)),
+            _identity("na_both_golden_doc", "National ID", "NID-5003", "steelblue"),
         ),
         members[0],
         description=f"{_SCENARIO_TAG} HEAD + PRIMARY on one person - expect 2 rows",
@@ -336,45 +271,31 @@ def generate_role_reassignment_scenarios(ctx: DemoContext) -> None:
     )
     IndividualRoleInHouseholdFactory(household=household, individual=members[1], role=ROLE_PRIMARY)
     IndividualRoleInHouseholdFactory(household=household, individual=members[2], role=ROLE_ALTERNATE)
-    _attach_identity(ctx, members[2], duplicate_attrs("Yusuf Barakzai", "na_alt_doc", "PSP-5004", "indianred"))
+    _attach_identity(ctx, members[2], _identity("na_alt_doc", "Passport", "PSP-5004", "indianred"))
     _create_na_ticket(
         ctx,
         _make_golden(
             ctx,
-            {
-                "full_name": "Marwa Hakimi",
-                "sex": "FEMALE",
-                "birth_date": date(1992, 8, 23),
-                "doc_key": "na_alt_golden_doc",
-                "doc_label": "National ID",
-                "doc_number": "NID-5004",
-                "photo_color": "darkseagreen",
-            },
+            _person("Marwa Hakimi", "FEMALE", date(1992, 8, 23)),
+            _identity("na_alt_golden_doc", "National ID", "NID-5004", "darkseagreen"),
         ),
         members[2],
         description=f"{_SCENARIO_TAG} ALTERNATE only - expect 0 rows; withdrawal allowed straight away",
     )
 
     # 0 rows: head of a sole-member household, skipped by the activeIndividualsCount rule.
-    household, members = _make_household_with_members(
+    _, members = _make_household_with_members(
         ctx,
         village="Ghazni",
         members=[_person("Sami Faizi", "MALE", date(1981, 5, 19))],
     )
-    _attach_identity(ctx, members[0], duplicate_attrs("Sami Faizi", "na_solo_doc", "PSP-5005", "goldenrod"))
+    _attach_identity(ctx, members[0], _identity("na_solo_doc", "Passport", "PSP-5005", "goldenrod"))
     _create_na_ticket(
         ctx,
         _make_golden(
             ctx,
-            {
-                "full_name": "Hoda Amiri",
-                "sex": "FEMALE",
-                "birth_date": date(1987, 11, 28),
-                "doc_key": "na_solo_golden_doc",
-                "doc_label": "National ID",
-                "doc_number": "NID-5005",
-                "photo_color": "steelblue",
-            },
+            _person("Hoda Amiri", "FEMALE", date(1987, 11, 28)),
+            _identity("na_solo_golden_doc", "National ID", "NID-5005", "steelblue"),
         ),
         members[0],
         description=f"{_SCENARIO_TAG} HEAD of a sole-member household - expect 0 rows (active-members rule)",
@@ -400,20 +321,13 @@ def generate_role_reassignment_scenarios(ctx: DemoContext) -> None:
         ],
     )
     IndividualRoleInHouseholdFactory(household=other_household, individual=members[2], role=ROLE_PRIMARY)
-    _attach_identity(ctx, members[2], duplicate_attrs("Idris Safi", "na_2hh_doc", "PSP-5006", "mediumpurple"))
+    _attach_identity(ctx, members[2], _identity("na_2hh_doc", "Passport", "PSP-5006", "mediumpurple"))
     _create_na_ticket(
         ctx,
         _make_golden(
             ctx,
-            {
-                "full_name": "Parwin Nazari",
-                "sex": "FEMALE",
-                "birth_date": date(1994, 9, 12),
-                "doc_key": "na_2hh_golden_doc",
-                "doc_label": "National ID",
-                "doc_number": "NID-5006",
-                "photo_color": "darkseagreen",
-            },
+            _person("Parwin Nazari", "FEMALE", date(1994, 9, 12)),
+            _identity("na_2hh_golden_doc", "National ID", "NID-5006", "darkseagreen"),
         ),
         members[2],
         description=f"{_SCENARIO_TAG} PRIMARY in two households - expect 2 rows; role-name keys drop one",
@@ -501,7 +415,7 @@ def generate_fake_grievances() -> None:
     # Additional tickets whose two individuals differ across every comparison row,
     # so the NA Tickets Management panel actually highlights the differences.
     ctx = DemoContext(program=program, ba=ba, rdi=rdi, admin2=admin2)
-    _create_dedup_ticket(
+    _create_na_ticket_for_new_individuals(
         ctx,
         golden_attrs={
             "full_name": "Amina Yusuf",
@@ -524,7 +438,7 @@ def generate_fake_grievances() -> None:
             "photo_color": "indianred",
         },
     )
-    _create_dedup_ticket(
+    _create_na_ticket_for_new_individuals(
         ctx,
         golden_attrs={
             "full_name": "Sara Ahmadi",
