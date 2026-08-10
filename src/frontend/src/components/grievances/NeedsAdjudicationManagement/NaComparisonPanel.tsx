@@ -26,7 +26,7 @@ import {
 } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { NaReassignRoleModal } from './NaReassignRoleModal';
-import { applyMark, clearMark } from './naDecision';
+import { applyMark, clearMark, individualRole } from './naDecision';
 import { reassignmentKey, roleLabel } from './naRoleUtils';
 import { NaMark, NaRoleAssignment, NaTicketDecision } from './naTypes';
 
@@ -120,7 +120,11 @@ const comparisonRows: ComparisonRow[] = [
     label: 'Photo',
     render: (i) =>
       i?.id ? (
-        <GrievanceIndividualPhotoModal individualId={i.id} isCurrent />
+        <GrievanceIndividualPhotoModal
+          individualId={i.id}
+          programCode={i.programCode}
+          isCurrent
+        />
       ) : (
         '-'
       ),
@@ -295,19 +299,10 @@ export const NaComparisonPanel = ({
 
   const similarity = person2?.similarityScore;
 
-  // Which header icon each person shows, derived from the current mark.
-  const person1Role =
-    mark === 'person1_duplicate'
-      ? 'duplicate'
-      : mark === 'person2_duplicate' || mark === 'not_duplicates'
-        ? 'unique'
-        : undefined;
-  const person2Role =
-    mark === 'person2_duplicate'
-      ? 'duplicate'
-      : mark === 'person1_duplicate' || mark === 'not_duplicates'
-        ? 'unique'
-        : undefined;
+  // Ticket-wide, not per pair: person 1 is compared against every candidate, so a
+  // mark made on one pair has to show on all of them.
+  const person1Role = individualRole(decision, person1?.id);
+  const person2Role = individualRole(decision, person2?.id);
 
   return (
     <ApproveBox>

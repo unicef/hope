@@ -170,8 +170,8 @@ class DeduplicationResultSerializer(serializers.Serializer):
     distinct = serializers.BooleanField(default=False)
 
     def get_unicef_id(self, obj: Any) -> str:
-        individual = Individual.all_objects.get(id=obj.get("hit_id"))
-        return str(individual.unicef_id)
+        individual = Individual.all_objects.filter(id=obj.get("hit_id")).first()
+        return str(individual.unicef_id) if individual else ""
 
     def get_age(self, obj: Any) -> int | None:
         date_of_birth = obj.get("dob")

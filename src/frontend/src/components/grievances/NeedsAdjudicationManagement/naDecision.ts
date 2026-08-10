@@ -85,6 +85,22 @@ const derive = (
   };
 };
 
+/**
+ * An individual's outcome for the ticket as a whole: withdrawn, kept, or undecided.
+ *
+ * Taken from the resolved id lists rather than a single pair's mark, since only the
+ * lists account for every mark at once.
+ */
+export const individualRole = (
+  decision: NaTicketDecision | undefined,
+  individualId: string | null | undefined,
+): 'duplicate' | 'unique' | undefined => {
+  if (!decision || !individualId) return undefined;
+  if (decision.duplicateIndividualIds.includes(individualId)) return 'duplicate';
+  if (decision.distinctIndividualIds.includes(individualId)) return 'unique';
+  return undefined;
+};
+
 /** Records the operator's mark for one golden-record/duplicate pair. */
 export const applyMark = (
   decision: NaTicketDecision | undefined,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyMark, clearMark } from './naDecision';
+import { applyMark, clearMark, individualRole } from './naDecision';
 import { NaIndividual } from './naRoleUtils';
 
 const withHeadRole = (id: string, householdId: string): NaIndividual => ({
@@ -159,5 +159,37 @@ describe('clearMark', () => {
     expect(decision?.marks).toEqual({ 'dup-2': 'person2_duplicate' });
     expect(decision?.duplicateIndividualIds).toEqual(['dup-2']);
     expect(decision?.distinctIndividualIds).toEqual(['golden']);
+  });
+});
+
+describe('individualRole', () => {
+  it('shows the golden record as a duplicate on a pair that was called not-duplicates', () => {
+    const first = applyMark(
+      undefined,
+      { person1, person2: dup1, mark: 'not_duplicates' },
+      [dup1, dup2],
+    );
+    const decision = applyMark(
+      first,
+      { person1, person2: dup2, mark: 'person1_duplicate' },
+      [dup1, dup2],
+    );
+
+    expect(individualRole(decision, 'golden')).toBe('duplicate');
+    expect(individualRole(decision, 'dup-1')).toBe('unique');
+  });
+
+  it('gives no role to an individual nobody has marked yet', () => {
+    const decision = applyMark(
+      undefined,
+      { person1, person2: dup1, mark: 'person2_duplicate' },
+      [dup1, dup2],
+    );
+
+    expect(individualRole(decision, 'dup-2')).toBeUndefined();
+  });
+
+  it('gives no role when the ticket carries no decision at all', () => {
+    expect(individualRole(undefined, 'golden')).toBeUndefined();
   });
 });

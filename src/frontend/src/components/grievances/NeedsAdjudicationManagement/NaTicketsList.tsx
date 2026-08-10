@@ -61,8 +61,22 @@ export const NaTicketsList = ({
   };
 
   return (
-    <Paper>
-      <Box sx={{ maxHeight: '60vh', overflow: 'auto' }}>
+    <Paper
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
+      }}
+    >
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          maxHeight: { xs: '60vh', lg: 'none' },
+          overflow: 'auto',
+        }}
+      >
         {isLoading ? (
           <LoadingComponent />
         ) : tickets.length === 0 ? (

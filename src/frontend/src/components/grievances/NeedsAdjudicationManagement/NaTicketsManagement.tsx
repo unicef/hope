@@ -306,9 +306,23 @@ export const NaTicketsManagement = ({
             }}
           />
           <Box
-            sx={{ display: 'flex', alignItems: 'stretch', p: 5, gap: 5 }}
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', lg: 'row' },
+              alignItems: 'stretch',
+              height: { lg: 'calc(100vh - 320px)' },
+              minHeight: { lg: 420 },
+              p: 5,
+              gap: 5,
+            }}
           >
-            <Box sx={{ width: '40%', minWidth: 360 }}>
+            <Box
+              sx={{
+                width: { xs: '100%', lg: '40%' },
+                minWidth: { lg: 360 },
+                display: 'flex',
+              }}
+            >
               <NaTicketsList
                 tickets={results}
                 isLoading={listLoading}
@@ -326,7 +340,7 @@ export const NaTicketsManagement = ({
                 }}
               />
             </Box>
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
               <NaComparisonPanel
                 ticketId={selectedTicketId}
                 decision={
