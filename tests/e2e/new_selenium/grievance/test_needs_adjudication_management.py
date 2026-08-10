@@ -220,3 +220,19 @@ def test_na_withdrawing_an_alternate_collector_needs_no_reassignment(
     assert primary_role.individual == na_ticket_alternate.replacement
     na_ticket_alternate.ticket.refresh_from_db()
     assert na_ticket_alternate.ticket.status == GrievanceTicket.STATUS_CLOSED
+
+
+def test_na_reassign_picker_offers_only_individuals_from_the_ticket_program(
+    login: HopeTestBrowser,
+    na_program: Program,
+    na_ticket_head: NaScenario,
+    individual_in_other_program: Individual,
+) -> None:
+    _open_ticket(login, na_program, na_ticket_head)
+
+    _withdraw_person2(login)
+    login.click('button[data-cy="button-na-reassign-HEAD"]')
+
+    login.wait_for_element_present(f'input[aria-label="{na_ticket_head.replacement.id}"]')
+
+    login.assert_element_absent(f'input[aria-label="{individual_in_other_program.id}"]')

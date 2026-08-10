@@ -362,3 +362,31 @@ def na_ticket_alternate(na_program: Program) -> NaScenario:
     )
     IndividualRoleInHouseholdFactory(household=household, individual=duplicate, role=ROLE_ALTERNATE)
     return NaScenario(_na_ticket(na_program, golden, duplicate), golden, duplicate, household, head)
+
+
+@pytest.fixture
+def individual_in_other_program(business_area: BusinessArea) -> Individual:
+    other_program = ProgramFactory(
+        name="Other NA Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        beneficiary_group=BeneficiaryGroupFactory(
+            name="Other NA Household Group",
+            group_label="Household",
+            group_label_plural="Households",
+            member_label="Individual",
+            member_label_plural="Individuals",
+            master_detail=True,
+        ),
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+    household = _household(other_program, village="Jalalabad")
+    return _rename(
+        household.head_of_household,
+        full_name="Nadia Sarwar",
+        given_name="Nadia",
+        family_name="Sarwar",
+        sex="FEMALE",
+        birth_date=date(1988, 2, 6),
+    )
