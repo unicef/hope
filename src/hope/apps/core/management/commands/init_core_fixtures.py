@@ -35,3 +35,9 @@ def initialize_core_fixtures() -> None:
         value="True",
         required=False,
     )
+    FlagState.objects.get_or_create(
+        name="IS_ROOT",
+        condition="boolean",
+        value="True",
+        required=False,
+    )

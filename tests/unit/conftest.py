@@ -15,10 +15,15 @@ from elasticsearch import Elasticsearch
 from elasticsearch.dsl import connections
 import pytest
 
-from extras.test_utils.factories import CurrencyFactory
+from extras.test_utils.factories import CurrencyFactory, FlagStateFactory
 from extras.test_utils.fixtures import *  # noqa: F403, F401
 from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
 from hope.models.currency import Currency
+
+
+@pytest.fixture
+def enable_is_root() -> None:
+    FlagStateFactory.create(name="IS_ROOT", condition="boolean", value="True", required=False)
 
 
 @pytest.fixture(autouse=True)

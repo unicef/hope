@@ -164,11 +164,17 @@ def record(db, request):
 
 @pytest.fixture
 def app(django_app_factory, settings):
+    from flags.models import FlagState
+
     from extras.test_utils.factories import UserFactory
 
     # Allow is_root() to return True for the smoke-test superuser
-    root_token = "smoke-test-root-token"
-    settings.ROOT_TOKEN = root_token
+    FlagState.objects.get_or_create(
+        name="IS_ROOT",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
 
     admin_user = UserFactory(
         username="smoke_superuser",
@@ -179,14 +185,12 @@ def app(django_app_factory, settings):
     django_app = django_app_factory(csrf_checks=False)
     django_app.set_user(admin_user)
     django_app._user = admin_user
-    django_app._root_token = root_token
-    django_app.extra_environ["HTTP_X_ROOT_TOKEN"] = root_token
     return django_app
 
 
 def _mock_request(app) -> Mock:
     """Build a mock request that passes is_root() checks."""
-    return Mock(user=app._user, headers={"x-root-token": app._root_token})
+    return Mock(user=app._user)
 
 
 @pytest.mark.django_db
