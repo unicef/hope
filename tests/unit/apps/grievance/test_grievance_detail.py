@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     HouseholdFactory,
     IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     PartnerFactory,
     ProgramFactory,
     UserFactory,
@@ -52,7 +53,7 @@ from extras.test_utils.factories.sanction_list import (
     SanctionListIndividualFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import (
     DUPLICATE,
     ROLE_ALTERNATE,
@@ -2511,3 +2512,331 @@ def test_grievance_detail_add_individual_null_individual_data(
     assert response.status_code == status.HTTP_200_OK
     data = response.data
     assert data["ticket_details"]["individual_data"] is None
+
+
+@pytest.fixture
+def na_golden_record(afghanistan: BusinessArea, program: Program) -> Individual:
+    return HouseholdFactory(program=program, business_area=afghanistan, create_role=False).head_of_household
+
+
+@pytest.fixture
+def na_duplicate(afghanistan: BusinessArea, program: Program) -> Individual:
+    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
+    return IndividualFactory(household=household, program=program, business_area=afghanistan)
+
+
+@pytest.fixture
+def na_grievance(afghanistan: BusinessArea, program: Program) -> GrievanceTicket:
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        business_area=afghanistan,
+        status=GrievanceTicket.STATUS_NEW,
+    )
+    grievance.programs.set([program])
+    return grievance
+
+
+@pytest.fixture
+def na_biometric_grievance(afghanistan: BusinessArea, program: Program) -> GrievanceTicket:
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+        business_area=afghanistan,
+        status=GrievanceTicket.STATUS_NEW,
+    )
+    grievance.programs.set([program])
+    return grievance
+
+
+@pytest.fixture
+def na_ticket_scored_in_extra_data(
+    na_grievance: GrievanceTicket, na_golden_record: Individual, na_duplicate: Individual
+) -> TicketNeedsAdjudicationDetails:
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=na_grievance,
+        golden_records_individual=na_golden_record,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+        extra_data={
+            "golden_records": [
+                {
+                    "hit_id": str(na_duplicate.id),
+                    "full_name": na_duplicate.full_name,
+                    "score": 88.5,
+                    "proximity_to_score": 3.0,
+                }
+            ]
+        },
+    )
+    ticket_details.possible_duplicates.add(na_duplicate)
+    return ticket_details
+
+
+@pytest.fixture
+def na_ticket_scored_by_biometrics(
+    na_biometric_grievance: GrievanceTicket, na_golden_record: Individual, na_duplicate: Individual
+) -> TicketNeedsAdjudicationDetails:
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=na_biometric_grievance,
+        golden_records_individual=na_golden_record,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+        extra_data={
+            "golden_records": [],
+            "dedup_engine_similarity_pair": {
+                "similarity_score": 93.75,
+                "status_code": "200",
+                "individual1": {
+                    "id": str(na_golden_record.id),
+                    "unicef_id": na_golden_record.unicef_id,
+                    "full_name": na_golden_record.full_name,
+                    "photo_name": None,
+                },
+                "individual2": {
+                    "id": str(na_duplicate.id),
+                    "unicef_id": na_duplicate.unicef_id,
+                    "full_name": na_duplicate.full_name,
+                    "photo_name": None,
+                },
+            },
+        },
+    )
+    ticket_details.possible_duplicates.add(na_duplicate)
+    return ticket_details
+
+
+@pytest.fixture
+def na_ticket_duplicate_is_primary_collector(
+    na_grievance: GrievanceTicket, na_golden_record: Individual, na_duplicate: Individual
+) -> TicketNeedsAdjudicationDetails:
+    IndividualRoleInHouseholdFactory(individual=na_duplicate, household=na_duplicate.household, role=ROLE_PRIMARY)
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=na_grievance,
+        golden_records_individual=na_golden_record,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.possible_duplicates.add(na_duplicate)
+    ticket_details.selected_individuals.add(na_golden_record, na_duplicate)
+    return ticket_details
+
+
+def test_needs_adjudication_duplicate_is_scored_against_the_golden_record(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_scored_in_extra_data: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_scored_in_extra_data.ticket.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["possible_duplicates"][0]["similarity_score"] == 88.5
+
+
+def test_needs_adjudication_golden_record_is_not_scored_against_itself(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_scored_in_extra_data: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_scored_in_extra_data.ticket.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["golden_records_individual"]["similarity_score"] is None
+
+
+def test_needs_adjudication_face_match_score_is_shown_with_biometric_permission(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_scored_by_biometrics: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
+        ],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_scored_by_biometrics.ticket.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["possible_duplicates"][0]["similarity_score"] == 93.75
+
+
+def test_needs_adjudication_face_match_score_is_hidden_without_biometric_permission(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_scored_by_biometrics: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_scored_by_biometrics.ticket.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["possible_duplicates"][0]["similarity_score"] is None
+
+
+def test_needs_adjudication_collector_role_is_empty_for_a_head_of_household(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_golden_record: Individual,
+    na_ticket_duplicate_is_primary_collector: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_duplicate_is_primary_collector.ticket.id),
+            },
+        )
+    )
+
+    head_id = str(na_golden_record.id)
+    rows_by_id = {row["id"]: row for row in response.data["ticket_details"]["selected_duplicates"]}
+
+    assert response.status_code == status.HTTP_200_OK
+    assert rows_by_id[head_id]["role"] is None
+    assert rows_by_id[head_id]["household"]["head_of_household"]["id"] == head_id
+
+
+def test_needs_adjudication_primary_collector_role_is_exposed_for_reassignment(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_duplicate: Individual,
+    na_ticket_duplicate_is_primary_collector: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_duplicate_is_primary_collector.ticket.id),
+            },
+        )
+    )
+
+    rows_by_id = {row["id"]: row for row in response.data["ticket_details"]["selected_duplicates"]}
+    collector_row = rows_by_id[str(na_duplicate.id)]
+
+    assert response.status_code == status.HTTP_200_OK
+    assert collector_row["role"] == ROLE_PRIMARY
+    assert any(role["role"] == ROLE_PRIMARY for role in collector_row["roles_in_households"])
+
+
+def test_needs_adjudication_comparison_counts_head_of_household_as_a_role(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_golden_record: Individual,
+    na_ticket_duplicate_is_primary_collector: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_duplicate_is_primary_collector.ticket.id),
+            },
+        )
+    )
+
+    golden = response.data["ticket_details"]["golden_records_individual"]
+    roles_by_name = {entry["role"]: entry for entry in golden["roles_in_households"]}
+
+    assert response.status_code == status.HTTP_200_OK
+    assert roles_by_name["HEAD"]["household"]["id"] == str(na_golden_record.household.id)
