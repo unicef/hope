@@ -85,6 +85,7 @@ EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+EMAIL_SUBJECT_PREFIX = ""
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")
@@ -92,13 +93,6 @@ ENV = env("ENV")
 DB_ZOMBIE_TIMEOUT_MS = 4 * 60 * 60 * 1000
 
 PROCESS_ROLE = get_process_role()
-
-# prefix all non-production emails
-if ENV != "prod":
-    EMAIL_SUBJECT_PREFIX = f"{ENV}"
-else:
-    EMAIL_SUBJECT_PREFIX = ""
-
 
 RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
