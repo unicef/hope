@@ -1016,3 +1016,34 @@ def test_importer_sets_phone_no_valid_on_imported_individual(rdi: RegistrationDa
     individual = Individual.pending_objects.get(id=individual_temp_id)
     assert str(individual.phone_no) == "+258841625891"
     assert individual.phone_no_valid is True
+
+
+@pytest.mark.django_db
+def test_importer_sets_phone_no_alternative_valid_on_imported_individual(rdi: RegistrationDataImport) -> None:
+    individual_temp_id = uuid.uuid4().hex
+    individuals_data = [
+        {
+            "id": individual_temp_id,
+            "given_name": "Alternative",
+            "family_name": "Phone",
+            "full_name": "Alternative Phone",
+            "sex": "MALE",
+            "birth_date": "1990-01-01",
+            "phone_no_alternative": "+258841625891",
+        }
+    ]
+    importer = Importer(
+        registration_data_import=rdi,
+        households_data=[],
+        individuals_data=individuals_data,
+        documents_data=[],
+        accounts_data=[],
+        identities_data=[],
+    )
+
+    importer.import_data()
+
+    assert importer.errors == []
+    individual = Individual.pending_objects.get(id=individual_temp_id)
+    assert str(individual.phone_no_alternative) == "+258841625891"
+    assert individual.phone_no_alternative_valid is True
