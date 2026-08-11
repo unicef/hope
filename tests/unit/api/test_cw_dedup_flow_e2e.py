@@ -2,6 +2,8 @@ from typing import Any
 from unittest.mock import patch
 import uuid
 
+from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -27,6 +29,12 @@ pytestmark = [
     pytest.mark.elasticsearch,
     pytest.mark.xdist_group(name="elasticsearch"),
 ]
+
+
+@pytest.fixture
+def warm_content_type_cache() -> None:
+    # ContentType.objects.get_for_model is cached, so to prevent query count variation run it before tests
+    ContentType.objects.get_for_models(*apps.get_models())
 
 
 @pytest.fixture
@@ -170,6 +178,7 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
     django_assert_num_queries: Any,
     mock_deduplication_engine_env_vars: Any,
     cw_dedup_eager_setup: None,
+    warm_content_type_cache: None,
 ) -> None:
     create_program_es_index(program)
 
@@ -310,6 +319,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
     django_assert_num_queries: Any,
     mock_deduplication_engine_env_vars: Any,
     cw_dedup_eager_setup: None,
+    warm_content_type_cache: None,
 ) -> None:
     create_program_es_index(social_program)
 
@@ -345,7 +355,7 @@ def test_cw_social_workers_auto_merges_with_duplicate_ticket(
         country_workspace_id=country_workspace_id,
         django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
         django_assert_num_queries=django_assert_num_queries,
-        expected_queries=193,
+        expected_queries=192,
     )
 
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
