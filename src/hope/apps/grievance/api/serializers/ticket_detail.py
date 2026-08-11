@@ -226,14 +226,11 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
 
 
 class NaRoleHouseholdSerializer(serializers.ModelSerializer):
-    active_individuals_count = serializers.SerializerMethodField()
+    active_individuals_count = serializers.IntegerField(source="active_individuals.count", read_only=True)
 
     class Meta:
         model = Household
         fields = ("id", "unicef_id", "withdrawn", "active_individuals_count")
-
-    def get_active_individuals_count(self, obj: Household) -> int:
-        return obj.active_individuals.count()
 
 
 class NaRoleInHouseholdSerializer(serializers.Serializer):
@@ -244,7 +241,7 @@ class NaRoleInHouseholdSerializer(serializers.Serializer):
 class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
     household = HouseholdForTicketSerializer()  # type: ignore[assignment]
     role = serializers.SerializerMethodField()
-    roles_in_households = serializers.SerializerMethodField()
+    roles_in_households = IndividualRoleInHouseholdSerializer(source="households_and_roles", many=True)
 
     class Meta:
         model = Individual
@@ -265,12 +262,8 @@ class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
         )
 
     def get_role(self, obj: Individual) -> str | None:
-        role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
+        role = obj.households_and_roles.filter(household=obj.household).first()
         return role.role if role else None
-
-    @extend_schema_field(IndividualRoleInHouseholdSerializer(many=True))
-    def get_roles_in_households(self, obj: Individual) -> ReturnDict:
-        return IndividualRoleInHouseholdSerializer(obj.households_and_roles.all(), many=True).data
 
 
 class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
@@ -342,7 +335,7 @@ class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
 
 
 class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
-    has_duplicated_document = serializers.SerializerMethodField()
+    has_duplicated_document = serializers.BooleanField(read_only=True)
     can_close_as_unique = serializers.SerializerMethodField()
     golden_records_individual = IndividualForNaComparisonSerializer()
     extra_data = serializers.SerializerMethodField()
@@ -376,9 +369,6 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
             "na_can_view_biometric_results": can_view_biometric_results(self.context),
         }
         return super().to_representation(instance)
-
-    def get_has_duplicated_document(self, obj: TicketNeedsAdjudicationDetails) -> bool:
-        return obj.has_duplicated_document
 
     def get_can_close_as_unique(self, obj: TicketNeedsAdjudicationDetails) -> bool:
         return can_close_as_unique(obj)
