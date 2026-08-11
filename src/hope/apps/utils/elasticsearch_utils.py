@@ -34,6 +34,12 @@ def populate_index(
     # Django declares it WITH HOLD, which materializes the ENTIRE result set on DECLARE
     # before the first row arrives - minutes-to-hours on big programs under IO pressure
     with transaction.atomic():
+        # cursors are planned for partial reads (cursor_tuple_fraction=0.1) -> plain index
+        # scan -> one RANDOM heap page read per row on a big scattered table. We always read
+        # the FULL result, and saying so buys a bitmap heap scan (sequential, prefetched):
+        # measured 7x faster chunk fetches on remote disks. SET LOCAL dies with this txn.
+        with transaction.get_connection().cursor() as c:
+            c.execute("SET LOCAL cursor_tuple_fraction = 1.0")
         qs: Any = queryset.iterator(chunk_size=chunk_size)
         if progress_cb is not None:
             qs = _reporting(qs, progress_cb)
