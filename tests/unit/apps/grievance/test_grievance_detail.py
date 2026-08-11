@@ -1348,6 +1348,7 @@ def test_grievance_detail_system_flagging(
         "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
         "sex": golden_records_individual.sex,
         "duplicate": golden_records_individual.duplicate,
+        "program": golden_records_individual.program.id,
         "program_code": golden_records_individual.program.code,
         "household": {
             "id": str(golden_records_individual.household.id),
