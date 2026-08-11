@@ -406,23 +406,7 @@ def test_send_email_notification_disabled_by_business_area(
 
 @mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
 @override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
-def test_send_email_notification_subject_test_env(
-    mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
-) -> None:
-    pdu_notification = PDUOnlineEditNotification(
-        pdu_with_authorized_users,
-        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
-        user_action_user,
-        "1 January 2025",
-    )
-    assert pdu_notification.email.subject == "[test] PDU Online Edit pending for Approval"
-
-
-@mock.patch("hope.apps.utils.mailjet.send_email_async_task.delay")
-@override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
-def test_send_email_notification_subject_prod_env(
+def test_send_email_notification_subject_send_for_approval(
     mock_send: Any, pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User
 ) -> None:
     pdu_notification = PDUOnlineEditNotification(
@@ -489,7 +473,6 @@ def test_send_email_notification_without_catch_all_email(
     assert mock_post.call_count == 1
 
 
-@override_settings(ENV="prod")
 def send_email_notification_exclude_superuser(
     pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
 ) -> None:
@@ -507,6 +490,23 @@ def send_email_notification_exclude_superuser(
     actual_recipients = list(pdu_notification.user_recipients.all())
     assert len(actual_recipients) == 5
     assert authorized_users["unicef_hq_authorized"] not in actual_recipients
+
+
+@override_config(SEND_PDU_ONLINE_EDIT_NOTIFICATION=True, NOTIFY_INTERNAL_USERS=True)
+def test_send_email_notification_include_internal_users(
+    pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
+) -> None:
+    authorized_users["unicef_hq_authorized"].is_superuser = True
+    authorized_users["unicef_hq_authorized"].save()
+
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_with_authorized_users,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        user_action_user,
+        "1 January 2025",
+    )
+
+    assert authorized_users["unicef_hq_authorized"] in pdu_notification.user_recipients
 
 
 @override_config(

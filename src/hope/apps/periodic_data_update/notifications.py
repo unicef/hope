@@ -91,8 +91,7 @@ class PDUOnlineEditNotification:
             .exclude(id=self.action_user.id)
             .distinct()
         )
-
-        if settings.ENV == "prod":
+        if not config.NOTIFY_INTERNAL_USERS:
             users = users.exclude(is_superuser=True)
         return users
 
