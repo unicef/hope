@@ -365,6 +365,50 @@ def na_ticket_alternate(na_program: Program) -> NaScenario:
 
 
 @pytest.fixture
+def na_ticket_two_duplicates(na_program: Program) -> NaScenario:
+    """Person 1 is compared against two candidates.
+
+    The backend refuses to close a ticket while any of its active individuals is still
+    unflagged, so both pairs have to be marked before this ticket can be executed. With
+    no roles in play, the marks are the only thing that can hold Finalize back.
+    """
+    golden = _golden_record(na_program)
+    household = _household(na_program, village="Ghazni")
+    first_duplicate = _member(
+        household,
+        full_name="Sahar Wardak",
+        given_name="Sahar",
+        family_name="Wardak",
+        sex="FEMALE",
+        birth_date=date(1983, 1, 30),
+    )
+    second_duplicate = _member(
+        household,
+        full_name="Latifa Wardak",
+        given_name="Latifa",
+        family_name="Wardak",
+        sex="FEMALE",
+        birth_date=date(1990, 11, 12),
+    )
+    ticket_details = _na_ticket(na_program, golden, first_duplicate)
+    ticket_details.possible_duplicates.set([first_duplicate, second_duplicate])
+    return NaScenario(ticket_details, golden, first_duplicate, household, household.head_of_household)
+
+
+@pytest.fixture
+def na_ticket_in_other_program(business_area: BusinessArea) -> GrievanceTicket:
+    """A Needs Adjudication ticket in a second programme of the same business area.
+
+    The ticket list must not show it while another programme is selected — the
+    business-area-wide endpoint returns tickets from every programme.
+    """
+    other_program = ProgramFactory(business_area=business_area, name="Second NA Program")
+    golden = _household(other_program, village="Bamyan").head_of_household
+    duplicate = _household(other_program, village="Bamyan").head_of_household
+    return _na_ticket(other_program, golden, duplicate).ticket
+
+
+@pytest.fixture
 def individual_in_other_program(business_area: BusinessArea) -> Individual:
     other_program = ProgramFactory(
         name="Other NA Program",

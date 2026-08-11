@@ -84,8 +84,8 @@ describe('applyMark', () => {
   });
 
   it('records how many duplicates the ticket compares', () => {
-    // The Finalize gate needs the full candidate count to tell a finished ticket
-    // from one where only the first pair was marked.
+    // The Finalize gate needs the full candidate count to tell a fully decided ticket
+    // from one that still has unmarked pairs.
     const decision = applyMark(
       undefined,
       { person1, person2: dup1, mark: 'person2_duplicate' },

@@ -32,8 +32,7 @@ interface NaReassignRoleModalProps {
   role: NaRequiredRole;
   household: { id: string; unicefId: string };
   individualToReassign: NaIndividual;
-  // Everyone this ticket withdraws. `_validate_role_reassignment` rejects a
-  // replacement that is itself marked as a duplicate.
+  // everyone this ticket withdraws; a replacement cannot be one of them
   duplicateIndividualIds: string[];
   onSelect: (individual: { id: string; fullName?: string }) => void;
 }
@@ -94,8 +93,7 @@ export const NaReassignRoleModal = ({
   const [selectedIndividual, setSelectedIndividual] = useState(null);
   const [selectedHousehold, setSelectedHousehold] = useState(null);
 
-  // In All Programmes the page filters can carry any programme, but the backend only
-  // accepts a replacement from the programme of the individual losing the role.
+  // under `programs/all` nothing else scopes the lookup, and a cross-programme pick is rejected
   const programScopedFilter = {
     ...appliedFilterIND,
     program: individualToReassign.program ?? '',

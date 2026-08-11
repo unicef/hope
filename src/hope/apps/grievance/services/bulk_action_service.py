@@ -159,12 +159,13 @@ class BulkActionService:
         user: User,
         resolutions: Sequence[dict],
         business_area_slug: str,
-    ) -> list[GrievanceTicket]:
-        """Resolve and auto-close the selected Needs Adjudication tickets in one all-or-nothing batch.
+    ) -> tuple[list[GrievanceTicket], list[GrievanceTicket]]:
+        """Resolve and auto-close the selected Needs Adjudication tickets in one batch.
 
         Each resolution marks individuals as duplicate/distinct and closes the ticket directly,
-        bypassing the FOR_APPROVAL step. If any ticket is missing, already closed, not a Needs Adjudication ticket,
-        or not resolvable by this user, nothing is committed.
+        bypassing the FOR_APPROVAL step. Returns the tickets it resolved and, separately, the ones
+        somebody else closed in the meantime, which are skipped. If any other ticket is missing, is
+        not a Needs Adjudication ticket, or is not resolvable by this user, nothing is committed.
         """
         resolutions_by_id = {str(resolution["ticket_id"]): resolution for resolution in resolutions}
         ticket_ids = list(resolutions_by_id.keys())
@@ -179,10 +180,19 @@ class BulkActionService:
             .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
             .prefetch_related("programs")
         )
+        skipped_closed: list[GrievanceTicket] = []
         if len(tickets) != len(ticket_ids):
-            raise ValidationError(
-                "Some selected tickets do not exist, are closed, or are not Needs Adjudication tickets."
+            missing_ids = set(ticket_ids) - {str(ticket.id) for ticket in tickets}
+            skipped_closed = list(
+                GrievanceTicket.objects.filter(
+                    id__in=missing_ids,
+                    category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                    business_area__slug=business_area_slug,
+                    status=GrievanceTicket.STATUS_CLOSED,
+                ).order_by("unicef_id")
             )
+            if len(skipped_closed) != len(missing_ids):
+                raise ValidationError("Some selected tickets do not exist or are not Needs Adjudication tickets.")
 
         required = [
             Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE.value,
@@ -205,7 +215,7 @@ class BulkActionService:
                 new_object=ticket,
             )
         self._clear_cache(business_area_slug)
-        return tickets
+        return tickets, skipped_closed
 
     def _resolve_single_needs_adjudication(self, ticket: GrievanceTicket, resolution: dict, user: User) -> None:
         ticket_details = ticket.ticket_details

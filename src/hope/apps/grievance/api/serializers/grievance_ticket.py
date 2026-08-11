@@ -839,6 +839,13 @@ class NeedsAdjudicationResolutionSerializer(serializers.Serializer):
         return attrs
 
 
+class BulkNeedsAdjudicationResultSerializer(serializers.Serializer):
+    """What the batch did: the tickets it resolved, and the ones it skipped as already closed."""
+
+    resolved = GrievanceTicketSimpleSerializer(many=True)
+    skipped_closed = GrievanceTicketSimpleSerializer(many=True)
+
+
 class BulkNeedsAdjudicationSerializer(serializers.Serializer):
     tickets = NeedsAdjudicationResolutionSerializer(many=True, allow_empty=False)
 

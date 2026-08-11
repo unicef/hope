@@ -224,7 +224,7 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
     dedup_engine_similarity_pair = serializers.SerializerMethodField()
 
     def get_dedup_engine_similarity_pair(self, obj: Any) -> dict:
-        if can_view_biometric_results(self.context):
+        if self.context["na_can_view_biometric_results"]:
             return DeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
         return {}
 
@@ -274,9 +274,7 @@ class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
 
     @extend_schema_field(IndividualRoleInHouseholdSerializer(many=True))
     def get_roles_in_households(self, obj: Individual) -> ReturnDict:
-        return IndividualRoleInHouseholdSerializer(
-            obj.households_and_roles(manager="all_merge_status_objects"), many=True
-        ).data
+        return IndividualRoleInHouseholdSerializer(obj.households_and_roles.all(), many=True).data
 
 
 class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
@@ -301,6 +299,7 @@ class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
             "duplicate",
             "documents",
             "accounts",
+            "program",
             "program_code",
             "roles_in_households",
             "similarity_score",
@@ -319,7 +318,7 @@ class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
 
     @extend_schema_field(NaRoleInHouseholdSerializer(many=True))
     def get_roles_in_households(self, obj: Individual) -> list[dict]:
-        roles = NaRoleInHouseholdSerializer(obj.households_and_roles(manager="all_merge_status_objects"), many=True)
+        roles = NaRoleInHouseholdSerializer(obj.households_and_roles.all(), many=True)
         data = list(roles.data)
         if obj.is_head():
             data.append({"role": HEAD, "household": NaRoleHouseholdSerializer(obj.household).data})
@@ -376,9 +375,9 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: TicketNeedsAdjudicationDetails) -> dict:
         self._context = {
-            **self._context,
+            **self.context,
             "na_ticket_details": instance,
-            "na_can_view_biometric_results": can_view_biometric_results(self._context),
+            "na_can_view_biometric_results": can_view_biometric_results(self.context),
         }
         return super().to_representation(instance)
 

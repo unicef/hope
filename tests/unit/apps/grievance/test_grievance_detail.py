@@ -40,6 +40,8 @@ from extras.test_utils.factories.household import (
     DocumentTypeFactory,
 )
 from extras.test_utils.factories.payment import (
+    AccountFactory,
+    AccountTypeFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
@@ -67,6 +69,7 @@ from hope.models import (
     Household,
     Individual,
     IndividualRoleInHousehold,
+    MergeStatusModel,
     Partner,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -1702,6 +1705,7 @@ def test_grievance_detail_needs_adjudication(
         "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
         "sex": golden_records_individual.sex,
         "duplicate": golden_records_individual.duplicate,
+        "program": golden_records_individual.program.id,
         "program_code": golden_records_individual.program.code,
         "similarity_score": None,
         "household": {
@@ -1813,6 +1817,7 @@ def test_grievance_detail_needs_adjudication(
         "last_registration_date": f"{individuals2[0].last_registration_date:%Y-%m-%d}",
         "sex": individuals2[0].sex,
         "duplicate": individuals2[0].duplicate,
+        "program": individuals2[0].program.id,
         "program_code": individuals2[0].program.code,
         "similarity_score": None,
         "household": {
@@ -1892,6 +1897,7 @@ def test_grievance_detail_needs_adjudication(
             "last_registration_date": f"{individuals2[0].last_registration_date:%Y-%m-%d}",
             "sex": individuals2[0].sex,
             "duplicate": individuals2[0].duplicate,
+            "program": individuals2[0].program.id,
             "program_code": individuals2[0].program.code,
             "similarity_score": None,
             "household": {
@@ -2840,3 +2846,137 @@ def test_needs_adjudication_comparison_counts_head_of_household_as_a_role(
 
     assert response.status_code == status.HTTP_200_OK
     assert roles_by_name["HEAD"]["household"]["id"] == str(na_golden_record.household.id)
+
+
+@pytest.fixture
+def na_ticket_duplicate_with_account(
+    na_grievance: GrievanceTicket, na_golden_record: Individual, na_duplicate: Individual
+) -> TicketNeedsAdjudicationDetails:
+    AccountFactory(
+        individual=na_duplicate,
+        number="PL61109010140000071219812874",
+        account_type=AccountTypeFactory(key="bank", label="Bank"),
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=na_grievance,
+        golden_records_individual=na_golden_record,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.possible_duplicates.add(na_duplicate)
+    return ticket_details
+
+
+def test_needs_adjudication_comparison_shows_accounts_with_the_delivery_permission(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_duplicate_with_account: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
+        ],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_duplicate_with_account.ticket.id),
+            },
+        )
+    )
+
+    accounts = response.data["ticket_details"]["possible_duplicates"][0]["accounts"]
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [account["number"] for account in accounts] == ["PL61109010140000071219812874"]
+
+
+def test_needs_adjudication_comparison_hides_accounts_without_the_delivery_permission(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_duplicate_with_account: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_duplicate_with_account.ticket.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["possible_duplicates"][0]["accounts"] == []
+
+
+@pytest.fixture
+def na_ticket_with_three_duplicates(
+    afghanistan: BusinessArea, program: Program, na_grievance: GrievanceTicket, na_golden_record: Individual
+) -> TicketNeedsAdjudicationDetails:
+    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
+    duplicates = [IndividualFactory(household=household, program=program, business_area=afghanistan) for _ in range(3)]
+    for duplicate in duplicates:
+        IndividualRoleInHouseholdFactory(individual=duplicate, household=household, role=ROLE_ALTERNATE)
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=na_grievance,
+        golden_records_individual=na_golden_record,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.possible_duplicates.add(*duplicates)
+    return ticket_details
+
+
+def test_needs_adjudication_comparison_query_count_for_three_duplicates(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_with_three_duplicates: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+    django_assert_num_queries: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
+        ],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+    url = reverse(
+        detail_url_name,
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "pk": str(na_ticket_with_three_duplicates.ticket.id),
+        },
+    )
+
+    with django_assert_num_queries(95):
+        response = authenticated_client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["ticket_details"]["possible_duplicates"]) == 3

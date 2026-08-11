@@ -8,6 +8,11 @@ re-validates it at close time — so a mismatch between the two only shows up en
 
 import pytest
 
+from extras.test_utils.factories.grievance import (
+    GrievanceTicketFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
+from extras.test_utils.factories.household import HouseholdFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import ROLE_PRIMARY
@@ -52,6 +57,59 @@ def _finalize(browser: HopeTestBrowser) -> None:
     browser.wait_for_element_visible('button[data-cy="button-confirm"]').click()
     # Session decisions are cleared only after the bulk request succeeds.
     browser.wait_for_text("Tickets managed: 0", '[data-cy="na-tickets-managed-count"]', timeout=60)
+
+
+@pytest.fixture
+def na_ticket_closed(na_program: Program) -> GrievanceTicket:
+    """An already adjudicated ticket, which the list must not offer again."""
+    golden = HouseholdFactory(
+        program=na_program, business_area=na_program.business_area, create_role=False
+    ).head_of_household
+    duplicate = HouseholdFactory(
+        program=na_program, business_area=na_program.business_area, create_role=False
+    ).head_of_household
+    grievance = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
+        status=GrievanceTicket.STATUS_CLOSED,
+        business_area=na_program.business_area,
+        consent=True,
+    )
+    grievance.programs.set([na_program])
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=grievance,
+        golden_records_individual=golden,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.possible_duplicates.add(duplicate)
+    return grievance
+
+
+def test_na_management_lists_only_the_selected_program_tickets(
+    login: HopeTestBrowser,
+    na_program: Program,
+    na_ticket_plain: NaScenario,
+    na_ticket_in_other_program: GrievanceTicket,
+) -> None:
+    login.open(f"/{na_program.business_area.slug}/programs/{na_program.code}/grievance/na-tickets-management")
+    login.wait_for_text("NA Tickets Management", 'h5[data-cy="page-header-title"]', timeout=60)
+    login.wait_for_element_visible(f'[data-cy="na-ticket-list-item-{na_ticket_plain.ticket.unicef_id}"]')
+
+    login.assert_element_absent(f'[data-cy="na-ticket-list-item-{na_ticket_in_other_program.unicef_id}"]')
+
+
+def test_na_management_does_not_list_a_closed_ticket(
+    login: HopeTestBrowser,
+    na_program: Program,
+    na_ticket_plain: NaScenario,
+    na_ticket_closed: GrievanceTicket,
+) -> None:
+    login.open(f"/{na_program.business_area.slug}/programs/{na_program.code}/grievance/na-tickets-management")
+    login.wait_for_text("NA Tickets Management", 'h5[data-cy="page-header-title"]', timeout=60)
+    login.wait_for_element_visible(f'[data-cy="na-ticket-list-item-{na_ticket_plain.ticket.unicef_id}"]')
+
+    login.assert_element_absent(f'[data-cy="na-ticket-list-item-{na_ticket_closed.unicef_id}"]')
 
 
 def test_na_management_lists_ticket_and_renders_comparison(
@@ -136,6 +194,47 @@ def test_na_not_duplicates_marks_both_individuals_distinct(
     assert set(details.selected_distinct.all()) == {na_ticket_plain.person1, na_ticket_plain.person2}
     na_ticket_plain.person2.refresh_from_db()
     assert na_ticket_plain.person2.duplicate is False
+
+
+def test_na_finalize_is_blocked_until_every_duplicate_is_decided(
+    login: HopeTestBrowser,
+    na_program: Program,
+    na_ticket_two_duplicates: NaScenario,
+) -> None:
+    """Finalize stays disabled while any compared pair is still unmarked, and unlocks once all are."""
+    _open_ticket(login, na_program, na_ticket_two_duplicates)
+
+    _withdraw_person2(login)
+
+    login.assert_text("1 of 2 decided", '[data-cy="na-duplicate-selector"]')
+    login.assert_text("Decision incomplete", '[data-cy="na-ticket-decision-incomplete"]')
+    login.assert_element_present('button[data-cy="button-na-finalize"][disabled]')
+
+    login.click('button[data-cy="button-na-duplicate-next"]')
+    login.click('button[data-cy="button-na-withdraw-person2"]')
+
+    login.wait_for_element_absent('button[data-cy="button-na-finalize"][disabled]')
+    login.assert_element_absent('[data-cy="na-ticket-decision-incomplete"]')
+
+
+def test_na_finalize_skips_a_ticket_closed_while_the_operator_was_deciding(
+    login: HopeTestBrowser,
+    na_program: Program,
+    na_ticket_plain: NaScenario,
+) -> None:
+    _open_ticket(login, na_program, na_ticket_plain)
+
+    _withdraw_person2(login)
+
+    ticket = na_ticket_plain.ticket
+    ticket.status = GrievanceTicket.STATUS_CLOSED
+    ticket.save(update_fields=["status"])
+
+    login.click('button[data-cy="button-na-finalize"]')
+    login.wait_for_element_visible('button[data-cy="button-confirm"]').click()
+
+    login.wait_for_text("Tickets managed: 0", '[data-cy="na-tickets-managed-count"]', timeout=60)
+    login.assert_text(f"Closed by someone else in the meantime and skipped: {ticket.unicef_id}")
 
 
 def test_na_withdrawing_a_head_of_household_requires_reassignment(
@@ -234,5 +333,28 @@ def test_na_reassign_picker_offers_only_individuals_from_the_ticket_program(
     login.click('button[data-cy="button-na-reassign-HEAD"]')
 
     login.wait_for_element_present(f'input[aria-label="{na_ticket_head.replacement.id}"]')
+
+    login.assert_element_absent(f'input[aria-label="{individual_in_other_program.id}"]')
+
+
+def test_na_reassign_picker_offers_only_the_ticket_program_when_browsing_all_programmes(
+    login: HopeTestBrowser,
+    na_program: Program,
+    na_ticket_primary: NaScenario,
+    individual_in_other_program: Individual,
+) -> None:
+    """Under `programs/all` nothing scopes the lookup but the filter the screen sends.
+
+    A collector, unlike a head of household, may come from outside the household
+    """
+    login.open(f"/{na_program.business_area.slug}/programs/all/grievance/na-tickets-management")
+    login.wait_for_text("NA Tickets Management", 'h5[data-cy="page-header-title"]', timeout=60)
+    login.click(f'[data-cy="na-ticket-list-item-{na_ticket_primary.ticket.unicef_id}"]')
+    login.wait_for_element_visible('[data-cy="na-comparison-table"]')
+
+    _withdraw_person2(login)
+    login.click('button[data-cy="button-na-reassign-PRIMARY"]')
+
+    login.wait_for_element_present(f'input[aria-label="{na_ticket_primary.replacement.id}"]')
 
     login.assert_element_absent(f'input[aria-label="{individual_in_other_program.id}"]')

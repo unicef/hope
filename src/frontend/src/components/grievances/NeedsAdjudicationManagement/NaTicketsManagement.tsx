@@ -54,7 +54,7 @@ export const NaTicketsManagement = ({
   onBack,
 }: NaTicketsManagementProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
+  const { businessAreaSlug, programId, isAllPrograms } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const queryClient = useQueryClient();
@@ -120,7 +120,7 @@ export const NaTicketsManagement = ({
   const finalizeBlockedReason = (): string => {
     if (incompleteCount > 0)
       return t(
-        '{{count}} ticket(s) still have a duplicate left to decide on before finalizing',
+        '{{count}} ticket(s) need every duplicate decided before finalizing',
         { count: incompleteCount },
       );
     if (unresolvedCount > 0)
@@ -136,15 +136,39 @@ export const NaTicketsManagement = ({
         businessAreaSlug,
         formData: { tickets: buildExecutePayload(decisions) },
       }),
-    onSuccess: () => {
-      showMessage(t('{{count}} ticket(s) finalized', { count: managedCount }));
+    onSuccess: (data: any) => {
+      const skipped = data?.skippedClosed ?? [];
+      const resolvedCount = data?.resolved?.length ?? 0;
+      showMessage(
+        skipped.length > 0
+          ? t(
+              '{{count}} ticket(s) finalized. Closed by someone else in the meantime and skipped: {{tickets}}',
+              {
+                count: resolvedCount,
+                tickets: skipped
+                  .map((ticket: { unicefId: string }) => ticket.unicefId)
+                  .join(', '),
+              },
+            )
+          : t('{{count}} ticket(s) finalized', { count: resolvedCount }),
+      );
       setDecisions({});
       queryClient.invalidateQueries({
         queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsList),
       });
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsList,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
           RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
         ),
       });
       queryClient.invalidateQueries({
@@ -192,8 +216,7 @@ export const NaTicketsManagement = ({
 
   const queryVariables = useMemo(
     () => ({
-      // A closed ticket can no longer be resolved: the bulk endpoint rejects the whole
-      // batch if one is in it, so the queue must never offer them.
+      // a closed ticket cannot be resolved and the row would not say so
       grievanceStatus: GrievanceStatuses.Active,
       search: (appliedFilter.search as string).trim(),
       documentType: appliedFilter.documentType,
@@ -215,50 +238,73 @@ export const NaTicketsManagement = ({
     [appliedFilter, isAllPrograms],
   );
 
-  const { data: listData, isLoading: listLoading } =
+  const listParams = createApiParams(
+    {
+      businessAreaSlug,
+      category: NEEDS_ADJUDICATION_CATEGORY,
+      limit: rowsPerPage,
+      offset: page * rowsPerPage,
+      ordering: '-created_at',
+    },
+    queryVariables,
+  );
+  const countParams = createApiParams(
+    { businessAreaSlug, category: NEEDS_ADJUDICATION_CATEGORY },
+    queryVariables,
+  );
+  const programListParams = { ...listParams, programCode: programId };
+  const programCountParams = { ...countParams, programCode: programId };
+
+  const { data: allProgramsListData, isLoading: allProgramsListLoading } =
     useQuery<PaginatedGrievanceTicketListList>({
-      queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsList, {
-        businessAreaSlug,
-        category: NEEDS_ADJUDICATION_CATEGORY,
-        page,
-        rowsPerPage,
-        queryVariables,
-      }),
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsList(
-          createApiParams(
-            {
-              businessAreaSlug,
-              category: NEEDS_ADJUDICATION_CATEGORY,
-              limit: rowsPerPage,
-              offset: page * rowsPerPage,
-              ordering: '-created_at',
-            },
-            queryVariables,
-          ),
-        ),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsList,
+        listParams,
+      ),
+      queryFn: () => RestService.restBusinessAreasGrievanceTicketsList(listParams),
+      enabled: isAllPrograms,
     });
 
-  const { data: countData } = useQuery<CountResponse>({
+  const { data: allProgramsCountData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
-      {
-        businessAreaSlug,
-        category: NEEDS_ADJUDICATION_CATEGORY,
-        queryVariables,
-      },
+      countParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
-        createApiParams(
-          {
-            businessAreaSlug,
-            category: NEEDS_ADJUDICATION_CATEGORY,
-          },
-          queryVariables,
-        ),
-      ),
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve(countParams),
+    enabled: isAllPrograms,
   });
+
+  const { data: programListData, isLoading: programListLoading } =
+    useQuery<PaginatedGrievanceTicketListList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsGrievanceTicketsList,
+        programListParams,
+      ),
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsGrievanceTicketsList(
+          programListParams,
+        ),
+      enabled: !isAllPrograms,
+    });
+
+  const { data: programCountData } = useQuery<CountResponse>({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
+      programCountParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
+        programCountParams,
+      ),
+    enabled: !isAllPrograms,
+  });
+
+  const listData = isAllPrograms ? allProgramsListData : programListData;
+  const listLoading = isAllPrograms
+    ? allProgramsListLoading
+    : programListLoading;
+  const countData = isAllPrograms ? allProgramsCountData : programCountData;
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({

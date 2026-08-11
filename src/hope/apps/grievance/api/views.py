@@ -68,6 +68,7 @@ from hope.apps.grievance.api.serializers.dashboard import GrievanceDashboardSeri
 from hope.apps.grievance.api.serializers.grievance_ticket import (
     BulkCloseGrievanceTicketsSerializer,
     BulkGrievanceTicketsAddNoteSerializer,
+    BulkNeedsAdjudicationResultSerializer,
     BulkNeedsAdjudicationSerializer,
     BulkUpdateGrievanceTicketsAssigneesSerializer,
     BulkUpdateGrievanceTicketsPrioritySerializer,
@@ -585,6 +586,12 @@ class GrievanceTicketGlobalViewSet(
                 to_prefetch.append(f"{key}__{value['individual']}")
             if "golden_records_individual" in value:
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
+        if self.action == "retrieve":
+            to_prefetch += [
+                "needs_adjudication_ticket_details__golden_records_individual__households_and_roles__household",
+                "needs_adjudication_ticket_details__possible_duplicates__households_and_roles__household",
+                "needs_adjudication_ticket_details__possible_duplicates__household",
+            ]
         return (
             super()
             .get_queryset()
@@ -1481,19 +1488,19 @@ class GrievanceTicketGlobalViewSet(
     @transaction.atomic
     @extend_schema(
         request=BulkNeedsAdjudicationSerializer,
-        responses={202: GrievanceTicketDetailSerializer(many=True)},
+        responses={202: BulkNeedsAdjudicationResultSerializer},
     )
     @action(detail=False, methods=["post"], url_path="bulk-needs-adjudication")
     def bulk_needs_adjudication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        tickets = BulkActionService().bulk_resolve_needs_adjudication(
+        resolved, skipped_closed = BulkActionService().bulk_resolve_needs_adjudication(
             request.user,  # type: ignore
             serializer.validated_data["tickets"],
             self.business_area_slug,  # type: ignore
         )
         return Response(
-            GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            BulkNeedsAdjudicationResultSerializer({"resolved": resolved, "skipped_closed": skipped_closed}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
