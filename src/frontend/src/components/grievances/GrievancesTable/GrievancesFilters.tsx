@@ -142,14 +142,19 @@ export const GrievancesFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             value={filter.search}
             label="Search"
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
-            borderRadius="4px 0px 0px 4px"
           />
         </Grid>
         <DocumentSearchField
@@ -275,7 +280,13 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
-          <Grid container spacing={3} alignItems="flex-end">
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              alignItems: 'flex-end',
+            }}
+          >
             <Grid size={{ xs: 6 }}>
               <NumberTextField
                 topLabel={t('Similarity Score')}

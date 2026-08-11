@@ -8,6 +8,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -70,7 +71,10 @@ function Description({
   const { isAllPrograms, businessArea } = useBaseUrl();
 
   const { data: partnerChoicesData } = useQuery({
-    queryKey: ['partnerForGrievanceChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersPartnerForGrievanceChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasUsersPartnerForGrievanceChoicesRetrieve({
         businessAreaSlug: businessArea,

@@ -21,6 +21,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { showApiErrorMessages } from '@utils/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -73,7 +74,10 @@ export function ClosePaymentPlanDialog({
       showMessage(t('Payment Plan has been closed.'));
       onClose();
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     },
     onError: (error: any) => {
@@ -150,7 +154,11 @@ export function ClosePaymentPlanDialog({
           </DialogTitleWrapper>
           <DialogContent>
             <DialogContainer>
-              <Box p={3}>
+              <Box
+                sx={{
+                  p: 3,
+                }}
+              >
                 <Grid container spacing={2}>
                   {summaryRows.map((row) => (
                     <Grid size={{ xs: 6 }} key={row.label}>
@@ -159,13 +167,22 @@ export function ClosePaymentPlanDialog({
                   ))}
                 </Grid>
               </Box>
-              <Box p={3}>
+              <Box
+                sx={{
+                  p: 3,
+                }}
+              >
                 {t(
                   'By closing this payment plan you confirm you have verified the information above and considered it correct. Once closed, the payment plan cannot be modified again and all information is considered final.',
                 )}
               </Box>
               {!hasVerification && (
-                <WarningBox p={3} m={3}>
+                <WarningBox
+                  sx={{
+                    p: 3,
+                    m: 3,
+                  }}
+                >
                   <GreyText>
                     {t(
                       'This payment plan has not had any verification carried out. Please include below a justification about closing the payment plan without having carried forward any payment verification.',

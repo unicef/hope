@@ -4,6 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 import { useProgramContext } from 'src/programContext';
@@ -42,10 +43,10 @@ function RecipientsTable({
   const [page, setPage] = useState(0);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: [
-      'businessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList',
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList,
       queryVariables,
-    ],
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList(
         queryVariables,

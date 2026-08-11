@@ -12,7 +12,7 @@ import { BiometricsResults } from './BiometricsResults';
 import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 interface NeedsAdjudicationActionsProps {
@@ -58,19 +58,26 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
       showMessage(t('Action successful'));
       setSelectedIndividualIds([]);
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
 
   return (
     <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      mt={2}
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mt: 2,
+      }}
     >
-      <Box display="flex" gap={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+        }}
+      >
         <Button
           onClick={() =>
             navigate(`/${baseUrl}/grievance/new-ticket`, {

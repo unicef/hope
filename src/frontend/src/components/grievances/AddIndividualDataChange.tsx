@@ -1,5 +1,5 @@
 import { Button, Grid, Typography } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
@@ -20,6 +20,7 @@ import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface AddIndividualDataChangeFieldProps {
@@ -128,7 +129,10 @@ function AddIndividualDataChange({
   const { businessAreaSlug } = useBaseUrl();
 
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
@@ -138,7 +142,10 @@ function AddIndividualDataChange({
   });
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,
@@ -147,7 +154,10 @@ function AddIndividualDataChange({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: ['individualChoices', businessAreaSlug],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug,
@@ -155,7 +165,7 @@ function AddIndividualDataChange({
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
-    queryKey: ['countriesList'],
+    queryKey: restQueryKey(RestService.restChoicesCountriesList),
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
@@ -232,7 +242,7 @@ function AddIndividualDataChange({
                 <Grid size={12}>
                   <Button
                     color="primary"
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     disabled={isEditTicket}
                     onClick={() => {
                       arrayHelpers.push({
@@ -279,7 +289,7 @@ function AddIndividualDataChange({
                 <Grid size={12}>
                   <Button
                     color="primary"
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     onClick={() => {
                       arrayHelpers.push({
                         id: crypto.randomUUID(),

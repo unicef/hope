@@ -98,13 +98,24 @@ export function PageHeader({
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
-                <Box display="flex" alignItems="center">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
                   <TitleContainer>
                     <Typography data-cy="page-header-title" variant="h5">
                       {title}
                     </Typography>
                   </TitleContainer>
-                  <Box data-cy="button-admin" display="flex" ml={2}>
+                  <Box
+                    data-cy="button-admin"
+                    sx={{
+                      display: 'flex',
+                      ml: 2,
+                    }}
+                  >
                     {flags}
                   </Box>
                 </Box>

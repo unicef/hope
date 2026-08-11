@@ -8,6 +8,7 @@ import { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructi
 import { PaginatedFollowUpInstructionListList } from '@restgenerated/models/PaginatedFollowUpInstructionListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useState } from 'react';
 
@@ -19,20 +20,21 @@ export const FollowUpInstructionTable = (): ReactElement => {
   });
   const [page, setPage] = useState(0);
 
+  const instructionsListParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    ...queryVariables,
+  };
   const { data, isLoading, error } =
     useQuery<PaginatedFollowUpInstructionListList>({
-      queryKey: [
-        'followUpInstructionsList',
-        businessArea,
-        programId,
-        queryVariables,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsFollowUpInstructionsList,
+        instructionsListParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsFollowUpInstructionsList({
-          businessAreaSlug: businessArea,
-          programCode: programId,
-          ...queryVariables,
-        }),
+        RestService.restBusinessAreasProgramsFollowUpInstructionsList(
+          instructionsListParams,
+        ),
       enabled: !!businessArea && !!programId,
       refetchInterval: (query) => {
         const results = query.state.data?.results ?? [];
@@ -44,19 +46,18 @@ export const FollowUpInstructionTable = (): ReactElement => {
       refetchIntervalInBackground: true,
     });
 
+  const instructionsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: dataCount } = useQuery<CountResponse>({
-    queryKey: [
-      'followUpInstructionsCount',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsFollowUpInstructionsCountRetrieve,
+      instructionsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsFollowUpInstructionsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        instructionsCountParams,
       ),
     enabled: !!businessArea && !!programId && page === 0,
   });

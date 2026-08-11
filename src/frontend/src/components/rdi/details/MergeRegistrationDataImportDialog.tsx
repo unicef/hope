@@ -16,6 +16,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useActionMutation } from '@hooks/useActionMutation';
 import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 
@@ -35,7 +36,9 @@ function MergeRegistrationDataImportDialog({
   const { mutateAsync, isPending } = useActionMutation(
     registration.id,
     RestService.restBusinessAreasProgramsRegistrationDataImportsMergeCreate,
-    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
+    restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+    ),
   );
   const merge = async(): Promise<void> => {
     const { errors } = await mutateAsync();

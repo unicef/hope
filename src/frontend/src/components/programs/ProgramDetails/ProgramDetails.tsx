@@ -223,7 +223,12 @@ export const ProgramDetails = ({
             <Grid container spacing={6}>
               {partners.map((partner) => (
                 <Grid key={partner.id} size={12}>
-                  <StyledBox p={6} flexDirection="column">
+                  <StyledBox
+                    sx={{
+                      p: 6,
+                      flexDirection: 'column',
+                    }}
+                  >
                     <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}
                     </Typography>

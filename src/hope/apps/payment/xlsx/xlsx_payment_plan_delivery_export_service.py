@@ -115,9 +115,7 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         if not payments_ids:
             return
 
-        payments: list[Payment] = list(
-            cast("QuerySet[Payment, Payment]", qs.only("id", "order_number", "token_number"))
-        )
+        payments: list[Payment] = list(qs.only("id", "order_number", "token_number"))
         if not payments:  # pragma: no cover
             return
 

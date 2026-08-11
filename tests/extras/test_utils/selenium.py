@@ -1,4 +1,7 @@
+import time
+
 from django.conf import settings
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from seleniumbase import BaseCase
 
@@ -59,21 +62,36 @@ class HopeTestBrowser(BaseCase):
         self.wait_for_element_visible(selector, timeout=timeout)
         # A click can be dropped during the MUI open transition; if the listbox
         # stays open after the pick, click the option once more.
-        self._click_listbox_option(name, selector)
+        self._click_listbox_option(name, selector, timeout)
         if not self._listbox_closed(selector):
-            self._click_listbox_option(name, selector)
+            self._click_listbox_option(name, selector, timeout)
         self.wait_for_element_absent(selector)
 
-    def _click_listbox_option(self, name: str, selector: str) -> None:
-        options = self.find_elements(f"{selector} li")
-        for option in options:
-            if option.text.strip() == name:
-                # A coordinate-based click can land on a neighbouring option while
-                # the MUI menu is still playing its entering transform; dispatch the
-                # click on the exact node so the target can't be mid-animation.
-                self.execute_script("arguments[0].click()", option)
-                return
-        raise AssertionError(f"Option '{name}' not found in listbox. Available: {[o.text.strip() for o in options]}")
+    def _click_listbox_option(
+        self,
+        name: str,
+        selector: str,
+        timeout: int = 10,
+        not_found_message: str | None = None,
+    ) -> None:
+        """Click the option labelled exactly `name`, retrying while an async listbox re-renders."""
+        deadline = time.monotonic() + timeout
+        labels: list[str] = []
+        while True:
+            try:
+                options = self.find_elements(f"{selector} li")
+                labels = [option.text.strip() for option in options]
+                matches = [option for option, label in zip(options, labels, strict=True) if label == name]
+                if matches:
+                    # Clicking the node avoids landing on a neighbour mid-transform.
+                    self.execute_script("arguments[0].click()", matches[0])
+                    return
+            except StaleElementReferenceException:
+                labels = []
+            if time.monotonic() >= deadline:
+                message = not_found_message or f"Option '{name}' not found in listbox"
+                raise AssertionError(f"{message}. Available: {labels}")
+            time.sleep(0.1)
 
     def _listbox_closed(self, selector: str, timeout: int = 5) -> bool:
         try:
@@ -128,15 +146,11 @@ class HopeTestBrowser(BaseCase):
         else:
             self.click(select_selector)
         self.wait_for_element_visible('ul[role="listbox"]')
-        elements = self.find_elements('ul[role="listbox"] li')
-        for element in elements:
-            if element.text.strip() == name:
-                element.click()
-                break
-        else:
-            raise AssertionError(
-                f"Chip option '{name}' not found in select. Available: {[e.text.strip() for e in elements]}"
-            )
+        self._click_listbox_option(
+            name,
+            'ul[role="listbox"]',
+            not_found_message=f"Chip option '{name}' not found in select",
+        )
         self.execute_script(
             "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', keyCode:27, bubbles:true}))"
         )

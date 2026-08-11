@@ -15,10 +15,13 @@ from extras.test_utils.factories import (
     ProgramFactory,
 )
 from extras.test_utils.factories.core import (
+    FileTempFactory,
     FlexibleAttributeChoiceFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
 )
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import (
     AutoCompleteFilterTemp,
     CaseInsensitiveTuple,
@@ -58,7 +61,7 @@ from hope.apps.core.utils import (
     unique_slugify,
 )
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
-from hope.models import BusinessArea, FlexibleAttribute, Household, Individual, Payment
+from hope.models import BusinessArea, FileTemp, FlexibleAttribute, Household, Individual, Payment
 
 # ============================================================================
 # Pure function tests (no DB needed)
@@ -370,6 +373,16 @@ def test_nested_getattr_raises_when_no_default():
     obj = MagicMock(spec=[])
     with pytest.raises(AttributeError):
         nested_getattr(obj, "missing")
+
+
+@pytest.mark.django_db
+def test_nested_getattr_returns_default_when_related_object_deleted():
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(export_file_delivery=file_temp)
+    snapshot = copy_model_object(payment_plan)
+    FileTemp.objects.filter(pk=file_temp.pk).delete()
+
+    assert nested_getattr(snapshot, "export_file_delivery", None) is None
 
 
 def test_build_arg_dict_from_dict_maps_keys():

@@ -29,7 +29,12 @@ export function FinalizedTargetPopulationHeaderButtons({
   const [openDuplicate, setOpenDuplicate] = useState(false);
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canDuplicate && (
         <IconContainer>
           <Button

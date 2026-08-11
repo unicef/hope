@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { renderUserName } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface AuthorizedUsersOnlineListCreateProps {
   setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
@@ -49,7 +50,10 @@ export const AuthorizedUsersOnlineListCreate: React.FC<
   const [permission, setPermission] = React.useState<string[]>([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['availableUsers', businessAreaSlug, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList,
+      { businessAreaSlug, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList(
         {
@@ -109,7 +113,13 @@ export const AuthorizedUsersOnlineListCreate: React.FC<
   if (error) {
     return (
       <BaseSection title={t('Authorized Users Online')}>
-        <Box color="error.main">{t('Failed to load authorized users.')}</Box>
+        <Box
+          sx={{
+            color: 'error.main',
+          }}
+        >
+          {t('Failed to load authorized users.')}
+        </Box>
       </BaseSection>
     );
   }

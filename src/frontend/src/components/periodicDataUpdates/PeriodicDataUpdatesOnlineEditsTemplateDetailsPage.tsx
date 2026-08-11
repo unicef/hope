@@ -34,6 +34,7 @@ import {
   periodicDataUpdatesOnlineEditsStatusToColor,
   showApiErrorMessages,
 } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -110,12 +111,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     onSuccess: () => {
       showMessage(t('Template approved successfully.'));
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     },
     onError: (error: any) => {
@@ -142,12 +140,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       setSendBackDialogOpen(false);
       setSendBackComment('');
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     } catch (e) {
       showApiErrorMessages(
@@ -172,12 +167,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       );
       showMessage(t('Periodic data update sent for approval.'));
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     } catch (e) {
       showApiErrorMessages(e, showMessage, t('Failed to send for approval.'));
@@ -199,12 +191,9 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     onSuccess: () => {
       showMessage('Template merged successfully.');
       queryClient.invalidateQueries({
-        queryKey: [
-          'onlineEditsTemplateDetails',
-          businessArea,
-          programId,
-          numericId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
     },
     onError: (error: any) => {
@@ -221,12 +210,10 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: [
-      'onlineEditsTemplateDetails',
-      businessArea,
-      programId,
-      numericId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+      { businessAreaSlug: businessArea, programCode: programId, id: numericId },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve(
         {
@@ -396,7 +383,13 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       >
         <>
           {status === 'NEW' && canSave && isAuthorized && (
-            <Box px={6} pt={2} pb={2}>
+            <Box
+              sx={{
+                px: 6,
+                pt: 2,
+                pb: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -410,7 +403,15 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
             </Box>
           )}
           {status === 'READY' && canApprove && isAuthorized && (
-            <Box px={6} pt={2} pb={2} display="flex" gap={2}>
+            <Box
+              sx={{
+                px: 6,
+                pt: 2,
+                pb: 2,
+                display: 'flex',
+                gap: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -432,7 +433,15 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
             </Box>
           )}
           {status === 'APPROVED' && canMerge && isAuthorized && (
-            <Box px={6} pt={2} pb={2} display="flex" gap={2}>
+            <Box
+              sx={{
+                px: 6,
+                pt: 2,
+                pb: 2,
+                display: 'flex',
+                gap: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -595,8 +604,12 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
           </Grid>
         </Grid>
       </BaseSection>
-
-      <Box pl={12} pt={6}>
+      <Box
+        sx={{
+          pl: 12,
+          pt: 6,
+        }}
+      >
         {sentBackComment &&
           typeof sentBackComment === 'object' &&
           sentBackComment.comment && (
@@ -608,9 +621,12 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
             />
           )}
       </Box>
-
       {/* Periodic Data Update Table */}
-      <Box p={3}>
+      <Box
+        sx={{
+          p: 3,
+        }}
+      >
         <PeriodicDataUpdateEditableTable
           allPduFields={allPduFields}
           editRows={editRows}

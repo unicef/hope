@@ -17,6 +17,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.household.const import FEMALE, HEAD, MALE, OTHER, SON_DAUGHTER, WIFE_HUSBAND
 from hope.apps.household.services.individual_xlsx_update import IndividualXlsxUpdate, InvalidColumnsError
+from hope.models import AsyncJob
 
 pytestmark = pytest.mark.django_db
 
@@ -243,3 +244,26 @@ def test_raise_error_when_invalid_phone_number(xlsx_update_invalid_phone_no_file
         IndividualXlsxUpdate(xlsx_update_invalid_phone_no_file).update_individuals()
 
     assert str({"phone_no": [f"Invalid phone number for individual {individuals[0]}."]}) == str(context.value)
+
+
+def test_update_individuals_schedules_recalculation_for_recalc_fields(
+    xlsx_update_valid_file_complex, individuals
+) -> None:
+    updater = IndividualXlsxUpdate(xlsx_update_valid_file_complex)
+
+    updater.update_individuals()
+
+    job = AsyncJob.objects.get(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    )
+    assert job.config["household_ids"] == [str(individuals[0].household_id)]
+
+
+def test_update_individuals_skips_recalculation_without_recalc_fields(xlsx_update_file, individuals) -> None:
+    updater = IndividualXlsxUpdate(xlsx_update_file)
+
+    updater.update_individuals()
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    ).exists()

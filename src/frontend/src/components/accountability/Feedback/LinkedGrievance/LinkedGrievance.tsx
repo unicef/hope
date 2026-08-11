@@ -28,7 +28,11 @@ function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
   return (
     <Grid size={{ xs: 4 }}>
       {feedback.linkedGrievanceId ? (
-        <Box p={3}>
+        <Box
+          sx={{
+            p: 3,
+          }}
+        >
           <ContainerColumnWithBorder>
             <Title>
               <Typography variant="h6">{t('Linked Grievance')}</Typography>

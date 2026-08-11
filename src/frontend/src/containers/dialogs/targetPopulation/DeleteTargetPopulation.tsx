@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +33,7 @@ export const DeleteTargetPopulation = ({
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loadingDelete } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -47,6 +49,13 @@ export const DeleteTargetPopulation = ({
         programCode,
         id,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
+      });
+    },
   });
   const handleDelete = async(): Promise<void> => {
     try {

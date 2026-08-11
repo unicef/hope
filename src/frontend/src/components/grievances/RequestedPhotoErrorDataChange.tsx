@@ -19,6 +19,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -79,7 +80,7 @@ export function RequestedPhotoErrorDataChange({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, businessAreaSlug } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
@@ -99,11 +100,9 @@ export function RequestedPhotoErrorDataChange({
     onSuccess: () => {
       showMessage(t('Changes Approved'));
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
     onError: (error: any) => {
@@ -129,7 +128,7 @@ export function RequestedPhotoErrorDataChange({
         return (
           <ApproveBox>
             <Title>
-              <Box display="flex" justifyContent="space-between">
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6">{t('Requested Data Change')}</Typography>
                 {shouldShowEditButton ? (
                   <Button

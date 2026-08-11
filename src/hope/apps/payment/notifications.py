@@ -18,12 +18,16 @@ class PaymentNotification:
     ACTION_APPROVE = PaymentPlan.Action.APPROVE.name
     ACTION_AUTHORIZE = PaymentPlan.Action.AUTHORIZE.name
     ACTION_REVIEW = PaymentPlan.Action.REVIEW.name  # payment plan release
+    ACTION_MARK_READY_FOR_CLOSURE = PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name
+    ACTION_SEND_BACK_TO_FINISHED = PaymentPlan.Action.SEND_BACK_TO_FINISHED.name
 
     ACTION_TO_RECIPIENTS_PERMISSIONS_MAP = {
         ACTION_SEND_FOR_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
         ACTION_APPROVE: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
         ACTION_AUTHORIZE: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
         ACTION_REVIEW: Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.name,
+        ACTION_MARK_READY_FOR_CLOSURE: Permissions.PM_CLOSE_FINISHED.name,
+        ACTION_SEND_BACK_TO_FINISHED: Permissions.PM_MARK_READY_FOR_CLOSURE.name,
     }
 
     ACTION_PREPARE_EMAIL_BODIES_MAP = {
@@ -45,6 +49,16 @@ class PaymentNotification:
         ACTION_REVIEW: {
             "action_name": "released",
             "subject": "Payment is Released",
+            "recipient_title": "Reviewer",
+        },
+        ACTION_MARK_READY_FOR_CLOSURE: {
+            "action_name": "marked as ready for closure",
+            "subject": "Payment pending for Closure",
+            "recipient_title": "Reviewer",
+        },
+        ACTION_SEND_BACK_TO_FINISHED: {
+            "action_name": "sent back to finished",
+            "subject": "Payment sent back to Finished",
             "recipient_title": "Reviewer",
         },
     }

@@ -601,7 +601,7 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(77):
+    with django_assert_num_queries(76):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_child_payment_plan_async_task(follow_up_pp_2)
 
@@ -629,11 +629,11 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
 
 
 @pytest.mark.parametrize(
-    ("plan_type", "method_name"),
+    ("plan_type", "method_name", "expected_kwargs"),
     [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up"),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up"),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment"),
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up", {}),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up", {"fixed_amount": None, "amounts": None}),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment", {"fixed_amount": None, "amounts": None}),
     ],
 )
 def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
@@ -642,6 +642,7 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
+    expected_kwargs: dict,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -666,7 +667,7 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
         )
 
     assert result == expected_child_plan
-    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date)
+    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date, **expected_kwargs)
 
 
 def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
@@ -692,11 +693,15 @@ def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validati
 
 
 @pytest.mark.parametrize(
-    ("plan_type", "method_name"),
+    ("plan_type", "method_name", "expected_kwargs"),
     [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments"),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments"),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments"),
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments", {}),
+        (PaymentPlan.PlanType.TOP_UP, "create_funded_child_payments", {"amounts": None, "fixed_amount": None}),
+        (
+            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+            "create_funded_child_payments",
+            {"amounts": None, "fixed_amount": None},
+        ),
     ],
 )
 def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
@@ -705,6 +710,7 @@ def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_e
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
+    expected_kwargs: dict,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -716,7 +722,7 @@ def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_e
     with mock.patch.object(PaymentPlanService, method_name) as service_method:
         PaymentPlanService(payment_plan).create_child_plan_payments()
 
-    service_method.assert_called_once_with()
+    service_method.assert_called_once_with(**expected_kwargs)
 
 
 def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
@@ -1959,6 +1965,65 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
         service.check_payment_plan_and_update_status(approval_process)
 
     mock_flow_cls.return_value.status_approve.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_ready_for_closure_sends_notification(mock_notify, user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    PaymentPlanService(payment_plan).ready_for_closure(user=user)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    mock_notify.assert_called_once_with(
+        payment_plan,
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+        str(user.pk),
+        mock.ANY,
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_ready_for_closure_suppresses_notification_when_notify_false(
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    PaymentPlanService(payment_plan).ready_for_closure(user, notify=False)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    mock_notify.assert_not_called()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_send_back_to_finished_sends_notification(
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+
+    PaymentPlanService(payment_plan).send_back_to_finished(user=user)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.FINISHED
+    mock_notify.assert_called_once_with(
+        payment_plan,
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+        str(user.pk),
+        mock.ANY,
+    )
 
 
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):

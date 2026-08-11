@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -32,7 +33,14 @@ const BatchDetailsPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
 
   const { data: group } = useQuery({
-    queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: groupId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
         businessAreaSlug: businessArea,
@@ -63,7 +71,7 @@ const BatchDetailsPage = (): ReactElement => {
 
   return (
     <>
-      <BatchDetailsHeader groupId={groupId} tag={tag} hasExportFile={hasExportFile} hasPassword={hasPassword} isBusy={isBusy} />
+      <BatchDetailsHeader groupId={groupId} tag={tag} planType={batch?.planType} hasExportFile={hasExportFile} hasPassword={hasPassword} isBusy={isBusy} />
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}

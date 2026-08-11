@@ -4,6 +4,7 @@ import get from 'lodash/get';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { CurrencyChoice } from '@restgenerated/models/CurrencyChoice';
 
 const getCurrencyLabel = (option: CurrencyChoice): string => {
@@ -22,7 +23,7 @@ export const FormikCurrencyAutocomplete = ({
   const { t } = useTranslation();
 
   const { data } = useQuery({
-    queryKey: ['currencies'],
+    queryKey: restQueryKey(RestService.restChoicesCurrenciesList),
     queryFn: () => RestService.restChoicesCurrenciesList(),
   });
 

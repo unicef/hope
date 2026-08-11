@@ -7,6 +7,7 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +24,7 @@ export function BulkCloseModal({
 }: BulkCloseModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const queryClient = useQueryClient();
 
   // Only Grievance Complaint tickets in For Approval can be closed. The whole
@@ -44,14 +45,15 @@ export function BulkCloseModal({
     onSuccess: () => {
       if (isAllPrograms) {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasGrievanceTickets'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+          ),
         });
       } else {
         queryClient.invalidateQueries({
-          queryKey: [
-            'businessAreasProgramsGrievanceTickets',
-            { program: programId },
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+          ),
         });
       }
       showMessage(

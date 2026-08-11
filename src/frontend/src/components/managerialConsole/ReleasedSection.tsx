@@ -14,12 +14,13 @@ import {
   TableSortLabel,
   TextField,
 } from '@mui/material';
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
 
 interface ReleasedSectionProps {
-  releasedData: any;
+  releasedData: PaginatedPaymentPlanList;
 }
 
 export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
@@ -36,7 +37,7 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
     filterRows,
   } = useSortAndFilter({ initialSortField: null, initialSortDirection: 'asc' });
 
-  const programs = releasedData?.results?.reduce((acc, row) => {
+  const programs = releasedData?.results?.reduce<string[]>((acc, row) => {
     if (!acc.includes(row.program)) {
       acc.push(row.program);
     }

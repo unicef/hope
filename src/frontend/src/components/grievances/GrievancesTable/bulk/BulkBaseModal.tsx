@@ -8,8 +8,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Table,
-  TableBody,
   Typography,
 } from '@mui/material';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
@@ -25,7 +23,7 @@ export const StyledLink = styled.div`
   display: flex;
   align-content: center;
 `;
-const StyledTable = styled(Table)`
+const StyledContainer = styled.div`
   min-width: 400px;
   max-width: 800px;
 `;
@@ -70,7 +68,7 @@ export function BulkBaseModal({
       {buttonTitle}
     </Button>
   );
-  const onAccept = async(): Promise<void> => {
+  const onAccept = async (): Promise<void> => {
     try {
       await onSave(selectedTickets);
       setDialogOpen(false);
@@ -92,19 +90,22 @@ export function BulkBaseModal({
           <DialogTitle id="scroll-dialog-title">{title}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box mt={2} mb={6}>
-            <StyledTable>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 6,
+            }}
+          >
+            <StyledContainer>
               <Typography>
                 {t('Tickets ID')}:{' '}
                 <Bold data-cy="selected-tickets">
                   {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
                 </Bold>
               </Typography>
-            </StyledTable>
+            </StyledContainer>
           </Box>
-          <StyledTable>
-            <TableBody data-cy="dropdown">{children}</TableBody>
-          </StyledTable>
+          <StyledContainer data-cy="dropdown">{children}</StyledContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>

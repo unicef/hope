@@ -17,10 +17,11 @@ import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataCha
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export type RoleReassignData = {
@@ -37,7 +38,6 @@ export function RequestedIndividualDataChange({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessAreaSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const queryClient = useQueryClient();
@@ -144,14 +144,12 @@ export function RequestedIndividualDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
@@ -366,7 +364,12 @@ export function RequestedIndividualDataChange({
         return (
           <ApproveBox>
             <Title>
-              <Box display="flex" justifyContent="space-between">
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography variant="h6">Requested Data Change</Typography>
                 {shouldShowEditButton(allChangesLength) ? (
                   <Button

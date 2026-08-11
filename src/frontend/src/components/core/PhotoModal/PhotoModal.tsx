@@ -108,7 +108,12 @@ function PhotoModal({
         break;
       case 'pictureClose':
         element = (
-          <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <MiniImage
               data-cy="mini-image-close"
               alt={alt}
@@ -159,7 +164,11 @@ function PhotoModal({
           showRotate={showRotate}
         />
         <DialogContent>
-          <Box p={3}>
+          <Box
+            sx={{
+              p: 3,
+            }}
+          >
             <TransformWrapper>
               <TransformComponent>
                 <StyledImage id="modalImg" alt="photo" src={src} />

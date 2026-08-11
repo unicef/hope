@@ -29,6 +29,7 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import {
   formatCurrencyWithSymbol,
@@ -88,7 +89,10 @@ const PeopleDetailsPage = (): ReactElement => {
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -96,7 +100,7 @@ const PeopleDetailsPage = (): ReactElement => {
     });
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
-    queryKey: ['fieldsAttributes'],
+    queryKey: restQueryKey(FieldsAttributesService.fieldsAttributesRetrieve),
     queryFn: async () => {
       const data = await FieldsAttributesService.fieldsAttributesRetrieve();
       return { allIndividualsFlexFieldsAttributes: data };
@@ -105,7 +109,10 @@ const PeopleDetailsPage = (): ReactElement => {
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -114,7 +121,10 @@ const PeopleDetailsPage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        { businessAreaSlug: businessArea, programCode: programId, limit: 1000 },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
