@@ -36,9 +36,13 @@ instead of rebuilding:
   which deletes dark versions newer than the alias target first for a clean rebuild.
 
 Versions BELOW the alias target (the rollback safety net during a sanity window) are never
-touched; those are ``es_drop_old_index_versions``' job, days later. Re-running the command is
-always safe; a fully-reindexed program just gets its next version (there is deliberately no
-"mapping unchanged, skip" detection - the operator decides when a reindex is due).
+touched; those are ``es_drop_old_index_versions``' job, days later.
+
+Fleet-level resume: a program whose ALIAS TARGETS already carry the current code mapping stamp
+was completed by this very code, so it is skipped - re-running ``--all`` after a mid-fleet
+crash finishes only the remaining programs. ``--force`` rebuilds such programs anyway (next
+version as usual); ``--sweep-wrecks`` also bypasses the skip, because analyzer-only changes
+are invisible to the stamp and a sweep must never be suppressed by it.
 
 Examples
 --------
@@ -118,6 +122,15 @@ class Command(BaseCommand):
             ),
         )
         parser.add_argument(
+            "--force",
+            action="store_true",
+            help=(
+                "Reindex even programs whose alias target already carries the current code "
+                "mapping stamp. Without it such programs are skipped, so a re-run after a "
+                "mid-fleet crash finishes only the remaining programs."
+            ),
+        )
+        parser.add_argument(
             "--force-unlock",
             action="store_true",
             help="Remove a stale lock left by a crashed run, then continue.",
@@ -145,7 +158,7 @@ class Command(BaseCommand):
             self._report_status(es, code_by_id)
             return
         if opts["dry_run"]:
-            self._report_plan(es, code_by_id)
+            self._report_plan(es, code_by_id, opts)
             return
 
         self._acquire_lock(es, force=opts["force_unlock"])
@@ -196,7 +209,7 @@ class Command(BaseCommand):
                 db_count = doc_class().get_queryset().count()
                 self.stdout.write(f"{code}  {name}: {detail}  versions={versions}  es={es_count} db={db_count}")
 
-    def _report_plan(self, es: Elasticsearch, code_by_id: dict) -> None:
+    def _report_plan(self, es: Elasticsearch, code_by_id: dict, opts: dict) -> None:
         for pid, code in sorted(code_by_id.items(), key=lambda kv: kv[1] or ""):
             docs = self._doc_classes(str(pid))
             names = [d._index._name for d in docs]
@@ -204,7 +217,14 @@ class Command(BaseCommand):
             if not_aliased:
                 self.stdout.write(f"{code}: SKIP - not an alias yet: {not_aliased} (run es_bootstrap_aliases)")
                 continue
-            current = {n: self._alias_target(es, n) for n in names}
+            current = {n: t for n in names if (t := self._alias_target(es, n)) is not None}
+            if (
+                not opts["force"]
+                and not opts["sweep_wrecks"]
+                and all(self._resumable(es, doc, current[doc._index._name]) for doc in docs)
+            ):
+                self.stdout.write(f"{code}: up-to-date {list(current.values())} - would skip (--force to rebuild)")
+                continue
             try:
                 suffix = self._pair_suffix(current)
             except CommandError as exc:
@@ -277,6 +297,17 @@ class Command(BaseCommand):
             if target is None:
                 raise CommandError(f"{name} is not an alias - run es_bootstrap_aliases first")
             old[name] = target
+
+        # fleet-level resume: alias targets stamped with the current code mapping were completed
+        # by this very code - skip, so a crashed --all run finishes only the remainder. --force
+        # rebuilds anyway; --sweep-wrecks bypasses too (analyzer-only changes are invisible to
+        # the stamp, a sweep must never be suppressed by it).
+        if (
+            not opts["force"]
+            and not opts["sweep_wrecks"]
+            and all(self._resumable(es, doc_class, old[doc_class._index._name]) for doc_class in docs)
+        ):
+            return f"up-to-date ({list(old.values())} built from current mapping) - skipped, --force to rebuild"
 
         if opts["sweep_wrecks"]:
             for name, old_target in old.items():

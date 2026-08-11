@@ -162,6 +162,21 @@ def es_sanity_window(index_names: list[str]) -> MagicMock:
 
 
 @pytest.fixture
+def es_up_to_date(program: Program) -> MagicMock:
+    """Alias already on _v2 whose mapping stamp MATCHES the current code mapping (completed run)."""
+    from hope.apps.household.services.index_management import mapping_content_hash
+
+    docs = [get_individual_doc(str(program.id)), get_household_doc(str(program.id))]
+    hashes = {f"{doc._index._name}_v2": mapping_content_hash(doc._index.to_dict().get("mappings")) for doc in docs}
+    es = _make_es(alias_version="v2", swap_flips_to="v3")
+    es.indices.exists.side_effect = lambda **kw: kw["index"] in hashes
+    es.indices.get_mapping.side_effect = lambda **kw: {
+        kw["index"]: {"mappings": {"_meta": {"hope_mapping_hash": hashes[kw["index"]]}}}
+    }
+    return es
+
+
+@pytest.fixture
 def es_locked() -> MagicMock:
     es = _make_es()
     es.indices.create.side_effect = BadRequestError("resource_already_exists_exception", MagicMock(), None)
@@ -419,6 +434,48 @@ def test_status_reports_alias_and_versions(program: Program, es_aliased: MagicMo
     assert "ALIAS ->" in out.getvalue()
     assert "versions=[1]" in out.getvalue()
     es_aliased.indices.create.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_up_to_date_program_is_skipped(program: Program, es_up_to_date: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_up_to_date), patch(DELTA_CALL) as delta, patch(POPULATE) as populate:
+        call_command(CMD, program=str(program.id), stdout=out)
+
+    assert "up-to-date" in out.getvalue()
+    populate.assert_not_called()
+    delta.assert_not_called()
+    es_up_to_date.indices.update_aliases.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_force_rebuilds_an_up_to_date_program(
+    program: Program, index_names: list[str], es_up_to_date: MagicMock
+) -> None:
+    with patch(GET_CONN, return_value=es_up_to_date), patch(DELTA_CALL), patch(POPULATE) as populate:
+        call_command(CMD, program=str(program.id), force=True, stdout=StringIO())
+
+    populated = [call.args[1]._index._name for call in populate.call_args_list]
+    assert sorted(populated) == sorted(f"{n}_v3" for n in index_names)
+    assert es_up_to_date.indices.update_aliases.call_count == 1
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_sweep_wrecks_bypasses_the_up_to_date_skip(program: Program, es_up_to_date: MagicMock) -> None:
+    with patch(GET_CONN, return_value=es_up_to_date), patch(DELTA_CALL), patch(POPULATE) as populate:
+        call_command(CMD, program=str(program.id), sweep_wrecks=True, stdout=StringIO())
+
+    populate.assert_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_dry_run_reports_up_to_date_programs(program: Program, es_up_to_date: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_up_to_date):
+        call_command(CMD, program=str(program.id), dry_run=True, stdout=out)
+
+    assert "would skip" in out.getvalue()
+    es_up_to_date.indices.create.assert_not_called()
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
