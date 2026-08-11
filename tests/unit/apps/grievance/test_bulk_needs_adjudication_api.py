@@ -160,16 +160,6 @@ def na_ticket_with_withdrawn_duplicate(
 
 
 @pytest.fixture
-def na_ticket_legacy_single_duplicate(
-    business_area: BusinessArea, program: Any, make_na_ticket: Callable
-) -> TicketNeedsAdjudicationDetails:
-    # pre-multi-duplicate ticket: the compared individual sits on the legacy FK and nowhere else
-    golden = HouseholdFactory(program=program, business_area=business_area, create_role=False).head_of_household
-    duplicate = HouseholdFactory(program=program, business_area=business_area, create_role=False).head_of_household
-    return make_na_ticket(golden, possible_duplicate=duplicate, is_multiple_duplicates_version=False)
-
-
-@pytest.fixture
 def na_ticket_in_other_business_area(make_na_ticket: Callable) -> TicketNeedsAdjudicationDetails:
     other_business_area = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="4410")
     other_program = ProgramFactory(business_area=other_business_area, name="program ukraine 1")
@@ -186,8 +176,7 @@ def na_ticket_in_other_business_area(make_na_ticket: Callable) -> TicketNeedsAdj
 def na_ticket_two_duplicates_sharing_a_household(
     business_area: BusinessArea, program: Any, make_na_ticket: Callable
 ) -> TicketNeedsAdjudicationDetails:
-    # both duplicates live in the household one of them collects for, so the operator can pick the
-    # other duplicate as the replacement — which the backend must refuse
+    # both duplicates live in the household one of them collects for
     household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
     collector = IndividualFactory(household=household, program=program, business_area=business_area)
     IndividualRoleInHouseholdFactory(individual=collector, household=household, role=ROLE_PRIMARY)

@@ -35,7 +35,7 @@ from hope.apps.household.api.serializers.individual import (
 from hope.apps.household.const import HEAD
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
 from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
-from hope.models import BusinessArea, Household, Individual, Program
+from hope.models import BusinessArea, Household, Individual
 
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
@@ -203,12 +203,8 @@ class DeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
 
 def can_view_biometric_results(context: Mapping[str, Any]) -> bool:
     request = context["request"]
-    business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
-    if program_code := request.parser_context["kwargs"].get("program_code"):
-        scope = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
-    else:
-        scope = BusinessArea.objects.filter(slug=business_area_slug).first()
-    return request.user.has_perm(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, scope)
+    business_area = BusinessArea.objects.filter(slug=request.parser_context["kwargs"]["business_area_slug"]).first()
+    return request.user.has_perm(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, business_area)
 
 
 def find_score(hits: list[dict] | None, individual_id: str) -> float | None:

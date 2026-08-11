@@ -324,29 +324,25 @@ def test_na_withdrawing_an_alternate_collector_needs_no_reassignment(
 def test_na_reassign_picker_offers_only_individuals_from_the_ticket_program(
     login: HopeTestBrowser,
     na_program: Program,
-    na_ticket_head: NaScenario,
+    na_ticket_primary: NaScenario,
     individual_in_other_program: Individual,
 ) -> None:
-    _open_ticket(login, na_program, na_ticket_head)
+    _open_ticket(login, na_program, na_ticket_primary)
 
     _withdraw_person2(login)
-    login.click('button[data-cy="button-na-reassign-HEAD"]')
+    login.click('button[data-cy="button-na-reassign-PRIMARY"]')
 
-    login.wait_for_element_present(f'input[aria-label="{na_ticket_head.replacement.id}"]')
+    login.wait_for_element_present(f'input[aria-label="{na_ticket_primary.replacement.id}"]')
 
     login.assert_element_absent(f'input[aria-label="{individual_in_other_program.id}"]')
 
 
-def test_na_reassign_picker_offers_only_the_ticket_program_when_browsing_all_programmes(
+def test_na_reassign_picker_offers_only_individuals_from_the_ticket_program_in_all_programmes(
     login: HopeTestBrowser,
     na_program: Program,
     na_ticket_primary: NaScenario,
     individual_in_other_program: Individual,
 ) -> None:
-    """Under `programs/all` nothing scopes the lookup but the filter the screen sends.
-
-    A collector, unlike a head of household, may come from outside the household
-    """
     login.open(f"/{na_program.business_area.slug}/programs/all/grievance/na-tickets-management")
     login.wait_for_text("NA Tickets Management", 'h5[data-cy="page-header-title"]', timeout=60)
     login.click(f'[data-cy="na-ticket-list-item-{na_ticket_primary.ticket.unicef_id}"]')
