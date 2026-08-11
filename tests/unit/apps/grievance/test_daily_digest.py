@@ -403,6 +403,7 @@ def test_row_cap_summarises_the_remainder(
     assert "and 3 more" in message["TextPart"]
 
 
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_fan_out_queues_one_job_per_enabled_business_area(
     business_area: BusinessArea, other_business_area: BusinessArea, silent_business_area: BusinessArea
 ) -> None:
@@ -419,12 +420,21 @@ def test_fan_out_queues_one_job_per_enabled_business_area(
     )
 
 
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_fan_out_pins_yesterday_as_the_digest_date(business_area: BusinessArea) -> None:
     with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
         with freeze_time(NEXT_DAY):
             daily_grievance_digest_async_task()
 
     assert mock_queue_task.call_args.kwargs["config"]["digest_date"] == "2026-08-09"
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=False)
+def test_fan_out_queues_nothing_when_the_global_flag_is_off(business_area: BusinessArea) -> None:
+    with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
+        daily_grievance_digest_async_task()
+
+    mock_queue_task.assert_not_called()
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)

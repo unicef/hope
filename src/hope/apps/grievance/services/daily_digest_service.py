@@ -31,6 +31,8 @@ class RecipientDigest:
     user: "User"
     assigned: list[GrievanceTicket] = field(default_factory=list)
     edited: list[GrievanceTicket] = field(default_factory=list)
+    assigned_total: int = 0
+    edited_total: int = 0
 
 
 class DailyDigestService:
@@ -43,7 +45,7 @@ class DailyDigestService:
     recipient, under "assigned" when it qualifies for both sections.
     """
 
-    # limit number of tickets that can be send in one email
+    # limit number of tickets that can be send in one email, and how many are ever held in memory
     ROW_LIMIT = 50
 
     def __init__(self, business_area: "BusinessArea", digest_date: date) -> None:
@@ -83,16 +85,22 @@ class DailyDigestService:
         # A ticket already listed under "assigned" is not repeated under "edited" for that user.
         assigned_pairs: set[tuple[Any, Any]] = set()
 
-        for ticket in self._assigned_tickets():
-            digest_for(ticket.assigned_to).assigned.append(ticket)
+        for ticket in self._assigned_tickets().iterator():
+            digest = digest_for(ticket.assigned_to)
+            digest.assigned_total += 1
+            if digest.assigned_total <= self.ROW_LIMIT:
+                digest.assigned.append(ticket)
             assigned_pairs.add((ticket.assigned_to_id, ticket.pk))
 
-        for ticket in self._edited_tickets():
+        for ticket in self._edited_tickets().iterator():
             candidates = {c.pk: c for c in (ticket.created_by, ticket.assigned_to) if is_mailable(c)}
             for pk, candidate in candidates.items():
                 if pk == ticket.user_modified_by_id or (pk, ticket.pk) in assigned_pairs:
                     continue
-                digest_for(candidate).edited.append(ticket)
+                digest = digest_for(candidate)
+                digest.edited_total += 1
+                if digest.edited_total <= self.ROW_LIMIT:
+                    digest.edited.append(ticket)
 
         return list(digests.values())
 
@@ -127,8 +135,8 @@ class DailyDigestService:
             .order_by("unicef_id")
         )
 
-    @classmethod
-    def _rows(cls, tickets: list[GrievanceTicket]) -> tuple[list[dict[str, Any]], int]:
+    @staticmethod
+    def _rows(tickets: list[GrievanceTicket], total: int) -> tuple[list[dict[str, Any]], int]:
         rows = [
             {
                 "ticket_id": ticket.unicef_id,
@@ -136,13 +144,13 @@ class DailyDigestService:
                 "ticket_status": ticket.get_status_display(),
                 "ticket_url": grievance_ticket_url(ticket),
             }
-            for ticket in tickets[: cls.ROW_LIMIT]
+            for ticket in tickets
         ]
-        return rows, max(len(tickets) - cls.ROW_LIMIT, 0)
+        return rows, max(total - len(rows), 0)
 
     def _build_email(self, digest: RecipientDigest) -> MailjetClient:
-        assigned_rows, assigned_remaining = self._rows(digest.assigned)
-        edited_rows, edited_remaining = self._rows(digest.edited)
+        assigned_rows, assigned_remaining = self._rows(digest.assigned, digest.assigned_total)
+        edited_rows, edited_remaining = self._rows(digest.edited, digest.edited_total)
         context = {
             "first_name": digest.user.first_name or getattr(digest.user, "username", ""),
             "last_name": digest.user.last_name,

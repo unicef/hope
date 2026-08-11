@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 import logging
 
+from constance import config
 from django.db import Error, transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -103,6 +104,8 @@ def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
 
 @app.task()
 def daily_grievance_digest_async_task() -> None:
+    if not config.SEND_GRIEVANCES_NOTIFICATION:
+        return
     digest_date = (timezone.now() - timedelta(days=1)).date().isoformat()
     for business_area_id, name in BusinessArea.objects.filter(enable_email_notification=True).values_list("id", "name"):
         PeriodicAsyncJob.queue_task(
