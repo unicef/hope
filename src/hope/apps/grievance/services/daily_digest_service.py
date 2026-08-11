@@ -7,7 +7,7 @@ the ticket, so there is no event stream to keep.
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, time, timedelta
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from constance import config
 from django.db.models import F, Q
@@ -86,9 +86,8 @@ class DailyDigestService:
         assigned_pairs: set[tuple[Any, Any]] = set()
 
         for ticket in self._assigned_tickets().iterator():
-            if not is_mailable(ticket.assigned_to):
-                continue
-            digest = digest_for(ticket.assigned_to)
+            # the queryset only yields tickets with an active assignee that has an email
+            digest = digest_for(cast("User", ticket.assigned_to))
             digest.assigned_total += 1
             if digest.assigned_total <= self.ROW_LIMIT:
                 digest.assigned.append(ticket)

@@ -403,6 +403,24 @@ def test_row_cap_summarises_the_remainder(
     assert "and 3 more" in message["TextPart"]
 
 
+def test_row_cap_limits_the_edited_tickets_held_in_memory(
+    business_area: BusinessArea, assignee: User, actor: User
+) -> None:
+    GrievanceTicketFactory.create_batch(
+        52,
+        business_area=business_area,
+        assigned_to=assignee,
+        user_modified=DURING_THE_DAY,
+        user_modified_by=actor,
+    )
+
+    digests = DailyDigestService(business_area, DIGEST_DATE).build_digests()
+
+    assert len(digests) == 1
+    assert digests[0].edited_total == 52
+    assert len(digests[0].edited) == 50
+
+
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_fan_out_queues_one_job_per_enabled_business_area(
     business_area: BusinessArea, other_business_area: BusinessArea, silent_business_area: BusinessArea
