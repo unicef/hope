@@ -160,6 +160,18 @@ def na_ticket_with_withdrawn_duplicate(
 
 
 @pytest.fixture
+def na_tickets_sharing_an_individual(
+    business_area: BusinessArea, program: Any, make_na_ticket: Callable
+) -> tuple[TicketNeedsAdjudicationDetails, TicketNeedsAdjudicationDetails]:
+    # one individual is a candidate on both tickets, which is what makes a contradictory batch
+    # possible in the first place
+    shared = HouseholdFactory(program=program, business_area=business_area, create_role=False).head_of_household
+    first_golden = HouseholdFactory(program=program, business_area=business_area, create_role=False).head_of_household
+    second_golden = HouseholdFactory(program=program, business_area=business_area, create_role=False).head_of_household
+    return make_na_ticket(first_golden, shared), make_na_ticket(second_golden, shared)
+
+
+@pytest.fixture
 def na_ticket_in_other_business_area(make_na_ticket: Callable) -> TicketNeedsAdjudicationDetails:
     other_business_area = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="4410")
     other_program = ProgramFactory(business_area=other_business_area, name="program ukraine 1")
@@ -1280,3 +1292,51 @@ def test_bulk_needs_adjudication_rejects_reassigning_a_role_to_another_duplicate
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert na_ticket_two_duplicates_sharing_a_household.ticket.status == GrievanceTicket.STATUS_NEW
+
+
+def test_bulk_needs_adjudication_rejects_one_individual_marked_both_ways_across_tickets(
+    api_client: Any,
+    user: User,
+    business_area: BusinessArea,
+    na_tickets_sharing_an_individual: tuple[TicketNeedsAdjudicationDetails, TicketNeedsAdjudicationDetails],
+    bulk_na_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
+        business_area,
+        whole_business_area_access=True,
+    )
+    first_ticket, second_ticket = na_tickets_sharing_an_individual
+    shared = first_ticket.possible_duplicates.get()
+
+    client = api_client(user)
+    response = client.post(
+        bulk_na_url,
+        {
+            "tickets": [
+                {
+                    "ticket_id": str(first_ticket.ticket.id),
+                    "duplicate_individual_ids": [str(shared.id)],
+                    "distinct_individual_ids": [str(first_ticket.golden_records_individual.id)],
+                },
+                {
+                    "ticket_id": str(second_ticket.ticket.id),
+                    "duplicate_individual_ids": [str(second_ticket.golden_records_individual.id)],
+                    "distinct_individual_ids": [str(shared.id)],
+                },
+            ]
+        },
+        format="json",
+    )
+
+    first_ticket.ticket.refresh_from_db()
+    shared.refresh_from_db()
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert first_ticket.ticket.status == GrievanceTicket.STATUS_NEW
+    assert shared.duplicate is False

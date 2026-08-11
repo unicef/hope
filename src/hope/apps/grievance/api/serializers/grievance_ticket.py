@@ -853,4 +853,11 @@ class BulkNeedsAdjudicationSerializer(serializers.Serializer):
         ticket_ids = [resolution["ticket_id"] for resolution in value]
         if len(set(ticket_ids)) != len(ticket_ids):
             raise serializers.ValidationError("Each ticket can only be resolved once per request.")
+        # an individual can sit on several tickets
+        duplicates = {individual_id for resolution in value for individual_id in resolution["duplicate_individual_ids"]}
+        distinct = {individual_id for resolution in value for individual_id in resolution["distinct_individual_ids"]}
+        if duplicates & distinct:
+            raise serializers.ValidationError(
+                "An individual cannot be marked duplicate on one ticket and distinct on another."
+            )
         return value
