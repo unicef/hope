@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeIs
 
 from django.conf import settings
 from django.db.models import Q
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from hope.models import BusinessArea
 
 
-def is_mailable(user: User | None) -> bool:
+def is_mailable(user: User | None) -> TypeIs[User]:
     return user is not None and user.is_active and bool(user.email)
 
 

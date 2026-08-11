@@ -86,6 +86,8 @@ class DailyDigestService:
         assigned_pairs: set[tuple[Any, Any]] = set()
 
         for ticket in self._assigned_tickets().iterator():
+            if not is_mailable(ticket.assigned_to):
+                continue
             digest = digest_for(ticket.assigned_to)
             digest.assigned_total += 1
             if digest.assigned_total <= self.ROW_LIMIT:
