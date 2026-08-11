@@ -43,16 +43,6 @@ def assigned_ticket(business_area: BusinessArea, assignee: User) -> GrievanceTic
 
 
 @pytest.fixture
-def creator() -> User:
-    return UserFactory(first_name="Cre", last_name="Ator", email="creator@example.com")
-
-
-@pytest.fixture
-def editor() -> User:
-    return UserFactory(first_name="Ed", last_name="Itor", email="editor@example.com")
-
-
-@pytest.fixture
 def sensitive_ticket(business_area: BusinessArea, assignee: User) -> GrievanceTicket:
     return GrievanceTicketFactory(
         business_area=business_area,
@@ -194,10 +184,10 @@ def close_feedback_ticket_role() -> Role:
     )
 
 
-def test_init_builds_recipients_and_emails_for_assignment_changed(
+def test_init_builds_recipients_and_emails_for_sensitive_reminder(
     assigned_ticket: GrievanceTicket, assignee: User
 ) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     assert notification.user_recipients == [assignee]
     assert len(notification.emails) == 1
@@ -214,37 +204,21 @@ def test_assigned_to_recipient_returns_empty_when_unassigned(business_area: Busi
     assert notification.emails == []
 
 
-def test_assignment_changed_recipient_targets_the_assignee(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
-
-    assert notification.user_recipients == [assignee]
-
-
-def test_assignment_changed_recipient_excludes_editor_who_assigned_themselves(
-    assigned_ticket: GrievanceTicket, assignee: User
-) -> None:
-    notification = GrievanceNotification(
-        assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, editor=assignee
-    )
-
-    assert notification.user_recipients == []
-
-
-def test_assignment_changed_recipient_excludes_inactive_assignee(business_area: BusinessArea) -> None:
+def test_assigned_to_recipient_excludes_inactive_assignee(business_area: BusinessArea) -> None:
     inactive_assignee = UserFactory(email="inactive-assignee@example.com", is_active=False)
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=inactive_assignee)
 
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     assert notification.user_recipients == []
     assert notification.emails == []
 
 
-def test_assignment_changed_recipient_excludes_assignee_without_email(business_area: BusinessArea) -> None:
+def test_assigned_to_recipient_excludes_assignee_without_email(business_area: BusinessArea) -> None:
     no_email_assignee = UserFactory(email="")
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=no_email_assignee)
 
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     assert notification.user_recipients == []
     assert notification.emails == []
@@ -334,7 +308,7 @@ def test_prepare_notification_for_ticket_creation_excludes_creator_from_sensitiv
 
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=True)
 def test_default_context_uses_https_when_redirect_is_https(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     context = notification._prepare_default_context(assignee)
 
@@ -345,7 +319,7 @@ def test_default_context_uses_https_when_redirect_is_https(assigned_ticket: Grie
 
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=False)
 def test_default_context_uses_http_when_redirect_not_https(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     context = notification._prepare_default_context(assignee)
 
@@ -498,7 +472,7 @@ def test_for_approval_body(assigned_ticket: GrievanceTicket, assignee: User) -> 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTicket) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         notification.send_email_notification()
@@ -508,7 +482,7 @@ def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTi
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=False)
 def test_send_email_notification_skipped_when_config_off(assigned_ticket: GrievanceTicket) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         notification.send_email_notification()
@@ -520,7 +494,7 @@ def test_send_email_notification_skipped_when_config_off(assigned_ticket: Grieva
 def test_send_email_notification_skipped_when_business_area_disabled(assignee: User) -> None:
     business_area = BusinessAreaFactory(enable_email_notification=False)
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         notification.send_email_notification()
@@ -528,7 +502,7 @@ def test_send_email_notification_skipped_when_business_area_disabled(assignee: U
     mock_send.assert_not_called()
 
 
-def test_prepare_notification_for_ticket_creation_assigned_and_category(
+def test_prepare_notification_for_ticket_creation_emits_only_the_category_broadcast(
     business_area: BusinessArea, assignee: User
 ) -> None:
     ticket = GrievanceTicketFactory(
@@ -540,9 +514,7 @@ def test_prepare_notification_for_ticket_creation_assigned_and_category(
 
     notifications = GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
 
-    actions = {n.action for n in notifications}
-    assert GrievanceNotification.ACTION_ASSIGNMENT_CHANGED in actions
-    assert GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED in actions
+    assert [n.action for n in notifications] == [GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED]
 
 
 def test_prepare_notification_for_ticket_creation_no_assignee_no_matching_category(business_area: BusinessArea) -> None:
@@ -558,43 +530,9 @@ def test_prepare_notification_for_ticket_creation_no_assignee_no_matching_catego
     assert notifications == []
 
 
-def test_prepare_notification_for_ticket_creation_notifies_assignee_other_than_creator(
-    business_area: BusinessArea, assignee: User, creator: User
-) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        assigned_to=assignee,
-        created_by=creator,
-        category=GrievanceTicket.CATEGORY_REFERRAL,
-        issue_type=None,
-    )
-
-    notifications = GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
-
-    assert len(notifications) == 1
-    assert notifications[0].action == GrievanceNotification.ACTION_ASSIGNMENT_CHANGED
-    assert notifications[0].user_recipients == [assignee]
-
-
-def test_prepare_notification_for_ticket_creation_skips_assignment_email_for_self_assigning_creator(
-    business_area: BusinessArea, creator: User
-) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        assigned_to=creator,
-        created_by=creator,
-        category=GrievanceTicket.CATEGORY_REFERRAL,
-        issue_type=None,
-    )
-
-    notifications = GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
-
-    assert notifications[0].user_recipients == []
-
-
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_send_all_notifications_sends_each(assigned_ticket: GrievanceTicket) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         GrievanceNotification.send_all_notifications([notification])
@@ -663,100 +601,12 @@ def test_sensitive_created_recipients_excludes_assignee_expired_and_unpermitted(
 
 
 def test_default_context_drops_url_for_sensitive_ticket(sensitive_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     context = notification._prepare_default_context(assignee)
 
     assert context["ticket_url"] is None
     assert context["ticket_id"] == sensitive_ticket.unicef_id
-
-
-def test_assignment_body_omits_link_for_sensitive_ticket(sensitive_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
-
-    text_body, html_body, _ = notification._prepare_assignment_changed_bodies(assignee)
-
-    assert "<a href" not in html_body
-    assert sensitive_ticket.unicef_id in html_body
-    assert "http" not in text_body
-
-
-def test_assignment_body_keeps_link_for_non_sensitive_ticket(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
-
-    _, html_body, _ = notification._prepare_assignment_changed_bodies(assignee)
-
-    assert "<a href" in html_body
-
-
-def test_ticket_updated_recipients_creator_and_assignee_exclude_editor(
-    business_area: BusinessArea, assignee: User, creator: User, editor: User
-) -> None:
-    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee, created_by=creator)
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=editor)
-
-    assert {user.id for user in notification.user_recipients} == {creator.id, assignee.id}
-
-
-def test_ticket_updated_recipients_exclude_assignee_when_reassigned(
-    business_area: BusinessArea, assignee: User, creator: User, editor: User
-) -> None:
-    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee, created_by=creator)
-
-    notification = GrievanceNotification(
-        ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=editor, exclude_assignee=True
-    )
-
-    assert {user.id for user in notification.user_recipients} == {creator.id}
-
-
-def test_ticket_updated_recipients_exclude_editor_who_is_creator(
-    business_area: BusinessArea, assignee: User, creator: User
-) -> None:
-    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee, created_by=creator)
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=creator)
-
-    assert notification.user_recipients == [assignee]
-
-
-def test_ticket_updated_recipients_dedupe_when_creator_is_assignee(business_area: BusinessArea, creator: User) -> None:
-    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=creator, created_by=creator)
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=UserFactory())
-
-    assert notification.user_recipients == [creator]
-
-
-def test_ticket_updated_recipients_empty_without_creator_or_assignee(business_area: BusinessArea) -> None:
-    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None, created_by=None)
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=UserFactory())
-
-    assert notification.user_recipients == []
-
-
-def test_ticket_updated_recipients_skip_inactive_and_blank_email(business_area: BusinessArea, creator: User) -> None:
-    inactive_assignee = UserFactory(email="inactive@example.com", is_active=False)
-    blank_email_creator = UserFactory(email="")
-    ticket = GrievanceTicketFactory(
-        business_area=business_area, assigned_to=inactive_assignee, created_by=blank_email_creator
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_TICKET_UPDATED, editor=creator)
-
-    assert notification.user_recipients == []
-
-
-def test_ticket_updated_body_states_change_without_details(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_TICKET_UPDATED)
-
-    text_body, html_body, subject = notification._prepare_ticket_updated_bodies(assignee)
-
-    assert assigned_ticket.unicef_id in subject
-    assert "Changes have been made" in html_body
-    assert "Changes have been made" in text_body
 
 
 def test_sensitive_created_recipients_exclude_role_scoped_to_other_program(
@@ -823,7 +673,7 @@ def test_sensitive_ticket_payload_sent_to_mailjet_has_no_link(
     mocked_requests_post: Any, sensitive_ticket: GrievanceTicket, assignee: User
 ) -> None:
     mocked_requests_post.return_value.status_code = 200
-    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     notification.send_email_notification()
 
@@ -840,7 +690,7 @@ def test_non_sensitive_ticket_payload_sent_to_mailjet_keeps_link(
     mocked_requests_post: Any, assigned_ticket: GrievanceTicket
 ) -> None:
     mocked_requests_post.return_value.status_code = 200
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
 
     notification.send_email_notification()
 

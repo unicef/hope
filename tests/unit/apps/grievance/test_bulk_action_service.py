@@ -1,17 +1,9 @@
-from types import SimpleNamespace
 from typing import Any
-from unittest.mock import patch
 
-from django.db import connection
-from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import BusinessAreaFactory, GrievanceTicketFactory, UserFactory
-from hope.apps.grievance.celery_tasks import (
-    bulk_assign_notifications_async_task,
-    bulk_assign_notifications_async_task_action,
-)
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_NOT_SET,
@@ -19,7 +11,6 @@ from hope.apps.grievance.constants import (
     URGENCY_VERY_URGENT,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.models import BusinessArea, User
 
@@ -97,15 +88,6 @@ def grievance_context(business_area: BusinessArea, users: dict[str, User]) -> di
 
 
 @pytest.fixture
-def tickets_assigned_to_user_two(grievance_context: dict[str, Any]) -> list[GrievanceTicket]:
-    tickets = grievance_context["grievance_tickets"][:3]
-    GrievanceTicket.objects.filter(id__in=[ticket.id for ticket in tickets]).update(
-        assigned_to=grievance_context["users"]["user_two"]
-    )
-    return tickets
-
-
-@pytest.fixture
 def closed_ticket(business_area: BusinessArea, users: dict[str, User]) -> GrievanceTicket:
     user = users["user"]
     return GrievanceTicketFactory(
@@ -144,123 +126,44 @@ def test_bulk_update_assignee(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.status == GrievanceTicket.STATUS_ASSIGNED
 
 
-def test_bulk_update_assignee_enqueues_notification_for_new_assignee(grievance_context: dict[str, Any]) -> None:
+def test_bulk_update_assignee_stamps_only_the_tickets_that_changed(grievance_context: dict[str, Any]) -> None:
     user = grievance_context["users"]["user"]
     user_two = grievance_context["users"]["user_two"]
     business_area = grievance_context["business_area"]
-    grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
+    grievance_ticket1, _, _, grievance_ticket4 = grievance_context["grievance_tickets"]
 
-    with patch("hope.apps.grievance.services.bulk_action_service.bulk_assign_notifications_async_task") as mock_enqueue:
-        BulkActionService().bulk_assign(
-            [grievance_ticket1.id, grievance_ticket2.id],
-            user_two.id,
-            business_area.slug,
-            action_user=user,
-        )
-
-    reassigned_ids, action_user_id = mock_enqueue.call_args.args
-    assert set(reassigned_ids) == {grievance_ticket1.id, grievance_ticket2.id}
-    assert action_user_id == user.id
-
-
-def test_bulk_update_assignee_skips_enqueue_when_assignee_unchanged(grievance_context: dict[str, Any]) -> None:
-    user = grievance_context["users"]["user"]
-    user_two = grievance_context["users"]["user_two"]
-    business_area = grievance_context["business_area"]
-    _, _, _, grievance_ticket4 = grievance_context["grievance_tickets"]
-
+    assert grievance_ticket1.assigned_to == user
     assert grievance_ticket4.assigned_to == user_two
 
-    with patch("hope.apps.grievance.services.bulk_action_service.bulk_assign_notifications_async_task") as mock_enqueue:
-        BulkActionService().bulk_assign(
-            [grievance_ticket4.id],
-            user_two.id,
-            business_area.slug,
-            action_user=user,
-        )
+    BulkActionService().bulk_assign(
+        [grievance_ticket1.id, grievance_ticket4.id],
+        user_two.id,
+        business_area.slug,
+        action_user=user,
+    )
 
-    mock_enqueue.assert_not_called()
+    grievance_ticket1.refresh_from_db()
+    grievance_ticket4.refresh_from_db()
+
+    assert grievance_ticket1.assigned_at is not None
+    assert grievance_ticket1.assigned_by == user
+    assert grievance_ticket4.assigned_at is None
+    assert grievance_ticket4.assigned_by is None
 
 
-@pytest.mark.parametrize("action_user_name", ["user", None])
-def test_bulk_assign_notifications_task_action_builds_notification_for_new_assignee(
+def test_bulk_update_assignee_leaves_assigned_by_null_without_an_action_user(
     grievance_context: dict[str, Any],
-    tickets_assigned_to_user_two: list[GrievanceTicket],
-    action_user_name: str | None,
 ) -> None:
-    action_user = grievance_context["users"].get(action_user_name)
     user_two = grievance_context["users"]["user_two"]
-    grievance_ticket1, grievance_ticket2, _ = tickets_assigned_to_user_two
-    job = SimpleNamespace(
-        config={
-            "ticket_ids": [str(grievance_ticket1.id), str(grievance_ticket2.id)],
-            "action_user_id": getattr(action_user, "id", None),
-        }
-    )
+    business_area = grievance_context["business_area"]
+    grievance_ticket1, _, _, _ = grievance_context["grievance_tickets"]
 
-    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        bulk_assign_notifications_async_task_action(job)
+    BulkActionService().bulk_assign([grievance_ticket1.id], user_two.id, business_area.slug)
 
-    sent_notifications = mock_send.call_args.args[0]
-    assert {notification.action for notification in sent_notifications} == {
-        GrievanceNotification.ACTION_ASSIGNMENT_CHANGED
-    }
-    assert {notification.grievance_ticket.id for notification in sent_notifications} == {
-        grievance_ticket1.id,
-        grievance_ticket2.id,
-    }
-    assert all(notification.extra_data.get("editor") == action_user for notification in sent_notifications)
-    assert all(notification.user_recipients == [user_two] for notification in sent_notifications)
+    grievance_ticket1.refresh_from_db()
 
-
-def test_bulk_assign_notifications_task_action_does_not_scale_queries_per_ticket(
-    grievance_context: dict[str, Any],
-    tickets_assigned_to_user_two: list[GrievanceTicket],
-) -> None:
-    user = grievance_context["users"]["user"]
-    ticket1, ticket2, ticket3 = tickets_assigned_to_user_two
-    single_job = SimpleNamespace(config={"ticket_ids": [str(ticket1.id)], "action_user_id": str(user.id)})
-    many_job = SimpleNamespace(
-        config={
-            "ticket_ids": [str(ticket1.id), str(ticket2.id), str(ticket3.id)],
-            "action_user_id": str(user.id),
-        }
-    )
-
-    with patch.object(GrievanceNotification, "send_all_notifications"):
-        bulk_assign_notifications_async_task_action(single_job)  # warm up any one-off caches
-        with CaptureQueriesContext(connection) as single_ctx:
-            bulk_assign_notifications_async_task_action(single_job)
-        with CaptureQueriesContext(connection) as many_ctx:
-            bulk_assign_notifications_async_task_action(many_job)
-
-    assert len(many_ctx.captured_queries) == len(single_ctx.captured_queries)
-
-
-def test_bulk_assign_notifications_async_task_queues_job_with_serialized_config(
-    grievance_context: dict[str, Any],
-) -> None:
-    user = grievance_context["users"]["user"]
-    grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
-
-    with patch("hope.apps.grievance.celery_tasks.AsyncJob.queue_task") as mock_queue_task:
-        bulk_assign_notifications_async_task([grievance_ticket1.id, grievance_ticket2.id], user.id)
-
-    kwargs = mock_queue_task.call_args.kwargs
-    assert kwargs["config"]["ticket_ids"] == [str(grievance_ticket1.id), str(grievance_ticket2.id)]
-    assert kwargs["config"]["action_user_id"] == str(user.id)
-    assert kwargs["owner_id"] == str(user.id)
-    assert kwargs["group_key"] == "grievance"
-    assert kwargs["action"] == "hope.apps.grievance.celery_tasks.bulk_assign_notifications_async_task_action"
-
-
-def test_bulk_assign_notifications_async_task_queues_job_without_action_user() -> None:
-    with patch("hope.apps.grievance.celery_tasks.AsyncJob.queue_task") as mock_queue_task:
-        bulk_assign_notifications_async_task(["11111111-1111-1111-1111-111111111111"], None)
-
-    kwargs = mock_queue_task.call_args.kwargs
-    assert kwargs["config"]["action_user_id"] is None
-    assert kwargs["owner_id"] is None
+    assert grievance_ticket1.assigned_at is not None
+    assert grievance_ticket1.assigned_by is None
 
 
 def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:

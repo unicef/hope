@@ -744,20 +744,6 @@ class GrievanceTicketGlobalViewSet(
             old_object=old_grievance_ticket,
             new_object=grievance_ticket,
         )
-        # The new assignee already receives a dedicated assignment email.
-        assignment_changed = old_grievance_ticket.assigned_to_id != grievance_ticket.assigned_to_id
-        transaction.on_commit(
-            lambda: GrievanceNotification.send_all_notifications(
-                [
-                    GrievanceNotification(
-                        grievance_ticket,
-                        GrievanceNotification.ACTION_TICKET_UPDATED,
-                        editor=user,
-                        exclude_assignee=assignment_changed,
-                    )
-                ]
-            )
-        )
         resp = GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request})
         return Response(resp.data, status.HTTP_200_OK)
 

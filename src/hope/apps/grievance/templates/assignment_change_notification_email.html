@@ -1,5 +1,0 @@
-{% extends 'base_notification_email.html' %}
-
-{% block content %}
-    <p>You have been assigned to a Grievance & Feedback ticket {% if ticket_url %}<a href="{{ ticket_url }}">{{ ticket_id }}</a>{% else %}{{ ticket_id }}{% endif %}. Please take action.</p>
-{% endblock content %}

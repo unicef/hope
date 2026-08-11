@@ -9,7 +9,6 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions, check_creator_or_owner_permission
 from hope.apps.core.utils import clear_cache_for_key
-from hope.apps.grievance.celery_tasks import bulk_assign_notifications_async_task
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
 from hope.apps.grievance.services.ticket_status_changer_service import TicketStatusChangerService
@@ -56,12 +55,15 @@ class BulkActionService:
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
 
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
-        # Capture which tickets actually change assignee before the update, to notify only those new assignees.
+        # Capture which tickets actually change assignee before the update; only those count as assigned.
         reassigned_ids = list(queryset.exclude(assigned_to=user).values_list("id", flat=True))
 
-        updated_count = queryset.update(assigned_to=user, updated_at=timezone.now())
+        now = timezone.now()
+        updated_count = queryset.update(assigned_to=user, updated_at=now)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
+        if reassigned_ids:
+            queryset.filter(id__in=reassigned_ids).update(assigned_at=now, assigned_by=action_user)
 
         # Update also status to assigned if status is new
         new_tickets.update(status=GrievanceTicket.STATUS_ASSIGNED)
@@ -69,8 +71,6 @@ class BulkActionService:
 
         self._clear_cache(business_area_slug)
 
-        if reassigned_ids:
-            bulk_assign_notifications_async_task(reassigned_ids, action_user.id if action_user else None)
         return queryset
 
     @transaction.atomic

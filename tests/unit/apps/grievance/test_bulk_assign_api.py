@@ -1,5 +1,4 @@
 from typing import Any, Callable
-from unittest.mock import patch
 
 import pytest
 from rest_framework import status
@@ -185,7 +184,7 @@ def test_bulk_update_grievance_assignee(
             assert ticket["assigned_to"]["id"] == str(user.id)
 
 
-def test_bulk_assign_endpoint_enqueues_notification_for_new_assignee(
+def test_bulk_assign_endpoint_records_the_assigning_user(
     api_client: Any,
     user: User,
     user2: User,
@@ -199,18 +198,20 @@ def test_bulk_assign_endpoint_enqueues_notification_for_new_assignee(
     ticket1, ticket2 = bulk_grievance_tickets
     client = api_client(user)
 
-    with patch("hope.apps.grievance.services.bulk_action_service.bulk_assign_notifications_async_task") as mock_enqueue:
-        response = client.post(
-            bulk_assign_url,
-            {
-                "grievance_ticket_ids": [str(ticket1.id), str(ticket2.id)],
-                "assigned_to": str(user2.id),
-            },
-            format="json",
-        )
+    response = client.post(
+        bulk_assign_url,
+        {
+            "grievance_ticket_ids": [str(ticket1.id), str(ticket2.id)],
+            "assigned_to": str(user2.id),
+        },
+        format="json",
+    )
 
     assert response.status_code == status.HTTP_202_ACCEPTED
 
-    reassigned_ids, action_user_id = mock_enqueue.call_args.args
-    assert set(reassigned_ids) == {ticket1.id, ticket2.id}
-    assert action_user_id == user.id
+    ticket1.refresh_from_db()
+    ticket2.refresh_from_db()
+    assert ticket1.assigned_by == user
+    assert ticket2.assigned_by == user
+    assert ticket1.assigned_at is not None
+    assert ticket2.assigned_at is not None

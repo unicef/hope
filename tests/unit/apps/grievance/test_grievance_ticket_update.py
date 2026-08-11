@@ -39,6 +39,7 @@ from extras.test_utils.factories.payment import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.constants import (
+    PRIORITY_HIGH,
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
     SUBMISSION_CHANNEL_CALL_CENTER,
@@ -1606,7 +1607,7 @@ def test_update_system_ticket_accepts_echoed_hope_channel(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
-def test_update_grievance_ticket_sends_ticket_updated_notification_on_change(
+def test_update_grievance_ticket_records_the_editor(
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1614,23 +1615,20 @@ def test_update_grievance_ticket_sends_ticket_updated_notification_on_change(
     complaint_ticket: GrievanceTicket,
     complaint_ticket_detail_url: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Callable,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
-    owner = UserFactory()
 
     client = api_client(user)
-    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        with django_capture_on_commit_callbacks(execute=True):
-            response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(owner.id)}, format="json")
+    response = client.patch(complaint_ticket_detail_url, {"priority": PRIORITY_HIGH}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
-    sent_actions = [notification.action for call in mock_send.call_args_list for notification in call.args[0]]
-    assert GrievanceNotification.ACTION_TICKET_UPDATED in sent_actions
+    complaint_ticket.refresh_from_db()
+    assert complaint_ticket.user_modified_by == user
+    assert complaint_ticket.user_modified is not None
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
-def test_update_grievance_ticket_notifies_new_assignee(
+def test_update_grievance_ticket_records_the_assignment(
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -1638,55 +1636,18 @@ def test_update_grievance_ticket_notifies_new_assignee(
     complaint_ticket: GrievanceTicket,
     complaint_ticket_detail_url: str,
     create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Callable,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
     owner = UserFactory(email="new-assignee@example.com")
 
     client = api_client(user)
-    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        with django_capture_on_commit_callbacks(execute=True):
-            response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(owner.id)}, format="json")
+    response = client.patch(complaint_ticket_detail_url, {"assigned_to": str(owner.id)}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
-    sent = [
-        (notification.action, [recipient.id for recipient in notification.user_recipients])
-        for call in mock_send.call_args_list
-        for notification in call.args[0]
-    ]
-    assert (GrievanceNotification.ACTION_ASSIGNMENT_CHANGED, [owner.id]) in sent
-    # The new assignee gets the dedicated assignment email, not also the ticket-updated one.
-    ticket_updated_recipients = [
-        recipient.id
-        for call in mock_send.call_args_list
-        for notification in call.args[0]
-        if notification.action == GrievanceNotification.ACTION_TICKET_UPDATED
-        for recipient in notification.user_recipients
-    ]
-    assert owner.id not in ticket_updated_recipients
-
-
-@pytest.mark.usefixtures("mock_elasticsearch")
-def test_update_grievance_ticket_sends_notification_even_when_values_unchanged(
-    api_client: Any,
-    user: User,
-    afghanistan: BusinessArea,
-    program: Program,
-    complaint_ticket: GrievanceTicket,
-    complaint_ticket_detail_url: str,
-    create_user_role_with_permissions: Callable,
-    django_capture_on_commit_callbacks: Callable,
-) -> None:
-    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
-
-    client = api_client(user)
-    with patch.object(GrievanceNotification, "send_all_notifications") as mock_send:
-        with django_capture_on_commit_callbacks(execute=True):
-            response = client.patch(complaint_ticket_detail_url, {"priority": complaint_ticket.priority}, format="json")
-
-    assert response.status_code == status.HTTP_200_OK
-    sent_actions = [notification.action for call in mock_send.call_args_list for notification in call.args[0]]
-    assert GrievanceNotification.ACTION_TICKET_UPDATED in sent_actions
+    complaint_ticket.refresh_from_db()
+    assert complaint_ticket.assigned_to == owner
+    assert complaint_ticket.assigned_at is not None
+    assert complaint_ticket.assigned_by == user
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

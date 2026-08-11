@@ -15,6 +15,10 @@ if TYPE_CHECKING:
     from hope.models import BusinessArea
 
 
+def is_mailable(user: User | None) -> bool:
+    return user is not None and user.is_active and bool(user.email)
+
+
 def users_with_permissions(
     business_area: "BusinessArea",
     permissions: "Sequence[Permissions | str]",

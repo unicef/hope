@@ -4,15 +4,15 @@ import logging
 from typing import TYPE_CHECKING, Any, Callable
 
 from constance import config
-from django.conf import settings
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils import timezone
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.utils import grievance_ticket_url
 from hope.apps.utils.mailjet import MailjetClient
-from hope.apps.utils.recipients import users_with_permissions
+from hope.apps.utils.recipients import is_mailable, users_with_permissions
 from hope.models import User
 
 if TYPE_CHECKING:
@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceNotification:
-    ACTION_ASSIGNMENT_CHANGED = auto()
     ACTION_SYSTEM_FLAGGING_CREATED = auto()
     ACTION_DEDUPLICATION_CREATED = auto()
     ACTION_PAYMENT_VERIFICATION_CREATED = auto()
@@ -32,7 +31,6 @@ class GrievanceNotification:
     ACTION_SENSITIVE_REMINDER = auto()
     ACTION_OVERDUE = auto()
     ACTION_SEND_TO_APPROVAL = auto()
-    ACTION_TICKET_UPDATED = auto()
 
     ACTION_VIEW_PERMISSIONS = {
         ACTION_SENSITIVE_CREATED: [
@@ -107,18 +105,10 @@ class GrievanceNotification:
         self.enable_email_notification = grievance_ticket.business_area.enable_email_notification
 
     def _prepare_default_context(self, user_recipient: "User") -> dict[str, Any]:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        # sensitive grievance shouldn't contain any urls
-        is_sensitive = self.grievance_ticket.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE
-        ticket_url = (
-            None
-            if is_sensitive
-            else f"{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{self.grievance_ticket.id}"
-        )
         return {
             "first_name": user_recipient.first_name or getattr(user_recipient, "username", ""),
             "last_name": user_recipient.last_name,
-            "ticket_url": ticket_url,
+            "ticket_url": grievance_ticket_url(self.grievance_ticket),
             "ticket_id": self.grievance_ticket.unicef_id,
             "ticket_category": self.grievance_ticket.get_category_display(),
             "title": "Grievance and feedback notification",
@@ -195,26 +185,9 @@ class GrievanceNotification:
                 [Permissions.PAYMENT_VERIFICATION_VIEW_LIST, Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
             )
             queryset = queryset.filter(pk__in=payment_users.values("pk"))
-        # Assignee gets a dedicated assignment email; the editor is the user performing the creation.
+        # Assignee is notified about the ticket in the daily digest; the editor is the user performing
+        # the creation.
         return self._exclude_users(queryset, self.grievance_ticket.assigned_to, self._editor).all()
-
-    def _prepare_creator_and_assignee_recipients(self) -> "list[User]":
-        editor = self._editor
-        candidates = [self.grievance_ticket.created_by]
-        # When the same request reassigned the ticket, the new assignee already gets a dedicated
-        # assignment email, so skip them here to avoid a duplicate notification.
-        if not self.extra_data.get("exclude_assignee"):
-            candidates.append(self.grievance_ticket.assigned_to)
-        recipients = {}
-        for user in candidates:
-            if user is None:
-                continue
-            if not user.is_active or not user.email:
-                continue
-            if editor is not None and user.id == editor.id:
-                continue
-            recipients[user.id] = user
-        return list(recipients.values())
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
         permissions = GrievanceNotification.CATEGORY_APPROVE_PERMISSIONS.get(self.grievance_ticket.category)
@@ -288,38 +261,17 @@ class GrievanceNotification:
             f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}",
         )
 
-    def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        text_body, html_body = self._render_bodies("assignment_change", context)
-        return (
-            text_body,
-            html_body,
-            f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}",
-        )
-
-    def _prepare_ticket_updated_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        text_body, html_body = self._render_bodies("ticket_updated", context)
-        return (
-            text_body,
-            html_body,
-            f"Changes made on Grievance & Feedback ticket {self.grievance_ticket.unicef_id}",
-        )
-
     def _prepare_assigned_to_recipient(self) -> "list[User] | None":
         assigned_to = self.grievance_ticket.assigned_to
-        if assigned_to is None:
+        if assigned_to is None or not is_mailable(assigned_to):
             return []
         # Never notify the user who performed the action about their own action.
         editor = self._editor
         if editor is not None and assigned_to.id == editor.id:
             return []
-        if not assigned_to.is_active or not assigned_to.email:
-            return []
         return [assigned_to]
 
     ACTION_PREPARE_BODIES_DICT = {
-        ACTION_ASSIGNMENT_CHANGED: _prepare_assignment_changed_bodies,
         ACTION_SYSTEM_FLAGGING_CREATED: _prepare_universal_category_created_bodies,
         ACTION_DEDUPLICATION_CREATED: _prepare_universal_category_created_bodies,
         ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_universal_category_created_bodies,
@@ -329,11 +281,9 @@ class GrievanceNotification:
         ACTION_NOTES_ADDED: _prepare_add_note_bodies,
         ACTION_OVERDUE: _prepare_overdue_bodies,
         ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_bodies,
-        ACTION_TICKET_UPDATED: _prepare_ticket_updated_bodies,
     }
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {
-        ACTION_ASSIGNMENT_CHANGED: _prepare_assigned_to_recipient,
         ACTION_SYSTEM_FLAGGING_CREATED: _prepare_permission_based_recipients,
         ACTION_DEDUPLICATION_CREATED: _prepare_permission_based_recipients,
         ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_permission_based_recipients,
@@ -343,7 +293,6 @@ class GrievanceNotification:
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_recipients,
         ACTION_NOTES_ADDED: _prepare_assigned_to_recipient,
         ACTION_SENSITIVE_REMINDER: _prepare_assigned_to_recipient,
-        ACTION_TICKET_UPDATED: _prepare_creator_and_assignee_recipients,
     }
 
     @classmethod
@@ -351,15 +300,6 @@ class GrievanceNotification:
         cls: "GrievanceNotification", grievance_ticket: GrievanceTicket
     ) -> list["GrievanceNotification"]:
         notifications = []
-        if grievance_ticket.assigned_to:
-            # The editor exclusion drops the recipient when the creator self-assigns.
-            notifications.append(
-                GrievanceNotification(
-                    grievance_ticket,
-                    GrievanceNotification.ACTION_ASSIGNMENT_CHANGED,
-                    editor=grievance_ticket.created_by,
-                )
-            )
         category_action_dict = {
             GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED,
             GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: GrievanceNotification.ACTION_DEDUPLICATION_CREATED,
