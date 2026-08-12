@@ -136,6 +136,35 @@ flowchart TD
     and deduplication results for every not-yet-reindexed program — the worst failure
     mode, because nothing errors.
 
+### How to add the flag
+
+Flags live in constance — runtime-toggleable from the administration panel, no deploy
+needed to flip them, which is exactly what step 3 requires. Define it in
+`src/hope/config/fragments/constance.py` (`CONSTANCE_CONFIG`), prefixed `ES_USE_`,
+**default `False`**:
+
+```python
+"ES_USE_FULL_NAME_NGRAMS": (
+    False,
+    "Search/dedup queries use the new full_name ngram field (requires a fleet reindex)",
+    bool,
+),
+```
+
+and branch on it at the query site:
+
+```python
+from constance import config
+
+if config.ES_USE_FULL_NAME_NGRAMS:
+    search = search.query("match", full_name__ngram=value)
+else:
+    search = search.query("match", full_name=value)
+```
+
+Constance additions need no migration. Keep the old query path intact until step 4, then
+delete the flag together with it.
+
 ## New programs
 
 Nothing to do: when a program becomes ACTIVE, the signal creates the pair as `_v1` with
