@@ -154,6 +154,12 @@ def test_file_field_serializes_a_blank_file_as_none() -> None:
     assert UploadBasenameFileField(use_url=False).to_representation(field_file) is None
 
 
+def test_file_field_serializes_the_stored_name_and_not_a_url() -> None:
+    field_file = FieldFile(None, PaymentPlanSupportingDocument._meta.get_field("file"), "abc/2026/07/def/my report.pdf")
+
+    assert UploadBasenameFileField().to_representation(field_file) == "my report.pdf"
+
+
 def test_validate_file_size_success(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
     document_data = {"file": upload_file, "title": "test"}
     serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)

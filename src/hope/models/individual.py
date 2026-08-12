@@ -184,7 +184,6 @@ class Individual(
     )
 
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
-    # no upload to cause of dedup engine logic
     photo = models.ImageField(blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,

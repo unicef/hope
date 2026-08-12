@@ -1,9 +1,9 @@
 from datetime import date
 from io import BytesIO
 from typing import Any
-from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -19,7 +19,7 @@ from extras.test_utils.factories import (
     TicketAddIndividualDetailsFactory,
     UserFactory,
 )
-from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.models import GrievanceTicket, TicketAddIndividualDetails
 from hope.apps.grievance.services.data_change.add_individual_service import AddIndividualService
 from hope.apps.grievance.services.data_change.utils import handle_add_identity
 from hope.apps.household.const import HEAD, RELATIONSHIP_UNKNOWN, SINGLE
@@ -358,29 +358,28 @@ def test_close_with_head_relationship_replaces_head_of_household(
     assert previous_head.relationship == RELATIONSHIP_UNKNOWN
 
 
-@patch("hope.apps.grievance.services.data_change.add_individual_service.handle_photo")
-def test_save_stores_the_photo_under_the_individual_photo_field(
-    mock_handle_photo: Any,
+def test_save_stores_the_photo_on_the_individual_photo_path(
     ticket_without_details: GrievanceTicket,
     save_extras_with_photo: dict[str, Any],
-    photo_upload: InMemoryUploadedFile,
 ) -> None:
-    mock_handle_photo.return_value = "photo.jpg"
-
     AddIndividualService(ticket_without_details, save_extras_with_photo).save()
 
-    mock_handle_photo.assert_called_once_with(photo_upload, None, Individual._meta.get_field("photo"))
+    stored_name = TicketAddIndividualDetails.objects.get(ticket=ticket_without_details).individual_data["photo"]
+    assert "/" not in stored_name
+    assert stored_name.endswith(".jpg")
+    assert default_storage.exists(stored_name)
 
 
-@patch("hope.apps.grievance.services.data_change.add_individual_service.handle_photo")
-def test_update_stores_the_photo_under_the_individual_photo_field(
-    mock_handle_photo: Any,
+def test_update_stores_the_photo_on_the_individual_photo_path(
     add_individual_context: dict[str, Any],
     update_extras_with_photo: dict[str, Any],
-    photo_upload: InMemoryUploadedFile,
 ) -> None:
-    mock_handle_photo.return_value = "photo.jpg"
+    ticket_details = add_individual_context["ticket_details"]
 
     AddIndividualService(add_individual_context["ticket"], update_extras_with_photo).update()
 
-    mock_handle_photo.assert_called_once_with(photo_upload, None, Individual._meta.get_field("photo"))
+    ticket_details.refresh_from_db()
+    stored_name = ticket_details.individual_data["photo"]
+    assert "/" not in stored_name
+    assert stored_name.endswith(".jpg")
+    assert default_storage.exists(stored_name)

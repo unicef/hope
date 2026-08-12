@@ -3,7 +3,6 @@ from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
-from django.core.files.storage import default_storage
 from django.forms import modelform_factory
 
 from hope.apps.core.utils import (
@@ -43,6 +42,7 @@ from hope.models import (
     PendingIndividualRoleInHousehold,
     RegistrationDataImport,
 )
+from hope.models.utils import save_flex_field_image
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):
@@ -423,7 +423,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
             if image_base64 := individual_dict.get(field_name):
                 images[field_name] = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
-        return {field_name: default_storage.save(image.name, image) for field_name, image in images.items()}
+        return {field_name: save_flex_field_image(image, image.name) for field_name, image in images.items()}
 
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()

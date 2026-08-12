@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import re
 from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
 from uuid import uuid4
 
@@ -45,6 +46,10 @@ class UniqueUploadPath:
     def __call__(self, instance: models.Model | None, filename: str) -> str:
         return f"{self.prefix}/{timezone.now():%Y/%m}/{uuid4().hex}/{filename}"
 
+    def matches(self, name: str) -> bool:
+        """Whether name/path has the shape this instance generates."""
+        return re.fullmatch(rf"{re.escape(self.prefix)}/\d{{4}}/\d{{2}}/[0-9a-f]{{32}}/.+", name) is not None
+
 
 def upload_basename(name: str | None) -> str:
     """Drop the generated upload path, leaving the name only."""
@@ -56,12 +61,19 @@ def replace_upload(field_file: "FieldFile", filename: str, content: File) -> Non
 
     Use in places where new file should delete old one.
     With transactional operation deletion is done on commit.
+    Files that have different path strcuture than generated with this class are not deleted.
     """
     previous_name = field_file.name
     field_file.save(filename, content)
-    if previous_name and previous_name != field_file.name:
-        storage = field_file.storage
-        transaction.on_commit(lambda: storage.delete(previous_name))
+    upload_to = field_file.field.upload_to
+    if not isinstance(upload_to, UniqueUploadPath):
+        return
+    if not previous_name or previous_name == field_file.name:
+        return
+    if not upload_to.matches(previous_name):
+        return
+    storage = field_file.storage
+    transaction.on_commit(lambda: storage.delete(previous_name), robust=True)
 
 
 def save_unique_upload(content: File, prefix: str, filename: str) -> str:
