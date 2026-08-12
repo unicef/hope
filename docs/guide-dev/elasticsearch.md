@@ -165,6 +165,32 @@ else:
 Constance additions need no migration. Keep the old query path intact until step 4, then
 delete the flag together with it.
 
+### The whole thing, in order
+
+The complete sequence for shipping an ES-backed feature, from first edit to cleanup:
+
+1. **Define the flag** — `ES_USE_<FEATURE>` in `CONSTANCE_CONFIG`, default `False`.
+2. **Extend the mapping** — add (never change) fields in `documents.py`, with
+   `prepare_*()` where the value is derived.
+3. **Feed the populate** — if the new field reads a relation, extend `select_related` /
+   `Prefetch` in the per-program `get_queryset` (filtered like the related managers).
+4. **Feed the delta** — if a side-object change must re-index the document, mirror it in
+   `get_instances_from_related` **and** `es_populate_delta._program_delta`.
+5. **Write the query path** — new search/dedup code branches on the flag; the old path
+   stays byte-for-byte intact.
+6. **Test** — `mock_elasticsearch` / `django_elasticsearch_setup`,
+   `@override_config(IS_ELASTICSEARCH_ENABLED=True)` for sync paths.
+7. **Merge and deploy** — flag is OFF, so nothing observable changes yet.
+8. **Reindex the fleet** — `es_reindex --all` (add `--force` if the change was
+   analyzer/settings-only); confirm with `es_reindex --all --status` that every alias
+   points at a new version and counts match.
+9. **Flip the flag ON** — constance panel, no deploy; the new query path is live
+   everywhere at once.
+10. **Sanity window** (1–3 days) — old versions stay as instant rollback: flag OFF rolls
+    back the query path, alias flip rolls back an index.
+11. **Clean up** — `es_drop_old_index_versions --all --confirm`, then delete the flag and
+    the old query path.
+
 ## New programs
 
 Nothing to do: when a program becomes ACTIVE, the signal creates the pair as `_v1` with
