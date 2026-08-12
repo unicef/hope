@@ -12,6 +12,7 @@ from hope.apps.payment.services.payment_household_snapshot_service import (
     get_household_snapshot,
 )
 from hope.models import Household, Individual, UniversalUpdate
+from hope.models.utils import replace_upload
 
 
 def _get_unicef_ids_from_sheet(ws: Worksheet) -> list[str]:
@@ -36,7 +37,7 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     program_id = universal_update.program_id
     content = create_snapshot_content(log_message, str(program_id), unicef_ids)
     content_bytes = content.encode("utf-8")
-    universal_update.backup_snapshot.save("snapshot.json", ContentFile(content_bytes))
+    replace_upload(universal_update.backup_snapshot, "snapshot.json", ContentFile(content_bytes))
     universal_update.save()
 
 

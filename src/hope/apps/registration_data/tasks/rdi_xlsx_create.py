@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, Callable
 import uuid
 
 from django.core.files import File
-from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
 from django_countries.fields import Country
@@ -50,6 +49,7 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
+from hope.models.utils import save_flex_field_image
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -181,7 +181,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             file = File(file_io, name=file_name)
 
             if is_flex_field:
-                return default_storage.save(file_name, file)
+                return save_flex_field_image(file, file_name)
 
             return file
         return "" if is_field_required is True else None

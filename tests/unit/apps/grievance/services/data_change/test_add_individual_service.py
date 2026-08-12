@@ -1,7 +1,10 @@
 from datetime import date
+from io import BytesIO
 from typing import Any
 
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
+from django.core.files.uploadedfile import InMemoryUploadedFile
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
@@ -9,13 +12,14 @@ from extras.test_utils.factories import (
     CountryFactory,
     DocumentFactory,
     DocumentTypeFactory,
+    GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
     TicketAddIndividualDetailsFactory,
     UserFactory,
 )
-from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.models import GrievanceTicket, TicketAddIndividualDetails
 from hope.apps.grievance.services.data_change.add_individual_service import AddIndividualService
 from hope.apps.grievance.services.data_change.utils import handle_add_identity
 from hope.apps.household.const import HEAD, RELATIONSHIP_UNKNOWN, SINGLE
@@ -81,6 +85,44 @@ def unapproved_add_individual_context(program: Program) -> dict[str, Any]:
     ticket = ticket_details.ticket
     ticket.save()
     return {"household": household, "ticket": ticket, "ticket_details": ticket_details}
+
+
+@pytest.fixture
+def photo_upload() -> InMemoryUploadedFile:
+    return InMemoryUploadedFile(
+        file=BytesIO(b"123"),
+        field_name="photo",
+        name="test123.jpg",
+        content_type="image/jpeg",
+        size=3,
+        charset=None,
+    )
+
+
+@pytest.fixture
+def ticket_without_details(program: Program) -> GrievanceTicket:
+    return GrievanceTicketFactory(
+        business_area=program.business_area,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+    )
+
+
+@pytest.fixture
+def save_extras_with_photo(program: Program, photo_upload: InMemoryUploadedFile) -> dict[str, Any]:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    return {
+        "issue_type": {
+            "add_individual_issue_type_extras": {
+                "household": household,
+                "individual_data": {"photo": photo_upload},
+            }
+        }
+    }
+
+
+@pytest.fixture
+def update_extras_with_photo(photo_upload: InMemoryUploadedFile) -> dict[str, Any]:
+    return {"add_individual_issue_type_extras": {"individual_data": {"photo": photo_upload}}}
 
 
 @pytest.fixture
@@ -314,3 +356,30 @@ def test_close_with_head_relationship_replaces_head_of_household(
     assert household.head_of_household == new_head
     previous_head.refresh_from_db()
     assert previous_head.relationship == RELATIONSHIP_UNKNOWN
+
+
+def test_save_stores_the_photo_on_the_individual_photo_path(
+    ticket_without_details: GrievanceTicket,
+    save_extras_with_photo: dict[str, Any],
+) -> None:
+    AddIndividualService(ticket_without_details, save_extras_with_photo).save()
+
+    stored_name = TicketAddIndividualDetails.objects.get(ticket=ticket_without_details).individual_data["photo"]
+    assert "/" not in stored_name
+    assert stored_name.endswith(".jpg")
+    assert default_storage.exists(stored_name)
+
+
+def test_update_stores_the_photo_on_the_individual_photo_path(
+    add_individual_context: dict[str, Any],
+    update_extras_with_photo: dict[str, Any],
+) -> None:
+    ticket_details = add_individual_context["ticket_details"]
+
+    AddIndividualService(add_individual_context["ticket"], update_extras_with_photo).update()
+
+    ticket_details.refresh_from_db()
+    stored_name = ticket_details.individual_data["photo"]
+    assert "/" not in stored_name
+    assert stored_name.endswith(".jpg")
+    assert default_storage.exists(stored_name)

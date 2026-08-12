@@ -16,13 +16,14 @@ from extras.test_utils.factories.core import (
 )
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.registration_data import ImportDataFactory
 from hope.apps.core.field_attributes.core_fields_attributes import TYPE_SELECT_MANY, TYPE_SELECT_ONE
 from hope.apps.core.utils import SheetImageLoader
 from hope.apps.registration_data.validators import (
     KoboProjectImportDataInstanceValidator,
     UploadXLSXInstanceValidator,
 )
-from hope.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData
+from hope.models import DataCollectingType, FlexibleAttribute, ImportData, PeriodicFieldData
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("mock_elasticsearch")]
 
@@ -122,6 +123,16 @@ def pdu_attribute_factory(program: Any):
         )
 
     return _create
+
+
+@pytest.fixture
+def import_data_with_a_png_file() -> ImportData:
+    return ImportDataFactory(file__filename="image.png", file__data=b"not an xlsx")
+
+
+@pytest.fixture
+def import_data_with_a_corrupted_xlsx_file() -> ImportData:
+    return ImportDataFactory(file__filename="broken.xlsx", file__data=b"not a zip archive")
 
 
 def test_string_validator(program: Any, countries: dict[str, Any], afghanistan_admin_areas: list[Any]) -> None:
@@ -616,6 +627,30 @@ def test_validate_file_extension(program: Any) -> None:
         errors = validator.validate_everything(file, "afghanistan")
         assert errors[0]["row_number"] == expected_values[0]["row_number"]
         assert errors[0]["message"] == expected_values[0]["message"]
+
+
+def test_validate_file_extension_reports_the_name_without_the_upload_path(
+    program: Any, import_data_with_a_png_file: ImportData
+) -> None:
+    stored_file = import_data_with_a_png_file.file
+    assert stored_file.name.startswith("import_data/")
+    validator = UploadXLSXInstanceValidator(program)
+
+    validator.validate_file_extension(stored_file)
+
+    assert validator.errors[0]["header"] == "image.png"
+
+
+def test_validate_everything_reports_a_corrupted_file_without_the_upload_path(
+    program: Any, import_data_with_a_corrupted_xlsx_file: ImportData
+) -> None:
+    stored_file = import_data_with_a_corrupted_xlsx_file.file
+    assert stored_file.name.startswith("import_data/")
+    validator = UploadXLSXInstanceValidator(program)
+
+    errors = validator.validate_everything(stored_file, "afghanistan")
+
+    assert errors[0]["header"] == "broken.xlsx"
 
 
 def test_validate_file_content_as_xlsx(program: Any) -> None:

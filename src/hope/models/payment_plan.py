@@ -44,6 +44,7 @@ from hope.models.utils import (
     InternalDataFieldModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+    upload_basename,
 )
 
 if TYPE_CHECKING:
@@ -1154,7 +1155,7 @@ class PaymentPlan(
     def imported_file_name(self) -> str:
         """Get file to import entitlements."""
         try:
-            return (self.imported_file.file.name or "") if self.imported_file else ""
+            return upload_basename(self.imported_file.file.name or "") if self.imported_file else ""
         except FileTemp.DoesNotExist:
             return ""
 

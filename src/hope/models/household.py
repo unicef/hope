@@ -48,6 +48,7 @@ from hope.models.utils import (
     SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+    UniqueUploadPath,
 )
 
 if TYPE_CHECKING:
@@ -276,6 +277,8 @@ class Household(
         blank=True,
     )
     consent_sign = ImageField(
+        upload_to=UniqueUploadPath("household_consent_sign"),
+        max_length=255,
         validators=[validate_image_file_extension],
         blank=True,
         help_text="Household consent sign image",

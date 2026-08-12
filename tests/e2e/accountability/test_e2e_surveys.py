@@ -72,6 +72,7 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys.get_nav_accountability().click()
         page_accountability_surveys.get_nav_surveys().click()
 
+        page_accountability_surveys.wait_for_text("Surveys", page_accountability_surveys.page_header_title)
         assert "Surveys" in page_accountability_surveys.get_page_header_title().text
         assert "NEW SURVEY" in page_accountability_surveys.get_button_new_survey().text
         assert "Search" in page_accountability_surveys.get_filters_search().text

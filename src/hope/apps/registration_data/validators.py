@@ -44,6 +44,7 @@ from hope.apps.registration_data.utils import (
     find_attachment_in_kobo,
 )
 from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
+from hope.models.utils import upload_basename
 
 logger = logging.getLogger(__name__)
 
@@ -999,7 +1000,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 self.errors.append(
                     {
                         "row_number": 1,
-                        "header": f"{xlsx_file.name}",
+                        "header": upload_basename(xlsx_file.name),
                         "message": "Only .xlsx files are accepted for import",
                     }
                 )
@@ -1019,7 +1020,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return [
                     {
                         "row_number": 1,
-                        "header": f"{xlsx_file.name}",
+                        "header": upload_basename(xlsx_file.name),
                         "message": "Invalid .xlsx file",
                     }
                 ]

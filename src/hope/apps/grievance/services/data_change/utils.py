@@ -8,6 +8,7 @@ import urllib.parse
 from constance import config
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import models
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
@@ -40,7 +41,7 @@ from hope.models import (
     IndividualRoleInHousehold,
     Partner,
 )
-from hope.models.utils import MergeStatusModel
+from hope.models.utils import MergeStatusModel, save_flex_field_image
 
 logger = logging.getLogger(__name__)
 
@@ -342,7 +343,7 @@ def prepare_edit_documents(documents_to_edit: list[Document]) -> list[dict]:
         document_photo = document_to_edit.get("new_photo")
         document_photoraw = document_to_edit.get("photoraw")
 
-        document_photo = handle_photo(document_photo, document_photoraw)
+        document_photo = handle_photo(document_photo, document_photoraw, Document._meta.get_field("photo"))
 
         document_id = str(document.id)
 
@@ -426,9 +427,20 @@ def generate_filename() -> str:
     return f"{file_name}-{timezone.now()}"
 
 
-def handle_photo(photo: InMemoryUploadedFile | str | None, photoraw: str | None) -> str | None:
+def handle_photo(
+    photo: InMemoryUploadedFile | str | None,
+    photoraw: str | None,
+    field: models.FileField,
+) -> str | None:
+    """Save an uploaded photo and return the name to store on `field`.
+
+    The caller assigns the result as a plain string, which skips upload_to, so the path has
+    to be built here from the target field. `instance` is None because the row it belongs to
+    may not exist yet.
+    """
     if isinstance(photo, InMemoryUploadedFile):
-        return default_storage.save(f"{generate_filename()}.jpg", photo)
+        name = field.generate_filename(None, f"{generate_filename()}.jpg")
+        return default_storage.save(name, photo, max_length=field.max_length)
     if isinstance(photo, str):
         return photoraw
     return None
@@ -437,7 +449,7 @@ def handle_photo(photo: InMemoryUploadedFile | str | None, photoraw: str | None)
 def handle_document(document: dict) -> dict:
     # photo is photo URL and raw photo is just name
     photo = document.pop("new_photo") if "new_photo" in document else document.get("photo")
-    photo_name = handle_photo(photo, document.get("photo"))
+    photo_name = handle_photo(photo, document.get("photo"), Document._meta.get_field("photo"))
     document["photo"] = default_storage.url(photo_name) if photo else None
     document["photoraw"] = photo_name if photo else None
     return document
@@ -463,7 +475,7 @@ def save_images(flex_fields: dict, associated_with: str) -> None:
         if flex_field["type"] == TYPE_IMAGE:
             if isinstance(value, InMemoryUploadedFile):
                 file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits))
-                flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
+                flex_fields[name] = save_flex_field_image(value, f"{file_name}-{timezone.now()}.jpg")
             elif isinstance(value, str):
                 file_name = value.replace(default_storage.base_url, "")
                 unquoted_value = urllib.parse.unquote(file_name)

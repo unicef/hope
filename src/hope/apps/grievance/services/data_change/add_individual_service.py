@@ -47,7 +47,7 @@ class AddIndividualService(DataChangeService):
         # Handle photo field
         photo = individual_data.pop("photo", None)
         if photo is not None:
-            saved_photo = handle_photo(photo, None)
+            saved_photo = handle_photo(photo, None, Individual._meta.get_field("photo"))
             if saved_photo:
                 individual_data["photo"] = saved_photo
         individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
@@ -76,7 +76,7 @@ class AddIndividualService(DataChangeService):
         # Handle photo field
         photo = new_individual_data.pop("photo", None)
         if photo is not None:
-            saved_photo = handle_photo(photo, None)
+            saved_photo = handle_photo(photo, None, Individual._meta.get_field("photo"))
             if saved_photo:
                 new_individual_data["photo"] = saved_photo
         new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}

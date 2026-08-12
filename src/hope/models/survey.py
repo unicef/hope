@@ -12,6 +12,8 @@ from hope.models.utils import (
     AdminUrlMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+    UniqueUploadPath,
+    replace_upload,
 )
 
 
@@ -92,7 +94,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
 
     sampling_type = models.CharField(max_length=50, choices=get_sampling_choices, default=SAMPLING_FULL_LIST)
     sample_size = models.PositiveIntegerField(default=0)
-    sample_file = models.FileField(upload_to="", blank=True, null=True)
+    sample_file = models.FileField(upload_to=UniqueUploadPath("survey_sample"), max_length=255, blank=True, null=True)
     sample_file_generated_at = models.DateTimeField(blank=True, null=True)
 
     full_list_arguments = models.JSONField(default=dict, blank=True)
@@ -123,6 +125,6 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         )
 
     def store_sample_file(self, filename: str, file: File) -> None:
-        self.sample_file.save(filename, file)
+        replace_upload(self.sample_file, filename, file)
         self.sample_file_generated_at = timezone.now()
         self.save()

@@ -3,6 +3,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 
+from hope.models.utils import UniqueUploadPath, upload_basename
+
 
 def get_storage_status_choices() -> tuple:
     return StorageFile.STATUS_CHOICE
@@ -30,7 +32,7 @@ class StorageFile(models.Model):
         verbose_name=_("Created by"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True, blank=True)
-    file = models.FileField(upload_to="files")
+    file = models.FileField(upload_to=UniqueUploadPath("files"), max_length=255)
 
     status = models.CharField(
         choices=get_storage_status_choices,
@@ -43,11 +45,11 @@ class StorageFile(models.Model):
         ordering = ("id",)
 
     def __str__(self) -> str:
-        return self.file.name or ""
+        return self.file_name
 
     @property
     def file_name(self) -> str:
-        return self.file.name or ""
+        return upload_basename(self.file.name) if self.file.name else ""
 
     @property
     def file_url(self) -> str:

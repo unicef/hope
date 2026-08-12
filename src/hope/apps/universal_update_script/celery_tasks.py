@@ -11,6 +11,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.unive
     UniversalIndividualUpdateService,
 )
 from hope.models import AsyncJob, UniversalUpdate
+from hope.models.utils import replace_upload
 
 SOFT_TIME_LIMIT = 30 * 60
 HARD_TIME_LIMIT = 35 * 60
@@ -79,7 +80,7 @@ def generate_universal_individual_update_template_async_task_action(job: AsyncJo
         engine = UniversalIndividualUpdateService(universal_update)
         template_file = engine.generate_xlsx_template()
         content = template_file.getvalue()
-        universal_update.template_file.save("template.xlsx", ContentFile(content))
+        replace_upload(universal_update.template_file, "template.xlsx", ContentFile(content))
         universal_update.save()
         universal_update.save_logs("Finished Generating Template")
         return RESULT_SUCCESS

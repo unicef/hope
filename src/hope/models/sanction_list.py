@@ -4,7 +4,7 @@ from django.db import models
 from strategy_field.fields import StrategyField
 
 from hope.apps.sanction_list.strategies import registry
-from hope.models.utils import TimeStampedModel, TimeStampedUUIDModel
+from hope.models.utils import TimeStampedModel, TimeStampedUUIDModel, UniqueUploadPath
 
 if TYPE_CHECKING:
     from hope.apps.sanction_list.strategies._base import BaseSanctionList
@@ -32,7 +32,7 @@ class SanctionList(TimeStampedModel):
 
 class UploadedXLSXFile(TimeStampedUUIDModel):
     selected_lists = models.ManyToManyField(SanctionList)
-    file = models.FileField()
+    file = models.FileField(upload_to=UniqueUploadPath("sanction_list_upload"), max_length=255)
     associated_email = models.EmailField()
 
     class Meta:

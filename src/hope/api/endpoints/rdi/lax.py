@@ -55,6 +55,7 @@ from hope.models import (
     RegistrationDataImport,
 )
 from hope.models.currency import Currency
+from hope.models.utils import save_flex_field_image
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -281,7 +282,7 @@ class HandleFlexFieldsMixin:
             if not photo_file:
                 continue
 
-            saved_path = default_storage.save(photo_file.name, photo_file)
+            saved_path = save_flex_field_image(photo_file, photo_file.name)
             flex_fields[field_name] = saved_path
             saved_paths.append(saved_path)
 

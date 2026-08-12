@@ -241,6 +241,7 @@ def test_wallet_images_stored_as_saved_files(
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
     num_image_path = individual.flex_fields["wallet_num_image_i_f"]
     id_image_path = individual.flex_fields["id_wallet_image_i_f"]
+    assert num_image_path.startswith("flex_field_image/")
     assert num_image_path.endswith(".jpg")
     assert default_storage.exists(num_image_path)
     assert default_storage.exists(id_image_path)

@@ -1,5 +1,9 @@
 from datetime import timedelta
+from io import BytesIO
 
+from django.core.files import File
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db import IntegrityError
 from django.utils import timezone
 import pytest
@@ -78,6 +82,11 @@ def country() -> Country:
 @pytest.fixture
 def individual(business_area: BusinessArea, program: Program) -> Individual:
     return HouseholdFactory(business_area=business_area, program=program).head_of_household
+
+
+@pytest.fixture
+def document_type() -> DocumentType:
+    return DocumentTypeFactory()
 
 
 def test_household_admin_areas_set(household, area_hierarchy) -> None:
@@ -266,6 +275,38 @@ def test_create_duplicated_documents_with_different_numbers_and_types_and_unique
     )
     _make_document(individual, country, program, doc_type_1, "213123", rdi_merge_status=MergeStatusModel.MERGED)
     _make_document(individual, country, program, doc_type_2, "213124", rdi_merge_status=MergeStatusModel.MERGED)
+
+
+def test_bulk_create_writes_document_photo_to_storage(individual, country, program, document_type) -> None:
+    document = Document(
+        document_number="213125",
+        individual=individual,
+        country=country,
+        type=document_type,
+        program=program,
+        rdi_merge_status=MergeStatusModel.MERGED,
+        photo=File(BytesIO(b"123"), name="passport.jpg"),
+    )
+
+    Document.objects.bulk_create([document])
+
+    saved_name = Document.objects.get(document_number="213125").photo.name
+    assert saved_name.startswith("document_photo/")
+    assert default_storage.exists(saved_name)
+
+
+def test_two_documents_with_the_same_photo_name_keep_separate_files(
+    individual, country, program, document_type
+) -> None:
+    document = _make_document(individual, country, program, document_type, "213126")
+    other_document = _make_document(individual, country, program, document_type, "213127")
+
+    document.photo.save("passport.jpg", ContentFile(b"first"))
+    other_document.photo.save("passport.jpg", ContentFile(b"second"))
+
+    assert document.photo.name != other_document.photo.name
+    assert document.photo.read() == b"first"
+    assert other_document.photo.read() == b"second"
 
 
 # --- Individual ---

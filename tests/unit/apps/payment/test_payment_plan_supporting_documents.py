@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.fields.files import FieldFile
 from django.http import FileResponse
 from django.urls import reverse
 import pytest
@@ -14,7 +15,10 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.api.serializers import PaymentPlanSupportingDocumentSerializer
+from hope.apps.payment.api.serializers import (
+    PaymentPlanSupportingDocumentSerializer,
+    UploadBasenameFileField,
+)
 from hope.models import PaymentPlan, PaymentPlanSupportingDocument, User
 
 pytestmark = pytest.mark.django_db
@@ -134,7 +138,26 @@ def supporting_documents_download_url(business_area: Any, payment_plan: PaymentP
 def document(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
     return PaymentPlanSupportingDocumentFactory(
         payment_plan=payment_plan,
+        file=SimpleUploadedFile("supporting_doc.pdf", b"abc", content_type="application/pdf"),
     )
+
+
+def test_file_field_serializes_the_name_without_its_upload_path() -> None:
+    field_file = FieldFile(None, PaymentPlanSupportingDocument._meta.get_field("file"), "abc/2026/07/def/report.pdf")
+
+    assert UploadBasenameFileField(use_url=False).to_representation(field_file) == "report.pdf"
+
+
+def test_file_field_serializes_a_blank_file_as_none() -> None:
+    field_file = FieldFile(None, PaymentPlanSupportingDocument._meta.get_field("file"), "")
+
+    assert UploadBasenameFileField(use_url=False).to_representation(field_file) is None
+
+
+def test_file_field_serializes_the_stored_name_and_not_a_url() -> None:
+    field_file = FieldFile(None, PaymentPlanSupportingDocument._meta.get_field("file"), "abc/2026/07/def/my report.pdf")
+
+    assert UploadBasenameFileField().to_representation(field_file) == "my report.pdf"
 
 
 def test_validate_file_size_success(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
@@ -239,4 +262,4 @@ def test_get_document_success(
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == f"attachment; filename={document.file.name}"
+    assert response["Content-Disposition"] == 'attachment; filename="supporting_doc.pdf"'

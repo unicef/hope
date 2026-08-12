@@ -1,15 +1,20 @@
 import hashlib
 import logging
+import re
 from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
+from uuid import uuid4
 
 from concurrency.fields import IntegerVersionField
 from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
-from django.db import models
+from django.core.files import File
+from django.core.files.storage import default_storage
+from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 from model_utils.managers import SoftDeletableManagerMixin
 from model_utils.models import UUIDModel
@@ -20,9 +25,72 @@ from hope.apps.core.utils import nested_getattr
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+    from django.db.models.fields.files import FieldFile
 
 
 logger = logging.getLogger(__name__)
+
+
+@deconstructible
+class UniqueUploadPath:
+    """Give every uploaded file its own folder.
+
+    File names come straight from user uploads, so two unrelated records easily carry the same
+    name, and the media storage is configured to overwrite on name collision. The uuid folder
+    makes the full path unique, so an upload can no longer replace another record's file.
+    """
+
+    def __init__(self, prefix: str) -> None:
+        self.prefix = prefix
+
+    def __call__(self, instance: models.Model | None, filename: str) -> str:
+        return f"{self.prefix}/{timezone.now():%Y/%m}/{uuid4().hex}/{filename}"
+
+    def matches(self, name: str) -> bool:
+        """Whether name/path has the shape this instance generates."""
+        return re.fullmatch(rf"{re.escape(self.prefix)}/\d{{4}}/\d{{2}}/[0-9a-f]{{32}}/.+", name) is not None
+
+
+def upload_basename(name: str | None) -> str:
+    """Drop the generated upload path, leaving the name only."""
+    return name.rsplit("/", 1)[-1] if name else ""
+
+
+def replace_upload(field_file: "FieldFile", filename: str, content: File) -> None:
+    """Store a file over the one a field already holds, dropping the file it replaces.
+
+    Use in places where new file should delete old one.
+    With transactional operation deletion is done on commit.
+    Files that have different path strcuture than generated with this class are not deleted.
+    """
+    previous_name = field_file.name
+    field_file.save(filename, content)
+    upload_to = field_file.field.upload_to
+    if not isinstance(upload_to, UniqueUploadPath):
+        return
+    if not previous_name or previous_name == field_file.name:
+        return
+    if not upload_to.matches(previous_name):
+        return
+    storage = field_file.storage
+    transaction.on_commit(lambda: storage.delete(previous_name), robust=True)
+
+
+def save_unique_upload(content: File, prefix: str, filename: str) -> str:
+    """Store a file that has no model field, under the same unique path scheme.
+
+    Flex field images are kept as a name inside a JSONField, so there is no FileField to
+    carry an upload_to. This applies the same path and the same name validation the field
+    would: Storage.generate_filename rejects a `..` directory and strips the base name down
+    to word characters, dashes and dots, which plain Storage.save does not do.
+    """
+    name = default_storage.generate_filename(UniqueUploadPath(prefix)(None, filename))
+    return default_storage.save(name, content)
+
+
+def save_flex_field_image(content: File, filename: str) -> str:
+    """Store a flex field image under the shared flex field prefix."""
+    return save_unique_upload(content, "flex_field_image", filename)
 
 
 class BulkSignalsManagerMixin:

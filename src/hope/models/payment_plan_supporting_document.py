@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from hope.models.payment_plan import PaymentPlan
+from hope.models.utils import UniqueUploadPath
 
 
 class PaymentPlanSupportingDocument(models.Model):
@@ -10,7 +11,7 @@ class PaymentPlanSupportingDocument(models.Model):
 
     title = models.CharField(max_length=255)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="documents")
-    file = models.FileField()
+    file = models.FileField(upload_to=UniqueUploadPath("payment_plan_supporting_document"), max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"

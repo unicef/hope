@@ -1101,8 +1101,10 @@ def test_attach_file_sets_file_on_record(
 
     invoice.refresh_from_db()
     assert invoice.file is not None
-    assert invoice.file.file.name.startswith("AD-attach")
-    assert invoice.file.file.name.endswith(".zip")
+    stored_name = invoice.file.file.name
+    assert stored_name.startswith("file_temp/")
+    assert stored_name.rsplit("/", 1)[-1].startswith("AD-attach")
+    assert stored_name.endswith(".zip")
 
 
 def test_mark_record_error_sets_status_and_error_msg(
@@ -1850,7 +1852,7 @@ def test_send_notification_emails_sends_to_users_with_permission(
             "email": user.email,
             "message": f"Payment Plan: https://example.com/{report.payment_plan.business_area.slug}/programs/"
             f"{report.payment_plan.program.code}/payment-module/payment-plans/{report.payment_plan.id}",
-            "title": f"Payment Plan {report.report_file.file.name} Western Union report",
+            "title": "Payment Plan qcf.xlsx Western Union report",
             "link": "https://example.com/download/report",
         },
     )

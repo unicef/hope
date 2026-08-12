@@ -503,9 +503,11 @@ def test_create_household_with_consent_sign_stores_image_file(
 
     household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
     programme_code = program.code
-    assert household.consent_sign.name.startswith(programme_code)
-    assert household.consent_sign.name.endswith(".png")
-    assert default_storage.exists(household.consent_sign.name)
+    stored_name = household.consent_sign.name
+    assert stored_name.startswith("household_consent_sign/")
+    assert stored_name.rsplit("/", 1)[-1].startswith(programme_code)
+    assert stored_name.endswith(".png")
+    assert default_storage.exists(stored_name)
 
 
 def test_consent_sign_cleanup_on_failure(
