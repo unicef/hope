@@ -28,7 +28,7 @@ def populate_index(
     chunk_size: int = 2000,
     progress_cb: Callable[[int], None] | None = None,
 ) -> None:
-    if not config.IS_ELASTICSEARCH_ENABLED:  # pragma: no cover
+    if not config.IS_ELASTICSEARCH_ENABLED:
         return
     # atomic() so iterator() opens a plain (lazy) server-side cursor: outside a transaction
     # Django declares it WITH HOLD, which materializes the ENTIRE result set on DECLARE

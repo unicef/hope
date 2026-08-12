@@ -7,6 +7,7 @@ import pytest
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import (
     populate_all_indexes,
+    populate_index,
     rebuild_search_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
@@ -166,3 +167,14 @@ def test_remove_elasticsearch_documents_by_matching_ids_ignores_not_found() -> N
     )
 
     remove_elasticsearch_documents_by_matching_ids(["id-1"], mock_document)
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=False)
+def test_populate_index_noops_when_elasticsearch_disabled() -> None:
+    mock_queryset = MagicMock()
+    mock_doc = MagicMock()
+
+    populate_index(mock_queryset, mock_doc)
+
+    mock_queryset.iterator.assert_not_called()
+    mock_doc.assert_not_called()
