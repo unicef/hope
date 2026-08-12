@@ -1,6 +1,6 @@
 from smart_admin.utils import MatchString, RegexString
 
-from hope.config.env import env
+from hope.apps.utils.security import is_root
 
 SMART_ADMIN_SECTIONS = {
     "HOPE": [
@@ -44,4 +44,4 @@ SMART_ADMIN_BOOKMARKS = "hope.apps.administration.admin_site.get_bookmarks"
 
 SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
-SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
+SMART_ADMIN_ISROOT = lambda r, *a: is_root(r)

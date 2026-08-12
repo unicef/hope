@@ -10,13 +10,17 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
+import { restQueryKey } from '@utils/queryKeys';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const { data } = useQuery({
-    queryKey: ['allFieldsAttributes', businessArea, selectedProgram?.id],
+    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
+      slug: businessArea,
+      programId: selectedProgram?.id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
@@ -29,8 +33,9 @@ export function FlexFieldTab(): ReactElement {
   const [selectedOption, setSelectedOption] = useState('All');
   const [selectedFieldType, setSelectedFieldType] = useState('All');
   useEffect(() => {
-    if (data?.results && !selectOptions.length) {
-      const options = data.results.map((el) => el.associatedWith);
+    // restBusinessAreasAllFieldsAttributesList returns a bare array, not a paginated page.
+    if (data?.length && !selectOptions.length) {
+      const options = data.map((el) => el.associatedWith);
       const filteredOptions = options.filter(
         (item, index) => options.indexOf(item) === index,
       );
@@ -100,7 +105,7 @@ export function FlexFieldTab(): ReactElement {
         selectedOption={selectedOption}
         searchValue={searchValue}
         selectedFieldType={selectedFieldType}
-        fields={data.results}
+        fields={data}
       />
     </Box>
   );

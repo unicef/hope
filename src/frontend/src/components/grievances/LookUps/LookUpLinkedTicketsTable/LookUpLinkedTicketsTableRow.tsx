@@ -48,7 +48,7 @@ export function LookUpLinkedTicketsTableRow({
           color="primary"
           onClick={(event) => checkboxClickHandler(event, ticket.id)}
           checked={isItemSelected}
-          inputProps={{ 'aria-labelledby': ticket.id }}
+          slotProps={{ input: { 'aria-labelledby': ticket.id } }}
         />
       </TableCell>
       <TableCell align="left">

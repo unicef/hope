@@ -12,6 +12,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
@@ -63,7 +64,10 @@ const NewOfflineTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        { businessAreaSlug: businessArea, programCode: programId },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
@@ -254,12 +258,18 @@ const NewOfflineTemplatePage = (): ReactElement => {
                 />
               )}
               <Box
-                display="flex"
-                mt={4}
-                justifyContent="flex-start"
-                width="100%"
+                sx={{
+                  display: 'flex',
+                  mt: 4,
+                  justifyContent: 'flex-start',
+                  width: '100%',
+                }}
               >
-                <Box mr={2}>
+                <Box
+                  sx={{
+                    mr: 2,
+                  }}
+                >
                   <Button
                     variant="outlined"
                     color="secondary"
@@ -270,9 +280,17 @@ const NewOfflineTemplatePage = (): ReactElement => {
                     Cancel
                   </Button>
                 </Box>
-                <Box display="flex">
+                <Box
+                  sx={{
+                    display: 'flex',
+                  }}
+                >
                   {activeStep === 1 && (
-                    <Box mr={2}>
+                    <Box
+                      sx={{
+                        mr: 2,
+                      }}
+                    >
                       <Button
                         data-cy="back-button"
                         variant="outlined"

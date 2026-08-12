@@ -17,6 +17,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
@@ -40,7 +41,11 @@ export const PaymentPlanDetailsHeader = ({
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({
-    queryKey: ['programCyclesDetails', businessArea, programCycleId, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesRetrieve, {
+      businessAreaSlug: businessArea,
+      id: programCycleId,
+      programCode: programId,
+    }),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,
@@ -94,9 +99,6 @@ export const PaymentPlanDetailsHeader = ({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-  const canSendToVision =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_VISION, permissions) &&
-    paymentPlan.canSendToVision;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canMarkReadyForClosure = hasPermissions(
@@ -225,18 +227,36 @@ export const PaymentPlanDetailsHeader = ({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           {t('Payment Plan')} ID:{' '}
-          <Box ml={1} mr={2}>
+          <Box
+            sx={{
+              ml: 1,
+              mr: 2,
+            }}
+          >
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
-          <Box mr={2}>
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
             />
           </Box>
-          <Box mr={2}>
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             {paymentPlan.backgroundActionStatus && (
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}

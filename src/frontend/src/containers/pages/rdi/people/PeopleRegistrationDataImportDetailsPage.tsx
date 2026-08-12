@@ -11,6 +11,7 @@ import { Tab, Tabs } from '@core/Tabs';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
@@ -66,7 +67,10 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<RegistrationDataImportDetail>({
-    queryKey: ['registrationDataImport', businessArea, programCode, id],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+      { businessAreaSlug: businessArea, programCode, id },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve({
         businessAreaSlug: businessArea,
@@ -94,7 +98,9 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,

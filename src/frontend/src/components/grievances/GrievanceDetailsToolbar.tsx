@@ -10,6 +10,7 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { Box, Button, Tooltip } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   GRIEVANCE_CATEGORIES,
@@ -26,7 +27,7 @@ import {
   getGrievanceDetailsPath,
   getGrievanceEditPath,
 } from './utils/createGrievanceUtils';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 const Separator = styled.div`
@@ -107,16 +108,14 @@ export const GrievanceDetailsToolbar = ({
         formData: { status },
       });
     },
-    onError: (e: any) => {
+    onError: (e: ApiErrorShape) => {
       showApiErrorMessages(e, showMessage);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessArea,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });
@@ -304,11 +303,9 @@ export const GrievanceDetailsToolbar = ({
             { businessAreaSlug: businessArea, id: linkedId, formData: {} },
           );
           queryClient.invalidateQueries({
-            queryKey: [
-              'businessAreasGrievanceTicketsRetrieve',
-              businessArea,
-              linkedId,
-            ],
+            queryKey: restQueryKey(
+              RestService.restBusinessAreasGrievanceTicketsRetrieve,
+            ),
           });
         } catch (e) {
           showApiErrorMessages(e, showMessage);
@@ -454,9 +451,18 @@ export const GrievanceDetailsToolbar = ({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={ticket.adminUrl} />}
     >
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {isEditable && canEdit && (
-          <Box mr={3}>
+          <Box
+            sx={{
+              mr: 3,
+            }}
+          >
             <Button
               color="primary"
               variant="outlined"
@@ -472,7 +478,11 @@ export const GrievanceDetailsToolbar = ({
           </Box>
         )}
         {isBeneficiaryTicket && (
-          <Box mr={3}>
+          <Box
+            sx={{
+              mr: 3,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"
@@ -499,7 +509,11 @@ export const GrievanceDetailsToolbar = ({
           </LoadingButton>
         )}
         {isAssigned && canSetInProgress && (
-          <Box mr={3}>
+          <Box
+            sx={{
+              mr: 3,
+            }}
+          >
             <LoadingButton
               loading={loading}
               color="primary"
@@ -518,7 +532,11 @@ export const GrievanceDetailsToolbar = ({
         {isInProgress && (
           <>
             {canSetOnHold && (
-              <Box mr={3}>
+              <Box
+                sx={{
+                  mr: 3,
+                }}
+              >
                 <LoadingButton
                   loading={loading}
                   color="primary"
@@ -533,7 +551,11 @@ export const GrievanceDetailsToolbar = ({
               </Box>
             )}
             {canSendForApproval && (
-              <Box mr={3}>
+              <Box
+                sx={{
+                  mr: 3,
+                }}
+              >
                 <LoadingButton
                   loading={loading}
                   color="primary"
@@ -577,7 +599,11 @@ export const GrievanceDetailsToolbar = ({
         {isOnHold && (
           <>
             {canSetInProgress && (
-              <Box mr={3}>
+              <Box
+                sx={{
+                  mr: 3,
+                }}
+              >
                 <LoadingButton
                   loading={loading}
                   color="primary"
@@ -594,7 +620,11 @@ export const GrievanceDetailsToolbar = ({
               </Box>
             )}
             {canSendForApproval && (
-              <Box mr={3}>
+              <Box
+                sx={{
+                  mr: 3,
+                }}
+              >
                 <LoadingButton
                   loading={loading}
                   color="primary"
@@ -639,7 +669,11 @@ export const GrievanceDetailsToolbar = ({
         {isForApproval && (
           <>
             {canSendBack && (
-              <Box mr={3}>
+              <Box
+                sx={{
+                  mr: 3,
+                }}
+              >
                 <LoadingButton
                   loading={loading}
                   color="primary"
@@ -656,7 +690,11 @@ export const GrievanceDetailsToolbar = ({
               </Box>
             )}
             {canCreateDataChange() && (
-              <Box mr={3}>
+              <Box
+                sx={{
+                  mr: 3,
+                }}
+              >
                 <Button
                   onClick={() =>
                     navigate(`/${baseUrl}/grievance/new-ticket`, {

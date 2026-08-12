@@ -137,6 +137,18 @@ module.exports = defineConfig([
       '@tanstack/query/no-rest-destructuring': 'warn',
       '@tanstack/query/stable-query-client': 'error',
 
+      // Query keys must be derived from the fetcher via restQueryKey (utils/queryKeys.ts)
+      // so reader and invalidator keys cannot drift. The migration is complete, so this is
+      // an error — a hand-written key silently stops matching its invalidator.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Property[key.name='queryKey'] > ArrayExpression",
+          message:
+            'Derive query keys via restQueryKey(RestService.method[, params]) — see utils/queryKeys.ts — instead of a hand-written array literal.',
+        },
+      ],
+
       'react/jsx-filename-extension': [
         1,
         {

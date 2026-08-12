@@ -4,7 +4,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -74,22 +75,21 @@ export function TargetPopulationTable({
   }, [initialQueryVariables]);
 
   // Count query (enabled only on page 0)
+  const targetPopulationsCountParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+    },
+    queryVariables,
+  );
   const { data: countData } = useQuery({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsCount',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve,
+      targetPopulationsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsCountRetrieve(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-          },
-          queryVariables,
-        ),
+        targetPopulationsCountParams,
       ),
     enabled: page === 0,
   });
@@ -97,30 +97,30 @@ export function TargetPopulationTable({
   const persistedCount = usePersistedCount(page, countData);
 
   // Main data query
+  const targetPopulationsListParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      programCode: programId,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: targetPopulationsData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-      queryVariables,
-      page,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsTargetPopulationsList,
+      targetPopulationsListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
+        targetPopulationsListParams,
       );
     },
+    placeholderData: keepPreviousData,
   });
 
   const handleRadioChange = (id: string): void => {
@@ -154,6 +154,7 @@ export function TargetPopulationTable({
         setQueryVariables={setQueryVariables}
         data={targetPopulationsData}
         isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         renderRow={(row: TargetPopulationList) => {
           const idx = results.indexOf(row);
@@ -164,7 +165,10 @@ export function TargetPopulationTable({
           return (
             <>
               {isNewGroup && (
-                <GroupHeaderRow name={row.paymentPlanGroup?.name} id={row.paymentPlanGroup?.id} />
+                <GroupHeaderRow
+                  name={row.paymentPlanGroup?.name}
+                  id={row.paymentPlanGroup?.id}
+                />
               )}
               <TargetPopulationTableRow
                 radioChangeHandler={enableRadioButton && handleRadioChange}

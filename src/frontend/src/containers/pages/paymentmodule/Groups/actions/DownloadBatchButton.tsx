@@ -25,7 +25,11 @@ export function DownloadBatchButton({
   const href = `/api/download-payment-plan-group-batch/${groupId}/${tag}`;
 
   return (
-    <Box m={2}>
+    <Box
+      sx={{
+        m: 2,
+      }}
+    >
       <Button
         component="a"
         href={href}

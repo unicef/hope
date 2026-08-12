@@ -25,7 +25,11 @@ const CommunicationMessageDetails = ({
   const { t } = useTranslation();
   return (
     <Grid size={{ xs: 8 }} data-cy="communication-message-details">
-      <Box p={5}>
+      <Box
+        sx={{
+          p: 5,
+        }}
+      >
         <StyledBox>
           <Title>
             <Typography variant="h6" data-cy="message-title">
@@ -34,8 +38,18 @@ const CommunicationMessageDetails = ({
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
-              <Grid container justifyContent="space-between" size={{ xs: 12 }}>
-                <Box ml={2}>
+              <Grid
+                container
+                size={{ xs: 12 }}
+                sx={{
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Box
+                  sx={{
+                    ml: 2,
+                  }}
+                >
                   <Typography variant="subtitle2" data-cy="message-created-by">
                     {message.createdBy}
                   </Typography>
@@ -46,7 +60,12 @@ const CommunicationMessageDetails = ({
                   </UniversalMoment>
                 </Typography>
               </Grid>
-              <Box ml={6} p={3}>
+              <Box
+                sx={{
+                  ml: 6,
+                  p: 3,
+                }}
+              >
                 <Box data-cy="message-title-content">{message.title}</Box>
                 <Box data-cy="message-body-content">{message.body}</Box>
               </Box>

@@ -27,6 +27,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { showApiErrorMessages } from '@utils/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import type { PaymentPlanExcludeBeneficiaries } from '@restgenerated/models/PaymentPlanExcludeBeneficiaries';
 
 interface ExcludeSectionProps {
@@ -78,7 +79,7 @@ function ExcludeSection({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
       });
     },
     onError: (error) => {
@@ -206,8 +207,18 @@ function ExcludeSection({
 
     if (editMode) {
       return (
-        <Box display="flex" alignItems="center" justifyContent="center">
-          <Box mr={2}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             <Button
               variant="text"
               color="primary"
@@ -249,8 +260,18 @@ function ExcludeSection({
 
     if (isExclusionsOpen) {
       return (
-        <Box display="flex" alignItems="center" justifyContent="center">
-          <Box mr={2}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             <Button variant="text" color="primary" onClick={resetExclusions}>
               {t('Close')}
             </Button>
@@ -304,8 +325,20 @@ function ExcludeSection({
 
     if (isEdit || numberOfExcluded === 0) {
       return (
-        <Box mt={2} display="flex" alignItems="center">
-          <Grid alignItems="flex-start" container spacing={3}>
+        <Box
+          sx={{
+            mt: 2,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              alignItems: 'flex-start',
+            }}
+          >
             <Grid size={{ xs: 12 }}>
               <Field
                 name="exclusionReason"
@@ -317,7 +350,11 @@ function ExcludeSection({
               />
             </Grid>
             <Grid size={{ xs: 6 }}>
-              <Box mr={2}>
+              <Box
+                sx={{
+                  mr: 2,
+                }}
+              >
                 <StyledTextField
                   label={
                     isSocialDctType
@@ -377,12 +414,22 @@ function ExcludeSection({
       {({ submitForm, values, resetForm }) => (
         <Form>
           <PaperContainer>
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography variant="h6">{t('Exclude')}</Typography>
               {renderButtons(submitForm, values, resetForm)}
             </Box>
             {!isExclusionsOpen && numberOfExcluded > 0 ? (
-              <Box mt={2} mb={2}>
+              <Box
+                sx={{
+                  mt: 2,
+                  mb: 2,
+                }}
+              >
                 <GreyText>
                   {`${numberOfExcluded} ${
                     numberOfExcluded === 1
@@ -393,28 +440,51 @@ function ExcludeSection({
               </Box>
             ) : null}
             <Collapse in={isExclusionsOpen}>
-              <Box display="flex" flexDirection="column">
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 {isExclusionsOpen && exclusionReason && !isEdit ? (
                   <Grid container>
                     <Grid size={{ xs: 8 }}>
-                      <Box display="flex" flexDirection="column">
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
                         <Box
-                          display="flex"
-                          alignItems={
-                            exclusionReason.length > 100
-                              ? 'flex-start'
-                              : 'center'
-                          }
-                          mt={4}
-                          mb={2}
+                          sx={{
+                            display: 'flex',
+
+                            alignItems:
+                              exclusionReason.length > 100
+                                ? 'flex-start'
+                                : 'center',
+
+                            mt: 4,
+                            mb: 2,
+                          }}
                         >
-                          <Box mr={2}>
+                          <Box
+                            sx={{
+                              mr: 2,
+                            }}
+                          >
                             <GreyText>{t('Reason')}:</GreyText>
                           </Box>
                           <Typography>{exclusionReason}</Typography>
                         </Box>
                         {excludeHouseholdError && (
-                          <Box display="flex" flexDirection="column" mt={2}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              mt: 2,
+                            }}
+                          >
                             {formatErrorToArray(excludeHouseholdError).map(
                               (el) => (
                                 <FormHelperText key={el} error>
@@ -438,7 +508,11 @@ function ExcludeSection({
                     </Grid>
                   ))}
                 </Grid>
-                <Grid container direction="column" size={{ xs: 3 }}>
+                <Grid
+                  container
+                  sx={{ flexDirection: 'column' }}
+                  size={{ xs: 3 }}
+                >
                   {excludedIds.map((id) => (
                     <Grid key={id} size={{ xs: 12 }}>
                       <ExcludedItem

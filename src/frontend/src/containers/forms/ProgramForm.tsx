@@ -12,6 +12,7 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, useFormikContext } from 'formik';
 import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,7 +36,9 @@ const ProgramForm = ({
   const isEditProgram = location.pathname.indexOf('edit') !== -1;
 
   const { data } = useQuery<ProgramChoices>({
-    queryKey: ['programChoices', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -46,7 +49,7 @@ const ProgramForm = ({
 
   const { data: beneficiaryGroupsData } =
     useQuery<PaginatedBeneficiaryGroupList>({
-      queryKey: ['beneficiaryGroups'],
+      queryKey: restQueryKey(RestService.restBeneficiaryGroupsList),
       queryFn: () => RestService.restBeneficiaryGroupsList({}),
     });
 

@@ -15,6 +15,7 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
@@ -37,7 +38,10 @@ export function DeleteHouseholdGrievanceDetails({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasHouseholdsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -56,12 +60,27 @@ export function DeleteHouseholdGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} to be withdrawn`}</Typography>
           {approveStatus && ticket.ticketDetails.reasonHousehold && (
-            <Box display="flex" alignItems="center">
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
               <Info />
-              <Box mr={2}>
+              <Box
+                sx={{
+                  mr: 2,
+                }}
+              >
                 <p>
                   This {beneficiaryGroup?.groupLabel} is a duplicate of a{' '}
                   {beneficiaryGroup?.groupLabel} ID:

@@ -104,21 +104,34 @@ export const VolumeByDeliveryMechanismSection: FC<
   };
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <Title>
         <Typography variant="h6">
           {t('Volume by Delivery Mechanism')}
         </Typography>{' '}
       </Title>
       <ContentWrapper>
-        <Grid container spacing={0} justifyContent="flex-start">
+        <Grid
+          container
+          spacing={0}
+          sx={{
+            justifyContent: 'flex-start',
+          }}
+        >
           {mappedDeliveryMechanism}
         </Grid>
         <Grid
           container
           spacing={0}
-          justifyContent="flex-start"
-          alignItems="center"
+          sx={{
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+          }}
         >
           <Grid size={{ xs: 4 }}>
             <ChartContainer>

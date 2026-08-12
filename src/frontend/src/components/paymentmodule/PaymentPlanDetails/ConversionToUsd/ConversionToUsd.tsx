@@ -18,13 +18,13 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
-
 
 const OptionDetails = styled(Box)`
   margin-left: 32px;
@@ -55,15 +55,19 @@ function ConversionToUsd({
     paymentPlan.customExchangeRate ? 'custom' : 'unore',
   );
   const [customExchangeRate, setCustomExchangeRate] = useState<string>(
-    paymentPlan.customExchangeRate ? paymentPlan.exchangeRate ?? '' : '',
+    paymentPlan.customExchangeRate ? (paymentPlan.exchangeRate ?? '') : '',
   );
 
   useEffect(() => {
     setSelectedOption(paymentPlan.customExchangeRate ? 'custom' : 'unore');
     setCustomExchangeRate(
-      paymentPlan.customExchangeRate ? paymentPlan.exchangeRate ?? '' : '',
+      paymentPlan.customExchangeRate ? (paymentPlan.exchangeRate ?? '') : '',
     );
-  }, [paymentPlan.customExchangeRate, paymentPlan.exchangeRate, paymentPlan.id]);
+  }, [
+    paymentPlan.customExchangeRate,
+    paymentPlan.exchangeRate,
+    paymentPlan.id,
+  ]);
 
   const { mutateAsync: applyExchangeRate, isPending } = useMutation({
     mutationFn: ({
@@ -77,16 +81,20 @@ function ConversionToUsd({
       programCode: string;
       requestBody: ApplyCustomExchangeRate;
     }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate({
-        businessAreaSlug,
-        id,
-        programCode,
-        requestBody,
-      }),
+      RestService.restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate(
+        {
+          businessAreaSlug,
+          id,
+          programCode,
+          requestBody,
+        },
+      ),
     onSuccess: () => {
-      showMessage(t('Exchange rate is being applied, please wait until completed'));
+      showMessage(
+        t('Exchange rate is being applied, please wait until completed'),
+      );
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
       });
     },
     onError: (error: any) => {
@@ -133,11 +141,26 @@ function ConversionToUsd({
       : t('Exchange rate is unavailable');
 
   return (
-    <Box m={5}>
+    <Box
+      sx={{
+        m: 5,
+      }}
+    >
       <ContainerColumnWithBorder>
-        <Box mt={4}>
+        <Box
+          sx={{
+            mt: 4,
+          }}
+        >
           <Title>
-            <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={2}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: 2,
+              }}
+            >
               <Typography variant="h6">{t('Conversion to USD')}</Typography>
               <LoadingButton
                 variant="contained"
@@ -158,7 +181,11 @@ function ConversionToUsd({
             </Box>
           </Title>
           {paymentPlan.unoreExchangeRateUnavailable && (
-            <Box mb={3}>
+            <Box
+              sx={{
+                mb: 3,
+              }}
+            >
               <Alert severity="warning">
                 {t(
                   'The UNORE exchange rate service is currently unavailable. The latest rate could not be retrieved - please try again later or apply a custom exchange rate.',
@@ -193,15 +220,19 @@ function ConversionToUsd({
               <TextField
                 size="small"
                 type="number"
-                helperText={t('Enter the amount of local currency against 1 USD')}
+                helperText={t(
+                  'Enter the amount of local currency against 1 USD',
+                )}
                 value={customExchangeRate}
                 disabled={selectedOption !== 'custom' || !isSupportedStatus}
                 onChange={(event) => setCustomExchangeRate(event.target.value)}
                 sx={{ width: { xs: '100%', sm: 280 } }}
-                inputProps={{
-                  step: '0.00000001',
-                  min: '0',
-                  readOnly: isCustomExchangeRateReadOnly,
+                slotProps={{
+                  htmlInput: {
+                    step: '0.00000001',
+                    min: '0',
+                    readOnly: isCustomExchangeRateReadOnly,
+                  },
                 }}
               />
             </OptionDetails>

@@ -3,6 +3,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 import { ReactElement, useMemo, useState, useEffect } from 'react';
@@ -40,10 +41,10 @@ function RecipientsTable({
   }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: [
-      'businessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList',
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList,
       queryVariables,
-    ],
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList(
         queryVariables,

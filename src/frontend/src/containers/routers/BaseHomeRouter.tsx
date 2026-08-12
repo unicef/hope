@@ -10,6 +10,7 @@ import { theme } from 'src/theme';
 import { FC, useState } from 'react';
 import { RestService } from '@restgenerated/index';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 
 const Root = styled.div`
   display: flex;
@@ -41,21 +42,26 @@ export const BaseHomeRouter: FC = () => {
     setOpen(false);
   };
 
+  const profileParams = {
+    businessAreaSlug: businessArea,
+    program: programCode === 'all' ? undefined : programCode,
+  };
+
   const {
     data: businessAreaData,
     isLoading: businessAreaLoading,
     isError: businessAreaError,
   } = useQuery({
-    queryKey: ['businessAreasProfile', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersProfileRetrieve,
+      profileParams,
+    ),
     queryFn: () => {
-      return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
-        program: programCode === 'all' ? undefined : programCode,
-      });
+      return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
     },
     retry: false,
-    staleTime: 15 * 60 * 1000, // Data is considered fresh for 15 minutes (business areas don't change often)
-    gcTime: 60 * 60 * 1000, // Keep unused data in cache for 1 hour
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 

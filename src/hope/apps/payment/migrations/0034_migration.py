@@ -22,6 +22,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="account",
             name="number",
-            field=models.CharField(blank=True, db_index=True, max_length=256, null=True),
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                help_text="The account number or wallet identifier",
+                max_length=256,
+                null=True,
+            ),
         ),
     ]

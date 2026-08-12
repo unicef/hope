@@ -38,7 +38,13 @@ export function VerificationPlanDetails({
 
   return (
     <Container>
-      <Box display="flex" alignItems="center" justifyContent="space-between">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <Title>
           <Typography
             data-cy={`verification-plan-${verificationPlan.unicefId}`}

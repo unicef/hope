@@ -17,6 +17,7 @@ import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/Fo
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   getTargetingCriteriaVariables,
   HhIndIdValidation,
@@ -68,12 +69,13 @@ const CreateTargetPopulationPage = (): ReactElement => {
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate the list and detail queries for target populations and program
         queryClient.invalidateQueries({
-          queryKey: ['targetPopulations', businessAreaSlug, programCode],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsTargetPopulationsList,
+          ),
         });
         queryClient.invalidateQueries({
-          queryKey: ['program', businessAreaSlug, programCode],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
         });
       },
     });
@@ -82,14 +84,19 @@ const CreateTargetPopulationPage = (): ReactElement => {
   const navigate = useNavigate();
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessAreaSlug],
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessAreaSlug,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
         slug: businessAreaSlug,
       }),
   });
   const { data: program } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessAreaSlug, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug,
+      code: programCode,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug,
@@ -172,10 +179,21 @@ const CreateTargetPopulationPage = (): ReactElement => {
               permissions={permissions}
             />
             <PaperContainer>
-              <Box pt={3} pb={3}>
+              <Box
+                sx={{
+                  pt: 3,
+                  pb: 3,
+                }}
+              >
                 <Typography variant="h6">{t('Targeting Criteria')}</Typography>
               </Box>
-              <Grid container mb={5} spacing={3}>
+              <Grid
+                container
+                spacing={3}
+                sx={{
+                  mb: 5,
+                }}
+              >
                 <Grid size={6}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
@@ -195,7 +213,13 @@ const CreateTargetPopulationPage = (): ReactElement => {
                   />
                 </Grid>
                 <Grid size={6}>
-                  <Box display="flex" alignItems="flex-start" gap={2}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 2,
+                    }}
+                  >
                     <PaymentPlanGroupAutocompleteRest
                       value={values.paymentPlanGroupId}
                       onChange={async (e) => {
@@ -264,7 +288,12 @@ const CreateTargetPopulationPage = (): ReactElement => {
                   </Grid>
                 )}
               </Grid>
-              <Box pt={6} pb={6}>
+              <Box
+                sx={{
+                  pt: 6,
+                  pb: 6,
+                }}
+              >
                 <Divider />
               </Box>
               {values.program ? (
@@ -284,13 +313,14 @@ const CreateTargetPopulationPage = (): ReactElement => {
               ) : null}
             </PaperContainer>
             <Exclusions />
-
             <Box
-              pt={3}
-              pb={3}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
+              sx={{
+                pt: 3,
+                pb: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
             >
               <Typography style={{ color: '#b1b1b5' }} variant="h6">
                 {t('Save to see the list of households')}

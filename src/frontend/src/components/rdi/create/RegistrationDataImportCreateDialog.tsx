@@ -173,7 +173,13 @@ export const RegistrationDataImportCreateDialog = ({
               </MenuItem>
             </ComboBox>
           </FormControl>
-          <Box mt={2}>{importTypeForm}</Box>
+          <Box
+            sx={{
+              mt: 2,
+            }}
+          >
+            {importTypeForm}
+          </Box>
         </DialogContent>
         <StyledDialogFooter data-cy="dialog-actions-container">
           <Button

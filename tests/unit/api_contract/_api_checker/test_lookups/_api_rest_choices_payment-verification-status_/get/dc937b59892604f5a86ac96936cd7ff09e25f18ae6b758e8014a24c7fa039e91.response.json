@@ -12,19 +12,19 @@
     },
     "data": [
         {
-            "name": "NOT RECEIVED",
+            "name": "Not Received",
             "value": "NOT_RECEIVED"
         },
         {
-            "name": "PENDING",
+            "name": "Pending",
             "value": "PENDING"
         },
         {
-            "name": "RECEIVED",
+            "name": "Received",
             "value": "RECEIVED"
         },
         {
-            "name": "RECEIVED WITH ISSUES",
+            "name": "Received With Issues",
             "value": "RECEIVED_WITH_ISSUES"
         }
     ],

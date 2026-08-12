@@ -46,7 +46,7 @@ const headCells: HeadCell<Individual>[] = [
   },
   {
     disablePadding: false,
-    label: 'Dedupe within Batch',
+    label: 'Dedupe within RDI',
     id: 'deduplicationBatchStatus',
     numeric: false,
   },

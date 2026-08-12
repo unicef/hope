@@ -8,7 +8,8 @@ import { adjustHeadCells } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { createApiParams } from '@utils/apiUtils';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
@@ -63,41 +64,41 @@ function PaymentPlansTable({
 
   const [page, setPage] = useState(0);
 
+  const paymentPlansListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: paymentPlansData,
     isLoading,
+    isFetching,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansList,
+      paymentPlansListParams,
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        paymentPlansListParams,
       );
     },
+    placeholderData: keepPreviousData,
   });
 
+  const paymentPlansCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansCountRetrieve',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve,
+      paymentPlansCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        paymentPlansCountParams,
       ),
     enabled: !!businessArea && !!programId && page === 0,
   });
@@ -120,7 +121,10 @@ function PaymentPlansTable({
     const rows = paymentPlansData?.results ?? [];
     rows.forEach((row, idx) => {
       const prev = rows[idx - 1];
-      if (idx === 0 || prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id) {
+      if (
+        idx === 0 ||
+        prev?.paymentPlanGroup?.id !== row.paymentPlanGroup?.id
+      ) {
         ids.add(row.id);
       }
     });
@@ -134,6 +138,7 @@ function PaymentPlansTable({
       headCells={adjustedHeadCells as any}
       data={paymentPlansData}
       isLoading={isLoading}
+      isFetching={isFetching}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}

@@ -67,7 +67,12 @@ export function AccountToEditTable({
   return (
     <>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">
             {t('Account to be edited')} - {account.accountType}
           </Typography>
@@ -88,7 +93,7 @@ export function AccountToEditTable({
                     ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                   }
                   checked={selectedAccountsToEdit.includes(index)}
-                  inputProps={{ 'aria-labelledby': 'selected' }}
+                  slotProps={{ input: { 'aria-labelledby': 'selected' } }}
                 />
               ) : (
                 selectedAccountsToEdit.includes(index) && (

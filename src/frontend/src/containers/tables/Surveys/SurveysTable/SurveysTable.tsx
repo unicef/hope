@@ -7,8 +7,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { PaginatedSurveyList } from '@restgenerated/models/PaginatedSurveyList';
 import { Survey } from '@restgenerated/models/Survey';
@@ -64,9 +65,20 @@ function SurveysTable({
   const {
     data: dataSurveys,
     isLoading: isLoadingSurveys,
+    isFetching: isFetchingSurveys,
     error: errorSurveys,
   } = useQuery<PaginatedSurveyList>({
-    queryKey: ['businessAreasProgramsSurveysList', queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysList,
+      createApiParams(
+        {
+          businessAreaSlug: queryVariables.businessAreaSlug,
+          programCode: queryVariables.programCode,
+        },
+        queryVariables,
+        { withPagination: true },
+      ),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysList(
         createApiParams(
@@ -78,16 +90,21 @@ function SurveysTable({
           { withPagination: true },
         ),
       ),
+    placeholderData: keepPreviousData,
     enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
   });
 
   const { data: dataSurveysCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsSurveysCount',
-      businessAreaSlug,
-      programId,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysCountRetrieve,
+      createApiParams(
+        {
+          businessAreaSlug: queryVariables.businessAreaSlug,
+          programCode: queryVariables.programCode,
+        },
+        queryVariables,
+      ),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysCountRetrieve(
         createApiParams(
@@ -103,7 +120,6 @@ function SurveysTable({
 
   const itemsCount = usePersistedCount(page, dataSurveysCount);
 
-
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -111,6 +127,7 @@ function SurveysTable({
         title={t('Surveys List')}
         data={dataSurveys}
         isLoading={isLoadingSurveys}
+        isFetching={isFetchingSurveys}
         error={errorSurveys}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

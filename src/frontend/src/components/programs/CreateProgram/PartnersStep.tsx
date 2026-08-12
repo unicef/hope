@@ -74,7 +74,13 @@ export const PartnersStep: FC<PartnersStepProps> = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" mt={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          mt: 2,
+        }}
+      >
         <Grid container spacing={2}>
           <Grid size={6}>
             <Field
@@ -113,7 +119,11 @@ export const PartnersStep: FC<PartnersStepProps> = ({
                       canDeleteProgramPartner={values.partners.length > 1}
                     />
                   ))}
-                  <Box display="flex">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                    }}
+                  >
                     <ButtonTooltip
                       disabled={addPartnerDisabled}
                       data-cy="button-add-partner"
@@ -137,8 +147,17 @@ export const PartnersStep: FC<PartnersStepProps> = ({
           />
         </>
       )}
-      <Box display="flex" justifyContent="space-between">
-        <Box mr={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Box
+          sx={{
+            mr: 2,
+          }}
+        >
           <Button
             data-cy="button-cancel"
             component={Link}
@@ -151,8 +170,16 @@ export const PartnersStep: FC<PartnersStepProps> = ({
             {t('Cancel')}
           </Button>
         </Box>
-        <Box display="flex">
-          <Box mr={2}>
+        <Box
+          sx={{
+            display: 'flex',
+          }}
+        >
+          <Box
+            sx={{
+              mr: 2,
+            }}
+          >
             <Button
               data-cy="button-back"
               variant="outlined"

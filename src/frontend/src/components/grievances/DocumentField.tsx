@@ -43,8 +43,18 @@ export function DocumentField({
   )}`;
 
   return (
-    <Box mt={2}>
-      <Grid container alignItems="center" spacing={3}>
+    <Box
+      sx={{
+        mt: 2,
+      }}
+    >
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Grid size={3}>
           <Field
             name={`${docFieldName}.key`}

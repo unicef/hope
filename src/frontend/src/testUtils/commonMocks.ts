@@ -60,30 +60,39 @@ const _utilsMock = vi.hoisted(() => ({
   individualStatusToColor: vi.fn(() => '#000000'),
 }));
 
-const _restServiceMethods = vi.hoisted(() => ({
-  restBusinessAreasProgramsHouseholdsList: vi.fn(),
-  restBusinessAreasProgramsHouseholdsCountRetrieve: vi.fn(),
-  restBusinessAreasProgramsIndividualsList: vi.fn(),
-  restBusinessAreasProgramsHouseholdsMembersList: vi.fn(),
-  restBusinessAreasProgramsList: vi.fn(),
-  restBusinessAreasProgramsCountRetrieve: vi.fn(),
-  restBusinessAreasUsersProfileRetrieve: vi.fn(() =>
-    Promise.resolve({
-      id: 'test-user',
-      username: 'mock-user',
-      permissions: ['can_view_programs'],
-    }),
-  ),
-  restBusinessAreasProgramsCyclesList: vi.fn(),
-  restBusinessAreasProgramsCyclesRetrieve: vi.fn(),
-  restBusinessAreasProgramsCyclesCreate: vi.fn(),
-  restBusinessAreasProgramsCyclesUpdate: vi.fn(),
-  restBusinessAreasProgramsCyclesPartialUpdate: vi.fn(),
-  restBusinessAreasProgramsCyclesDestroy: vi.fn(),
-  restBusinessAreasProgramsCyclesFinishCreate: vi.fn(),
-  restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
-  restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
-}));
+const _restServiceMethods = vi.hoisted(() => {
+  const methods = {
+    restBusinessAreasProgramsHouseholdsList: vi.fn(),
+    restBusinessAreasProgramsHouseholdsCountRetrieve: vi.fn(),
+    restBusinessAreasProgramsIndividualsList: vi.fn(),
+    restBusinessAreasProgramsIndividualsCountRetrieve: vi.fn(),
+    restBusinessAreasProgramsHouseholdsMembersList: vi.fn(),
+    restBusinessAreasProgramsList: vi.fn(),
+    restBusinessAreasProgramsCountRetrieve: vi.fn(),
+    restBusinessAreasUsersProfileRetrieve: vi.fn(() =>
+      Promise.resolve({
+        id: 'test-user',
+        username: 'mock-user',
+        permissions: ['can_view_programs'],
+      }),
+    ),
+    restBusinessAreasProgramsCyclesList: vi.fn(),
+    restBusinessAreasProgramsCyclesRetrieve: vi.fn(),
+    restBusinessAreasProgramsCyclesCreate: vi.fn(),
+    restBusinessAreasProgramsCyclesUpdate: vi.fn(),
+    restBusinessAreasProgramsCyclesPartialUpdate: vi.fn(),
+    restBusinessAreasProgramsCyclesDestroy: vi.fn(),
+    restBusinessAreasProgramsCyclesFinishCreate: vi.fn(),
+    restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
+    restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
+  };
+  // restQueryKey derives the key root from `fn.name`, and every bare spy is named 'spy'.
+  // Without this, all mocked fetchers share one root and collapse into one cache entry.
+  for (const [name, fn] of Object.entries(methods)) {
+    Object.defineProperty(fn, 'name', { value: name, configurable: true });
+  }
+  return methods;
+});
 
 // Top-level vi.mock() registrations — no hoisting warnings
 vi.mock('@hooks/useBaseUrl', () => ({

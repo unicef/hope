@@ -19,6 +19,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +64,10 @@ export function ApprovePaymentPlan({
       showMessage(t('Payment Plan has been approved.'));
       setApproveDialogOpen(false);
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     },
   });
@@ -80,8 +84,7 @@ export function ApprovePaymentPlan({
       paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1];
     const approvalNumberRequired =
       latestApprovalProcess?.approvalNumberRequired;
-    const approvalsCount =
-      latestApprovalProcess?.actions?.approval?.length;
+    const approvalsCount = latestApprovalProcess?.actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };
@@ -105,7 +108,11 @@ export function ApprovePaymentPlan({
       {({ submitForm }) => (
         <>
           {approveDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"
@@ -129,11 +136,19 @@ export function ApprovePaymentPlan({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   {t('Are you sure you want to approve this Payment Plan?')}
                 </Box>
                 {shouldShowLastApproverMessage() && (
-                  <Box p={5}>
+                  <Box
+                    sx={{
+                      p: 5,
+                    }}
+                  >
                     <GreyText>
                       {t(
                         'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',

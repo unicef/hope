@@ -1,5 +1,6 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 
 export const useHopeDetailsQuery = <TData, TOptions = any>(
   id: string,
@@ -7,9 +8,8 @@ export const useHopeDetailsQuery = <TData, TOptions = any>(
   options: any,
 ): UseQueryResult<TData> => {
   const { businessAreaSlug, programCode } = useBaseUrl();
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   return useQuery({
-    queryKey: [queryFn.name, { id, programCode, businessAreaSlug }],
+    queryKey: restQueryKey(queryFn, { id, programCode, businessAreaSlug }),
     queryFn: () =>
       queryFn({
         id,

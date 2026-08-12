@@ -1,7 +1,7 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -51,6 +51,7 @@ import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FspChoices } from '@restgenerated/models/FspChoices';
+import { restQueryKey } from '@utils/queryKeys';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -209,21 +210,20 @@ export const TargetingCriteriaForm = ({
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
   >({
-    queryKey: [
-      'businessAreasAvailableFspsForDeliveryMechanismsList',
-      businessArea,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
         businessAreaSlug: businessArea,
       }),
   });
   const { data, isLoading: loading } = useQuery({
-    queryKey: [
-      'businessAreasAllFieldsAttributesList',
-      businessArea,
-      selectedProgram?.id,
-    ],
+    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
+      slug: businessArea,
+      programId: selectedProgram?.id,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
@@ -255,7 +255,6 @@ export const TargetingCriteriaForm = ({
   const filteredIndividualData = useMemo(
     () => ({
       allFieldsAttributes: data
-        //@ts-ignore
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
     }),
@@ -264,7 +263,6 @@ export const TargetingCriteriaForm = ({
 
   const filteredHouseholdData = useMemo(
     () => ({
-      //@ts-ignore
       allFieldsAttributes: data?.filter(associatedWith('Household')),
     }),
     [data],
@@ -272,7 +270,6 @@ export const TargetingCriteriaForm = ({
 
   const allDataChoicesDictTmp = useMemo(
     () =>
-      // @ts-ignore
       data?.reduce((acc, item) => {
         acc[item.name] = item.choices;
         return acc;
@@ -379,16 +376,14 @@ export const TargetingCriteriaForm = ({
               </DialogTitleWrapper>
               <DialogContent>
                 {
-                  // @ts-ignore
-                  errors.nonFieldErrors && (
+                  (errors as { nonFieldErrors?: string[] }).nonFieldErrors && (
                     <DialogError>
                       <ul>
-                        {
-                          // @ts-ignore
-                          errors.nonFieldErrors.map((message) => (
-                            <li key={message}>{message}</li>
-                          ))
-                        }
+                        {(
+                          errors as { nonFieldErrors?: string[] }
+                        ).nonFieldErrors.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))}
                       </ul>
                     </DialogError>
                   )
@@ -470,7 +465,12 @@ export const TargetingCriteriaForm = ({
                   )}
                 />
                 {householdFiltersAvailable || isSocialDctType ? (
-                  <Box display="flex" flexDirection="column">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
                     <ButtonBox>
                       <Button
                         onClick={() =>
@@ -479,7 +479,7 @@ export const TargetingCriteriaForm = ({
                             .push({ fieldName: '' })
                         }
                         color="primary"
-                        startIcon={<AddCircleOutline />}
+                        startIcon={<AddCircleOutlined />}
                         data-cy="button-household-rule"
                       >
                         ADD{' '}
@@ -501,7 +501,11 @@ export const TargetingCriteriaForm = ({
                     <Grid container spacing={3}>
                       <>
                         <Grid size={{ xs: 12 }}>
-                          <Box pb={3}>
+                          <Box
+                            sx={{
+                              pb: 3,
+                            }}
+                          >
                             <Field
                               data-cy="input-included-individual-ids"
                               name="individualIds"
@@ -543,7 +547,12 @@ export const TargetingCriteriaForm = ({
                         </ArrayFieldWrapper>
                       )}
                     />
-                    <Box display="flex" flexDirection="column">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
                       <ButtonBox>
                         <Button
                           data-cy="button-individual-rule"
@@ -555,7 +564,7 @@ export const TargetingCriteriaForm = ({
                               })
                           }
                           color="primary"
-                          startIcon={<AddCircleOutline />}
+                          startIcon={<AddCircleOutlined />}
                         >
                           {`ADD ${beneficiaryGroup?.memberLabel.toUpperCase()}
                           RULE GROUP`}
@@ -570,18 +579,26 @@ export const TargetingCriteriaForm = ({
                     <AndDividerLabel>And</AndDividerLabel>
                   </AndDivider>
                   {criteriaIndex === 0 && (
-                    <Box mt={2} display="flex" flexDirection="column">
+                    <Box
+                      sx={{
+                        mt: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
                       <ButtonBox style={{ width: '600px' }}>
                         <Button
                           data-cy="button-payment-channel-rule"
                           onClick={() => handlePaymentChannelButtonClick()}
                           color="primary"
-                          startIcon={<AddCircleOutline />}
+                          startIcon={<AddCircleOutlined />}
                         >
                           <Box
                             style={{ textAlign: 'left' }}
-                            display="flex"
-                            flexDirection="column"
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                            }}
                           >
                             <Box>PAYMENT CHANNEL VALIDATION</Box>
                             <Box>(Delivery mechanism and FSP requirements)</Box>
@@ -589,7 +606,11 @@ export const TargetingCriteriaForm = ({
                         </Button>
                       </ButtonBox>
                       <Collapse in={openPaymentChannelCollapse}>
-                        <Box mt={4}>
+                        <Box
+                          sx={{
+                            mt: 4,
+                          }}
+                        >
                           <Grid container spacing={3}>
                             <Grid size={{ xs: 12 }}>
                               <Field
@@ -643,7 +664,12 @@ export const TargetingCriteriaForm = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <StyledBox display="flex" justifyContent="flex-end">
+                  <StyledBox
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
                     <div>
                       <Button
                         onClick={() => {

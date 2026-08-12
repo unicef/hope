@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
@@ -56,12 +57,10 @@ const RegistrationPeopleFilters = ({
   const { businessAreaSlug, programCode } = useBaseUrl();
 
   const { data: registrationChoicesData } = useQuery({
-    queryKey: [
-      RestService
-        .restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList.name,
-      businessAreaSlug,
-      programCode,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList,
+      { businessAreaSlug, programCode },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
         { businessAreaSlug, programCode },

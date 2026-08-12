@@ -41,8 +41,13 @@ import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { AreaList } from '@restgenerated/models/AreaList';
 import { RestService } from '@restgenerated/services/RestService';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
+import { useSexChoices } from '@hooks/useSexChoices';
+import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
+import { restQueryKey } from '@utils/queryKeys';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
@@ -117,6 +122,20 @@ export const EditVerificationPlan = ({
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const {
+    data: sexChoices = [],
+    isLoading: isSexChoicesLoading,
+    isError: isSexChoicesError,
+    error: sexChoicesError,
+  } = useSexChoices();
+  const {
+    data: channelChoices = [],
+    isLoading: isChannelChoicesLoading,
+    isError: isChannelChoicesError,
+    error: channelChoicesError,
+  } = useVerificationChannelChoices();
+  useApiErrorSnackbar(isSexChoicesError, sexChoicesError);
+  useApiErrorSnackbar(isChannelChoicesError, channelChoicesError);
   // Helper function to prepare mutation data
   const prepareUpdateMutationData = (
     tab: number,
@@ -154,11 +173,11 @@ export const EditVerificationPlan = ({
             ? values.excludedAdminAreasRandom || []
             : [],
           age: values.ageCheckbox
-            ? ({
+            ? {
                 min: values.filterAgeMin || 0,
                 max: values.filterAgeMax || 999,
-              })
-            : ({ min: 0, max: 999 }),
+              }
+            : { min: 0, max: 999 },
           sex: values.sexCheckbox ? values.filterSex || '' : '',
         },
       };
@@ -187,12 +206,9 @@ export const EditVerificationPlan = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -229,7 +245,10 @@ export const EditVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList,
+      { businessAreaSlug: businessArea, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
@@ -244,7 +263,10 @@ export const EditVerificationPlan = ({
   const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
@@ -417,7 +439,11 @@ export const EditVerificationPlan = ({
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
-                    <Box pt={6}>
+                    <Box
+                      sx={{
+                        pt: 6,
+                      }}
+                    >
                       {mappedAdminAreas && (
                         <Field
                           name="excludedAdminAreasFull"
@@ -427,12 +453,18 @@ export const EditVerificationPlan = ({
                           component={FormikMultiSelectField}
                         />
                       )}
-                      <Box pt={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                        }}
+                      >
                         <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight="fontWeightBold"
+                          sx={{
+                            pb: 3,
+                            pt: 3,
+                            fontSize: 16,
+                            fontWeight: 'fontWeightBold',
+                          }}
                         >
                           Sample size:{' '}
                           {isNaN(sampleSizesData?.sampleSize?.sampleSize)
@@ -446,33 +478,29 @@ export const EditVerificationPlan = ({
                             : ` ${sampleSizesData?.sampleSize?.paymentRecordCount}`}
                           {getSampleSizePercentage()}
                         </Box>
-                        <Box fontSize={12} color="#797979">
+                        <Box
+                          sx={{
+                            fontSize: 12,
+                            color: '#797979',
+                          }}
+                        >
                           {t('This option is recommended for RapidPro')}
                         </Box>
-                        <Field
-                          name="verificationChannel"
-                          label={t('Verification Channel')}
-                          style={{ flexDirection: 'row', alignItems: 'center' }}
-                          choices={[
-                            {
-                              value: 'RAPIDPRO',
-                              name: 'RAPIDPRO',
-                              dataCy: 'radio-rapidpro',
-                            },
-                            {
-                              value: 'XLSX',
-                              name: 'XLSX',
-                              dataCy: 'radio-xlsx',
-                            },
-                            {
-                              value: 'MANUAL',
-                              name: 'MANUAL',
-                              dataCy: 'radio-manual',
-                            },
-                          ]}
-                          component={FormikRadioGroup}
-                          alignItems="center"
-                        />
+                        {isChannelChoicesLoading ? (
+                          <LoadingComponent />
+                        ) : (
+                          <Field
+                            name="verificationChannel"
+                            label={t('Verification Channel')}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                            }}
+                            choices={channelChoices}
+                            component={FormikRadioGroup}
+                            alignItems="center"
+                          />
+                        )}
                         {values.verificationChannel === 'RAPIDPRO' && (
                           <Field
                             name="rapidProFlow"
@@ -495,7 +523,11 @@ export const EditVerificationPlan = ({
                     </Box>
                   </TabPanel>
                   <TabPanel value={selectedTab} index={1}>
-                    <Box pt={3}>
+                    <Box
+                      sx={{
+                        pt: 3,
+                      }}
+                    >
                       <Field
                         name="confidenceInterval"
                         label={t('Confidence Interval')}
@@ -515,8 +547,17 @@ export const EditVerificationPlan = ({
                       <Typography variant="caption">
                         {t('Cluster Filters')}
                       </Typography>
-                      <Box flexDirection="column" display="flex">
-                        <Box display="flex">
+                      <Box
+                        sx={{
+                          flexDirection: 'column',
+                          display: 'flex',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                          }}
+                        >
                           <Field
                             name="adminCheckbox"
                             label={t('Administrative Level')}
@@ -548,7 +589,11 @@ export const EditVerificationPlan = ({
                         <Grid container>
                           {values.ageCheckbox && (
                             <Grid size={{ xs: 12 }}>
-                              <Box mt={6}>
+                              <Box
+                                sx={{
+                                  mt: 6,
+                                }}
+                              >
                                 <Grid container>
                                   <Grid size={{ xs: 4 }}>
                                     <Field
@@ -574,26 +619,22 @@ export const EditVerificationPlan = ({
                           )}
                           {values.sexCheckbox && (
                             <Grid size={{ xs: 5 }}>
-                              <Box mt={6}>
-                                <Field
-                                  name="filterSex"
-                                  label={t('Gender')}
-                                  color="primary"
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                    { value: 'OTHER', name: t('Other') },
-                                    {
-                                      value: 'NOT_COLLECTED',
-                                      name: t('Not Collected'),
-                                    },
-                                    {
-                                      value: 'NOT_ANSWERED',
-                                      name: t('Not Answered'),
-                                    },
-                                  ]}
-                                  component={FormikSelectField}
-                                />
+                              <Box
+                                sx={{
+                                  mt: 6,
+                                }}
+                              >
+                                {isSexChoicesLoading ? (
+                                  <LoadingComponent />
+                                ) : (
+                                  <Field
+                                    name="filterSex"
+                                    label={t('Gender')}
+                                    color="primary"
+                                    choices={sexChoices}
+                                    component={FormikSelectField}
+                                  />
+                                )}
                               </Box>
                             </Grid>
                           )}
@@ -601,10 +642,12 @@ export const EditVerificationPlan = ({
                       </Box>
 
                       <Box
-                        pb={3}
-                        pt={3}
-                        fontSize={16}
-                        fontWeight="fontWeightBold"
+                        sx={{
+                          pb: 3,
+                          pt: 3,
+                          fontSize: 16,
+                          fontWeight: 'fontWeightBold',
+                        }}
                       >
                         Sample size:{' '}
                         {isNaN(sampleSizesData?.sampleSize?.sampleSize)
@@ -616,28 +659,20 @@ export const EditVerificationPlan = ({
                           : ` ${formatFigure(sampleSizesData?.sampleSize?.paymentRecordCount)}`}
                         {getSampleSizePercentage()}
                       </Box>
-                      <Field
-                        name="verificationChannel"
-                        label="Verification Channel"
-                        style={{
-                          flexDirection: 'row',
-                        }}
-                        alignItems="center"
-                        choices={[
-                          {
-                            value: 'RAPIDPRO',
-                            name: 'RAPIDPRO',
-                            dataCy: 'radio-rapidpro',
-                          },
-                          { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                          {
-                            value: 'MANUAL',
-                            name: 'MANUAL',
-                            dataCy: 'radio-manual',
-                          },
-                        ]}
-                        component={FormikRadioGroup}
-                      />
+                      {isChannelChoicesLoading ? (
+                        <LoadingComponent />
+                      ) : (
+                        <Field
+                          name="verificationChannel"
+                          label="Verification Channel"
+                          style={{
+                            flexDirection: 'row',
+                          }}
+                          alignItems="center"
+                          choices={channelChoices}
+                          component={FormikRadioGroup}
+                        />
+                      )}
                       {values.verificationChannel === 'RAPIDPRO' && (
                         <Field
                           name="rapidProFlow"

@@ -2,7 +2,7 @@
     "fsp": {
         "master": {
             "model": "payment.financialserviceprovider",
-            "pk": "1f14cbd5-b350-499e-ae6f-09929b794f2c",
+            "pk": "fc235582-e7a3-46f2-b69d-7cd96cced137",
             "fields": {
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
@@ -15,17 +15,17 @@
                 "data_transfer_configuration": {},
                 "payment_gateway_id": null,
                 "allowed_business_areas": [
-                    "eba374c8-af94-43f2-bc33-ecda36c7e5f5"
+                    "1347dc12-9f22-4a24-9dff-8983d113286b"
                 ],
                 "delivery_mechanisms": [
-                    "10070359-3843-48c2-869c-3376683c4017"
+                    "819fb1fe-65c5-4182-83cf-e0f763238993"
                 ]
             }
         },
         "deps": [
             {
                 "model": "core.businessarea",
-                "pk": "eba374c8-af94-43f2-bc33-ecda36c7e5f5",
+                "pk": "1347dc12-9f22-4a24-9dff-8983d113286b",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -43,9 +43,6 @@
                     "rdi_import_xlsx_disabled": false,
                     "active": true,
                     "enable_email_notification": true,
-                    "kobo_username": null,
-                    "kobo_token": null,
-                    "kobo_url": null,
                     "rapid_pro_host": null,
                     "rapid_pro_payment_verification_token": null,
                     "rapid_pro_messages_token": null,
@@ -66,7 +63,7 @@
             },
             {
                 "model": "payment.deliverymechanism",
-                "pk": "10070359-3843-48c2-869c-3376683c4017",
+                "pk": "819fb1fe-65c5-4182-83cf-e0f763238993",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",

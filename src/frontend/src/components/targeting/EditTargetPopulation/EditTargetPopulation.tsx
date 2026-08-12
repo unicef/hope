@@ -37,6 +37,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
@@ -105,7 +106,10 @@ const EditTargetPopulation = ({
   };
 
   const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programCode],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: programCode,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
@@ -142,9 +146,15 @@ const EditTargetPopulation = ({
           requestBody,
         }),
       onSuccess: () => {
-        // Invalidate and refetch the grievance ticket details
         queryClient.invalidateQueries({
-          queryKey: ['targetPopulation', businessArea, id, programCode],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+          ),
+        });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsTargetPopulationsList,
+          ),
         });
       },
     });
@@ -260,10 +270,21 @@ const EditTargetPopulation = ({
             data-cy="edit-target-population-header"
           />
           <PaperContainer data-cy="paper-container">
-            <Box pt={3} pb={3}>
+            <Box
+              sx={{
+                pt: 3,
+                pb: 3,
+              }}
+            >
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
-            <Grid container mb={5} spacing={3}>
+            <Grid
+              container
+              spacing={3}
+              sx={{
+                mb: 5,
+              }}
+            >
               <Grid size={6}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
@@ -288,7 +309,13 @@ const EditTargetPopulation = ({
                 />
               </Grid>
               <Grid size={6}>
-                <Box display="flex" alignItems="center" gap={2}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                  }}
+                >
                   <TextField
                     label={t('Group')}
                     value={values.paymentPlanGroupId?.name || ''}
@@ -357,7 +384,12 @@ const EditTargetPopulation = ({
                 </Grid>
               )}
             </Grid>
-            <Box pt={6} pb={6}>
+            <Box
+              sx={{
+                pt: 6,
+                pb: 6,
+              }}
+            >
               <Divider />
             </Box>
             <FieldArray
@@ -381,12 +413,14 @@ const EditTargetPopulation = ({
             data-cy="exclusions"
           />
           <Box
-            pt={3}
-            pb={3}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
             data-cy="save-message-box"
+            sx={{
+              pt: 3,
+              pb: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t(

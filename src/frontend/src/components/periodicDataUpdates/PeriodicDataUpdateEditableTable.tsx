@@ -460,12 +460,20 @@ const PeriodicDataUpdateEditableTable: React.FC<
     </Table>
   );
   return (
-    <Box pt={6}>
+    <Box
+      sx={{
+        pt: 6,
+      }}
+    >
       <BaseSection
         p={0}
         containerPadding={{ py: 3, px: 0 }}
         title={
-          <Box p={6}>
+          <Box
+            sx={{
+              p: 6,
+            }}
+          >
             <Typography data-cy="title" variant="h6">
               Periodic Data Update
             </Typography>

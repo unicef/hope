@@ -6,7 +6,11 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
 import { getApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +21,7 @@ interface XlsxImportDialogProps {
   /** Wires the actual import endpoint; receives the multipart form data. */
   mutationFn: (formData: PaymentPlanImportFile) => Promise<unknown>;
   /** Query key invalidated on a successful import. */
-  invalidateQueryKey: unknown[];
+  invalidateQueryKey: QueryKey;
   successMessage: string;
   /** Fallback message when the API error has no parsable body. */
   errorFallback?: string;
@@ -82,7 +86,11 @@ export function XlsxImportDialog({
 
   return (
     <>
-      <Box m={buttonMargin}>
+      <Box
+        sx={{
+          m: buttonMargin,
+        }}
+      >
         <Button
           startIcon={<Publish />}
           color="primary"

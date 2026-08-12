@@ -60,7 +60,13 @@ export const DropzoneField = ({
     acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
 
   return (
-    <Box display="flex" justifyContent="center" p={5}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        p: 5,
+      }}
+    >
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
         <input

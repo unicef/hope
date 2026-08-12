@@ -1,5 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
@@ -40,19 +41,18 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const householdsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve,
+      householdsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        householdsCountParams,
       ),
     enabled: page === 0 && !notAllowedRdiShowPreviewStatuses.includes(rdi.status),
   });

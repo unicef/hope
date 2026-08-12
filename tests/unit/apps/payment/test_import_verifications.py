@@ -112,6 +112,13 @@ def test_export_received_from_pending(verification_setup, initial_status, result
     assert wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value == result
 
 
+def test_generate_workbook_loads_verification_rows_in_one_query(verification_setup, django_assert_num_queries):
+    export_service = XlsxVerificationExportService(verification_setup["verification_plan"])
+
+    with django_assert_num_queries(1):
+        export_service.generate_workbook()
+
+
 def test_validation_valid_not_changed_file(verification_setup):
     verification_plan = verification_setup["verification_plan"]
     export_service = XlsxVerificationExportService(verification_plan)

@@ -5,6 +5,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
@@ -40,7 +41,10 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
     onSuccess: () => {
       showMessage(t('Payment Plan has been sent back.'));
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     },
     onError: (error: any) => {
@@ -48,30 +52,20 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
     },
   });
 
-  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
-
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       <>
-        {paymentPlan.hasPaymentListExportFile && (
-          <Box m={2}>
-            <Button
-              color="primary"
-              component="a"
-              variant="contained"
-              data-cy="button-download-xlsx"
-              download
-              href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-              disabled={shouldDisableDownloadXlsx}
-              data-perm={PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP}
-            >
-              {t('Download XLSX')}
-            </Button>
-          </Box>
-        )}
-
         {canSendBack && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <LoadingButton
               color="primary"
               variant="contained"
@@ -86,7 +80,11 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
         )}
 
         {canClose && (
-          <Box m={2}>
+          <Box
+            sx={{
+              m: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"

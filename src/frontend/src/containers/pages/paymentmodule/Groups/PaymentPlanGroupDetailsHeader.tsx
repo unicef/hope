@@ -37,10 +37,21 @@ export function PaymentPlanGroupDetailsHeader({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems="baseline" gap={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 1,
+          }}
+        >
           <Box>{group?.name ?? t('Group Detail')}</Box>
           {group?.unicefId && (
-            <Box color="text.secondary" fontSize="0.85em">
+            <Box
+              sx={{
+                color: 'text.secondary',
+                fontSize: '0.85em',
+              }}
+            >
               {group.unicefId}
             </Box>
           )}
@@ -49,7 +60,12 @@ export function PaymentPlanGroupDetailsHeader({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={group?.adminUrl} />}
     >
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         <EditGroupName group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />

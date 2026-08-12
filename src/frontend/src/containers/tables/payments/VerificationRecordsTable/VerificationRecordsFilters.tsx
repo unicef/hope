@@ -6,9 +6,9 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { Choice } from '@restgenerated/models/Choice';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
+import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
+import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -47,20 +47,20 @@ export function VerificationRecordsFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
-    queryKey: ['verificationStatusChoices'],
-    queryFn: () => RestService.restChoicesPaymentVerificationStatusList(),
-  });
+  const {
+    data: verificationStatusChoices = [],
+    isError: isStatusChoicesError,
+    error: statusChoicesError,
+  } = useVerificationStatusChoices();
+  const {
+    data: verificationChannelChoices = [],
+    isError: isChannelChoicesError,
+    error: channelChoicesError,
+  } = useVerificationChannelChoices();
 
-  const verificationChannelChoices = [
-    { name: 'Manual', value: 'MANUAL' },
-    { name: 'RapidPro', value: 'RAPIDPRO' },
-    { name: 'XLSX', value: 'XLSX' },
-  ];
-
-  if (!verificationStatusChoices) {
-    return null;
-  }
+  // A failed lookup must not hide the filter bar — surface it and keep filtering usable.
+  useApiErrorSnackbar(isStatusChoicesError, statusChoicesError);
+  useApiErrorSnackbar(isChannelChoicesError, channelChoicesError);
 
   const verificationPlanOptions = verifications.map((item) => (
     <MenuItem key={item.unicefId} value={item.id}>

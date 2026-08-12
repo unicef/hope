@@ -27,6 +27,7 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { WarningTooltip } from '@core/WarningTooltip';
 
 const EndInputAdornment = styled(InputAdornment)`
@@ -76,7 +77,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       },
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', paymentPlan.id],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
       },
     });
@@ -144,7 +147,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         });
         showMessage(t('Funds commitment items assigned successfully'));
         await queryClient.invalidateQueries({
-          queryKey: ['paymentPlan'],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
       } catch (e) {
         showApiErrorMessages(e, showMessage);
@@ -175,16 +180,28 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   };
 
   return (
-    <Box m={5}>
+    <Box
+      sx={{
+        m: 5,
+      }}
+    >
       <ContainerColumnWithBorder>
-        <Box mt={4}>
+        <Box
+          sx={{
+            mt: 4,
+          }}
+        >
           <Title>
             <Typography variant="h6">{t('Funds Commitment')}</Typography>
           </Title>
         </Box>
         {paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW && (
           <React.Fragment>
-            <Box mt={2}>
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
               <FormControl fullWidth size="small">
                 <Autocomplete
                   value={selectedFundsCommitment}
@@ -213,7 +230,11 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               </FormControl>
             </Box>
             {selectedCommitment && (
-              <Box mt={2}>
+              <Box
+                sx={{
+                  mt: 2,
+                }}
+              >
                 <FormControl fullWidth size="small">
                   <InputLabel>{t('Funds Commitment Items')}</InputLabel>
                   <Select
@@ -278,7 +299,11 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 </FormControl>
               </Box>
             )}
-            <Box mt={3}>
+            <Box
+              sx={{
+                mt: 3,
+              }}
+            >
               <Tooltip
                 title={!canAssignFunds ? t('Permission Denied') : ''}
                 arrow
@@ -306,9 +331,19 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         )}
         {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.length > 0 && (
           <React.Fragment>
-            <Box mt={2}>
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
               {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
-                <Typography variant="h6" fontWeight="bold" mb={2}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 'bold',
+                    mb: 2,
+                  }}
+                >
                   {t('Funds Commitment Number')}:{' '}
                   {formatFigure(selectedCommitment?.fundsCommitmentNumber) ??
                     '-'}{' '}
@@ -321,8 +356,19 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               )}
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
                 (item, index) => (
-                  <Box key={index} mb={4}>
-                    <Typography variant="subtitle1" fontWeight="bold" mb={2}>
+                  <Box
+                    key={index}
+                    sx={{
+                      mb: 4,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 'bold',
+                        mb: 2,
+                      }}
+                    >
                       {t('Item')} #{item.fundsCommitmentItem}
                     </Typography>
                     <Grid container spacing={3}>

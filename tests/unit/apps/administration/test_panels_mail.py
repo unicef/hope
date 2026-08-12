@@ -32,10 +32,9 @@ def test_email_panel_get_masks_password_for_non_root(superuser_client: Client) -
     assert response.context["smtp"]["EMAIL_HOST_PASSWORD"] == "****"
 
 
-def test_email_panel_get_reveals_password_for_root(superuser_client: Client) -> None:
+def test_email_panel_get_reveals_password_for_root(superuser_client: Client, enable_is_root) -> None:
     response = superuser_client.get(
         reverse("admin:console-email"),
-        headers={"x-root-token": settings.ROOT_TOKEN},
     )
 
     assert response.status_code == 200

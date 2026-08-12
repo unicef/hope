@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 from django.forms import modelform_factory
 
+from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import (
     Account,
     AccountType,
@@ -402,6 +403,10 @@ class Importer:
                 individual.first_registration_date = timezone.now()
             if not getattr(individual, "last_registration_date", None):
                 individual.last_registration_date = timezone.now()
+            if individual.phone_no:
+                individual.phone_no_valid = is_valid_phone_number(str(individual.phone_no))
+            if individual.phone_no_alternative:
+                individual.phone_no_alternative_valid = is_valid_phone_number(str(individual.phone_no_alternative))
         Individual.objects.bulk_create(self.individuals_to_create)
 
     def _save_documents(self) -> None:

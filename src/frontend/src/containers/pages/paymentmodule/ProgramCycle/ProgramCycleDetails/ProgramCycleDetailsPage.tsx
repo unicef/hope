@@ -9,6 +9,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
@@ -31,7 +32,11 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
   const permissions = usePermissions();
 
   const { data, isLoading } = useQuery<ProgramCycleList>({
-    queryKey: ['programCyclesDetails', businessArea, programCycleId, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesRetrieve, {
+      businessAreaSlug: businessArea,
+      id: programCycleId,
+      programCode: programId,
+    }),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,

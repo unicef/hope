@@ -187,7 +187,7 @@ class PaymentPlanFlow:
     def background_action_status_xlsx_import_error(self) -> None:
         pass
 
-    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus), target=None)
+    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus))
     def background_action_status_none(self) -> None:
         self.payment_plan.background_action_status = None
 
@@ -544,6 +544,6 @@ class FollowUpInstructionFlow:
     def background_action_status_xlsx_import_error(self) -> None:
         pass
 
-    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus), target=None)
+    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus))
     def background_action_status_none(self) -> None:
         self.instruction.background_action_status = None

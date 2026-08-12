@@ -7,11 +7,12 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaymentPlanGroupAutocompleteRest } from '@shared/autocompletes/rest/PaymentPlanGroupAutocompleteRest';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -49,9 +50,13 @@ export const DuplicateTargetPopulation = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { data: programData } = useQuery<ProgramDetail>({
-    queryKey: ['programDetail', businessArea, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve, {
+      businessAreaSlug: businessArea,
+      code: programId,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
@@ -81,6 +86,13 @@ export const DuplicateTargetPopulation = ({
         id,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
+      });
+    },
   });
 
   const initialValues = {
@@ -121,6 +133,8 @@ export const DuplicateTargetPopulation = ({
                 paymentPlanGroupId: values.paymentPlanGroupId.value,
                 paymentPlanPurposes: values.paymentPlanPurposes,
               },
+              // The mutation's generated return type differs from the actual
+              // duplicated-target-population response; cast to read `res.id`.
             })) as unknown as TargetPopulationDetail;
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
