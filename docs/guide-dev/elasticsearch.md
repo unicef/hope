@@ -92,6 +92,50 @@ resumed, and nothing touches an alias before a count verification passes.
     a deploy, reindex with `es_reindex --all --force` (or per program with
     `--sweep-wrecks`).
 
+### Add fields — never change them
+
+Elasticsearch mappings are **append-only**: an existing field's type, analyzer or
+sub-fields can never be altered on a live index, and even with blue-green the change only
+materializes when the reindex swap happens. So:
+
+- **Adding a field** is the normal, supported flow above.
+- **Changing an existing field** (type, analyzer, similarity, `index_prefixes`, ...) is a
+  *breaking* change: until `es_reindex` has rebuilt and swapped a program, its live index
+  still serves the OLD definition. Any query that relies on the new definition returns
+  wrong results (or errors) against not-yet-reindexed programs.
+- **Renaming** a field is an add + a later removal — the old field keeps existing (and
+  keeps being written) until every consumer is migrated and a reindex drops it.
+
+### The deploy → reindex gap and feature flags
+
+A mapping change ships in **two independent steps** — the code deploy and the fleet
+reindex — and there is always a window between them. During that window the aliases still
+point at indexes built from the previous mapping. Two consequences:
+
+1. Signal writes push the **full document** (all mapped fields) into the old live index,
+   so a brand-new field gets created there by ES **dynamic mapping with a guessed type**.
+   Harmless for existing queries, but never assume the field is properly typed until the
+   reindex swap.
+2. Query code that depends on the new/changed field **must be gated behind a feature
+   flag** (constance flag, default off) so the old query path keeps serving until every
+   program is on the new mapping.
+
+The full rollout contract:
+
+```mermaid
+flowchart TD
+    P1["1. merge + deploy:<br/>new mapping in documents.py,<br/>new query path behind a<br/>constance flag (OFF)"] --> P2
+    P2["2. es_reindex --all<br/>every alias now points at an index<br/>built from the new mapping<br/>(verify with --status)"] --> P3
+    P3["3. flip the flag ON<br/>new query path live everywhere"] --> P4
+    P4["4. after the sanity window:<br/>es_drop_old_index_versions,<br/>remove the flag + old query path"]
+```
+
+!!! danger "Never flip the flag before the fleet reindex finishes"
+    Between steps 1 and 2 the new field either does not exist in the live index or exists
+    with a dynamically guessed type. A flag flipped early produces silently wrong search
+    and deduplication results for every not-yet-reindexed program — the worst failure
+    mode, because nothing errors.
+
 ## New programs
 
 Nothing to do: when a program becomes ACTIVE, the signal creates the pair as `_v1` with
