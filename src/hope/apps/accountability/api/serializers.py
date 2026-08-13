@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from rest_framework import serializers
 
@@ -181,7 +183,31 @@ class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
         )
 
 
-class MessageCreateSerializer(serializers.Serializer):
+class ProgramScopedRecipientsMixin:
+    """Recipients referenced by id in the body must belong to the program from the url path."""
+
+    def _validate_program(self, obj: Any, program: Any) -> Any:
+        if obj is not None and program != self.context["program"]:
+            raise serializers.ValidationError("Object does not belong to the Programme.")
+        return obj
+
+    def validate_payment_plan(self, payment_plan: PaymentPlan | None) -> PaymentPlan | None:
+        return self._validate_program(payment_plan, payment_plan and payment_plan.program_cycle.program)
+
+    def validate_registration_data_import(
+        self, registration_data_import: RegistrationDataImport | None
+    ) -> RegistrationDataImport | None:
+        return self._validate_program(
+            registration_data_import, registration_data_import and registration_data_import.program
+        )
+
+    def validate_households(self, households: list[Household]) -> list[Household]:
+        for household in households:
+            self._validate_program(household, household.program)
+        return households
+
+
+class MessageCreateSerializer(ProgramScopedRecipientsMixin, serializers.Serializer):
     title = serializers.CharField()
     body = serializers.CharField()
     sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
@@ -216,7 +242,7 @@ class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgu
     sex = serializers.CharField(allow_null=True)
 
 
-class SurveySerializer(serializers.ModelSerializer):
+class SurveySerializer(ProgramScopedRecipientsMixin, serializers.ModelSerializer):
     title = serializers.CharField()
     body = serializers.CharField(required=False, allow_blank=True)
     sampling_type = serializers.CharField()
@@ -294,7 +320,7 @@ class SurveyRapidProFlowSerializer(serializers.Serializer):
     name: serializers.CharField = serializers.CharField()
 
 
-class SurveySampleSizeSerializer(serializers.Serializer):
+class SurveySampleSizeSerializer(ProgramScopedRecipientsMixin, serializers.Serializer):
     payment_plan = serializers.PrimaryKeyRelatedField(
         queryset=PaymentPlan.objects.all(), required=False, allow_null=True
     )
@@ -309,7 +335,7 @@ class SampleSizeSerializer(serializers.Serializer):
     excluded_recipients_count = serializers.IntegerField()
 
 
-class MessageSampleSizeSerializer(serializers.Serializer):
+class MessageSampleSizeSerializer(ProgramScopedRecipientsMixin, serializers.Serializer):
     households = serializers.ListSerializer(
         child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()),
         required=False,

@@ -4,12 +4,13 @@ from typing import Any
 
 from django.db.models import Count, Q
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import get_count_and_percentage
 from hope.apps.registration_data.utils import get_rdi_program_population
-from hope.models import ImportData, KoboImportData, RegistrationDataImport
+from hope.models import ImportData, KoboImportData, Program, RegistrationDataImport
 
 
 class RegistrationDataImportListSerializer(serializers.ModelSerializer):
@@ -163,6 +164,11 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
     )
     screen_beneficiary = serializers.BooleanField(required=True)
     exclude_external_collectors = serializers.BooleanField(required=False, default=False)
+
+    def validate_import_from_program_id(self, import_from_program_id: str) -> str:
+        # the source program has to belong to the business area of the url path
+        get_object_or_404(Program, id=import_from_program_id, business_area=self.context["business_area"])
+        return import_from_program_id
 
     def get_object(self, validated_data: dict) -> RegistrationDataImport:
         request = self.context["request"]

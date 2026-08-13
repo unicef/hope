@@ -306,8 +306,8 @@ class MessageViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        program = Program.objects.get(code=self.program_code)
+        business_area = self.business_area
+        program = self.program
 
         input_data = serializer.validated_data
         input_data["program"] = str(program.pk)
@@ -406,8 +406,8 @@ class SurveyViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        business_area = BusinessArea.objects.get(slug=self.business_area_slug)
-        program = Program.objects.get(code=self.program_code)
+        business_area = self.business_area
+        program = self.program
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
