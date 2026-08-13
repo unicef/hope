@@ -165,12 +165,11 @@ class IndividualXlsxUpdate:
             if "phone_no" in form.errors:
                 form.errors["phone_no"] = ErrorList([f"Invalid phone number for individual {individual.unicef_id}."])
             raise ValidationError(form.errors)
-        # TODO: add 'program_id' arg or None? individual.program_id
         log_create(
             Individual.ACTIVITY_LOG_MAPPING,
             "business_area",
-            None,
-            None,
+            self.xlsx_update_file.uploaded_by,
+            individual.program_id,
             old_object=old_individual,
             new_object=individual,
         )
