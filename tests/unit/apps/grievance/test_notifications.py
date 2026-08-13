@@ -238,8 +238,8 @@ def test_note_added_recipient_excludes_assignee_who_wrote_the_note(
     assert notification.emails == []
 
 
-@override_settings(ENV="prod")
-def test_users_with_permissions_exclude_staff_and_superuser_in_prod(
+@override_config(NOTIFY_INTERNAL_USERS=False)
+def test_users_with_permissions_exclude_staff_and_superuser(
     business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
 ) -> None:
     staff = UserFactory(email="staff@example.com", is_staff=True)
@@ -253,8 +253,23 @@ def test_users_with_permissions_exclude_staff_and_superuser_in_prod(
     assert list(notification.user_recipients) == []
 
 
-@override_settings(ENV="prod")
-def test_users_with_permissions_keep_regular_users_in_prod(
+@override_config(NOTIFY_INTERNAL_USERS=True)
+def test_users_with_permissions_include_staff_and_superuser_when_internal_users_notified(
+    business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
+) -> None:
+    staff = UserFactory(email="staff@example.com", is_staff=True)
+    UserRoleAssignmentFactory(user=staff, role=sensitive_role, business_area=business_area)
+
+    superuser = UserFactory(email="super@example.com", is_superuser=True)
+    UserRoleAssignmentFactory(user=superuser, role=sensitive_role, business_area=business_area)
+
+    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_CREATED)
+
+    assert set(notification.user_recipients) == {staff, superuser}
+
+
+@override_config(NOTIFY_INTERNAL_USERS=False)
+def test_users_with_permissions_keep_regular_users(
     business_area: BusinessArea, sensitive_ticket: GrievanceTicket, sensitive_role: Role
 ) -> None:
     recipient = UserFactory(email="regular@example.com")
