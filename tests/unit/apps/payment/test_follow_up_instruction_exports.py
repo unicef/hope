@@ -232,6 +232,23 @@ def test_delivery_export_happy_path_aggregates_households(
     assert rows[shared_household_id]["delivered_quantity"] == Decimal("0.00")
 
 
+def test_delivery_export_includes_fsp_extra_field_from_later_child_plan(
+    instruction,
+    instruction_payments,
+    delivery_template,
+):
+    payment_from_later_plan = instruction_payments[2]
+    payment_from_later_plan.set_fsp_extra_fields({"later_child_reference": "FSP-LATER-001"})
+    payment_from_later_plan.save(update_fields=["extras"])
+
+    workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
+    headers = [cell.value for cell in workbook.active[1]]
+    rows = _rows_by_household(workbook.active)
+
+    assert "later_child_reference" in headers
+    assert rows[payment_from_later_plan.household.unicef_id]["later_child_reference"] == "FSP-LATER-001"
+
+
 class _MinimalExportService(XlsxFollowUpInstructionBaseExportService):
     filename_prefix = "test"
 
