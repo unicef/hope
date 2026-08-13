@@ -33,7 +33,6 @@ _MOD = "hope.apps.household.management.commands.es_populate_delta"
 CHECK = f"{_MOD}.check_program_indexes"
 CREATE = f"{_MOD}.create_program_indexes"
 POPULATE = f"{_MOD}.populate_program_indexes"
-VERSION = f"{_MOD}.Command._print_server_version"
 PROCESS = f"{_MOD}.Command._process_program"
 DELTA = f"{_MOD}.Command._program_delta"
 APPLY = f"{_MOD}.Command._apply_delta"
@@ -42,7 +41,7 @@ GET_HH_DOC = "hope.apps.household.documents.get_household_doc"
 GET_CONN = "elasticsearch.dsl.connections.get_connection"
 REMOVE = "hope.apps.utils.elasticsearch_utils.remove_elasticsearch_documents_by_matching_ids"
 
-OPTS = {"dry_run": False, "chunk_size": 2000, "parallel": False, "threads": 4, "verify": False}
+OPTS = {"dry_run": False, "chunk_size": 2000, "parallel": False}
 
 
 # ── _parse_since ─────────────────────────────────────────────────────────────
@@ -144,7 +143,7 @@ def test_program_delta_household_change_marks_members_present() -> None:
 
 def test_program_delta_head_change_marks_household_present() -> None:
     # Household doc embeds the head's own name/phone fields -> a change to the head individual
-    # (exactly what es_mutate_stream bumps via given_name) must re-index the household.
+    # must re-index the household.
     prog = ProgramFactory(status=Program.ACTIVE)
     since = timezone.now()
     past = since - datetime.timedelta(hours=1)
@@ -334,17 +333,12 @@ def test_command_never_imports_index_delete() -> None:
     assert not hasattr(mod, "delete_program_indexes")
 
 
-# ── handle: argument validation & server version ──────────────────────────────
+# ── handle: argument validation ───────────────────────────────────────────────
 
 
 def test_requires_since_or_reconcile() -> None:
     with pytest.raises(CommandError):
-        call_command(CMD, "--using", "default")
-
-
-def test_unknown_using_alias_raises() -> None:
-    with pytest.raises(CommandError):
-        call_command(CMD, "--using", "does-not-exist", "--reconcile")
+        call_command(CMD)
 
 
 def test_target_suffix_with_reconcile_raises() -> None:
@@ -352,35 +346,11 @@ def test_target_suffix_with_reconcile_raises() -> None:
         call_command(CMD, "--reconcile", "--target-suffix", "v2")
 
 
-def test_target_suffix_with_verify_raises() -> None:
-    with pytest.raises(CommandError, match="target-suffix"):
-        call_command(CMD, "--since", "2026-07-01T09:00:00Z", "--verify", "--target-suffix", "v2")
-
-
-@patch(GET_CONN)
-def test_print_server_version_prints_host_and_version(mock_conn) -> None:
-    mock_conn.return_value.info.return_value = {"version": {"number": "9.0.1"}, "cluster_name": "shadow"}
-    out = StringIO()
-
-    Command(stdout=out)._print_server_version("default")
-
-    printed = out.getvalue()
-    assert "9.0.1" in printed
-    assert "shadow" in printed
-
-
-@patch(GET_CONN, side_effect=OSError("no route to host"))
-def test_print_server_version_unreachable_raises(mock_conn) -> None:
-    with pytest.raises(CommandError, match="Cannot reach ES"):
-        Command(stdout=StringIO())._print_server_version("default")
-
-
 # ── handle: --since orchestration / --reconcile / scope ───────────────────────
 
 
-@patch(VERSION)
 @patch(PROCESS, return_value=("delta synced", "ind +1/-0 hh +0/-0"))
-def test_since_processes_every_active_program(mock_process, mock_version) -> None:
+def test_since_processes_every_active_program(mock_process) -> None:
     # No cross-program pre-filter: every in-scope program is handed to _process_program.
     prog = ProgramFactory(status=Program.ACTIVE)
     since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
@@ -391,9 +361,8 @@ def test_since_processes_every_active_program(mock_process, mock_version) -> Non
     assert mock_process.call_args.args[0] == str(prog.id)
 
 
-@patch(VERSION)
 @patch(PROCESS, return_value=("failed", "boom"))
-def test_since_failure_is_listed_and_command_errors(mock_process, mock_version) -> None:
+def test_since_failure_is_listed_and_command_errors(mock_process) -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
     out = StringIO()
@@ -407,9 +376,8 @@ def test_since_failure_is_listed_and_command_errors(mock_process, mock_version) 
     assert "boom" in printed
 
 
-@patch(VERSION)
 @patch(CHECK, return_value=(False, "count mismatch"))
-def test_reconcile_reports_drift_read_only(mock_check, mock_version) -> None:
+def test_reconcile_reports_drift_read_only(mock_check) -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     out = StringIO()
 
@@ -420,10 +388,9 @@ def test_reconcile_reports_drift_read_only(mock_check, mock_version) -> None:
     assert prog.code in printed
 
 
-@patch(VERSION)
 @patch(PROCESS)
 @patch(CHECK, return_value=(True, "ok"))
-def test_reconcile_only_does_not_sync(mock_check, mock_process, mock_version) -> None:
+def test_reconcile_only_does_not_sync(mock_check, mock_process) -> None:
     ProgramFactory(status=Program.ACTIVE)
 
     call_command(CMD, "--reconcile", stdout=StringIO())
@@ -431,9 +398,8 @@ def test_reconcile_only_does_not_sync(mock_check, mock_process, mock_version) ->
     mock_process.assert_not_called()
 
 
-@patch(VERSION)
 @patch(PROCESS)
-def test_scope_no_match_warns_and_skips(mock_process, mock_version) -> None:
+def test_scope_no_match_warns_and_skips(mock_process) -> None:
     ProgramFactory(status=Program.ACTIVE)
     since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
     out = StringIO()

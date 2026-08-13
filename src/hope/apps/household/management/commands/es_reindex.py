@@ -109,7 +109,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--chunk-size",
             type=int,
-            default=getattr(settings, "ELASTICSEARCH_POPULATE_CHUNK_SIZE", 2000),
+            default=2000,
             help="Bulk chunk size for the full populate.",
         )
         parser.add_argument(

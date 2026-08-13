@@ -1,11 +1,15 @@
-"""Catch up a shadow Elasticsearch cluster with Postgres after the bulk copy, incrementally.
+"""Incremental Postgres -> Elasticsearch catch-up for the per-program indexes.
 
-Records keep changing in Postgres while the ES bulk copy runs, so the shadow cluster drifts.
+Postgres keeps changing while a blue-green populate runs (and between runs), so ES drifts.
 This command closes that gap **without ever deleting an index**: it loops the in-scope programs
 and, for each one that has a delta since ``--since``, writes only the changed documents into the
 existing per-program index (upsert changed, delete the docs of soft-removed records). A program
 whose index does not exist yet (e.g. created during the window) is the only full-populate case:
 we create the index and populate the whole program.
+
+``es_reindex`` calls this internally (pre-swap catch-up into the dark pair via
+``--target-suffix``, then post-swap passes through the alias); it stays usable standalone for
+ad-hoc drift fixes.
 
 Postgres is the source of truth. The Individual/Household ES documents embed related objects, so a
 change is any of:
@@ -19,21 +23,18 @@ change is any of:
 A soft-delete bumps ``updated_at`` and sets ``is_removed=True``; such records are removed from ES
 by ``_id`` (the document, never the index).
 
-Known gaps, out of scope for this incremental pass (need a separate full ``es_shadow_populate``):
+Known gaps, out of scope for this incremental pass (a full rebuild via ``es_reindex`` clears both):
 
 * Reference-data rename (Partner / Area / Country / DocumentType): touches documents across many
   programs with no per-program key -- only reported here as a warning, not applied.
-* Hard-delete (row physically gone): ``--since`` cannot see it, so its ES document is left orphaned.
-  A future ``--reconcile`` id-diff pass would remove such orphans.
-
-The shadow cluster is selected by pointing the pod's ELASTICSEARCH_HOST env at it; the 'default'
-connection then writes there.
+* Hard-delete (row physically gone): ``--since`` cannot see it, so its ES document is left
+  orphaned. ``--reconcile`` reports the resulting count drift but does not remove orphans.
 
 Examples
 --------
-Catch up all active programs from the bulk-copy start time (minus a small buffer)::
+Catch up all active programs changed since a timestamp::
 
-    python manage.py es_populate_delta --since 2026-07-01T08:55Z --parallel --threads 8
+    python manage.py es_populate_delta --since 2026-07-01T08:55Z
 
 Dry-run -- print each program's delta without writing::
 
@@ -54,7 +55,6 @@ from datetime import datetime
 from typing import Any
 import uuid
 
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
@@ -68,26 +68,18 @@ from hope.apps.household.services.index_management import (
 
 class Command(BaseCommand):
     help = (
-        "Incrementally catch up per-program ES indexes on a shadow cluster against Postgres: "
-        "upsert only changed documents, never delete an index. "
-        "Shadow cluster is the one that waits to be plugged into prod and replace the current one."
+        "Incrementally catch up per-program ES indexes against Postgres: upsert only documents "
+        "changed since --since, never delete an index. Used internally by es_reindex; standalone "
+        "for ad-hoc drift fixes."
     )
 
     def add_arguments(self, parser: Any) -> None:
-        parser.add_argument(
-            "--using",
-            default="default",
-            help=(
-                "Connection alias from settings.ELASTICSEARCH_DSL (default: 'default'). "
-                "Point the pod's ELASTICSEARCH_HOST at the shadow cluster and 'default' writes there."
-            ),
-        )
         parser.add_argument(
             "--since",
             default=None,
             help=(
                 "ISO-8601 timestamp. Sync programs with an Individual/Household/Document/Identity "
-                "changed at/after this time. Use the bulk-copy start time minus a small buffer."
+                "changed at/after this time."
             ),
         )
         parser.add_argument(
@@ -113,19 +105,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--parallel",
             action="store_true",
-            default=getattr(settings, "ELASTICSEARCH_POPULATE_PARALLEL", False),
             help="Use parallel_bulk for indexing.",
-        )
-        parser.add_argument(
-            "--threads",
-            type=int,
-            default=getattr(settings, "ELASTICSEARCH_POPULATE_THREAD_COUNT", 4),
-            help="Worker threads when --parallel is set.",
         )
         parser.add_argument(
             "--chunk-size",
             type=int,
-            default=getattr(settings, "ELASTICSEARCH_POPULATE_CHUNK_SIZE", 2000),
+            default=2000,
             help="Bulk chunk size.",
         )
         parser.add_argument(
@@ -142,27 +127,14 @@ class Command(BaseCommand):
             action="store_true",
             help="Print each program's delta (and full-populate/no-delta status) without writing.",
         )
-        parser.add_argument(
-            "--verify",
-            action="store_true",
-            help="After each program, run check_program_indexes() to confirm DB/ES counts match.",
-        )
 
     def handle(self, *args: Any, **opts: Any) -> None:
-        using: str = opts["using"]
-        if using not in settings.ELASTICSEARCH_DSL:
-            raise CommandError(
-                f"Connection alias '{using}' is not registered in settings.ELASTICSEARCH_DSL "
-                f"(have: {list(settings.ELASTICSEARCH_DSL)}). "
-                f"Use --using default and point the pod's ELASTICSEARCH_HOST at the shadow cluster."
-            )
+        using = "default"
         if not opts["since"] and not opts["reconcile"]:
             raise CommandError("Provide --since <timestamp> and/or --reconcile.")
-        if opts["target_suffix"] and (opts["reconcile"] or opts["verify"] or not opts["since"]):
-            # reconcile/verify compare through the ALIAS (the old index) - meaningless for a dark target
-            raise CommandError("--target-suffix requires --since and cannot be combined with --reconcile/--verify.")
-
-        self._print_server_version(using)
+        if opts["target_suffix"] and (opts["reconcile"] or not opts["since"]):
+            # reconcile compares through the ALIAS (the old index) - meaningless for a dark target
+            raise CommandError("--target-suffix requires --since and cannot be combined with --reconcile.")
 
         from hope.models import Program
 
@@ -181,7 +153,6 @@ class Command(BaseCommand):
 
         since = self._parse_since(opts["since"])
         self._warn_reference_data(since)
-        self.stdout.write(f"Target cluster: '{using}' -> {settings.ELASTICSEARCH_DSL[using]['hosts']}")
         self._sync_programs(code_by_id, since, using, opts)
 
     def _sync_programs(self, code_by_id: dict, since: datetime, using: str, opts: dict) -> None:
@@ -205,20 +176,13 @@ class Command(BaseCommand):
                 continue
             if status != "no delta":
                 synced += 1
-            if opts["verify"] and not opts["dry_run"]:
-                vok, vmsg = check_program_indexes(str(pid), using=using)
-                self.stdout.write((self.style.SUCCESS if vok else self.style.WARNING)(f"    verify: {vmsg}"))
 
         if failed:
             self.stdout.write(self.style.ERROR(f"Failed programs ({len(failed)}):"))
             for code, pid, msg in failed:
                 self.stdout.write(self.style.ERROR(f"  - {code}  id={pid}  {msg}"))
-            raise CommandError(f"Done with {len(failed)} failure(s) on cluster '{using}'.")
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Done. Cluster '{using}': {synced} of {total} program(s) had work, rest already in sync."
-            )
-        )
+            raise CommandError(f"Done with {len(failed)} failure(s).")
+        self.stdout.write(self.style.SUCCESS(f"Done. {synced} of {total} program(s) had work, rest already in sync."))
 
     def _process_program(self, pid: str, since: datetime, using: str, opts: dict) -> tuple[str, str]:
         """Sync one program: full-populate if the index is missing, else upsert/delete only the delta."""
@@ -338,7 +302,7 @@ class Command(BaseCommand):
             .distinct()
         )
         # Household doc embeds head_of_household's own fields (given_name, full_name, phone...) ->
-        # a change to the head individual re-indexes the household. This is what es_mutate_stream bumps.
+        # a change to the head individual re-indexes the household.
         hh_present |= set(
             Household.objects.filter(program_id=pid, head_of_household__updated_at__gte=since)
             .values_list("id", flat=True)
@@ -356,19 +320,6 @@ class Command(BaseCommand):
             "hh_present": hh_present,
             "hh_removed": hh_removed,
         }
-
-    def _print_server_version(self, using: str) -> None:
-        # Confirm which ES server we are about to write to (host + version) before any work.
-        from elasticsearch.dsl import connections
-
-        host = settings.ELASTICSEARCH_DSL[using]["hosts"]
-        try:
-            info = connections.get_connection(using).info()
-            version = info["version"]["number"]
-            cluster = info.get("cluster_name", "?")
-            self.stdout.write(self.style.SUCCESS(f"ES '{using}' -> {host} | cluster={cluster} version={version}"))
-        except Exception as exc:  # noqa: BLE001  # surface a clear connection error instead of a later traceback
-            raise CommandError(f"Cannot reach ES '{using}' at {host}: {exc}") from exc
 
     def _report_reconcile(self, code_by_id: dict, using: str) -> None:
         # Read-only drift report. Rebuilding a mismatch would mean deleting the index -- not allowed
@@ -389,7 +340,7 @@ class Command(BaseCommand):
                 self.style.WARNING(
                     f"Reference data changed since {since.isoformat()} ({', '.join(ref_changed)}); "
                     f"this spans many programs with no per-program key and is NOT applied by the delta -- "
-                    f"run a full es_shadow_populate for those."
+                    f"rebuild the affected programs with es_reindex."
                 )
             )
 
