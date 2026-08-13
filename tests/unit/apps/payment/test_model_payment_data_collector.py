@@ -86,6 +86,71 @@ def account_setup():
     }
 
 
+@pytest.fixture
+def non_generic_accounts_setup(account_setup):
+    financial_institution = account_setup["financial_institution"]
+    financial_institution.country = CountryFactory()
+    financial_institution.save(update_fields=["country"])
+    AccountFactory(
+        individual=account_setup["individual"],
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    AccountFactory(
+        individual=account_setup["individual_2"],
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    return account_setup
+
+
+@pytest.fixture
+def bulk_required_fields_setup(account_setup):
+    fsp = account_setup["fsp"]
+    collector = account_setup["individual"]
+    financial_institution = account_setup["financial_institution"]
+    financial_institution.country = CountryFactory()
+    financial_institution.save(update_fields=["country"])
+    collector.phone_no = "+48111222333"
+    collector.save(update_fields=["phone_no"])
+    account_setup["dm_config"].required_fields = ["provider", "phone", "service_provider_code", "missing"]
+    account_setup["dm_config"].save(update_fields=["required_fields"])
+    FspNameMapping.objects.create(
+        external_name="phone",
+        hope_name="phone_no",
+        source=FspNameMapping.SourceModel.INDIVIDUAL,
+        fsp=fsp,
+    )
+    FinancialInstitutionMappingFactory(
+        financial_institution=financial_institution,
+        financial_service_provider=fsp,
+        code="BANK-CODE",
+    )
+    account = AccountFactory(
+        individual=collector,
+        account_type=account_setup["account_type_bank"],
+        financial_institution=financial_institution,
+        number="123456",
+        data={"provider": "Provider", "service_provider_code": "STALE-CODE"},
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    return account_setup, account
+
+
+@pytest.fixture
+def mapped_service_provider_field_setup(bulk_required_fields_setup):
+    account_setup, account = bulk_required_fields_setup
+    mapping = FspNameMapping.objects.create(
+        external_name="bank_code",
+        hope_name=PaymentDataCollector.SERVICE_PROVIDER_CODE,
+        source=FspNameMapping.SourceModel.ACCOUNT,
+        fsp=account_setup["fsp"],
+    )
+    return account_setup, account, mapping
+
+
 def test_get_associated_object(account_setup):
     dmd = AccountFactory(
         data={"test": "test"},
@@ -243,6 +308,20 @@ def test_resolve_financial_institution_code_returns_none_without_account_or_fina
     assert PaymentDataCollector.resolve_financial_institution_code(account_setup["fsp"], account) is None
 
 
+def test_resolve_required_field_uses_mapped_financial_institution_code(mapped_service_provider_field_setup):
+    account_setup, account, mapping = mapped_service_provider_field_setup
+
+    value = PaymentDataCollector.resolve_required_field(
+        account_setup["fsp"],
+        account_setup["individual"],
+        account,
+        mapping.external_name,
+        mapping,
+    )
+
+    assert value == "BANK-CODE"
+
+
 def test_delivery_data_without_account_does_not_add_account_defaults(account_setup):
     dm_config = account_setup["dm_config"]
     dm_config.required_fields = ["service_provider_code"]
@@ -322,6 +401,62 @@ def test_validate_account(account_setup):
     collector.phone_no = ""
     collector.save(update_fields=["phone_no"])
     assert PaymentDataCollector.validate_account(fsp, account_setup["dm_atm_card"], collector) is False
+
+
+def test_validate_accounts_uses_constant_number_of_queries(account_setup, django_assert_num_queries):
+    collector = account_setup["individual"]
+    collector_2 = account_setup["individual_2"]
+    with django_assert_num_queries(3):
+        validation_results = PaymentDataCollector.validate_accounts(
+            account_setup["fsp"],
+            account_setup["dm_atm_card"],
+            [collector, collector_2],
+        )
+
+    assert validation_results == {collector.id: True, collector_2.id: True}
+
+
+def test_delivery_data_for_collectors_does_not_load_financial_institution_countries_per_account(
+    non_generic_accounts_setup,
+    django_assert_num_queries,
+):
+    collector = non_generic_accounts_setup["individual"]
+    collector_2 = non_generic_accounts_setup["individual_2"]
+    with django_assert_num_queries(4):
+        delivery_data = PaymentDataCollector.delivery_data_for_collectors(
+            non_generic_accounts_setup["fsp"],
+            non_generic_accounts_setup["dm_atm_card"],
+            [collector, collector_2],
+        )
+
+    assert set(delivery_data) == {collector.id, collector_2.id}
+
+
+def test_bulk_collector_processing_resolves_required_fields_and_validity(bulk_required_fields_setup):
+    account_setup, account = bulk_required_fields_setup
+    collector = account_setup["individual"]
+
+    delivery_data = PaymentDataCollector.delivery_data_for_collectors(
+        account_setup["fsp"],
+        account_setup["dm_atm_card"],
+        [collector],
+    )
+    validity = PaymentDataCollector.validate_accounts(
+        account_setup["fsp"],
+        account_setup["dm_atm_card"],
+        [collector],
+    )
+
+    assert delivery_data[collector.id] == {
+        "provider": "Provider",
+        "phone": str(collector.phone_no),
+        "service_provider_code": "BANK-CODE",
+        "missing": None,
+        "number": "123456",
+        "financial_institution_name": account.financial_institution.name,
+        "financial_institution_pk": str(account.financial_institution_id),
+    }
+    assert validity == {collector.id: False}
 
 
 def test_validate_account_resolves_service_provider_code_from_financial_institution(account_setup):

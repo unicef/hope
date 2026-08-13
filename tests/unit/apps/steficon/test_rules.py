@@ -1,12 +1,12 @@
-from typing import Tuple
 from unittest.mock import Mock
 
+from django.test import RequestFactory
+from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, UserFactory
 from hope.admin.rule import RuleAdmin
 from hope.admin.rule_commit import RuleCommitAdmin
-from hope.config import settings
 from hope.models import Household, Rule, User
 
 CODE = """
@@ -31,7 +31,7 @@ s = s.upper()
 
 
 @pytest.fixture
-def basic_rule_setup() -> Tuple[User, Household]:
+def basic_rule_setup() -> tuple[User, Household]:
     BusinessAreaFactory()
     user = UserFactory(is_superuser=True, username="test")
     user.set_password("test")
@@ -53,7 +53,7 @@ def test_rule() -> None:
 
 
 @pytest.mark.django_db
-def test_execution(basic_rule_setup: Tuple[User, Household]) -> None:
+def test_execution(basic_rule_setup: tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     rule = Rule(definition="result.value=101")
     result = rule.execute({"hh": household})
@@ -137,7 +137,7 @@ def test_release() -> None:
 
 
 @pytest.mark.django_db
-def test_nested_rule(basic_rule_setup: Tuple[User, Household]) -> None:
+def test_nested_rule(basic_rule_setup: tuple[User, Household]) -> None:
     user, household = basic_rule_setup
     rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
     rule2 = Rule.objects.create(
@@ -168,16 +168,18 @@ def test_modules() -> None:
 
 
 @pytest.mark.django_db
-def test_root_user_can_edit_version_and_rule(basic_rule_setup: Tuple[User, Household]) -> None:
+def test_root_user_can_edit_version_and_rule(basic_rule_setup: tuple[User, Household], enable_is_root) -> None:
     user, household = basic_rule_setup
-    assert RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(
-        Mock(user=user, headers={"x-root-token": settings.ROOT_TOKEN})
-    ) == ["updated_by"]
+    request = RequestFactory().get("/")
+    request.user = user
+    assert RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(request) == ["updated_by"]
 
 
 @pytest.mark.django_db
 def test_regular_user_cannot_edit_version_and_rule() -> None:
-    assert RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))) == [
+    request = RequestFactory().get("/")
+    request.user = UserFactory(is_superuser=False)
+    assert RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(request) == [
         "updated_by",
         "version",
         "rule",
@@ -185,14 +187,23 @@ def test_regular_user_cannot_edit_version_and_rule() -> None:
 
 
 @pytest.mark.django_db
-def test_get_readonly_fields(basic_rule_setup: Tuple[User, Household]) -> None:
+def test_get_readonly_fields(basic_rule_setup: tuple[User, Household], enable_is_root) -> None:
     user, household = basic_rule_setup
     # is_root
-    assert RuleAdmin(Mock(), Mock()).get_readonly_fields(
-        Mock(user=user, headers={"x-root-token": settings.ROOT_TOKEN})
-    ) == ["created_by", "created_at", "updated_by", "updated_at", "version"]
-    # is_superuser
-    assert RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=True))) == [
+    request = RequestFactory().get("/")
+    request.user = user
+    assert RuleAdmin(Mock(), Mock()).get_readonly_fields(request) == [
+        "created_by",
+        "created_at",
+        "updated_by",
+        "updated_at",
+        "version",
+    ]
+    # is_superuser (without IS_ROOT flag)
+    FlagState.objects.filter(name="IS_ROOT").delete()
+    request = RequestFactory().get("/")
+    request.user = UserFactory(is_superuser=True)
+    assert RuleAdmin(Mock(), Mock()).get_readonly_fields(request) == [
         "created_by",
         "created_at",
         "updated_by",
@@ -208,7 +219,9 @@ def test_get_readonly_fields(basic_rule_setup: Tuple[User, Household]) -> None:
         "flags",
     ]
     # just regular staff user
-    assert RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))) == [
+    request = RequestFactory().get("/")
+    request.user = UserFactory(is_superuser=False)
+    assert RuleAdmin(Mock(), Mock()).get_readonly_fields(request) == [
         "created_by",
         "created_at",
         "updated_by",

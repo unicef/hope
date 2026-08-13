@@ -6,10 +6,10 @@ from unittest.mock import patch
 import uuid
 
 from aniso8601 import parse_date
+from constance.test import override_config
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
-from django.test import override_settings
 from django.utils import timezone
 from django.utils.timezone import now
 from flags.models import FlagState
@@ -604,7 +604,7 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(76):
+    with django_assert_num_queries(59):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_child_payment_plan_async_task(follow_up_pp_2)
 
@@ -1830,7 +1830,6 @@ def test_get_collector() -> None:
     assert collcector_type == "PRIMARY"
 
 
-@override_settings(ENV="prod")
 def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> None:
     partner_unicef = PartnerFactory(name="UNICEF")
     partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
@@ -1879,6 +1878,38 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
         assert user_with_perm_ba_wide in emailed_users
         assert superuser_with_perm not in emailed_users
         assert user_with_perm_in_different_program not in emailed_users
+
+
+@override_config(NOTIFY_INTERNAL_USERS=True)
+def test_send_reconciliation_overdue_email_recipients_include_internal_users(business_area: Any) -> None:
+    partner_unicef = PartnerFactory(name="UNICEF")
+    partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+    role, _ = Role.objects.update_or_create(
+        name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
+    )
+
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program)
+    pp = PaymentPlanFactory(
+        dispersion_start_date=now() - timedelta(days=10),
+        dispersion_end_date=now(),
+        status=PaymentPlan.Status.ACCEPTED,
+        program_cycle=cycle,
+    )
+    pp.refresh_from_db()
+    program = pp.program
+    program.reconciliation_window_in_days = 10
+    program.send_reconciliation_window_expiry_notifications = True
+    program.save()
+
+    superuser_with_perm = UserFactory(partner=partner_unicef_hq, is_superuser=True)
+    RoleAssignment.objects.create(user=superuser_with_perm, role=role, business_area=business_area, program=program)
+
+    with mock.patch.object(User, "email_user", autospec=True) as mock_email_user:
+        PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
+
+        assert mock_email_user.call_count == 1
+        assert mock_email_user.call_args_list[0].args[0] == superuser_with_perm
 
 
 @pytest.fixture

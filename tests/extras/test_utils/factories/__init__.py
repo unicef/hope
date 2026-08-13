@@ -128,7 +128,7 @@ from .targeting import (
     TargetingIndividualBlockRuleFilterFactory,
     TargetingIndividualRuleFilterBlockFactory,
 )
-from .third_party import GroupFactory
+from .third_party import FlagStateFactory, GroupFactory
 from .vision import DownPaymentFactory, FundsCommitmentFactory, FundsCommitmentGroupFactory, FundsCommitmentItemFactory
 
 __all__ = [
@@ -161,6 +161,7 @@ __all__ = [
     "FeedbackMessageFactory",
     "FileTempFactory",
     "FinancialInstitutionFactory",
+    "FlagStateFactory",
     "FinancialInstitutionMappingFactory",
     "FinancialServiceProviderFactory",
     "FinancialServiceProviderXlsxTemplateFactory",
