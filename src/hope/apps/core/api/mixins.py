@@ -189,7 +189,7 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
 
         program_ids = self.request.user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
-            self.PERMISSIONS,
+            self.get_permissions_for_action(),
         )
 
         return queryset.filter(

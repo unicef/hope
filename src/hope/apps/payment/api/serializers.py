@@ -89,8 +89,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_pk"]
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        payment_plan = self.context["payment_plan"]
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
 

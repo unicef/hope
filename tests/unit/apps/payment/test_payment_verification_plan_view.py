@@ -1212,13 +1212,21 @@ def test_record_viewset_get_object_returns_parent_payment_plan(
     verification_context: dict[str, Any],
 ) -> None:
     viewset = PaymentVerificationRecordViewSet()
-    viewset.kwargs = {"payment_verification_pk": str(verification_context["payment_plan"].pk)}
+    viewset.kwargs = {
+        "business_area_slug": verification_context["business_area"].slug,
+        "program_code": verification_context["program_active"].code,
+        "payment_verification_pk": str(verification_context["payment_plan"].pk),
+    }
     assert viewset.get_object() == verification_context["payment_plan"]
 
 
-def test_record_viewset_get_object_raises_404_for_unknown_id() -> None:
+def test_record_viewset_get_object_raises_404_for_unknown_id(verification_context: dict[str, Any]) -> None:
     viewset = PaymentVerificationRecordViewSet()
-    viewset.kwargs = {"payment_verification_pk": "00000000-0000-0000-0000-000000000000"}
+    viewset.kwargs = {
+        "business_area_slug": verification_context["business_area"].slug,
+        "program_code": verification_context["program_active"].code,
+        "payment_verification_pk": "00000000-0000-0000-0000-000000000000",
+    }
     with pytest.raises(Http404):
         viewset.get_object()
 

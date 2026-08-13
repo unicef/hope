@@ -116,7 +116,8 @@ class FeedbackViewSet(
     program_model_field = "program"
 
     def get_object(self) -> Feedback:
-        return get_object_or_404(Feedback, id=self.kwargs.get("pk"))
+        # via get_queryset - permissions are checked against the path, so the object must be scoped the same way
+        return get_object_or_404(self.get_queryset(), id=self.kwargs.get("pk"))
 
     def get_queryset(self) -> QuerySet[Feedback]:
         queryset = super().get_queryset()
@@ -138,10 +139,10 @@ class FeedbackViewSet(
         program_code = self.kwargs.get("program_code")
         program = None
         if program_code:
-            program = Program.objects.get(code=program_code)
+            program = get_object_or_404(Program, code=program_code, business_area=business_area)
 
         if program_id := serializer.validated_data.get("program_id"):
-            program = Program.objects.get(id=program_id)
+            program = get_object_or_404(Program, id=program_id, business_area=business_area)
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("It is not possible to create Feedback for a Finished Program.")
@@ -195,7 +196,7 @@ class FeedbackViewSet(
         program = feedback.program
 
         if program_id := serializer.validated_data.get("program_id"):
-            program = Program.objects.get(id=program_id)
+            program = get_object_or_404(Program, id=program_id, business_area=business_area)
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("It is not possible to update Feedback for a Finished Program.")
