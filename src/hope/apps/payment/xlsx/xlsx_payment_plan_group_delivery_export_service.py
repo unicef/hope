@@ -221,9 +221,9 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 fsp_extra_fields_headers=group_fsp_extra_fields_headers,
             )
             per_fsp_service.prepare_headers(cast("FinancialServiceProviderXlsxTemplate", template))
-            if not header:
-                header = per_fsp_service.header_list
+            if not prepared_services:
                 self.allow_export_fsp_auth_code = per_fsp_service.allow_export_fsp_auth_code
+            header.extend(column for column in per_fsp_service.header_list if column not in header)
             prepared_services.append(per_fsp_service)
             self.exported_plan_ids.append(payment_plan.id)
 
@@ -234,7 +234,14 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 "household_snapshot", "currency", "delivery_type", "financial_service_provider", "parent"
             ).order_by("unicef_id")
             for payment in payments.iterator(chunk_size=self.batch_size):
-                self.ws_export_list.append(per_fsp_service.get_payment_row(payment))
+                payment_row = dict(
+                    zip(
+                        per_fsp_service.header_list,
+                        per_fsp_service.get_payment_row(payment),
+                        strict=True,
+                    )
+                )
+                self.ws_export_list.append([payment_row.get(column, "") for column in header])
 
         self._adjust_column_width_from_col(ws=self.ws_export_list)
         return self.wb

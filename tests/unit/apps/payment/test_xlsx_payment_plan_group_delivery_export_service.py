@@ -358,6 +358,69 @@ def group_with_account_snapshot_and_template_without_account_data(
 
 
 @pytest.fixture
+def group_with_plan_specific_account_headers(
+    program_cycle,
+    business_area,
+    fsp,
+    delivery_mechanism,
+):
+    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "account_data"])
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=template,
+    )
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plans = sorted(
+        (
+            PaymentPlanFactory(
+                program_cycle=program_cycle,
+                payment_plan_group=group,
+                business_area=business_area,
+                financial_service_provider=fsp,
+                delivery_mechanism=delivery_mechanism,
+                status=PaymentPlan.Status.ACCEPTED,
+            ),
+            PaymentPlanFactory(
+                program_cycle=program_cycle,
+                payment_plan_group=group,
+                business_area=business_area,
+                financial_service_provider=fsp,
+                delivery_mechanism=delivery_mechanism,
+                status=PaymentPlan.Status.ACCEPTED,
+            ),
+        ),
+        key=lambda payment_plan: payment_plan.unicef_id,
+    )
+    payment_with_account = PaymentFactory(
+        parent=plans[0],
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plans[0].program,
+    )
+    PaymentHouseholdSnapshotFactory(
+        payment=payment_with_account,
+        snapshot_data={
+            "primary_collector": {
+                "account_data": {
+                    "iban": "IBAN-A",
+                    "number": "NUM-A",
+                }
+            }
+        },
+    )
+    payment_with_extra = PaymentFactory(
+        parent=plans[1],
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plans[1].program,
+        extras={"fsp_extra_fields": {"number": "EXTRA-NUMBER-B"}},
+    )
+    PaymentHouseholdSnapshotFactory(payment=payment_with_extra, snapshot_data={})
+    return group, payment_with_account, payment_with_extra
+
+
+@pytest.fixture
 def group_with_two_plans_and_payments(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan_one = PaymentPlanFactory(
@@ -555,6 +618,23 @@ def test_account_values_are_omitted_when_group_template_excludes_account_data(
     assert list(workbook.active.values) == [
         ("payment_id", "provider_reference"),
         (payment.unicef_id, "FSP-REFERENCE"),
+    ]
+
+
+def test_rows_are_aligned_to_group_headers_when_account_headers_differ_between_plans(
+    group_with_plan_specific_account_headers,
+):
+    group, payment_with_account, payment_with_extra = group_with_plan_specific_account_headers
+
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(
+        group,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+    ).generate_workbook()
+
+    assert list(workbook.active.values) == [
+        ("payment_id", "iban", "number", "financial_institution_pk", "financial_institution_name"),
+        (payment_with_account.unicef_id, "IBAN-A", "NUM-A", "", ""),
+        (payment_with_extra.unicef_id, "", "EXTRA-NUMBER-B", "", ""),
     ]
 
 
