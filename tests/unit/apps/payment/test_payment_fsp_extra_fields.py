@@ -339,6 +339,7 @@ def test_fsp_extra_fields_import_merges_non_empty_values(
     old_signature = payments[0].signature_hash
     with django_assert_num_queries(1):
         service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, fsp_extra_fields_import_file)
+    assert "household_snapshot" not in service.payments[payments[0].unicef_id]._state.fields_cache
     service.open_workbook()
     service.validate()
 
@@ -380,7 +381,7 @@ def test_fsp_extra_fields_import_logs_previous_and_updated_values(
         "date_field": "2026-07-23T00:00:00",
     }
 
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(5):
         updated_count = service.import_payment_list(str(payment_plan.created_by_id))
 
     log = LogEntry.objects.get(content_type=content_type, object_id=payments[0].pk)

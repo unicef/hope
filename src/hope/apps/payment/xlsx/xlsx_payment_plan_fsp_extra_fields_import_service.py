@@ -4,6 +4,7 @@ import datetime
 from decimal import Decimal
 from typing import IO, TYPE_CHECKING, Any, cast
 
+from django.db.models import prefetch_related_objects
 import openpyxl
 
 from hope.apps.activity_log.utils import copy_model_object
@@ -42,7 +43,6 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
             for payment in payment_plan.eligible_payments.select_related(
                 "currency",
                 "delivery_type",
-                "household_snapshot",
             )
         }
         self.is_updated = False
@@ -164,11 +164,13 @@ class XlsxPaymentPlanFspExtraFieldsImportService(XlsxImportBaseService):
                     **updates,
                 }
             )
-            payment.update_signature_hash()
             payments_to_update.append(payment)
             log_pairs.append((old_payment, payment))
 
         if payments_to_update:
+            prefetch_related_objects(payments_to_update, "household_snapshot")
+            for payment in payments_to_update:
+                payment.update_signature_hash()
             Payment.objects.bulk_update(
                 payments_to_update,
                 fields=("extras", "signature_hash"),
