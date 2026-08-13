@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
             name="financial_institution",
             field=models.ForeignKey(
                 blank=True,
+                help_text="The financial institution holding this account",
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 to="payment.financialinstitution",

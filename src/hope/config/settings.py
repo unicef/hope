@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
 
 from django.http import HttpRequest
 from django.urls import reverse_lazy
@@ -86,6 +85,7 @@ EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+EMAIL_SUBJECT_PREFIX = ""
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")
@@ -93,13 +93,6 @@ ENV = env("ENV")
 DB_ZOMBIE_TIMEOUT_MS = 4 * 60 * 60 * 1000
 
 PROCESS_ROLE = get_process_role()
-
-# prefix all non-production emails
-if ENV != "prod":
-    EMAIL_SUBJECT_PREFIX = f"{ENV}"
-else:
-    EMAIL_SUBJECT_PREFIX = ""
-
 
 RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
@@ -367,8 +360,6 @@ COUNTRIES_OVERRIDE = {
     },
 }
 
-ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
-
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
 
@@ -380,7 +371,7 @@ AA_PERMISSION_HANDLER = 3
 
 
 def filter_environment(key: str, config: dict, request: HttpRequest) -> bool:
-    return key == "ROOT_ACCESS_TOKEN" or key.startswith("DIRENV")
+    return key.startswith("DIRENV")
 
 
 def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:
@@ -454,6 +445,7 @@ FLAGS = {
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
     "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
+    "IS_ROOT": [{"condition": "boolean", "value": False}],
 }
 
 MARKDOWNIFY = {

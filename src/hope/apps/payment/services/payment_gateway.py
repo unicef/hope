@@ -437,6 +437,7 @@ class PaymentGatewayAPI(BaseAPI):
 
 class PaymentGatewayService:
     ADD_RECORDS_CHUNK_SIZE = 500
+    SYNC_RECORDS_CHUNK_SIZE = 500
     PENDING_UPDATE_PAYMENT_STATUSES = [
         Payment.STATUS_PENDING,
         Payment.STATUS_SENT_TO_PG,
@@ -531,6 +532,34 @@ class PaymentGatewayService:
                     payments_qs = payments_qs.filter(id__in=id_filters)
                 self._add_records_to_container(payments_qs.order_by("unicef_id"), split)
 
+    @staticmethod
+    def _resolve_fsp(
+        fsp_data: FspData,
+        payment_gateway_id: str,
+        fsps_by_pg_id: dict[str | None, FinancialServiceProvider],
+        fsps_by_vendor_number: dict[str, FinancialServiceProvider],
+    ) -> tuple[FinancialServiceProvider, bool]:
+        if fsp := fsps_by_pg_id.get(payment_gateway_id):
+            return fsp, False
+
+        if not fsp_data.vendor_number:
+            raise ValueError(f"Payment Gateway FSP {fsp_data.name} is missing vendor_number")
+
+        if fsp := fsps_by_vendor_number.get(fsp_data.vendor_number):
+            if fsp.payment_gateway_id and fsp.payment_gateway_id != payment_gateway_id:
+                raise ValueError(
+                    f"FSP {fsp.name} already has a different payment_gateway_id: "
+                    f"{fsp.payment_gateway_id} != {payment_gateway_id}"
+                )
+            return fsp, False
+
+        return (
+            FinancialServiceProvider(
+                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            ),
+            True,
+        )
+
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
 
@@ -550,39 +579,55 @@ class PaymentGatewayService:
             dm.payment_gateway_id: dm for dm in DeliveryMechanism.objects.filter(payment_gateway_id__in=all_dm_pg_ids)
         }
 
+        fsps_to_create = []
+        fsps_to_update = []
+        fsp_sync_items = []
+        sync_time = timezone.now()
+
         for fsp_data in fsps_data:
-            with transaction.atomic():
-                payment_gateway_id = str(fsp_data.id)
+            payment_gateway_id = str(fsp_data.id)
+            fsp, created = self._resolve_fsp(
+                fsp_data,
+                payment_gateway_id,
+                fsps_by_pg_id,
+                fsps_by_vendor_number,
+            )
 
-                fsp = fsps_by_pg_id.get(payment_gateway_id)
-                created = False
-                if not fsp:
-                    if not fsp_data.vendor_number:
-                        raise ValueError(f"Payment Gateway FSP {fsp_data.name} is missing vendor_number")
+            data_transfer_configuration = [dataclasses.asdict(config) for config in fsp_data.configs]  # type: ignore
+            changed = (
+                fsp.payment_gateway_id != payment_gateway_id
+                or fsp.vision_vendor_number != fsp_data.vendor_number
+                or fsp.name != fsp_data.name
+                or fsp.data_transfer_configuration != data_transfer_configuration
+            )
 
-                    fsp = fsps_by_vendor_number.get(fsp_data.vendor_number)
-                    if fsp:
-                        if fsp.payment_gateway_id and fsp.payment_gateway_id != payment_gateway_id:
-                            raise ValueError(
-                                f"FSP {fsp.name} already has a different payment_gateway_id: "
-                                f"{fsp.payment_gateway_id} != {payment_gateway_id}"
-                            )
-                        fsp.payment_gateway_id = payment_gateway_id
-                    else:
-                        fsp = FinancialServiceProvider(
-                            payment_gateway_id=payment_gateway_id,
-                            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                        )
-                        created = True
+            fsp.payment_gateway_id = payment_gateway_id
+            fsp.vision_vendor_number = fsp_data.vendor_number
+            fsp.name = fsp_data.name
+            fsp.data_transfer_configuration = data_transfer_configuration
 
-                fsp.vision_vendor_number = fsp_data.vendor_number
-                fsp.name = fsp_data.name
-                fsp.data_transfer_configuration = [dataclasses.asdict(config) for config in fsp_data.configs]  # type: ignore
-                fsp.save()
+            if created:
+                fsps_to_create.append(fsp)
+            elif changed:
+                fsp.updated_at = sync_time
+                fsps_to_update.append(fsp)
+            fsp_sync_items.append((fsp_data, fsp))
 
+        with transaction.atomic():
+            FinancialServiceProvider.objects.bulk_create(fsps_to_create)
+            FinancialServiceProvider.objects.bulk_update(
+                fsps_to_update,
+                [
+                    "payment_gateway_id",
+                    "vision_vendor_number",
+                    "name",
+                    "data_transfer_configuration",
+                    "updated_at",
+                ],
+            )
+
+            for fsp_data, fsp in fsp_sync_items:
                 if delivery_mechanisms_pg_ids := {str(config.delivery_mechanism) for config in fsp_data.configs}:
-                    if not created:
-                        fsp.delivery_mechanisms.clear()
                     fsp.delivery_mechanisms.set(
                         [
                             delivery_mechanisms_by_pg_id[pg_id]
@@ -628,19 +673,27 @@ class PaymentGatewayService:
             )
 
     @staticmethod
+    def _payment_records_by_remote_id(
+        payment_records: list[PaymentRecordData],
+    ) -> dict[str, PaymentRecordData]:
+        records_by_remote_id = {}
+        for payment_record in payment_records:
+            records_by_remote_id.setdefault(payment_record.remote_id, payment_record)
+        return records_by_remote_id
+
+    @staticmethod
     def update_payment(  # noqa: PLR0913
         payment: Payment,
-        pg_payment_records: list[PaymentRecordData],
+        payment_records_by_remote_id: dict[str, PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
         exchange_rate: Decimal | float | None,
         log_pairs: "list[tuple[Payment, Payment]]",
-    ) -> None:
-        try:
-            matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
-        except StopIteration:
+    ) -> tuple[str, ...] | None:
+        matching_pg_payment = payment_records_by_remote_id.get(str(payment.id))
+        if matching_pg_payment is None:
             logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
-            return
+            return None
 
         old_payment = cast("Payment", copy_model_object(payment))
         payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
@@ -675,8 +728,17 @@ class PaymentGatewayService:
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
 
-        payment.save(update_fields=update_fields)
         log_pairs.append((old_payment, payment))
+        return tuple(update_fields)
+
+    @classmethod
+    def _bulk_update_payments(cls, payments_by_update_fields: dict[tuple[str, ...], list[Payment]]) -> None:
+        for update_fields, payments in payments_by_update_fields.items():
+            Payment.signature_manager.bulk_update_with_signature(
+                payments,
+                update_fields,
+                batch_size=cls.SYNC_RECORDS_CHUNK_SIZE,
+            )
 
     def sync_records(self) -> None:
         payment_plans = PaymentPlan.objects.prefetch_related(
@@ -709,15 +771,20 @@ class PaymentGatewayService:
                     pending_payments = getattr(instruction, "eligible_items", [])
                     if pending_payments:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+                        payment_records_by_remote_id = self._payment_records_by_remote_id(pg_payment_records)
+                        payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
                         for payment in pending_payments:
-                            self.update_payment(
+                            update_fields = self.update_payment(
                                 payment,
-                                pg_payment_records,
+                                payment_records_by_remote_id,
                                 instruction,
                                 payment_plan,
                                 exchange_rate,
                                 payment_log_pairs,
                             )
+                            if update_fields:
+                                payments_by_update_fields.setdefault(update_fields, []).append(payment)
+                        self._bulk_update_payments(payments_by_update_fields)
 
                 bulk_log_payment_changes(payment_log_pairs, self.user)
                 payment_plan.update_money_fields()
@@ -738,14 +805,16 @@ class PaymentGatewayService:
         pg_payment_record = self.api.get_record(payment.id)
         if pg_payment_record:
             payment_log_pairs: list = []
-            self.update_payment(
+            update_fields = self.update_payment(
                 payment,
-                [pg_payment_record],
+                {pg_payment_record.remote_id: pg_payment_record},
                 payment.parent_split,  # type: ignore[arg-type]
                 payment_plan,
                 payment_plan.exchange_rate,
                 payment_log_pairs,
             )
+            if update_fields:
+                self._bulk_update_payments({update_fields: [payment]})
             bulk_log_payment_changes(payment_log_pairs, self.user)
 
             if payment_plan.is_reconciled:
@@ -777,16 +846,21 @@ class PaymentGatewayService:
                 .select_related("household_snapshot", "delivery_type", "currency")
             )
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+            payment_records_by_remote_id = self._payment_records_by_remote_id(pg_payment_records)
             instruction_log_pairs: list = []
+            payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
             for payment in payments:
-                self.update_payment(
+                update_fields = self.update_payment(
                     payment,
-                    pg_payment_records,
+                    payment_records_by_remote_id,
                     instruction,
                     payment_plan,
                     exchange_rate,
                     instruction_log_pairs,
                 )
+                if update_fields:
+                    payments_by_update_fields.setdefault(update_fields, []).append(payment)
+            self._bulk_update_payments(payments_by_update_fields)
             bulk_log_payment_changes(instruction_log_pairs, self.user)
 
         if payment_plan.is_reconciled:

@@ -3,9 +3,9 @@ from decimal import Decimal
 from itertools import groupby
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Union, cast
+from uuid import UUID
 
 from constance import config
-from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -485,7 +485,7 @@ class PaymentPlanService:
             household_id=OuterRef("pk"),
             unicef_id__in=ind_ids,
         )
-        households = (
+        household_rows = list(
             households.annotate(
                 pr_collector=IndividualRoleInHousehold.objects.filter(
                     household=OuterRef("pk"), role=ROLE_PRIMARY
@@ -505,16 +505,25 @@ class PaymentPlanService:
             .values("pk", "pr_collector", "alt_collector", "unicef_id", "head_of_household", "use_alt_collector")
         )
 
-        for household in households:
-            collector, collector_type = PaymentPlanService._get_collector(household)
+        collector_ids = {
+            household["alt_collector"] if household["use_alt_collector"] else household["pr_collector"]
+            for household in household_rows
+        }
+        collector_ids.discard(None)
+        collectors_by_id = {
+            collector.id: collector
+            for collector in Individual.objects.filter(id__in=collector_ids).select_related("household__country")
+        }
+        delivery_mechanism = payment_plan.delivery_mechanism
+        financial_service_provider = payment_plan.financial_service_provider
+        wallet_validity_by_collector_id = PaymentDataCollector.validate_accounts(
+            financial_service_provider,
+            delivery_mechanism,
+            collectors_by_id.values(),
+        )
 
-            has_valid_wallet = True
-            if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
-                has_valid_wallet = PaymentDataCollector.validate_account(
-                    payment_plan.financial_service_provider,
-                    payment_plan.delivery_mechanism,
-                    collector,
-                )
+        for household in household_rows:
+            collector, collector_type = PaymentPlanService._get_collector(household, collectors_by_id)
 
             payments_to_create.append(
                 Payment(
@@ -528,9 +537,9 @@ class PaymentPlanService:
                     head_of_household_id=household["head_of_household"],
                     collector=collector,
                     collector_type=collector_type,
-                    financial_service_provider=payment_plan.financial_service_provider,
-                    delivery_type=payment_plan.delivery_mechanism,
-                    has_valid_wallet=has_valid_wallet,
+                    financial_service_provider=financial_service_provider,
+                    delivery_type=delivery_mechanism,
+                    has_valid_wallet=wallet_validity_by_collector_id[collector.id],
                 )
             )
         try:
@@ -542,7 +551,10 @@ class PaymentPlanService:
         PaymentPlanService.generate_signature(payment_plan)
 
     @staticmethod
-    def _get_collector(household: dict[str, Any]) -> tuple[Individual, str]:
+    def _get_collector(
+        household: dict[str, Any],
+        collectors_by_id: dict[UUID, Individual] | None = None,
+    ) -> tuple[Individual, str]:
         use_alt_collector = household.get("use_alt_collector", False)
         if use_alt_collector:
             collector_id = household.get("alt_collector")
@@ -556,7 +568,10 @@ class PaymentPlanService:
             logging.exception(msg)
             raise ValidationError(msg)
 
-        return Individual.objects.get(id=collector_id), collector_type
+        collector = collectors_by_id.get(collector_id) if collectors_by_id is not None else None
+        if collector is None:
+            collector = Individual.objects.get(id=collector_id)
+        return collector, collector_type
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
@@ -1569,7 +1584,7 @@ class PaymentPlanService:
             Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
         ).distinct()
 
-        if settings.ENV == "prod":
+        if not config.NOTIFY_INTERNAL_USERS:
             users = users.exclude(is_superuser=True)
 
         if users:

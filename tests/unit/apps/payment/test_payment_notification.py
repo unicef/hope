@@ -732,7 +732,6 @@ def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_clos
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
 def test_send_email_notification_subject_mark_ready_for_closure(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
@@ -758,7 +757,6 @@ def test_send_email_notification_mark_ready_for_closure(notification_setup: dict
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
 def test_send_email_notification_subject_send_back_to_finished(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
@@ -797,21 +795,7 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
-def test_send_email_notification_subject_test_env(notification_setup: dict, mocker: Any) -> None:
-    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
-    payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
-        notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
-    )
-    assert payment_notification.email.subject == "[test] Payment pending for Approval"
-
-
-@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
-def test_send_email_notification_subject_prod_env(notification_setup: dict, mocker: Any) -> None:
+def test_send_email_notification_subject_send_for_approval(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
@@ -891,7 +875,6 @@ def test_send_email_notification_without_catch_all_email(notification_setup: dic
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
 )
-@override_settings(ENV="prod")
 def test_send_email_notification_exclude_superuser(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     users = notification_setup["users"]
@@ -939,7 +922,6 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
 )
-@override_settings(ENV="prod")
 def test_send_email_notification_exclude_staff_user(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     users = notification_setup["users"]
@@ -980,3 +962,27 @@ def test_send_email_notification_exclude_staff_user(notification_setup: dict, mo
         assert users[key].email in payment_notification.email.recipients
 
     assert mock_post.call_count == 1
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
+    NOTIFY_INTERNAL_USERS=True,
+)
+def test_send_email_notification_include_internal_users(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.utils.celery_tasks.requests.post")
+    users = notification_setup["users"]
+    users["user_with_partner_unicef_hq"].is_superuser = True
+    users["user_with_partner_unicef_hq"].is_staff = True
+    users["user_with_partner_unicef_hq"].save()
+
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    payment_notification.send_email_notification()
+
+    assert users["user_with_partner_unicef_hq"].email in payment_notification.email.recipients

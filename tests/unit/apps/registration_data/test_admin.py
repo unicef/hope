@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 import uuid
 
 from constance.test import override_config
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.test import Client
@@ -275,6 +274,7 @@ def test_delete_rdi_merged(
     django_app: Any,
     afghanistan: BusinessArea,
     program: Program,
+    enable_is_root,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         name="RDI To Remove",
@@ -345,7 +345,7 @@ def test_delete_rdi_merged(
     assert Document.objects.count() == 1
 
     url = reverse("admin:registration_data_registrationdataimport_delete_merged_rdi", args=[rdi.pk])
-    response = django_app.get(url, user=admin_user, headers={"X-Root-Token": settings.ROOT_TOKEN})
+    response = django_app.get(url, user=admin_user)
     assert response.status_code == 200
     content = response.content.decode()
     assert "DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING" in content
