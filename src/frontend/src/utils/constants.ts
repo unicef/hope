@@ -51,6 +51,8 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
     'XLSX Importing Reconciliation',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
     'XLSX Import Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
+    'XLSX Importing FSP Extra Fields',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
     'Applying Custom Exchange Rate',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
