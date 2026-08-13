@@ -28,6 +28,7 @@ import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/Acce
 import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
+import { FspExtraFields } from '@components/paymentmodule/PaymentPlanDetails/FspExtraFields/FspExtraFields';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
@@ -127,6 +128,13 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
+          {status === PaymentPlanStatusEnum.LOCKED_FSP &&
+            !paymentPlan.isInstructionManaged && (
+              <FspExtraFields
+                paymentPlan={paymentPlan}
+                permissions={permissions}
+              />
+            )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
           <ConversionToUsd
