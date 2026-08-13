@@ -1,5 +1,6 @@
 from datetime import UTC
 import hashlib
+import json
 from typing import Any
 from unittest import mock
 
@@ -45,7 +46,7 @@ def calculate_hash_manually(payment: Payment) -> str:
     sha1.update(str(payment.program_id).encode("utf-8"))
     sha1.update(str(payment.order_number).encode("utf-8"))
     sha1.update(str(payment.token_number).encode("utf-8"))
-    sha1.update(str(payment.household_snapshot.snapshot_data).encode("utf-8"))
+    sha1.update(json.dumps(payment.household_snapshot.snapshot_data, sort_keys=True, default=str).encode("utf-8"))
     sha1.update(str(payment.business_area_id).encode("utf-8"))
     sha1.update(str(payment.status).encode("utf-8"))
     sha1.update(str(payment.status_date).encode("utf-8"))
@@ -59,6 +60,7 @@ def calculate_hash_manually(payment: Payment) -> str:
     sha1.update(str(payment.delivered_quantity_usd).encode("utf-8"))
     sha1.update(str(payment.delivery_date).encode("utf-8"))
     sha1.update(str(payment.transaction_reference_id).encode("utf-8"))
+    sha1.update(json.dumps(payment.fsp_extra_fields, sort_keys=True, default=str).encode("utf-8"))
     return sha1.hexdigest()
 
 

@@ -9,10 +9,13 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
@@ -30,6 +33,17 @@ export function VerifyPaymentGrievance({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
+  const {
+    data: verificationStatusChoices = [],
+    isLoading: isStatusChoicesLoading,
+    isError: isStatusChoicesError,
+    error: statusChoicesError,
+  } = useVerificationStatusChoices();
+  useApiErrorSnackbar(isStatusChoicesError, statusChoicesError);
+  // Grievance verification only allows marking a payment received / not received.
+  const statusChoices = verificationStatusChoices.filter((choice) =>
+    ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value),
+  );
 
   const { mutateAsync: mutate } = useMutation({
     mutationFn: (values: any) => {
@@ -109,16 +123,17 @@ export function VerifyPaymentGrievance({
               <DialogContainer>
                 <Grid container>
                   <Grid size={{ xs: 12 }}>
-                    <Field
-                      name="newStatus"
-                      label="Status"
-                      style={{ flexDirection: 'row' }}
-                      choices={[
-                        { value: 'RECEIVED', name: t('Received') },
-                        { value: 'NOT_RECEIVED', name: t('Not Received') },
-                      ]}
-                      component={FormikRadioGroup}
-                    />
+                    {isStatusChoicesLoading ? (
+                      <LoadingComponent />
+                    ) : (
+                      <Field
+                        name="newStatus"
+                        label="Status"
+                        style={{ flexDirection: 'row' }}
+                        choices={statusChoices}
+                        component={FormikRadioGroup}
+                      />
+                    )}
                   </Grid>
                   <Grid size={{ xs: 6 }}>
                     {values.newStatus === 'RECEIVED' && (

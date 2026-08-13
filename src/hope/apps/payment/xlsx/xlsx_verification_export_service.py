@@ -79,7 +79,13 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     def __init__(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         self.payment_verification_plan = payment_verification_plan
         self.is_social_worker_program = payment_verification_plan.payment_plan.program.is_social_worker_program
-        self.payment_record_verifications = payment_verification_plan.payment_record_verifications.all()
+        self.payment_record_verifications = payment_verification_plan.payment_record_verifications.select_related(
+            "payment__head_of_household",
+            "payment__household__admin1",
+            "payment__household__admin2",
+            "payment__household__admin3",
+            "payment__household__admin4",
+        )
         self.HEADERS = self._get_headers()
 
     def _create_workbook(self) -> openpyxl.Workbook:

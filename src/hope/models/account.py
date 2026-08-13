@@ -17,19 +17,33 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         "household.Individual",
         on_delete=models.CASCADE,
         related_name="accounts",
+        help_text="The individual this account belongs to",
     )
     account_type = models.ForeignKey(
         "payment.AccountType",
         on_delete=models.PROTECT,
+        help_text="The type of account (e.g. bank, wallet)",
     )
     financial_institution = models.ForeignKey(
         "payment.FinancialInstitution",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
+        help_text="The financial institution holding this account",
     )
-    number = models.CharField(max_length=256, blank=True, null=True, db_index=True)
-    data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
+    number = models.CharField(
+        max_length=256,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="The account number or wallet identifier",
+    )
+    data = JSONField(
+        default=dict,
+        blank=True,
+        encoder=DjangoJSONEncoder,
+        help_text="Additional account-specific fields",
+    )
     unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)
     is_unique = models.BooleanField(default=True, db_index=True)
     active = models.BooleanField(default=True, db_index=True)  # False for duplicated/withdrawn individual

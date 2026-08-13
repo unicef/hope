@@ -86,12 +86,12 @@ Full docs: [seleniumbase.io/help_docs/method_summary](https://seleniumbase.io/he
 
 ```python
 # BAD
-browser.click(INPUT_NAME)          # dismiss picker
-browser.sleep(0.3)                 # flaky
+browser.click(INPUT_NAME)  # dismiss picker
+browser.sleep(0.3)  # flaky
 browser.click(INPUT_END_DATE)
 
 # GOOD
-browser.click(INPUT_NAME)          # dismiss picker
+browser.click(INPUT_NAME)  # dismiss picker
 browser.wait_for_element_clickable(INPUT_END_DATE)
 browser.click(INPUT_END_DATE)
 ```
@@ -132,16 +132,17 @@ All interactive elements use `data-cy` attributes. Common patterns:
 ```python
 # Buttons
 'a[data-cy="button-new-program"]'
+
 'button[data-cy="button-next"]'
 'button[data-cy="button-save"]'
 
 # Inputs
 'input[data-cy="input-name"]'
 'textarea[data-cy="input-description"]'
-'input[name="startDate"]'           # date inputs use name attr
+'input[name="startDate"]'  # date inputs use name attr
 
 # Dropdowns (click to open, then use helper)
-'div[data-cy="select-sector"]'      # → browser.select_option_by_name("Child Protection")
+'div[data-cy="select-sector"]'  # → browser.select_option_by_name("Child Protection")
 'div[data-cy="input-beneficiary-group"]'  # → browser.select_listbox_element("Main Menu")
 
 # Labels / display values
