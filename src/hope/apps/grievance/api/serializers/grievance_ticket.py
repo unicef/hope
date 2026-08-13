@@ -813,3 +813,58 @@ class BulkCloseGrievanceTicketsSerializer(serializers.Serializer):
     grievance_ticket_ids = serializers.ListField(
         child=serializers.UUIDField(),
     )
+
+
+class NeedsAdjudicationRoleReassignEntrySerializer(serializers.Serializer):
+    role = serializers.CharField()
+    household = serializers.CharField()
+    individual = serializers.CharField()
+    new_individual = serializers.CharField()
+
+
+class NeedsAdjudicationResolutionSerializer(serializers.Serializer):
+    ticket_id = serializers.UUIDField()
+    duplicate_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+    distinct_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+    role_reassign_data = serializers.DictField(
+        child=NeedsAdjudicationRoleReassignEntrySerializer(), required=False, default=dict
+    )
+
+    def validate(self, attrs: dict) -> dict:
+        if not attrs["duplicate_individual_ids"] and not attrs["distinct_individual_ids"]:
+            raise serializers.ValidationError("At least one individual must be marked as duplicate or distinct.")
+        overlap = set(attrs["duplicate_individual_ids"]) & set(attrs["distinct_individual_ids"])
+        if overlap:
+            raise serializers.ValidationError("An individual cannot be both duplicate and distinct.")
+        return attrs
+
+
+class BulkNeedsAdjudicationResultSerializer(serializers.Serializer):
+    """What the batch did: the tickets it resolved, and the ones it skipped as already closed."""
+
+    resolved = GrievanceTicketSimpleSerializer(many=True)
+    skipped_closed = GrievanceTicketSimpleSerializer(many=True)
+
+
+MAX_NEEDS_ADJUDICATION_BATCH = 50
+
+
+class BulkNeedsAdjudicationSerializer(serializers.Serializer):
+    tickets = NeedsAdjudicationResolutionSerializer(many=True, allow_empty=False)
+
+    def validate_tickets(self, value: list[dict]) -> list[dict]:
+        if len(value) > MAX_NEEDS_ADJUDICATION_BATCH:
+            raise serializers.ValidationError(
+                f"At most {MAX_NEEDS_ADJUDICATION_BATCH} tickets can be finalized at once, got {len(value)}."
+            )
+        ticket_ids = [resolution["ticket_id"] for resolution in value]
+        if len(set(ticket_ids)) != len(ticket_ids):
+            raise serializers.ValidationError("Each ticket can only be resolved once per request.")
+        # an individual can sit on several tickets
+        duplicates = {individual_id for resolution in value for individual_id in resolution["duplicate_individual_ids"]}
+        distinct = {individual_id for resolution in value for individual_id in resolution["distinct_individual_ids"]}
+        if duplicates & distinct:
+            raise serializers.ValidationError(
+                "An individual cannot be marked duplicate on one ticket and distinct on another."
+            )
+        return value
