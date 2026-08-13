@@ -93,7 +93,9 @@ class VisionAPI(BaseAPI):
                     vision_data["sent"] = True
                 VisionService.set_status(locked_payment_plan, send_status)
 
-            locked_payment_plan.save(update_fields=["internal_data"])
+            PaymentPlan.objects.filter(pk=locked_payment_plan.pk).update(
+                internal_data=locked_payment_plan.internal_data
+            )
 
         # Keep the caller's instance aligned with the row merged under lock. In particular, do not leave the async
         # task holding the stale pre-callback JSON after a callback wins the race with the outbound response.

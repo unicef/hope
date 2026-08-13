@@ -139,7 +139,7 @@ class VisionService:
         cls.set_status(payment_plan, VisionStatus.FC_ASSOCIATED)
         PaymentPlanService(payment_plan).release_from_vision()
         cls.set_status(payment_plan, VisionStatus.RELEASED)
-        payment_plan.save(update_fields=["internal_data"])
+        PaymentPlan.objects.filter(pk=payment_plan.pk).update(internal_data=payment_plan.internal_data)
 
         if payment_plan.can_send_to_payment_gateway:
             PaymentPlanService(payment_plan).execute_update_status_action(

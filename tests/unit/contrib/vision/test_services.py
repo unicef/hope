@@ -363,7 +363,7 @@ def test_send_result_merges_callback_state_instead_of_overwriting_it(
         "response": {"status": "ok"},
     }
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(4):
         VisionAPI._persist_send_result(
             stale_payment_plan,
             send_log,

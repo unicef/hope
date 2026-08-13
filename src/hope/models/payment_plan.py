@@ -1220,7 +1220,7 @@ class PaymentPlan(
         ).exists()
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
 
-    @property
+    @cached_property
     def vision_integration_enabled(self) -> bool:
         # TODO(Vision decision): Instruction-managed Follow-Up plans currently use instruction-level FSP delivery,
         # which cannot invoke the automatic per-plan PG flow. Keep them outside Vision until that flow is defined.

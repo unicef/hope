@@ -2030,6 +2030,11 @@ def vision_reject_approval_process(payment_plan_actions_context: dict[str, Any])
     ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
 
 
+@pytest.fixture
+def vision_enabled_payment_plan_actions(payment_plan_actions_context: dict[str, Any]) -> None:
+    _enable_vision_flag(payment_plan_actions_context)
+
+
 def test_send_to_vision_flag_disabled_returns_403(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -2221,10 +2226,11 @@ def test_reject_invalidates_vision_attempt(
     create_user_role_with_permissions: Any,
     vision_status: VisionStatus,
     vision_reject_approval_process: None,
+    vision_enabled_payment_plan_actions: None,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
+        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW, Permissions.PM_VIEW_LIST],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
@@ -2259,6 +2265,7 @@ def test_reject_invalidates_vision_attempt(
 def test_abort_invalidates_vision_attempt(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
+    vision_enabled_payment_plan_actions: None,
 ) -> None:
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
@@ -2327,7 +2334,8 @@ def test_manual_pg_send_is_blocked_for_vision_managed_plan(
         payment_plan_actions_context["program_active"],
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save(update_fields=["status"])
+    payment_plan_actions_context["pp"].internal_data = {"vision": {"sent": True, "status": VisionStatus.RELEASED.value}}
+    payment_plan_actions_context["pp"].save(update_fields=["status", "internal_data"])
 
     response = payment_plan_actions_context["client"].get(
         payment_plan_actions_context["url_send_to_payment_gate_way"],
