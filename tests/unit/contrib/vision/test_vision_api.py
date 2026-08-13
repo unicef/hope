@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.api.mixins import BaseAPI
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
-from hope.contrib.vision.choices import VisionLogEntryType
+from hope.contrib.vision.choices import VisionLogEntryType, VisionStatus
 from hope.models import PaymentPlan
 
 
@@ -271,6 +271,22 @@ def test_send_payment_plan_logs_4xx_error(vision_api_payment_plan_factory) -> No
             assert pp.vision_status == "SEND_FAILED"
 
 
+def test_send_payment_plan_persists_missing_credentials_failure(
+    settings,
+    vision_api_payment_plan_factory,
+    django_assert_num_queries,
+) -> None:
+    settings.VISION_CLIENT_ID = ""
+    api = VisionAPI()
+    payment_plan = vision_api_payment_plan_factory()
+
+    with django_assert_num_queries(4), pytest.raises(VisionAPIMissingCredentialsError):
+        api.send_payment_plan(payment_plan)
+
+    assert payment_plan.vision_status == VisionStatus.SEND_FAILED.value
+    assert payment_plan.vision_data["log"][0]["response"] == {"error": "Vision API credentials are not configured"}
+
+
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
 def test_send_payment_plan_logs_payload_and_response(
@@ -309,6 +325,24 @@ def test_send_payment_plan_already_sent_raises_error(
         api.send_payment_plan(pp)
     mock_acquire_token.assert_not_called()
     mock_post.assert_not_called()
+
+
+def test_callback_view_gets_payment_plan_with_related_data(
+    vision_api_payment_plan_factory,
+    django_assert_num_queries,
+) -> None:
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-LOOKUP")
+
+    with django_assert_num_queries(1):
+        selected_payment_plan = PaymentPlanCallbackView._get_payment_plan("PP-LOOKUP")
+
+    assert selected_payment_plan.pk == payment_plan.pk
+    assert selected_payment_plan.business_area_id == payment_plan.business_area_id
+    assert selected_payment_plan.created_by_id == payment_plan.created_by_id
+    assert "business_area" in selected_payment_plan._state.fields_cache
+    assert "created_by" in selected_payment_plan._state.fields_cache
 
 
 @patch("hope.models.APILogEntry.objects.create")

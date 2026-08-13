@@ -2,6 +2,7 @@ from unittest.mock import ANY, MagicMock, PropertyMock, patch
 
 from flags.models import FlagState
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
@@ -15,8 +16,11 @@ from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
-from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task_action
-from hope.models import Approval, PaymentPlan
+from hope.contrib.vision.tasks import (
+    send_payment_plan_to_vision_async_task,
+    send_payment_plan_to_vision_async_task_action,
+)
+from hope.models import Approval, AsyncJob, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -103,6 +107,62 @@ def conflicting_fc_items(vision_payment_plan: PaymentPlan) -> list:
     ]
 
 
+@pytest.fixture
+def fc_items_with_existing_group_assignment(vision_payment_plan: PaymentPlan) -> tuple[list, object]:
+    target_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    matching_items = [
+        FundsCommitmentItemFactory(
+            funds_commitment_group=target_group,
+            office=vision_payment_plan.business_area,
+        )
+    ]
+    existing_item = FundsCommitmentItemFactory(
+        funds_commitment_group=FundsCommitmentGroupFactory(funds_commitment_number="FC999"),
+        office=vision_payment_plan.business_area,
+        payment_plan=vision_payment_plan,
+    )
+    return matching_items, existing_item
+
+
+@pytest.fixture
+def malformed_vision_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
+    vision_payment_plan.internal_data = {"vision": "invalid"}
+    return vision_payment_plan
+
+
+@pytest.fixture
+def accepted_vision_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
+    vision_payment_plan.status = PaymentPlan.Status.ACCEPTED
+    return vision_payment_plan
+
+
+@pytest.fixture
+def vision_payment_plan_without_approval(vision_payment_plan: PaymentPlan) -> PaymentPlan:
+    vision_payment_plan.approval_process.all().delete()
+    return vision_payment_plan
+
+
+def test_vision_data_replaces_malformed_state(
+    malformed_vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(0):
+        vision_data = VisionService.vision_data(malformed_vision_payment_plan)
+
+    assert vision_data == {}
+    assert malformed_vision_payment_plan.internal_data == {"vision": {}}
+
+
+def test_vision_status_treats_malformed_state_as_not_sent(
+    malformed_vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(0):
+        vision_status = malformed_vision_payment_plan.vision_status
+
+    assert vision_status == VisionStatus.NOT_SENT.value
+
+
 def test_assign_funds_commitment_assigns_all_matching_items(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
@@ -157,6 +217,22 @@ def test_assign_funds_commitment_rejects_item_assigned_to_another_plan(
     assert [item.payment_plan_id for item in conflicting_fc_items] == original_assignments
 
 
+def test_assign_funds_commitment_rejects_plan_items_from_another_group(
+    vision_payment_plan: PaymentPlan,
+    fc_items_with_existing_group_assignment: tuple[list, object],
+    django_assert_num_queries,
+) -> None:
+    matching_items, existing_item = fc_items_with_existing_group_assignment
+
+    with django_assert_num_queries(3), pytest.raises(FundsCommitmentAssignmentError) as error:
+        VisionService.assign_funds_commitment(vision_payment_plan, "FC123")
+
+    assert error.value.status == VisionStatus.CALLBACK_FAILED
+    assert error.value.error_code == VisionErrorCode.FC_CONFLICT
+    assert matching_items[0].payment_plan_id is None
+    assert existing_item.payment_plan_id == vision_payment_plan.pk
+
+
 def test_process_callback_without_fc_keeps_plan_blocked(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
@@ -174,6 +250,28 @@ def test_process_callback_without_fc_keeps_plan_blocked(
     assert vision_payment_plan.vision_data == {
         "vision_id": "VISION-1",
         "status": VisionStatus.FC_MISSING.value,
+    }
+
+
+def test_process_callback_records_fc_assignment_failure(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+
+    with django_assert_num_queries(2):
+        VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-1",
+            vision_result="SUCCESS",
+            fc_num="UNKNOWN",
+        )
+
+    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert vision_payment_plan.vision_data == {
+        "vision_id": "VISION-1",
+        "fc_num": "UNKNOWN",
+        "status": VisionStatus.FC_NOT_FOUND.value,
     }
 
 
@@ -408,6 +506,33 @@ def test_release_from_vision_uses_payment_plan_creator(
     )
 
 
+def test_release_from_vision_rejects_non_review_plan(
+    accepted_vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(0), pytest.raises(ValidationError, match="Only an in-review"):
+        PaymentPlanService(accepted_vision_payment_plan).release_from_vision()
+
+
+def test_release_from_vision_requires_approval_process(
+    vision_payment_plan_without_approval: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(1), pytest.raises(ValidationError, match="Approval Process object not found"):
+        PaymentPlanService(vision_payment_plan_without_approval).release_from_vision()
+
+
+def test_manual_review_is_rejected_for_vision_managed_plan(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(1), pytest.raises(ValidationError, match="released automatically"):
+        PaymentPlanService(vision_payment_plan).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.REVIEW},
+            user=vision_payment_plan.created_by,
+        )
+
+
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action")
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision")
 def test_process_callback_assigns_fc_releases_and_sends_to_pg(
@@ -437,6 +562,32 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
 
 
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action")
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision")
+def test_process_callback_assigns_fc_releases_without_pg_send(
+    mock_release,
+    mock_send_to_pg,
+    vision_payment_plan: PaymentPlan,
+    matching_fc_items: list,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+    with (
+        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
+        django_assert_num_queries(6),
+    ):
+        VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-1",
+            vision_result="SUCCESS",
+            fc_num="FC123",
+        )
+
+    mock_release.assert_called_once_with()
+    mock_send_to_pg.assert_not_called()
+    assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
+
+
 @patch("hope.contrib.vision.tasks.VisionAPI")
 def test_send_payment_plan_to_vision_task_calls_api(
     mock_vision_api,
@@ -448,6 +599,20 @@ def test_send_payment_plan_to_vision_task_calls_api(
 
     sent_payment_plan = mock_vision_api.return_value.send_payment_plan.call_args.args[0]
     assert sent_payment_plan.pk == vision_enabled_payment_plan.pk
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_send_payment_plan_to_vision_task_skips_ineligible_plan(
+    mock_vision_api,
+    vision_disabled_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    job = MagicMock(config={"payment_plan_id": str(vision_disabled_payment_plan.pk)})
+
+    with django_assert_num_queries(2):
+        send_payment_plan_to_vision_async_task_action(job)
+
+    mock_vision_api.assert_not_called()
 
 
 @patch("hope.contrib.vision.tasks.VisionAPI")
@@ -463,6 +628,35 @@ def test_send_payment_plan_to_vision_task_records_failure(
 
     vision_enabled_payment_plan.refresh_from_db()
     assert vision_enabled_payment_plan.vision_status == VisionStatus.SEND_FAILED.value
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_send_payment_plan_to_vision_task_does_not_duplicate_persisted_failure_log(
+    mock_vision_api,
+    vision_enabled_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    def persist_failure_then_raise(payment_plan: PaymentPlan) -> None:
+        persisted_payment_plan = PaymentPlan.objects.get(pk=payment_plan.pk)
+        persisted_payment_plan.internal_data = {
+            "vision": {
+                "status": VisionStatus.SEND_FAILED.value,
+                "log": [{"type": VisionLogEntryType.API_CALL.value}],
+            }
+        }
+        PaymentPlan.objects.filter(pk=persisted_payment_plan.pk).update(
+            internal_data=persisted_payment_plan.internal_data
+        )
+        raise VisionAPIError("Vision request failed")
+
+    mock_vision_api.return_value.send_payment_plan.side_effect = persist_failure_then_raise
+    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
+
+    with django_assert_num_queries(22), pytest.raises(VisionAPIError):
+        send_payment_plan_to_vision_async_task_action(job)
+
+    vision_enabled_payment_plan.refresh_from_db()
+    assert vision_enabled_payment_plan.vision_data["log"] == [{"type": VisionLogEntryType.API_CALL.value}]
 
 
 @patch("hope.contrib.vision.tasks.VisionAPI")
@@ -491,3 +685,27 @@ def test_send_payment_plan_to_vision_task_preserves_completed_callback_state(
 
     vision_enabled_payment_plan.refresh_from_db()
     assert vision_enabled_payment_plan.vision_status == VisionStatus.RELEASED.value
+
+
+@patch("hope.contrib.vision.tasks.AsyncJob.requeue")
+def test_send_payment_plan_to_vision_task_requeues_async_job(
+    mock_requeue,
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    expected_job = MagicMock(spec=AsyncJob)
+    mock_requeue.return_value = expected_job
+
+    with django_assert_num_queries(0):
+        job = send_payment_plan_to_vision_async_task(vision_payment_plan, str(vision_payment_plan.created_by_id))
+
+    assert job == expected_job
+    mock_requeue.assert_called_once_with(
+        instance=vision_payment_plan,
+        owner_id=str(vision_payment_plan.created_by_id),
+        job_name="send_payment_plan_to_vision_async_task",
+        action="hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task_action",
+        config={"payment_plan_id": str(vision_payment_plan.pk)},
+        group_key="payment",
+        description=f"Send payment plan {vision_payment_plan.pk} to Vision",
+    )
