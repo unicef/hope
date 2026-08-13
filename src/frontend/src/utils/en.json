@@ -941,5 +941,14 @@
   "Create Follow-up PP": "Create Follow-up PP",
   "Set the Dispersion Dates": "Set the Dispersion Dates",
   "Unsuccessful payments": "Unsuccessful payments",
-  "YYYY-MM-DD": "YYYY-MM-DD"
+  "YYYY-MM-DD": "YYYY-MM-DD",
+  "Account": "Account",
+  "First Name": "First Name",
+  "Last Name": "Last Name",
+  "Primary Collector": "Primary Collector",
+  "Similarity score": "Similarity score",
+  "Sex": "Sex",
+  "Phone": "Phone",
+  "Withdraw": "Withdraw",
+  "Not Duplicates": "Not Duplicates"
 }

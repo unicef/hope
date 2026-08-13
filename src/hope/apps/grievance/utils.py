@@ -155,8 +155,14 @@ def validate_all_individuals_before_close_needs_adjudication(
 ) -> None:
     duplicates_qs = ticket_details.selected_individuals.filter(withdrawn=False)
     distinct_qs = ticket_details.selected_distinct.filter(withdrawn=False)
-    all_possible_duplicates = list(ticket_details.possible_duplicates.all()) + [
-        ticket_details.golden_records_individual
+    all_possible_duplicates = [
+        individual
+        for individual in [
+            *ticket_details.possible_duplicates.all(),
+            ticket_details.possible_duplicate,
+            ticket_details.golden_records_individual,
+        ]
+        if individual is not None
     ]
     withdrawn_in_all_possible_duplicates = [i for i in all_possible_duplicates if i.withdrawn]
 
