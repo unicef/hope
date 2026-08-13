@@ -113,6 +113,7 @@ class BulkActionService:
                 business_area__slug=business_area_slug,
                 id__in=tickets_ids,
             )
+            .order_by("pk")
             .select_for_update(of=("self",))
             .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
             .prefetch_related("programs")
@@ -176,6 +177,7 @@ class BulkActionService:
                 business_area__slug=business_area_slug,
                 id__in=ticket_ids,
             )
+            .order_by("pk")
             .select_for_update(of=("self",))
             .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
             .prefetch_related("programs")

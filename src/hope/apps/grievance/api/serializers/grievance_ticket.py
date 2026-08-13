@@ -846,10 +846,17 @@ class BulkNeedsAdjudicationResultSerializer(serializers.Serializer):
     skipped_closed = GrievanceTicketSimpleSerializer(many=True)
 
 
+MAX_NEEDS_ADJUDICATION_BATCH = 50
+
+
 class BulkNeedsAdjudicationSerializer(serializers.Serializer):
     tickets = NeedsAdjudicationResolutionSerializer(many=True, allow_empty=False)
 
     def validate_tickets(self, value: list[dict]) -> list[dict]:
+        if len(value) > MAX_NEEDS_ADJUDICATION_BATCH:
+            raise serializers.ValidationError(
+                f"At most {MAX_NEEDS_ADJUDICATION_BATCH} tickets can be finalized at once, got {len(value)}."
+            )
         ticket_ids = [resolution["ticket_id"] for resolution in value]
         if len(set(ticket_ids)) != len(ticket_ids):
             raise serializers.ValidationError("Each ticket can only be resolved once per request.")

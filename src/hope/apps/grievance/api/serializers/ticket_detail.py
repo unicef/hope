@@ -226,7 +226,12 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
 
 
 class NaRoleHouseholdSerializer(serializers.ModelSerializer):
-    active_individuals_count = serializers.IntegerField(source="active_individuals.count", read_only=True)
+    active_individuals_count = serializers.SerializerMethodField()
+
+    def get_active_individuals_count(self, obj: Household) -> int:
+        # annotated by the retrieve queryset
+        annotated = getattr(obj, "active_individuals_count_annotated", None)
+        return obj.active_individuals.count() if annotated is None else annotated
 
     class Meta:
         model = Household

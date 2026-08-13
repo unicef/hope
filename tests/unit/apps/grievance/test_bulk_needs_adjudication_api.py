@@ -1,6 +1,7 @@
 """Tests for the bulk Needs Adjudication resolve+auto-close API action."""
 
 from typing import Any, Callable
+from uuid import uuid4
 
 import pytest
 from rest_framework import status
@@ -23,6 +24,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.api.serializers.grievance_ticket import MAX_NEEDS_ADJUDICATION_BATCH
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY, UNIQUE
 from hope.models import BusinessArea, IndividualRoleInHousehold, User
@@ -203,6 +205,19 @@ def bulk_na_url(business_area: BusinessArea) -> str:
         "api:grievance:grievance-tickets-global-bulk-needs-adjudication",
         kwargs={"business_area_slug": business_area.slug},
     )
+
+
+@pytest.fixture
+def one_resolution_over_the_batch_limit() -> list[dict]:
+    """The batch cap is a serializer rule checked before any lookup, so these ids need not exist."""
+    return [
+        {
+            "ticket_id": str(uuid4()),
+            "duplicate_individual_ids": [str(uuid4())],
+            "distinct_individual_ids": [],
+        }
+        for _ in range(MAX_NEEDS_ADJUDICATION_BATCH + 1)
+    ]
 
 
 def test_bulk_needs_adjudication_marks_person_duplicate_and_closes(
@@ -572,6 +587,31 @@ def test_bulk_needs_adjudication_rejects_empty_tickets_list(
     response = client.post(bulk_na_url, {"tickets": []}, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_bulk_needs_adjudication_rejects_a_batch_over_the_limit(
+    api_client: Any,
+    user: User,
+    business_area: BusinessArea,
+    bulk_na_url: str,
+    one_resolution_over_the_batch_limit: list[dict],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
+        business_area,
+        whole_business_area_access=True,
+    )
+
+    client = api_client(user)
+    response = client.post(bulk_na_url, {"tickets": one_resolution_over_the_batch_limit}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert str(MAX_NEEDS_ADJUDICATION_BATCH) in str(response.data)
 
 
 def test_bulk_needs_adjudication_reassigns_head_and_closes(

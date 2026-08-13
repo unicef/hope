@@ -587,11 +587,26 @@ class GrievanceTicketGlobalViewSet(
             if "golden_records_individual" in value:
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
         if self.action == "retrieve":
-            to_prefetch += [
+            # The comparison panel renders active_individuals_count per household, and
+            # Household.active_individuals is a property, so DRF would otherwise issue one COUNT
+            # per rendered household.
+            households = Household.objects.annotate(
+                active_individuals_count_annotated=Count(
+                    "individuals",
+                    filter=Q(individuals__withdrawn=False, individuals__duplicate=False),
+                )
+            )
+            annotated_paths = [
+                "needs_adjudication_ticket_details__golden_records_individual__household",
                 "needs_adjudication_ticket_details__golden_records_individual__households_and_roles__household",
-                "needs_adjudication_ticket_details__possible_duplicates__households_and_roles__household",
                 "needs_adjudication_ticket_details__possible_duplicates__household",
+                "needs_adjudication_ticket_details__possible_duplicates__households_and_roles__household",
+                "needs_adjudication_ticket_details__possible_duplicate__household",
+                "needs_adjudication_ticket_details__possible_duplicate__households_and_roles__household",
             ]
+            # the loop above already asks for some of these as plain lookups, which would clash
+            to_prefetch = [path for path in to_prefetch if path not in annotated_paths]
+            to_prefetch += [Prefetch(path, queryset=households) for path in annotated_paths]
         return (
             super()
             .get_queryset()

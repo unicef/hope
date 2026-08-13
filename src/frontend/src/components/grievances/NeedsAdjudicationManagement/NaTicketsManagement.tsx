@@ -46,6 +46,9 @@ const initialFilter = {
   areaScope: 'all',
 };
 
+// Mirrors MAX_NEEDS_ADJUDICATION_BATCH in the backend serializer, which rejects larger batches.
+const MAX_NEEDS_ADJUDICATION_BATCH = 50;
+
 interface NaTicketsManagementProps {
   onBack: () => void;
 }
@@ -118,6 +121,11 @@ export const NaTicketsManagement = ({
   ).length;
 
   const finalizeBlockedReason = (): string => {
+    if (managedCount > MAX_NEEDS_ADJUDICATION_BATCH)
+      return t(
+        'You can finalize at most {{max}} tickets at a time, and you have {{count}} managed. Undo some decisions, finalize, then carry on with the rest.',
+        { max: MAX_NEEDS_ADJUDICATION_BATCH, count: managedCount },
+      );
     if (incompleteCount > 0)
       return t(
         '{{count}} ticket(s) need every duplicate decided before finalizing',
@@ -355,6 +363,7 @@ export const NaTicketsManagement = ({
                 color="primary"
                 disabled={
                   managedCount === 0 ||
+                  managedCount > MAX_NEEDS_ADJUDICATION_BATCH ||
                   unresolvedCount > 0 ||
                   incompleteCount > 0 ||
                   isFinalizing

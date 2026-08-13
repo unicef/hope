@@ -2976,8 +2976,62 @@ def test_needs_adjudication_comparison_query_count_for_three_duplicates(
         },
     )
 
-    with django_assert_num_queries(95):
+    with django_assert_num_queries(93):
         response = authenticated_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["ticket_details"]["possible_duplicates"]) == 3
+
+
+@pytest.fixture
+def na_ticket_duplicate_in_mixed_household(
+    afghanistan: BusinessArea, program: Program, na_grievance: GrievanceTicket, na_golden_record: Individual
+) -> TicketNeedsAdjudicationDetails:
+    """Four members in the candidate's household, of which only two are active.
+
+    Active are the head, which HouseholdFactory creates, and the candidate itself.
+    The withdrawn member and the one an earlier adjudication already marked duplicate do not count.
+    """
+    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
+    candidate = IndividualFactory(household=household, program=program, business_area=afghanistan)
+    IndividualRoleInHouseholdFactory(individual=candidate, household=household, role=ROLE_ALTERNATE)
+    IndividualFactory(household=household, program=program, business_area=afghanistan, withdrawn=True)
+    IndividualFactory(household=household, program=program, business_area=afghanistan, duplicate=True)
+    ticket_details = TicketNeedsAdjudicationDetailsFactory(
+        ticket=na_grievance,
+        golden_records_individual=na_golden_record,
+        is_multiple_duplicates_version=True,
+        selected_individual=None,
+    )
+    ticket_details.possible_duplicates.add(candidate)
+    return ticket_details
+
+
+def test_needs_adjudication_comparison_counts_only_active_individuals_per_household(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    na_ticket_duplicate_in_mixed_household: TicketNeedsAdjudicationDetails,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(na_ticket_duplicate_in_mixed_household.ticket.id),
+            },
+        )
+    )
+    roles = response.data["ticket_details"]["possible_duplicates"][0]["roles_in_households"]
+
+    assert response.status_code == status.HTTP_200_OK
+    assert roles[0]["household"]["active_individuals_count"] == 2  # the head and the candidate
