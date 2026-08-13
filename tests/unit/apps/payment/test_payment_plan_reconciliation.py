@@ -297,7 +297,7 @@ def test_import_row_saves_extra_columns_to_extras(
     payment.save()
     payment.refresh_from_db()
 
-    assert payment.extras == {"custom_field_1": "abc", "custom_field_2": 42}
+    assert payment.extras == {"extra_fields": {"custom_field_1": "abc", "custom_field_2": 42}}
 
 
 def test_import_row_empty_extras_stays_empty_dict(

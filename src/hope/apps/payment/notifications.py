@@ -104,8 +104,7 @@ class PaymentNotification:
             .exclude(id=self.action_user.id)
             .distinct()
         )
-
-        if settings.ENV == "prod":
+        if not config.NOTIFY_INTERNAL_USERS:
             users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
         return users
 

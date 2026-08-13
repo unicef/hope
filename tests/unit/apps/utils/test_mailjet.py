@@ -17,7 +17,7 @@ pytestmark = pytest.mark.django_db
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
+@override_settings(DEFAULT_EMAIL_DISPLAY="test")
 @override_config(ENABLE_MAILJET=True)
 def test_mailjet_body_with_template(mocked_requests_post: Any) -> None:
     mocked_requests_post.return_value.status_code = 200
@@ -36,9 +36,9 @@ def test_mailjet_body_with_template(mocked_requests_post: Any) -> None:
                 {
                     "From": {
                         "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        "Name": "test",
                     },
-                    "Subject": "[test] Subject for email with Template",
+                    "Subject": "Subject for email with Template",
                     "To": [
                         {
                             "Email": "test@email.com",
@@ -70,7 +70,7 @@ def test_mailjet_body_with_template(mocked_requests_post: Any) -> None:
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @override_settings(
-    EMAIL_SUBJECT_PREFIX="test",
+    DEFAULT_EMAIL_DISPLAY="test",
     CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"],
 )
 @override_config(ENABLE_MAILJET=True)
@@ -91,9 +91,9 @@ def test_mailjet_body_with_template_with_catch_all(mocked_requests_post: Any) ->
                 {
                     "From": {
                         "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        "Name": "test",
                     },
-                    "Subject": "[test] Subject for email with Template for Catch All",
+                    "Subject": "Subject for email with Template for Catch All",
                     "To": [
                         {
                             "Email": "catchallemail@email.com",
@@ -124,7 +124,7 @@ def test_mailjet_body_with_template_with_catch_all(mocked_requests_post: Any) ->
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
+@override_settings(DEFAULT_EMAIL_DISPLAY="test")
 @override_config(ENABLE_MAILJET=True)
 def test_mailjet_body_with_html_and_text_body(mocked_requests_post: Any) -> None:
     mocked_requests_post.return_value.status_code = 200
@@ -143,9 +143,9 @@ def test_mailjet_body_with_html_and_text_body(mocked_requests_post: Any) -> None
                 {
                     "From": {
                         "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        "Name": "test",
                     },
-                    "Subject": "[test] Subject for email with HTML and Text body",
+                    "Subject": "Subject for email with HTML and Text body",
                     "To": [
                         {
                             "Email": "test@email.com",
@@ -175,7 +175,7 @@ def test_mailjet_body_with_html_and_text_body(mocked_requests_post: Any) -> None
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
+@override_settings(DEFAULT_EMAIL_DISPLAY="test")
 @override_config(ENABLE_MAILJET=True)
 def test_mailjet_body_with_text_body(mocked_requests_post: Any) -> None:
     mocked_requests_post.return_value.status_code = 200
@@ -193,9 +193,9 @@ def test_mailjet_body_with_text_body(mocked_requests_post: Any) -> None:
                 {
                     "From": {
                         "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        "Name": "test",
                     },
-                    "Subject": "[test] Subject for email with Text body",
+                    "Subject": "Subject for email with Text body",
                     "To": [
                         {
                             "Email": "test@email.com",
@@ -224,7 +224,7 @@ def test_mailjet_body_with_text_body(mocked_requests_post: Any) -> None:
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
+@override_settings(DEFAULT_EMAIL_DISPLAY="test")
 @override_config(ENABLE_MAILJET=True)
 def test_mailjet_body_with_template_and_attachment(mocked_requests_post: Any) -> None:
     mocked_requests_post.return_value.status_code = 200
@@ -266,9 +266,9 @@ def test_mailjet_body_with_template_and_attachment(mocked_requests_post: Any) ->
                 {
                     "From": {
                         "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        "Name": "test",
                     },
-                    "Subject": "[test] Subject for email with Template and Attachments",
+                    "Subject": "Subject for email with Template and Attachments",
                     "To": [
                         {
                             "Email": "test@email.com",
@@ -372,7 +372,6 @@ def test_mailjet_incorrect_body_without_template_and_without_html_and_text_body(
 
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
 @override_config(ENABLE_MAILJET=True)
 def test_email_user_via_mailjet(mocked_requests_post: Any) -> None:
     mocked_requests_post.return_value.status_code = 200
@@ -390,7 +389,7 @@ def test_email_user_via_mailjet(mocked_requests_post: Any) -> None:
             "Messages": [
                 {
                     "From": {"Email": "sender@email.com", "Name": "Sender"},
-                    "Subject": "[test] Test subject",
+                    "Subject": "Test subject",
                     "To": [
                         {
                             "Email": "testuser@email.com",

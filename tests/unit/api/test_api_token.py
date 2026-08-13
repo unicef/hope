@@ -43,7 +43,7 @@ def token(user, afghanistan) -> APIToken:
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @patch.object(APITokenAdmin, "message_user", return_value=None)
 @patch.object(APITokenAdmin, "__init__", return_value=None)
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
+@override_settings(DEFAULT_EMAIL_DISPLAY="test")
 @override_config(ENABLE_MAILJET=True)
 def test_send_api_token(
     mocked_admin_init: MagicMock,
@@ -64,9 +64,9 @@ def test_send_api_token(
                 {
                     "From": {
                         "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        "Name": "test",
                     },
-                    "Subject": f"[test] HOPE API Token {token} infos",
+                    "Subject": f"HOPE API Token {token} infos",
                     "To": [
                         {
                             "Email": "testapitoken@email.com",

@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="account",
             name="account_type",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="payment.accounttype"),
+            field=models.ForeignKey(
+                help_text="The type of account (e.g. bank, wallet)",
+                on_delete=django.db.models.deletion.PROTECT,
+                to="payment.accounttype",
+            ),
         ),
     ]
