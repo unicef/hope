@@ -84,10 +84,14 @@ export function FspExtraFields({
 
   const handleImport = async (): Promise<void> => {
     if (!file) return;
-    await importFile({
-      // @ts-ignore File is required for multipart upload despite the generated string type.
-      file,
-    });
+    try {
+      await importFile({
+        // @ts-ignore File is required for multipart upload despite the generated string type.
+        file,
+      });
+    } catch {
+      // Error is handled by the mutation's onError callback.
+    }
   };
 
   return (
