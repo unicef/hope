@@ -231,6 +231,10 @@ class PaymentPlan(
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
         )
+        XLSX_IMPORTING_FSP_EXTRA_FIELDS = (
+            "XLSX_IMPORTING_FSP_EXTRA_FIELDS",
+            "Importing FSP Extra Fields XLSX file",
+        )
         EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
         EXCLUDE_BENEFICIARIES_ERROR = (
             "EXCLUDE_BENEFICIARIES_ERROR",

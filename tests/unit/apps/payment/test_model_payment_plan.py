@@ -870,6 +870,25 @@ def test_payment_plan_flow_xlsx_import_error_from_importing_reconciliation() -> 
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
 
 
+@pytest.fixture
+def payment_plan_importing_fsp_extra_fields() -> PaymentPlan:
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED_FSP,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    )
+
+
+def test_payment_plan_flow_xlsx_import_error_from_importing_fsp_extra_fields(
+    payment_plan_importing_fsp_extra_fields: PaymentPlan,
+) -> None:
+    PaymentPlanFlow(payment_plan_importing_fsp_extra_fields).background_action_status_xlsx_import_error()
+
+    assert (
+        payment_plan_importing_fsp_extra_fields.background_action_status
+        == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    )
+
+
 def test_remove_export_file_delivery_skips_when_no_file_temp_id() -> None:
     payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
     # no export_file_delivery set → file_temp_id is None

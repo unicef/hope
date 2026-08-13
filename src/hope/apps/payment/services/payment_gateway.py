@@ -217,7 +217,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         if not payload.is_valid():
             raise PaymentGatewayAPI.PaymentGatewayAPIError(payload.errors)
 
-        return payload.data
+        fsp_extra_fields = {key: value for key, value in obj.fsp_extra_fields.items() if key not in payload.fields}
+        return {**fsp_extra_fields, **payload.data}
 
     class Meta:
         model = Payment

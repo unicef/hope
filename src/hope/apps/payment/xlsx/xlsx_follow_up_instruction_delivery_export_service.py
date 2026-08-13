@@ -8,9 +8,10 @@ from hope.apps.payment.xlsx.xlsx_follow_up_instruction_base_export_service impor
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import (
     XlsxPaymentPlanDeliveryExportService,
 )
+from hope.models import Payment
 
 if TYPE_CHECKING:
-    from hope.models import FollowUpInstruction, Payment
+    from hope.models import FollowUpInstruction
 
 
 class XlsxFollowUpInstructionDeliveryExportService(XlsxFollowUpInstructionBaseExportService):
@@ -23,7 +24,14 @@ class XlsxFollowUpInstructionDeliveryExportService(XlsxFollowUpInstructionBaseEx
         return "follow_up_instruction_delivery_payment_list"
 
     def get_source_headers(self) -> list[str]:
-        self.payment_plan_delivery_export_service = XlsxPaymentPlanDeliveryExportService(self.payment_plan, None)
+        fsp_extra_fields_headers = XlsxPaymentPlanDeliveryExportService.get_fsp_extra_fields_headers(
+            Payment.objects.filter(parent__follow_up_instruction=self.instruction).eligible().only("extras")
+        )
+        self.payment_plan_delivery_export_service = XlsxPaymentPlanDeliveryExportService(
+            self.payment_plan,
+            None,
+            fsp_extra_fields_headers=fsp_extra_fields_headers,
+        )
         fsp = self.payment_plan.financial_service_provider
         delivery_mechanism = self.payment_plan.delivery_mechanism
         if fsp is None or delivery_mechanism is None:
