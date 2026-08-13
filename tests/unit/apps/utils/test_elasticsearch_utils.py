@@ -4,14 +4,14 @@ from constance.test import override_config
 from elasticsearch import NotFoundError
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
+from extras.test_utils.factories import BusinessAreaFactory, IndividualFactory, ProgramFactory
 from hope.apps.utils.elasticsearch_utils import (
     populate_all_indexes,
     populate_index,
     rebuild_search_index,
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hope.models import BusinessArea, Program
+from hope.models import BusinessArea, Individual, Program
 
 pytestmark = [
     pytest.mark.elasticsearch,
@@ -178,3 +178,43 @@ def test_populate_index_noops_when_elasticsearch_disabled() -> None:
 
     mock_queryset.iterator.assert_not_called()
     mock_doc.assert_not_called()
+
+
+@pytest.fixture
+def program_with_three_individuals() -> Program:
+    ba: BusinessArea = BusinessAreaFactory()
+    with override_config(IS_ELASTICSEARCH_ENABLED=False):
+        program: Program = ProgramFactory(business_area=ba, status=Program.ACTIVE)
+        IndividualFactory(program=program, business_area=ba)
+        IndividualFactory(program=program, business_area=ba)
+        IndividualFactory(program=program, business_area=ba)
+    return program
+
+
+@pytest.mark.django_db
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_populate_index_streams_the_queryset_to_the_doc(program_with_three_individuals: Program) -> None:
+    consumed: list = []
+    mock_doc_class = MagicMock()
+    mock_doc_class.return_value.update.side_effect = lambda rows, parallel: consumed.extend(rows)
+    queryset = Individual.all_merge_status_objects.filter(program=program_with_three_individuals)
+
+    populate_index(queryset, mock_doc_class)
+
+    assert len(consumed) == 3
+
+
+@pytest.mark.django_db
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_populate_index_reports_progress_per_chunk_and_at_the_end(
+    program_with_three_individuals: Program, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("hope.apps.utils.elasticsearch_utils.PROGRESS_EVERY", 2)
+    ticks: list[int] = []
+    mock_doc_class = MagicMock()
+    mock_doc_class.return_value.update.side_effect = lambda rows, parallel: list(rows)
+    queryset = Individual.all_merge_status_objects.filter(program=program_with_three_individuals)
+
+    populate_index(queryset, mock_doc_class, progress_cb=ticks.append)
+
+    assert ticks == [2, 3]
