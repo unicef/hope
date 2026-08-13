@@ -1921,8 +1921,10 @@ def test_payment_payload_system_fields_override_fsp_extra_fields(payment_gateway
     payment.extras = {
         "extra_fields": {"reconciliation_reference": "do-not-send"},
         "fsp_extra_fields": {
+            "account": "do-not-send",
             "amount": "do-not-override",
             "fsp_reference": "FSP-001",
+            "origination_currency": "do-not-send",
         },
     }
 
@@ -1930,6 +1932,8 @@ def test_payment_payload_system_fields_override_fsp_extra_fields(payment_gateway
 
     assert payload["fsp_reference"] == "FSP-001"
     assert payload["amount"] == str(payment.entitlement_quantity)
+    assert "account" not in payload
+    assert "origination_currency" not in payload
     assert "reconciliation_reference" not in payload
 
 
