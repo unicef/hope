@@ -19,6 +19,7 @@ List what would go, then actually drop::
 
 """
 
+import re
 from typing import Any
 import uuid
 
@@ -68,6 +69,10 @@ class Command(BaseCommand):
         candidates = es.indices.get(index=f"{name}_v*", ignore_unavailable=True)
         dropped = 0
         for candidate in sorted(candidates):
+            # same guard as es_reindex's _sweep_wrecks: the wildcard also matches names like
+            # <name>_v2_backup - only strict _vN is ours to delete
+            if not re.match(rf"^{re.escape(name)}_v(\d+)$", candidate):
+                continue
             if candidate in current:
                 continue
             if candidates[candidate].get("aliases"):

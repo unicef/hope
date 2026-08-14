@@ -31,7 +31,8 @@ def index_names(program: Program) -> list[str]:
 
 
 def _make_es(*, aliased: bool = True) -> MagicMock:
-    """Every name: alias on _v2; leftovers _v1 (unaliased) and _v3 (aliased elsewhere)."""
+    """Every name: alias on _v2; leftovers _v1 (unaliased), _v3 (aliased elsewhere) and
+    _v2_backup (unaliased but NOT a strict _vN name - the wildcard still matches it)."""
     es = MagicMock()
     es.indices.exists_alias.return_value = aliased
     es.indices.get_alias.side_effect = lambda **kw: {f"{kw['name']}_v2": {"aliases": {kw["name"]: {}}}}
@@ -39,6 +40,7 @@ def _make_es(*, aliased: bool = True) -> MagicMock:
         kw["index"].replace("_v*", "_v1"): {"aliases": {}},
         kw["index"].replace("_v*", "_v2"): {"aliases": {kw["index"].removesuffix("_v*"): {}}},
         kw["index"].replace("_v*", "_v3"): {"aliases": {"someone-elses-alias": {}}},
+        kw["index"].replace("_v*", "_v2_backup"): {"aliases": {}},
     }
     return es
 
@@ -85,6 +87,16 @@ def test_aliased_leftover_is_skipped_with_warning(program: Program, es_aliased: 
     deleted = [kw["index"] for _, kw in es_aliased.indices.delete.call_args_list]
     assert not any(name.endswith("_v3") for name in deleted)
     assert "has aliases attached - skipped" in out.getvalue()
+
+
+def test_non_strict_version_name_is_never_deleted(program: Program, es_aliased: MagicMock) -> None:
+    # the _v* wildcard also matches names like <name>_v2_backup - unaliased, so it looks
+    # exactly like a leftover, but it is not a strict _vN name and is not ours to delete
+    with patch(GET_CONN, return_value=es_aliased):
+        call_command(CMD, program=str(program.id), confirm=True, stdout=StringIO())
+
+    deleted = [kw["index"] for _, kw in es_aliased.indices.delete.call_args_list]
+    assert not any(name.endswith("_v2_backup") for name in deleted)
 
 
 def test_non_alias_name_is_skipped(program: Program, es_not_aliased: MagicMock) -> None:
