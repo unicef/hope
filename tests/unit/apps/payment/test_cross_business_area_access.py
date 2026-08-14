@@ -113,6 +113,7 @@ def attacker(
             Permissions.PAYMENT_VERIFICATION_VIEW_LIST,
             Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
             Permissions.PAYMENT_VERIFICATION_DELETE,
+            Permissions.PAYMENT_VERIFICATION_ACTIVATE,
         ],
         attacker_business_area,
         program=attacker_payment_plan.program,
@@ -277,6 +278,28 @@ def test_delete_payment_verification_plan_from_other_business_area_is_denied(
     assert PaymentVerificationPlan.objects.filter(id=victim_verification_plan.id).exists()
 
 
+def test_activate_verification_plan_from_other_business_area_under_own_plan_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_payment_plan: PaymentPlan,
+    victim_verification_plan: PaymentVerificationPlan,
+) -> None:
+    url = reverse(
+        "api:payments:payment-verifications-activate-payment-verification-plan",
+        kwargs={
+            **cross_ba_kwargs,
+            "pk": str(attacker_payment_plan.id),
+            "verification_plan_id": str(victim_verification_plan.id),
+        },
+    )
+
+    response = api_client.post(url, {}, format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    victim_verification_plan.refresh_from_db()
+    assert victim_verification_plan.status == PaymentVerificationPlan.STATUS_PENDING
+
+
 def test_list_verification_records_from_other_business_area_is_denied(
     api_client: APIClient, cross_ba_kwargs: dict[str, str], victim_payment_plan: PaymentPlan
 ) -> None:
@@ -430,3 +453,25 @@ def test_delete_verification_plan_of_another_payment_plan_is_denied(
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     assert PaymentVerificationPlan.objects.filter(id=attacker_second_plan_verification_plan.id).exists()
+
+
+def test_activate_verification_plan_of_another_payment_plan_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_payment_plan: PaymentPlan,
+    attacker_second_plan_verification_plan: PaymentVerificationPlan,
+) -> None:
+    url = reverse(
+        "api:payments:payment-verifications-activate-payment-verification-plan",
+        kwargs={
+            **cross_ba_kwargs,
+            "pk": str(attacker_payment_plan.id),
+            "verification_plan_id": str(attacker_second_plan_verification_plan.id),
+        },
+    )
+
+    response = api_client.post(url, {}, format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    attacker_second_plan_verification_plan.refresh_from_db()
+    assert attacker_second_plan_verification_plan.status == PaymentVerificationPlan.STATUS_PENDING

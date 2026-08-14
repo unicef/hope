@@ -395,7 +395,7 @@ class PaymentVerificationViewSet(
         payment_plan = self.get_object()
         try:
             payment_verification_plan = PaymentVerificationPlan.objects.select_for_update(nowait=True).get(
-                pk=verification_plan_id
+                pk=verification_plan_id, payment_plan=payment_plan
             )
         except PaymentVerificationPlan.DoesNotExist:
             raise Http404
