@@ -202,7 +202,8 @@ name.
 !!! danger
     - The admin **Rebuild Index** button deletes the LIVE index first — search and
       deduplication run against an empty index until the populate finishes. It is a
-      recovery tool, not a routine one (it now requires an extra confirmation).
+      recovery tool, not a routine one (it requires an extra confirmation and runs in the
+      background as an AsyncJob).
     - `search_index --rebuild` (from django-elasticsearch-dsl) is a **silent no-op** in
       HOPE — the DED registry is empty. Do not "fix" that by registering documents in it;
       the whole sync path is HOPE's own.

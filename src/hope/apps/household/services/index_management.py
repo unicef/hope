@@ -204,6 +204,11 @@ def rebuild_program_indexes(
     paths must use ``ensure_program_indexes`` instead. The end state is alias-consistent (the
     rebuilt index is ``_v1`` behind the suffix-less alias).
     """
+    if not config.IS_ELASTICSEARCH_ENABLED:
+        # delete and create work regardless of the flag but populate_index silently no-ops:
+        # the live index would be destroyed, replaced with an EMPTY one, and reported rebuilt
+        return False, "Elasticsearch is disabled - the rebuild would leave an empty index."
+
     success, msg = delete_program_indexes(program_id, using=using)
     if not success:  # pragma: no cover
         return False, f"Delete failed: {msg}"
