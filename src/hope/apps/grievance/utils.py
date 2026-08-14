@@ -1,6 +1,7 @@
 import logging
 import os
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
@@ -21,6 +22,17 @@ from hope.apps.grievance.validators import validate_file
 from hope.models import Individual, Partner
 
 logger = logging.getLogger(__name__)
+
+
+def grievance_ticket_url(grievance_ticket: GrievanceTicket) -> str | None:
+    # sensitive grievance shouldn't contain any urls
+    if grievance_ticket.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
+        return None
+    protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+    return (
+        f"{protocol}://{settings.FRONTEND_HOST}/{grievance_ticket.business_area.slug}/programs/all/grievance/tickets/"
+        f"{grievance_ticket.grievance_type_to_string()}-generated/{grievance_ticket.id}"
+    )
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:

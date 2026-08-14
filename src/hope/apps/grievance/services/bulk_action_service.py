@@ -53,21 +53,28 @@ class BulkActionService:
         tickets_ids: Sequence[str],
         assigned_to_id: str | None,
         business_area_slug: str,
+        action_user: User | None = None,
     ) -> QuerySet[GrievanceTicket]:
         user = get_object_or_404(User, id=assigned_to_id)
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
 
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
+        # Capture which tickets actually change assignee before the update; only those count as assigned.
+        reassigned_ids = list(queryset.exclude(assigned_to=user).values_list("id", flat=True))
 
-        updated_count = queryset.update(assigned_to=user, updated_at=timezone.now())
+        now = timezone.now()
+        updated_count = queryset.update(assigned_to=user, updated_at=now)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
+        if reassigned_ids:
+            queryset.filter(id__in=reassigned_ids).update(assigned_at=now, assigned_by=action_user)
 
         # Update also status to assigned if status is new
         new_tickets.update(status=GrievanceTicket.STATUS_ASSIGNED)
         increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
 
         self._clear_cache(business_area_slug)
+
         return queryset
 
     @transaction.atomic

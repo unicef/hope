@@ -425,6 +425,32 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         blank=True,
         verbose_name=_("Assigned to"),
     )
+    user_modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="modified_tickets",
+        null=True,
+        blank=True,
+        db_index=False,
+        verbose_name=_("Modified by"),
+        help_text=_("User who last edited this ticket through the update endpoint."),
+    )
+    assigned_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Assignee changed at"),
+        help_text=_("When the assignee of this ticket last changed."),
+    )
+    assigned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="assigned_tickets_by",
+        null=True,
+        blank=True,
+        db_index=False,
+        verbose_name=_("Assigned by"),
+        help_text=_("User who last changed the assignee of this ticket."),
+    )
 
     objects = GrievanceTicketManager()
 
@@ -529,6 +555,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
                 condition=models.Q(ignored=False),
                 name="idx_gt_ba_updated_not_ign",
             ),
+            models.Index(fields=["assigned_at"], name="idx_gt_assigned_at"),
         ]
 
     def clean(self) -> None:

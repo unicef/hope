@@ -1,0 +1,24 @@
+{% extends 'base_notification_email.txt' %}
+
+{% block content %}
+    Here is your Grievance & Feedback summary for {{ digest_date }}.
+    {% if assigned_rows %}
+    Tickets assigned to you:
+    {% for row in assigned_rows %}
+    - {{ row.ticket_id }} ({{ row.ticket_category }}, {{ row.ticket_status }}){% if row.ticket_url %} {{ row.ticket_url }}{% endif %}
+    {% endfor %}
+    {% if assigned_remaining %}
+    ... and {{ assigned_remaining }} more.
+    {% endif %}
+    {% endif %}
+    {% if edited_rows %}
+    Tickets you are responsible for that were changed:
+    {% for row in edited_rows %}
+    - {{ row.ticket_id }} ({{ row.ticket_category }}, {{ row.ticket_status }}){% if row.ticket_url %} {{ row.ticket_url }}{% endif %}
+    {% endfor %}
+    {% if edited_remaining %}
+    ... and {{ edited_remaining }} more.
+    {% endif %}
+    {% endif %}
+    Please access HOPE to take action.
+{% endblock content %}

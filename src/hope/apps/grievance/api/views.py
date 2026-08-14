@@ -773,7 +773,7 @@ class GrievanceTicketGlobalViewSet(
         return Response(resp.data, status.HTTP_200_OK)
 
     def _validate_status_change_preconditions(
-        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int, notifications: list
+        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int
     ) -> None:
         if permissions_to_use := self.get_permissions_for_status_change(
             new_status, grievance_ticket.status, grievance_ticket.is_feedback
@@ -785,18 +785,17 @@ class GrievanceTicketGlobalViewSet(
                 grievance_ticket,
             )
 
-        if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
-            if not check_permissions(
+        if (
+            new_status == GrievanceTicket.STATUS_ASSIGNED
+            and not grievance_ticket.assigned_to
+            and not check_permissions(
                 user,
                 [Permissions.GRIEVANCE_ASSIGN],
                 business_area=self.business_area,
                 program=grievance_ticket.programs.first(),
-            ):
-                raise PermissionDenied
-
-            notifications.append(
-                GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
             )
+        ):
+            raise PermissionDenied
         if new_status == GrievanceTicket.STATUS_CLOSED and isinstance(
             grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
         ):
@@ -818,7 +817,9 @@ class GrievanceTicketGlobalViewSet(
         user: Any, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
     ) -> None:
         if ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            notifications.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
+            notifications.append(
+                GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=user)
+            )
         if ticket.status == GrievanceTicket.STATUS_CLOSED:
             clear_cache(ticket.ticket_details, ticket.business_area.slug)
         if (
@@ -830,6 +831,7 @@ class GrievanceTicketGlobalViewSet(
                     ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=user,
+                    editor=user,
                 )
             )
 
@@ -862,7 +864,7 @@ class GrievanceTicketGlobalViewSet(
                 status=status.HTTP_202_ACCEPTED,
             )
 
-        self._validate_status_change_preconditions(user, grievance_ticket, new_status, notifications)
+        self._validate_status_change_preconditions(user, grievance_ticket, new_status)
 
         status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
         status_changer.change_status(new_status)
@@ -879,7 +881,7 @@ class GrievanceTicketGlobalViewSet(
             new_object=grievance_ticket,
         )
 
-        GrievanceNotification.send_all_notifications(notifications)
+        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(notifications))
         return Response(
             GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
@@ -980,9 +982,10 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket,
             GrievanceNotification.ACTION_NOTES_ADDED,
             created_by=user,
+            editor=user,
             ticket_note=ticket_note,
         )
-        notification.send_email_notification()
+        transaction.on_commit(notification.send_email_notification)
 
         return Response(TicketNoteSerializer(ticket_note).data, status=status.HTTP_201_CREATED)
 
@@ -1417,6 +1420,7 @@ class GrievanceTicketGlobalViewSet(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["assigned_to"],
             self.business_area_slug,  # type: ignore
+            action_user=request.user,  # type: ignore[arg-type]
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
