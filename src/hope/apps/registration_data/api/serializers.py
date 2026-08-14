@@ -153,6 +153,8 @@ class RefuseRdiSerializer(serializers.Serializer):
 
 
 class RegistrationDataImportCreateSerializer(serializers.Serializer):
+    import_from_program: Program  # resolved by validate_import_from_program_id, reused by the view
+
     import_from_program_id = serializers.CharField(required=True)
     import_from_ids = serializers.CharField(
         required=True,
@@ -167,7 +169,9 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
 
     def validate_import_from_program_id(self, import_from_program_id: str) -> str:
         # the source program has to belong to the business area of the url path
-        get_object_or_404(Program, id=import_from_program_id, business_area=self.context["business_area"])
+        self.import_from_program = get_object_or_404(
+            Program, id=import_from_program_id, business_area=self.context["business_area"]
+        )
         return import_from_program_id
 
     def get_object(self, validated_data: dict) -> RegistrationDataImport:

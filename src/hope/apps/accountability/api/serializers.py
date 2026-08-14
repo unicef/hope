@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.conf import settings
+from django.http import Http404
 from rest_framework import serializers
 
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -187,8 +188,9 @@ class ProgramScopedRecipientsMixin:
     """Recipients referenced by id in the body must belong to the program from the url path."""
 
     def _validate_program(self, obj: Any, program: Any) -> Any:
+        # 404, like every other out of scope id, so it stays indistinguishable from an id that does not exist
         if obj is not None and program != self.context["program"]:
-            raise serializers.ValidationError("Object does not belong to the Programme.")
+            raise Http404
         return obj
 
     def validate_payment_plan(self, payment_plan: PaymentPlan | None) -> PaymentPlan | None:

@@ -111,7 +111,7 @@ def test_create_survey_for_payment_plan_from_other_business_area_is_denied(
         format="json",
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.status_code
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     assert not Survey.objects.exists()
 
 
@@ -134,5 +134,5 @@ def test_create_message_for_households_from_other_business_area_is_denied(
         format="json",
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.status_code
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     assert not Message.objects.exists()

@@ -340,7 +340,7 @@ class RegistrationDataImportViewSet(
         serializer.is_valid(raise_exception=True)
         registration_data_import = serializer.get_object(serializer.validated_data)
         import_from_program_id = serializer.validated_data["import_from_program_id"]
-        import_from_program = Program.objects.get(id=import_from_program_id)
+        import_from_program = serializer.import_from_program  # already scoped to the business area of the url path
         if self.program.status == Program.FINISHED:
             raise ValidationError("In order to perform this action, program status must not be finished.")
 
