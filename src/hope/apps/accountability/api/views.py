@@ -116,7 +116,7 @@ class FeedbackViewSet(
     program_model_field = "program"
 
     def get_object(self) -> Feedback:
-        # via get_queryset - permissions are checked against the path, so the object must be scoped the same way
+        # permissions are checked against the path, so the object has to be scoped the same way
         return get_object_or_404(self.get_queryset(), id=self.kwargs.get("pk"))
 
     def get_queryset(self) -> QuerySet[Feedback]:
