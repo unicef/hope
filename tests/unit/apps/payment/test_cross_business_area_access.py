@@ -9,8 +9,10 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
+    HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     PaymentPlanSupportingDocumentFactory,
     PaymentVerificationPlanFactory,
@@ -116,6 +118,7 @@ def attacker(
             Permissions.PAYMENT_VERIFICATION_DELETE,
             Permissions.PAYMENT_VERIFICATION_ACTIVATE,
             Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
+            Permissions.TARGETING_CREATE,
         ],
         attacker_business_area,
         program=attacker_payment_plan.program,
@@ -491,3 +494,42 @@ def test_create_payment_plan_group_in_cycle_of_other_business_area_is_denied(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.status_code
     assert not PaymentPlanGroup.objects.filter(cycle=victim_cycle, name="cross ba group").exists()
+
+
+def test_create_target_population_in_cycle_of_other_business_area_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_purpose: PaymentPlanPurpose,
+    victim_payment_plan: PaymentPlan,
+) -> None:
+    victim_cycle = victim_payment_plan.program_cycle
+    victim_household = HouseholdFactory(
+        business_area=victim_payment_plan.business_area,
+        program=victim_payment_plan.program,
+        create_role=False,
+    )
+    url = reverse("api:payments:target-populations-list", kwargs=cross_ba_kwargs)
+
+    response = api_client.post(
+        url,
+        {
+            "name": "cross ba target population",
+            "program_cycle_id": str(victim_cycle.id),
+            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=victim_cycle).id),
+            "payment_plan_purposes": [str(attacker_purpose.id)],
+            "rules": [
+                {
+                    "household_filters_blocks": [],
+                    "household_ids": victim_household.unicef_id,
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
+    assert not PaymentPlan.objects.filter(name="cross ba target population").exists()

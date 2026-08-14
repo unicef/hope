@@ -602,7 +602,9 @@ class PaymentPlanService:
     @staticmethod
     def create(input_data: dict, user: "User", business_area_slug: str) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-        program_cycle = get_object_or_404(ProgramCycle, pk=input_data["program_cycle_id"])
+        program_cycle = get_object_or_404(
+            ProgramCycle, pk=input_data["program_cycle_id"], program__business_area=business_area
+        )
         program = program_cycle.program
         if program_cycle.status == ProgramCycle.FINISHED:
             raise ValidationError("Impossible to create Target Population for Programme Cycle within Finished status")
