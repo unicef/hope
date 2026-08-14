@@ -234,12 +234,14 @@ class Command(BaseCommand):
         parallel = opts["parallel"]
         # get_queryset() rather than raw model managers: same scope (program + merge status)
         # plus the select/prefetch that keeps prepare() from doing per-row queries
+        # no using= here: update() forwards unknown kwargs all the way into Elasticsearch.bulk(),
+        # which rejects them - the doc class already carries its connection
         if delta["ind_present"]:
             qs = ind_doc().get_queryset().filter(id__in=delta["ind_present"]).iterator(chunk_size=chunk)
-            ind_doc().update(qs, action="index", parallel=parallel, using=using)
+            ind_doc().update(qs, action="index", parallel=parallel)
         if delta["hh_present"]:
             qs = hh_doc().get_queryset().filter(id__in=delta["hh_present"]).iterator(chunk_size=chunk)
-            hh_doc().update(qs, action="index", parallel=parallel, using=using)
+            hh_doc().update(qs, action="index", parallel=parallel)
         if delta["ind_removed"]:
             remove_elasticsearch_documents_by_matching_ids([str(i) for i in delta["ind_removed"]], ind_doc, using=using)
         if delta["hh_removed"]:

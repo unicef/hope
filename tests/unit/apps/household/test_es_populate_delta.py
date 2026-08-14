@@ -322,7 +322,8 @@ def test_apply_delta_upserts_present_and_removes_soft_deleted(mock_remove) -> No
 
     ind_doc.return_value.update.assert_called_once()
     assert ind_doc.return_value.update.call_args.kwargs["action"] == "index"
-    assert ind_doc.return_value.update.call_args.kwargs["using"] == "default"
+    # no using= allowed: update() forwards unknown kwargs into Elasticsearch.bulk(), which rejects them
+    assert "using" not in ind_doc.return_value.update.call_args.kwargs
     mock_remove.assert_called_once_with([str(removed_id)], ind_doc, using="default")
 
 
