@@ -285,6 +285,25 @@ def test_role_assignment_inline_formfield_for_foreignkey_business_area(
     assert business_area_ukr in field.queryset
 
 
+def test_role_assignment_inline_business_area_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    business_area_afg: BusinessArea,
+    business_area_ukr: BusinessArea,
+    partner: Partner,
+):
+    partner.allowed_business_areas.add(business_area_afg)
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    assert "business_area" not in admin.get_autocomplete_fields(request)
+
+    form_set = admin.get_formset(request, partner)
+    field = form_set.form.base_fields["business_area"]
+    assert list(field.queryset) == [business_area_afg]
+
+
 def test_role_assignment_inline_formfield_for_foreignkey_role(
     request_factory: RequestFactory,
     admin_site: AdminSite,
@@ -895,3 +914,63 @@ def test_partner_admin_get_form(
     assert parent_partner in form.base_fields["parent"].queryset
     assert unicef_subpartner not in form.base_fields["parent"].queryset
     assert partner not in form.base_fields["parent"].queryset
+
+
+def test_role_assignment_inline_formset_post_disallowed_business_area(  # noqa: PLR0917
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    business_area_afg: BusinessArea,
+    business_area_ukr: BusinessArea,
+    role_available_for_partner: Role,
+    partner: Partner,
+):
+    partner.allowed_business_areas.add(business_area_afg)
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    inline = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    form_set = inline.get_formset(request, partner)
+
+    data = {
+        "role_assignments-TOTAL_FORMS": "1",
+        "role_assignments-INITIAL_FORMS": "0",
+        "role_assignments-0-business_area": str(business_area_ukr.id),
+        "role_assignments-0-role": str(role_available_for_partner.id),
+        "role_assignments-0-program": "",
+        "role_assignments-0-expiry_date": "",
+        "role_assignments-0-id": "",
+        "role_assignments-0-DELETE": "",
+    }
+    formset = form_set(data=data, instance=partner)
+
+    assert formset.is_valid() is False
+    assert formset.errors[0].get("business_area")
+
+
+def test_role_assignment_inline_formset_post_allowed_business_area(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    business_area_afg: BusinessArea,
+    role_available_for_partner: Role,
+    partner: Partner,
+):
+    partner.allowed_business_areas.add(business_area_afg)
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    inline = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    form_set = inline.get_formset(request, partner)
+
+    data = {
+        "role_assignments-TOTAL_FORMS": "1",
+        "role_assignments-INITIAL_FORMS": "0",
+        "role_assignments-0-business_area": str(business_area_afg.id),
+        "role_assignments-0-role": str(role_available_for_partner.id),
+        "role_assignments-0-program": "",
+        "role_assignments-0-expiry_date": "",
+        "role_assignments-0-id": "",
+        "role_assignments-0-DELETE": "",
+    }
+    formset = form_set(data=data, instance=partner)
+
+    assert formset.is_valid()

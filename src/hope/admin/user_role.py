@@ -23,6 +23,12 @@ class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     formset = RoleAssignmentInlineFormSet
     ordering = ["business_area__name"]
 
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        # business_area is intentionally excluded: its choices are restricted to the
+        # partner's allowed_business_areas, and the autocomplete widget would bypass
+        # that restriction by listing every business area.
+        return [field for field in super().get_autocomplete_fields(request) if field != "business_area"]
+
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         partner_id = request.resolver_match.kwargs.get("object_id")
 
