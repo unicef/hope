@@ -557,6 +557,9 @@ class GrievanceTicketGlobalViewSet(
 
     parser_classes = (DictDrfNestedParser, JSONParser)
 
+    def get_serializer_context(self) -> dict:
+        return {**super().get_serializer_context(), "business_area": self.business_area}
+
     def get_count_queryset(self) -> QuerySet:
         return super().get_queryset().filter(self.grievance_permissions_query)
 
