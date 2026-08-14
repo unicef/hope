@@ -4,6 +4,8 @@ After ``es_reindex`` swaps an alias to ``_vN+1``, the old ``_vN`` is deliberatel
 instant rollback target. Days later this command sweeps it - together with any dark leftovers
 from crashed reindex runs. Safety by construction:
 
+* it refuses to run while ``es_reindex`` holds its lock - a mid-build dark ``_vN+1`` has no
+  alias yet and would look exactly like a deletable leftover,
 * only indexes matching a program's ``<name>_vN`` pattern are considered,
 * the alias's CURRENT target is never touched,
 * anything that still has ANY alias attached is skipped (nothing pointed-at gets deleted),
@@ -28,6 +30,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.dsl import connections
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.apps.household.management.commands.es_reindex import Command as ReindexCommand
 
 
 class Command(BaseCommand):
@@ -47,6 +50,13 @@ class Command(BaseCommand):
             raise CommandError("Provide exactly one scope: --program, --business-area or --all.")
 
         es: Elasticsearch = connections.get_connection()
+        if es.indices.exists(index=ReindexCommand.LOCK_INDEX):
+            # a mid-build dark _vN+1 has no alias yet, so it looks exactly like a deletable
+            # leftover - the reindex lock is the only thing that tells them apart
+            raise CommandError(
+                f"es_reindex holds its lock ({ReindexCommand.LOCK_INDEX}) - a run is in progress, or a crashed "
+                f"one left the lock. Finish/resume it first (es_reindex --force-unlock clears a stale lock)."
+            )
         code_by_id = self._scope(opts)
         if not code_by_id:
             self.stdout.write(self.style.WARNING("No active programs in scope - nothing to do."))

@@ -34,6 +34,7 @@ def _make_es(*, aliased: bool = True) -> MagicMock:
     """Every name: alias on _v2; leftovers _v1 (unaliased), _v3 (aliased elsewhere) and
     _v2_backup (unaliased but NOT a strict _vN name - the wildcard still matches it)."""
     es = MagicMock()
+    es.indices.exists.return_value = False  # no es_reindex lock held
     es.indices.exists_alias.return_value = aliased
     es.indices.get_alias.side_effect = lambda **kw: {f"{kw['name']}_v2": {"aliases": {kw["name"]: {}}}}
     es.indices.get.side_effect = lambda **kw: {
@@ -58,6 +59,16 @@ def es_not_aliased() -> MagicMock:
 def test_requires_exactly_one_scope() -> None:
     with pytest.raises(CommandError, match="exactly one scope"):
         call_command(CMD)
+
+
+def test_refuses_while_es_reindex_holds_its_lock(program: Program, es_aliased: MagicMock) -> None:
+    # a mid-build dark _vN+1 has no alias and looks exactly like a deletable leftover;
+    # the reindex lock is the only discriminator, so the whole command refuses to run
+    es_aliased.indices.exists.return_value = True
+    with patch(GET_CONN, return_value=es_aliased), pytest.raises(CommandError, match="es_reindex holds its lock"):
+        call_command(CMD, program=str(program.id), confirm=True)
+
+    es_aliased.indices.delete.assert_not_called()
 
 
 def test_without_confirm_lists_but_deletes_nothing(program: Program, es_aliased: MagicMock) -> None:
