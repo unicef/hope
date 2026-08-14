@@ -23,6 +23,7 @@ from hope.models import (
     BusinessArea,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanPurpose,
     PaymentPlanSupportingDocument,
     PaymentVerificationPlan,
@@ -114,6 +115,7 @@ def attacker(
             Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
             Permissions.PAYMENT_VERIFICATION_DELETE,
             Permissions.PAYMENT_VERIFICATION_ACTIVATE,
+            Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
         ],
         attacker_business_area,
         program=attacker_payment_plan.program,
@@ -475,3 +477,17 @@ def test_activate_verification_plan_of_another_payment_plan_is_denied(
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     attacker_second_plan_verification_plan.refresh_from_db()
     assert attacker_second_plan_verification_plan.status == PaymentVerificationPlan.STATUS_PENDING
+
+
+def test_create_payment_plan_group_in_cycle_of_other_business_area_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    victim_payment_plan: PaymentPlan,
+) -> None:
+    victim_cycle = victim_payment_plan.program_cycle
+    url = reverse("api:payments:payment-plan-groups-list", kwargs=cross_ba_kwargs)
+
+    response = api_client.post(url, {"name": "cross ba group", "cycle": str(victim_cycle.id)}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.status_code
+    assert not PaymentPlanGroup.objects.filter(cycle=victim_cycle, name="cross ba group").exists()

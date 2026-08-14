@@ -15,6 +15,7 @@ from rest_framework.settings import api_settings
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.api.fields import ScopedRelatedField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.api.serializers.household import (
@@ -63,6 +64,7 @@ from hope.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     Program,
+    ProgramCycle,
     log_create,
 )
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
@@ -1877,6 +1879,8 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+    cycle = ScopedRelatedField(queryset=ProgramCycle.objects.all(), scope="program")
+
     class Meta:
         model = PaymentPlanGroup
         fields = ["id", "unicef_id", "name", "cycle"]
