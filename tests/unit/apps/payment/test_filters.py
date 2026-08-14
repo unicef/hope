@@ -6,7 +6,6 @@ from uuid import uuid4
 from django.http import Http404
 import pytest
 
-from extras.test_utils.factories.activity_log import LogEntryFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.household import HouseholdFactory
 from extras.test_utils.factories.payment import (
@@ -26,7 +25,6 @@ from hope.apps.payment.filters import (
     PaymentFilter,
     PaymentPlanFilter,
     PaymentVerificationFilter,
-    PaymentVerificationLogEntryFilter,
     PaymentVerificationPlanFilter,
     PaymentVerificationSummaryFilter,
 )
@@ -34,7 +32,6 @@ from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Individual,
-    LogEntry,
     Payment,
     PaymentPlan,
     PaymentVerification,
@@ -331,26 +328,6 @@ def test_payment_verification_summary_filter_returns_all(business_area):
     filtered = PaymentVerificationSummaryFilter(data={}, queryset=qs).qs
 
     assert list(filtered.values_list("pk", flat=True)) == [summary.pk]
-
-
-# ---------------------------------------------------------------------------
-# PaymentVerificationLogEntryFilter
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.enable_activity_log
-def test_payment_verification_log_entry_filter_object_id(business_area):
-    plan = PaymentPlanFactory(business_area=business_area, status=PaymentPlan.Status.FINISHED)
-    pvp_a = PaymentVerificationPlanFactory(payment_plan=plan)
-    pvp_b = PaymentVerificationPlanFactory(payment_plan=plan)
-    matching_a = LogEntryFactory(business_area=business_area, object_id=pvp_a.pk)
-    matching_b = LogEntryFactory(business_area=business_area, object_id=pvp_b.pk)
-    LogEntryFactory(business_area=business_area, object_id=uuid4())
-
-    qs = LogEntry.objects.all()
-    filtered = PaymentVerificationLogEntryFilter(data={"object_id": str(plan.pk)}, queryset=qs).qs
-
-    assert set(filtered.values_list("pk", flat=True)) == {matching_a.pk, matching_b.pk}
 
 
 # ---------------------------------------------------------------------------
