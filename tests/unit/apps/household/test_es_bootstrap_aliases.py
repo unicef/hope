@@ -8,6 +8,7 @@ missing, resume after crash, lock, dry-run). DB is used only for the Program the
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
+from constance.test import override_config
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from elasticsearch import BadRequestError
@@ -149,6 +150,14 @@ def test_requires_exactly_one_scope() -> None:
         call_command(CMD)
 
 
+def test_disabled_elasticsearch_flag_aborts(program: Program) -> None:
+    # with the flag off the fresh-program branch would create index + alias, populate
+    # NOTHING (populate_index no-ops) and still report "full-populated"
+    with pytest.raises(CommandError, match="IS_ELASTICSEARCH_ENABLED"):
+        call_command(CMD, program=str(program.id))
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_bootstrap_runs_full_sequence_per_index(program: Program, index_names: list[str], es_bare: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_bare), patch(DELTA_CALL) as delta:
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -160,6 +169,7 @@ def test_bootstrap_runs_full_sequence_per_index(program: Program, index_names: l
     assert delta.call_count == 1
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_bootstrap_write_blocks_source_before_clone(program: Program, es_bare: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_bare), patch(DELTA_CALL):
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -168,6 +178,7 @@ def test_bootstrap_write_blocks_source_before_clone(program: Program, es_bare: M
     assert first_block["settings"] == {"index.blocks.write": True}
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_bootstrap_unblocks_and_restores_replicas_on_target(program: Program, es_bare: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_bare), patch(DELTA_CALL):
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -177,6 +188,7 @@ def test_bootstrap_unblocks_and_restores_replicas_on_target(program: Program, es
     assert final["settings"] == {"index.blocks.write": None, "index.number_of_replicas": "0"}
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_skip_when_alias_already_exists(program: Program, es_aliased: MagicMock) -> None:
     out = StringIO()
     with patch(GET_CONN, return_value=es_aliased), patch(DELTA_CALL):
@@ -187,6 +199,7 @@ def test_skip_when_alias_already_exists(program: Program, es_aliased: MagicMock)
     assert "skip (already alias)" in out.getvalue()
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_missing_index_creates_v1_with_alias(program: Program, index_names: list[str], es_missing: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_missing), patch(DELTA_CALL), patch(POPULATE):
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -197,6 +210,7 @@ def test_missing_index_creates_v1_with_alias(program: Program, index_names: list
     assert all(kw["aliases"] == {kw["index"].removesuffix("_v1"): {}} for kw in versioned)
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_missing_index_is_full_populated_not_left_empty(program: Program, es_missing: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_missing), patch(DELTA_CALL), patch(POPULATE) as populate:
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -204,6 +218,7 @@ def test_missing_index_is_full_populated_not_left_empty(program: Program, es_mis
     assert populate.call_count == 2
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_resume_after_crash_skips_clone_but_redoes_takeover(program: Program, es_resume: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_resume), patch(DELTA_CALL):
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -212,6 +227,7 @@ def test_resume_after_crash_skips_clone_but_redoes_takeover(program: Program, es
     assert es_resume.indices.update_aliases.call_count == 2
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_count_mismatch_aborts_before_takeover_and_unblocks_source(
     program: Program, es_count_mismatch: MagicMock
 ) -> None:
@@ -231,16 +247,19 @@ def test_count_mismatch_aborts_before_takeover_and_unblocks_source(
     assert len(unblocks) == 2
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_cluster_not_green_aborts(program: Program, es_yellow: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_yellow), pytest.raises(CommandError, match="GREEN"):
         call_command(CMD, program=str(program.id), stdout=StringIO())
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_lock_held_by_another_run_refuses(program: Program, es_locked: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_locked), pytest.raises(CommandError, match="lock"):
         call_command(CMD, program=str(program.id), stdout=StringIO())
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_lock_released_after_run(program: Program, es_bare: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_bare), patch(DELTA_CALL):
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -249,6 +268,7 @@ def test_lock_released_after_run(program: Program, es_bare: MagicMock) -> None:
     assert Command.LOCK_INDEX in deleted
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_dry_run_touches_nothing(program: Program, es_bare: MagicMock) -> None:
     out = StringIO()
     with patch(GET_CONN, return_value=es_bare), patch(DELTA_CALL) as delta:
@@ -261,6 +281,7 @@ def test_dry_run_touches_nothing(program: Program, es_bare: MagicMock) -> None:
     assert "BOOTSTRAP (clone-first)" in out.getvalue()
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_status_reports_bare_state(program: Program, es_bare: MagicMock) -> None:
     out = StringIO()
     with patch(GET_CONN, return_value=es_bare):
@@ -270,6 +291,7 @@ def test_status_reports_bare_state(program: Program, es_bare: MagicMock) -> None
     es_bare.indices.clone.assert_not_called()
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_skip_delta_skips_the_sweep(program: Program, es_bare: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_bare), patch(DELTA_CALL) as delta:
         call_command(CMD, program=str(program.id), skip_delta=True, stdout=StringIO())
@@ -277,6 +299,7 @@ def test_skip_delta_skips_the_sweep(program: Program, es_bare: MagicMock) -> Non
     assert delta.call_count == 0
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_clone_failure_unblocks_source_and_still_runs_delta(program: Program, es_clone_fails: MagicMock) -> None:
     with (
         patch(GET_CONN, return_value=es_clone_fails),
@@ -290,6 +313,7 @@ def test_clone_failure_unblocks_source_and_still_runs_delta(program: Program, es
     assert delta.call_count == 1
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_health_timeout_unblocks_source(program: Program, es_health_times_out: MagicMock) -> None:
     with (
         patch(GET_CONN, return_value=es_health_times_out),
@@ -302,6 +326,7 @@ def test_health_timeout_unblocks_source(program: Program, es_health_times_out: M
     es_health_times_out.indices.update_aliases.assert_not_called()
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_alias_call_failure_unblocks_source(program: Program, es_alias_call_fails: MagicMock) -> None:
     with (
         patch(GET_CONN, return_value=es_alias_call_fails),
@@ -313,6 +338,7 @@ def test_alias_call_failure_unblocks_source(program: Program, es_alias_call_fail
     assert len(_source_unblock_calls(es_alias_call_fails)) == 2
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_target_is_opened_before_the_takeover(program: Program, es_bare: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_bare), patch(DELTA_CALL):
         call_command(CMD, program=str(program.id), stdout=StringIO())
@@ -326,6 +352,7 @@ def test_target_is_opened_before_the_takeover(program: Program, es_bare: MagicMo
     assert open_positions[0] < swap_positions[0]
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_alias_state_heals_lingering_write_block(program: Program, es_aliased_with_blocked_target: MagicMock) -> None:
     out = StringIO()
     with patch(GET_CONN, return_value=es_aliased_with_blocked_target), patch(DELTA_CALL):
@@ -340,6 +367,7 @@ def test_alias_state_heals_lingering_write_block(program: Program, es_aliased_wi
     assert "healed lingering write block" in out.getvalue()
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_ambiguous_program_code_is_rejected(programs_same_code: list[Program], es_bare: MagicMock) -> None:
     with (
         patch(GET_CONN, return_value=es_bare),

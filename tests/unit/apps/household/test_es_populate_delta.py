@@ -10,6 +10,7 @@ from io import StringIO
 from unittest.mock import MagicMock, patch
 import uuid
 
+from constance.test import override_config
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.utils import timezone
@@ -347,10 +348,18 @@ def test_target_suffix_with_reconcile_raises() -> None:
         call_command(CMD, "--reconcile", "--target-suffix", "v2")
 
 
+def test_disabled_elasticsearch_flag_aborts() -> None:
+    # only part of the write path checks the flag: upserts would still run while the
+    # delete helper silently skips - refuse to run half-blind
+    with pytest.raises(CommandError, match="IS_ELASTICSEARCH_ENABLED"):
+        call_command(CMD, "--since", "2026-07-01T09:00:00Z")
+
+
 # ── handle: --since orchestration / --reconcile / scope ───────────────────────
 
 
 @patch(PROCESS, return_value=("delta synced", "ind +1/-0 hh +0/-0"))
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_since_processes_every_active_program(mock_process) -> None:
     # No cross-program pre-filter: every in-scope program is handed to _process_program.
     prog = ProgramFactory(status=Program.ACTIVE)
@@ -363,6 +372,7 @@ def test_since_processes_every_active_program(mock_process) -> None:
 
 
 @patch(PROCESS, return_value=("failed", "boom"))
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_since_failure_is_listed_and_command_errors(mock_process) -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     since = (timezone.now() - datetime.timedelta(days=1)).isoformat()
@@ -378,6 +388,7 @@ def test_since_failure_is_listed_and_command_errors(mock_process) -> None:
 
 
 @patch(CHECK, return_value=(False, "count mismatch"))
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_reconcile_reports_drift_read_only(mock_check) -> None:
     prog = ProgramFactory(status=Program.ACTIVE)
     out = StringIO()
@@ -391,6 +402,7 @@ def test_reconcile_reports_drift_read_only(mock_check) -> None:
 
 @patch(PROCESS)
 @patch(CHECK, return_value=(True, "ok"))
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_reconcile_only_does_not_sync(mock_check, mock_process) -> None:
     ProgramFactory(status=Program.ACTIVE)
 
@@ -400,6 +412,7 @@ def test_reconcile_only_does_not_sync(mock_check, mock_process) -> None:
 
 
 @patch(PROCESS)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_scope_no_match_warns_and_skips(mock_process) -> None:
     ProgramFactory(status=Program.ACTIVE)
     since = (timezone.now() - datetime.timedelta(days=1)).isoformat()

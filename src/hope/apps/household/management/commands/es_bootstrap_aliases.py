@@ -55,6 +55,7 @@ Read-only state report::
 from typing import Any
 import uuid
 
+from constance import config
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
@@ -96,6 +97,10 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **opts: Any) -> None:
         if sum([bool(opts["program"]), bool(opts["business_area"]), opts["all"]]) != 1:
             raise CommandError("Provide exactly one scope: --program, --business-area or --all.")
+        if not config.IS_ELASTICSEARCH_ENABLED:
+            # the fresh-program branch would create the index + alias, populate nothing
+            # (populate_index no-ops on the flag) and still report "full-populated"
+            raise CommandError("IS_ELASTICSEARCH_ENABLED is off - populate would silently no-op. Aborting.")
 
         es: Elasticsearch = connections.get_connection()
         code_by_id = self._scope(opts)

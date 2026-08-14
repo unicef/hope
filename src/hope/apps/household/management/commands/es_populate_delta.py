@@ -55,6 +55,7 @@ from datetime import datetime
 from typing import Any
 import uuid
 
+from constance import config
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
@@ -135,6 +136,10 @@ class Command(BaseCommand):
         if opts["target_suffix"] and (opts["reconcile"] or not opts["since"]):
             # reconcile compares through the ALIAS (the old index) - meaningless for a dark target
             raise CommandError("--target-suffix requires --since and cannot be combined with --reconcile.")
+        if not config.IS_ELASTICSEARCH_ENABLED:
+            # only PART of the write path checks the flag: upserts would still run while
+            # remove_elasticsearch_documents_by_matching_ids silently skips every delete
+            raise CommandError("IS_ELASTICSEARCH_ENABLED is off - deletes would silently no-op. Aborting.")
 
         from hope.models import Program
 
