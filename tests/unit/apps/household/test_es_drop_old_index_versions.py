@@ -62,8 +62,6 @@ def test_requires_exactly_one_scope() -> None:
 
 
 def test_refuses_while_es_reindex_holds_its_lock(program: Program, es_aliased: MagicMock) -> None:
-    # a mid-build dark _vN+1 has no alias and looks exactly like a deletable leftover;
-    # the reindex lock is the only discriminator, so the whole command refuses to run
     es_aliased.indices.exists.return_value = True
     with patch(GET_CONN, return_value=es_aliased), pytest.raises(CommandError, match="es_reindex holds its lock"):
         call_command(CMD, program=str(program.id), confirm=True)
@@ -101,8 +99,6 @@ def test_aliased_leftover_is_skipped_with_warning(program: Program, es_aliased: 
 
 
 def test_non_strict_version_name_is_never_deleted(program: Program, es_aliased: MagicMock) -> None:
-    # the _v* wildcard also matches names like <name>_v2_backup - unaliased, so it looks
-    # exactly like a leftover, but it is not a strict _vN name and is not ours to delete
     with patch(GET_CONN, return_value=es_aliased):
         call_command(CMD, program=str(program.id), confirm=True, stdout=StringIO())
 

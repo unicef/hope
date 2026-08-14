@@ -267,7 +267,6 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
             pass
 
         def get_queryset(self) -> QuerySet[Household]:
-            # same rationale as the individual queryset above
             return (
                 Household.objects.filter(program_id=program_id)
                 .select_related("head_of_household", "admin1", "admin2", "business_area")

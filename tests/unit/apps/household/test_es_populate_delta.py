@@ -349,8 +349,6 @@ def test_target_suffix_with_reconcile_raises() -> None:
 
 
 def test_disabled_elasticsearch_flag_aborts() -> None:
-    # only part of the write path checks the flag: upserts would still run while the
-    # delete helper silently skips - refuse to run half-blind
     with pytest.raises(CommandError, match="IS_ELASTICSEARCH_ENABLED"):
         call_command(CMD, "--since", "2026-07-01T09:00:00Z")
 

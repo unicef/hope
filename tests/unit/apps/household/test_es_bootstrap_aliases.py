@@ -151,8 +151,6 @@ def test_requires_exactly_one_scope() -> None:
 
 
 def test_disabled_elasticsearch_flag_aborts(program: Program) -> None:
-    # with the flag off the fresh-program branch would create index + alias, populate
-    # NOTHING (populate_index no-ops) and still report "full-populated"
     with pytest.raises(CommandError, match="IS_ELASTICSEARCH_ENABLED"):
         call_command(CMD, program=str(program.id))
 

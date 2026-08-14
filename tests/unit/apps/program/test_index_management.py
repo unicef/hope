@@ -214,8 +214,6 @@ def test_populate_program_indexes_empty_program(
 
 @override_config(IS_ELASTICSEARCH_ENABLED=False)
 def test_rebuild_program_indexes_refuses_when_elasticsearch_disabled(program: Program) -> None:
-    # delete/create work regardless of the flag but populate_index no-ops: proceeding would
-    # replace the live index with an empty one and still report success
     ok, msg = rebuild_program_indexes(str(program.id))
 
     assert ok is False
