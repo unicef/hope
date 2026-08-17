@@ -656,7 +656,7 @@ class Individual(
     def is_head(self) -> bool:
         if not self.household:
             return False
-        return self.household.head_of_household.id == self.id
+        return self.household.head_of_household_id == self.id
 
     def erase(self) -> None:
         for document in self.documents.all():
