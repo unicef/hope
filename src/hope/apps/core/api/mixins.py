@@ -2,7 +2,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, Mapping
 
 from django.conf import settings
-from django.db.models import Q, QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
 from requests.adapters import HTTPAdapter
@@ -218,17 +218,32 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     #  Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
 
     program_model_field = "program"
+    program_model_field_is_many = False
 
     def get_queryset(self) -> QuerySet:
-        from hope.models import Area, Program
+        from hope.models import Program
 
         queryset = super().get_queryset()
         user = self.request.user
-        partner = user.partner
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
             self.get_permissions_for_action(),
         )
+        area_ids_by_program = self._area_ids_by_program(user.partner, program_ids)
+        accessible_program_ids = list(Program.objects.filter(id__in=program_ids).values_list("id", flat=True))
+
+        if self.program_model_field_is_many:
+            filter_q = self._visibility_q_for_many(queryset.model, accessible_program_ids, area_ids_by_program)
+            without_program_q = Q(~Exists(self._program_link_queryset(queryset.model)))
+        else:
+            filter_q = self._visibility_q_for_fk(accessible_program_ids, area_ids_by_program)
+            without_program_q = Q(**{f"{self.program_model_field}__isnull": True})
+
+        # filter_q empty if no access to any program
+        return queryset.filter(Q(filter_q) | without_program_q) if filter_q else queryset.none()
+
+    def _area_ids_by_program(self, partner: Any, program_ids: list) -> dict[str, list]:
+        from hope.models import Area
 
         # Batch-fetch all area limits for all programs in a single query instead of one per program.
         area_ids_by_program: dict[str, list] = {}
@@ -242,9 +257,40 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         ):
             p_id = str(row["admin_area_limits__program_id"])
             area_ids_by_program.setdefault(p_id, []).append(row["id"])
+        return area_ids_by_program
+
+    def _areas_q(self, area_ids: list) -> Q:
+        areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
+        areas_query = Q()
+        for field in self.admin_area_model_fields:
+            areas_query |= Q(**{f"{field}__in": area_ids})
+        return areas_null | areas_query
+
+    def _program_link_queryset(self, model: Any) -> QuerySet:
+        m2m_field = model._meta.get_field(self.program_model_field)
+        through = m2m_field.remote_field.through
+        return through.objects.filter(**{m2m_field.m2m_field_name(): OuterRef("pk")})
+
+    def _visibility_q_for_many(self, model: Any, program_ids: list, area_ids_by_program: dict[str, list]) -> Q:
+        programs_by_area_limits: dict[frozenset, list] = {}
+        for program_id in program_ids:
+            key = frozenset(area_ids_by_program.get(str(program_id), ()))
+            programs_by_area_limits.setdefault(key, []).append(program_id)
+
+        m2m_field = model._meta.get_field(self.program_model_field)
+        target_column = f"{m2m_field.m2m_reverse_field_name()}_id"
 
         filter_q = Q()
-        for program_id in Program.objects.filter(id__in=program_ids).values_list("id", flat=True):
+        for area_ids, group_program_ids in programs_by_area_limits.items():
+            link_exists = Q(
+                Exists(self._program_link_queryset(model).filter(**{f"{target_column}__in": group_program_ids}))
+            )
+            filter_q |= link_exists & self._areas_q(sorted(area_ids)) if area_ids else link_exists
+        return filter_q
+
+    def _visibility_q_for_fk(self, program_ids: list, area_ids_by_program: dict[str, list]) -> Q:
+        filter_q = Q()
+        for program_id in program_ids:
             program_q = Q(**{f"{self.program_model_field}__id__in": [program_id]})
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             areas_query = Q()
@@ -253,11 +299,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
                     areas_query |= Q(**{f"{field}__in": area_ids})
 
             filter_q |= Q(program_q & areas_null) | Q(program_q & areas_query)
-        return (
-            queryset.filter(Q(filter_q) | Q(**{f"{self.program_model_field}__isnull": True}))
-            if filter_q
-            else queryset.none()
-        )  # filter_q empty if no access to any program
+        return filter_q
 
 
 class PermissionActionMixin:
