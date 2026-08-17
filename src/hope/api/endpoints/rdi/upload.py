@@ -25,6 +25,7 @@ from hope.apps.household.const import (
 )
 from hope.models import (
     Account,
+    AccountAttachment,
     AccountType,
     Area,
     FinancialInstitution,
@@ -104,6 +105,20 @@ class DocumentSerializerUpload(serializers.ModelSerializer):
         ]
 
 
+class AccountAttachmentSerializerUpload(serializers.ModelSerializer):
+    title = serializers.CharField(allow_blank=True, required=False)
+    file = serializers.CharField()
+
+    class Meta:
+        model = AccountAttachment
+        fields = ["title", "file"]
+
+    def validate_file(self, value: str) -> str:
+        if len(value) * 3 // 4 > AccountAttachment.FILE_SIZE_LIMIT:
+            raise ValidationError(f"File size must be ≤ {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB.")
+        return value
+
+
 class AccountSerializerUpload(serializers.ModelSerializer):
     type = serializers.SlugRelatedField(
         source="account_type",
@@ -116,10 +131,16 @@ class AccountSerializerUpload(serializers.ModelSerializer):
         required=False, queryset=FinancialInstitution.objects.all()
     )
     data = serializers.JSONField(required=False, default=dict)  # type: ignore
+    attachments = AccountAttachmentSerializerUpload(many=True, required=False)
 
     class Meta:
         model = PendingAccount
-        fields = ["type", "number", "financial_institution", "data"]
+        fields = ["type", "number", "financial_institution", "data", "attachments"]
+
+    def validate_attachments(self, value: list[dict]) -> list[dict]:
+        if len(value) > AccountAttachment.FILE_LIMIT:
+            raise ValidationError(f"An account cannot have more than {AccountAttachment.FILE_LIMIT} attachments.")
+        return value
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)

@@ -34,10 +34,12 @@ from hope.apps.core.api.mixins import (
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
+    ProgramVisibilityMixin,
     SerializerActionMixin,
 )
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.utils import check_concurrency_version_in_mutation
+from hope.apps.household.api.serializers.individual import AccountSerializer
 from hope.apps.payment.api.caches import (
     PaymentPlanGroupListKeyConstructor,
     PaymentPlanKeyConstructor,
@@ -57,6 +59,7 @@ from hope.apps.payment.api.filters import (
 )
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
+    AccountAttachmentUploadSerializer,
     ApplyCustomExchangeRateSerializer,
     ApplyEngineFormulaSerializer,
     ApplyFlatAmountEntitlementSerializer,
@@ -158,6 +161,8 @@ from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
+    Account,
+    AccountAttachment,
     BusinessArea,
     DeliveryMechanism,
     FileTemp,
@@ -2353,6 +2358,54 @@ class PaymentPlanManagerialViewSet(
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
         }
         return action_to_permissions_map.get(action_name)
+
+
+class AccountViewSet(
+    ProgramVisibilityMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Account.all_objects.select_related("account_type").prefetch_related("attachments")
+    serializer_class = AccountSerializer
+    program_model_field = "individual__program"
+    admin_area_model_fields = [
+        "individual__household__admin1",
+        "individual__household__admin2",
+        "individual__household__admin3",
+    ]
+    PERMISSIONS = [Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION]
+
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(individual_id=self.kwargs["individual_pk"])
+
+
+class AccountAttachmentViewSet(ProgramMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
+    queryset = AccountAttachment.objects.all()
+    serializer_class = AccountAttachmentUploadSerializer
+    lookup_field = "file_id"
+    program_model_field = "account__individual__program"
+
+    PERMISSIONS = [Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION]
+
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(account_id=self.kwargs["account_pk"])
+
+    def get_object(self) -> AccountAttachment:
+        return get_object_or_404(self.get_queryset(), id=self.kwargs["file_id"])
+
+    @action(detail=True, methods=["get"])
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
+        attachment = self.get_object()
+        file = attachment.file
+        file_mimetype, _ = mimetypes.guess_type(file.url)
+        response = FileResponse(
+            file.open(),
+            as_attachment=True,
+            content_type=file_mimetype or "application/octet-stream",
+        )
+        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
+        return response
 
 
 class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):

@@ -9,6 +9,7 @@ from django.forms import model_to_dict
 from hope.apps.household.const import HEAD, NON_BENEFICIARY, RELATIONSHIP_UNKNOWN, ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
+    AccountAttachment,
     Country,
     DocumentType,
     Household,
@@ -53,8 +54,8 @@ class DocumentMixin:
 
 class AccountMixin:
     @staticmethod
-    def save_account(member: PendingIndividual, doc: dict) -> None:
-        PendingAccount.objects.create(individual=member, **doc)
+    def save_account(member: PendingIndividual, doc: dict) -> PendingAccount:
+        return PendingAccount.objects.create(individual=member, **doc)
 
 
 DATA_PREFIX_PREFIX = "data:"
@@ -136,7 +137,14 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             doc["photo"] = self.get_photo(doc.pop("image", None))
             self.save_document(ind, doc)
         for account in accounts:
-            self.save_account(ind, account)
+            attachments = account.pop("attachments", [])
+            account_obj = self.save_account(ind, account)
+            for attachment in attachments:
+                AccountAttachment.objects.create(
+                    account=account_obj,
+                    title=attachment.get("title", ""),
+                    file=self.get_photo(attachment["file"]),
+                )
         if member_data["relationship"] == HEAD:
             hh.head_of_household = ind
             hh.save()

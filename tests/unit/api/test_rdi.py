@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.api.endpoints.rdi.upload import AccountSerializerUpload
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     HEAD,
@@ -13,6 +14,7 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.models import (
+    AccountAttachment,
     BusinessArea,
     FinancialInstitution,
     PendingAccount,
@@ -334,3 +336,128 @@ def test_complete_transitions_rdi_to_in_review(
     assert data[0] == {"id": str(rdi_loading.id), "status": "IN_REVIEW"}
     rdi_loading.refresh_from_db()
     assert rdi_loading.status == RegistrationDataImport.IN_REVIEW
+
+
+def test_push_creates_account_attachments(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    bank_account_type,
+    generic_bank,
+    base64_image: str,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {
+            "residence_status": "",
+            "village": "village_attachments",
+            "country": "AF",
+            "members": [
+                {
+                    "relationship": HEAD,
+                    "full_name": "James Head #1",
+                    "birth_date": "2000-01-01",
+                    "sex": "MALE",
+                    "role": "",
+                    "accounts": [
+                        {
+                            "type": "bank",
+                            "number": "123",
+                            "attachments": [
+                                {"title": "Wallet number image", "file": base64_image},
+                                {"file": base64_image},
+                            ],
+                        }
+                    ],
+                },
+                {
+                    "relationship": NON_BENEFICIARY,
+                    "full_name": "Mary Primary #9",
+                    "birth_date": "2000-01-01",
+                    "role": ROLE_PRIMARY,
+                    "sex": "FEMALE",
+                },
+            ],
+            "size": 1,
+        }
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    hh = PendingHousehold.objects.get(registration_data_import_id=response.json()["id"], village="village_attachments")
+    account = PendingAccount.objects.get(individual=hh.head_of_household)
+    attachments = list(account.attachments.all())
+    assert len(attachments) == 2
+    assert {attachment.title for attachment in attachments} == {"Wallet number image", ""}
+    assert all(attachment.file.name for attachment in attachments)
+
+
+def test_push_without_accounts_creates_no_attachments(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {
+            "residence_status": "",
+            "village": "village_no_accounts",
+            "country": "AF",
+            "members": [
+                {
+                    "relationship": HEAD,
+                    "full_name": "James Head #2",
+                    "birth_date": "2000-01-01",
+                    "sex": "MALE",
+                    "role": "",
+                },
+                {
+                    "relationship": NON_BENEFICIARY,
+                    "full_name": "Mary Primary #9",
+                    "birth_date": "2000-01-01",
+                    "role": ROLE_PRIMARY,
+                    "sex": "FEMALE",
+                },
+            ],
+            "size": 1,
+        }
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    hh = PendingHousehold.objects.get(registration_data_import_id=response.json()["id"], village="village_no_accounts")
+    assert not AccountAttachment.objects.filter(account__individual=hh.head_of_household).exists()
+
+
+def test_account_upload_serializer_rejects_too_many_attachments(
+    bank_account_type, generic_bank, base64_image: str
+) -> None:
+    serializer = AccountSerializerUpload(
+        data={
+            "type": "bank",
+            "number": "123",
+            "attachments": [{"file": base64_image}] * (AccountAttachment.FILE_LIMIT + 1),
+        }
+    )
+
+    assert not serializer.is_valid()
+    assert serializer.errors["attachments"][0] == "An account cannot have more than 10 attachments."
+
+
+def test_account_upload_serializer_rejects_oversized_attachment(bank_account_type, generic_bank) -> None:
+    serializer = AccountSerializerUpload(
+        data={
+            "type": "bank",
+            "number": "123",
+            "attachments": [{"file": "A" * (AccountAttachment.FILE_SIZE_LIMIT * 2)}],
+        }
+    )
+
+    assert not serializer.is_valid()
+    assert serializer.errors["attachments"][0]["file"][0] == "File size must be ≤ 10MB."
