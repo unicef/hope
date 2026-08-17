@@ -26,6 +26,7 @@ from hope.apps.household.const import (
 from hope.apps.program.api.serializers import ProgramOnlyNameSerializer
 from hope.models import (
     Account,
+    AccountAttachment,
     Country,
     Document,
     DocumentType,
@@ -112,14 +113,30 @@ class AccountDataFieldSerializer(serializers.Serializer):
     value = serializers.CharField()
 
 
+class AccountAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AccountAttachment
+        fields = ("id", "title", "file", "uploaded_at", "created_by")
+
+
 class AccountSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     account_type_key = serializers.CharField(source="account_type.key")
     data_fields = serializers.SerializerMethodField()
+    attachments = AccountAttachmentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Account
-        fields = ("id", "name", "data_fields", "account_type", "number", "financial_institution", "account_type_key")
+        fields = (
+            "id",
+            "name",
+            "data_fields",
+            "account_type",
+            "number",
+            "financial_institution",
+            "account_type_key",
+            "attachments",
+        )
 
     def get_name(self, obj: Account) -> str:
         return obj.account_type.label
@@ -414,7 +431,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
             obj.program,
         ):
-            queryset = obj.accounts(manager="all_objects").all()
+            queryset = obj.accounts(manager="all_objects").prefetch_related("attachments")
         else:
             queryset = obj.accounts.none()
         return AccountSerializer(queryset, many=True).data

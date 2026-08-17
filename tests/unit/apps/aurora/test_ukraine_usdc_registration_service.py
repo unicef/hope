@@ -26,6 +26,7 @@ from hope.apps.household.const import IDENTIFICATION_TYPE_TAX_ID, ROLE_PRIMARY
 from hope.contrib.aurora.models import Record
 from hope.contrib.aurora.services.ukraine_flex_registration_service import UkraineUSDCRegistrationService
 from hope.models import (
+    AccountAttachment,
     DataCollectingType,
     DeliveryMechanism,
     FinancialInstitution,
@@ -239,10 +240,13 @@ def test_wallet_images_stored_as_saved_files(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    num_image_path = individual.flex_fields["wallet_num_image_i_f"]
+    account = PendingAccount.objects.get(individual=individual)
+    attachment = AccountAttachment.objects.get(account=account)
     id_image_path = individual.flex_fields["id_wallet_image_i_f"]
-    assert num_image_path.endswith(".jpg")
-    assert default_storage.exists(num_image_path)
+    assert "wallet_num_image_i_f" not in individual.flex_fields
+    assert attachment.title == "Wallet number image"
+    assert attachment.file.name.endswith(".jpg")
+    assert default_storage.exists(attachment.file.name)
     assert default_storage.exists(id_image_path)
 
 
@@ -254,7 +258,6 @@ def test_individual_detail_flex_image_resolves_to_url(
     digital_wallet_delivery_mechanism: DeliveryMechanism,
     usdc_record: Record,
 ) -> None:
-    FlexibleAttributeFactory(name="wallet_num_image_i_f", type=FlexibleAttribute.IMAGE)
     FlexibleAttributeFactory(name="id_wallet_image_i_f", type=FlexibleAttribute.IMAGE)
     service = UkraineUSDCRegistrationService(registration)
     rdi = service.create_rdi(user, "usdc rdi")
@@ -264,7 +267,7 @@ def test_individual_detail_flex_image_resolves_to_url(
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
     resolved = resolve_flex_fields_choices_to_string(individual)
 
-    assert resolved["wallet_num_image_i_f"].endswith(".jpg")
+    assert "wallet_num_image_i_f" not in resolved
     assert resolved["id_wallet_image_i_f"].endswith(".jpg")
 
 
@@ -468,6 +471,46 @@ def test_no_wallet_account_when_address_missing(
     assert not PendingAccount.objects.filter(individual=individual).exists()
 
 
+def test_no_attachment_when_wallet_address_missing(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    generic_crypto_fi: FinancialInstitution,
+    submission_timestamp: datetime.datetime,
+    settings: Any,
+    tmp_path: Any,
+) -> None:
+    settings.MEDIA_ROOT = str(tmp_path)
+    record = RecordFactory(
+        registration=registration.source_id,
+        timestamp=submission_timestamp,
+        source_id=11,
+        fields={
+            "consent": [{"consent_h_c": ["1"]}],
+            "individual_details": [
+                {
+                    "given_name_i_c": "Ivan",
+                    "family_name_i_c": "Kovalenko",
+                    "birth_date": "1970-07-07",
+                    "gender_i_c": "male",
+                    "wallet_num_image_i_f": "d2FsbGV0X251bV9pbWFnZQ==",
+                }
+            ],
+        },
+        files=json.dumps({}).encode(),
+    )
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [record.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert not AccountAttachment.objects.filter(account__individual=individual).exists()
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_head_of_household_phone_number_marked_valid(
     registration: Any,
     user: Any,
@@ -540,9 +583,10 @@ def test_only_present_wallet_image_stored(
     service.process_records(rdi.id, [usdc_record.id])
 
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
-    assert "id_wallet_image_i_f" not in individual.flex_fields
-    assert individual.flex_fields["wallet_num_image_i_f"].endswith(".jpg")
-    assert default_storage.exists(individual.flex_fields["wallet_num_image_i_f"])
+    attachment = AccountAttachment.objects.get(account__individual=individual)
+    assert individual.flex_fields == {}
+    assert attachment.file.name.endswith(".jpg")
+    assert default_storage.exists(attachment.file.name)
 
 
 def test_rejects_record_with_no_individuals(

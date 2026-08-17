@@ -13,6 +13,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
+    AccountAttachmentFactory,
     AccountFactory,
     AreaFactory,
     AreaTypeFactory,
@@ -1138,3 +1139,69 @@ def test_get_individual_photos(detail_context: dict, create_user_role_with_permi
     assert data["photo"] is not None
     assert data["documents"][0]["document_number"] == "666-777-888"
     assert data["documents"][0]["photo"] is not None
+
+
+@pytest.fixture
+def account_attachment(detail_context: dict) -> Any:
+    account = detail_context["individual1"].accounts(manager="all_objects").first()
+    return AccountAttachmentFactory(account=account, title="Wallet number image")
+
+
+def test_individual_detail_exposes_account_attachments(
+    detail_context: dict, account_attachment: Any, create_user_role_with_permissions: Callable
+) -> None:
+    ctx = detail_context
+    create_user_role_with_permissions(
+        user=ctx["user"],
+        permissions=[
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
+        ],
+        business_area=ctx["afghanistan"],
+        program=ctx["program"],
+    )
+
+    response = ctx["client"].get(
+        reverse(
+            "api:households:individuals-detail",
+            kwargs={
+                "business_area_slug": ctx["afghanistan"].slug,
+                "program_code": ctx["program"].code,
+                "pk": str(ctx["individual1"].id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    attachments = response.data["accounts"][0]["attachments"]
+    assert len(attachments) == 1
+    assert attachments[0]["id"] == account_attachment.id
+    assert attachments[0]["title"] == "Wallet number image"
+    assert attachments[0]["file"] == account_attachment.file.url
+    assert response.data["accounts"][1]["attachments"] == []
+
+
+def test_individual_detail_hides_accounts_without_delivery_mechanisms_permission(
+    detail_context: dict, account_attachment: Any, create_user_role_with_permissions: Callable
+) -> None:
+    ctx = detail_context
+    create_user_role_with_permissions(
+        user=ctx["user"],
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+        business_area=ctx["afghanistan"],
+        program=ctx["program"],
+    )
+
+    response = ctx["client"].get(
+        reverse(
+            "api:households:individuals-detail",
+            kwargs={
+                "business_area_slug": ctx["afghanistan"].slug,
+                "program_code": ctx["program"].code,
+                "pk": str(ctx["individual1"].id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["accounts"] == []
