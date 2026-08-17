@@ -6,6 +6,7 @@ lazily (during validation/form rendering), so they are exercised explicitly here
 """
 
 from hope.models.fsp_name_mapping import FspNameMapping
+from hope.models.grant import Grant
 from hope.models.payment_plan_split import PaymentPlanSplit
 from hope.models.storage_file import StorageFile, get_storage_status_choices
 from hope.models.western_union_invoice_payment import (
@@ -28,3 +29,11 @@ def test_western_union_invoice_payment_transaction_status_choices() -> None:
 
 def test_storage_file_status_choices() -> None:
     assert get_storage_status_choices() == StorageFile.STATUS_CHOICE
+
+
+def test_grant_auto_value_is_the_member_name() -> None:
+    assert Grant.API_READ_ONLY.value == "API_READ_ONLY"
+
+
+def test_grant_choices_pairs_the_member_name_with_itself() -> None:
+    assert ("API_RDI_UPLOAD", "API_RDI_UPLOAD") in Grant.choices()

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, cast
+from typing import cast
 
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button
@@ -220,7 +220,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         ),
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
-    def delete_rdi(self, request: HttpRequest, pk: str) -> Any:  # TODO: typing
+    def delete_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         try:
             if request.method == "POST":
                 with transaction.atomic():

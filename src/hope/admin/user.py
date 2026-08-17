@@ -488,7 +488,7 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
                 self.message_user(request, "Please correct errors below", messages.ERROR)
                 context["form"] = form
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
-        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
+        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore[arg-type]
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
     def _get_user(self, email: str, partner: Any, row: dict) -> tuple:
