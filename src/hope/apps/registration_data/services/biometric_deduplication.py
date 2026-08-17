@@ -1,5 +1,4 @@
 import logging
-from typing import cast
 
 from django.conf import settings
 from django.db import transaction
@@ -403,7 +402,7 @@ class BiometricDeduplicationService:
         if rdi.country_workspace_id is not None:
             self.report_rdi_approved(rdi.country_workspace_id)
         else:
-            self.report_individuals_status(cast("Program", rdi.program), individual_ids, self.INDIVIDUALS_MERGED)
+            self.report_individuals_status(rdi.program, individual_ids, self.INDIVIDUALS_MERGED)
 
     def report_rdi_approved(self, rdi_country_workspace_id: str) -> None:
         try:

@@ -250,6 +250,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         except (RegistrationDataImport.DoesNotExist, Error) as e:
             logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
+        return None
 
     @staticmethod
     def delete_merged_rdi_visible(rdi: RegistrationDataImport) -> bool:
