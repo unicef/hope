@@ -764,8 +764,6 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     individual_data = JSONField(null=True, blank=True)
-    # TODO: deprecated will be removed in next release as update Roles moved into TicketHouseholdDataUpdateDetails
-    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
     def household(self) -> "Household | None":

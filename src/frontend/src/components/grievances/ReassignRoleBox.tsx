@@ -1,7 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
-import isEmpty from 'lodash/isEmpty';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -50,7 +49,6 @@ export const ReassignRoleBox = ({
 
   // Initialize core data based on ticket category
   const ticketCategory = ticket.category.toString();
-  const ticketIssueType = ticket.issueType?.toString();
 
   let individual = ticket.individual;
   let household = ticket.household;
@@ -77,24 +75,9 @@ export const ReassignRoleBox = ({
   }
 
   // Initialize role and household data
-  let householdsAndRoles = individual?.rolesInHouseholds || [];
-  let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
-
-  // Handle special case for DATA_CHANGE with EDIT_INDIVIDUAL
-  const isEditIndividualDataChange =
-    ticketCategory === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    ticketIssueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL;
-
-  if (isEditIndividualDataChange) {
-    const individualData = ticket.ticketDetails.individualData;
-
-    if (isEmpty(individualData.role)) {
-      householdsAndRoles = [];
-    }
-    if (isEmpty(individualData.relationship)) {
-      shouldShowReassignHoH = false;
-    }
-  }
+  const householdsAndRoles = individual?.rolesInHouseholds || [];
+  const shouldShowReassignHoH =
+    individual?.id === household?.headOfHousehold?.id;
 
   // Build lookup dictionaries for reassign data
   const reassignDataDictByIndividualId = {};

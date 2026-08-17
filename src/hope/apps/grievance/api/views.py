@@ -1327,6 +1327,9 @@ class GrievanceTicketGlobalViewSet(
         check_concurrency_version_in_mutation(serializer.validated_data.get("household_version"), household)
         check_concurrency_version_in_mutation(serializer.validated_data.get("individual_version"), individual)
 
+        if grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
+            log_and_raise("Role reassignment is not available for Individual Data Update tickets")
+
         ticket_details = grievance_ticket.ticket_details
         if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
             if ticket_details.is_multiple_duplicates_version:
