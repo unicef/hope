@@ -95,7 +95,7 @@ export function LookUpIndividualTable({
       orderBy: filter.orderBy,
       householdId,
       excludedId: excludedId || ticket?.individual?.id || null,
-      programId: isAllPrograms ? filter.program : programId,
+      program: isAllPrograms ? filter.program : undefined,
       isActiveProgram:
         filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       withdrawn: false,
@@ -120,7 +120,6 @@ export function LookUpIndividualTable({
       excludedId,
       ticket?.individual?.id,
       isAllPrograms,
-      programId,
     ],
   );
 

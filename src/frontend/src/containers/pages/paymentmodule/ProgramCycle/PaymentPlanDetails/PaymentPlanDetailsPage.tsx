@@ -92,7 +92,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
 
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
-    status === PaymentPlanStatusEnum.FINISHED;
+    status === PaymentPlanStatusEnum.FINISHED ||
+    status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
+    status === PaymentPlanStatusEnum.CLOSED;
 
   const shouldDisplayVerificationSummary =
     status === PaymentPlanStatusEnum.FINISHED ||

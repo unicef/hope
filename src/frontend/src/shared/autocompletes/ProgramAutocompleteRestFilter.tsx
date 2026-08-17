@@ -15,6 +15,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { BaseAutocompleteFilterRest } from '@shared/autocompletes/BaseAutocompleteFilterRest';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { AutocompleteOption } from '@shared/autocompletes/types';
 
 export function ProgramAutocompleteRestFilter({
@@ -26,6 +27,7 @@ export function ProgramAutocompleteRestFilter({
   appliedFilter,
   setAppliedFilter,
   setFilter,
+  status,
   dataCy = 'program-autocomplete',
 }: {
   disabled?: boolean;
@@ -36,6 +38,7 @@ export function ProgramAutocompleteRestFilter({
   appliedFilter: Filter;
   setAppliedFilter: (filter: Filter) => void;
   setFilter: (filter: Filter) => void;
+  status?: Array<ProgramStatusEnum>;
   dataCy?: string;
 }): ReactElement {
   const { businessArea } = useBaseUrl();
@@ -50,6 +53,7 @@ export function ProgramAutocompleteRestFilter({
     limit: 20,
     businessAreaSlug: businessArea,
     search: debouncedInputText || undefined,
+    status,
   });
 
   const {

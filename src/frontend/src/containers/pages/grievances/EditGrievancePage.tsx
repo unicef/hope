@@ -17,6 +17,7 @@ import { LookUpPaymentRecord } from '@components/grievances/LookUps/LookUpPaymen
 import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import {
   getGrievanceDetailsPath,
+  isSystemGenerated,
   selectedIssueType,
 } from '@components/grievances/utils/createGrievanceUtils';
 import {
@@ -322,7 +323,12 @@ const EditGrievancePage = (): ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: getGrievanceDetailsPath(ticket.id, ticket.category, baseUrl),
+      to: getGrievanceDetailsPath(
+        ticket.id,
+        ticket.category,
+        baseUrl,
+        ticket.issueType,
+      ),
     },
   ];
 
@@ -360,6 +366,7 @@ const EditGrievancePage = (): ReactElement => {
     ticket.id,
     ticket.category,
     baseUrl,
+    ticket.issueType,
   );
 
   const mappedProgramChoices = programsData?.results?.map((element) => ({
@@ -618,6 +625,27 @@ const EditGrievancePage = (): ReactElement => {
                             label={t('Urgency')}
                             choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 3 }}>
+                          <Field
+                            name="submissionChannel"
+                            fullWidth
+                            variant="outlined"
+                            label={t('Submission Channel')}
+                            choices={
+                              isSystemGenerated(
+                                ticket.category,
+                                ticket.issueType,
+                              )
+                                ? choicesData.grievanceTicketSubmissionChannelChoices
+                                : choicesData.grievanceTicketManualSubmissionChannelChoices
+                            }
+                            component={FormikSelectField}
+                            disabled={isSystemGenerated(
+                              ticket.category,
+                              ticket.issueType,
+                            )}
                           />
                         </Grid>
                         <Grid size={{ xs: 3 }}>
