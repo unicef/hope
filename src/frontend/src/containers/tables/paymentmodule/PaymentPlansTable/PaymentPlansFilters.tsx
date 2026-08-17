@@ -36,7 +36,6 @@ export const allowedStatusChoices = [
   PaymentPlanStatusEnum.LOCKED,
   PaymentPlanStatusEnum.LOCKED_FSP,
   PaymentPlanStatusEnum.OPEN,
-  PaymentPlanStatusEnum.PREPARING,
   PaymentPlanStatusEnum.PROCESSING,
   PaymentPlanStatusEnum.STEFICON_COMPLETED,
   PaymentPlanStatusEnum.STEFICON_ERROR,

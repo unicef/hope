@@ -269,7 +269,6 @@ class PaymentPlanFilter(FilterSet):
     def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         # assigned TP statuses
         is_assigned = [
-            PaymentPlan.Status.PREPARING,
             PaymentPlan.Status.OPEN,
             PaymentPlan.Status.LOCKED,
             PaymentPlan.Status.LOCKED_FSP,

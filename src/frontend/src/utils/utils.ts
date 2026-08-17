@@ -300,7 +300,6 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
     [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
     [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
-    [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
     [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,

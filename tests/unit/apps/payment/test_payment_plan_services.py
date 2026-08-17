@@ -1632,7 +1632,7 @@ def test_create_payments_integrity_error_handling(
     household.save(update_fields=["size"])
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        status=PaymentPlan.Status.PREPARING,
+        status=PaymentPlan.Status.DRAFT,
         business_area=business_area,
         program_cycle=cycle,
         delivery_mechanism=dm_transfer_to_account,
@@ -1669,7 +1669,7 @@ def test_create_payments_integrity_error_handling(
 
 
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.PREPARING
+    payment_plan_base.status = PaymentPlan.Status.OPEN
     payment_plan_base.save()
 
     with pytest.raises(ValidationError) as error:

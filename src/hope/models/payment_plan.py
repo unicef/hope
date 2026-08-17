@@ -138,11 +138,6 @@ class PaymentPlan(
         TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
         DRAFT = "DRAFT", "Draft"  # like ready for PP create
 
-        PREPARING = (
-            "PREPARING",
-            "Preparing",
-        )  # deprecated will remove it after data migrations
-
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
