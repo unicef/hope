@@ -1,0 +1,28 @@
+{% extends 'base_notification_email.html' %}
+
+{% block content %}
+    <p>Here is your Grievance &amp; Feedback summary for {{ digest_date }}.</p>
+    {% if assigned_rows %}
+        <h2 style="font-size: 15px; margin-bottom: 8px;">Tickets assigned to you</h2>
+        <ul style="margin: 0 0 15px 20px; padding: 0;">
+            {% for row in assigned_rows %}
+                <li>{% if row.ticket_url %}<a href="{{ row.ticket_url }}">{{ row.ticket_id }}</a>{% else %}{{ row.ticket_id }}{% endif %} &mdash; {{ row.ticket_category }} ({{ row.ticket_status }})</li>
+            {% endfor %}
+            {% if assigned_remaining %}
+                <li>&hellip; and {{ assigned_remaining }} more.</li>
+            {% endif %}
+        </ul>
+    {% endif %}
+    {% if edited_rows %}
+        <h2 style="font-size: 15px; margin-bottom: 8px;">Tickets you are responsible for that were changed</h2>
+        <ul style="margin: 0 0 15px 20px; padding: 0;">
+            {% for row in edited_rows %}
+                <li>{% if row.ticket_url %}<a href="{{ row.ticket_url }}">{{ row.ticket_id }}</a>{% else %}{{ row.ticket_id }}{% endif %} &mdash; {{ row.ticket_category }} ({{ row.ticket_status }})</li>
+            {% endfor %}
+            {% if edited_remaining %}
+                <li>&hellip; and {{ edited_remaining }} more.</li>
+            {% endif %}
+        </ul>
+    {% endif %}
+    <p>Please access HOPE to take action.</p>
+{% endblock content %}
