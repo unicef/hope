@@ -1,8 +1,11 @@
+from collections.abc import Iterable
 from typing import Any
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import nested_dict_get
@@ -21,6 +24,50 @@ from hope.apps.household.const import (
 )
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models import Household, Individual, IndividualRoleInHousehold, User
+
+
+def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> dict[str, str]:
+    """Map household unicef id -> individual unicef id, for one page of tickets.
+
+    Only social worker programme tickets need it, so the rest of the page is skipped.
+    """
+    household_unicef_ids = {
+        ticket.household_unicef_id
+        for ticket in tickets
+        if ticket.household_unicef_id and getattr(ticket, "has_social_worker_program_annotated", False)
+    }
+    if not household_unicef_ids:
+        return {}
+    return dict(
+        Individual.objects.filter(household__unicef_id__in=household_unicef_ids)
+        # Lowest id per household, the same individual the old per-ticket subquery picked.
+        .order_by("household__unicef_id", "id")
+        .distinct("household__unicef_id")
+        .values_list("household__unicef_id", "unicef_id")
+    )
+
+
+class GrievanceTargetIdMixin:
+    """Looks up the serializer's `target_id` fallback once per page.
+
+    It used to be a queryset annotation, which joined household into the main list
+    query and made it lock that table (ticket 331051).
+
+    Only for paginated viewsets - list() serializes the page, so a viewset with
+    pagination_class = None cannot use this mixin. Both grievance lists paginate.
+    """
+
+    fallback_individual_unicef_ids: dict[str, str] | None = None
+
+    def get_serializer_context(self) -> dict:
+        context = super().get_serializer_context()
+        context["fallback_individual_unicef_ids"] = self.fallback_individual_unicef_ids
+        return context
+
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page)
+        return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
 
 class GrievancePermissionsMixin:

@@ -180,9 +180,9 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             ticket_details = obj.ticket_details
             if ticket_details and getattr(ticket_details, "individual", None):
                 return ticket_details.individual.unicef_id if ticket_details.individual else ""
-            if fallback_individual_unicef_id := getattr(obj, "fallback_individual_unicef_id_annotated", None):
-                return fallback_individual_unicef_id
-            return ""
+            # batched per page by GrievanceTargetIdMixin, absent outside the list endpoints
+            fallback_individual_unicef_ids = self.context.get("fallback_individual_unicef_ids") or {}
+            return fallback_individual_unicef_ids.get(obj.household_unicef_id, "")
 
         return obj.household_unicef_id or ""
 

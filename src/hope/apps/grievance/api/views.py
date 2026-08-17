@@ -63,6 +63,7 @@ from hope.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hope.apps.grievance.api.mixins import (
     GrievanceMutationMixin,
     GrievancePermissionsMixin,
+    GrievanceTargetIdMixin,
 )
 from hope.apps.grievance.api.serializers.dashboard import GrievanceDashboardSerializer
 from hope.apps.grievance.api.serializers.grievance_ticket import (
@@ -290,6 +291,7 @@ class GrievanceTicketViewSet(
     ProgramVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
+    GrievanceTargetIdMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
@@ -344,11 +346,6 @@ class GrievanceTicketViewSet(
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
                 ),
-                fallback_individual_unicef_id_annotated=Subquery(
-                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
-                        :1
-                    ]
-                ),
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
@@ -394,6 +391,7 @@ class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
+    GrievanceTargetIdMixin,
     SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
@@ -588,11 +586,6 @@ class GrievanceTicketGlobalViewSet(
                         grievance_tickets=OuterRef("pk"),
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
-                ),
-                fallback_individual_unicef_id_annotated=Subquery(
-                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
-                        :1
-                    ]
                 ),
                 total=Case(
                     When(
