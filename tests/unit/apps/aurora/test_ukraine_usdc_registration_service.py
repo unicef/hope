@@ -1,3 +1,4 @@
+import base64
 import datetime
 import json
 from typing import Any
@@ -712,3 +713,25 @@ def test_failed_individual_validation_leaves_no_orphan_images(
     usdc_record.refresh_from_db()
     assert usdc_record.status == Record.STATUS_ERROR
     assert list(tmp_path.iterdir()) == []
+
+
+def test_oversized_wallet_image_is_reported_against_its_field(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record: Record,
+) -> None:
+    oversized = base64.b64encode(b"a" * (AccountAttachment.FILE_SIZE_LIMIT + 1)).decode()
+    usdc_record.fields["individual_details"][0]["wallet_num_image_i_f"] = oversized
+    usdc_record.save(update_fields=["fields"])
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record.id])
+
+    usdc_record.refresh_from_db()
+    assert usdc_record.status == Record.STATUS_ERROR
+    assert "wallet_num_image_i_f" in usdc_record.error_message
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi).exists()

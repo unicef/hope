@@ -55,7 +55,15 @@ class DocumentMixin:
 class AccountMixin:
     @staticmethod
     def save_account(member: PendingIndividual, doc: dict) -> PendingAccount:
-        return PendingAccount.objects.create(individual=member, **doc)
+        attachments = doc.pop("attachments", [])
+        account = PendingAccount.objects.create(individual=member, **doc)
+        for attachment in attachments:
+            AccountAttachment.objects.create(
+                account=account,
+                title=attachment.get("title", ""),
+                file=PhotoMixin.get_photo(attachment["file"]),
+            )
+        return account
 
 
 DATA_PREFIX_PREFIX = "data:"
@@ -137,14 +145,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             doc["photo"] = self.get_photo(doc.pop("image", None))
             self.save_document(ind, doc)
         for account in accounts:
-            attachments = account.pop("attachments", [])
-            account_obj = self.save_account(ind, account)
-            for attachment in attachments:
-                AccountAttachment.objects.create(
-                    account=account_obj,
-                    title=attachment.get("title", ""),
-                    file=self.get_photo(attachment["file"]),
-                )
+            self.save_account(ind, account)
         if member_data["relationship"] == HEAD:
             hh.head_of_household = ind
             hh.save()

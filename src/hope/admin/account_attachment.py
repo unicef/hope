@@ -17,4 +17,6 @@ class AccountAttachmentAdmin(HOPEModelAdminBase):
     search_fields = ("title",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).select_related("account__account_type", "created_by")
+        return (
+            super().get_queryset(request).select_related("account__account_type", "account__individual", "created_by")
+        )

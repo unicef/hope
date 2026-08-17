@@ -194,6 +194,12 @@ def list_context(
     }
 
 
+@pytest.fixture
+def account_attachment(detail_context: dict) -> Any:
+    account = detail_context["individual1"].accounts(manager="all_objects").first()
+    return AccountAttachmentFactory(account=account, title="Wallet number image")
+
+
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
@@ -1139,12 +1145,6 @@ def test_get_individual_photos(detail_context: dict, create_user_role_with_permi
     assert data["photo"] is not None
     assert data["documents"][0]["document_number"] == "666-777-888"
     assert data["documents"][0]["photo"] is not None
-
-
-@pytest.fixture
-def account_attachment(detail_context: dict) -> Any:
-    account = detail_context["individual1"].accounts(manager="all_objects").first()
-    return AccountAttachmentFactory(account=account, title="Wallet number image")
 
 
 def test_individual_detail_exposes_account_attachments(

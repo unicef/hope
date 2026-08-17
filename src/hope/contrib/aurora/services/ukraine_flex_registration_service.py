@@ -373,6 +373,14 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         wallet_number_image = self._decode_images(individual_dict, [self.WALLET_NUMBER_IMAGE_FIELD]).get(
             self.WALLET_NUMBER_IMAGE_FIELD
         )
+        if wallet_number_image and wallet_number_image.size > AccountAttachment.FILE_SIZE_LIMIT:
+            raise ValidationError(
+                {
+                    self.WALLET_NUMBER_IMAGE_FIELD: [
+                        f"File size must be ≤ {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB."
+                    ]
+                }
+            )
 
         household = self._build_household(record, registration_data_import)
         individual = self._build_head_of_household(

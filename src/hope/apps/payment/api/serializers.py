@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Any, cast
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
 from django.db.models.functions import Coalesce
@@ -93,8 +94,13 @@ class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        account_id = self.context["request"].parser_context["kwargs"]["account_pk"]
-        account = get_object_or_404(Account.all_objects, id=account_id, individual__program=self.context["program"])
+        kwargs = self.context["request"].parser_context["kwargs"]
+        account = get_object_or_404(
+            Account.all_objects,
+            id=kwargs["account_pk"],
+            individual_id=kwargs["individual_pk"],
+            individual__program=self.context["program"],
+        )
         data["account"] = account
         data["created_by"] = self.context["request"].user
 
@@ -106,7 +112,12 @@ class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> AccountAttachment:
-        return super().create(validated_data)
+        # validate() counted before this insert, so a concurrent upload can take the last slot.
+        # The model still refuses, but with Django's ValidationError, which DRF returns as a 500.
+        try:
+            return super().create(validated_data)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e.messages) from e
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):

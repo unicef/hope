@@ -2380,16 +2380,28 @@ class AccountViewSet(
         return super().get_queryset().filter(individual_id=self.kwargs["individual_pk"])
 
 
-class AccountAttachmentViewSet(ProgramMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
+class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
     queryset = AccountAttachment.objects.all()
     serializer_class = AccountAttachmentUploadSerializer
     lookup_field = "file_id"
     program_model_field = "account__individual__program"
+    admin_area_model_fields = [
+        "account__individual__household__admin1",
+        "account__individual__household__admin2",
+        "account__individual__household__admin3",
+    ]
 
     PERMISSIONS = [Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(account_id=self.kwargs["account_pk"])
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                account_id=self.kwargs["account_pk"],
+                account__individual_id=self.kwargs["individual_pk"],
+            )
+        )
 
     def get_object(self) -> AccountAttachment:
         return get_object_or_404(self.get_queryset(), id=self.kwargs["file_id"])

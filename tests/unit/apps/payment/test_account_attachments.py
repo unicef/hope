@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import FileResponse
 from django.urls import reverse
@@ -48,7 +49,7 @@ def serializer_context(account: Account, program: Program) -> dict[str, Any]:
     factory = APIRequestFactory()
     request = factory.post("")
     request.user = UserFactory()
-    request.parser_context = {"kwargs": {"account_pk": str(account.id)}}
+    request.parser_context = {"kwargs": {"account_pk": str(account.id), "individual_pk": str(account.individual_id)}}
     return {"request": request, "program": program}
 
 
@@ -79,6 +80,41 @@ def user_without_permission(business_area: Any, program: Program, create_user_ro
 @pytest.fixture
 def attachment(account: Account) -> AccountAttachment:
     return AccountAttachmentFactory(account=account)
+
+
+@pytest.fixture
+def other_program_account(business_area: Any) -> Account:
+    other_program = ProgramFactory(business_area=business_area)
+    individual = IndividualFactory(household=None, business_area=business_area, program=other_program)
+    return AccountFactory(individual=individual, rdi_merge_status=MergeStatusModel.MERGED)
+
+
+@pytest.fixture
+def accounts_list_url(business_area: Any, program: Program, account: Account) -> str:
+    return reverse(
+        "api:households:accounts-list",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "individual_pk": str(account.individual_id),
+        },
+    )
+
+
+@pytest.fixture
+def other_individual_account(business_area: Any, program: Program) -> Account:
+    individual = IndividualFactory(household=None, business_area=business_area, program=program)
+    return AccountFactory(individual=individual, rdi_merge_status=MergeStatusModel.MERGED)
+
+
+@pytest.fixture
+def second_account(account: Account) -> Account:
+    return AccountFactory(individual=account.individual, rdi_merge_status=MergeStatusModel.MERGED)
+
+
+@pytest.fixture
+def second_account_attachment(second_account: Account) -> AccountAttachment:
+    return AccountAttachmentFactory(account=second_account)
 
 
 @pytest.fixture
@@ -253,13 +289,6 @@ def test_download_denied_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@pytest.fixture
-def other_program_account(business_area: Any) -> Account:
-    other_program = ProgramFactory(business_area=business_area)
-    individual = IndividualFactory(household=None, business_area=business_area, program=other_program)
-    return AccountFactory(individual=individual, rdi_merge_status=MergeStatusModel.MERGED)
-
-
 def test_post_rejects_account_from_another_program(
     api_client: APIClient,
     business_area: Any,
@@ -314,18 +343,6 @@ def test_delete_rejects_attachment_from_another_program(
     assert AccountAttachment.objects.filter(pk=other_attachment.pk).exists()
 
 
-@pytest.fixture
-def accounts_list_url(business_area: Any, program: Program, account: Account) -> str:
-    return reverse(
-        "api:households:accounts-list",
-        kwargs={
-            "business_area_slug": business_area.slug,
-            "program_code": program.code,
-            "individual_pk": str(account.individual_id),
-        },
-    )
-
-
 def test_accounts_list_returns_only_the_individuals_accounts(
     api_client: APIClient,
     accounts_list_url: str,
@@ -351,3 +368,61 @@ def test_accounts_list_denied_without_permission(
     response = api_client.get(accounts_list_url)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_accounts_list_excludes_accounts_of_another_individual_in_the_same_program(
+    api_client: APIClient,
+    accounts_list_url: str,
+    attachment_user: User,
+    account: Account,
+    other_individual_account: Account,
+) -> None:
+    api_client.force_authenticate(user=attachment_user)
+
+    response = api_client.get(accounts_list_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [item["id"] for item in response.data["results"]] == [str(account.id)]
+
+
+def test_delete_rejects_attachment_of_another_account_on_the_same_individual(
+    api_client: APIClient,
+    business_area: Any,
+    program: Program,
+    account: Account,
+    second_account_attachment: AccountAttachment,
+    attachment_user: User,
+) -> None:
+    api_client.force_authenticate(user=attachment_user)
+    url = reverse(
+        "api:households:account-attachments-detail",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "individual_pk": str(account.individual_id),
+            "account_pk": str(account.id),
+            "file_id": str(second_account_attachment.id),
+        },
+    )
+
+    response = api_client.delete(url)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert AccountAttachment.objects.filter(pk=second_account_attachment.pk).exists()
+
+
+def test_post_returns_400_when_the_model_rejects_the_create(
+    api_client: APIClient, attachments_list_url: str, attachment_user: User, mocker
+) -> None:
+    api_client.force_authenticate(user=attachment_user)
+    mocker.patch.object(
+        AccountAttachment,
+        "clean",
+        side_effect=DjangoValidationError("Account already has the maximum of 10 attachments."),
+    )
+    data = {"file": SimpleUploadedFile("wallet.jpg", b"abc", content_type="image/jpeg")}
+
+    response = api_client.post(attachments_list_url, data, format="multipart")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "maximum of 10 attachments" in str(response.data)

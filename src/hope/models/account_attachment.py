@@ -27,14 +27,21 @@ class AccountAttachment(models.Model):
         return self.title or self.file.name or ""
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        # Validated here rather than only in the serializer: attachments are also created by the
+        # RDI upload, the Aurora parser and the Django admin, none of which run that serializer.
         self.clean()
         super().save(*args, **kwargs)
 
     def clean(self) -> None:
         super().clean()
-        if not self._state.adding:
-            return
+        # Size is checked on every save: the file stays editable in the admin, so an update can
+        # replace a small file with an oversized one.
         if self.file and self.file.size > self.FILE_SIZE_LIMIT:
             raise ValidationError(f"File size must be ≤ {self.FILE_SIZE_LIMIT // (1024 * 1024)}MB.")
-        if self.account_id and AccountAttachment.objects.filter(account_id=self.account_id).count() >= self.FILE_LIMIT:
+        # The count is about what gets added, so updating a row at the limit must stay possible.
+        if (
+            self._state.adding
+            and self.account_id
+            and AccountAttachment.objects.filter(account_id=self.account_id).count() >= self.FILE_LIMIT
+        ):
             raise ValidationError(f"Account already has the maximum of {self.FILE_LIMIT} attachments.")

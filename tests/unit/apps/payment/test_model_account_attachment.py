@@ -70,6 +70,17 @@ def test_rejects_file_above_size_limit(account: Account) -> None:
         AccountAttachmentFactory(account=account, file=oversized)
 
 
+def test_rejects_replacing_file_with_one_above_size_limit(account: Account) -> None:
+    attachment = AccountAttachmentFactory(account=account)
+
+    attachment.file = SimpleUploadedFile(
+        "big.jpg", b"a" * (AccountAttachment.FILE_SIZE_LIMIT + 1), content_type="image/jpeg"
+    )
+
+    with pytest.raises(ValidationError, match="File size must be ≤ 10MB."):
+        attachment.save()
+
+
 def test_rejects_creation_beyond_file_limit(account: Account) -> None:
     AccountAttachmentFactory.create_batch(AccountAttachment.FILE_LIMIT, account=account)
 
