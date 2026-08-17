@@ -287,19 +287,21 @@ def test_role_assignment_inline_formfield_for_foreignkey_business_area(
 
 def test_role_assignment_inline_business_area_not_autocomplete(
     request_factory: RequestFactory,
-    admin_site: AdminSite,
     business_area_afg: BusinessArea,
     business_area_ukr: BusinessArea,
     partner: Partner,
 ):
+    from django.contrib import admin
+
     partner.allowed_business_areas.add(business_area_afg)
 
     request = get_mock_request(request_factory, object_id=partner.id)
 
-    admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
-    assert "business_area" not in admin.get_autocomplete_fields(request)
+    model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin.site)
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "business_area" not in fields
 
-    form_set = admin.get_formset(request, partner)
+    form_set = model_admin.get_formset(request, partner)
     field = form_set.form.base_fields["business_area"]
     assert list(field.queryset) == [business_area_afg]
 
