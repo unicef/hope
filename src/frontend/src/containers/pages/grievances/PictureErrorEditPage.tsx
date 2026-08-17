@@ -1,0 +1,200 @@
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { Title } from '@components/core/Title';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PictureErrorEditField } from '@components/grievances/GrievancesPhotoModals/PictureErrorEditField';
+import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Button, Typography } from '@mui/material';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { isPermissionDeniedError, showApiErrorMessages } from '@utils/utils';
+import { Formik } from 'formik';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../../config/permissions';
+
+const PictureErrorEditPage = (): ReactElement => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { baseUrl, businessAreaSlug, programCode } = useBaseUrl();
+  const permissions = usePermissions();
+  const { showMessage } = useSnackbar();
+  const { id } = useParams();
+  const queryClient = useQueryClient();
+
+  const {
+    data: ticket,
+    isLoading: ticketLoading,
+    error,
+  } = useQuery<GrievanceTicketDetail>({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug, id },
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: id,
+      }),
+  });
+
+  const profileParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        profileParams,
+      ),
+      queryFn: () => RestService.restBusinessAreasUsersProfileRetrieve(profileParams),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const { mutateAsync: updateGrievanceTicket, isPending: loading } =
+    useMutation({
+      mutationFn: (data: { id: string; formData: any }) =>
+        RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
+          businessAreaSlug,
+          id: data.id,
+          formData: data.formData,
+        }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsRetrieve,
+          ),
+        });
+      },
+    });
+
+  if (ticketLoading || currentUserDataLoading) return <LoadingComponent />;
+  if (isPermissionDeniedError(error))
+    return <PermissionDenied permission={PERMISSIONS.GRIEVANCES_UPDATE} />;
+  if (!ticket || !currentUserData) return <LoadingComponent />;
+
+  const currentUserId = currentUserData.id;
+  const isCreator = ticket.createdBy?.id === currentUserId;
+  const isOwner = ticket.assignedTo?.id === currentUserId;
+
+  if (
+    !hasCreatorOrOwnerPermissions(
+      PERMISSIONS.GRIEVANCES_UPDATE,
+      isCreator,
+      PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
+      isOwner,
+      PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
+      permissions,
+    )
+  )
+    return (
+      <PermissionDenied
+        permission={[
+          PERMISSIONS.GRIEVANCES_UPDATE,
+          PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
+          PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
+        ]}
+      />
+    );
+
+  const grievanceDetailsPath = getGrievanceDetailsPath(
+    ticket.id,
+    ticket.category,
+    baseUrl,
+    ticket.issueType,
+  );
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: t('Grievance and Feedback'),
+      to: grievanceDetailsPath,
+    },
+  ];
+
+  const currentPictureSrc =
+    ticket.ticketDetails?.individualData?.photo?.previousValue;
+
+  return (
+    <Formik
+      initialValues={{ photo: null }}
+      onSubmit={async (values) => {
+        try {
+          const formData = {
+            priority: ticket.priority ?? 0,
+            urgency: ticket.urgency ?? 0,
+            assignedTo: ticket.assignedTo?.id ?? null,
+            language: ticket.language ?? '',
+            program: ticket.programs?.[0]?.id,
+            extras: {
+              individualDataUpdateIssueTypeExtras: {
+                individualData: { photo: values.photo },
+              },
+            },
+          };
+          await updateGrievanceTicket({ id: ticket.id, formData });
+          showMessage(t('Grievance Ticket edited.'));
+          navigate(grievanceDetailsPath);
+        } catch (e) {
+          showApiErrorMessages(e, showMessage);
+        }
+      }}
+    >
+      {({ submitForm, values }) => (
+        <>
+          <PageHeader
+            title={`${t('Edit Ticket')} #${ticket.unicefId}`}
+            breadCrumbs={breadCrumbsItems}
+          >
+            <Box sx={{ display: 'flex', alignContent: 'center' }}>
+              <Box sx={{ mr: 3 }}>
+                <Button component={Link} to={grievanceDetailsPath}>
+                  {t('Cancel')}
+                </Button>
+              </Box>
+              <LoadingButton
+                loading={loading}
+                disabled={!values.photo}
+                color="primary"
+                variant="contained"
+                onClick={submitForm}
+                data-cy="button-submit"
+              >
+                {t('Save')}
+              </LoadingButton>
+            </Box>
+          </PageHeader>
+          <Box sx={{ p: 5 }}>
+            <ContainerColumnWithBorder>
+              <Title>
+                <Typography variant="h6">{t('Photo')}</Typography>
+              </Title>
+              <PictureErrorEditField
+                currentPhotoSrc={currentPictureSrc}
+                fieldName="photo"
+              />
+            </ContainerColumnWithBorder>
+          </Box>
+        </>
+      )}
+    </Formik>
+  );
+};
+
+export default withErrorBoundary(PictureErrorEditPage, 'PictureErrorEditPage');
