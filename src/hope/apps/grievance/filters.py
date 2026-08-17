@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from django.db.models import Count, F, Func, Q, QuerySet, Window
+from django.db.models import Count, Exists, F, Func, OuterRef, Q, QuerySet, Window
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -25,6 +25,11 @@ logger = logging.getLogger(__name__)
 
 class IsNull(Func):
     template = "%(expressions)s IS NULL"
+
+
+def program_with_status_exists(program_status: str) -> Exists:
+    through_model = GrievanceTicket.programs.through
+    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__status=program_status))
 
 
 class GrievanceOrderingFilter(OrderingFilter):
@@ -234,9 +239,9 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
-            return qs.filter(programs__status=Program.ACTIVE)
+            return qs.filter(program_with_status_exists(Program.ACTIVE))
         if value is False:
-            return qs.filter(programs__status=Program.FINISHED)
+            return qs.filter(program_with_status_exists(Program.FINISHED))
         return qs
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
@@ -344,7 +349,7 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:
-            return queryset.filter(programs__status=Program.ACTIVE).order_by("-created_at").distinct()
+            return queryset.filter(program_with_status_exists(Program.ACTIVE)).order_by("-created_at")
         return queryset
 
 
