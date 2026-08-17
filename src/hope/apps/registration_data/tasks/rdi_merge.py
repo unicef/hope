@@ -130,12 +130,9 @@ class RdiMergeTask:
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
     ) -> None:
         business_area = obj_hct.business_area
-        program = obj_hct.program
         if business_area is None:
             raise ValueError("RDI business_area must not be None")
-        if program is None:
-            raise ValueError("RDI program must not be None")
-        DeduplicateTask(business_area.slug, program.id).deduplicate_individuals_against_population(individuals)
+        DeduplicateTask(business_area.slug, obj_hct.program.id).deduplicate_individuals_against_population(individuals)
         logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individuals)} individuals")
 
         golden_record_duplicates = Individual.objects.filter(

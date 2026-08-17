@@ -305,10 +305,7 @@ class CreateLaxBaseView(HOPEAPIBusinessAreaView, HandleFlexFieldsMixin):
 
     @cached_property
     def _rdi_program(self) -> "Program":
-        program = self.selected_rdi.program
-        if program is None:
-            raise ValueError("RDI program must not be None")
-        return program
+        return self.selected_rdi.program
 
     @cached_property
     def _programme_code(self) -> str:
