@@ -221,3 +221,18 @@ def test_get_url_uses_constructor_api_url(settings):
     api = ConstructorOverrideAPI(api_url="https://cw.example.com")
 
     assert api.get_url("/api/rest/rdi/delete-callback/") == ("https://cw.example.com/api/rest/rdi/delete-callback/")
+
+
+@pytest.mark.parametrize(
+    ("api_url", "endpoint"),
+    [
+        ("https://cw.example.com/api/", "/rest/rdi/delete-callback/"),
+        ("https://cw.example.com/api", "/rest/rdi/delete-callback/"),
+        ("https://cw.example.com/api/", "rest/rdi/delete-callback/"),
+    ],
+)
+def test_get_url_normalizes_slashes(settings, api_url, endpoint):
+    settings.TEST_API_KEY = "settings_key"
+    api = ConstructorOverrideAPI(api_url=api_url)
+
+    assert api.get_url(endpoint) == "https://cw.example.com/api/rest/rdi/delete-callback/"

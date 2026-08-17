@@ -76,7 +76,7 @@ class BaseAPI:
             self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
     def get_url(self, endpoint: str) -> str:
-        return f"{self.api_url}{endpoint}"
+        return f"{self.api_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
     def validate_response(self, response: Response) -> Response:
         if not response.ok:
