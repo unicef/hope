@@ -142,6 +142,28 @@ def vision_payment_plan_without_approval(vision_payment_plan: PaymentPlan) -> Pa
     return vision_payment_plan
 
 
+@pytest.fixture(
+    params=[
+        (VisionStatus.FC_MISSING, None),
+        (VisionStatus.FC_NOT_FOUND, None),
+        (VisionStatus.CALLBACK_FAILED, VisionErrorCode.FC_AMBIGUOUS),
+        (VisionStatus.CALLBACK_FAILED, VisionErrorCode.FC_CONFLICT),
+    ]
+)
+def payment_plan_with_fc_assignment_failure(request, vision_payment_plan: PaymentPlan) -> PaymentPlan:
+    vision_status, error_code = request.param
+    VisionService.set_status(vision_payment_plan, vision_status, error_code=error_code)
+    return vision_payment_plan
+
+
+@pytest.fixture
+def vision_disabled_payment_plan_with_fc_failure(
+    vision_disabled_payment_plan: PaymentPlan,
+) -> PaymentPlan:
+    VisionService.set_status(vision_disabled_payment_plan, VisionStatus.FC_NOT_FOUND)
+    return vision_disabled_payment_plan
+
+
 def test_vision_data_replaces_malformed_state(
     malformed_vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
@@ -239,13 +261,14 @@ def test_process_callback_without_fc_keeps_plan_blocked(
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with django_assert_num_queries(1):
-        VisionService.process_callback(
+        fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="SUCCESS",
             fc_num="",
         )
 
+    assert fc_assignment_failed is True
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "vision_id": "VISION-1",
@@ -260,13 +283,14 @@ def test_process_callback_records_fc_assignment_failure(
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
 
     with django_assert_num_queries(2):
-        VisionService.process_callback(
+        fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="SUCCESS",
             fc_num="UNKNOWN",
         )
 
+    assert fc_assignment_failed is True
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "vision_id": "VISION-1",
@@ -281,13 +305,14 @@ def test_process_callback_failure_stores_returned_fc_number(
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with django_assert_num_queries(1):
-        VisionService.process_callback(
+        fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
             vision_result="ERROR",
             fc_num="FC123",
         )
 
+    assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
         "vision_id": "VISION-1",
@@ -295,6 +320,23 @@ def test_process_callback_failure_stores_returned_fc_number(
         "status": VisionStatus.CALLBACK_FAILED.value,
         "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
     }
+
+
+def test_process_callback_repeats_existing_fc_assignment_failure(
+    payment_plan_with_fc_assignment_failure: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    payment_plan = payment_plan_with_fc_assignment_failure
+
+    with django_assert_num_queries(1):
+        fc_assignment_failed = VisionService.process_callback(
+            payment_plan,
+            vision_payment_plan_id="VISION-RETRY",
+            vision_result="SUCCESS",
+            fc_num="FC123",
+        )
+
+    assert fc_assignment_failed is True
 
 
 def test_process_callback_ignores_plan_that_is_not_waiting_for_vision(
@@ -424,6 +466,21 @@ def test_callback_does_not_process_when_vision_flag_is_disabled(
         "sent": True,
         "status": VisionStatus.WAITING_FOR_CALLBACK.value,
     }
+
+
+def test_disabled_vision_flag_keeps_stored_fc_failure_log_only(
+    vision_disabled_payment_plan_with_fc_failure: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(1):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_disabled_payment_plan_with_fc_failure,
+            vision_payment_plan_id="VISION-1",
+            vision_result="SUCCESS",
+            fc_num="FC123",
+        )
+
+    assert fc_assignment_failed is False
 
 
 def test_instruction_managed_plan_is_excluded_from_vision(

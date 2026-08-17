@@ -139,6 +139,16 @@ def test_payment_plan_callback_request_serializer_ack_payload_uses_initial_data_
     }
 
 
+def test_payment_plan_callback_request_serializer_ack_payload_includes_message() -> None:
+    serializer = PaymentPlanCallbackRequestSerializer(data={"messageId": "msg-001", "payplanSno": "PP001"})
+    assert serializer.ack_payload("KO", message="FC not found") == {
+        "status": "KO",
+        "message_id": "msg-001",
+        "payplan_sno": "PP001",
+        "message": "FC not found",
+    }
+
+
 def test_payment_plan_callback_ack_serializer_to_representation() -> None:
     serializer = PaymentPlanCallbackAckSerializer(
         {
@@ -151,4 +161,21 @@ def test_payment_plan_callback_ack_serializer_to_representation() -> None:
         "status": "OK",
         "messageId": "msg-001",
         "payplanSno": "PP001",
+    }
+
+
+def test_payment_plan_callback_ack_serializer_to_representation_includes_message() -> None:
+    serializer = PaymentPlanCallbackAckSerializer(
+        {
+            "status": "KO",
+            "message_id": "msg-001",
+            "payplan_sno": "PP001",
+            "message": "FC not found",
+        }
+    )
+    assert serializer.data == {
+        "status": "KO",
+        "messageId": "msg-001",
+        "payplanSno": "PP001",
+        "message": "FC not found",
     }

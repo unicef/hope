@@ -191,7 +191,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def send_to_payment_gateway(self) -> PaymentPlan:
-        # TODO(Vision decision): Confirm whether an FSP delivery comment is required and where it should be stored.
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
 

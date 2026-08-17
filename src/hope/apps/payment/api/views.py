@@ -2745,7 +2745,6 @@ class PaymentPlanGroupViewSet(
     )
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
     def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        # TODO(Vision decision): Confirm whether an FSP delivery comment is required and where it should be stored.
         payment_plan_group = self.get_object()
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")

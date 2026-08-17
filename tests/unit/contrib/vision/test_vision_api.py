@@ -347,7 +347,7 @@ def test_callback_view_gets_payment_plan_with_related_data(
 
 @patch("hope.models.APILogEntry.objects.create")
 @patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
-def test_callback_view_success(mock_get, mock_log_entry) -> None:
+def test_callback_view_missing_fc_returns_ko(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
@@ -378,20 +378,22 @@ def test_callback_view_success(mock_get, mock_log_entry) -> None:
     view = PaymentPlanCallbackView.as_view()
     response = view(request)
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     mock_get.assert_called_once_with("PP043")
     mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
     assert response.data == {
-        "status": "OK",
+        "status": "KO",
         "messageId": "AGoSIRjbhXM_6L58Q2zj3MevWx81",
         "payplanSno": "PP043",
+        "message": "FC not found",
     }
     assert "vision" in mock_pp.internal_data
     entry = mock_pp.internal_data["vision"]["log"][0]
     assert entry["type"] == VisionLogEntryType.PUSH_NOTIFICATION.value
     assert datetime.fromisoformat(entry["timestamp"])
     assert entry["payload"]["payplanSno"] == "PP043"
-    assert entry["response"]["status"] == "OK"
+    assert entry["response"]["status"] == "KO"
+    assert entry["response"]["message"] == "FC not found"
     assert mock_pp.internal_data["vision"]["vision_id"] == "00000062"
     assert mock_pp.internal_data["vision"]["status"] == "FC_MISSING"
 
@@ -428,6 +430,7 @@ def test_callback_view_success_with_fc_num(mock_get, mock_log_entry) -> None:
 
     view = PaymentPlanCallbackView.as_view()
     with patch("hope.contrib.vision.views.VisionService.process_callback") as mock_process_callback:
+        mock_process_callback.return_value = False
         response = view(request)
 
     assert response.status_code == 200

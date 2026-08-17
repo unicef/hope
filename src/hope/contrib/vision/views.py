@@ -19,6 +19,7 @@ from hope.models import Grant, PaymentPlan
 
 VISION_RESPONSE_OK = "OK"
 VISION_RESPONSE_KO = "KO"
+VISION_FC_NOT_FOUND_MESSAGE = "FC not found"
 
 
 class PaymentPlanCallbackView(HOPEAPIView, APIView):
@@ -26,8 +27,13 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
     permission = Grant.API_VISION_PP_CREATE
 
     @staticmethod
-    def _build_response(vision_status: str, serializer: PaymentPlanCallbackRequestSerializer) -> dict[str, str]:
-        return dict(PaymentPlanCallbackAckSerializer(serializer.ack_payload(vision_status)).data)
+    def _build_response(
+        vision_status: str,
+        serializer: PaymentPlanCallbackRequestSerializer,
+        *,
+        message: str | None = None,
+    ) -> dict[str, str]:
+        return dict(PaymentPlanCallbackAckSerializer(serializer.ack_payload(vision_status, message=message)).data)
 
     @staticmethod
     def _error_response(serializer: PaymentPlanCallbackRequestSerializer) -> Response:
@@ -78,17 +84,25 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             payment_plan.save(update_fields=["internal_data"])
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-        response_data = self._build_response(VISION_RESPONSE_OK, serializer)
-        self._append_log(payment_plan, serializer.external_payload, response_data)
-        # TODO(Vision decision): Keep returning OK for a transport-valid callback even when FC assignment fails until
-        # the business confirms whether missing, unknown, ambiguous, or conflicting FC data should return KO to Vision.
-        VisionService.process_callback(
+        fc_assignment_failed = VisionService.process_callback(
             payment_plan,
             vision_payment_plan_id=serializer.validated_vision_payplan_sno,
             vision_result=serializer.validated_data.get("status", ""),
             fc_num=serializer.validated_data.get("fc_num", ""),
         )
+        if fc_assignment_failed:
+            response_data = self._build_response(
+                VISION_RESPONSE_KO,
+                serializer,
+                message=VISION_FC_NOT_FOUND_MESSAGE,
+            )
+            response_status = status.HTTP_400_BAD_REQUEST
+        else:
+            response_data = self._build_response(VISION_RESPONSE_OK, serializer)
+            response_status = status.HTTP_200_OK
+
+        self._append_log(payment_plan, serializer.external_payload, response_data)
 
         payment_plan.save(update_fields=["internal_data"])
 
-        return Response(response_data, status=status.HTTP_200_OK)
+        return Response(response_data, status=response_status)
