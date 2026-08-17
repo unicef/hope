@@ -338,6 +338,34 @@ def error_records_by_payment_instruction(payment_gateway_setup):
     }
 
 
+@pytest.fixture
+def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
+    split_1, _ = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    PaymentPlanSplit.objects.filter(pk=split_1.pk).update(sent_to_payment_gateway=True)
+    return {
+        "payment_plan": payment_gateway_setup["payment_plan"],
+        "sent_split": split_1,
+        "unsent_payment": payment_1,
+        "sent_payment": payment_2,
+        "gateway_records": [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(payment_2.id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent=str(split_1.id),
+                status="ERROR",
+                auth_code="1",
+                payout_amount=0.0,
+                fsp_code="1",
+                message="Error",
+            )
+        ],
+    }
+
+
 def test_sync_records_batches_updates_and_uses_prefetched_reconciliation(error_records_by_payment_instruction) -> None:
     pg_service = PaymentGatewayService()
     pg_service.api.get_records_for_payment_instruction = Mock(
@@ -360,6 +388,30 @@ def test_sync_records_batches_updates_and_uses_prefetched_reconciliation(error_r
     payments_by_update_fields = bulk_update_mock.call_args.args[0]
     assert len(payments_by_update_fields) == 1
     assert len(next(iter(payments_by_update_fields.values()))) == 2
+
+
+def test_sync_records_keeps_plan_unreconciled_when_pending_payment_is_not_in_sent_instruction(
+    payment_gateway_setup_with_unsent_pending_payment,
+) -> None:
+    setup = payment_gateway_setup_with_unsent_pending_payment
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_records_for_payment_instruction = Mock(return_value=setup["gateway_records"])
+
+    with (
+        mock.patch.object(PaymentPlan, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
+        mock.patch.object(pg_service, "change_payment_instruction_status") as change_status_mock,
+    ):
+        pg_service.sync_records()
+
+    is_reconciled_mock.assert_not_called()
+    change_status_mock.assert_not_called()
+    pg_service.api.get_records_for_payment_instruction.assert_called_once_with(setup["sent_split"].id)
+    setup["payment_plan"].refresh_from_db()
+    setup["unsent_payment"].refresh_from_db()
+    setup["sent_payment"].refresh_from_db()
+    assert setup["payment_plan"].status == PaymentPlan.Status.ACCEPTED
+    assert setup["unsent_payment"].status == Payment.STATUS_PENDING
+    assert setup["sent_payment"].status == Payment.STATUS_ERROR
 
 
 @mock.patch(
