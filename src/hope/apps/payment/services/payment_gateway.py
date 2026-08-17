@@ -773,7 +773,7 @@ class PaymentGatewayService:
             exchange_rate = payment_plan.exchange_rate
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             payment_log_pairs: list = []
-            has_eligible_payments: bool = payment_plan.has_eligible_payments  # type: ignore[attr-defined]
+            has_eligible_payments: bool = payment_plan.has_eligible_payments
             pending_payments: list[Payment] = getattr(payment_plan, "eligible_pending_payments", [])
 
             if (not has_eligible_payments or pending_payments) and payment_plan.is_payment_gateway:
