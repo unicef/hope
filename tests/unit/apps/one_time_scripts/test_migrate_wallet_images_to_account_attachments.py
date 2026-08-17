@@ -3,7 +3,12 @@ from django.core.files.storage import default_storage
 import pytest
 
 from extras.test_utils.factories.household import IndividualFactory
-from extras.test_utils.factories.payment import AccountFactory, AccountTypeFactory, DeliveryMechanismFactory
+from extras.test_utils.factories.payment import (
+    AccountAttachmentFactory,
+    AccountFactory,
+    AccountTypeFactory,
+    DeliveryMechanismFactory,
+)
 from hope.models import AccountAttachment, AccountType, Individual
 from hope.one_time_scripts.migrate_wallet_images_to_account_attachments import (
     migrate_wallet_images_to_account_attachments,
@@ -96,3 +101,35 @@ def test_pending_individual_is_migrated(wallet_account_type: AccountType, stored
     individual.refresh_from_db()
     assert AccountAttachment.objects.filter(account=account).exists()
     assert individual.flex_fields == {}
+
+
+def test_one_failing_record_does_not_stop_the_run(wallet_account_type: AccountType, stored_image: str) -> None:
+    failing_individual = IndividualFactory(flex_fields={"wallet_num_image_i_f": stored_image})
+    failing_account = AccountFactory(individual=failing_individual, account_type=wallet_account_type)
+    AccountAttachmentFactory.create_batch(AccountAttachment.FILE_LIMIT, account=failing_account, title="other")
+    healthy_individual = IndividualFactory(flex_fields={"wallet_num_image_i_f": stored_image})
+    healthy_account = AccountFactory(individual=healthy_individual, account_type=wallet_account_type)
+
+    migrate_wallet_images_to_account_attachments()
+
+    failing_individual.refresh_from_db()
+    healthy_individual.refresh_from_db()
+    assert failing_individual.flex_fields == {"wallet_num_image_i_f": stored_image}
+    assert healthy_individual.flex_fields == {}
+    assert AccountAttachment.objects.get(account=healthy_account).title == "Wallet number image"
+
+
+def test_failed_attachment_creation_removes_the_copied_file(
+    wallet_account_type: AccountType, stored_image: str
+) -> None:
+    individual = IndividualFactory(flex_fields={"wallet_num_image_i_f": stored_image})
+    account = AccountFactory(individual=individual, account_type=wallet_account_type)
+    AccountAttachmentFactory.create_batch(AccountAttachment.FILE_LIMIT, account=account, title="other")
+    names_before = set(default_storage.listdir("")[1])
+
+    migrate_wallet_images_to_account_attachments()
+
+    individual.refresh_from_db()
+    assert individual.flex_fields == {"wallet_num_image_i_f": stored_image}
+    assert default_storage.exists(stored_image)
+    assert set(default_storage.listdir("")[1]) == names_before

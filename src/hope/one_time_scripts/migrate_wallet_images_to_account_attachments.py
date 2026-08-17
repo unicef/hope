@@ -1,5 +1,4 @@
-"""
-Move USDC wallet number images off Individual.flex_fields onto the wallet account.
+"""Move USDC wallet number images off Individual.flex_fields onto the wallet account.
 
 The image belongs to the wallet, not to the individual, so every ``wallet_num_image_i_f``
 flex value is copied to an AccountAttachment on that individual's digital wallet account and
@@ -11,6 +10,9 @@ Run from Django shell:
     )
     migrate_wallet_images_to_account_attachments()
 """
+
+import os
+import uuid
 
 from django.core.files.storage import default_storage
 from django.db import transaction
@@ -47,26 +49,27 @@ def migrate_wallet_images_to_account_attachments() -> None:
             print(f"[SKIP] {individual.pk}: source file '{source_name}' missing from storage")
             skipped += 1
             continue
-        if AccountAttachment.objects.filter(account=account, title=WALLET_NUMBER_IMAGE_TITLE).exists():
-            _drop_flex_field(individual)
-            print(f"[SKIP] {individual.pk}: attachment already exists, flex field dropped")
-            skipped += 1
-            continue
-
+        copied_name = None
         try:
             with default_storage.open(source_name) as source:
-                copied_name = default_storage.save(source_name, source)
-        except Exception as e:  # noqa: BLE001 - one bad blob must not stop the run
-            print(f"[ERROR] {individual.pk}: failed to copy '{source_name}': {e}")
+                copied_name = default_storage.save(_copy_name(source_name), source)
+            with transaction.atomic():
+                AccountAttachment.objects.create(account=account, title=WALLET_NUMBER_IMAGE_TITLE, file=copied_name)
+                _drop_flex_field(individual)
+        except Exception as e:  # noqa: BLE001 - one bad record must not stop the run
+            if copied_name:
+                default_storage.delete(copied_name)
+            print(f"[ERROR] {individual.pk}: failed to migrate '{source_name}': {e}")
             failed += 1
             continue
 
-        with transaction.atomic():
-            AccountAttachment.objects.create(account=account, title=WALLET_NUMBER_IMAGE_TITLE, file=copied_name)
-            _drop_flex_field(individual)
         migrated += 1
 
     print(f"Done. migrated={migrated} skipped={skipped} failed={failed}")
+
+
+def _copy_name(source_name: str) -> str:
+    return f"{uuid.uuid4().hex}{os.path.splitext(source_name)[1]}"
 
 
 def _drop_flex_field(individual: Individual) -> None:
