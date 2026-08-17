@@ -1,6 +1,9 @@
 """These pin the behaviour of `BusinessAreaVisibilityMixin.get_queryset`
 (`src/hope/apps/core/api/mixins.py`) before it is rewritten to use `Exists()` over
 the ticket -> program through model (ticket 331051).
+
+The admin-area cases here are also covered by
+`test_grievance_list_global.py::test_grievance_ticket_global_list_area_limits`.
 """
 
 from typing import Any, Callable
@@ -265,7 +268,7 @@ def test_partner_with_limits_in_one_program_sees_all_areas_in_another(
     assert [result["id"] for result in response.data["results"]] == [str(ticket_in_program_two_area_two.id)]
 
 
-def test_user_without_program_access_gets_empty_list(
+def test_list_is_empty_when_business_area_has_no_programs(
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
@@ -331,19 +334,3 @@ def test_list_query_count_does_not_grow_with_page_size(
         client.get(list_url(afghanistan), {"limit": 6})
 
     assert len(six_rows.captured_queries) == len(three_rows.captured_queries)
-
-
-@pytest.mark.parametrize("permissions", [[], [Permissions.PROGRAMME_ACTIVATE]])
-def test_list_and_count_are_forbidden_without_grievance_permissions(
-    api_client: Any,
-    user: User,
-    afghanistan: BusinessArea,
-    ticket_in_three_programs: GrievanceTicket,
-    permissions: list,
-    create_user_role_with_permissions: Callable,
-) -> None:
-    create_user_role_with_permissions(user, permissions, afghanistan, whole_business_area_access=True)
-    client = api_client(user)
-
-    assert client.get(list_url(afghanistan)).status_code == status.HTTP_403_FORBIDDEN
-    assert client.get(count_url(afghanistan)).status_code == status.HTTP_403_FORBIDDEN
