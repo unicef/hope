@@ -900,18 +900,23 @@ class PaymentGatewayService:
             "id", "payment_gateway_id"
         )
         account_type_map = {str(account_type.payment_gateway_id): account_type for account_type in account_types}
-
-        for dm in delivery_mechanisms:
-            DeliveryMechanism.objects.update_or_create(
-                payment_gateway_id=dm.id,
-                defaults={
-                    "code": dm.code,
-                    "name": dm.name,
-                    "transfer_type": dm.transfer_type,
-                    "is_active": True,
-                    "account_type": account_type_map.get(str(dm.account_type)) if dm.account_type else None,
-                },
+        delivery_mechanism_objects = [
+            DeliveryMechanism(
+                payment_gateway_id=str(dm.id),
+                code=dm.code,
+                name=dm.name,
+                transfer_type=dm.transfer_type,
+                is_active=True,
+                account_type=account_type_map.get(str(dm.account_type)) if dm.account_type else None,
             )
+            for dm in delivery_mechanisms
+        ]
+        DeliveryMechanism.objects.bulk_create(
+            delivery_mechanism_objects,
+            update_conflicts=True,
+            update_fields=["code", "name", "transfer_type", "is_active", "account_type", "updated_at"],
+            unique_fields=["payment_gateway_id"],
+        )
 
     def add_missing_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         record_ids: list[str] = []

@@ -1655,6 +1655,7 @@ def test_sync_delivery_mechanisms(
     get_delivery_mechanisms_mock: Any,
     delivery_mechanisms: dict,
     account_types: dict,
+    django_assert_num_queries: Any,
 ) -> None:
     assert DeliveryMechanism.objects.count() == len(delivery_mechanisms)
 
@@ -1677,7 +1678,8 @@ def test_sync_delivery_mechanisms(
     pg_service = PaymentGatewayService()
     pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock  # type: ignore
 
-    pg_service.sync_delivery_mechanisms()
+    with django_assert_num_queries(2):
+        pg_service.sync_delivery_mechanisms()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     assert dm_cash.is_active
     assert dm_cash.account_type.key == "bank"
