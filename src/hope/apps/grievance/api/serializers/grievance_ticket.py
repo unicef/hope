@@ -9,7 +9,12 @@ from hope.apps.geo.api.serializers import AreaListSerializer
 from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
-from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
+from hope.apps.grievance.constants import (
+    PRIORITY_CHOICES,
+    SUBMISSION_CHANNEL_CHOICES,
+    SUBMISSION_CHANNEL_MANUAL_CHOICES,
+    URGENCY_CHOICES,
+)
 from hope.apps.grievance.models import GrievanceDocument, GrievanceTicket, TicketNote
 from hope.apps.household.api.serializers.household import HouseholdForTicketSerializer
 from hope.apps.household.api.serializers.individual import (
@@ -150,6 +155,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "issue_type",
             "priority",
             "urgency",
+            "submission_channel",
             "created_at",
             "created_by",
             "total_days",
@@ -224,6 +230,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "issue_type",
             "priority",
             "urgency",
+            "submission_channel",
             "created_at",
             "created_by",
             "updated_at",
@@ -288,6 +295,8 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_system_category_choices = serializers.SerializerMethodField()
     grievance_ticket_priority_choices = serializers.SerializerMethodField()
     grievance_ticket_urgency_choices = serializers.SerializerMethodField()
+    grievance_ticket_submission_channel_choices = serializers.SerializerMethodField()
+    grievance_ticket_manual_submission_channel_choices = serializers.SerializerMethodField()
     grievance_ticket_issue_type_choices = serializers.SerializerMethodField()
     document_type_choices = serializers.SerializerMethodField()
 
@@ -311,6 +320,12 @@ class GrievanceChoicesSerializer(serializers.Serializer):
 
     def get_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(URGENCY_CHOICES)
+
+    def get_grievance_ticket_submission_channel_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        return to_choice_object(SUBMISSION_CHANNEL_CHOICES)
+
+    def get_grievance_ticket_manual_submission_channel_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        return to_choice_object(SUBMISSION_CHANNEL_MANUAL_CHOICES)
 
     def get_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> list[dict]:
         categories = dict(GrievanceTicket.CATEGORY_CHOICES)
@@ -609,6 +624,9 @@ class CreateGrievanceTicketSerializer(serializers.Serializer):
     assigned_to = serializers.PrimaryKeyRelatedField(required=False, queryset=User.objects.all())
     category = serializers.IntegerField()
     issue_type = serializers.IntegerField(required=False)
+    submission_channel = serializers.ChoiceField(
+        choices=SUBMISSION_CHANNEL_MANUAL_CHOICES, required=False, allow_null=True
+    )
     admin = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Area.objects.all())
     area = serializers.CharField(required=False, allow_blank=True)
     language = serializers.CharField(required=False, allow_blank=True)
@@ -672,6 +690,9 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
     extras = UpdateGrievanceTicketExtrasSerializer(required=False)
     priority = serializers.IntegerField()
     urgency = serializers.IntegerField()
+    # All choices (incl. HOPE) accepted on update: the FE echoes a system ticket's existing
+    # HOPE value back. Users still can't *pick* HOPE — the edit dropdown uses manual choices.
+    submission_channel = serializers.ChoiceField(choices=SUBMISSION_CHANNEL_CHOICES, required=False, allow_null=True)
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
     program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
     comments = serializers.CharField(required=False, allow_null=True, allow_blank=True)
@@ -788,3 +809,64 @@ class BulkGrievanceTicketsAddNoteSerializer(serializers.Serializer):
         child=serializers.UUIDField(),
     )
     note = serializers.CharField()
+
+
+class BulkCloseGrievanceTicketsSerializer(serializers.Serializer):
+    grievance_ticket_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+    )
+
+
+class NeedsAdjudicationRoleReassignEntrySerializer(serializers.Serializer):
+    role = serializers.CharField()
+    household = serializers.CharField()
+    individual = serializers.CharField()
+    new_individual = serializers.CharField()
+
+
+class NeedsAdjudicationResolutionSerializer(serializers.Serializer):
+    ticket_id = serializers.UUIDField()
+    duplicate_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+    distinct_individual_ids = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+    role_reassign_data = serializers.DictField(
+        child=NeedsAdjudicationRoleReassignEntrySerializer(), required=False, default=dict
+    )
+
+    def validate(self, attrs: dict) -> dict:
+        if not attrs["duplicate_individual_ids"] and not attrs["distinct_individual_ids"]:
+            raise serializers.ValidationError("At least one individual must be marked as duplicate or distinct.")
+        overlap = set(attrs["duplicate_individual_ids"]) & set(attrs["distinct_individual_ids"])
+        if overlap:
+            raise serializers.ValidationError("An individual cannot be both duplicate and distinct.")
+        return attrs
+
+
+class BulkNeedsAdjudicationResultSerializer(serializers.Serializer):
+    """What the batch did: the tickets it resolved, and the ones it skipped as already closed."""
+
+    resolved = GrievanceTicketSimpleSerializer(many=True)
+    skipped_closed = GrievanceTicketSimpleSerializer(many=True)
+
+
+MAX_NEEDS_ADJUDICATION_BATCH = 50
+
+
+class BulkNeedsAdjudicationSerializer(serializers.Serializer):
+    tickets = NeedsAdjudicationResolutionSerializer(many=True, allow_empty=False)
+
+    def validate_tickets(self, value: list[dict]) -> list[dict]:
+        if len(value) > MAX_NEEDS_ADJUDICATION_BATCH:
+            raise serializers.ValidationError(
+                f"At most {MAX_NEEDS_ADJUDICATION_BATCH} tickets can be finalized at once, got {len(value)}."
+            )
+        ticket_ids = [resolution["ticket_id"] for resolution in value]
+        if len(set(ticket_ids)) != len(ticket_ids):
+            raise serializers.ValidationError("Each ticket can only be resolved once per request.")
+        # an individual can sit on several tickets
+        duplicates = {individual_id for resolution in value for individual_id in resolution["duplicate_individual_ids"]}
+        distinct = {individual_id for resolution in value for individual_id in resolution["distinct_individual_ids"]}
+        if duplicates & distinct:
+            raise serializers.ValidationError(
+                "An individual cannot be marked duplicate on one ticket and distinct on another."
+            )
+        return value
