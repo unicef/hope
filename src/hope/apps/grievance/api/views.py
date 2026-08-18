@@ -11,16 +11,14 @@ from django.db.models import (
     DateTimeField,
     Exists,
     F,
-    IntegerField,
     OuterRef,
     Prefetch,
     Q,
     QuerySet,
-    Subquery,
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, Extract
+from django.db.models.functions import Extract
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -61,9 +59,9 @@ from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import check_concurrency_version_in_mutation, sort_by_attr
 from hope.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hope.apps.grievance.api.mixins import (
+    GrievanceListBatchMixin,
     GrievanceMutationMixin,
     GrievancePermissionsMixin,
-    GrievanceTargetIdMixin,
 )
 from hope.apps.grievance.api.serializers.dashboard import GrievanceDashboardSerializer
 from hope.apps.grievance.api.serializers.grievance_ticket import (
@@ -291,7 +289,7 @@ class GrievanceTicketViewSet(
     ProgramVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
-    GrievanceTargetIdMixin,
+    GrievanceListBatchMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
@@ -331,7 +329,8 @@ class GrievanceTicketViewSet(
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(
-                "programs",
+                # the path prefetches both levels: programs for the serializer's get_programs,
+                # sanction_lists for Program.screen_beneficiary (one exists() per program per row without it).
                 "programs__sanction_lists",
                 *to_prefetch,
                 Prefetch(
@@ -353,20 +352,6 @@ class GrievanceTicketViewSet(
                     ),
                     default=Value(timezone.now(), output_field=DateTimeField()) - F("created_at"),
                     output_field=DateField(),
-                ),
-                existing_tickets_count=Coalesce(
-                    Subquery(
-                        GrievanceTicket.objects.filter(
-                            household_unicef_id=OuterRef("household_unicef_id"),
-                            household_unicef_id__gt="",
-                        )
-                        .exclude(pk=OuterRef("pk"))
-                        .values("household_unicef_id")
-                        .annotate(c=Count("pk"))
-                        .values("c")[:1],
-                        output_field=IntegerField(),
-                    ),
-                    Value(0),
                 ),
             )
             .annotate(total_days=F("total__day"))
@@ -391,7 +376,7 @@ class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
-    GrievanceTargetIdMixin,
+    GrievanceListBatchMixin,
     SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
@@ -574,11 +559,15 @@ class GrievanceTicketGlobalViewSet(
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(
-                "programs",
+                # the path prefetches both levels: programs for the serializer's get_programs,
+                # sanction_lists for Program.screen_beneficiary (one exists() per program per row without it).
+                "programs__sanction_lists",
                 *to_prefetch,
                 # feeds TicketNeedsAdjudicationDetails.documents_no_longer_conflict() (can_close_as_unique)
                 "needs_adjudication_ticket_details__golden_records_individual__documents__type",
                 "needs_adjudication_ticket_details__possible_duplicates__documents__type",
+                # read per row by the list serializer's related_tickets_count;
+                "linked_tickets",
             )
             .annotate(
                 has_social_worker_program_annotated=Exists(

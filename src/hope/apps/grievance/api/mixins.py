@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from typing import Any
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.request import Request
@@ -36,8 +36,10 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
         for ticket in tickets
         if ticket.household_unicef_id and getattr(ticket, "has_social_worker_program_annotated", False)
     }
+
     if not household_unicef_ids:
         return {}
+
     return dict(
         Individual.objects.filter(household__unicef_id__in=household_unicef_ids)
         # Lowest id per household, the same individual the old per-ticket subquery picked.
@@ -47,26 +49,46 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
     )
 
 
-class GrievanceTargetIdMixin:
-    """Looks up the serializer's `target_id` fallback once per page.
+def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str, int]:
+    """Map household unicef id -> number of *other* tickets for that household, for one page."""
+    household_unicef_ids = {ticket.household_unicef_id for ticket in tickets if ticket.household_unicef_id}
 
-    It used to be a queryset annotation, which joined household into the main list
-    query and made it lock that table (ticket 331051).
+    if not household_unicef_ids:
+        return {}
+
+    return {
+        row["household_unicef_id"]: row["ticket_count"] - 1
+        for row in GrievanceTicket.objects.filter(household_unicef_id__in=household_unicef_ids)
+        .values("household_unicef_id")
+        .annotate(ticket_count=Count("pk"))
+    }
+
+
+class GrievanceListBatchMixin:
+    """Resolves per page what the list serializer used to resolve per row.
+
+    `target_id`'s fallback was a queryset annotation, which joined household into the
+    main list query and made it lock that table; `related_tickets_count` was a
+    correlated subquery on the program-nested list and a COUNT per row on the global
+    one (ticket 331051).
 
     Only for paginated viewsets - list() serializes the page, so a viewset with
     pagination_class = None cannot use this mixin. Both grievance lists paginate.
     """
 
     fallback_individual_unicef_ids: dict[str, str] | None = None
+    existing_tickets_counts: dict[str, int] | None = None
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()
         context["fallback_individual_unicef_ids"] = self.fallback_individual_unicef_ids
+        context["existing_tickets_counts"] = self.existing_tickets_counts
         return context
 
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
         self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page)
+        self.existing_tickets_counts = get_existing_tickets_counts(page)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
 
