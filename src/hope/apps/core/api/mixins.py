@@ -139,7 +139,7 @@ class BusinessAreaMixin:
         return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(**{f"{self.business_area_model_field}__slug": self.business_area_slug})
+        return super().get_queryset().filter(**{f"{self.business_area_model_field}": self.business_area})
 
 
 class ProgramMixin:
