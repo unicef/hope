@@ -2412,8 +2412,7 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         # get_queryset(), so without this the upload would skip the program and area-limit filtering
         # that destroy and download get from ProgramVisibilityMixin.
         context = super().get_serializer_context()
-        if self.request.method == "POST":
-            context["account"] = get_object_or_404(self._visible_accounts(), id=self.kwargs["account_pk"])
+        context["account"] = get_object_or_404(self._visible_accounts(), id=self.kwargs["account_pk"])
         return context
 
     def _visible_accounts(self) -> QuerySet:
