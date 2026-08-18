@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from typing import Any
 
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.request import Request
@@ -96,12 +96,12 @@ class GrievancePermissionsMixin:
     @staticmethod
     def _tickets_without_programs_query() -> Q:
         through_model = GrievanceTicket.programs.through
-        return ~Q(id__in=through_model.objects.values("grievanceticket_id"))
+        return Q(~Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
 
     @staticmethod
     def _tickets_for_program_ids_query(program_ids: set) -> Q:
         through_model = GrievanceTicket.programs.through
-        return Q(id__in=through_model.objects.filter(program_id__in=program_ids).values("grievanceticket_id"))
+        return Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program_id__in=program_ids)))
 
     @property
     def grievance_permissions_query(self) -> Q:
