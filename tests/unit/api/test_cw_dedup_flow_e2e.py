@@ -407,13 +407,13 @@ def test_cw_reset_wipes_population_then_reupload_merges_clean(
         first_id_map["cw-ind-B"],
         first_id_map["cw-ind-C"],
     )
-    assert Individual.objects.filter(country_workspace_id__in=cw_individual_ids.values()).count() == 3
+    assert Individual.pending_objects.filter(country_workspace_id__in=cw_individual_ids.values()).count() == 3
 
     _reset_rdi(token_api_client, user_business_area, first_rdi_id, cw_callback_url, django_capture_on_commit_callbacks)
 
     # Reset hard-deletes the RDI and its whole population — reusable, not just flagged deleted.
     assert not RegistrationDataImport.objects.filter(id=first_rdi_id).exists()
-    assert not Individual.objects.filter(country_workspace_id__in=cw_individual_ids.values()).exists()
+    assert not Individual.pending_objects.filter(country_workspace_id__in=cw_individual_ids.values()).exists()
 
     # Re-run the exact CW ids into a fresh RDI and complete it: dedup must behave identically.
     second_rdi_id = _create_rdi(
