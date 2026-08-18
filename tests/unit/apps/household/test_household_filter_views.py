@@ -28,7 +28,12 @@ from extras.test_utils.factories.grievance import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.exceptions import SearchError
 from hope.apps.household.const import HOST, REFUGEE, ROLE_PRIMARY
-from hope.apps.household.filters import HouseholdFilter, HouseholdOfficeSearchFilter, MergedHouseholdFilter
+from hope.apps.household.filters import (
+    HouseholdFilter,
+    HouseholdOfficeSearchFilter,
+    MergedHouseholdFilter,
+    _prepare_kobo_asset_id_value,
+)
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Household, Program
 from hope.models.utils import MergeStatusModel
@@ -1200,3 +1205,67 @@ def test_office_search_filter_by_grievance_without_household_returns_none(empty_
     result = household_filter.filter_by_grievance_for_office_search(queryset, "GRV-8002")
 
     assert list(result) == []
+
+
+def test_prepare_kobo_asset_id_value_returns_short_code_unchanged() -> None:
+    code = "KOBO"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "KOBO"
+
+
+def test_prepare_kobo_asset_id_value_strips_kobo_prefix() -> None:
+    code = "KOBO-111222"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "111222"
+
+
+def test_prepare_kobo_asset_id_value_takes_part_after_slash() -> None:
+    code = "HOPE-20220531-3/111222"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "111222"
+
+
+def test_prepare_kobo_asset_id_value_decodes_march_2022_code() -> None:
+    code = "HOPE-202233112067"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "12067"
+
+
+def test_prepare_kobo_asset_id_value_decodes_april_2022_five_digit_id() -> None:
+    code = "HOPE-202241512068"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "12068"
+
+
+def test_prepare_kobo_asset_id_value_decodes_april_2022_six_digit_id() -> None:
+    code = "HOPE-2022430157380"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "157380"
+
+
+def test_prepare_kobo_asset_id_value_decodes_may_2022_code() -> None:
+    code = "HOPE-2022530392136"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "392136"
+
+
+def test_prepare_kobo_asset_id_value_decodes_june_2022_code() -> None:
+    code = "HOPE-2022601392137"
+
+    result = _prepare_kobo_asset_id_value(code)
+
+    assert result == "392137"
