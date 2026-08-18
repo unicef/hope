@@ -399,24 +399,44 @@ def attacker_second_plan_verification_plan(attacker_second_payment_plan: Payment
     return PaymentVerificationPlanFactory(payment_plan=attacker_second_payment_plan)
 
 
-def test_retrieve_payment_under_mismatched_payment_plan_path_is_denied(
+def test_retrieve_payment_of_other_business_area_under_own_payment_plan_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
     attacker_payment_plan: PaymentPlan,
-    attacker_second_plan_payment: Payment,
+    victim_payment: Payment,
 ) -> None:
     url = reverse(
         "api:payments:payments-detail",
         kwargs={
             **cross_ba_kwargs,
             "payment_plan_pk": str(attacker_payment_plan.id),
-            "payment_id": str(attacker_second_plan_payment.id),
+            "payment_id": str(victim_payment.id),
         },
     )
 
     response = api_client.get(url)
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+
+
+def test_retrieve_payment_of_own_program_works_without_a_usable_payment_plan_in_the_path(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_second_plan_payment: Payment,
+) -> None:
+    """The details page is opened by a plain link and sends no plan id, so the payment has to be found anyway."""
+    url = reverse(
+        "api:payments:payments-detail",
+        kwargs={
+            **cross_ba_kwargs,
+            "payment_plan_pk": "undefined",
+            "payment_id": str(attacker_second_plan_payment.id),
+        },
+    )
+
+    response = api_client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK, response.status_code
 
 
 def test_retrieve_verification_record_under_mismatched_payment_plan_path_is_denied(
