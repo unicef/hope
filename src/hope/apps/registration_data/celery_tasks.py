@@ -531,12 +531,39 @@ def rdi_dispatcher_task_action(job: AsyncRetryJob) -> bool:
 
 
 def remove_rdi_population_async_task(rdi: RegistrationDataImport, *, callback_url: str) -> AsyncRetryJob | None:
-    """STUB (REWORK #3) — enqueue the retriable RDI-population wipe job.
+    """Enqueue the retriable wipe job; returns None if a live wipe already backs the RDI."""
+    return AsyncRetryJob.requeue(
+        instance=rdi,
+        job_name=remove_rdi_population_async_task.__name__,
+        program=rdi.program,
+        action="hope.apps.registration_data.celery_tasks.remove_rdi_population_async_task_action",
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": callback_url,
+            "on_failure_action": "hope.apps.registration_data.celery_tasks.remove_rdi_population_on_failure",
+        },
+        group_key="registration_data",
+        description=f"Delete RDI population {rdi.id}",
+    )
 
-    Empty placeholder so ``ResetRDIView`` and the Section A tests have a symbol to
-    import / patch. Real requeue + config wiring is unimplemented.
-    """
-    raise NotImplementedError("REWORK #3: remove_rdi_population_async_task not implemented yet")
+
+def remove_rdi_population_async_task_action(job: AsyncRetryJob) -> None:
+    """Retriable wipe worker (REWORK #3): mark DELETING, wipe, then success-callback CW on success only."""
+    from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
+
+    RdiPopulationRemoval().execute(job.config["registration_data_import_id"], job.config["callback_url"])
+
+
+def remove_rdi_population_on_failure(job: AsyncRetryJob, exc: Exception) -> None:
+    """on_failure_action target — fires only when transient retries are exhausted (REWORK #3)."""
+    from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
+
+    RdiPopulationRemoval.mark_failed(job.config["registration_data_import_id"], reason=str(exc))
+
+
+def notify_rdi_deleted_async_task(callback_url: str) -> None:
+    """STUB placeholder (REWORK #4 / Section D) — success-only CW callback enqueuer."""
+    return
 
 
 def rdi_dispatcher_task(program: Program) -> None:

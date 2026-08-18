@@ -5,6 +5,7 @@ import uuid
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 import pytest
+import responses
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
@@ -281,11 +282,6 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
 # (`delete_rdi=True`, no `DELETED` state), so re-uploading needs a fresh CREATE, not the
 # same id. Proves an RDI is *reusable* after reset, not merely gone.
 
-# Patched so the success callback never leaves the process: the outbound HOPE->CW ping is
-# a network dependency, mocked at its method boundary (mirrors how `_complete_rdi` mocks
-# `get_rdi_findings`). The wipe + callback jobs run inline under `cw_dedup_eager_setup`.
-NOTIFY_RDI_DELETED = "hope.apps.registration_data.api.country_workspace.CountryWorkspaceAPI.notify_rdi_deleted"
-
 
 @pytest.fixture
 def cw_callback_url() -> str:
@@ -352,23 +348,26 @@ def _reset_rdi(
     django_capture_on_commit_callbacks: Any,
 ) -> None:
     reset_url = reverse("api:rdi-reset", args=[business_area.slug, rdi_id])
-    # The view enqueues the wipe via `transaction.on_commit`; capture(execute=True) fires it
-    # (and the nested success-callback job) inline once the request's atomic block commits.
-    with patch(NOTIFY_RDI_DELETED) as mock_notify:
+    # Mock the outbound HOPE->CW callback at the HTTP boundary (not the method), so the real
+    # `_post` / auth-header / body logic runs. `responses` patches `HTTPAdapter.send`, so
+    # `BaseAPI`'s custom-mounted retry adapter is still intercepted; the Django test client
+    # calls to HOPE endpoints are untouched (not `requests`-based).
+    with responses.RequestsMock() as rsps:
+        rsps.add(responses.POST, callback_url, status=200)
+        # The view enqueues the wipe via `transaction.on_commit`; capture(execute=True) fires
+        # it (and the nested success-callback job) inline once the atomic block commits.
         with django_capture_on_commit_callbacks(execute=True):
             resp = token_api_client.post(reset_url, {"callback_url": callback_url}, format="json")
 
-    assert resp.status_code == status.HTTP_202_ACCEPTED, str(resp.json())
-    assert resp.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
-    # Success-only callback: the wipe finished, so CW was pinged exactly once.
-    mock_notify.assert_called_once()
+        assert resp.status_code == status.HTTP_202_ACCEPTED, str(resp.json())
+        assert resp.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
+        # Success-only callback fired exactly once, on the signed URL, with no token and no body.
+        assert len(rsps.calls) == 1
+        sent = rsps.calls[0].request
+        assert "Authorization" not in sent.headers
+        assert not sent.body
 
 
-@pytest.mark.xfail(
-    reason="pending REWORK #2-#5: remove_rdi_population_async_task is a stub, CountryWorkspaceAPI "
-    "and the DELETE_SCHEDULED/DELETING/DELETE_FAILED states are unimplemented",
-    strict=False,
-)
 def test_cw_reset_wipes_population_then_reupload_merges_clean(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
@@ -383,7 +382,6 @@ def test_cw_reset_wipes_population_then_reupload_merges_clean(
     cw_findings: list[dict],
     cw_callback_url: str,
     django_capture_on_commit_callbacks: Any,
-    django_assert_num_queries: Any,
     mock_deduplication_engine_env_vars: Any,
     cw_dedup_eager_setup: None,
     warm_content_type_cache: None,
@@ -438,17 +436,17 @@ def test_cw_reset_wipes_population_then_reupload_merges_clean(
         second_id_map["cw-ind-C"],
     )
 
-    _complete_rdi(
-        token_api_client=token_api_client,
-        business_area=user_business_area,
-        rdi_id=second_rdi_id,
-        cw_findings=cw_findings,
-        country_workspace_id=country_workspace_id,
-        django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
-        django_assert_num_queries=django_assert_num_queries,
-        # TODO: re-capture on a real run once REWORK #3 lands; mirrors the lax-complete count.
-        expected_queries=193,
-    )
+    # Complete without a query-count assert — N+1 coverage stays on the lax/social tests;
+    # here we only need the re-uploaded RDI to merge cleanly after a reset.
+    complete_url = reverse("api:rdi-complete", args=[user_business_area.slug, second_rdi_id])
+    with patch(
+        "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings",
+        return_value=cw_findings,
+    ) as mock_findings:
+        with django_capture_on_commit_callbacks(execute=True):
+            resp = token_api_client.post(complete_url, {}, format="json")
+    assert resp.status_code == status.HTTP_200_OK, str(resp.json())
+    mock_findings.assert_called_once_with(country_workspace_id)
 
     rdi = RegistrationDataImport.objects.get(id=second_rdi_id)
     assert rdi.status == RegistrationDataImport.MERGED
