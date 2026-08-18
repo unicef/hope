@@ -530,6 +530,15 @@ def rdi_dispatcher_task_action(job: AsyncRetryJob) -> bool:
     return True
 
 
+def remove_rdi_population_async_task(rdi: RegistrationDataImport, *, callback_url: str) -> AsyncRetryJob | None:
+    """STUB (REWORK #3) — enqueue the retriable RDI-population wipe job.
+
+    Empty placeholder so ``ResetRDIView`` and the Section A tests have a symbol to
+    import / patch. Real requeue + config wiring is unimplemented.
+    """
+    raise NotImplementedError("REWORK #3: remove_rdi_population_async_task not implemented yet")
+
+
 def rdi_dispatcher_task(program: Program) -> None:
     """Advance a program's CW merge queue: process the oldest RDI still waiting to merge.
 

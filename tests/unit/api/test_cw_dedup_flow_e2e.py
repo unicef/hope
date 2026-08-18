@@ -276,6 +276,210 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
     assert not tickets_for_c.exists()
 
 
+# --- Reset (async hard-delete) flow -------------------------------------------------
+# CREATE -> UPLOAD -> RESET -> CREATE -> UPLOAD -> COMPLETE. RESET hard-deletes the RDI
+# (`delete_rdi=True`, no `DELETED` state), so re-uploading needs a fresh CREATE, not the
+# same id. Proves an RDI is *reusable* after reset, not merely gone.
+
+# Patched so the success callback never leaves the process: the outbound HOPE->CW ping is
+# a network dependency, mocked at its method boundary (mirrors how `_complete_rdi` mocks
+# `get_rdi_findings`). The wipe + callback jobs run inline under `cw_dedup_eager_setup`.
+NOTIFY_RDI_DELETED = "hope.apps.registration_data.api.country_workspace.CountryWorkspaceAPI.notify_rdi_deleted"
+
+
+@pytest.fixture
+def cw_callback_url() -> str:
+    # Passes RDIResetSerializer.validate_callback_url: http(s) scheme, no `//` in the path.
+    return "https://cw.example.test/api/rdi/reset-callback/cb-token"
+
+
+def _push_individuals(
+    token_api_client: APIClient,
+    business_area: BusinessArea,
+    rdi_id: str,
+    cw_individual_ids: dict[str, str],
+    document_type_key: str,
+) -> dict[str, str]:
+    push_indiv_url = reverse("api:rdi-push-lax-individuals", args=[business_area.slug, rdi_id])
+    resp = token_api_client.post(
+        push_indiv_url,
+        [
+            _individual_payload(cw_individual_ids["A"], document_type_key),
+            _individual_payload(cw_individual_ids["B"], document_type_key),
+            _individual_payload(cw_individual_ids["C"], document_type_key),
+        ],
+        format="json",
+    )
+    assert resp.status_code == status.HTTP_201_CREATED, str(resp.json())
+    assert resp.data["accepted"] == 3
+    return resp.data["individual_id_mapping"]
+
+
+def _push_household(
+    token_api_client: APIClient,
+    business_area: BusinessArea,
+    rdi_id: str,
+    hoh_unicef_id: str,
+    member_b_unicef_id: str,
+    member_c_unicef_id: str,
+) -> None:
+    push_hh_url = reverse("api:rdi-push-lax-households", args=[business_area.slug, rdi_id])
+    resp = token_api_client.post(
+        push_hh_url,
+        [
+            {
+                "country": "AF",
+                "country_origin": "AF",
+                "size": 3,
+                "consent_sharing": ["UNICEF"],
+                "village": "CW Village",
+                "head_of_household_id": hoh_unicef_id,
+                "primary_collector_id": hoh_unicef_id,
+                "members": [hoh_unicef_id, member_b_unicef_id, member_c_unicef_id],
+            }
+        ],
+        format="json",
+    )
+    assert resp.status_code == status.HTTP_201_CREATED, str(resp.json())
+    assert resp.data["accepted"] == 1
+
+
+def _reset_rdi(
+    token_api_client: APIClient,
+    business_area: BusinessArea,
+    rdi_id: str,
+    callback_url: str,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    reset_url = reverse("api:rdi-reset", args=[business_area.slug, rdi_id])
+    # The view enqueues the wipe via `transaction.on_commit`; capture(execute=True) fires it
+    # (and the nested success-callback job) inline once the request's atomic block commits.
+    with patch(NOTIFY_RDI_DELETED) as mock_notify:
+        with django_capture_on_commit_callbacks(execute=True):
+            resp = token_api_client.post(reset_url, {"callback_url": callback_url}, format="json")
+
+    assert resp.status_code == status.HTTP_202_ACCEPTED, str(resp.json())
+    assert resp.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
+    # Success-only callback: the wipe finished, so CW was pinged exactly once.
+    mock_notify.assert_called_once()
+
+
+@pytest.mark.xfail(
+    reason="pending REWORK #2-#5: remove_rdi_population_async_task is a stub, CountryWorkspaceAPI "
+    "and the DELETE_SCHEDULED/DELETING/DELETE_FAILED states are unimplemented",
+    strict=False,
+)
+def test_cw_reset_wipes_population_then_reupload_merges_clean(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    imported_by_user: User,
+    afghanistan_country: Country,
+    birth_certificate_doc_type: DocumentType,
+    django_elasticsearch_setup: None,
+    create_program_es_index: Any,
+    country_workspace_id: str,
+    cw_individual_ids: dict[str, str],
+    cw_findings: list[dict],
+    cw_callback_url: str,
+    django_capture_on_commit_callbacks: Any,
+    django_assert_num_queries: Any,
+    mock_deduplication_engine_env_vars: Any,
+    cw_dedup_eager_setup: None,
+    warm_content_type_cache: None,
+) -> None:
+    create_program_es_index(program)
+
+    first_rdi_id = _create_rdi(
+        token_api_client=token_api_client,
+        business_area=user_business_area,
+        program=program,
+        imported_by=imported_by_user,
+        country_workspace_id=country_workspace_id,
+        name="cw-e2e-reset-rdi-1",
+    )
+    first_id_map = _push_individuals(
+        token_api_client, user_business_area, first_rdi_id, cw_individual_ids, birth_certificate_doc_type.key
+    )
+    _push_household(
+        token_api_client,
+        user_business_area,
+        first_rdi_id,
+        first_id_map["cw-ind-A"],
+        first_id_map["cw-ind-B"],
+        first_id_map["cw-ind-C"],
+    )
+    assert Individual.objects.filter(country_workspace_id__in=cw_individual_ids.values()).count() == 3
+
+    _reset_rdi(token_api_client, user_business_area, first_rdi_id, cw_callback_url, django_capture_on_commit_callbacks)
+
+    # Reset hard-deletes the RDI and its whole population — reusable, not just flagged deleted.
+    assert not RegistrationDataImport.objects.filter(id=first_rdi_id).exists()
+    assert not Individual.objects.filter(country_workspace_id__in=cw_individual_ids.values()).exists()
+
+    # Re-run the exact CW ids into a fresh RDI and complete it: dedup must behave identically.
+    second_rdi_id = _create_rdi(
+        token_api_client=token_api_client,
+        business_area=user_business_area,
+        program=program,
+        imported_by=imported_by_user,
+        country_workspace_id=country_workspace_id,
+        name="cw-e2e-reset-rdi-2",
+    )
+    second_id_map = _push_individuals(
+        token_api_client, user_business_area, second_rdi_id, cw_individual_ids, birth_certificate_doc_type.key
+    )
+    _push_household(
+        token_api_client,
+        user_business_area,
+        second_rdi_id,
+        second_id_map["cw-ind-A"],
+        second_id_map["cw-ind-B"],
+        second_id_map["cw-ind-C"],
+    )
+
+    _complete_rdi(
+        token_api_client=token_api_client,
+        business_area=user_business_area,
+        rdi_id=second_rdi_id,
+        cw_findings=cw_findings,
+        country_workspace_id=country_workspace_id,
+        django_capture_on_commit_callbacks=django_capture_on_commit_callbacks,
+        django_assert_num_queries=django_assert_num_queries,
+        # TODO: re-capture on a real run once REWORK #3 lands; mirrors the lax-complete count.
+        expected_queries=193,
+    )
+
+    rdi = RegistrationDataImport.objects.get(id=second_rdi_id)
+    assert rdi.status == RegistrationDataImport.MERGED
+
+    pairs = BiometricDedupeSimilarityPair.objects.filter(program=program)
+    assert pairs.count() == 1
+    pair = pairs.get()
+    paired_cw_ids = {pair.individual1.country_workspace_id, pair.individual2.country_workspace_id}
+    assert paired_cw_ids == {cw_individual_ids["A"], cw_individual_ids["B"]}
+
+    merged = Individual.objects.filter(registration_data_import=rdi)
+    assert set(merged.values_list("country_workspace_id", flat=True)) == set(cw_individual_ids.values())
+
+    ind_a = merged.get(country_workspace_id=cw_individual_ids["A"])
+    ind_b = merged.get(country_workspace_id=cw_individual_ids["B"])
+    ind_c = merged.get(country_workspace_id=cw_individual_ids["C"])
+
+    tickets_for_pair = TicketNeedsAdjudicationDetails.objects.filter(golden_records_individual__in=[ind_a, ind_b])
+    assert tickets_for_pair.count() == 1
+    ticket = tickets_for_pair.get()
+    involved_ids = {
+        ticket.golden_records_individual_id,
+        *ticket.possible_duplicates.values_list("id", flat=True),
+    }
+    assert involved_ids == {ind_a.id, ind_b.id}
+    assert ticket.is_multiple_duplicates_version is True
+
+    tickets_for_c = TicketNeedsAdjudicationDetails.objects.filter(golden_records_individual=ind_c)
+    assert not tickets_for_c.exists()
+
+
 @pytest.fixture
 def social_program(business_area: BusinessArea) -> Program:
     dct = DataCollectingTypeFactory(

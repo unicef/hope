@@ -1,8 +1,9 @@
 from dataclasses import asdict
+import logging
 from typing import TYPE_CHECKING, Any, cast
+from urllib.parse import urlsplit
 
 from django.db.models import QuerySet
-from django.db.models.deletion import ProtectedError
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.http.response import Http404, HttpResponseBase
@@ -17,8 +18,10 @@ from hope.api.endpoints.base import BusinessAreaIngestCWOnlyMixin, HOPEAPIBusine
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
-from hope.apps.registration_data.celery_tasks import rdi_dispatcher_task
-from hope.apps.registration_data.services.rdi_removal import remove_rdi_population
+from hope.apps.registration_data.celery_tasks import (
+    rdi_dispatcher_task,
+    remove_rdi_population_async_task,
+)
 from hope.models import (
     Country,
     Grant,
@@ -31,6 +34,8 @@ from hope.models import (
 
 if TYPE_CHECKING:
     from hope.models import BusinessArea
+
+logger = logging.getLogger(__name__)
 
 
 class RDISerializer(serializers.ModelSerializer):
@@ -238,35 +243,60 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
         )
 
 
-class DeleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
-    """Api to hard-delete an RDI (and everything tied to it) for a CW-managed business area.
+class RDIResetSerializer(serializers.Serializer):
+    callback_url = serializers.URLField(required=True)
 
-    RDI is deletable in every status except ``MERGED`` (terminal -> 409). An in-flight merge
-    holding the row lock is not waited on -> 409 ``rdi_merge_in_progress`` (retryable).
+    def validate_callback_url(self, value: str) -> str:
+        parts = urlsplit(value)
+        if parts.scheme not in ("http", "https"):
+            raise serializers.ValidationError("callback_url must be http or https")
+        if "//" in parts.path:
+            raise serializers.ValidationError("callback_url path must not contain '//'")
+        return value
+
+
+class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
+    """Async reset (hard-delete) of a CW-managed RDI.
+
+    RDI is resettable in every status except ``MERGED`` (terminal -> 409). An in-flight
+    merge holding the row lock is not waited on -> 409 ``rdi_merge_in_progress`` (retryable).
     """
 
     permission = Grant.API_RDI_DELETE
 
-    def delete(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        try:
-            with atomic():
-                base_qs = RegistrationDataImport.objects.filter(
-                    id=self.kwargs["rdi"],
-                    business_area=self.selected_business_area,
-                    country_workspace_id__isnull=False,
-                )
-                try:
-                    rdi = base_qs.select_for_update(skip_locked=True, of=("self",)).select_related("program").get()
-                except RegistrationDataImport.DoesNotExist:
-                    if base_qs.exists():
-                        return Response({"error": "rdi_merge_in_progress"}, status=status.HTTP_409_CONFLICT)
-                    raise Http404
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        rdi_id = self.kwargs["rdi"]
+        serializer = RDIResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        callback_url = serializer.validated_data["callback_url"]
+        logger.debug("RDI reset requested for %s (callback_url=%s)", rdi_id, callback_url)
 
-                if rdi.status == RegistrationDataImport.MERGED:
-                    return Response({"error": "rdi_already_merged"}, status=status.HTTP_409_CONFLICT)
+        with atomic():
+            base_qs = RegistrationDataImport.objects.filter(
+                id=rdi_id,
+                business_area=self.selected_business_area,
+                country_workspace_id__isnull=False,
+            )
+            try:
+                rdi = base_qs.select_for_update(skip_locked=True, of=("self",)).select_related("program").get()
+            except RegistrationDataImport.DoesNotExist:
+                if base_qs.exists():
+                    logger.info("RDI reset conflict for %s: row lock held by an in-flight merge", rdi_id)
+                    return Response({"error": "rdi_merge_in_progress"}, status=status.HTTP_409_CONFLICT)
+                logger.info("RDI reset 404 for %s: unknown or not CW-managed", rdi_id)
+                raise Http404
 
-                remove_rdi_population(rdi, delete_rdi=True, swallow_es_errors=True)
-        except ProtectedError:
-            return Response({"error": "rdi_has_dependents"}, status=status.HTTP_409_CONFLICT)
+            if rdi.status == RegistrationDataImport.MERGED:
+                logger.info("RDI reset conflict for %s: already MERGED (terminal)", rdi_id)
+                return Response({"error": "rdi_already_merged"}, status=status.HTTP_409_CONFLICT)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            job = remove_rdi_population_async_task(rdi, callback_url=callback_url)
+            if job is None:
+                logger.info("RDI reset for %s idempotent: a live wipe already backs it (status %s)", rdi_id, rdi.status)
+                return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)
+
+            rdi.status = RegistrationDataImport.DELETE_SCHEDULED
+            rdi.save(update_fields=["status"])
+            logger.info("RDI reset scheduled for %s: wipe job %s queued", rdi_id, job.pk)
+
+        return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)

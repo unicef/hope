@@ -1,9 +1,9 @@
 from hope.api.endpoints.rdi.base import (  # noqa: F401
     CompleteRDIView,
     CreateRDIView,
-    DeleteRDIView,
     PushLaxToRDIView,
     PushToRDIView,
+    ResetRDIView,
 )
 from hope.api.endpoints.rdi.delegate_people import (  # noqa: F401
     DelegatePeopleRDIView,
