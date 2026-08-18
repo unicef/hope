@@ -114,7 +114,11 @@ class AccountAttachmentSerializerUpload(serializers.ModelSerializer):
         fields = ["title", "file"]
 
     def validate_file(self, value: str) -> str:
-        if len(value) * 3 // 4 > AccountAttachment.FILE_SIZE_LIMIT:
+        # Checked before decoding: base64 packs 3 bytes into 4 characters, so the length is enough
+        # to reject an oversized blob without holding the decoded image in memory. The model
+        # enforces the exact limit once the file exists.
+        decoded_size = len(value) * 3 // 4
+        if decoded_size > AccountAttachment.FILE_SIZE_LIMIT:
             raise ValidationError(f"File size must be ≤ {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB.")
         return value
 

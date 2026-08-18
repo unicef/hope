@@ -84,7 +84,9 @@ class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
 
     def validate_file(self, file: Any) -> Any:
         if file.size > AccountAttachment.FILE_SIZE_LIMIT:
-            raise serializers.ValidationError("File size must be ≤ 10MB.")
+            raise serializers.ValidationError(
+                f"File size must be ≤ {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB."
+            )
 
         extension = file.name.split(".")[-1].lower()
         if extension not in ATTACHMENT_ALLOWED_EXTENSIONS:
@@ -122,7 +124,9 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
     def validate_file(self, file: Any) -> Any:
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
-            raise serializers.ValidationError("File size must be ≤ 10MB.")
+            raise serializers.ValidationError(
+                f"File size must be ≤ {PaymentPlanSupportingDocument.FILE_SIZE_LIMIT // (1024 * 1024)}MB."
+            )
 
         allowed_extensions = ["pdf", "xlsx", "jpg", "jpeg", "png"]
         extension = file.name.split(".")[-1].lower()
