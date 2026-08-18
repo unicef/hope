@@ -18,11 +18,14 @@ from rest_framework.test import APIClient
 
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.apps.registration_data.celery_tasks import remove_rdi_population_async_task_action
 from hope.models import (
     APILogEntry,
+    AsyncRetryJob,
     BusinessArea,
     Program,
     RegistrationDataImport,
+    User,
 )
 from hope.models.grant import Grant
 
@@ -31,6 +34,7 @@ pytestmark = pytest.mark.django_db
 CALLBACK_URL = "https://cw.example.com/api/rdi/callback/abc123"
 
 ENQUEUE = "hope.api.endpoints.rdi.base.remove_rdi_population_async_task"
+ES_REMOVE = "hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids"
 
 
 @pytest.fixture
@@ -348,3 +352,50 @@ def test_reset_writes_api_log_entry(
     entry = APILogEntry.objects.get(token=api_token, method="POST")
     assert entry.url == url
     assert entry.status_code == status.HTTP_202_ACCEPTED
+
+
+# ---------------------------------------------------------------------------
+# Reuse — a completed reset frees the country_workspace_id for recreate
+# (ported from the removed sync test_delete_rdi.py; reframed for async:
+# reset -> run the real wipe job -> recreate. Unlike the tests above, this one
+# runs the actual wipe so the row is really gone before recreate.)
+# ---------------------------------------------------------------------------
+def test_reset_frees_country_workspace_id_for_recreate(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    imported_by_user: User,
+) -> None:
+    cw_id = "cw-reuse-1"
+    rdi = RegistrationDataImportFactory(
+        business_area=user_business_area,
+        program=program,
+        status=RegistrationDataImport.LOADING,
+        country_workspace_id=cw_id,
+    )
+
+    with patch(ENQUEUE) as enqueue:
+        enqueue.return_value = Mock()
+        reset = token_api_client.post(
+            _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+        )
+    assert reset.status_code == status.HTTP_202_ACCEPTED, str(reset.content)
+
+    # run the real wipe (ES + success-callback stubbed) — deletes the row, freeing the cw_id
+    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    with (
+        patch(ES_REMOVE),
+        patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task"),
+    ):
+        remove_rdi_population_async_task_action(job)
+    assert not RegistrationDataImport.objects.filter(id=rdi.id).exists()
+
+    payload = {
+        "name": "recreated",
+        "collect_data_policy": "FULL",
+        "program": str(program.id),
+        "imported_by_email": imported_by_user.email,
+        "country_workspace_id": cw_id,
+    }
+    recreate = token_api_client.post(reverse("api:rdi-create", args=[user_business_area.slug]), payload, format="json")
+    assert recreate.status_code == status.HTTP_201_CREATED, str(recreate.json())

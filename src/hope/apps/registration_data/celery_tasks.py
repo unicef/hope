@@ -562,8 +562,20 @@ def remove_rdi_population_on_failure(job: AsyncRetryJob, exc: Exception) -> None
 
 
 def notify_rdi_deleted_async_task(callback_url: str) -> None:
-    """STUB placeholder (REWORK #4 / Section D) — success-only CW callback enqueuer."""
-    return
+    """Enqueue the success-only CW callback (REWORK #4). Retriable via async_retry_job_task (cap 3)."""
+    AsyncRetryJob.queue_task(
+        action="hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task_action",
+        config={"callback_url": callback_url},
+        group_key="registration_data",
+        description="Notify CW: RDI reset succeeded",
+    )
+
+
+def notify_rdi_deleted_async_task_action(job: AsyncRetryJob) -> None:
+    """One empty POST to the signed callback URL; non-2xx raises → async_retry_job_task retries (REWORK #4)."""
+    from hope.apps.registration_data.api.country_workspace import CountryWorkspaceAPI
+
+    CountryWorkspaceAPI(api_url=job.config["callback_url"]).notify_rdi_deleted()
 
 
 def rdi_dispatcher_task(program: Program) -> None:
