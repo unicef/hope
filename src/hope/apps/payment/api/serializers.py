@@ -46,7 +46,6 @@ from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models import (
-    Account,
     AccountAttachment,
     Approval,
     ApprovalProcess,
@@ -94,13 +93,7 @@ class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        kwargs = self.context["request"].parser_context["kwargs"]
-        account = get_object_or_404(
-            Account.all_objects,
-            id=kwargs["account_pk"],
-            individual_id=kwargs["individual_pk"],
-            individual__program=self.context["program"],
-        )
+        account = self.context["account"]
         data["account"] = account
         data["created_by"] = self.context["request"].user
 

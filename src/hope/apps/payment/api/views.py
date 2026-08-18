@@ -2377,7 +2377,7 @@ class AccountViewSet(
     PERMISSIONS = [Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(individual_id=self.kwargs["individual_pk"])
+        return super().get_queryset().filter(individual_id=self.kwargs["individual_pk"], individual__is_removed=False)
 
 
 class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
@@ -2400,11 +2400,41 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
             .filter(
                 account_id=self.kwargs["account_pk"],
                 account__individual_id=self.kwargs["individual_pk"],
+                account__individual__is_removed=False,
             )
         )
 
     def get_object(self) -> AccountAttachment:
         return get_object_or_404(self.get_queryset(), id=self.kwargs["file_id"])
+
+    def get_serializer_context(self) -> dict[str, Any]:
+        # The account is resolved here, not in the serializer: CreateModelMixin.create() never calls
+        # get_queryset(), so without this the upload would skip the program and area-limit filtering
+        # that destroy and download get from ProgramVisibilityMixin.
+        context = super().get_serializer_context()
+        if self.request.method == "POST":
+            context["account"] = get_object_or_404(self._visible_accounts(), id=self.kwargs["account_pk"])
+        return context
+
+    def _visible_accounts(self) -> QuerySet:
+        accounts = Account.all_objects.filter(
+            individual__program=self.program,
+            individual_id=self.kwargs["individual_pk"],
+            individual__is_removed=False,
+        )
+        if area_limits := self.request.user.partner.get_area_limits_for_program(self.program.id):
+            areas_null = Q(
+                individual__household__admin1__isnull=True,
+                individual__household__admin2__isnull=True,
+                individual__household__admin3__isnull=True,
+            )
+            areas_query = (
+                Q(individual__household__admin1__in=area_limits)
+                | Q(individual__household__admin2__in=area_limits)
+                | Q(individual__household__admin3__in=area_limits)
+            )
+            accounts = accounts.filter(areas_null | areas_query)
+        return accounts
 
     @action(detail=True, methods=["get"])
     def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:

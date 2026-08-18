@@ -25,6 +25,17 @@ def wallet_account_type() -> AccountType:
 
 
 @pytest.fixture
+def isolated_storage(settings, tmp_path) -> None:
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {"location": str(tmp_path)},
+        },
+    }
+
+
+@pytest.fixture
 def stored_image() -> str:
     return default_storage.save("wallet_number.jpg", ContentFile(b"wallet-number-image"))
 
@@ -120,7 +131,7 @@ def test_one_failing_record_does_not_stop_the_run(wallet_account_type: AccountTy
 
 
 def test_failed_attachment_creation_removes_the_copied_file(
-    wallet_account_type: AccountType, stored_image: str
+    isolated_storage: None, wallet_account_type: AccountType, stored_image: str
 ) -> None:
     individual = IndividualFactory(flex_fields={"wallet_num_image_i_f": stored_image})
     account = AccountFactory(individual=individual, account_type=wallet_account_type)

@@ -11,7 +11,11 @@ from rest_framework.test import APIClient, APIRequestFactory
 from extras.test_utils.factories import (
     AccountAttachmentFactory,
     AccountFactory,
+    AreaFactory,
+    AreaTypeFactory,
     BusinessAreaFactory,
+    CountryFactory,
+    HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
     UserFactory,
@@ -49,8 +53,7 @@ def serializer_context(account: Account, program: Program) -> dict[str, Any]:
     factory = APIRequestFactory()
     request = factory.post("")
     request.user = UserFactory()
-    request.parser_context = {"kwargs": {"account_pk": str(account.id), "individual_pk": str(account.individual_id)}}
-    return {"request": request, "program": program}
+    return {"request": request, "program": program, "account": account}
 
 
 @pytest.fixture
@@ -426,3 +429,61 @@ def test_post_returns_400_when_the_model_rejects_the_create(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "maximum of 10 attachments" in str(response.data)
+
+
+def test_accounts_list_hides_accounts_of_an_erased_individual(
+    api_client: APIClient, accounts_list_url: str, attachment_user: User, account: Account
+) -> None:
+    api_client.force_authenticate(user=attachment_user)
+    individual = account.individual
+    individual.is_removed = True
+    individual.save(update_fields=["is_removed"])
+
+    response = api_client.get(accounts_list_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["results"] == []
+
+
+@pytest.fixture
+def two_areas() -> tuple:
+    area_type = AreaTypeFactory(country=CountryFactory(), area_level=1)
+    return AreaFactory(area_type=area_type), AreaFactory(area_type=area_type)
+
+
+@pytest.fixture
+def account_in_second_area(business_area: Any, program: Program, two_areas: tuple) -> Account:
+    individual = IndividualFactory(household=None, business_area=business_area, program=program)
+    household = HouseholdFactory(program=program, head_of_household=individual, admin1=two_areas[1])
+    individual.household = household
+    individual.save(update_fields=["household"])
+    return AccountFactory(individual=individual, rdi_merge_status=MergeStatusModel.MERGED)
+
+
+def test_post_denied_for_account_outside_the_partner_area_limits(
+    api_client: APIClient,
+    business_area: Any,
+    program: Program,
+    attachment_user: User,
+    account_in_second_area: Account,
+    two_areas: tuple,
+    set_admin_area_limits_in_program: Any,
+) -> None:
+    api_client.force_authenticate(user=attachment_user)
+    set_admin_area_limits_in_program(attachment_user.partner, program, [two_areas[0]])
+    url = reverse(
+        "api:households:account-attachments-list",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "program_code": program.code,
+            "individual_pk": str(account_in_second_area.individual_id),
+            "account_pk": str(account_in_second_area.id),
+        },
+    )
+
+    response = api_client.post(
+        url, {"file": SimpleUploadedFile("wallet.jpg", b"abc", content_type="image/jpeg")}, format="multipart"
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert not account_in_second_area.attachments.exists()

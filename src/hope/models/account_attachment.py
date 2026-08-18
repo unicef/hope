@@ -27,8 +27,6 @@ class AccountAttachment(models.Model):
         return self.title or self.file.name or ""
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        # Validated here rather than only in the serializer: attachments are also created by the
-        # RDI upload, the Aurora parser and the Django admin, none of which run that serializer.
         self.clean()
         super().save(*args, **kwargs)
 
