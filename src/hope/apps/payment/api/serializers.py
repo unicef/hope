@@ -1494,6 +1494,8 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")
     collector = IndividualDetailSerializer()
     snapshot_collector_account_data = serializers.SerializerMethodField()
+    extra_fields = serializers.SerializerMethodField()
+    fsp_extra_fields = serializers.SerializerMethodField()
 
     class Meta(PaymentListSerializer.Meta):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
@@ -1509,12 +1511,21 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "additional_collector_name",
             "transaction_reference_id",
             "snapshot_collector_account_data",
-            "extras",
+            "extra_fields",
+            "fsp_extra_fields",
             "sent_to_fsp_date",
         )
 
     def get_snapshot_collector_account_data(self, obj: Payment) -> dict | None:
         return PaymentListSerializer.get_collector_field(obj, "account_data")
+
+    @extend_schema_field(serializers.DictField())
+    def get_extra_fields(self, obj: Payment) -> dict[str, object]:
+        return obj.extra_fields
+
+    @extend_schema_field(serializers.DictField())
+    def get_fsp_extra_fields(self, obj: Payment) -> dict[str, object]:
+        return obj.fsp_extra_fields
 
 
 class PaymentPlanSmallSerializer(serializers.ModelSerializer):

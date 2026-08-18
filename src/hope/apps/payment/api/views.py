@@ -105,6 +105,7 @@ from hope.apps.payment.api.serializers import (
 from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_delivery_xlsx_async_task,
     export_pdf_payment_plan_summary_async_task,
+    import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
     payment_plan_apply_custom_exchange_rate_async_task,
@@ -139,6 +140,12 @@ from hope.apps.payment.utils import (
 )
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
+)
+from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service import (
+    XlsxPaymentPlanFspExtraFieldsExportService,
+)
+from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service import (
+    XlsxPaymentPlanFspExtraFieldsImportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
     EmptyDeliveryExportError,
@@ -746,6 +753,7 @@ class PaymentPlanViewSet(
         "authorize",
         "mark_as_released",
         "send_to_payment_gateway",
+        "fsp_extra_fields_import_xlsx",
         "split",
         "close",
         "abort",
@@ -772,6 +780,7 @@ class PaymentPlanViewSet(
         "apply_engine_formula": ApplyEngineFormulaSerializer,
         "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
+        "fsp_extra_fields_import_xlsx": PaymentPlanImportFileSerializer,
         "reject": AcceptanceProcessSerializer,
         "approve": AcceptanceProcessSerializer,
         "authorize": AcceptanceProcessSerializer,
@@ -805,6 +814,8 @@ class PaymentPlanViewSet(
         "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
+        "fsp_extra_fields_template": [Permissions.PM_VIEW_LIST],
+        "fsp_extra_fields_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "entitlement_flat_amount": [
             Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
@@ -1212,6 +1223,90 @@ class PaymentPlanViewSet(
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
+        return Response(
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["get"], url_path="fsp-extra-fields-template")
+    def fsp_extra_fields_template(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
+        payment_plan = self.get_object()
+        if payment_plan.status != PaymentPlan.Status.LOCKED_FSP:
+            raise ValidationError("FSP extra fields template is available only for LOCKED_FSP Payment Plans.")
+
+        service = XlsxPaymentPlanFspExtraFieldsExportService(payment_plan)
+        output = BytesIO()
+        service.generate_workbook().save(output)
+        output.seek(0)
+        return FileResponse(
+            output,
+            as_attachment=True,
+            filename=service.filename,
+        )
+
+    @extend_schema(
+        request=PaymentPlanImportFileSerializer,
+        responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="fsp-extra-fields-import-xlsx",
+        parser_classes=[DictDrfNestedParser],
+    )
+    @transaction.atomic
+    def fsp_extra_fields_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        if payment_plan.status != PaymentPlan.Status.LOCKED_FSP:
+            raise ValidationError("FSP extra fields can be imported only for LOCKED_FSP Payment Plans.")
+        if (
+            payment_plan.background_action_status is not None
+            and payment_plan.background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        file = serializer.validated_data["file"]
+        import_service = XlsxPaymentPlanFspExtraFieldsImportService(payment_plan, file)
+        try:
+            import_service.open_workbook()
+        except BadZipFile:
+            raise ValidationError("Invalid XLSX file. Upload another file.")
+        import_service.validate()
+        if import_service.errors:
+            return Response(
+                data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file.seek(0)
+        file_temp = FileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created_by=request.user,
+            file=file,
+        )
+        old_payment_plan = copy_model_object(payment_plan)
+        flow = PaymentPlanFlow(payment_plan)
+        flow.background_action_status_xlsx_importing_fsp_extra_fields()
+        payment_plan.save(update_fields=["background_action_status", "updated_at"])
+        user_id = str(request.user.pk)
+        transaction.on_commit(
+            lambda: import_payment_plan_fsp_extra_fields_from_xlsx_async_task(
+                payment_plan,
+                str(file_temp.id),
+                user_id,
+            )
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,

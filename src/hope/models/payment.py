@@ -42,6 +42,9 @@ class Payment(
     AdminUrlMixin,
     SignatureMixin,
 ):
+    EXTRA_FIELDS_KEY = "extra_fields"
+    FSP_EXTRA_FIELDS_KEY = "fsp_extra_fields"
+
     usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
 
     STATUS_SUCCESS = "Transaction Successful"
@@ -101,6 +104,7 @@ class Payment(
             "transaction_reference_id",
             "excluded",
             "conflicted",
+            "fsp_extra_fields",
         ]
     )
 
@@ -285,7 +289,32 @@ class Payment(
         "delivered_quantity_usd",
         "delivery_date",
         "transaction_reference_id",
+        "fsp_extra_fields",
     )
+
+    @property
+    def extra_fields(self) -> dict[str, object]:
+        return self.extras.get(self.EXTRA_FIELDS_KEY, {})
+
+    @property
+    def fsp_extra_fields(self) -> dict[str, object]:
+        return self.extras.get(self.FSP_EXTRA_FIELDS_KEY, {})
+
+    def set_extra_fields(self, values: dict[str, object]) -> None:
+        extras = {**self.extras}
+        if values:
+            extras[self.EXTRA_FIELDS_KEY] = values
+        else:
+            extras.pop(self.EXTRA_FIELDS_KEY, None)
+        self.extras = extras
+
+    def set_fsp_extra_fields(self, values: dict[str, object]) -> None:
+        extras = {**self.extras}
+        if values:
+            extras[self.FSP_EXTRA_FIELDS_KEY] = values
+        else:
+            extras.pop(self.FSP_EXTRA_FIELDS_KEY, None)
+        self.extras = extras
 
     def mark_as_failed(self) -> None:  # pragma: no cover
         if self.status is self.STATUS_FORCE_FAILED:

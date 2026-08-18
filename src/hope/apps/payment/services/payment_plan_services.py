@@ -17,7 +17,6 @@ from django.db.models import (
     ExpressionWrapper,
     F,
     OuterRef,
-    Q,
     Value,
     When,
 )
@@ -49,6 +48,7 @@ from hope.apps.payment.services.payment_household_snapshot_service import (
 from hope.apps.payment.utils import get_link, get_quantity_in_usd, log_payment_plan_approval
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
+from hope.apps.utils.recipients import users_with_permissions
 from hope.models import (
     Approval,
     ApprovalProcess,
@@ -65,7 +65,6 @@ from hope.models import (
     PaymentPlanSplit,
     Program,
     ProgramCycle,
-    RoleAssignment,
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
     User,
@@ -160,7 +159,15 @@ class PaymentPlanService:
         return self.actions_map.get(self.action)
 
     def send_for_approval(self) -> PaymentPlan:
+        background_action_status = self.payment_plan.background_action_status
+        if (
+            background_action_status is not None
+            and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
         flow = PaymentPlanFlow(self.payment_plan)
+        if background_action_status in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES:
+            flow.background_action_status_none()
         flow.status_send_to_approval()
         self.payment_plan.save()
         # create new ApprovalProcess
@@ -321,7 +328,15 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock_fsp(self) -> PaymentPlan | None:
+        background_action_status = self.payment_plan.background_action_status
+        if (
+            background_action_status is not None
+            and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
         flow = PaymentPlanFlow(self.payment_plan)
+        if background_action_status in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES:
+            flow.background_action_status_none()
         flow.status_unlock_fsp()
         self.payment_plan.save()
 
@@ -1551,25 +1566,11 @@ class PaymentPlanService:
                 send_payment_plan_reconciliation_overdue_email_async_task(pp)
 
     def send_reconciliation_overdue_email_for_pp(self) -> None:
-        business_area = self.payment_plan.business_area
-        program = self.payment_plan.program
-        permission = Permissions.RECEIVE_PP_OVERDUE_EMAIL.value
-
-        role_assignments = (
-            RoleAssignment.objects.filter(
-                Q(role__permissions__contains=[permission])
-                & Q(business_area=business_area)
-                & (Q(program=None) | Q(program=program))
-            )
-            .exclude(expiry_date__lt=timezone.now())
-            .distinct()
+        users = users_with_permissions(
+            self.payment_plan.business_area,
+            [Permissions.RECEIVE_PP_OVERDUE_EMAIL],
+            [self.payment_plan.program],
         )
-        users = User.objects.filter(
-            Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-        ).distinct()
-
-        if not config.NOTIFY_INTERNAL_USERS:
-            users = users.exclude(is_superuser=True)
 
         if users:
             text_template = "payment/pp_reconciliation_overdue_email.txt"
