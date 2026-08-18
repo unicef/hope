@@ -319,7 +319,16 @@ class GrievanceTicketViewSet(
     program_model_field_is_many = True
 
     def get_count_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(self.grievance_permissions_query)
+        through_model = GrievanceTicket.programs.through
+        return GrievanceTicket.objects.filter(
+            Exists(
+                through_model.objects.filter(
+                    program_id=self.program.id,
+                    grievanceticket_id=OuterRef("pk"),
+                )
+            ),
+            business_area__slug=self.business_area_slug,
+        ).filter(self.grievance_permissions_query)
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
