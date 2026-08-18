@@ -23,4 +23,4 @@ class FeedbackAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     def frontend_url(self, obj: Feedback) -> str | None:
         if not obj.program:
             return None
-        return f"/{obj.business_area.slug}/programs/{obj.program.code}/accountability/feedback/{obj.id}"
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/grievance/feedback/{obj.id}"
