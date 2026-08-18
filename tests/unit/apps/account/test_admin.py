@@ -306,6 +306,21 @@ def test_role_assignment_inline_business_area_not_autocomplete(
     assert list(field.queryset) == [business_area_afg]
 
 
+def test_role_assignment_inline_role_not_autocomplete(
+    request_factory: RequestFactory,
+    partner: Partner,
+    role_available_for_partner: Role,
+    role_not_available_for_partner: Role,
+):
+    from django.contrib import admin
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin.site)
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "role" not in fields
+
+
 def test_role_assignment_inline_formfield_for_foreignkey_role(
     request_factory: RequestFactory,
     admin_site: AdminSite,
@@ -340,6 +355,44 @@ def test_role_assignment_inline_formfield_for_foreignkey_role_regular_partner(
     field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
     assert role_available_for_partner in field.queryset
     assert role_not_available_for_partner not in field.queryset
+
+
+def test_user_role_assignment_admin_business_area_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+    business_area_afg: BusinessArea,
+    role_1: Role,
+):
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_autocomplete_fields(request)
+    assert "business_area" not in fields
+
+
+def test_partner_role_assignment_admin_role_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_autocomplete_fields(request)
+    assert "role" not in fields
+
+
+def test_partner_role_assignment_admin_business_area_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_autocomplete_fields(request)
+    assert "business_area" not in fields
 
 
 def test_role_assignment_inline_has_permissions(
