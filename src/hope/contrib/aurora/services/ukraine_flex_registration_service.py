@@ -3,6 +3,7 @@ from typing import Any
 import uuid
 
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.forms import modelform_factory
 
@@ -30,6 +31,7 @@ from hope.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 from hope.models import (
+    AccountAttachment,
     AccountType,
     Area,
     Country,
@@ -354,7 +356,9 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         ),
     }
 
-    INDIVIDUAL_IMAGE_FLEX_FIELDS: list[str] = ["wallet_num_image_i_f", "id_wallet_image_i_f"]
+    INDIVIDUAL_IMAGE_FLEX_FIELDS: list[str] = ["id_wallet_image_i_f"]
+    WALLET_NUMBER_IMAGE_FIELD = "wallet_num_image_i_f"
+    WALLET_NUMBER_IMAGE_TITLE = "Wallet number image"
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
         record_data_dict = record.get_data()
@@ -363,12 +367,29 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             raise ValidationError("USDC registration expects exactly one individual per household")
 
         individual_dict = individuals_array[0]
+        # Decode every blob before anything is written, so a malformed image aborts the record
+        # without leaving orphan files behind.
+        flex_images = self._decode_images(individual_dict, self.INDIVIDUAL_IMAGE_FLEX_FIELDS)
+        wallet_number_image = self._decode_images(individual_dict, [self.WALLET_NUMBER_IMAGE_FIELD]).get(
+            self.WALLET_NUMBER_IMAGE_FIELD
+        )
+        if wallet_number_image and wallet_number_image.size > AccountAttachment.FILE_SIZE_LIMIT:
+            raise ValidationError(
+                {
+                    self.WALLET_NUMBER_IMAGE_FIELD: [
+                        f"File size must be ≤ {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB."
+                    ]
+                }
+            )
 
         household = self._build_household(record, registration_data_import)
-        individual = self._build_head_of_household(individual_dict, household, record, registration_data_import)
+        individual = self._build_head_of_household(
+            individual_dict, household, record, registration_data_import, flex_images
+        )
 
         PendingDocument.objects.bulk_create(self._prepare_documents(individual_dict, individual))
-        PendingAccount.objects.bulk_create(self._prepare_accounts(individual_dict, individual))
+        accounts = PendingAccount.objects.bulk_create(self._prepare_accounts(individual_dict, individual))
+        self._store_wallet_number_image(wallet_number_image, accounts)
 
     def _build_household(self, record: Any, registration_data_import: RegistrationDataImport) -> PendingHousehold:
         household_data = self._prepare_household_data({}, record, registration_data_import)
@@ -384,6 +405,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         household: PendingHousehold,
         record: Any,
         registration_data_import: RegistrationDataImport,
+        flex_images: dict[str, ContentFile],
     ) -> PendingIndividual:
         try:
             individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
@@ -395,8 +417,10 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             )
             individual.phone_no = phone_no
             individual.detail_id = record.source_id
-            if image_flex_fields := self._prepare_wallet_image_flex_fields(individual_dict):
-                individual.flex_fields = image_flex_fields
+            # Written only once the individual has validated, so a validation failure leaves no orphan files.
+            individual.flex_fields.update(
+                {field_name: default_storage.save(image.name, image) for field_name, image in flex_images.items()}
+            )
             individual.save()
         except ValidationError as e:
             raise ValidationError({"individual nr 1": [str(e)]}) from e
@@ -416,14 +440,17 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         individual_data["estimated_birth_date"] = False
         return individual_data
 
-    def _prepare_wallet_image_flex_fields(self, individual_dict: dict) -> dict:
-        # Decode every blob before writing any to storage, and only after the individual has
-        # validated, so a validation failure or a malformed second image leaves no orphan files.
-        images = {}
-        for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
-            if image_base64 := individual_dict.get(field_name):
-                images[field_name] = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
-        return {field_name: default_storage.save(image.name, image) for field_name, image in images.items()}
+    def _decode_images(self, individual_dict: dict, field_names: list[str]) -> dict[str, ContentFile]:
+        return {
+            field_name: self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
+            for field_name in field_names
+            if (image_base64 := individual_dict.get(field_name))
+        }
+
+    def _store_wallet_number_image(self, image: ContentFile | None, accounts: list[PendingAccount]) -> None:
+        if not image or not accounts:
+            return
+        AccountAttachment.objects.create(account=accounts[0], title=self.WALLET_NUMBER_IMAGE_TITLE, file=image)
 
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()
