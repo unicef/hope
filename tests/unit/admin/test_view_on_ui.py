@@ -61,29 +61,29 @@ def _handler(model: Any) -> Any:
 
 
 @pytest.fixture
-def _program():
+def program():
     def factory(**kwargs: Any) -> Program:
-        return ProgramFactory(code="TEST", business_area=BusinessAreaFactory(name="AFG"), **kwargs)
+        return ProgramFactory.create(code="TEST", business_area=BusinessAreaFactory(name="AFG"), **kwargs)
 
     return factory
 
 
 @pytest.fixture
-def _cycle():
+def cycle():
     def factory(program: Program) -> ProgramCycle:
-        return ProgramCycleFactory(program=program)
+        return ProgramCycleFactory.create(program=program)
 
     return factory
 
 
 @pytest.mark.django_db
-def test_frontend_url_program(_program):
-    assert site._registry[Program].frontend_url(_program()) == "/afg/programs/TEST/details/TEST"
+def test_frontend_url_program(program):
+    assert site._registry[Program].frontend_url(program()) == "/afg/programs/TEST/details/TEST"
 
 
 @pytest.mark.django_db
-def test_frontend_url_household(_program):
-    program = _program()
+def test_frontend_url_household(program):
+    program = program()
     household = HouseholdFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[Household].frontend_url(household) == f"/afg/programs/TEST/population/household/{household.id}"
@@ -91,8 +91,8 @@ def test_frontend_url_household(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_individual(_program):
-    program = _program()
+def test_frontend_url_individual(program):
+    program = program()
     individual = IndividualFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[Individual].frontend_url(individual)
@@ -101,8 +101,8 @@ def test_frontend_url_individual(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_individual_social(_program):
-    program = _program(
+def test_frontend_url_individual_social(program):
+    program = program(
         data_collecting_type=DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL),
         beneficiary_group=BeneficiaryGroupFactory(master_detail=False),
     )
@@ -113,23 +113,23 @@ def test_frontend_url_individual_social(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan(_program, _cycle):
-    plan = PaymentPlanFactory(program_cycle=_cycle(_program()))
+def test_frontend_url_payment_plan(program, cycle):
+    plan = PaymentPlanFactory(program_cycle=cycle(program()))
     assert (
         site._registry[PaymentPlan].frontend_url(plan) == f"/afg/programs/TEST/payment-module/payment-plans/{plan.id}"
     )
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan_pre_payment_status(_program, _cycle):
-    plan = PaymentPlanFactory(program_cycle=_cycle(_program()), status=PaymentPlan.Status.TP_OPEN)
+def test_frontend_url_payment_plan_pre_payment_status(program, cycle):
+    plan = PaymentPlanFactory(program_cycle=cycle(program()), status=PaymentPlan.Status.TP_OPEN)
     assert site._registry[PaymentPlan].frontend_url(plan) == f"/afg/programs/TEST/target-population/{plan.id}"
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan_follow_up(_program, _cycle):
+def test_frontend_url_payment_plan_follow_up(program, cycle):
     plan = PaymentPlanFactory(
-        program_cycle=_cycle(_program()),
+        program_cycle=cycle(program()),
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
@@ -144,9 +144,9 @@ def test_frontend_url_payment_plan_follow_up(_program, _cycle):
     "plan_type",
     [PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT],
 )
-def test_frontend_url_payment_plan_top_up(plan_type, _program, _cycle):
+def test_frontend_url_payment_plan_top_up(plan_type, program, cycle):
     plan = PaymentPlanFactory(
-        program_cycle=_cycle(_program()),
+        program_cycle=cycle(program()),
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=plan_type,
     )
@@ -157,24 +157,24 @@ def test_frontend_url_payment_plan_top_up(plan_type, _program, _cycle):
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment(_program, _cycle):
-    program = _program()
-    plan = PaymentPlanFactory(program_cycle=_cycle(program))
+def test_frontend_url_payment(program, cycle):
+    program = program()
+    plan = PaymentPlanFactory(program_cycle=cycle(program))
     payment = PaymentFactory(parent=plan, program=program)
     assert site._registry[Payment].frontend_url(payment) == f"/afg/programs/TEST/payment-module/payments/{payment.id}"
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_plan_group(_program, _cycle):
-    group = PaymentPlanGroupFactory(cycle=_cycle(_program()))
+def test_frontend_url_payment_plan_group(program, cycle):
+    group = PaymentPlanGroupFactory(cycle=cycle(program()))
     assert (
         site._registry[PaymentPlanGroup].frontend_url(group) == f"/afg/programs/TEST/payment-module/groups/{group.id}"
     )
 
 
 @pytest.mark.django_db
-def test_frontend_url_program_cycle(_program, _cycle):
-    cycle = _cycle(_program())
+def test_frontend_url_program_cycle(program, cycle):
+    cycle = cycle(program())
     assert (
         site._registry[ProgramCycle].frontend_url(cycle)
         == f"/afg/programs/TEST/payment-module/program-cycles/{cycle.id}"
@@ -182,8 +182,8 @@ def test_frontend_url_program_cycle(_program, _cycle):
 
 
 @pytest.mark.django_db
-def test_frontend_url_registration_data_import(_program):
-    program = _program()
+def test_frontend_url_registration_data_import(program):
+    program = program()
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[RegistrationDataImport].frontend_url(rdi)
@@ -192,15 +192,15 @@ def test_frontend_url_registration_data_import(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_survey(_program):
-    program = _program()
+def test_frontend_url_survey(program):
+    program = program()
     survey = SurveyFactory(program=program, business_area=program.business_area)
     assert site._registry[Survey].frontend_url(survey) == f"/afg/programs/TEST/accountability/surveys/{survey.id}"
 
 
 @pytest.mark.django_db
-def test_frontend_url_message(_program):
-    program = _program()
+def test_frontend_url_message(program):
+    program = program()
     message = CommunicationMessageFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[Message].frontend_url(message) == f"/afg/programs/TEST/accountability/communication/{message.id}"
@@ -208,8 +208,8 @@ def test_frontend_url_message(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_grievance_ticket(_program):
-    program = _program()
+def test_frontend_url_grievance_ticket(program):
+    program = program()
     ticket = GrievanceTicketFactory(business_area=program.business_area)
     ticket.programs.add(program)
     assert (
@@ -219,8 +219,8 @@ def test_frontend_url_grievance_ticket(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_grievance_ticket_system_generated(_program):
-    program = _program()
+def test_frontend_url_grievance_ticket_system_generated(program):
+    program = program()
     ticket = GrievanceTicketFactory(
         business_area=program.business_area,
         category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
@@ -243,8 +243,8 @@ def test_frontend_url_grievance_ticket_without_program():
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_verification_plan(_program, _cycle):
-    plan = PaymentPlanFactory(program_cycle=_cycle(_program()), status=PaymentPlan.Status.FINISHED)
+def test_frontend_url_payment_verification_plan(program, cycle):
+    plan = PaymentPlanFactory(program_cycle=cycle(program()), status=PaymentPlan.Status.FINISHED)
     verification_plan = PaymentVerificationPlanFactory(payment_plan=plan)
     assert (
         site._registry[PaymentVerificationPlan].frontend_url(verification_plan)
@@ -253,30 +253,30 @@ def test_frontend_url_payment_verification_plan(_program, _cycle):
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_without_program(_program, _cycle):
-    plan = PaymentPlanFactory(program_cycle=_cycle(_program()))
+def test_frontend_url_payment_without_program(program, cycle):
+    plan = PaymentPlanFactory(program_cycle=cycle(program()))
     payment = PaymentFactory(parent=plan)
     assert site._registry[Payment].frontend_url(payment) is None
 
 
 @pytest.mark.django_db
-def test_frontend_url_rdi_without_program(_program):
-    program = _program()
+def test_frontend_url_rdi_without_program(program):
+    program = program()
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
     rdi.program = None
     assert site._registry[RegistrationDataImport].frontend_url(rdi) is None
 
 
 @pytest.mark.django_db
-def test_frontend_url_survey_without_program(_program):
-    program = _program()
+def test_frontend_url_survey_without_program(program):
+    program = program()
     survey = SurveyFactory(program=None, business_area=program.business_area)
     assert site._registry[Survey].frontend_url(survey) is None
 
 
 @pytest.mark.django_db
-def test_frontend_url_message_without_program(_program):
-    program = _program()
+def test_frontend_url_message_without_program(program):
+    program = program()
     message = CommunicationMessageFactory(program=None, business_area=program.business_area)
     assert site._registry[Message].frontend_url(message) is None
 
@@ -287,8 +287,8 @@ def test_frontend_url_base_not_implemented():
 
 
 @pytest.mark.django_db
-def test_view_on_ui_sets_href(_program):
-    btn = _button(_program())
+def test_view_on_ui_sets_href(program):
+    btn = _button(program())
     _handler(Program).func(site._registry[Program], btn)
     protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
     assert btn.href == f"{protocol}://{settings.FRONTEND_HOST}/afg/programs/TEST/details/TEST"
@@ -302,8 +302,8 @@ def test_view_on_ui_without_original():
 
 
 @pytest.mark.django_db
-def test_view_on_ui_without_frontend_url(_program, _cycle):
-    plan = PaymentPlanFactory(program_cycle=_cycle(_program()))
+def test_view_on_ui_without_frontend_url(program, cycle):
+    plan = PaymentPlanFactory(program_cycle=cycle(program()))
     payment = PaymentFactory(parent=plan)
     btn = _button(payment)
     _handler(Payment).func(site._registry[Payment], btn)
@@ -311,8 +311,8 @@ def test_view_on_ui_without_frontend_url(_program, _cycle):
 
 
 @pytest.mark.django_db
-def test_frontend_url_feedback(_program):
-    program = _program()
+def test_frontend_url_feedback(program):
+    program = program()
     feedback = FeedbackFactory(program=program, business_area=program.business_area)
     assert site._registry[Feedback].frontend_url(feedback) == f"/afg/programs/TEST/grievance/feedback/{feedback.id}"
 
@@ -324,8 +324,8 @@ def test_frontend_url_feedback_without_program():
 
 
 @pytest.mark.django_db
-def test_frontend_url_follow_up_instruction(_program):
-    program = _program()
+def test_frontend_url_follow_up_instruction(program):
+    program = program()
     instruction = FollowUpInstructionFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[FollowUpInstruction].frontend_url(instruction)
@@ -334,8 +334,8 @@ def test_frontend_url_follow_up_instruction(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_pdu_online_edit(_program):
-    program = _program()
+def test_frontend_url_pdu_online_edit(program):
+    program = program()
     edit = PDUOnlineEditFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[PDUOnlineEdit].frontend_url(edit)
@@ -344,8 +344,8 @@ def test_frontend_url_pdu_online_edit(_program):
 
 
 @pytest.mark.django_db
-def test_frontend_url_payment_verification(_program, _cycle):
-    plan = PaymentPlanFactory(program_cycle=_cycle(_program()), status=PaymentPlan.Status.FINISHED)
+def test_frontend_url_payment_verification(program, cycle):
+    plan = PaymentPlanFactory(program_cycle=cycle(program()), status=PaymentPlan.Status.FINISHED)
     verification_plan = PaymentVerificationPlanFactory(payment_plan=plan)
     verification = PaymentVerificationFactory(payment_verification_plan=verification_plan)
     assert (
