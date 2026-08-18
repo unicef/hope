@@ -314,9 +314,7 @@ def test_view_on_ui_without_frontend_url(_program, _cycle):
 def test_frontend_url_feedback(_program):
     program = _program()
     feedback = FeedbackFactory(program=program, business_area=program.business_area)
-    assert (
-        site._registry[Feedback].frontend_url(feedback) == f"/afg/programs/TEST/accountability/feedback/{feedback.id}"
-    )
+    assert site._registry[Feedback].frontend_url(feedback) == f"/afg/programs/TEST/grievance/feedback/{feedback.id}"
 
 
 @pytest.mark.django_db
@@ -352,5 +350,5 @@ def test_frontend_url_payment_verification(_program, _cycle):
     verification = PaymentVerificationFactory(payment_verification_plan=verification_plan)
     assert (
         site._registry[PaymentVerification].frontend_url(verification)
-        == f"/afg/programs/TEST/payment-verification/payment-plan/{plan.id}"
+        == f"/afg/programs/TEST/payment-verification/payment-plan/{plan.id}/verification/payment/{verification.id}"
     )
