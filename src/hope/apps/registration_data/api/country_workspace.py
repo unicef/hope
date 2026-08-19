@@ -18,6 +18,6 @@ class CountryWorkspaceAPI(BaseAPI):
 
     API_EXCEPTION_CLASS = CountryWorkspaceAPIError
 
-    def notify_rdi_deleted(self) -> None:
-        """Success-only ping — POST to the signed callback_url (== self.api_url)."""
-        self._post(self.api_url, data=None)
+    def notify_rdi_deleted(self, signed_token: str) -> None:
+        """Success-only ping — POST the signed token to the callback_url (== self.api_url)."""
+        self._post(self.api_url, data={"signed_token": signed_token})

@@ -32,6 +32,7 @@ from hope.models.grant import Grant
 pytestmark = pytest.mark.django_db
 
 CALLBACK_URL = "https://cw.example.com/api/rdi/callback/abc123"
+SIGNED_TOKEN = "signed-token-abc123"
 
 ENQUEUE = "hope.api.endpoints.rdi.base.remove_rdi_population_async_task"
 ES_REMOVE = "hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids"
@@ -51,10 +52,19 @@ def _reset_url(ba: BusinessArea, rdi_id: str) -> str:
 # ---------------------------------------------------------------------------
 # F — callback_url body validation (400)
 # ---------------------------------------------------------------------------
-def test_reset_400_missing_callback_url(
+@pytest.mark.parametrize(
+    "body",
+    [
+        {},  # both fields absent
+        {"callback_url": CALLBACK_URL},  # signed_token missing
+        {"signed_token": SIGNED_TOKEN},  # callback_url missing
+    ],
+)
+def test_reset_400_missing_required_field(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
     program: Program,
+    body: dict,
 ) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=user_business_area,
@@ -62,7 +72,7 @@ def test_reset_400_missing_callback_url(
         status=RegistrationDataImport.LOADING,
         country_workspace_id="cw-400",
     )
-    response = token_api_client.post(_reset_url(user_business_area, str(rdi.id)), {}, format="json")
+    response = token_api_client.post(_reset_url(user_business_area, str(rdi.id)), body, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.content)
 
 
@@ -116,12 +126,14 @@ def test_reset_202_schedules_fresh(
         country_workspace_id="cw-202",
     )
     response = token_api_client.post(
-        _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+        _reset_url(user_business_area, str(rdi.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
     )
     assert response.status_code == status.HTTP_202_ACCEPTED, str(response.content)
     assert response.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()  # enqueue only, no inline wipe
-    enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL)
+    enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
 
 
 # ---------------------------------------------------------------------------
@@ -142,12 +154,14 @@ def test_reset_202_idempotent_when_live_job(
         country_workspace_id="cw-live",
     )
     response = token_api_client.post(
-        _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+        _reset_url(user_business_area, str(rdi.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
     )
     assert response.status_code == status.HTTP_202_ACCEPTED, str(response.content)
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED  # path D returns current status, never rewrites
-    enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL)
+    enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
 
 
 # ---------------------------------------------------------------------------
@@ -165,7 +179,9 @@ def test_reset_409_for_merged(
         country_workspace_id="cw-merged",
     )
     response = token_api_client.post(
-        _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+        _reset_url(user_business_area, str(rdi.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
     )
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {"error": "rdi_already_merged"}
@@ -202,7 +218,9 @@ def test_reset_409_when_merge_holds_row_lock(
                 [str(rdi.id)],
             )
             response = token_api_client.post(
-                _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+                _reset_url(user_business_area, str(rdi.id)),
+                {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+                format="json",
             )
     finally:
         locker.rollback()
@@ -221,7 +239,9 @@ def test_reset_404_for_unknown_rdi(
     user_business_area: BusinessArea,
 ) -> None:
     response = token_api_client.post(
-        _reset_url(user_business_area, str(uuid.uuid4())), {"callback_url": CALLBACK_URL}, format="json"
+        _reset_url(user_business_area, str(uuid.uuid4())),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -236,7 +256,9 @@ def test_reset_404_for_other_ba(
         country_workspace_id="cw-other-ba",
     )
     response = token_api_client.post(
-        _reset_url(user_business_area, str(other.id)), {"callback_url": CALLBACK_URL}, format="json"
+        _reset_url(user_business_area, str(other.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert RegistrationDataImport.objects.filter(id=other.id).exists()
@@ -254,7 +276,9 @@ def test_reset_404_for_non_cw_managed(
         country_workspace_id=None,
     )
     response = token_api_client.post(
-        _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+        _reset_url(user_business_area, str(rdi.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
@@ -271,7 +295,11 @@ def test_reset_401_without_token(
         business_area=user_business_area, program=program, status=RegistrationDataImport.LOADING
     )
     client = APIClient()
-    response = client.post(_reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json")
+    response = client.post(
+        _reset_url(user_business_area, str(rdi.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
 
@@ -285,7 +313,11 @@ def test_reset_401_invalid_token(
     )
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION="Token invalid-token")
-    response = client.post(_reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json")
+    response = client.post(
+        _reset_url(user_business_area, str(rdi.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
 
@@ -302,7 +334,9 @@ def test_reset_403_without_rdi_delete_grant(
     api_token.grants = [Grant.API_RDI_UPLOAD.name]
     api_token.save()
     response = token_api_client.post(
-        _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+        _reset_url(user_business_area, str(rdi.id)),
+        {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+        format="json",
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
@@ -324,7 +358,7 @@ def test_reset_writes_api_log_entry(
         country_workspace_id="cw-apilog",
     )
     url = _reset_url(user_business_area, str(rdi.id))
-    response = token_api_client.post(url, {"callback_url": CALLBACK_URL}, format="json")
+    response = token_api_client.post(url, {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}, format="json")
     assert response.status_code == status.HTTP_202_ACCEPTED
 
     entry = APILogEntry.objects.get(token=api_token, method="POST")
@@ -355,12 +389,16 @@ def test_reset_frees_country_workspace_id_for_recreate(
     with patch(ENQUEUE) as enqueue:
         enqueue.return_value = Mock()
         reset = token_api_client.post(
-            _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
+            _reset_url(user_business_area, str(rdi.id)),
+            {"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN},
+            format="json",
         )
     assert reset.status_code == status.HTTP_202_ACCEPTED, str(reset.content)
 
     # run the real wipe (ES + success-callback stubbed) — deletes the row, freeing the cw_id
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
     with (
         patch(ES_REMOVE),
         patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task"),

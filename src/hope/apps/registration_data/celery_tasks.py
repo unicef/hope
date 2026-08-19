@@ -531,7 +531,7 @@ def rdi_dispatcher_task_action(job: AsyncRetryJob) -> bool:
 
 
 def remove_rdi_population_async_task(
-    registration_data_import: RegistrationDataImport, *, callback_url: str
+    registration_data_import: RegistrationDataImport, *, callback_url: str, signed_token: str
 ) -> AsyncRetryJob | None:
     """Enqueue the retriable wipe job; returns None if a live wipe already backs the RDI."""
     return AsyncRetryJob.requeue(
@@ -542,6 +542,7 @@ def remove_rdi_population_async_task(
         config={
             "registration_data_import_id": str(registration_data_import.id),
             "callback_url": callback_url,
+            "signed_token": signed_token,
             "on_failure_action": "hope.apps.registration_data.celery_tasks.remove_rdi_population_on_failure",
         },
         group_key="registration_data",
@@ -553,7 +554,9 @@ def remove_rdi_population_async_task_action(job: AsyncRetryJob) -> None:
     """Retriable wipe worker (REWORK #3): wipe the population, then success-callback CW on success only."""
     from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
 
-    RdiPopulationRemoval().execute(job.config["registration_data_import_id"], job.config["callback_url"])
+    RdiPopulationRemoval().execute(
+        job.config["registration_data_import_id"], job.config["callback_url"], job.config["signed_token"]
+    )
 
 
 def remove_rdi_population_on_failure(job: AsyncRetryJob, exc: Exception) -> None:
@@ -563,22 +566,22 @@ def remove_rdi_population_on_failure(job: AsyncRetryJob, exc: Exception) -> None
     RdiPopulationRemoval.mark_failed(job.config["registration_data_import_id"], reason=str(exc))
 
 
-def notify_rdi_deleted_async_task(callback_url: str) -> None:
+def notify_rdi_deleted_async_task(callback_url: str, signed_token: str) -> None:
     """Enqueue the success-only CW callback (REWORK #4). Retriable via async_retry_job_task (cap 3)."""
     AsyncRetryJob.queue_task(
         job_name=notify_rdi_deleted_async_task.__name__,
         action="hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task_action",
-        config={"callback_url": callback_url},
+        config={"callback_url": callback_url, "signed_token": signed_token},
         group_key="registration_data",
         description="Notify CW: RDI reset succeeded",
     )
 
 
 def notify_rdi_deleted_async_task_action(job: AsyncRetryJob) -> None:
-    """One empty POST to the signed callback URL; non-2xx raises → async_retry_job_task retries (REWORK #4)."""
+    """One POST of the signed token to the callback URL; non-2xx raises → async_retry_job_task retries (REWORK #4)."""
     from hope.apps.registration_data.api.country_workspace import CountryWorkspaceAPI
 
-    CountryWorkspaceAPI(api_url=job.config["callback_url"]).notify_rdi_deleted()
+    CountryWorkspaceAPI(api_url=job.config["callback_url"]).notify_rdi_deleted(job.config["signed_token"])
 
 
 def rdi_dispatcher_task(program: Program) -> None:

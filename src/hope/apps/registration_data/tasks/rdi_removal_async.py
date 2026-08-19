@@ -28,7 +28,7 @@ class RdiPopulationRemoval:
                                       spent, the on_failure hook marks DELETE_FAILED.
     """
 
-    def execute(self, rdi_id: str, callback_url: str) -> None:
+    def execute(self, rdi_id: str, callback_url: str, signed_token: str) -> None:
         # lazy import: celery_tasks imports this class, so import at call time
         from hope.apps.registration_data.celery_tasks import locked_cache, notify_rdi_deleted_async_task
 
@@ -41,7 +41,7 @@ class RdiPopulationRemoval:
             try:
                 if not self._wipe(rdi_id):  # single locked txn; False if the row was already gone
                     logger.info("RDI wipe for %s: row already gone → idempotent success", rdi_id)
-                    notify_rdi_deleted_async_task(callback_url)
+                    notify_rdi_deleted_async_task(callback_url, signed_token)
                     return
             except (
                 NonRetriableTaskError
@@ -54,7 +54,7 @@ class RdiPopulationRemoval:
                 raise NonRetriableTaskError(str(exc)) from exc
 
             logger.info("RDI wipe for %s succeeded → notifying CW", rdi_id)
-            notify_rdi_deleted_async_task(callback_url)
+            notify_rdi_deleted_async_task(callback_url, signed_token)
 
     @staticmethod
     def _wipe(rdi_id: str) -> bool:

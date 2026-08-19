@@ -245,6 +245,7 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
 
 class RDIResetSerializer(serializers.Serializer):
     callback_url = serializers.URLField(required=True)
+    signed_token = serializers.CharField(required=True)
 
     def validate_callback_url(self, value: str) -> str:
         parts = urlsplit(value)
@@ -269,6 +270,7 @@ class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
         serializer = RDIResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         callback_url = serializer.validated_data["callback_url"]
+        signed_token = serializer.validated_data["signed_token"]
         logger.debug("RDI reset requested for %s (callback_url=%s)", rdi_id, callback_url)
 
         with atomic():
@@ -290,7 +292,7 @@ class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
                 logger.info("RDI reset conflict for %s: already MERGED (terminal)", rdi_id)
                 return Response({"error": "rdi_already_merged"}, status=status.HTTP_409_CONFLICT)
 
-            job = remove_rdi_population_async_task(rdi, callback_url=callback_url)
+            job = remove_rdi_population_async_task(rdi, callback_url=callback_url, signed_token=signed_token)
             if job is None:
                 logger.info("RDI reset for %s idempotent: a live wipe already backs it (status %s)", rdi_id, rdi.status)
                 return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)

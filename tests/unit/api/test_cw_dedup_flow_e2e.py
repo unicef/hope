@@ -1,3 +1,4 @@
+import json
 from typing import Any
 from unittest.mock import patch
 import uuid
@@ -289,6 +290,9 @@ def cw_callback_url() -> str:
     return "https://cw.example.test/api/rdi/reset-callback/cb-token"
 
 
+CW_SIGNED_TOKEN = "signed-token-abc123"
+
+
 def _push_individuals(
     token_api_client: APIClient,
     business_area: BusinessArea,
@@ -357,15 +361,17 @@ def _reset_rdi(
         # The view enqueues the wipe via `transaction.on_commit`; capture(execute=True) fires
         # it (and the nested success-callback job) inline once the atomic block commits.
         with django_capture_on_commit_callbacks(execute=True):
-            resp = token_api_client.post(reset_url, {"callback_url": callback_url}, format="json")
+            resp = token_api_client.post(
+                reset_url, {"callback_url": callback_url, "signed_token": CW_SIGNED_TOKEN}, format="json"
+            )
 
         assert resp.status_code == status.HTTP_202_ACCEPTED, str(resp.json())
         assert resp.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
-        # Success-only callback fired exactly once, on the signed URL, with no token and no body.
+        # Success-only callback fired exactly once, on the signed URL, no auth header, token in the body.
         assert len(rsps.calls) == 1
         sent = rsps.calls[0].request
         assert "Authorization" not in sent.headers
-        assert not sent.body
+        assert json.loads(sent.body) == {"signed_token": CW_SIGNED_TOKEN}
 
 
 def test_cw_reset_wipes_population_then_reupload_merges_clean(

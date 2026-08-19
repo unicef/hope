@@ -30,6 +30,7 @@ def _merge_key(rdi_id: object) -> str:
 pytestmark = pytest.mark.django_db
 
 CALLBACK_URL = "https://cw.example.com/api/rdi/callback/abc123"
+SIGNED_TOKEN = "signed-token-abc123"
 
 
 @pytest.fixture
@@ -43,12 +44,13 @@ def test_wipe_enqueue_queues_wipe_with_config(program) -> None:
     )
     queued = object()
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.requeue", return_value=queued) as requeue:
-        result = remove_rdi_population_async_task(rdi, callback_url=CALLBACK_URL)
+        result = remove_rdi_population_async_task(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
 
     assert result is queued
     config = requeue.call_args.kwargs["config"]
     assert config["registration_data_import_id"] == str(rdi.id)
     assert config["callback_url"] == CALLBACK_URL
+    assert config["signed_token"] == SIGNED_TOKEN
     assert config["on_failure_action"] == "hope.apps.registration_data.celery_tasks.remove_rdi_population_on_failure"
     assert "country_workspace_id" not in config
 
@@ -58,13 +60,13 @@ def test_wipe_enqueue_skips_when_wipe_already_running(program) -> None:
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue"):
-        first = remove_rdi_population_async_task(rdi, callback_url=CALLBACK_URL)
+        first = remove_rdi_population_async_task(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
     assert first is not None
     jobs_before = AsyncRetryJob.objects.count()
 
     # the first job is now live (STARTED) → requeue must not start a second one alongside it
     with patch.object(AsyncRetryJob, "task_status", new_callable=PropertyMock, return_value="STARTED"):
-        second = remove_rdi_population_async_task(rdi, callback_url=CALLBACK_URL)
+        second = remove_rdi_population_async_task(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
 
     assert second is None
     assert AsyncRetryJob.objects.count() == jobs_before  # no second wipe job was queued alongside the live one
@@ -74,7 +76,9 @@ def test_wipe_action_calls_wipe_and_notifies(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
 
     with (
         patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population") as wipe,
@@ -85,14 +89,16 @@ def test_wipe_action_calls_wipe_and_notifies(program) -> None:
     wipe.assert_called_once()
     assert wipe.call_args.args[0].id == rdi.id
     assert wipe.call_args.kwargs == {"delete_rdi": True, "swallow_es_errors": True}
-    notify.assert_called_once_with(CALLBACK_URL)
+    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN)
 
 
 def test_wipe_action_keeps_scheduled_status_during_wipe(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
     seen = {}
 
     def capture_status(*args: object, **kwargs: object) -> None:
@@ -105,12 +111,16 @@ def test_wipe_action_keeps_scheduled_status_during_wipe(program) -> None:
         remove_rdi_population_async_task_action(job)
 
     assert seen.get("status") == RegistrationDataImport.DELETE_SCHEDULED  # no transient marker; row stays until gone
-    notify.assert_called_once_with(CALLBACK_URL)
+    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN)
 
 
 def test_wipe_action_idempotent_when_row_gone() -> None:
     job = AsyncRetryJob(
-        config={"registration_data_import_id": "00000000-0000-0000-0000-000000000000", "callback_url": CALLBACK_URL}
+        config={
+            "registration_data_import_id": "00000000-0000-0000-0000-000000000000",
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+        }
     )
 
     with (
@@ -120,14 +130,16 @@ def test_wipe_action_idempotent_when_row_gone() -> None:
         remove_rdi_population_async_task_action(job)
 
     wipe.assert_not_called()
-    notify.assert_called_once_with(CALLBACK_URL)
+    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN)
 
 
 def test_wipe_action_merged_under_lock_fails(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.MERGED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
 
     with (
         patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population") as wipe,
@@ -146,7 +158,9 @@ def test_wipe_action_protected_error_sets_failed(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
 
     with (
         patch(
@@ -168,7 +182,9 @@ def test_wipe_action_transient_error_retries(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
 
     with (
         patch(
@@ -189,7 +205,9 @@ def test_wipe_on_failure_hook_sets_failed(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
 
     with patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task") as notify:
         remove_rdi_population_on_failure(job, RuntimeError("retries exhausted"))
@@ -225,7 +243,9 @@ def test_wipe_blocks_on_a_held_row_lock() -> None:
     rdi = RegistrationDataImportFactory(
         business_area=ba, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
 
     db = connections["default"].settings_dict
     locker = psycopg2.connect(
@@ -258,7 +278,9 @@ def test_wipe_action_skips_when_merge_holds_lock(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
     cache.set(_merge_key(rdi.id), "held")  # simulate a merge holding the shared lock for this RDI
 
     with (
@@ -278,7 +300,9 @@ def test_wipe_action_holds_merge_lock_during_wipe(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
     seen = {}
 
     def capture_lock(*args: object, **kwargs: object) -> None:
@@ -297,7 +321,9 @@ def test_wipe_action_releases_merge_lock_after_success(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
 
     with (
         patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population"),
@@ -315,7 +341,9 @@ def test_wipe_backs_off_while_a_real_merge_holds_the_lock() -> None:
     rdi = RegistrationDataImportFactory(
         business_area=ba, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    wipe_job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
+    wipe_job = AsyncRetryJob(
+        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+    )
     merge_job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id)})
 
     merge_holding = threading.Event()  # set once the real merge has acquired the cache lock
