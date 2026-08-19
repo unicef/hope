@@ -1357,8 +1357,8 @@ def test_filter_by_created_at(
 @pytest.mark.parametrize(
     ("is_filtered", "expected_count"),
     [
-        (True, 6),
-        (False, 9),
+        (True, 7),
+        (False, 10),
     ],
 )
 def test_filter_by_program(
@@ -1367,14 +1367,20 @@ def test_filter_by_program(
     list_global_url: str,
     tickets: dict,
     program_afghanistan1: Program,
+    multi_active_program_ticket: GrievanceTicket,
     is_filtered: bool,
     expected_count: int,
 ) -> None:
+    # multi_active_program_ticket is linked to program_afghanistan1 and a second active programme.
+    # The global list has no .distinct() left, so a through-table join here would return it twice
+    # programs__code matches one link per ticket, which is what the last assert pins.
     filter_value = program_afghanistan1.code if is_filtered else ""
     client = api_client(user)
     response = client.get(list_global_url, {"program": filter_value})
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data["results"]) == expected_count
+    returned_ids = [ticket["id"] for ticket in response.data["results"]]
+    assert len(returned_ids) == expected_count
+    assert returned_ids.count(str(multi_active_program_ticket.id)) == 1
 
 
 @pytest.mark.parametrize(
