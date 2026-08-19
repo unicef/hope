@@ -40,11 +40,21 @@ def _scope_fields_of(model: type) -> list[str]:
     return sorted(names & SCOPE_FIELDS)
 
 
+def _filtered_fields(node: object) -> set[str]:
+    """Model fields the queryset already compares against, whatever the depth of the relation."""
+    target = getattr(getattr(node, "lhs", None), "target", None)
+    if target is not None:
+        return {target.name}
+    return {name for child in getattr(node, "children", ()) for name in _filtered_fields(child)}
+
+
 def _is_already_scoped(field: RelatedField) -> bool:
     if isinstance(field, ScopedRelatedFieldMixin):
         return True
     queryset = field.queryset
-    return queryset is not None and any(name in str(queryset.all().query.where) for name in SCOPE_FIELDS)
+    # the name of the table shows up in the repr of the where clause, so the fields it compares
+    # have to be read from the tree instead of matched as text
+    return queryset is not None and bool(_filtered_fields(queryset.all().query.where) & SCOPE_FIELDS)
 
 
 def _viewsets_of_rest_api() -> set[type]:
