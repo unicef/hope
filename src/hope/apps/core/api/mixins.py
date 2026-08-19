@@ -2,7 +2,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, Mapping
 
 from django.conf import settings
-from django.db.models import Q, QuerySet
+from django.db.models import Exists, ManyToManyField, OuterRef, Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
 from requests.adapters import HTTPAdapter
@@ -184,6 +184,21 @@ class ProgramMixin:
 class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
     """Applies BusinessAreaMixin and also filters the qs based on the user's partner's permissions across programs."""
 
+    program_model_field_is_many = False
+
+    def _filter_many_programs_access(self, queryset: QuerySet, program_ids: list[str]) -> QuerySet:
+        program_field = queryset.model._meta.get_field(self.program_model_field)
+        if not isinstance(program_field, ManyToManyField):
+            raise TypeError(f"{self.program_model_field} must be a many-to-many field")
+
+        through_model = program_field.remote_field.through
+        source_field_name = program_field.m2m_field_name()
+        target_field_name = program_field.m2m_reverse_field_name()
+        program_links = through_model._default_manager.filter(**{f"{source_field_name}_id": OuterRef("pk")})
+        allowed_program_links = program_links.filter(**{f"{target_field_name}_id__in": program_ids})
+
+        return queryset.filter(~Exists(program_links) | Exists(allowed_program_links))
+
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()
 
@@ -191,6 +206,9 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
             self.business_area.id,
             self.PERMISSIONS,
         )
+
+        if self.program_model_field_is_many:
+            return self._filter_many_programs_access(queryset, program_ids)
 
         return queryset.filter(
             Q(**{f"{self.program_model_field}__id__in": program_ids})
