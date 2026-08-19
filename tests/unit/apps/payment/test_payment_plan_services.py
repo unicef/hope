@@ -55,6 +55,7 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     AccountType,
+    BusinessArea,
     DeliveryMechanism,
     FileTemp,
     FinancialServiceProvider,
@@ -114,12 +115,15 @@ def dm_transfer_to_digital_wallet() -> Any:
 
 
 @pytest.fixture
-def fsp(dm_transfer_to_account: Any, dm_transfer_to_digital_wallet: Any) -> FinancialServiceProvider:
+def fsp(
+    business_area: BusinessArea, dm_transfer_to_account: Any, dm_transfer_to_digital_wallet: Any
+) -> FinancialServiceProvider:
     fsp = FinancialServiceProviderFactory(
         name="Test FSP 1",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
     )
     fsp.delivery_mechanisms.add(dm_transfer_to_account, dm_transfer_to_digital_wallet)
+    fsp.allowed_business_areas.add(business_area)
     return fsp
 
 

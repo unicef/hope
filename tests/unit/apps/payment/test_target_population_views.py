@@ -963,6 +963,7 @@ def test_create_tp_rejects_fsp_conflicting_with_group(
         status=PaymentPlan.Status.TP_OPEN,
     )
     different_fsp = FinancialServiceProviderFactory()
+    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
 
     response = target_population_create_update_context["client"].post(
         target_population_create_update_context["create_url"],
@@ -1007,6 +1008,7 @@ def test_update_tp_rejects_fsp_conflicting_with_group(
         status=PaymentPlan.Status.TP_OPEN,
     )
     different_fsp = FinancialServiceProviderFactory()
+    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
 
     response = target_population_create_update_context["client"].patch(
         target_population_create_update_context["update_url"],
@@ -1038,6 +1040,7 @@ def test_update_tp_rejects_group_change_with_fsp_conflict(
     tp.save()
     new_group = PaymentPlanGroupFactory(cycle=cycle)
     different_fsp = FinancialServiceProviderFactory()
+    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
     PaymentPlanFactory(
         business_area=target_population_create_update_context["business_area"],
         program_cycle=cycle,

@@ -646,7 +646,8 @@ class PaymentPlanService:
             delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
             if fsp_id and delivery_mechanism_code:
-                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
+                # the list endpoint offers only the providers allowed in this business area, the id has to match
+                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id, allowed_business_areas=business_area)
                 PaymentPlanService._check_group_fsp_consistency(payment_plan_group, fsp)
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
                 payment_plan.financial_service_provider = fsp
@@ -697,7 +698,11 @@ class PaymentPlanService:
             self.payment_plan.delivery_mechanism = None
             return True
         if fsp_id and delivery_mechanism_code:
-            fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
+            fsp = get_object_or_404(
+                FinancialServiceProvider,
+                pk=fsp_id,
+                allowed_business_areas=self.payment_plan.business_area,
+            )
             delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
             if current_fsp != fsp or current_dm != delivery_mechanism:
                 self.payment_plan.financial_service_provider = fsp

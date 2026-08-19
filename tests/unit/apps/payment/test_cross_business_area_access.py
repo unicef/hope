@@ -9,6 +9,8 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -553,3 +555,52 @@ def test_create_target_population_in_cycle_of_other_business_area_is_denied(
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
     assert not PaymentPlan.objects.filter(name="cross ba target population").exists()
+
+
+@pytest.fixture
+def victim_fsp(victim_business_area: BusinessArea) -> Any:
+    delivery_mechanism = DeliveryMechanismFactory()
+    fsp = FinancialServiceProviderFactory(delivery_mechanisms=[delivery_mechanism])
+    fsp.allowed_business_areas.set([victim_business_area])
+    return fsp
+
+
+def test_create_target_population_with_fsp_of_other_business_area_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_payment_plan: PaymentPlan,
+    attacker_purpose: PaymentPlanPurpose,
+    victim_fsp: Any,
+) -> None:
+    household = HouseholdFactory(
+        business_area=attacker_payment_plan.business_area,
+        program=attacker_payment_plan.program,
+        create_role=False,
+    )
+    url = reverse("api:payments:target-populations-list", kwargs=cross_ba_kwargs)
+
+    response = api_client.post(
+        url,
+        {
+            "name": "target population with a foreign fsp",
+            "program_cycle_id": str(attacker_payment_plan.program_cycle.id),
+            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=attacker_payment_plan.program_cycle).id),
+            "payment_plan_purposes": [str(attacker_purpose.id)],
+            "fsp_id": str(victim_fsp.id),
+            "delivery_mechanism_code": victim_fsp.delivery_mechanisms.first().code,
+            "rules": [
+                {
+                    "household_filters_blocks": [],
+                    "household_ids": household.unicef_id,
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
+    assert not PaymentPlan.objects.filter(name="target population with a foreign fsp").exists()
