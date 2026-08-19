@@ -2531,12 +2531,7 @@ class PaymentViewSet(
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaymentSearchFilter
 
-    def get_object(self) -> Payment:
-        payment_id = self.kwargs["payment_id"]
-        return get_object_or_404(Payment, id=payment_id)
-
-    def get_queryset(self) -> QuerySet:
-        parent = PaymentPlan.objects.get(pk=self.kwargs["payment_plan_pk"])
+    def _with_related_data(self, queryset: QuerySet[Payment]) -> QuerySet[Payment]:
         # Prefetch roles for each individual's household
         role_prefetch = Prefetch(
             "households_and_roles",
@@ -2549,12 +2544,8 @@ class PaymentViewSet(
             queryset=Individual.objects.only("id", "household_id", "full_name").prefetch_related(role_prefetch),
             to_attr="prefetched_individuals",
         )
-        if parent.status == PaymentPlan.Status.OPEN:
-            qs = parent.eligible_payments_with_conflicts
-        else:
-            qs = parent.eligible_payments
         return (
-            qs.select_related(
+            queryset.select_related(
                 "currency",
                 "head_of_household",
                 "collector",
@@ -2563,10 +2554,28 @@ class PaymentViewSet(
                 "business_area",
                 "program__business_area",
                 "parent__program_cycle__program__data_collecting_type",
+                "parent__delivery_mechanism",
+                "parent__financial_service_provider",
             )
-            .prefetch_related(individual_prefetch, "payment_verifications")
+            .prefetch_related(
+                individual_prefetch,
+                "parent__payment_verification_plans",
+                "payment_verifications",
+            )
             .all()
         )
+
+    def get_object(self) -> Payment:
+        payment_id = self.kwargs["payment_id"]
+        return get_object_or_404(self._with_related_data(Payment.objects.all()), id=payment_id)
+
+    def get_queryset(self) -> QuerySet:
+        parent = PaymentPlan.objects.get(pk=self.kwargs["payment_plan_pk"])
+        if parent.status == PaymentPlan.Status.OPEN:
+            queryset = parent.eligible_payments_with_conflicts
+        else:
+            queryset = parent.eligible_payments
+        return self._with_related_data(queryset)
 
     @action(
         detail=True,
