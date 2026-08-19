@@ -8,11 +8,13 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     FeedbackFactory,
+    HouseholdFactory,
+    IndividualFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, Feedback, Program, User
+from hope.models import BusinessArea, Feedback, Household, Individual, Program, User
 
 pytestmark = pytest.mark.django_db
 
@@ -50,6 +52,7 @@ def attacker(
             Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
             Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
             Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE,
         ],
         attacker_business_area,
         program=attacker_program,
@@ -146,3 +149,62 @@ def test_move_feedback_to_program_in_other_business_area_is_denied(
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     attacker_feedback.refresh_from_db()
     assert attacker_feedback.program_id != victim_feedback.program_id
+
+
+@pytest.fixture
+def victim_household() -> Household:
+    program = ProgramFactory(business_area=BusinessAreaFactory(slug="ukraine"))
+    return HouseholdFactory(business_area=program.business_area, program=program, create_role=False)
+
+
+@pytest.fixture
+def victim_individual(victim_household: Household) -> Individual:
+    return IndividualFactory(
+        household=victim_household,
+        business_area=victim_household.business_area,
+        program=victim_household.program,
+        registration_data_import=victim_household.registration_data_import,
+    )
+
+
+@pytest.fixture
+def create_url(attacker_business_area: BusinessArea) -> str:
+    return reverse("api:accountability:feedbacks-list", kwargs={"business_area_slug": attacker_business_area.slug})
+
+
+def test_create_feedback_for_household_from_other_business_area_is_denied(
+    api_client: APIClient,
+    create_url: str,
+    victim_household: Household,
+) -> None:
+    response = api_client.post(
+        create_url,
+        {
+            "issue_type": Feedback.POSITIVE_FEEDBACK,
+            "description": "cross business area feedback",
+            "household_lookup": str(victim_household.id),
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    assert not Feedback.objects.filter(household_lookup=victim_household).exists()
+
+
+def test_create_feedback_for_individual_from_other_business_area_is_denied(
+    api_client: APIClient,
+    create_url: str,
+    victim_individual: Individual,
+) -> None:
+    response = api_client.post(
+        create_url,
+        {
+            "issue_type": Feedback.POSITIVE_FEEDBACK,
+            "description": "cross business area feedback",
+            "individual_lookup": str(victim_individual.id),
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    assert not Feedback.objects.filter(individual_lookup=victim_individual).exists()
