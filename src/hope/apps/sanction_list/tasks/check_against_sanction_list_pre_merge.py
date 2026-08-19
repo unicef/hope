@@ -13,6 +13,7 @@ from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.utils.querysets import evaluate_qs
 from hope.models import Individual, Program, RegistrationDataImport, SanctionListIndividual
+from hope.models.individual import sanction_list_last_check_key
 
 log = logging.getLogger(__name__)
 
@@ -171,7 +172,8 @@ def check_against_sanction_list_pre_merge(
         sanction_list_individuals_queryset = sanction_list_individuals_queryset.filter(
             id__in=sanction_list_individuals,
         )
-    if not individuals_ids:
+    full_run = not individuals_ids
+    if full_run:
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
     individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
@@ -209,7 +211,8 @@ def check_against_sanction_list_pre_merge(
                 f" Scores: ",
             )
             log.debug([(r.full_name, r.meta.score) for r in results])
-    cache.set("sanction_list_last_check", timezone.now(), None)
+    if full_run:
+        cache.set(sanction_list_last_check_key(program_id), timezone.now(), None)
 
     possible_matches_individuals = evaluate_qs(
         Individual.objects.filter(
@@ -222,13 +225,13 @@ def check_against_sanction_list_pre_merge(
     )
     possible_matches_individuals.update(sanction_list_possible_match=True)
 
-    if not individuals_ids:
+    if full_run:
         # If we not pass individuals_ids, it means we want to check all individuals in the program.
         # So we know that individuals which are not found in the possible matches
         # need to be marked as not possible matches.
         not_possible_matches_individuals = evaluate_qs(
             Individual.objects.exclude(id__in=possible_matches)
-            .filter(sanction_list_possible_match=True)
+            .filter(sanction_list_possible_match=True, program_id=program.id)
             .select_for_update()
             .order_by("pk")
         )
