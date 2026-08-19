@@ -4,6 +4,7 @@ from unittest.mock import PropertyMock, patch
 from django.core.cache import cache
 from django.db import OperationalError, connection, connections
 from django.db.models.deletion import ProtectedError
+from django.test.utils import CaptureQueriesContext
 import psycopg2
 import pytest
 
@@ -18,6 +19,7 @@ from hope.apps.registration_data.celery_tasks import (
     remove_rdi_population_on_failure,
 )
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
+from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
 from hope.models import AsyncRetryJob, RegistrationDataImport
 
 
@@ -68,7 +70,7 @@ def test_wipe_enqueue_skips_when_wipe_already_running(program) -> None:
     assert AsyncRetryJob.objects.count() == jobs_before  # no second wipe job was queued alongside the live one
 
 
-def test_wipe_action_success_deletes_and_notifies(program) -> None:
+def test_wipe_action_calls_wipe_and_notifies(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
@@ -86,7 +88,7 @@ def test_wipe_action_success_deletes_and_notifies(program) -> None:
     notify.assert_called_once_with(CALLBACK_URL)
 
 
-def test_wipe_action_commits_deleting_before_wipe(program) -> None:
+def test_wipe_action_keeps_scheduled_status_during_wipe(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
@@ -102,7 +104,7 @@ def test_wipe_action_commits_deleting_before_wipe(program) -> None:
     ):
         remove_rdi_population_async_task_action(job)
 
-    assert seen.get("status") == RegistrationDataImport.DELETING
+    assert seen.get("status") == RegistrationDataImport.DELETE_SCHEDULED  # no transient marker; row stays until gone
     notify.assert_called_once_with(CALLBACK_URL)
 
 
@@ -179,13 +181,13 @@ def test_wipe_action_transient_error_retries(program) -> None:
         remove_rdi_population_async_task_action(job)
 
     rdi.refresh_from_db()
-    assert rdi.status != RegistrationDataImport.DELETE_FAILED
+    assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED  # untouched on a transient failure → retried
     notify.assert_not_called()
 
 
 def test_wipe_on_failure_hook_sets_failed(program) -> None:
     rdi = RegistrationDataImportFactory(
-        business_area=program.business_area, program=program, status=RegistrationDataImport.DELETING
+        business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
     job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
 
@@ -198,33 +200,22 @@ def test_wipe_on_failure_hook_sets_failed(program) -> None:
     notify.assert_not_called()
 
 
-def test_fail_writes_status_keyed_on_rdi_id(program) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=program.business_area, program=program, status=RegistrationDataImport.DELETING
-    )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
-
-    remove_rdi_population_on_failure(job, RuntimeError("boom"))
-
-    rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.DELETE_FAILED
-
-
-def test_wipe_action_passes_swallow_es_errors(program) -> None:
+def test_fail_marks_status_keyed_on_id_without_a_select(program) -> None:
+    # keyed UPDATE from rdi_id alone, no fetch — so it fires even when the wipe's SELECT/lock raised
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL})
 
-    with (
-        patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population") as wipe,
-        patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task") as notify,
-    ):
-        remove_rdi_population_async_task_action(job)
+    with CaptureQueriesContext(connection) as ctx:
+        RdiPopulationRemoval.mark_failed(str(rdi.id), reason="boom")
 
-    wipe.assert_called_once()
-    assert wipe.call_args.kwargs["swallow_es_errors"] is True
-    notify.assert_called_once_with(CALLBACK_URL)
+    queries = ctx.captured_queries
+    assert len(queries) == 3  # SAVEPOINT, keyed UPDATE, RELEASE — no SELECT fetches the row first
+    assert queries[1]["sql"].upper().startswith("UPDATE")
+
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.DELETE_FAILED
+    assert rdi.error_message == "boom"
 
 
 @pytest.mark.django_db(transaction=True)
@@ -360,4 +351,4 @@ def test_wipe_backs_off_while_a_real_merge_holds_the_lock() -> None:
         merge_thread.join(timeout=5)
 
     rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.MERGING  # merge advanced; the wipe never wrote DELETING
+    assert rdi.status == RegistrationDataImport.MERGING  # merge advanced; the wipe never ran under its lock

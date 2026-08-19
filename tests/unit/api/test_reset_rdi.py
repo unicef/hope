@@ -124,28 +124,6 @@ def test_reset_202_schedules_fresh(
     enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL)
 
 
-@patch(ENQUEUE)
-def test_reset_202_reenqueues_stale(
-    enqueue: Mock,
-    token_api_client: APIClient,
-    user_business_area: BusinessArea,
-    program: Program,
-) -> None:
-    enqueue.return_value = Mock()  # no live job -> a fresh one is queued
-    rdi = RegistrationDataImportFactory(
-        business_area=user_business_area,
-        program=program,
-        status=RegistrationDataImport.DELETE_SCHEDULED,
-        country_workspace_id="cw-stale",
-    )
-    response = token_api_client.post(
-        _reset_url(user_business_area, str(rdi.id)), {"callback_url": CALLBACK_URL}, format="json"
-    )
-    assert response.status_code == status.HTTP_202_ACCEPTED, str(response.content)
-    assert response.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
-    enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL)
-
-
 # ---------------------------------------------------------------------------
 # D — idempotent double-POST while a wipe is genuinely running (202)
 # ---------------------------------------------------------------------------
@@ -160,7 +138,7 @@ def test_reset_202_idempotent_when_live_job(
     rdi = RegistrationDataImportFactory(
         business_area=user_business_area,
         program=program,
-        status=RegistrationDataImport.DELETING,
+        status=RegistrationDataImport.DELETE_SCHEDULED,  # a wipe is already in flight for this row
         country_workspace_id="cw-live",
     )
     response = token_api_client.post(
@@ -168,7 +146,7 @@ def test_reset_202_idempotent_when_live_job(
     )
     assert response.status_code == status.HTTP_202_ACCEPTED, str(response.content)
     rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.DELETING  # unchanged — no new schedule
+    assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED  # path D returns current status, never rewrites
     enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL)
 
 

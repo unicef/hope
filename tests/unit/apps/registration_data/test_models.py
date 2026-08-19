@@ -173,6 +173,5 @@ def test_new_delete_statuses_in_choices() -> None:
 
     assert {
         RegistrationDataImport.DELETE_SCHEDULED,
-        RegistrationDataImport.DELETING,
         RegistrationDataImport.DELETE_FAILED,
     } <= status_values

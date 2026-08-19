@@ -530,25 +530,27 @@ def rdi_dispatcher_task_action(job: AsyncRetryJob) -> bool:
     return True
 
 
-def remove_rdi_population_async_task(rdi: RegistrationDataImport, *, callback_url: str) -> AsyncRetryJob | None:
+def remove_rdi_population_async_task(
+    registration_data_import: RegistrationDataImport, *, callback_url: str
+) -> AsyncRetryJob | None:
     """Enqueue the retriable wipe job; returns None if a live wipe already backs the RDI."""
     return AsyncRetryJob.requeue(
-        instance=rdi,
+        instance=registration_data_import,
         job_name=remove_rdi_population_async_task.__name__,
-        program=rdi.program,
+        program=registration_data_import.program,
         action="hope.apps.registration_data.celery_tasks.remove_rdi_population_async_task_action",
         config={
-            "registration_data_import_id": str(rdi.id),
+            "registration_data_import_id": str(registration_data_import.id),
             "callback_url": callback_url,
             "on_failure_action": "hope.apps.registration_data.celery_tasks.remove_rdi_population_on_failure",
         },
         group_key="registration_data",
-        description=f"Delete RDI population {rdi.id}",
+        description=f"Delete RDI population {registration_data_import.id}",
     )
 
 
 def remove_rdi_population_async_task_action(job: AsyncRetryJob) -> None:
-    """Retriable wipe worker (REWORK #3): mark DELETING, wipe, then success-callback CW on success only."""
+    """Retriable wipe worker (REWORK #3): wipe the population, then success-callback CW on success only."""
     from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
 
     RdiPopulationRemoval().execute(job.config["registration_data_import_id"], job.config["callback_url"])
@@ -564,6 +566,7 @@ def remove_rdi_population_on_failure(job: AsyncRetryJob, exc: Exception) -> None
 def notify_rdi_deleted_async_task(callback_url: str) -> None:
     """Enqueue the success-only CW callback (REWORK #4). Retriable via async_retry_job_task (cap 3)."""
     AsyncRetryJob.queue_task(
+        job_name=notify_rdi_deleted_async_task.__name__,
         action="hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task_action",
         config={"callback_url": callback_url},
         group_key="registration_data",

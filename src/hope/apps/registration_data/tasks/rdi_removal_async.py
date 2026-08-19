@@ -14,14 +14,15 @@ logger = logging.getLogger(__name__)
 class RdiPopulationRemoval:
     """Retriable hard-delete of a CW-managed RDI's population (REWORK #3).
 
-    Two locked txns:
-      A — lock, fail fast if MERGED, commit the DELETING marker in its OWN txn so a
-          worker crash mid-wipe leaves the row visibly DELETING in the admin.
-      B — re-lock, defensively re-check MERGED, hard-delete the population.
+    One locked txn: lock the RDI, fail fast if MERGED, hard-delete the population.
+    The row stays DELETE_SCHEDULED until it is gone; progress is traced via logs and
+    the AsyncJob admin, not a transient status.
 
     Outcomes:
       - success / already-gone row  → enqueue the CW success callback (success-only).
-      - MERGED (terminal success)   → leave status intact, no retry.
+      - MERGED                       → nothing to wipe; leave status intact, no retry, no callback.
+                                       Re-raised as NonRetriableTaskError, so the AsyncJob is logged
+                                       as errored in the admin — a business no-op, not a task "success".
       - ProtectedError (dependents) → DELETE_FAILED, no retry.
       - any other error             → propagates; async_retry_job_task retries and, once
                                       spent, the on_failure hook marks DELETE_FAILED.
@@ -38,13 +39,13 @@ class RdiPopulationRemoval:
                 logger.info("RDI wipe for %s deferred: a merge holds the lock", rdi_id)
                 raise RuntimeError("rdi_merge_in_progress")  # transient → retried, never DELETE_FAILED
             try:
-                marked = self._mark_deleting(rdi_id)  # Txn A
-                wiped = marked and self._wipe(rdi_id)  # Txn B (skipped if the row was already gone)
-                if not marked or not wiped:
+                if not self._wipe(rdi_id):  # single locked txn; False if the row was already gone
                     logger.info("RDI wipe for %s: row already gone → idempotent success", rdi_id)
                     notify_rdi_deleted_async_task(callback_url)
                     return
-            except NonRetriableTaskError as exc:  # MERGED — terminal success, leave status intact, no retry
+            except (
+                NonRetriableTaskError
+            ) as exc:  # MERGED — nothing to wipe: leave intact, no retry (job logged errored)
                 logger.warning("RDI wipe for %s aborted: already MERGED, status left intact: %s", rdi_id, exc)
                 raise
             except ProtectedError as exc:  # rdi_has_dependents → deterministic, fail fast
@@ -56,22 +57,8 @@ class RdiPopulationRemoval:
             notify_rdi_deleted_async_task(callback_url)
 
     @staticmethod
-    def _mark_deleting(rdi_id: str) -> bool:
-        """Lock the RDI, fail fast if MERGED, commit the DELETING marker; False if the row is gone."""
-        with transaction.atomic():
-            rdi = RegistrationDataImport.objects.select_for_update(of=("self",)).filter(id=rdi_id).first()
-            if rdi is None:
-                return False
-            set_sentry_business_area_tag(rdi.business_area.slug)
-            if rdi.status == RegistrationDataImport.MERGED:
-                raise NonRetriableTaskError("rdi_already_merged")
-            rdi.status = RegistrationDataImport.DELETING
-            rdi.save(update_fields=["status"])
-            return True
-
-    @staticmethod
     def _wipe(rdi_id: str) -> bool:
-        """Re-lock the RDI, defensively fail fast if MERGED, and hard-delete its population. False if gone."""
+        """Lock the RDI, fail fast if MERGED, and hard-delete its population. False if the row is gone."""
         with transaction.atomic():
             rdi = (
                 RegistrationDataImport.objects.select_for_update(of=("self",))
@@ -81,6 +68,7 @@ class RdiPopulationRemoval:
             )
             if rdi is None:
                 return False
+            set_sentry_business_area_tag(rdi.business_area.slug)
             if rdi.status == RegistrationDataImport.MERGED:
                 raise NonRetriableTaskError("rdi_already_merged")
             remove_rdi_population(rdi, delete_rdi=True, swallow_es_errors=True)
