@@ -801,11 +801,16 @@ class GrievanceTicketGlobalViewSet(
         ):
             partner = user.partner
             for selected_individual in grievance_ticket.ticket_details.selected_individuals.select_related(
-                "household__admin2", "program"
+                "household"
             ).all():
-                if not partner.has_area_access(
-                    area_id=selected_individual.household.admin2.id,
-                    program_id=selected_individual.program.id,
+                household = selected_individual.household
+                if (
+                    household
+                    and household.admin2_id
+                    and not partner.has_area_access(
+                        area_id=household.admin2_id,
+                        program_id=selected_individual.program_id,
+                    )
                 ):
                     raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 

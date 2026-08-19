@@ -76,7 +76,7 @@ def adjudication_selected_individual(db) -> Individual:
 
 
 @pytest.fixture
-def adjudication_user(adjudication_selected_individual: Individual) -> User:
+def adjudication_user(db) -> User:
     return UserFactory()
 
 
@@ -91,6 +91,19 @@ def adjudication_ticket(adjudication_selected_individual: Individual) -> Grievan
     return details.ticket
 
 
+@pytest.fixture
+def adjudication_ticket_without_admin2(db) -> GrievanceTicket:
+    household = HouseholdFactory(admin2=None)
+    selected_individual = household.head_of_household
+    details = TicketNeedsAdjudicationDetailsFactory(
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        ticket__business_area=selected_individual.business_area,
+        golden_records_individual=selected_individual,
+    )
+    details.selected_individuals.add(selected_individual)
+    return details.ticket
+
+
 @pytest.mark.django_db
 def test_validate_preconditions_close_adjudication_partner_has_access(
     mock_viewset, adjudication_user: User, adjudication_ticket: GrievanceTicket, django_assert_num_queries
@@ -98,6 +111,22 @@ def test_validate_preconditions_close_adjudication_partner_has_access(
     with django_assert_num_queries(2):
         GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
             mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED
+        )
+
+
+@pytest.mark.django_db
+def test_validate_preconditions_close_adjudication_without_admin2(
+    mock_viewset,
+    adjudication_user: User,
+    adjudication_ticket_without_admin2: GrievanceTicket,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(2):
+        GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
+            mock_viewset,
+            adjudication_user,
+            adjudication_ticket_without_admin2,
+            GrievanceTicket.STATUS_CLOSED,
         )
 
 
