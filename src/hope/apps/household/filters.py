@@ -376,6 +376,19 @@ class IndividualFilter(UpdatedAtFilter):
     def _get_elasticsearch_query_for_individuals(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         es_filters = [{"term": {"business_area": business_area}}, {"term": {"program_id": str(program.pk)}}]
+        should = [
+            {"match_phrase_prefix": {"unicef_id": {"query": search}}},
+            {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
+            {"match_phrase_prefix": {"full_name": {"query": search}}},
+            {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
+            {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
+            {"match_phrase_prefix": {"detail_id": {"query": search}}},
+            {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
+        ]
+        # full_name_latin only exists in indexes rebuilt after the mapping change; on the others
+        # the clause silently matches nothing, so it stays off until the fleet reindex is done
+        if config.ES_USE_LATIN_NAMES:
+            should.append({"match_phrase_prefix": {"full_name_latin": {"query": search}}})
         return {
             "size": 100,
             "_source": False,
@@ -383,16 +396,7 @@ class IndividualFilter(UpdatedAtFilter):
                 "bool": {
                     "filter": es_filters,
                     "minimum_should_match": 1,
-                    "should": [
-                        {"match_phrase_prefix": {"unicef_id": {"query": search}}},
-                        {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
-                        {"match_phrase_prefix": {"full_name": {"query": search}}},
-                        {"match_phrase_prefix": {"full_name_latin": {"query": search}}},
-                        {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
-                        {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
-                        {"match_phrase_prefix": {"detail_id": {"query": search}}},
-                        {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
-                    ],
+                    "should": should,
                 }
             },
         }

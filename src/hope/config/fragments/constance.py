@@ -238,6 +238,11 @@ Clear Cache,clear-cache/
         "Enable Elasticsearch usage",
         bool,
     ),
+    "ES_USE_LATIN_NAMES": (
+        False,
+        "Search queries match the latin name fields (requires a fleet reindex - see docs/guide-dev/elasticsearch.md)",
+        bool,
+    ),
     "SURPRISE_PAGE_HEADING": (
         "🎉 You found a secret!",
         "Heading shown on the surprise/easter-egg page.",

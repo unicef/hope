@@ -560,6 +560,57 @@ def test_search(
     assert response_data[0]["id"] == str(individuals[1].id)
 
 
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_LATIN_NAMES=True)
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+def test_search_matches_latin_name_when_flag_is_on(
+    search_client: Any,
+    list_url: str,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    response_data, individuals = _test_search(
+        search_client,
+        list_url,
+        afghanistan,
+        program,
+        {"search": "Yuriy Shevchenko"},
+        {"full_name": "Анна Ковальська", "full_name_latin": "Anna Kovalska"},
+        {"full_name": "Юрій Шевченко", "full_name_latin": "Yuriy Shevchenko"},
+        {},
+        {},
+        is_elasticsearch_enabled=True,
+    )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(individuals[1].id)
+
+
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_LATIN_NAMES=False)
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+def test_search_ignores_latin_name_when_flag_is_off(
+    search_client: Any,
+    list_url: str,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    response_data, _ = _test_search(
+        search_client,
+        list_url,
+        afghanistan,
+        program,
+        {"search": "Yuriy Shevchenko"},
+        {"full_name": "Анна Ковальська", "full_name_latin": "Anna Kovalska"},
+        {"full_name": "Юрій Шевченко", "full_name_latin": "Yuriy Shevchenko"},
+        {},
+        {},
+        is_elasticsearch_enabled=True,
+    )
+    assert response_data == []
+
+
 @pytest.mark.parametrize(
     ("filters", "individual1_data", "individual2_data", "household1_data", "household2_data"),
     [
