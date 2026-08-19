@@ -58,9 +58,9 @@ export function ImportedPeopleTableRow({
   ];
 
   function renderDeduplicationStatus(
-    goldenRecordStatus: any,
-    batchStatus: any,
-    dict,
+    goldenRecordStatus: string,
+    batchStatus: string,
+    dict: Record<string, string>,
   ): string {
     const statuses = [goldenRecordStatus, batchStatus];
     statuses.sort(
@@ -95,8 +95,8 @@ export function ImportedPeopleTableRow({
         individual.deduplicationBatchResults?.length ? (
           <DedupeBiographicalBiometricResults
             status={renderDeduplicationStatus(
-              individual.deduplicationBatchStatus as any,
-              individual.biometricDeduplicationBatchStatus as any,
+              individual.deduplicationBatchStatus,
+              individual.biometricDeduplicationBatchStatus,
               deduplicationBatchDict,
             )}
             results={individual.deduplicationBatchResults}
@@ -106,8 +106,8 @@ export function ImportedPeopleTableRow({
           />
         ) : (
           renderDeduplicationStatus(
-            individual.deduplicationBatchStatus as any,
-            individual.biometricDeduplicationBatchStatus as any,
+            individual.deduplicationBatchStatus,
+            individual.biometricDeduplicationBatchStatus,
             deduplicationBatchDict,
           )
         )}
@@ -117,8 +117,8 @@ export function ImportedPeopleTableRow({
         individual.deduplicationGoldenRecordResults?.length ? (
           <DedupeBiographicalBiometricResults
             status={renderDeduplicationStatus(
-              individual.deduplicationGoldenRecordStatus as any,
-              individual.biometricDeduplicationGoldenRecordStatus as any,
+              individual.deduplicationGoldenRecordStatus,
+              individual.biometricDeduplicationGoldenRecordStatus,
               deduplicationGoldenDict,
             )}
             results={individual.deduplicationGoldenRecordResults}
@@ -129,8 +129,8 @@ export function ImportedPeopleTableRow({
           />
         ) : (
           renderDeduplicationStatus(
-            individual.deduplicationGoldenRecordResults as any,
-            individual.biometricDeduplicationGoldenRecordResults as any,
+            individual.deduplicationGoldenRecordStatus,
+            individual.biometricDeduplicationGoldenRecordStatus,
             deduplicationGoldenDict,
           )
         )}

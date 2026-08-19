@@ -19,6 +19,7 @@ import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +63,10 @@ export function RejectPaymentPlan({
       showMessage(t('Payment Plan has been rejected.'));
       setRejectDialogOpen(false);
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     },
   });
@@ -95,7 +99,11 @@ export function RejectPaymentPlan({
       {({ submitForm }) => (
         <>
           {rejectDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <ErrorButton
               data-cy="button-reject"
               onClick={() => setRejectDialogOpen(true)}
@@ -115,10 +123,18 @@ export function RejectPaymentPlan({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   {t('Are you sure you want to reject this payment plan?')}
                 </Box>
-                <Box p={5}>
+                <Box
+                  sx={{
+                    p: 5,
+                  }}
+                >
                   <GreyText>
                     {t(
                       'Note: Upon proceeding this payment plan will be automatically moved to locked status.',

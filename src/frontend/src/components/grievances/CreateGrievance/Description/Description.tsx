@@ -8,6 +8,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -70,7 +71,10 @@ function Description({
   const { isAllPrograms, businessArea } = useBaseUrl();
 
   const { data: partnerChoicesData } = useQuery({
-    queryKey: ['partnerForGrievanceChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersPartnerForGrievanceChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasUsersPartnerForGrievanceChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -92,6 +96,7 @@ function Description({
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
   const priorityChoicesData = choicesData?.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
+  const submissionChannelChoicesData = choicesData?.grievanceTicketManualSubmissionChannelChoices;
   const canAddDocumentation = hasPermissions(
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
     permissions,
@@ -270,6 +275,16 @@ function Description({
               variant="outlined"
               label={t('Urgency')}
               choices={urgencyChoicesData}
+              component={FormikSelectField}
+            />
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <Field
+              name="submissionChannel"
+              fullWidth
+              variant="outlined"
+              label={t('Submission Channel')}
+              choices={submissionChannelChoicesData}
               component={FormikSelectField}
             />
           </Grid>

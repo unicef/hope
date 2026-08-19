@@ -387,9 +387,6 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "phone_no_alternative",
             "phone_no_alternative_valid",
             "sanction_list_last_check",
-            "wallet_name",
-            "blockchain_name",
-            "wallet_address",
             "status",
             "deduplication_golden_record_status",
             "flex_fields",
@@ -481,6 +478,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
             "deduplication_golden_record_results",
             "duplicate",
             "documents",
+            "program",
             "program_code",
         )
 

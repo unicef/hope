@@ -61,6 +61,7 @@ def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
         business_area=business_area,
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.ACCEPTED,
         name="Test Payment Plan",
     )
 
@@ -120,7 +121,7 @@ def test_action_arrange_plan_without_source_act_run_assert_skips_source_lock(
 
     assert result is True
     service_cls.assert_called_once_with(payment_plan=regular_pp)
-    service_cls.return_value.create_child_plan_payments.assert_called_once_with()
+    service_cls.return_value.create_child_plan_payments.assert_called_once_with(amounts=None, fixed_amount=None)
 
 
 @freeze_time("2023-10-10")

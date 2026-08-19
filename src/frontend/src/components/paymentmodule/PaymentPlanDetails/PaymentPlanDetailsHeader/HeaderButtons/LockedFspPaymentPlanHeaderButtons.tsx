@@ -8,6 +8,7 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
@@ -40,8 +41,11 @@ export function LockedFspPaymentPlanHeaderButtons({
     onSuccess: async () => {
       showMessage(t('Payment Plan FSPs have been unlocked.'));
       await queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
         exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     },
     onError: (error: any) => {
@@ -62,8 +66,11 @@ export function LockedFspPaymentPlanHeaderButtons({
       onSuccess: async () => {
         showMessage(t('Payment Plan has been sent for approval.'));
         await queryClient.invalidateQueries({
-          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
           exact: false,
+        });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
         });
       },
       onError: (error: any) => {
@@ -72,9 +79,18 @@ export function LockedFspPaymentPlanHeaderButtons({
     });
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canUnlock && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LoadingButton
             loading={loadingUnlock}
             variant="outlined"
@@ -88,7 +104,11 @@ export function LockedFspPaymentPlanHeaderButtons({
         </Box>
       )}
       {canSendForApproval && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <LoadingButton
             loading={loadingSendForApproval}
             variant="contained"
@@ -102,7 +122,11 @@ export function LockedFspPaymentPlanHeaderButtons({
         </Box>
       )}
       {canAbort && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <AbortPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}

@@ -306,3 +306,43 @@ def test_execute(
         "card_expiry_date": "2016-06-27T00:00:00",
         "name_of_cardholder": "Name2",
     }
+
+
+def test_execute_sets_phone_no_valid_on_imported_individual(
+    rdi_people_dependencies: dict[str, object],
+    registration_data_import: object,
+    import_data: object,
+    business_area: object,
+    program: Program,
+) -> None:
+    assert rdi_people_dependencies
+    RdiXlsxPeopleCreateTask().execute(
+        registration_data_import.id,
+        import_data.id,
+        business_area.id,
+        program.id,
+    )
+
+    individual = PendingIndividual.objects.get(full_name="Derek IndexFour")
+
+    assert str(individual.phone_no) == "+48605899013"
+    assert individual.phone_no_valid is True
+
+
+def test_execute_sets_phone_no_valid_on_every_imported_individual_with_a_phone_number(
+    rdi_people_dependencies: dict[str, object],
+    registration_data_import: object,
+    import_data: object,
+    business_area: object,
+    program: Program,
+) -> None:
+    assert rdi_people_dependencies
+    RdiXlsxPeopleCreateTask().execute(
+        registration_data_import.id,
+        import_data.id,
+        business_area.id,
+        program.id,
+    )
+
+    assert PendingIndividual.objects.filter(phone_no_valid=True).count() == 5
+    assert PendingIndividual.objects.filter(phone_no_valid__isnull=True).count() == 0

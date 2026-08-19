@@ -7,7 +7,8 @@ import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { adjustHeadCells } from '@utils/utils';
@@ -94,8 +95,9 @@ export function LookUpIndividualTable({
       orderBy: filter.orderBy,
       householdId,
       excludedId: excludedId || ticket?.individual?.id || null,
-      programId: isAllPrograms ? filter.program : programId,
-      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
+      program: isAllPrograms ? filter.program : undefined,
+      isActiveProgram:
+        filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
       withdrawn: false,
       rdiMergeStatus: RdiMergeStatusEnum.MERGED,
     }),
@@ -118,7 +120,6 @@ export function LookUpIndividualTable({
       excludedId,
       ticket?.individual?.id,
       isAllPrograms,
-      programId,
     ],
   );
 
@@ -131,73 +132,81 @@ export function LookUpIndividualTable({
   const [page, setPage] = useState(0);
 
   // Selected Program Individuals
+  const selectedProgramIndividualsParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: selectedProgramIndividualsData,
     isLoading: isLoadingSelectedProgram,
+    isFetching: isFetchingSelectedProgram,
     error: errorSelectedProgram,
   } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasProgramsIndividualsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsList,
+      selectedProgramIndividualsParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        selectedProgramIndividualsParams,
       ),
     enabled: !!businessArea && !!programId && !isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   // Selected Program Count
+  const selectedProgramIndividualsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: selectedProgramIndividualsCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsIndividualsCountRetrieve',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve,
+      selectedProgramIndividualsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        selectedProgramIndividualsCountParams,
       ),
     enabled: !!businessArea && !!programId && !isAllPrograms && page === 0,
   });
 
   // All Programs Individuals
+  const allProgramsIndividualsParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: allProgramsIndividualsData,
     isLoading: isLoadingAllPrograms,
+    isFetching: isFetchingAllPrograms,
     error: errorAllPrograms,
   } = useQuery<PaginatedIndividualListList>({
-    queryKey: ['businessAreasIndividualsList', queryVariables, businessArea],
-    queryFn: () => {
-      return RestService.restBusinessAreasIndividualsList(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
-          withPagination: true,
-        }),
-      );
-    },
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasIndividualsList,
+      allProgramsIndividualsParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasIndividualsList(allProgramsIndividualsParams),
     enabled: !!businessArea && isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   // All Programs Count
+  const allProgramsIndividualsCountParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    queryVariables,
+  );
   const { data: allProgramsIndividualsCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasIndividualsCountRetrieve',
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasIndividualsCountRetrieve,
+      allProgramsIndividualsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasIndividualsCountRetrieve(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+        allProgramsIndividualsCountParams,
       ),
     enabled: !!businessArea && isAllPrograms && page === 0,
   });
@@ -254,6 +263,9 @@ export function LookUpIndividualTable({
       error={isAllPrograms ? errorAllPrograms : errorSelectedProgram}
       isLoading={
         isAllPrograms ? isLoadingAllPrograms : isLoadingSelectedProgram
+      }
+      isFetching={
+        isAllPrograms ? isFetchingAllPrograms : isFetchingSelectedProgram
       }
       itemsCount={itemsCount}
       renderRow={(row: IndividualList) => (

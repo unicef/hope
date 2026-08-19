@@ -13,6 +13,7 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import {
   adjustHeadCells,
@@ -113,19 +114,18 @@ export const HouseholdMembersTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const membersParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    id: household.id,
+  };
   const { data, isLoading, error } = useQuery<PaginatedHouseholdMemberList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsMembers',
-      programId,
-      businessArea,
-      household.id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsMembersList,
+      membersParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsMembersList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        id: household.id,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsMembersList(membersParams),
     enabled: !!businessArea && !!programId,
   });
 

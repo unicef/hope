@@ -9,6 +9,7 @@ import { NeedsAdjudicationDetailsOld } from '../NeedsAdjudication/NeedsAdjudicat
 import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails/PaymentGrievanceDetails';
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
+import { RequestedPhotoErrorDataChange } from '../RequestedPhotoErrorDataChange';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
@@ -106,6 +107,16 @@ function GrievancesApproveSection({
       );
     }
     if (
+      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR
+    ) {
+      return (
+        <RequestedPhotoErrorDataChange
+          ticket={ticket}
+          canApproveDataChange={canApproveDataChange}
+        />
+      );
+    }
+    if (
       ticket?.category?.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     ) {
       if (ticket.ticketDetails.hasMultiplePaymentVerifications === false) {
@@ -122,7 +133,12 @@ function GrievancesApproveSection({
 
   return (
     <Grid container size={12}>
-      <Box sx={{ width: '100%' }} p={3}>
+      <Box
+        sx={{
+          p: 3,
+          width: '100%',
+        }}
+      >
         {matchDetailsComponent()}
       </Box>
     </Grid>

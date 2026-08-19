@@ -61,7 +61,11 @@ export function AcceptanceProcessRow({
   const isClosed = paymentPlan.status === PaymentPlanStatusEnum.CLOSED;
 
   return (
-    <StyledBox m={5}>
+    <StyledBox
+      sx={{
+        m: 5,
+      }}
+    >
       <AcceptanceProcessStepper
         acceptanceProcess={acceptanceProcess}
         paymentPlan={paymentPlan}
@@ -99,19 +103,31 @@ export function AcceptanceProcessRow({
         </Grid>
         <Grid size={{ xs: 3 }}>
           {isClosed && (
-            <Box display="flex" flexDirection="column">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
               <GreyBox
-                display="flex"
-                alignItems="center"
-                ml={3}
-                mr={3}
-                p={3}
                 data-cy="finance-closure-card"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  ml: 3,
+                  mr: 3,
+                  p: 3,
+                }}
               >
                 {t('Closed by')} {paymentPlan.closedBy}
-                <Box ml={1}>
+                <Box
+                  sx={{
+                    ml: 1,
+                  }}
+                >
                   <GreyText>
-                    {t('on')} <UniversalMoment>{paymentPlan.statusDate}</UniversalMoment>
+                    {t('on')}{' '}
+                    <UniversalMoment>{paymentPlan.statusDate}</UniversalMoment>
                   </GreyText>
                 </Box>
               </GreyBox>

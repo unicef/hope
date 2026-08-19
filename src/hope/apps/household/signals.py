@@ -48,6 +48,17 @@ def increment_individual_list_cache_version(sender: type[Individual], instance: 
     transaction.on_commit(lambda: increment_individual_list_program_key(program_id))
 
 
+@receiver(post_save, sender="household.DocumentType")
+@receiver(post_delete, sender="household.DocumentType")
+def invalidate_doc_types_cache(sender: type[Any], instance: Any, **kwargs: Any) -> None:
+    from django.core.cache import cache
+
+    cache_key = instance.CACHE_KEY_ALL_DOC_TYPES
+    # Defer to commit so the cache is cleared only after the new data is visible,
+    # avoiding repopulation with stale (pre-commit) data.
+    transaction.on_commit(lambda: cache.delete(cache_key))
+
+
 def increment_household_list_cache_version_from_bulk(
     sender: type[Household | Individual], instances: list[Any], **kwargs: Any
 ) -> None:
@@ -119,7 +130,7 @@ def capture_program_old_status(sender: type[Program], instance: Program, **kwarg
 @receiver(post_save, sender="program.Program")
 def handle_program_status_change(sender: type[Program], instance: Program, created: bool, **kwargs: Any) -> None:
     """Manage Elasticsearch indexes based on Program status changes."""
-    from hope.apps.household.services.index_management import rebuild_program_indexes
+    from hope.apps.household.services.index_management import ensure_program_indexes
     from hope.models import Program
 
     if not _is_elasticsearch_enabled():
@@ -129,7 +140,7 @@ def handle_program_status_change(sender: type[Program], instance: Program, creat
     current_status = instance.status
     try:
         if old_status != current_status and current_status == Program.ACTIVE:
-            rebuild_program_indexes(str(instance.pk))
+            ensure_program_indexes(str(instance.pk))
     except Exception as e:  # pragma: no cover  # noqa
         logger.error(f"Failed to manage indexes for program {instance.id}: {e}")
     instance.__dict__.pop("_old_status", None)

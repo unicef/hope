@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
 
 from django.http import HttpRequest
 from django.urls import reverse_lazy
@@ -10,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from single_source import get_version
 
 from hope.config.env import env
+from hope.config.process_role import get_process_role
 
 DEBUG: bool = env("DEBUG")
 IS_TEST = False
@@ -85,18 +85,14 @@ EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+EMAIL_SUBJECT_PREFIX = ""
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")
 
 DB_ZOMBIE_TIMEOUT_MS = 4 * 60 * 60 * 1000
 
-# prefix all non-production emails
-if ENV != "prod":
-    EMAIL_SUBJECT_PREFIX = f"{ENV}"
-else:
-    EMAIL_SUBJECT_PREFIX = ""
-
+PROCESS_ROLE = get_process_role()
 
 RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
@@ -105,6 +101,7 @@ RO_CONN.update(
         "OPTIONS": {
             "options": (
                 "-c default_transaction_read_only=on "
+                f"-c application_name={PROCESS_ROLE}-ro "
                 f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
                 f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
             )
@@ -124,6 +121,7 @@ DATABASES["default"].update(
         "CONN_MAX_AGE": 60,
         "OPTIONS": {
             "options": (
+                f"-c application_name={PROCESS_ROLE} "
                 f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
                 f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
             )
@@ -351,6 +349,9 @@ DATAMART_USER = env("DATAMART_USER")
 DATAMART_PASSWORD = env("DATAMART_PASSWORD")
 DATAMART_URL = env("DATAMART_URL")
 
+DEDUPLICATION_ENGINE_API_URL = env("DEDUPLICATION_ENGINE_API_URL")
+DEDUPLICATION_ENGINE_API_KEY = env("DEDUPLICATION_ENGINE_API_KEY")
+
 COUNTRIES_OVERRIDE = {
     "U": {
         "name": _("Unknown or Not Applicable"),
@@ -358,8 +359,6 @@ COUNTRIES_OVERRIDE = {
         "ioc_code": "U",
     },
 }
-
-ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
@@ -372,7 +371,7 @@ AA_PERMISSION_HANDLER = 3
 
 
 def filter_environment(key: str, config: dict, request: HttpRequest) -> bool:
-    return key == "ROOT_ACCESS_TOKEN" or key.startswith("DIRENV")
+    return key.startswith("DIRENV")
 
 
 def masker(key: str, value: Any, config: dict, request: HttpRequest) -> Any:
@@ -445,6 +444,8 @@ FLAGS = {
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [{"condition": "boolean", "value": True}],
+    "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
+    "IS_ROOT": [{"condition": "boolean", "value": False}],
 }
 
 MARKDOWNIFY = {
@@ -501,10 +502,12 @@ from hope.config.fragments.kobo import *  # noqa: F403, F401, E402
 from hope.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hope.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hope.config.fragments.matomo import *  # noqa: F403, F401, E402
+from hope.config.fragments.payment_gateway import *  # noqa: F403, F401, E402
 from hope.config.fragments.sentry import *  # noqa: F403, F401, E402
 from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
+from hope.config.fragments.vision import *  # noqa: F403, F401, E402
 
 GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
 GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

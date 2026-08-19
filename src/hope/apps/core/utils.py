@@ -250,9 +250,10 @@ raise_attribute_error = object()
 
 
 def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error) -> Any:
+    # ObjectDoesNotExist: a FK may point at a row deleted earlier in the same transaction
     try:
         return functools.reduce(getattr, attr.split("."), obj)
-    except AttributeError as e:
+    except (AttributeError, ObjectDoesNotExist) as e:
         if default != raise_attribute_error:
             return default
         logger.warning(e)
@@ -410,6 +411,11 @@ def to_snake_case(camel_case_string: str) -> str:
 
     snake_case = re.sub("(?<!^)([A-Z0-9])", r"_\1", camel_case_string)
     return snake_case[0] + snake_case[1:].lower()
+
+
+def to_camel_case(snake_str: str) -> str:
+    first, *rest = snake_str.split("_")
+    return first + "".join(w.capitalize() for w in rest)
 
 
 def check_concurrency_version_in_mutation(version: int | None, target: Any) -> None:

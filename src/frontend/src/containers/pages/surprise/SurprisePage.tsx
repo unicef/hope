@@ -7,22 +7,18 @@ import surpriseFallback from '../../../images/surprise-fallback.jpg';
 
 const Container = styled.div`
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   display: flex;
   background-color: #003c8f;
 `;
 
 const Card = styled.div`
   text-align: center;
-  width: 533px;
-  border-radius: 4px;
-  background-color: #00adef;
-  box-shadow:
-    0 0 2px 0 rgba(0, 0, 0, 0.12),
-    0 2px 2px 0 rgba(0, 0, 0, 0.24);
-  padding: 40px 50px 50px;
+  width: 100%;
+  padding: 40px 0;
 `;
 
 const Heading = styled(Typography)`
@@ -32,6 +28,7 @@ const Heading = styled(Typography)`
     font-weight: 700;
     margin-top: 24px;
     letter-spacing: 0.5px;
+    padding: 0 16px;
   }
 `;
 
@@ -43,12 +40,26 @@ const SubHeading = styled(Typography)`
     margin-top: 8px;
     margin-bottom: 24px;
     opacity: 0.9;
+    padding: 0 16px;
+  }
+`;
+
+const Paragraph = styled(Typography)`
+  && {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 300;
+    margin-top: 0;
+    margin-bottom: 16px;
+    opacity: 0.9;
+    padding: 0 16px;
   }
 `;
 
 const Photo = styled.img`
-  width: 100%;
-  border-radius: 4px;
+  width: 100vw;
+  max-height: 70vh;
+  object-fit: contain;
   display: block;
 `;
 
@@ -72,15 +83,24 @@ export function SurprisePage(): ReactElement {
   const [imageSrc, setImageSrc] = useState<string>(surpriseFallback);
   const [heading, setHeading] = useState<string>(DEFAULT_HEADING);
   const [subheading, setSubheading] = useState<string>(DEFAULT_SUBHEADING);
+  const [paragraphs, setParagraphs] = useState<string[]>([]);
 
   useEffect(() => {
     fetch('/api/rest/surprise/')
       .then((res) => res.json())
-      .then((data: { image: string | null; heading: string; subheading: string }) => {
-        if (data.image) setImageSrc(data.image);
-        if (data.heading) setHeading(data.heading);
-        if (data.subheading) setSubheading(data.subheading);
-      })
+      .then(
+        (data: {
+          image: string | null;
+          heading: string;
+          subheading: string;
+          paragraphs?: string[];
+        }) => {
+          if (data.image) setImageSrc(data.image);
+          if (data.heading) setHeading(data.heading);
+          if (data.subheading) setSubheading(data.subheading);
+          if (data.paragraphs) setParagraphs(data.paragraphs);
+        },
+      )
       .catch(() => {
         // keep defaults
       });
@@ -93,6 +113,9 @@ export function SurprisePage(): ReactElement {
         <Heading>{heading}</Heading>
         <SubHeading>{subheading}</SubHeading>
         <Photo src={imageSrc} alt="A surprise for you" />
+        {paragraphs.map((paragraph, index) => (
+          <Paragraph key={index}>{paragraph}</Paragraph>
+        ))}
         <BackLink to="/login">← Back to login</BackLink>
       </Card>
     </Container>

@@ -2,6 +2,7 @@ import { ReactElement, useEffect, useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface FormikAsyncAutocompleteProps {
   field: any;
@@ -35,8 +36,12 @@ export function FormikAsyncAutocomplete({
   };
 
   const { data, isLoading } = useQuery({
-    queryKey: ['asyncAutocomplete', restEndpoint, inputValue, variables],
-    queryFn: async() => {
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      restEndpoint,
+      inputValue,
+      variables,
+    }),
+    queryFn: async () => {
       if (restEndpoint === 'adminAreas') {
         return RestService.restBusinessAreasGeoAreasList({
           businessAreaSlug: variables?.businessArea || '',
@@ -73,7 +78,18 @@ export function FormikAsyncAutocomplete({
   return (
     <Autocomplete
       renderInput={(params) => (
-        <TextField {...params} label={label} variant="outlined" />
+        <TextField
+          {...params}
+          label={label}
+          variant="outlined"
+          slotProps={{
+            ...params.slotProps,
+            htmlInput: {
+              ...params.slotProps.htmlInput,
+              'data-cy': `input-${field.name}`,
+            },
+          }}
+        />
       )}
       filterOptions={(option) => option}
       autoComplete

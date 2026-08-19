@@ -72,7 +72,12 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
     'Provide info about Programme Partner and set Area Access',
   );
   const businessAreaOptionLabel = (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <BigText>{t('Business Area')}</BigText>
       <SmallText>
         {t('The partner has access to the entire business area')}
@@ -153,8 +158,19 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
     values.partners[index]?.areaAccess === 'ADMIN_AREA';
 
   const adminAreaOptionLabel = (
-    <Box display="flex" flexDirection="column">
-      <Box display="flex" justifyContent="space-between" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Box>
           <BigText>{t('Admin Area')}</BigText>
           <SmallText>
@@ -225,8 +241,13 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
   };
 
   return (
-    <Grid container direction="column">
-      <Box display="flex" justifyContent="space-between">
+    <Grid container sx={{ flexDirection: 'column' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <Grid size={6}>
           <Field
             name={`partners[${index}].id`}
@@ -243,10 +264,18 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
           handleDeleteProgramPartner={handleDeleteProgramPartner}
         />
       </Box>
-      <Box mt={2}>
+      <Box
+        sx={{
+          mt: 2,
+        }}
+      >
         <GreyText>{description}</GreyText>
       </Box>
-      <Box mt={2}>
+      <Box
+        sx={{
+          mt: 2,
+        }}
+      >
         <BiggestText>{t('Area Access')}</BiggestText>
       </Box>
       <Grid size={6}>

@@ -45,9 +45,12 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import (
     PRIORITY_HIGH,
     PRIORITY_MEDIUM,
+    SUBMISSION_CHANNEL_CALL_CENTER,
+    SUBMISSION_CHANNEL_SUGGESTION_BOX,
     URGENCY_URGENT,
     URGENCY_VERY_URGENT,
 )
+from hope.apps.grievance.filters import GrievanceTicketFilter
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Partner, PaymentVerification, PaymentVerificationPlan, Program, User
@@ -264,7 +267,7 @@ def tickets(
         priority=PRIORITY_HIGH,
         urgency=URGENCY_URGENT,
     )
-    ticket0.unicef_id = "GRV-0001"
+    ticket0.unicef_id = "GRV-SEARCH-TARGET"
     ticket0.save()
     ticket0.programs.add(program_afghanistan1)
 
@@ -637,6 +640,68 @@ def list_global_url(afghanistan: BusinessArea) -> str:
     )
 
 
+@pytest.fixture
+def ticket_without_program(afghanistan: BusinessArea) -> GrievanceTicket:
+    return GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+
+
+@pytest.fixture
+def multi_active_program_ticket(afghanistan: BusinessArea, program_afghanistan1: Program) -> GrievanceTicket:
+    second_active_program = ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="another active program",
+    )
+    ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+    )
+    ticket.programs.add(program_afghanistan1, second_active_program)
+    return ticket
+
+
+@pytest.fixture
+def submission_channel_tickets(afghanistan: BusinessArea, program_afghanistan1: Program) -> dict:
+    call_center_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+        submission_channel=SUBMISSION_CHANNEL_CALL_CENTER,
+    )
+    call_center_ticket.programs.set([program_afghanistan1])
+    suggestion_box_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+        submission_channel=SUBMISSION_CHANNEL_SUGGESTION_BOX,
+    )
+    suggestion_box_ticket.programs.set([program_afghanistan1])
+    return {"call_center": call_center_ticket, "suggestion_box": suggestion_box_ticket}
+
+
+@pytest.fixture
+def two_plain_tickets(afghanistan: BusinessArea) -> list:
+    ticket1 = GrievanceTicketFactory(business_area=afghanistan)
+    ticket1.unicef_id = "GRV-9001"
+    ticket1.save(update_fields=["unicef_id"])
+    ticket2 = GrievanceTicketFactory(business_area=afghanistan)
+    ticket2.unicef_id = "GRV-9002"
+    ticket2.save(update_fields=["unicef_id"])
+    return [ticket1, ticket2]
+
+
+@pytest.fixture
+def finished_program_ticket(afghanistan: BusinessArea, program_afghanistan2: Program) -> Any:
+    ticket = GrievanceTicketFactory(business_area=afghanistan)
+    ticket.programs.add(program_afghanistan2)
+    return ticket
+
+
 def _test_filter(
     api_client: Any,
     user: User,
@@ -746,6 +811,33 @@ def test_filter_by_grievance_type(
         expected_count_for_program,
         expected_count_for_global,
     )
+
+
+def test_biometric_photo_error_is_system_generated_despite_data_change_category(afghanistan: BusinessArea) -> None:
+    photo_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO,
+    )
+    data_update_ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+    )
+    grievance_filter = GrievanceTicketFilter()
+    base_qs = GrievanceTicket.objects.all()
+
+    system_ids = set(
+        grievance_filter.filter_grievance_type(base_qs, "grievance_type", "system").values_list("id", flat=True)
+    )
+    user_ids = set(
+        grievance_filter.filter_grievance_type(base_qs, "grievance_type", "user").values_list("id", flat=True)
+    )
+
+    assert photo_ticket.id in system_ids
+    assert photo_ticket.id not in user_ids
+    assert data_update_ticket.id in user_ids
+    assert data_update_ticket.id not in system_ids
 
 
 @pytest.mark.parametrize(
@@ -1306,6 +1398,57 @@ def test_filter_by_program_status(
     assert len(response.data["results"]) == expected_count
 
 
+def test_filter_by_program_status_keeps_tickets_without_a_program(
+    api_client: Any,
+    user: User,
+    program_afghanistan1: Program,
+    ticket_without_program: GrievanceTicket,
+    list_global_url: str,
+) -> None:
+    client = api_client(user)
+    response = client.get(list_global_url, {"is_active_program": True})
+
+    assert response.status_code == status.HTTP_200_OK
+    returned_ids = [ticket["id"] for ticket in response.data["results"]]
+    assert str(ticket_without_program.id) in returned_ids
+
+
+def test_filter_by_program_status_does_not_duplicate_multi_program_tickets(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    multi_active_program_ticket: GrievanceTicket,
+    list_global_url: str,
+) -> None:
+    client = api_client(user)
+    response = client.get(list_global_url, {"is_active_program": True})
+    assert response.status_code == status.HTTP_200_OK
+    assert [t["id"] for t in response.data["results"]] == [str(multi_active_program_ticket.id)]
+
+    count_url = reverse(
+        "api:grievance:grievance-tickets-global-count",
+        kwargs={"business_area_slug": afghanistan.slug},
+    )
+    count_response = client.get(count_url, {"is_active_program": True})
+    assert count_response.status_code == status.HTTP_200_OK
+    assert count_response.data["count"] == 1
+
+
+def test_filter_by_submission_channel(
+    api_client: Any,
+    user: User,
+    submission_channel_tickets: dict,
+    list_global_url: str,
+) -> None:
+    client = api_client(user)
+    response = client.get(list_global_url, {"submission_channel": SUBMISSION_CHANNEL_CALL_CENTER})
+
+    assert response.status_code == status.HTTP_200_OK
+    returned_ids = {row["id"] for row in response.data["results"]}
+    assert str(submission_channel_tickets["call_center"].id) in returned_ids
+    assert str(submission_channel_tickets["suggestion_box"].id) not in returned_ids
+
+
 @pytest.mark.parametrize(
     (
         "has_cross_area_filter_permission",
@@ -1391,7 +1534,7 @@ def test_filter_by_cross_area(
 @pytest.mark.parametrize(
     ("filter_value", "expected_count_for_program", "expected_count_for_global"),
     [
-        ("GRV-0001", 1, 1),
+        ("GRV-SEARCH-TARGET", 1, 1),
         ("HH-0001", 4, 4),
         ("IND-0002", 2, 5),
         ("Tom", 4, 4),
@@ -1418,3 +1561,68 @@ def test_search(
     ]:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == expected_count
+
+
+def test_order_by_linked_tickets_orders_by_unicef_id(two_plain_tickets: list) -> None:
+    filterset = GrievanceTicketFilter(data={"order_by": "linked_tickets"}, queryset=GrievanceTicket.objects.all())
+
+    result = list(filterset.qs)
+
+    assert result == two_plain_tickets
+
+
+def test_order_by_linked_tickets_descending_reverses_order(two_plain_tickets: list) -> None:
+    filterset = GrievanceTicketFilter(data={"order_by": "-linked_tickets"}, queryset=GrievanceTicket.objects.all())
+
+    result = list(filterset.qs)
+
+    assert result == list(reversed(two_plain_tickets))
+
+
+def test_search_filter_with_comma_separated_unicef_ids(two_plain_tickets: list) -> None:
+    ticket1, ticket2 = two_plain_tickets
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    result = filterset.search_filter(queryset, "search", f"{ticket1.unicef_id}, {ticket2.unicef_id}")
+
+    assert set(result) == {ticket1, ticket2}
+
+
+def test_filter_by_program_without_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.filter_by_program(queryset, "program", "") is queryset
+
+
+def test_fsp_filter_without_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.fsp_filter(queryset, "fsp", "") is queryset
+
+
+def test_filter_grievance_type_with_unknown_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.filter_grievance_type(queryset, "grievance_type", "all") is queryset
+
+
+def test_filter_grievance_status_with_unknown_value_returns_queryset_unchanged(two_plain_tickets: list) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    assert filterset.filter_grievance_status(queryset, "grievance_status", "all") is queryset
+
+
+def test_filter_is_active_program_false_returns_finished_program_tickets(
+    finished_program_ticket: Any, two_plain_tickets: list
+) -> None:
+    queryset = GrievanceTicket.objects.all()
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+
+    result = filterset.filter_is_active_program(queryset, "is_active_program", False)
+
+    assert list(result) == [finished_program_ticket]

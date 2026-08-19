@@ -8,15 +8,15 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1139"
+        "Content-Length": "1137"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/individuals/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "3df420d5-3d68-4482-8f57-6c8176794de0",
-                "unicef_id": "IND-25-0000.0081",
+                "id": "2950def4-eacc-4680-b0b3-ec97a8687a03",
+                "unicef_id": "IND-25-0000.0003",
                 "full_name": "Person 0",
                 "full_name_latin": null,
                 "household": null,
@@ -27,7 +27,7 @@
                 "relationship_display": "",
                 "birth_date": "1990-01-01",
                 "deduplication_batch_status": "UNIQUE_IN_BATCH",
-                "deduplication_batch_status_display": "Unique in batch",
+                "deduplication_batch_status_display": "Unique in RDI",
                 "biometric_deduplication_batch_status": "NOT_PROCESSED",
                 "biometric_deduplication_batch_status_display": "Not Processed",
                 "deduplication_batch_results": [],
@@ -39,9 +39,9 @@
                 "deduplication_golden_record_results": [],
                 "biometric_deduplication_golden_record_results": [],
                 "program": {
-                    "id": "bd470378-1c45-43e4-8759-bc60d18ffc6e",
+                    "id": "0bbd1ea4-3885-4d41-911d-3dd1f49c50af",
                     "name": "Program 0",
-                    "code": "3oqd"
+                    "code": "lga1"
                 },
                 "last_registration_date": "2025-01-01",
                 "role": null

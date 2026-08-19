@@ -198,6 +198,75 @@ def group_with_accepted_plan_and_payment(business_area: Any, cycle: Any) -> Any:
 
 
 @pytest.fixture
+def group_with_accepted_follow_up_plan_and_payment(business_area: Any, cycle: Any) -> Any:
+    group = cycle.payment_plan_groups.first()
+    fsp = FinancialServiceProviderFactory()
+    delivery_mechanism = DeliveryMechanismFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+    payment = PaymentFactory(parent=plan, financial_service_provider=fsp, delivery_type=delivery_mechanism)
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group
+
+
+@pytest.fixture
+def group_with_accepted_top_up_plan_and_payment(business_area: Any, cycle: Any) -> Any:
+    group = cycle.payment_plan_groups.first()
+    fsp = FinancialServiceProviderFactory()
+    delivery_mechanism = DeliveryMechanismFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+    )
+    payment = PaymentFactory(parent=plan, financial_service_provider=fsp, delivery_type=delivery_mechanism)
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group
+
+
+@pytest.fixture
+def group_with_accepted_top_up_amendment_plan_and_payment(business_area: Any, cycle: Any) -> Any:
+    group = cycle.payment_plan_groups.first()
+    fsp = FinancialServiceProviderFactory()
+    delivery_mechanism = DeliveryMechanismFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+    )
+    payment = PaymentFactory(parent=plan, financial_service_provider=fsp, delivery_type=delivery_mechanism)
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group
+
+
+@pytest.fixture
 def group_with_accepted_plan_and_payment_no_template(business_area: Any, cycle: Any) -> Any:
     """Accepted plan with an eligible payment but no resolvable FSP XLSX template - export yields no rows."""
     group = cycle.payment_plan_groups.first()
@@ -490,6 +559,138 @@ def test_retrieve_detail_aggregated_totals(
     assert Decimal(data["total_delivered_quantity_usd"]) == Decimal("210.00")
     assert Decimal(data["total_undelivered_quantity_usd"]) == Decimal("90.00")
     assert data["payment_plans_count"] == 2
+
+
+def test_retrieve_detail_can_export_follow_up_flag(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_follow_up_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+    group = group_with_accepted_follow_up_plan_and_payment
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is False
+    assert data["can_export_follow_up"] is True
+    assert data["can_export_top_up"] is False
+    assert data["can_export_top_up_amendment"] is False
+
+
+def test_retrieve_detail_can_export_top_up_flag(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_top_up_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+    group = group_with_accepted_top_up_plan_and_payment
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is False
+    assert data["can_export_follow_up"] is False
+    assert data["can_export_top_up"] is True
+    assert data["can_export_top_up_amendment"] is False
+
+
+def test_retrieve_detail_can_export_regular_flag(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_accepted_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is True
+    assert data["can_export_follow_up"] is False
+    assert data["can_export_top_up"] is False
+    assert data["can_export_top_up_amendment"] is False
+
+
+def test_retrieve_detail_can_export_flags_false_for_open_plan(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is False
+    assert data["can_export_follow_up"] is False
+    assert data["can_export_top_up"] is False
+    assert data["can_export_top_up_amendment"] is False
+
+
+def test_retrieve_detail_can_export_top_up_amendment_flag(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_top_up_amendment_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+    group = group_with_accepted_top_up_amendment_plan_and_payment
+
+    response = client.get(_detail_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is False
+    assert data["can_export_follow_up"] is False
+    assert data["can_export_top_up"] is False
+    assert data["can_export_top_up_amendment"] is True
+
+
+def test_retrieve_detail_can_export_regular_false_when_already_exported(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_exported_batch: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_exported_batch.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["can_export_regular"] is False
 
 
 def test_delete_group_with_no_plans_succeeds(
@@ -1159,6 +1360,138 @@ def test_export_excludes_follow_up_plan_returns_400(
     mocked_task.assert_not_called()
 
 
+def test_export_follow_up_plan_type_queues_task_with_plan_type(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_follow_up_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_follow_up_plan_and_payment
+
+    with (
+        patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        response = client.post(
+            _export_url(business_area.slug, program.code, group.id),
+            {"plan_type": PaymentPlan.PlanType.FOLLOW_UP},
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    mocked_task.assert_called_once()
+    called_plan_type = mocked_task.call_args[0][4]
+    assert called_plan_type == PaymentPlan.PlanType.FOLLOW_UP
+
+
+def test_export_follow_up_plan_type_without_follow_up_plans_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan_and_payment
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(
+            _export_url(business_area.slug, program.code, group.id),
+            {"plan_type": PaymentPlan.PlanType.FOLLOW_UP},
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "not-yet-exported" in str(response.json())
+    mocked_task.assert_not_called()
+
+
+def test_export_top_up_plan_type_queues_task_with_plan_type(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_top_up_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_top_up_plan_and_payment
+
+    with (
+        patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        response = client.post(
+            _export_url(business_area.slug, program.code, group.id),
+            {"plan_type": PaymentPlan.PlanType.TOP_UP},
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    mocked_task.assert_called_once()
+    called_plan_type = mocked_task.call_args[0][4]
+    assert called_plan_type == PaymentPlan.PlanType.TOP_UP
+
+
+def test_export_top_up_amendment_plan_type_queues_task_with_plan_type(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_top_up_amendment_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_top_up_amendment_plan_and_payment
+
+    with (
+        patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        response = client.post(
+            _export_url(business_area.slug, program.code, group.id),
+            {"plan_type": PaymentPlan.PlanType.TOP_UP_AMENDMENT},
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    mocked_task.assert_called_once()
+    called_plan_type = mocked_task.call_args[0][4]
+    assert called_plan_type == PaymentPlan.PlanType.TOP_UP_AMENDMENT
+
+
+def test_export_invalid_plan_type_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan_and_payment
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(
+            _export_url(business_area.slug, program.code, group.id),
+            {"plan_type": "NOT_A_PLAN_TYPE"},
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "plan_type" in response.json()
+    mocked_task.assert_not_called()
+
+
 def test_export_without_eligible_payments_returns_400(
     client: Any,
     user: Any,
@@ -1226,11 +1559,12 @@ def test_export_queues_async_task_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag, called_plan_type = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_template_id is None
     assert called_tag is None
+    assert called_plan_type == PaymentPlan.PlanType.REGULAR
 
 
 def test_export_rejected_for_group_in_other_business_area(
@@ -1609,7 +1943,14 @@ def test_get_batches_sets_link_when_file_present(cycle: Any, business_area: Any)
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
     expected_link = reverse("download-payment-plan-group-batch", args=[str(group.id), 1])
-    assert result == [{"export_tag": 1, "export_file_link": expected_link, "has_password": False}]
+    assert result == [
+        {
+            "export_tag": 1,
+            "plan_type": PaymentPlan.PlanType.REGULAR,
+            "export_file_link": expected_link,
+            "has_password": False,
+        }
+    ]
 
 
 def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: Any) -> None:
@@ -1624,7 +1965,14 @@ def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: A
 
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
-    assert result == [{"export_tag": 1, "export_file_link": None, "has_password": False}]
+    assert result == [
+        {
+            "export_tag": 1,
+            "plan_type": PaymentPlan.PlanType.REGULAR,
+            "export_file_link": None,
+            "has_password": False,
+        }
+    ]
 
 
 def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> None:
@@ -1635,6 +1983,21 @@ def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> Non
     result = PaymentPlanGroupDetailSerializer().get_batches(group)
 
     assert [batch["export_tag"] for batch in result] == [1, 2]
+
+
+def test_get_batches_carries_plan_type_of_batch(cycle: Any, business_area: Any) -> None:
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        export_tag=1,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+    result = PaymentPlanGroupDetailSerializer().get_batches(group)
+
+    assert result[0]["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
 
 
 def test_delivery_import_xlsx_returns_400_when_no_file(
@@ -1865,7 +2228,7 @@ def test_delivery_import_xlsx_without_accepted_plan_returns_400(
     assert "Import requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
 
 
-def test_delivery_import_xlsx_with_only_follow_up_plan_returns_400(
+def test_delivery_import_xlsx_with_only_follow_up_plan_passes_plan_check(
     client: Any,
     user: Any,
     business_area: Any,
@@ -1892,8 +2255,11 @@ def test_delivery_import_xlsx_with_only_follow_up_plan_returns_400(
         format="multipart",
     )
 
+    # the follow-up plan satisfies the importable-plans gate; the request fails
+    # later on the unreadable file, not on the plan-type check
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Import requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
+    assert "Import requires at least one payment plan" not in str(response.json())
+    assert "Wrong file type" in str(response.json())
 
 
 def test_delivery_import_xlsx_queues_async_task_on_commit(
@@ -1924,8 +2290,9 @@ def test_delivery_import_xlsx_queues_async_task_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    (called_group,) = mocked_task.call_args[0]
+    called_group, called_user_id = mocked_task.call_args[0]
     assert called_group.id == group.id
+    assert called_user_id == str(user.pk)
 
 
 @pytest.mark.parametrize(
@@ -2049,11 +2416,12 @@ def test_export_with_template_queues_task_with_template_id_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag, called_plan_type = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_template_id == str(template.pk)
     assert called_tag is None
+    assert called_plan_type == PaymentPlan.PlanType.REGULAR
 
 
 @pytest.mark.parametrize(
@@ -2340,7 +2708,7 @@ def test_export_for_batch_queues_task_without_template_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag, _called_plan_type = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_tag == 5
@@ -2372,7 +2740,7 @@ def test_export_for_batch_queues_task_with_template_id_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id, called_tag, _called_plan_type = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_tag == 5

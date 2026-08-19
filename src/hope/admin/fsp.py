@@ -43,6 +43,8 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
             )
         )
 
+    readonly_fields = ("created_by",)
+
     def total_selected_columns(self, obj: Any) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
 
@@ -120,6 +122,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
         "created_by",
     )
     form = FspXlsxTemplatePerDeliveryMechanismForm
+    readonly_fields = ("created_by",)
 
     def get_queryset(self, request: "HttpRequest") -> "QuerySet":
         return (
@@ -232,7 +235,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("allowed_business_areas",),
         ("payment_gateway_id",),
     )
-    readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
+    readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration", "payment_gateway_id")
     inlines = (FspNameMappingInline, FSPXlsxTemplateInline)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:

@@ -16,6 +16,7 @@ import {
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -56,8 +57,11 @@ export function LockPaymentPlan({
       showMessage(t('Payment Plan has been locked.'));
       setLockDialogOpen(false);
       await queryClient.invalidateQueries({
-        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
         exact: false,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
       });
     },
     onError: (error: any) => {
@@ -67,7 +71,11 @@ export function LockPaymentPlan({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <Button
           color="primary"
           variant="contained"
@@ -90,13 +98,21 @@ export function LockPaymentPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               {t(
                 'After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.',
               )}
             </Box>
             {paymentPlan.paymentsConflictsCount > 0 && (
-              <Box p={5}>
+              <Box
+                sx={{
+                  p: 5,
+                }}
+              >
                 <GreyText>
                   {t('Note:')}{' '}
                   {paymentPlan.paymentsConflictsCount === 1

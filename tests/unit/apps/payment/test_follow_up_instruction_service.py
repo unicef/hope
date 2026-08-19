@@ -1,6 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from typing import Any
+from unittest.mock import patch
 import uuid
 
 import pytest
@@ -11,6 +12,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
@@ -19,7 +21,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
-from hope.models import FollowUpInstruction, Payment, PaymentPlan
+from hope.models import FollowUpInstruction, LogEntry, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -180,6 +182,51 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
     assert len(child_plans) == 2
     assert {child.source_payment_plan_id for child in child_plans} == {source_one.id, source_two.id}
     assert all(child.plan_type == PaymentPlan.PlanType.FOLLOW_UP for child in child_plans)
+
+
+@pytest.mark.enable_activity_log
+def test_create_logs_activity_for_each_child_payment_plan(
+    user,
+    program,
+    cycle,
+    second_cycle,
+    business_area,
+    currency,
+    delivery_mechanism,
+    fsp,
+):
+    group_one = PaymentPlanGroupFactory(cycle=cycle)
+    group_two = PaymentPlanGroupFactory(cycle=second_cycle)
+    source_one = _create_source_payment_plan(
+        cycle=cycle,
+        group=group_one,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    _create_source_payment_plan(
+        cycle=second_cycle,
+        group=group_two,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+
+    instruction = FollowUpInstructionService(program).create(
+        user=user,
+        payment_plan_group_ids=[str(group_one.id), str(group_two.id)],
+        dispersion_start_date=source_one.dispersion_start_date + timedelta(days=1),
+        dispersion_end_date=source_one.dispersion_end_date + timedelta(days=1),
+    )
+
+    child_ids = list(instruction.payment_plans.values_list("id", flat=True))
+    create_logs = LogEntry.objects.filter(object_id__in=child_ids, action=LogEntry.CREATE)
+    assert create_logs.count() == 2
+    assert all(log.user == user for log in create_logs)
 
 
 def test_create_excludes_source_plans_with_existing_follow_up_child(
@@ -705,6 +752,36 @@ def test_reactivate_abort_transitions_child_payment_plans_to_open(
     child_plan.refresh_from_db()
     assert result == instruction
     assert child_plan.status == PaymentPlan.Status.OPEN
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_close_transitions_child_payment_plans_to_closed_without_notification(
+    mock_notify: Any,
+    user: Any,
+    program: Any,
+    cycle: Any,
+    business_area: Any,
+    currency: Any,
+    delivery_mechanism: Any,
+    fsp: Any,
+) -> None:
+    instruction = FollowUpInstructionFactory(program=program, created_by=user)
+    child_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    result = FollowUpInstructionService(instruction=instruction).close(user=user)
+
+    child_plan.refresh_from_db()
+    assert result == instruction
+    assert child_plan.status == PaymentPlan.Status.CLOSED
+    mock_notify.assert_not_called()
 
 
 def test_status_returns_first_status_when_no_precedence_match(user, program, business_area, cycle) -> None:

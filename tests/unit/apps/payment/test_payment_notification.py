@@ -24,6 +24,8 @@ def action_permissions_list():
         Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
         Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
         Permissions.PM_DOWNLOAD_XLSX_FOR_FSP,
+        Permissions.PM_CLOSE_FINISHED,
+        Permissions.PM_MARK_READY_FOR_CLOSURE,
     ]
 
 
@@ -392,6 +394,24 @@ def notification_setup(
         name="Role with download xlsx permission",
     )
 
+    users["user_with_close_permission"] = UserFactory(partner=partner_empty)
+    create_user_role_with_permissions(
+        users["user_with_close_permission"],
+        [Permissions.PM_CLOSE_FINISHED],
+        business_area,
+        whole_business_area_access=True,
+        name="Role with close permission",
+    )
+
+    users["user_with_mark_ready_permission"] = UserFactory(partner=partner_empty)
+    create_user_role_with_permissions(
+        users["user_with_mark_ready_permission"],
+        [Permissions.PM_MARK_READY_FOR_CLOSURE],
+        business_area,
+        whole_business_area_access=True,
+        name="Role with mark ready for closure permission",
+    )
+
     users["user_with_action_permissions"] = UserFactory(partner=partner_empty)
     create_user_role_with_permissions(
         users["user_with_action_permissions"],
@@ -455,6 +475,8 @@ def test_prepare_user_recipients_for_send_for_approval(notification_setup: dict)
         "user_with_authorize_permission",
         "user_with_review_permission",
         "user_with_download_xlsx_permission",
+        "user_with_close_permission",
+        "user_with_mark_ready_permission",
     ]:
         assert users[key] not in payment_notification.user_recipients.all()
 
@@ -505,6 +527,8 @@ def test_prepare_user_recipients_for_approve(notification_setup: dict) -> None:
         "user_with_approval_permission_wrong_program_partner_empty",
         "user_with_review_permission",
         "user_with_download_xlsx_permission",
+        "user_with_close_permission",
+        "user_with_mark_ready_permission",
     ]:
         assert users[key] not in payment_notification.user_recipients.all()
 
@@ -555,6 +579,8 @@ def test_prepare_user_recipients_for_authorize(notification_setup: dict) -> None
         "user_with_approval_permission_wrong_program_partner_empty",
         "user_with_authorize_permission",
         "user_with_download_xlsx_permission",
+        "user_with_close_permission",
+        "user_with_mark_ready_permission",
     ]:
         assert users[key] not in payment_notification.user_recipients.all()
 
@@ -605,8 +631,154 @@ def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
         "user_with_approval_permission_wrong_program_partner_empty",
         "user_with_authorize_permission",
         "user_with_review_permission",
+        "user_with_close_permission",
+        "user_with_mark_ready_permission",
     ]:
         assert users[key] not in payment_notification.user_recipients.all()
+
+
+def test_prepare_user_recipients_for_mark_ready_for_closure(notification_setup: dict) -> None:
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    users = notification_setup["users"]
+    assert payment_notification.user_recipients.count() == 11
+
+    for key in [
+        "user_with_partner_unicef_hq",
+        "user_with_action_permissions",
+        "user_with_close_permission",
+        "user_with_no_permissions_partner_with_action_permissions",
+        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
+    ]:
+        assert users[key] in payment_notification.user_recipients.all()
+
+    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
+
+    for key in [
+        "user_with_mark_ready_permission",
+        "user_with_partner_unicef_in_ba",
+        "user_with_no_permissions",
+        "user_with_authorize_permission",
+        "user_with_review_permission",
+        "user_with_download_xlsx_permission",
+    ]:
+        assert users[key] not in payment_notification.user_recipients.all()
+
+
+def test_prepare_user_recipients_for_send_back_to_finished(notification_setup: dict) -> None:
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    users = notification_setup["users"]
+    assert payment_notification.user_recipients.count() == 11
+
+    for key in [
+        "user_with_partner_unicef_hq",
+        "user_with_action_permissions",
+        "user_with_mark_ready_permission",
+        "user_with_no_permissions_partner_with_action_permissions",
+        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
+    ]:
+        assert users[key] in payment_notification.user_recipients.all()
+
+    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
+
+    for key in [
+        "user_with_close_permission",
+        "user_with_partner_unicef_in_ba",
+        "user_with_no_permissions",
+        "user_with_authorize_permission",
+        "user_with_review_permission",
+        "user_with_download_xlsx_permission",
+    ]:
+        assert users[key] not in payment_notification.user_recipients.all()
+
+
+def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_closure(
+    notification_setup: dict,
+) -> None:
+    action_user = notification_setup["user_action_user"]
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        action_user,
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    assert action_user not in payment_notification.user_recipients.all()
+    assert action_user.email not in payment_notification.email.recipients
+    assert action_user.email in payment_notification.email.ccs
+
+
+@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+def test_send_email_notification_subject_mark_ready_for_closure(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    assert payment_notification.email.subject == "Payment pending for Closure"
+
+
+@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+def test_send_email_notification_mark_ready_for_closure(notification_setup: dict, mocker: Any) -> None:
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    payment_notification.send_email_notification()
+    assert mock_send.call_count == 1
+
+
+@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+def test_send_email_notification_subject_send_back_to_finished(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    assert payment_notification.email.subject == "Payment sent back to Finished"
+
+
+@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+def test_send_email_notification_send_back_to_finished(notification_setup: dict, mocker: Any) -> None:
+    mock_send = mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    payment_notification.send_email_notification()
+    assert mock_send.call_count == 1
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -623,21 +795,7 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
-def test_send_email_notification_subject_test_env(notification_setup: dict, mocker: Any) -> None:
-    mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
-    payment_notification = PaymentNotification(
-        notification_setup["payment_plan"],
-        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
-        notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
-    )
-    assert payment_notification.email.subject == "[test] Payment pending for Approval"
-
-
-@override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
-@override_settings(EMAIL_SUBJECT_PREFIX="")
-def test_send_email_notification_subject_prod_env(notification_setup: dict, mocker: Any) -> None:
+def test_send_email_notification_subject_send_for_approval(notification_setup: dict, mocker: Any) -> None:
     mocker.patch("hope.apps.payment.notifications.MailjetClient.send_email")
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
@@ -717,7 +875,6 @@ def test_send_email_notification_without_catch_all_email(notification_setup: dic
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
 )
-@override_settings(ENV="prod")
 def test_send_email_notification_exclude_superuser(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     users = notification_setup["users"]
@@ -765,7 +922,6 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
     ENABLE_MAILJET=True,
     MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
 )
-@override_settings(ENV="prod")
 def test_send_email_notification_exclude_staff_user(notification_setup: dict, mocker: Any) -> None:
     mock_post = mocker.patch("hope.apps.utils.celery_tasks.requests.post")
     users = notification_setup["users"]
@@ -806,3 +962,27 @@ def test_send_email_notification_exclude_staff_user(notification_setup: dict, mo
         assert users[key].email in payment_notification.email.recipients
 
     assert mock_post.call_count == 1
+
+
+@override_config(
+    SEND_PAYMENT_PLANS_NOTIFICATION=True,
+    ENABLE_MAILJET=True,
+    MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
+    NOTIFY_INTERNAL_USERS=True,
+)
+def test_send_email_notification_include_internal_users(notification_setup: dict, mocker: Any) -> None:
+    mocker.patch("hope.apps.utils.celery_tasks.requests.post")
+    users = notification_setup["users"]
+    users["user_with_partner_unicef_hq"].is_superuser = True
+    users["user_with_partner_unicef_hq"].is_staff = True
+    users["user_with_partner_unicef_hq"].save()
+
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+    payment_notification.send_email_notification()
+
+    assert users["user_with_partner_unicef_hq"].email in payment_notification.email.recipients

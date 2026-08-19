@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import {
@@ -55,18 +56,21 @@ export function AdminAreaAutocomplete({
     }));
   }, [debouncedInputText]);
 
+  const geoAreasParams = {
+    businessAreaSlug: businessArea,
+    level: level,
+    name: queryVariables.search,
+  };
   const {
     data: areasData,
     isLoading: loading,
     refetch,
   } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', queryVariables, businessArea, level],
-    queryFn: () =>
-      RestService.restBusinessAreasGeoAreasList({
-        businessAreaSlug: businessArea,
-        level: level,
-        name: queryVariables.search,
-      }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasList,
+      geoAreasParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasGeoAreasList(geoAreasParams),
     enabled: open && !!businessArea,
     staleTime: 0,
     refetchOnWindowFocus: false,

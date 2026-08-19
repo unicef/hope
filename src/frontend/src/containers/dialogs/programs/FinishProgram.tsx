@@ -6,6 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
@@ -38,7 +39,10 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['program', businessArea, program.code],
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsRetrieve),
+        });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
         });
       },
     });
@@ -81,7 +85,9 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            {t('Are you sure you want to finish this Programme?')}
+            {t(
+              'Are you sure you want to finish this Programme? All active tickets that are not yet closed, and any tickets with a Household ID or Individual ID related to this Programme, will be filtered out of every grievance list, report and dashboard. They will remain visible within this Programme.',
+            )}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>

@@ -1,9 +1,13 @@
+import copy
 import datetime
+import json
 
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
+    AreaFactory,
     BusinessAreaFactory,
     CountryFactory,
     DataCollectingTypeFactory,
@@ -19,9 +23,11 @@ from hope.apps.household.const import (
     DISABLED,
     FEMALE,
     GOVERNMENT_PARTNER,
+    HUMANITARIAN_PARTNER,
     MALE,
     NOT_DISABLED,
     PRIVATE_PARTNER,
+    ROLE_ALTERNATE,
 )
 from hope.contrib.aurora.services.czech_republic_flex_registration_service import CzechRepublicFlexRegistration
 from hope.models import (
@@ -197,6 +203,74 @@ def czech_context(czech_record_fields: dict) -> dict:
     }
 
 
+@pytest.fixture
+def czech_rdi_context(czech_context: dict) -> dict:
+    service = CzechRepublicFlexRegistration(czech_context["registration"])
+    rdi = service.create_rdi(czech_context["user"], "czech test rdi")
+    return {"service": service, "rdi": rdi}
+
+
+@pytest.fixture
+def record_with_humanitarian_consent(czech_context: dict, czech_record_fields: dict):
+    fields = copy.deepcopy(czech_record_fields)
+    fields["consent"][0]["consent_sharing_h_c_2"] = "y"
+    return RecordFactory(
+        registration=czech_context["registration"].source_id,
+        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        source_id=2,
+        fields=fields,
+        files=None,
+    )
+
+
+@pytest.fixture
+def record_with_string_storage(czech_context: dict, czech_record_fields: dict):
+    record = RecordFactory(
+        registration=czech_context["registration"].source_id,
+        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        source_id=3,
+        fields=None,
+        files=None,
+        storage=json.dumps(json.dumps(czech_record_fields)).encode(),
+    )
+    record.refresh_from_db()
+    return record
+
+
+@pytest.fixture
+def record_without_head(czech_context: dict, czech_record_fields: dict):
+    fields = copy.deepcopy(czech_record_fields)
+    fields.pop("legal-guardian-information")
+    fields["primary-carer-info"][0]["role_i_c"] = "y"
+    return RecordFactory(
+        registration=czech_context["registration"].source_id,
+        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        source_id=4,
+        fields=fields,
+        files=None,
+    )
+
+
+@pytest.fixture
+def record_with_invalid_document_date(czech_context: dict, czech_record_fields: dict):
+    fields = copy.deepcopy(czech_record_fields)
+    fields["primary-carer-info"][0]["national_passport_issuance_i_c"] = "not-a-date"
+    return RecordFactory(
+        registration=czech_context["registration"].source_id,
+        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        source_id=5,
+        fields=fields,
+        files=None,
+    )
+
+
+@pytest.fixture
+def czech_admin_areas() -> list:
+    admin1 = AreaFactory(p_code="CZ010")
+    admin2 = AreaFactory(p_code="CZ0109", parent=admin1)
+    return [admin1, admin2]
+
+
 def test_import_data_to_datahub(czech_context: dict) -> None:
     registration = czech_context["registration"]
     record = czech_context["record"]
@@ -290,3 +364,97 @@ def test_import_data_to_datahub(czech_context: dict) -> None:
     assert proof_legal_guardianship.document_number == "128dj"
     assert proof_legal_guardianship.individual == second_child
     assert proof_legal_guardianship.rdi_merge_status == "PENDING"
+
+
+def test_set_default_head_of_household_marks_first_role_y_individual() -> None:
+    individuals = [{"role_i_c": "n"}, {"role_i_c": "y"}, {"role_i_c": "y"}]
+
+    CzechRepublicFlexRegistration._set_default_head_of_household(individuals)
+
+    assert "relationship_i_c" not in individuals[0]
+    assert individuals[1]["relationship_i_c"] == "head"
+    assert "relationship_i_c" not in individuals[2]
+
+
+def test_validate_household_without_individuals_raises() -> None:
+    service = CzechRepublicFlexRegistration(None)
+
+    with pytest.raises(ValidationError, match="Household should has at least one individual"):
+        service.validate_household([])
+
+
+def test_validate_household_without_head_raises() -> None:
+    service = CzechRepublicFlexRegistration(None)
+
+    with pytest.raises(ValidationError, match="Household should has at least one Head of Household"):
+        service.validate_household([{"relationship_i_c": "son_daughter"}])
+
+
+def test_create_household_adds_humanitarian_partner_to_consent_sharing(
+    czech_rdi_context: dict, record_with_humanitarian_consent
+) -> None:
+    service = czech_rdi_context["service"]
+    rdi = czech_rdi_context["rdi"]
+
+    service.create_household_for_rdi_household(record_with_humanitarian_consent, rdi)
+
+    household = PendingHousehold.objects.first()
+    assert household.consent_sharing == [GOVERNMENT_PARTNER, PRIVATE_PARTNER, HUMANITARIAN_PARTNER]
+
+
+def test_create_household_parses_string_record_data(czech_rdi_context: dict, record_with_string_storage) -> None:
+    service = czech_rdi_context["service"]
+    rdi = czech_rdi_context["rdi"]
+
+    service.create_household_for_rdi_household(record_with_string_storage, rdi)
+
+    assert PendingHousehold.objects.count() == 1
+    assert PendingIndividual.objects.count() == 4
+
+
+def test_create_household_without_head_promotes_role_y_individual_to_head(
+    czech_rdi_context: dict, record_without_head
+) -> None:
+    service = czech_rdi_context["service"]
+    rdi = czech_rdi_context["rdi"]
+
+    service.create_household_for_rdi_household(record_without_head, rdi)
+
+    household = PendingHousehold.objects.first()
+    assert household.head_of_household.full_name == "Tetiana Symkanych"
+    role = PendingIndividualRoleInHousehold.objects.get()
+    assert role.role == ROLE_ALTERNATE
+
+
+def test_create_household_with_invalid_document_date_reports_individual_number(
+    czech_rdi_context: dict, record_with_invalid_document_date
+) -> None:
+    service = czech_rdi_context["service"]
+    rdi = czech_rdi_context["rdi"]
+
+    with pytest.raises(ValidationError, match="individual nr 1"):
+        service.create_household_for_rdi_household(record_with_invalid_document_date, rdi)
+
+
+def test_create_household_with_existing_admin_areas_fails_on_p_code_assignment(
+    czech_rdi_context: dict, czech_context: dict, czech_admin_areas: list
+) -> None:
+    service = czech_rdi_context["service"]
+    rdi = czech_rdi_context["rdi"]
+    record = czech_context["record"]
+
+    with pytest.raises(ValidationError, match="is not a valid UUID"):
+        service.create_household_for_rdi_household(record, rdi)
+
+
+def test_phone_number_validity_reflects_number(czech_context: dict) -> None:
+    registration = czech_context["registration"]
+    record = czech_context["record"]
+    user = czech_context["user"]
+
+    service = CzechRepublicFlexRegistration(registration)
+    rdi = service.create_rdi(user, f"czech_republic rdi {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    assert PendingIndividual.objects.get(full_name="Tetiana Symkanych").phone_no_valid is True
+    assert PendingIndividual.objects.get(full_name="Ivan Drago").phone_no_valid is False

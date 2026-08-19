@@ -16,6 +16,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedPDUOnlineEditListList } from '@restgenerated/models/PaginatedPDUOnlineEditListList';
 import {
   periodicDataUpdatesOnlineEditsStatusToColor,
@@ -108,26 +109,11 @@ const PeriodicDataUpdatePendingForMerge = () => {
     onSuccess: () => {
       showMessage('Templates merged successfully.');
       setSelected([]);
+      // Merged items move between the status-filtered lists.
       queryClient.invalidateQueries({
-        queryKey: [
-          'periodicDataUpdatePendingForMerge',
-          queryVariables,
-          businessAreaSlug,
-          programId,
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          'mergedPeriodicDataUpdates',
-          {
-            ordering: 'created_at',
-            businessAreaSlug,
-            programCode: programId,
-            status: ['MERGED' as const],
-          },
-          businessAreaSlug,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,
+        ),
       });
     },
     onError: (error: any) => {
@@ -141,12 +127,15 @@ const PeriodicDataUpdatePendingForMerge = () => {
   };
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
-    queryKey: [
-      'periodicDataUpdatePendingForMerge',
-      queryVariables,
-      businessAreaSlug,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList,
+      {
+        businessAreaSlug,
+        programCode: programId,
+        ordering: queryVariables.ordering,
+        status: queryVariables.status,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,

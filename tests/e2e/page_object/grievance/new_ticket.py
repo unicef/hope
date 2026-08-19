@@ -1,8 +1,14 @@
+from contextlib import suppress
 from time import sleep
 
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions
 
 from e2e.page_object.base_components import BaseComponents
 
@@ -56,6 +62,7 @@ class NewTicket(BaseComponents):
     checkbox = 'tr[role="checkbox"]'
     select_urgency = 'div[data-cy="select-urgency"]'
     select_priority = 'div[data-cy="select-priority"]'
+    select_submission_channel = 'div[data-cy="select-submissionChannel"]'
     input_language = 'textarea[data-cy="input-language"]'
     input_area = 'input[data-cy="input-area"]'
     admin_area_autocomplete = 'div[data-cy="admin-area-autocomplete"]'
@@ -74,7 +81,6 @@ class NewTicket(BaseComponents):
     select_program = 'div[data-cy="select-program"]'
     input_individual_data_phone_no_alternative = 'input[data-cy="input-individualDataPhoneNoAlternative"]'
     date_picker_filter = 'div[data-cy="date-picker-filter"]'
-    input_individualdata_blockchainname = 'input[data-cy="input-individualData.blockchainName"]'
     select_individualdata_selfcaredisability = 'div[data-cy="select-individualData.selfcareDisability"]'
     select_individualdata_observeddisability = 'div[data-cy="select-individualData.observedDisability"]'
     select_individualdata_workstatus = 'div[data-cy="select-individualData.workStatus"]'
@@ -97,8 +103,6 @@ class NewTicket(BaseComponents):
     select_individualdata_preferredlanguage = 'div[data-cy="select-individualData.preferredLanguage"]'
     select_individualdata_relationship = 'div[data-cy="select-individualData.relationship"]'
     select_individualdata_role = 'div[data-cy="select-individualData.role"]'
-    input_individualdata_walletaddress = 'input[data-cy="input-individualData.walletAddress"]'
-    input_individualdata_walletname = 'input[data-cy="input-individualData.walletName"]'
     input_individualdata_whoanswersaltphone = 'input[data-cy="input-individualData.whoAnswersAltPhone"]'
     input_individualdata_whoanswersphone = 'input[data-cy="input-individualData.whoAnswersPhone"]'
     select_householddataupdatefields_fieldname = 'div[data-cy="select-householdDataUpdateFields[{}].fieldName"]'
@@ -137,17 +141,17 @@ class NewTicket(BaseComponents):
     label_administrative_level3 = 'div[data-cy="label-Administrative Level 3"]'
     input_questionnaire_admin4 = '[data-cy="input-questionnaire_admin4"]'
     label_administrative_level4 = 'div[data-cy="label-Administrative Level 4"]'
-    input_questionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
+    input_questionnaire_months_displaced_h_f = '[data-cy="input-questionnaire_months_displaced_h_f"]'
     label_length_of_time_since_arrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
-    input_questionnaire_fullname = 'span[data-cy="input-questionnaire_fullName"]'
+    input_questionnaire_fullname = '[data-cy="input-questionnaire_fullName"]'
     label_individual_full_name = 'div[data-cy="label-Member full name"]'
-    input_questionnaire_birthdate = 'span[data-cy="input-questionnaire_birthDate"]'
+    input_questionnaire_birthdate = '[data-cy="input-questionnaire_birthDate"]'
     label_birth_date = 'div[data-cy="label-Birth Date"]'
-    input_questionnaire_sex = 'span[data-cy="input-questionnaire_sex"]'
+    input_questionnaire_sex = '[data-cy="input-questionnaire_sex"]'
     label_gender = 'div[data-cy="label-Gender"]'
-    input_questionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'
+    input_questionnaire_phoneno = '[data-cy="input-questionnaire_phoneNo"]'
     label_phone_number = 'div[data-cy="label-Phone Number"]'
-    input_questionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
+    input_questionnaire_relationship = '[data-cy="input-questionnaire_relationship"]'
     label_relationship_to_hoh = 'div[data-cy="label-Relationship to Head of Group"]'
 
     # Texts
@@ -232,6 +236,20 @@ class NewTicket(BaseComponents):
 
     def get_received_consent(self) -> WebElement:
         return self.wait_for(self.received_consent, timeout=100)
+
+    def check_received_consent(self) -> None:
+        for _ in range(3):
+            consent = self.wait_for(self.received_consent, timeout=30)
+            consent_input = consent.find_element(By.CSS_SELECTOR, "input")
+            if consent_input.is_selected():
+                return
+            self.click(self.received_consent)
+            try:
+                self._wait(5).until(expected_conditions.element_to_be_selected(consent_input))
+                return
+            except TimeoutException:
+                continue
+        raise AssertionError("Received consent checkbox could not be selected")
 
     def get_description(self) -> WebElement:
         return self.wait_for(self.description)
@@ -344,6 +362,9 @@ class NewTicket(BaseComponents):
     def get_select_priority(self) -> WebElement:
         return self.wait_for(self.select_priority)
 
+    def get_select_submission_channel(self) -> WebElement:
+        return self.wait_for(self.select_submission_channel)
+
     def get_input_language(self) -> WebElement:
         return self.wait_for(self.input_language)
 
@@ -411,9 +432,6 @@ class NewTicket(BaseComponents):
     def fill_date_picker_filter(self, value: str) -> None:
         self.fill_date_picker(self.wait_for(self.date_picker_filter), value)
 
-    def get_input_individualdata_blockchainname(self) -> WebElement:
-        return self.wait_for(self.input_individualdata_blockchainname)
-
     def get_select_individualdata_selfcaredisability(self) -> WebElement:
         return self.wait_for(self.select_individualdata_selfcaredisability)
 
@@ -480,12 +498,6 @@ class NewTicket(BaseComponents):
     def get_select_individualdata_role(self) -> WebElement:
         return self.wait_for(self.select_individualdata_role)
 
-    def get_input_individualdata_walletaddress(self) -> WebElement:
-        return self.wait_for(self.input_individualdata_walletaddress)
-
-    def get_input_individualdata_walletname(self) -> WebElement:
-        return self.wait_for(self.input_individualdata_walletname)
-
     def get_input_individualdata_whoanswersaltphone(self) -> WebElement:
         return self.wait_for(self.input_individualdata_whoanswersaltphone)
 
@@ -530,18 +542,22 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.input_file)
 
     def get_input_questionnaire_size(self) -> WebElement:
-        # Questionnaire checkboxes only mount once the household detail query
-        # resolves (LoadingComponent renders until then). Wait for the spinner
-        # to clear before scrolling/clicking, otherwise the checkbox span isn't
-        # in the DOM yet and the wait below times out.
-        self.wait_for_disappear('div[data-cy="loading-container"]')
+        # Questionnaire checkboxes mount only after the household-detail query
+        # resolves; a LoadingComponent (data-cy="loading-container") shows while
+        # it is in flight. Waiting only for the spinner to disappear is racy --
+        # until_not() returns immediately when the spinner has not mounted yet --
+        # so block on the query lifecycle instead: let the spinner appear
+        # (tolerating an already-fast query), then wait for it to clear.
+        spinner = 'div[data-cy="loading-container"]'
+        with suppress(NoSuchElementException):
+            self.wait_for(spinner, timeout=5)
+        self.wait_for_disappear(spinner)
         self.driver.execute_script(
             """
             container = document.querySelector("div[data-cy='main-content']")
             container.scrollBy(0,-600)
             """
         )
-        sleep(2)
         return self.wait_for(self.input_questionnaire_size)
 
     def get_label_household_size(self) -> WebElement:

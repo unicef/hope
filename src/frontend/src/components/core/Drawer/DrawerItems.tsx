@@ -24,6 +24,7 @@ import { useProgramContext } from 'src/programContext';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 
 const Text = styled(ListItemText)`
@@ -68,7 +69,9 @@ export const DrawerItems = ({
   const permissions = usePermissions();
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
         slug: businessArea,
@@ -114,7 +117,8 @@ export const DrawerItems = ({
     // When GlobalProgramFilter applied
     if (!isAllPrograms) {
       const safeProgramId = programId.replace(/[^a-zA-Z0-9\-_=+]/g, '');
-      updatedMenuItems[programDetailsIndex].href = `/details/${encodeURIComponent(safeProgramId)}`;
+      updatedMenuItems[programDetailsIndex].href =
+        `/details/${encodeURIComponent(safeProgramId)}`;
     }
     updatedMenuItems = updatedMenuItems.filter((item) => {
       let isVisible = isAllPrograms
@@ -271,7 +275,11 @@ export const DrawerItems = ({
             to={item.href}
             target="_blank"
           >
-            <Box display="flex">
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
               <Icon>{item.icon}</Icon>
               <Text primary={item?.name} />
             </Box>

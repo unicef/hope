@@ -1,6 +1,5 @@
 from decimal import Decimal
 import json
-import os
 from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
@@ -44,6 +43,7 @@ from hope.models import (
     FinancialInstitutionMapping,
     FinancialServiceProvider,
     FspNameMapping,
+    LogEntry,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
@@ -69,12 +69,9 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def mock_payment_gateway_env_vars() -> None:
-    with mock.patch.dict(
-        os.environ,
-        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST/"},
-    ):
-        yield
+def mock_payment_gateway_env_vars(settings) -> None:
+    settings.PAYMENT_GATEWAY_API_KEY = "TEST"
+    settings.PAYMENT_GATEWAY_API_URL = "TEST/"
 
 
 def normalize(data: Any) -> dict:
@@ -146,6 +143,17 @@ def pg_fsp(delivery_mechanisms):
     )
     fsp.delivery_mechanisms.add(delivery_mechanisms["cash_over_the_counter"])
     return fsp
+
+
+@pytest.fixture
+def unchanged_pg_fsp():
+    return FinancialServiceProviderFactory(
+        name="Unchanged FSP",
+        vision_vendor_number="VEN-UNCHANGED",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        data_transfer_configuration=[],
+        payment_gateway_id="fsp-unchanged",
+    )
 
 
 @pytest.fixture
@@ -274,6 +282,136 @@ def payment_gateway_setup(
         "collectors": collectors_and_households["collectors"],
         "households": collectors_and_households["households"],
     }
+
+
+@pytest.fixture
+def unmatched_payment_gateway_record():
+    return PaymentRecordData(
+        id=999,
+        remote_id="missing-payment",
+        created="2023-10-10",
+        modified="2023-10-11",
+        record_code="missing",
+        parent="missing",
+        status="PENDING",
+        auth_code="missing",
+        fsp_code="missing",
+    )
+
+
+@pytest.fixture
+def error_records_by_payment_instruction(payment_gateway_setup):
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    PaymentPlanSplit.objects.filter(pk__in=[split_1.pk, split_2.pk]).update(sent_to_payment_gateway=True)
+    return {
+        split_1.id: [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(payment_2.id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent=str(split_1.id),
+                status="ERROR",
+                auth_code="1",
+                payout_amount=0.0,
+                fsp_code="1",
+                message="Error",
+            )
+        ],
+        split_2.id: [
+            PaymentRecordData(
+                id=2,
+                remote_id=str(payment_1.id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="2",
+                parent=str(split_2.id),
+                status="ERROR",
+                auth_code="2",
+                payout_amount=0.0,
+                fsp_code="2",
+                message="Error",
+            )
+        ],
+    }
+
+
+@pytest.fixture
+def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
+    split_1, _ = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    PaymentPlanSplit.objects.filter(pk=split_1.pk).update(sent_to_payment_gateway=True)
+    return {
+        "payment_plan": payment_gateway_setup["payment_plan"],
+        "sent_split": split_1,
+        "unsent_payment": payment_1,
+        "sent_payment": payment_2,
+        "gateway_records": [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(payment_2.id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent=str(split_1.id),
+                status="ERROR",
+                auth_code="1",
+                payout_amount=0.0,
+                fsp_code="1",
+                message="Error",
+            )
+        ],
+    }
+
+
+def test_sync_records_batches_updates_and_uses_prefetched_reconciliation(error_records_by_payment_instruction) -> None:
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_records_for_payment_instruction = Mock(
+        side_effect=error_records_by_payment_instruction.__getitem__
+    )
+
+    with (
+        mock.patch.object(PaymentPlan, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
+        mock.patch.object(pg_service, "change_payment_instruction_status"),
+        mock.patch.object(
+            pg_service,
+            "_bulk_update_payments",
+            wraps=pg_service._bulk_update_payments,
+        ) as bulk_update_mock,
+    ):
+        pg_service.sync_records()
+
+    is_reconciled_mock.assert_not_called()
+    bulk_update_mock.assert_called_once()
+    payments_by_update_fields = bulk_update_mock.call_args.args[0]
+    assert len(payments_by_update_fields) == 1
+    assert len(next(iter(payments_by_update_fields.values()))) == 2
+
+
+def test_sync_records_keeps_plan_unreconciled_when_pending_payment_is_not_in_sent_instruction(
+    payment_gateway_setup_with_unsent_pending_payment,
+) -> None:
+    setup = payment_gateway_setup_with_unsent_pending_payment
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_records_for_payment_instruction = Mock(return_value=setup["gateway_records"])
+
+    with (
+        mock.patch.object(PaymentPlan, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
+        mock.patch.object(pg_service, "change_payment_instruction_status") as change_status_mock,
+    ):
+        pg_service.sync_records()
+
+    is_reconciled_mock.assert_not_called()
+    change_status_mock.assert_not_called()
+    pg_service.api.get_records_for_payment_instruction.assert_called_once_with(setup["sent_split"].id)
+    setup["payment_plan"].refresh_from_db()
+    setup["unsent_payment"].refresh_from_db()
+    setup["sent_payment"].refresh_from_db()
+    assert setup["payment_plan"].status == PaymentPlan.Status.ACCEPTED
+    assert setup["unsent_payment"].status == Payment.STATUS_PENDING
+    assert setup["sent_payment"].status == Payment.STATUS_ERROR
 
 
 @mock.patch(
@@ -483,6 +621,57 @@ def test_sync_records_error_messages(
     assert change_payment_instruction_status_mock.call_count == 2
 
 
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+def test_sync_records_ignores_unmatched_gateway_records(
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    payment_gateway_setup: dict,
+    unmatched_payment_gateway_record: PaymentRecordData,
+) -> None:
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    split_1.sent_to_payment_gateway = True
+    split_2.sent_to_payment_gateway = True
+    split_1.save(update_fields=["sent_to_payment_gateway"])
+    split_2.save(update_fields=["sent_to_payment_gateway"])
+    get_records_for_payment_instruction_mock.return_value = [unmatched_payment_gateway_record]
+
+    PaymentGatewayService().sync_records()
+
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    assert get_records_for_payment_instruction_mock.call_count == 2
+    assert payment_1.status == Payment.STATUS_PENDING
+    assert payment_2.status == Payment.STATUS_PENDING
+
+
+def test_bulk_update_payments_uses_one_query_and_persists_signatures(
+    payment_gateway_setup: dict,
+    django_assert_num_queries: Any,
+) -> None:
+    source_payments = payment_gateway_setup["payments"]
+    payment_1, payment_2 = Payment.objects.filter(pk__in=[source_payments[0].pk, source_payments[1].pk]).select_related(
+        "household_snapshot", "delivery_type", "currency"
+    )
+    old_signature_1 = payment_1.signature_hash
+    old_signature_2 = payment_2.signature_hash
+    payment_1.status = Payment.STATUS_ERROR
+    payment_2.status = Payment.STATUS_ERROR
+
+    with django_assert_num_queries(1):
+        PaymentGatewayService._bulk_update_payments({("status",): [payment_1, payment_2]})
+
+    expected_signature_1 = payment_1.signature_hash
+    expected_signature_2 = payment_2.signature_hash
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    assert payment_1.signature_hash == expected_signature_1
+    assert payment_2.signature_hash == expected_signature_2
+    assert payment_1.signature_hash != old_signature_1
+    assert payment_2.signature_hash != old_signature_2
+
+
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
@@ -567,6 +756,108 @@ def test_sync_payment_plan(
     assert payment_plan.status == PaymentPlan.Status.FINISHED
 
 
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+def test_sync_payment_plan_ignores_unmatched_gateway_records(
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    payment_gateway_setup: dict,
+    unmatched_payment_gateway_record: PaymentRecordData,
+) -> None:
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    split_1.sent_to_payment_gateway = True
+    split_2.sent_to_payment_gateway = True
+    split_1.save(update_fields=["sent_to_payment_gateway"])
+    split_2.save(update_fields=["sent_to_payment_gateway"])
+    get_records_for_payment_instruction_mock.return_value = [unmatched_payment_gateway_record]
+
+    PaymentGatewayService().sync_payment_plan(payment_gateway_setup["payment_plan"])
+
+    payment_1.refresh_from_db()
+    payment_2.refresh_from_db()
+    assert get_records_for_payment_instruction_mock.call_count == 2
+    assert payment_1.status == Payment.STATUS_PENDING
+    assert payment_2.status == Payment.STATUS_PENDING
+
+
+@pytest.mark.enable_activity_log
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+    return_value="FINALIZED",
+)
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction")
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+    return_value=100.00,
+)
+def test_sync_payment_plan_logs_payment_changes_with_user(
+    get_quantity_in_usd_mock: Any,
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    change_payment_instruction_status_mock: Any,
+    payment_gateway_setup: dict,
+) -> None:
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payments = payment_gateway_setup["payments"]
+    payment_plan = payment_gateway_setup["payment_plan"]
+    user = UserFactory()
+
+    split_1.sent_to_payment_gateway = True
+    split_2.sent_to_payment_gateway = True
+    split_1.save()
+    split_2.save()
+
+    payments[0].status = Payment.STATUS_PENDING
+    payments[1].status = Payment.STATUS_PENDING
+    payments[0].save()
+    payments[1].save()
+
+    get_records_for_payment_instruction_mock.side_effect = [
+        [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(payments[0].id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
+                auth_code="1",
+                payout_amount=float(payments[0].entitlement_quantity),
+                fsp_code="1",
+            )
+        ],
+        [
+            PaymentRecordData(
+                id=2,
+                remote_id=str(payments[1].id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="2",
+                parent="2",
+                status="ERROR",
+                auth_code="2",
+                payout_amount=0.0,
+                fsp_code="2",
+                message="Error",
+            ),
+        ],
+    ]
+
+    pg_service = PaymentGatewayService(user_id=str(user.pk))
+    pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+
+    pg_service.sync_payment_plan(payment_plan)
+
+    payment_logs = LogEntry.objects.filter(object_id__in=[str(p.id) for p in payments])
+    assert payment_logs.count() == 2
+    assert all(log.action == LogEntry.UPDATE for log in payment_logs)
+    assert all(log.user == user for log in payment_logs)
+    assert all("status" in log.changes for log in payment_logs)
+
+
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
@@ -629,6 +920,24 @@ def test_sync_record(
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
     assert change_payment_instruction_status_mock.call_count == 2
+
+
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+def test_sync_record_ignores_unmatched_gateway_record(
+    get_record_mock: Any,
+    get_exchange_rate_mock: Any,
+    payment_gateway_setup: dict,
+    unmatched_payment_gateway_record: PaymentRecordData,
+) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    get_record_mock.return_value = unmatched_payment_gateway_record
+
+    PaymentGatewayService().sync_record(payment)
+
+    payment.refresh_from_db()
+    assert get_record_mock.call_count == 1
+    assert payment.status == Payment.STATUS_PENDING
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
@@ -1199,6 +1508,14 @@ def test_api_create_payment_instruction(post_mock: Any) -> None:
     assert isinstance(response_data, PaymentInstructionData)
 
 
+def test_api_get_download_payment_instruction_url() -> None:
+    api = PaymentGatewayAPI()
+
+    response_data = api.get_download_payment_instruction_url("pi-remote-id")
+
+    assert response_data == api.get_url(api.Endpoints.DOWNLOAD_PAYMENT_INSTRUCTION.format(remote_id="pi-remote-id"))
+
+
 def test_payment_instruction_payload_includes_business_area_office_and_payment_country(
     payment_plan_splits: list[PaymentPlanSplit],
 ) -> None:
@@ -1390,6 +1707,7 @@ def test_sync_delivery_mechanisms(
     get_delivery_mechanisms_mock: Any,
     delivery_mechanisms: dict,
     account_types: dict,
+    django_assert_num_queries: Any,
 ) -> None:
     assert DeliveryMechanism.objects.count() == len(delivery_mechanisms)
 
@@ -1412,7 +1730,8 @@ def test_sync_delivery_mechanisms(
     pg_service = PaymentGatewayService()
     pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock  # type: ignore
 
-    pg_service.sync_delivery_mechanisms()
+    with django_assert_num_queries(2):
+        pg_service.sync_delivery_mechanisms()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     assert dm_cash.is_active
     assert dm_cash.account_type.key == "bank"
@@ -1553,6 +1872,8 @@ def test_sync_fsps(
     fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
     assert fsp_new.payment_gateway_id == "33"
     assert fsp_new.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+    assert fsp_new.created_at is not None
+    assert fsp_new.updated_at is not None
     assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == [
         "cash_over_the_counter",
         "transfer",
@@ -1610,6 +1931,31 @@ def test_sync_fsps_matches_existing_fsp_by_vision_vendor_number(
     assert existing_fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
     assert list(existing_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["transfer"]
     assert FinancialServiceProvider.objects.filter(vision_vendor_number="VEN-EXISTING").count() == 1
+
+
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
+def test_sync_fsps_does_not_update_unchanged_fsp(
+    get_fsps_mock: Any,
+    unchanged_pg_fsp: FinancialServiceProvider,
+) -> None:
+    original_updated_at = unchanged_pg_fsp.updated_at
+    get_fsps_mock.return_value = [
+        FspData(
+            id=unchanged_pg_fsp.payment_gateway_id,
+            remote_id=unchanged_pg_fsp.payment_gateway_id,
+            name=unchanged_pg_fsp.name,
+            vendor_number=unchanged_pg_fsp.vision_vendor_number,
+            configs=[],
+        )
+    ]
+
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_fsps = get_fsps_mock  # type: ignore
+
+    pg_service.sync_fsps()
+
+    unchanged_pg_fsp.refresh_from_db()
+    assert unchanged_pg_fsp.updated_at == original_updated_at
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
@@ -1832,6 +2178,27 @@ def test_payment_payload_uses_service_provider_code_from_snapshot(payment_gatewa
 
     map_financial_institution_mock.assert_not_called()
     assert payload["account"]["service_provider_code"] == "SNAPSHOT_CODE"
+
+
+def test_payment_payload_system_fields_override_fsp_extra_fields(payment_gateway_setup: dict) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    payment.extras = {
+        "extra_fields": {"reconciliation_reference": "do-not-send"},
+        "fsp_extra_fields": {
+            "account": "do-not-send",
+            "amount": "do-not-override",
+            "fsp_reference": "FSP-001",
+            "origination_currency": "do-not-send",
+        },
+    }
+
+    payload = PaymentSerializer().get_payload(payment)
+
+    assert payload["fsp_reference"] == "FSP-001"
+    assert payload["amount"] == str(payment.entitlement_quantity)
+    assert "account" not in payload
+    assert "origination_currency" not in payload
+    assert "reconciliation_reference" not in payload
 
 
 def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(

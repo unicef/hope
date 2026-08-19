@@ -7,6 +7,7 @@ import { Button } from '@mui/material';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,7 +48,9 @@ function ProgramsPage(): ReactElement {
   const permissions = usePermissions();
 
   const { data: choicesData } = useQuery<ProgramChoices>({
-    queryKey: ['programChoices', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsChoicesRetrieve({
         businessAreaSlug: businessArea,

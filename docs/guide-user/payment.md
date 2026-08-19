@@ -10,6 +10,8 @@ tags:
 
 The Payment module is the payment management tool within HOPE that facilitates the creation of payment lists using information from targeted households. This module is used to create payment plans with payees and entitlements, track approvals and authorizations, create and export payment lists for payment providers (FSPs or IPs) and perform reconciliation with reports from payment providers.
 
+Payment Plan Groups, Purposes, Follow-Up Instructions, Top-Ups and Top-Up Amendments are covered on their own page: [Payment Plan Groups, Purposes, Follow-Up Instructions & Top-Ups](payment-groups-and-purposes.md).
+
 ## HOPE and VISION Integration
 
 When payments are provided through an Implementing Partner and are included in the Direct Cash transfer to the Implementing Partner, HOPE Payment Module currently does not fetch data from Vision. It is the responsibility of UNICEF programme manager to ensure that the cash to be transferred to beneficiary by the IP in the Cash Plan does not exceed the agreed DCT amount. Cash plans using a UNICEF FSP need to receive up-to-date financial data (approved with sufficient fund commitments) from Vision to be approved and released. Vision either provides,
@@ -69,8 +71,14 @@ The entitle formula is used to define the amount that a household or individual 
 8. Upload the filled excel through UPLOAD RECONCILIATION INFO.
     ![Image](_screenshots/payment/pay_28.png)
 
-9. See the reconciliation summary below
+    In addition to the standard reconciliation columns, the file can contain extra columns provided by the Financial Service Provider (FSP), such as an identity or transaction reference. HOPE stores each non-empty value from these columns against the corresponding Payment Record. Empty values are not stored.
+
+9. See the reconciliation summary below.
     ![Image](_screenshots/payment/pay_30.png)
 
-10. Click EXPORT XLSX on the upper right.
+10. Open a Payment Record to review the imported values. They are displayed in the **Reconciliation Information: Extra Info** section. The information can be used, for example, to manually compare an FSP identity reference with the individual's registration-time [Identification Key](population.md#identification-key).
+
+11. Click EXPORT XLSX on the upper right.
     ![Image](_screenshots/payment/pay_29.png)
+
+Support for additional Payment Record reconciliation fields was introduced by [Change Request 299147: Identity Field customisation & PaymentRecord flex fields](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/299147).

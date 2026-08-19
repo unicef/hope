@@ -53,6 +53,8 @@ function PaymentDetails({
   ].includes(payment.status);
 
   const collectorAccountData = payment?.snapshotCollectorAccountData ?? {};
+  const extraFields = Object.entries(payment.extraFields ?? {});
+  const fspExtraFields = Object.entries(payment.fspExtraFields ?? {});
 
   return (
     <>
@@ -285,7 +287,7 @@ function PaymentDetails({
           )}
         </Grid>
       </Overview>
-      {payment.extras && Object.keys(payment.extras).length > 0 && (
+      {extraFields.length > 0 && (
         <Overview>
           <Title>
             <Typography variant="h6">
@@ -293,7 +295,24 @@ function PaymentDetails({
             </Typography>
           </Title>
           <Grid container spacing={3}>
-            {Object.entries(payment.extras).map(([key, value]) => (
+            {extraFields.map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
+                <LabelizedField
+                  label={formatNormalCaseValue(key)}
+                  value={safeStringify(value)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Overview>
+      )}
+      {fspExtraFields.length > 0 && (
+        <Overview>
+          <Title>
+            <Typography variant="h6">{t('FSP extra fields')}</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            {fspExtraFields.map(([key, value]) => (
               <Grid key={key} size={{ xs: 3 }}>
                 <LabelizedField
                   label={formatNormalCaseValue(key)}

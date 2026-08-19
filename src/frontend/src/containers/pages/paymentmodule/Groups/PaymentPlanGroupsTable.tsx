@@ -8,6 +8,7 @@ import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/Paginat
 import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useState } from 'react';
 
@@ -34,25 +35,33 @@ export const PaymentPlanGroupsTable = ({
     setPage(0);
   }, [filter]);
 
+  const groupsListParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    ...queryVariables,
+  };
   const { data, isLoading, error } = useQuery<PaginatedPaymentPlanGroupListList>({
-    queryKey: ['paymentPlanGroupsList', businessArea, programId, queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+      groupsListParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        ...queryVariables,
-      }),
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList(groupsListParams),
     enabled: !!businessArea && !!programId,
   });
 
+  const groupsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: dataCount } = useQuery<CountResponse>({
-    queryKey: ['paymentPlanGroupsCount', businessArea, programId, queryVariables],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsCountRetrieve,
+      groupsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        groupsCountParams,
       ),
     enabled: !!businessArea && !!programId && page === 0,
   });

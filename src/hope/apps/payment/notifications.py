@@ -3,12 +3,12 @@ from typing import Any
 
 from constance import config
 from django.conf import settings
-from django.db.models import Q, QuerySet
-from django.utils import timezone
+from django.db.models import QuerySet
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.mailjet import MailjetClient
-from hope.models import PaymentPlan, RoleAssignment, User
+from hope.apps.utils.recipients import users_with_permissions
+from hope.models import PaymentPlan, User
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +18,16 @@ class PaymentNotification:
     ACTION_APPROVE = PaymentPlan.Action.APPROVE.name
     ACTION_AUTHORIZE = PaymentPlan.Action.AUTHORIZE.name
     ACTION_REVIEW = PaymentPlan.Action.REVIEW.name  # payment plan release
+    ACTION_MARK_READY_FOR_CLOSURE = PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name
+    ACTION_SEND_BACK_TO_FINISHED = PaymentPlan.Action.SEND_BACK_TO_FINISHED.name
 
     ACTION_TO_RECIPIENTS_PERMISSIONS_MAP = {
         ACTION_SEND_FOR_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
         ACTION_APPROVE: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
         ACTION_AUTHORIZE: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
         ACTION_REVIEW: Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.name,
+        ACTION_MARK_READY_FOR_CLOSURE: Permissions.PM_CLOSE_FINISHED.name,
+        ACTION_SEND_BACK_TO_FINISHED: Permissions.PM_MARK_READY_FOR_CLOSURE.name,
     }
 
     ACTION_PREPARE_EMAIL_BODIES_MAP = {
@@ -45,6 +49,16 @@ class PaymentNotification:
         ACTION_REVIEW: {
             "action_name": "released",
             "subject": "Payment is Released",
+            "recipient_title": "Reviewer",
+        },
+        ACTION_MARK_READY_FOR_CLOSURE: {
+            "action_name": "marked as ready for closure",
+            "subject": "Payment pending for Closure",
+            "recipient_title": "Reviewer",
+        },
+        ACTION_SEND_BACK_TO_FINISHED: {
+            "action_name": "sent back to finished",
+            "subject": "Payment sent back to Finished",
             "recipient_title": "Reviewer",
         },
     }
@@ -71,29 +85,12 @@ class PaymentNotification:
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
         permission = PaymentNotification.ACTION_TO_RECIPIENTS_PERMISSIONS_MAP[self.action]
-        business_area = self.payment_plan.business_area
-        program = self.payment_plan.program
-
-        role_assignments = (
-            RoleAssignment.objects.filter(
-                Q(role__permissions__contains=[permission])
-                & Q(business_area=business_area)
-                & (Q(program=None) | Q(program=program))
-            )
-            .exclude(expiry_date__lt=timezone.now())
-            .distinct()
-        )
-        users = (
-            User.objects.filter(
-                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
-            )
-            .exclude(id=self.action_user.id)
-            .distinct()
-        )
-
-        if settings.ENV == "prod":
-            users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
-        return users
+        return users_with_permissions(
+            self.payment_plan.business_area,
+            [permission],
+            [self.payment_plan.program],
+            exclude_staff=True,
+        ).exclude(id=self.action_user.id)
 
     def _prepare_email(self) -> MailjetClient:
         body_variables = self._prepare_body_variables()

@@ -6,10 +6,10 @@ from unittest.mock import patch
 import uuid
 
 from aniso8601 import parse_date
+from constance.test import override_config
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
-from django.test import override_settings
 from django.utils import timezone
 from django.utils.timezone import now
 from freezegun import freeze_time
@@ -601,7 +601,7 @@ def test_create_follow_up_pp(
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(77):
+    with django_assert_num_queries(59):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_child_payment_plan_async_task(follow_up_pp_2)
 
@@ -629,11 +629,11 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
 
 
 @pytest.mark.parametrize(
-    ("plan_type", "method_name"),
+    ("plan_type", "method_name", "expected_kwargs"),
     [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up"),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up"),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment"),
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up", {}),
+        (PaymentPlan.PlanType.TOP_UP, "create_top_up", {"fixed_amount": None, "amounts": None}),
+        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment", {"fixed_amount": None, "amounts": None}),
     ],
 )
 def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
@@ -642,6 +642,7 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
+    expected_kwargs: dict,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -666,7 +667,7 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
         )
 
     assert result == expected_child_plan
-    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date)
+    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date, **expected_kwargs)
 
 
 def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
@@ -692,11 +693,15 @@ def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validati
 
 
 @pytest.mark.parametrize(
-    ("plan_type", "method_name"),
+    ("plan_type", "method_name", "expected_kwargs"),
     [
-        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments"),
-        (PaymentPlan.PlanType.TOP_UP, "create_top_up_payments"),
-        (PaymentPlan.PlanType.TOP_UP_AMENDMENT, "create_top_up_amendment_payments"),
+        (PaymentPlan.PlanType.FOLLOW_UP, "create_follow_up_payments", {}),
+        (PaymentPlan.PlanType.TOP_UP, "create_funded_child_payments", {"amounts": None, "fixed_amount": None}),
+        (
+            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+            "create_funded_child_payments",
+            {"amounts": None, "fixed_amount": None},
+        ),
     ],
 )
 def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_expected_service_method_called(
@@ -705,6 +710,7 @@ def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_e
     cycle: ProgramCycle,
     plan_type: str,
     method_name: str,
+    expected_kwargs: dict,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -716,7 +722,7 @@ def test_create_child_plan_payments_arrange_supported_type_act_dispatch_assert_e
     with mock.patch.object(PaymentPlanService, method_name) as service_method:
         PaymentPlanService(payment_plan).create_child_plan_payments()
 
-    service_method.assert_called_once_with()
+    service_method.assert_called_once_with(**expected_kwargs)
 
 
 def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert_validation_error(
@@ -1360,7 +1366,7 @@ def test_rebuild_payment_plan_population_full_rebuild_with_steficon_targeting_qu
     )
 
     mock_full_rebuild.assert_called_once_with(pp)
-    mock_apply_steficon.assert_called_once_with(pp, str(pp.steficon_rule_targeting.rule_id))
+    mock_apply_steficon.assert_called_once_with(pp, str(pp.steficon_rule_targeting.rule_id), None)
 
 
 def test_lock_fsp_validation(
@@ -1420,6 +1426,74 @@ def test_unlock_fsp(user: User, business_area: Any, cycle: ProgramCycle) -> None
 
     payment_plan.refresh_from_db(fields=("status",))
     assert payment_plan.status == PaymentPlan.Status.LOCKED
+
+
+@pytest.fixture
+def payment_plan_importing_fsp_extra_fields(user: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED_FSP,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    )
+
+
+@pytest.fixture
+def payment_plan_with_fsp_extra_fields_import_error(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED_FSP,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+    )
+
+
+def test_unlock_fsp_rejects_active_fsp_extra_fields_import(
+    payment_plan_importing_fsp_extra_fields: PaymentPlan,
+) -> None:
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(payment_plan_importing_fsp_extra_fields).unlock_fsp()
+
+
+def test_send_for_approval_rejects_active_fsp_extra_fields_import(
+    payment_plan_importing_fsp_extra_fields: PaymentPlan,
+) -> None:
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(payment_plan_importing_fsp_extra_fields).send_for_approval()
+
+
+def test_unlock_fsp_allows_retryable_background_error(
+    payment_plan_with_fsp_extra_fields_import_error: PaymentPlan,
+) -> None:
+    PaymentPlanService(payment_plan_with_fsp_extra_fields_import_error).unlock_fsp()
+
+    assert payment_plan_with_fsp_extra_fields_import_error.status == PaymentPlan.Status.LOCKED
+    assert payment_plan_with_fsp_extra_fields_import_error.background_action_status is None
+
+
+def test_send_for_approval_allows_retryable_background_error(
+    payment_plan_with_fsp_extra_fields_import_error: PaymentPlan,
+    user: User,
+    mocker: Any,
+) -> None:
+    notification_task = mocker.patch(
+        "hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task"
+    )
+
+    PaymentPlanService(payment_plan_with_fsp_extra_fields_import_error).execute_update_status_action(
+        {"action": PaymentPlan.Action.SEND_FOR_APPROVAL},
+        user,
+    )
+
+    assert payment_plan_with_fsp_extra_fields_import_error.status == PaymentPlan.Status.IN_APPROVAL
+    assert payment_plan_with_fsp_extra_fields_import_error.background_action_status is None
+    notification_task.assert_called_once()
 
 
 def test_update_pp_program_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
@@ -1821,7 +1895,6 @@ def test_get_collector() -> None:
     assert collcector_type == "PRIMARY"
 
 
-@override_settings(ENV="prod")
 def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> None:
     partner_unicef = PartnerFactory(name="UNICEF")
     partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
@@ -1870,6 +1943,38 @@ def test_send_reconciliation_overdue_email_recipients(business_area: Any) -> Non
         assert user_with_perm_ba_wide in emailed_users
         assert superuser_with_perm not in emailed_users
         assert user_with_perm_in_different_program not in emailed_users
+
+
+@override_config(NOTIFY_INTERNAL_USERS=True)
+def test_send_reconciliation_overdue_email_recipients_include_internal_users(business_area: Any) -> None:
+    partner_unicef = PartnerFactory(name="UNICEF")
+    partner_unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+    role, _ = Role.objects.update_or_create(
+        name="RECEIVE_PP_OVERDUE_EMAIL", defaults={"permissions": [Permissions.RECEIVE_PP_OVERDUE_EMAIL.value]}
+    )
+
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    cycle = ProgramCycleFactory(program=program)
+    pp = PaymentPlanFactory(
+        dispersion_start_date=now() - timedelta(days=10),
+        dispersion_end_date=now(),
+        status=PaymentPlan.Status.ACCEPTED,
+        program_cycle=cycle,
+    )
+    pp.refresh_from_db()
+    program = pp.program
+    program.reconciliation_window_in_days = 10
+    program.send_reconciliation_window_expiry_notifications = True
+    program.save()
+
+    superuser_with_perm = UserFactory(partner=partner_unicef_hq, is_superuser=True)
+    RoleAssignment.objects.create(user=superuser_with_perm, role=role, business_area=business_area, program=program)
+
+    with mock.patch.object(User, "email_user", autospec=True) as mock_email_user:
+        PaymentPlanService(pp).send_reconciliation_overdue_email_for_pp()
+
+        assert mock_email_user.call_count == 1
+        assert mock_email_user.call_args_list[0].args[0] == superuser_with_perm
 
 
 @pytest.fixture
@@ -1959,6 +2064,65 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
         service.check_payment_plan_and_update_status(approval_process)
 
     mock_flow_cls.return_value.status_approve.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_ready_for_closure_sends_notification(mock_notify, user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    PaymentPlanService(payment_plan).ready_for_closure(user=user)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    mock_notify.assert_called_once_with(
+        payment_plan,
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+        str(user.pk),
+        mock.ANY,
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_ready_for_closure_suppresses_notification_when_notify_false(
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.FINISHED,
+    )
+
+    PaymentPlanService(payment_plan).ready_for_closure(user, notify=False)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    mock_notify.assert_not_called()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+def test_send_back_to_finished_sends_notification(
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+
+    PaymentPlanService(payment_plan).send_back_to_finished(user=user)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.FINISHED
+    mock_notify.assert_called_once_with(
+        payment_plan,
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+        str(user.pk),
+        mock.ANY,
+    )
 
 
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):

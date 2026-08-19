@@ -10,6 +10,8 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
+from flags.models import FlagState
+import openpyxl
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -37,8 +39,11 @@ from extras.test_utils.factories.payment import PaymentVerificationPlanFactory, 
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import (
+    FileTemp,
     FinancialServiceProvider,
+    LogEntry,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -130,7 +135,289 @@ def payment_plan_actions_context(
         "url_pp_send_back_to_finished": reverse("api:payments:payment-plans-send-back-to-finished", kwargs=url_kwargs),
         "url_pp_abort": reverse("api:payments:payment-plans-abort", kwargs=url_kwargs),
         "url_pp_reactivate_abort": reverse("api:payments:payment-plans-reactivate-abort", kwargs=url_kwargs),
+        "url_send_to_vision": reverse("api:payments:payment-plans-send-to-vision", kwargs=url_kwargs),
     }
+
+
+@pytest.fixture
+def fsp_extra_fields_actions_context(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> dict[str, Any]:
+    context = payment_plan_actions_context
+    payment_plan = context["pp"]
+    payment_plan.status = PaymentPlan.Status.LOCKED_FSP
+    payment_plan.save(update_fields=["status"])
+    payment = PaymentFactory(
+        parent=payment_plan,
+        program=payment_plan.program,
+        unicef_id="PAYMENT-FSP-EXTRA-FIELDS",
+    )
+    payment.save(update_fields=["unicef_id"])
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PM_VIEW_LIST, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        context["business_area"],
+        context["program_active"],
+    )
+
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "fsp_reference"])
+    worksheet.append([payment.unicef_id, "FSP-001"])
+    stream = BytesIO()
+    workbook.save(stream)
+    import_file = SimpleUploadedFile("fsp_extra_fields.xlsx", stream.getvalue())
+    url_kwargs = {
+        "business_area_slug": context["business_area"].slug,
+        "program_code": context["program_active"].code,
+        "pk": payment_plan.pk,
+    }
+    return {
+        **context,
+        "import_file": import_file,
+        "template_url": reverse("api:payments:payment-plans-fsp-extra-fields-template", kwargs=url_kwargs),
+        "import_url": reverse("api:payments:payment-plans-fsp-extra-fields-import-xlsx", kwargs=url_kwargs),
+    }
+
+
+@pytest.fixture
+def locked_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    context = fsp_extra_fields_actions_context
+    context["pp"].status = PaymentPlan.Status.LOCKED
+    context["pp"].save(update_fields=["status"])
+    return context
+
+
+@pytest.fixture
+def retryable_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    context = fsp_extra_fields_actions_context
+    context["pp"].background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    context["pp"].save(update_fields=["background_action_status"])
+    return context
+
+
+@pytest.fixture
+def active_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    context = fsp_extra_fields_actions_context
+    context["pp"].background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    context["pp"].save(update_fields=["background_action_status"])
+    return context
+
+
+@pytest.fixture
+def unsupported_file_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        **fsp_extra_fields_actions_context,
+        "import_file": SimpleUploadedFile("fsp_extra_fields.csv", b"payment_id,fsp_reference"),
+    }
+
+
+@pytest.fixture
+def unreadable_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        **fsp_extra_fields_actions_context,
+        "import_file": SimpleUploadedFile("fsp_extra_fields.xlsx", b"not-an-xlsx-workbook"),
+    }
+
+
+@pytest.fixture
+def invalid_workbook_fsp_extra_fields_actions_context(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> dict[str, Any]:
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["fsp_reference"])
+    worksheet.append(["FSP-001"])
+    stream = BytesIO()
+    workbook.save(stream)
+    return {
+        **fsp_extra_fields_actions_context,
+        "import_file": SimpleUploadedFile("fsp_extra_fields.xlsx", stream.getvalue()),
+    }
+
+
+def test_fsp_extra_fields_template_is_available_for_locked_fsp(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = fsp_extra_fields_actions_context["client"].get(fsp_extra_fields_actions_context["template_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_fsp_extra_fields_template_is_not_available_for_locked(
+    locked_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = locked_fsp_extra_fields_actions_context["client"].get(
+        locked_fsp_extra_fields_actions_context["template_url"]
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "available only for LOCKED_FSP" in str(response.data)
+
+
+@patch("hope.apps.payment.api.views.import_payment_plan_fsp_extra_fields_from_xlsx_async_task")
+@pytest.mark.enable_activity_log
+def test_fsp_extra_fields_import_is_available_for_locked_fsp(
+    mock_import_task: Mock,
+    fsp_extra_fields_actions_context: dict[str, Any],
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
+        response = fsp_extra_fields_actions_context["client"].post(
+            fsp_extra_fields_actions_context["import_url"],
+            {"file": fsp_extra_fields_actions_context["import_file"]},
+            format="multipart",
+        )
+
+    fsp_extra_fields_actions_context["pp"].refresh_from_db(fields=["background_action_status"])
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        fsp_extra_fields_actions_context["pp"].background_action_status
+        == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    )
+    assert len(callbacks) == 1
+    file_temp = FileTemp.objects.get(object_id=fsp_extra_fields_actions_context["pp"].pk)
+    assert file_temp.created_by == fsp_extra_fields_actions_context["user"]
+    assert file_temp.file.name.endswith(".xlsx")
+    mock_import_task.assert_called_once_with(
+        fsp_extra_fields_actions_context["pp"],
+        str(file_temp.id),
+        str(fsp_extra_fields_actions_context["user"].pk),
+    )
+    log = LogEntry.objects.get(
+        content_type=get_content_type_for_model(fsp_extra_fields_actions_context["pp"]),
+        object_id=fsp_extra_fields_actions_context["pp"].pk,
+    )
+    assert log.user == fsp_extra_fields_actions_context["user"]
+    assert log.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    }
+    assert list(log.programs.values_list("pk", flat=True)) == [fsp_extra_fields_actions_context["pp"].program.pk]
+
+
+def test_fsp_extra_fields_import_can_retry_after_error(
+    retryable_fsp_extra_fields_actions_context: dict[str, Any],
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=False) as callbacks:
+        response = retryable_fsp_extra_fields_actions_context["client"].post(
+            retryable_fsp_extra_fields_actions_context["import_url"],
+            {"file": retryable_fsp_extra_fields_actions_context["import_file"]},
+            format="multipart",
+        )
+
+    retryable_fsp_extra_fields_actions_context["pp"].refresh_from_db(fields=["background_action_status"])
+    assert response.status_code == status.HTTP_200_OK
+    assert (
+        retryable_fsp_extra_fields_actions_context["pp"].background_action_status
+        == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
+    )
+    assert len(callbacks) == 1
+
+
+def test_fsp_extra_fields_import_rejects_active_background_action(
+    active_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = active_fsp_extra_fields_actions_context["client"].post(
+        active_fsp_extra_fields_actions_context["import_url"],
+        {"file": active_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Another background action is already in progress." in str(response.data)
+    assert FileTemp.objects.filter(object_id=active_fsp_extra_fields_actions_context["pp"].pk).exists() is False
+
+
+def test_fsp_extra_fields_import_requires_file(
+    fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = fsp_extra_fields_actions_context["client"].post(
+        fsp_extra_fields_actions_context["import_url"],
+        {},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "file" in response.data
+    assert FileTemp.objects.filter(object_id=fsp_extra_fields_actions_context["pp"].pk).exists() is False
+
+
+def test_fsp_extra_fields_import_rejects_unsupported_file_type(
+    unsupported_file_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = unsupported_file_fsp_extra_fields_actions_context["client"].post(
+        unsupported_file_fsp_extra_fields_actions_context["import_url"],
+        {"file": unsupported_file_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Unsupported file type (csv)." in str(response.data["file"])
+    assert (
+        FileTemp.objects.filter(object_id=unsupported_file_fsp_extra_fields_actions_context["pp"].pk).exists() is False
+    )
+
+
+def test_fsp_extra_fields_import_rejects_unreadable_xlsx(
+    unreadable_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = unreadable_fsp_extra_fields_actions_context["client"].post(
+        unreadable_fsp_extra_fields_actions_context["import_url"],
+        {"file": unreadable_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Invalid XLSX file. Upload another file." in str(response.data)
+    assert FileTemp.objects.filter(object_id=unreadable_fsp_extra_fields_actions_context["pp"].pk).exists() is False
+
+
+def test_fsp_extra_fields_import_returns_workbook_validation_errors(
+    invalid_workbook_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = invalid_workbook_fsp_extra_fields_actions_context["client"].post(
+        invalid_workbook_fsp_extra_fields_actions_context["import_url"],
+        {"file": invalid_workbook_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data == [
+        {
+            "sheet": "Sheet",
+            "coordinates": None,
+            "message": "Header payment_id is required exactly once",
+        }
+    ]
+    assert (
+        FileTemp.objects.filter(object_id=invalid_workbook_fsp_extra_fields_actions_context["pp"].pk).exists() is False
+    )
+
+
+def test_fsp_extra_fields_import_is_not_available_for_locked(
+    locked_fsp_extra_fields_actions_context: dict[str, Any],
+) -> None:
+    response = locked_fsp_extra_fields_actions_context["client"].post(
+        locked_fsp_extra_fields_actions_context["import_url"],
+        {"file": locked_fsp_extra_fields_actions_context["import_file"]},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "imported only for LOCKED_FSP" in str(response.data)
 
 
 @pytest.mark.parametrize(
@@ -689,7 +976,7 @@ def test_pp_entitlement_export_xlsx(
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
         payment_plan_actions_context["pp"].refresh_from_db()
-        assert payment_plan_actions_context["pp"].has_export_file is True
+        assert payment_plan_actions_context["pp"].has_entitlement_file is True
 
 
 def test_pp_entitlement_export_xlsx_invalid_status(
@@ -2009,3 +2296,151 @@ def test_get_object_raises_for_instruction_managed_blocked_action(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "This Payment Plan is managed by a Follow Up Instruction." in str(response.data)
+
+
+def _enable_vision_flag() -> None:
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+    )
+
+
+def test_send_to_vision_flag_disabled_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_VISION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_send_to_vision_wrong_status_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_VISION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.DRAFT
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_already_sent_returns_403(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_VISION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].internal_data = {"vision": {"sent": True}}
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    mock_vision.assert_not_called()
+
+
+def test_send_to_vision_no_permission_returns_403(
+    payment_plan_actions_context: dict[str, Any],
+) -> None:
+    _enable_vision_flag()
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_success(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.return_value = {"status": "ok", "messageId": "test-msg-id"}
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_VISION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["message"] == "Payment plan sent to Vision successfully: test-msg-id"
+    mock_vision.return_value.send_payment_plan.assert_called_once_with(payment_plan_actions_context["pp"])
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_api_error_returns_400(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIError("boom")
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_VISION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@patch("hope.apps.payment.api.views.VisionAPI")
+def test_send_to_vision_missing_creds_returns_400(
+    mock_vision: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag()
+    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIMissingCredentialsError("no creds")
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_VISION],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_send_to_vision"],
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

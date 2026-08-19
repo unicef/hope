@@ -73,7 +73,12 @@ export function DocumentsToRemoveTable({
   return (
     <>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Documents to be removed')}</Typography>
         </Box>
       </TableTitle>
@@ -81,12 +86,14 @@ export function DocumentsToRemoveTable({
         {documentsTableHead}
         <TableBody>
           {documentsToRemove?.map((row, index) => {
-            const document = Object.values(previousDocuments || {})
-              .find((doc: any) => doc.id === row.value) as any;
-
+            const document = Object.values(previousDocuments || {}).find(
+              (doc: any) => doc.id === row.value,
+            ) as any;
 
             return (
-              <TableRow key={`${document?.key || 'doc'}-${document?.country || index}`}>
+              <TableRow
+                key={`${document?.key || 'doc'}-${document?.country || index}`}
+              >
                 <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
@@ -99,7 +106,7 @@ export function DocumentsToRemoveTable({
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
                       checked={selectedDocumentsToRemove.includes(index)}
-                      inputProps={{ 'aria-labelledby': 'xd' }}
+                      slotProps={{ input: { 'aria-labelledby': 'xd' } }}
                     />
                   ) : (
                     selectedDocumentsToRemove.includes(index) && (

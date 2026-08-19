@@ -67,7 +67,11 @@ export function FormikBoolFieldGrievances({
       size="small"
       {...otherProps}
     >
-      <Box mb={1}>
+      <Box
+        sx={{
+          mb: 1,
+        }}
+      >
         <InputLabel>{otherProps.label}</InputLabel>
       </Box>
       <Select

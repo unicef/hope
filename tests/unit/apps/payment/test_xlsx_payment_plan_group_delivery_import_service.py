@@ -2,6 +2,8 @@ from decimal import Decimal
 from io import BytesIO
 from unittest.mock import patch
 
+from django.contrib.contenttypes.models import ContentType
+from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 import openpyxl
@@ -24,7 +26,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import Xls
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
     XlsxPaymentPlanGroupDeliveryImportService,
 )
-from hope.models import FinancialServiceProvider, Payment, PaymentPlan, ProgramCycle
+from hope.models import FileTemp, FinancialServiceProvider, Payment, PaymentPlan, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -116,6 +118,30 @@ def group_two_plans_one_fsp(program_cycle, business_area, fsp, delivery_mechanis
 
 
 @pytest.fixture
+def group_two_plans_with_shared_export_file(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    file_temp = FileTemp.objects.create(
+        object_id=str(ctx["group"].pk),
+        content_type=ContentType.objects.get_for_model(ctx["group"]),
+    )
+    file_temp.file.save("export.xlsx", ContentFile(b"exported-bytes"))
+    PaymentPlan.objects.filter(id__in=[ctx["plan_one"].id, ctx["plan_two"].id]).update(
+        export_tag=1, export_file_delivery=file_temp
+    )
+    ctx["plan_one"].refresh_from_db()
+    ctx["plan_two"].refresh_from_db()
+    return {**ctx, "file_temp": file_temp, "file_name": file_temp.file.name}
+
+
+@pytest.fixture
+def group_two_plans_with_sparse_fsp_header(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    ctx["payment_one"].extras = {"fsp_extra_fields": {"fsp_reference": "owned-by-fsp"}}
+    ctx["payment_one"].save(update_fields=["extras"])
+    return ctx
+
+
+@pytest.fixture
 def group_with_plan_without_template(program_cycle, business_area, fsp, delivery_mechanism):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan = PaymentPlanFactory(
@@ -180,7 +206,21 @@ def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, del
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
-    return {"group": group, "regular_plan": regular_plan, "follow_up_plan": follow_up_plan}
+    top_up_plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+    )
+    return {
+        "group": group,
+        "regular_plan": regular_plan,
+        "follow_up_plan": follow_up_plan,
+        "top_up_plan": top_up_plan,
+    }
 
 
 @pytest.fixture
@@ -252,6 +292,27 @@ def test_validate_succeeds_for_correct_header_and_rows(group_two_plans_one_fsp):
     assert service.errors == []
 
 
+def test_group_reconciliation_uses_group_wide_fsp_header_ownership(
+    group_two_plans_with_sparse_fsp_header,
+):
+    ctx = group_two_plans_with_sparse_fsp_header
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "fsp_reference", "returned_code"],
+        [
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "returned-fsp-value", "RETURNED-002"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    service.validate()
+    plan_service = service.per_plan_services[str(ctx["plan_two"].id)]
+    row = next(plan_service.ws_payments.iter_rows(min_row=2))
+
+    extras = plan_service._get_extras_for_row(row)
+
+    assert extras == {"returned_code": "RETURNED-002"}
+
+
 def test_validate_errors_when_required_column_missing(group_two_plans_one_fsp):
     ctx = group_two_plans_one_fsp
     file = _make_workbook(
@@ -314,7 +375,11 @@ def test_validate_errors_when_no_actual_changes(group_two_plans_one_fsp):
     service.open_workbook()
     service.validate()
 
-    assert any("aren't any updates" in error.message for error in service.errors)
+    expected_message = (
+        "There aren't any updates in the imported file. Reconciliation data is either empty or has already been "
+        "uploaded and cannot be overwritten."
+    )
+    assert any(error.message == expected_message for error in service.errors)
 
 
 def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_one_fsp):
@@ -408,13 +473,17 @@ def test_open_plans_are_not_indexed(group_with_open_plan):
     assert service.eligible_plans == []
 
 
-def test_follow_up_and_top_up_plans_are_excluded(group_with_follow_up_and_top_up_plans):
+def test_follow_up_and_top_up_plans_are_included(group_with_follow_up_and_top_up_plans):
     ctx = group_with_follow_up_and_top_up_plans
     file = _make_workbook(["payment_id", "delivered_quantity"], [])
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
 
-    assert [plan.id for plan in service.payment_plans] == [ctx["regular_plan"].id]
+    assert {plan.id for plan in service.payment_plans} == {
+        ctx["regular_plan"].id,
+        ctx["follow_up_plan"].id,
+        ctx["top_up_plan"].id,
+    }
 
 
 def test_payment_gateway_plan_is_skipped_and_its_payments_emit_specific_error(
@@ -471,6 +540,55 @@ def test_import_rolls_back_all_plans_when_any_plan_fails(group_two_plans_one_fsp
     ctx["payment_two"].refresh_from_db()
     assert ctx["payment_one"].delivered_quantity == before_one
     assert ctx["payment_two"].delivered_quantity == before_two
+
+
+def test_import_deletes_whole_shared_export_filetemp(
+    group_two_plans_with_shared_export_file, django_capture_on_commit_callbacks
+):
+    ctx = group_two_plans_with_shared_export_file
+    file_temp = ctx["file_temp"]
+    storage = file_temp.file.storage
+    file_name = ctx["file_name"]
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "currency"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+
+    # file delete is deferred to transaction.on_commit, so execute the captured callbacks
+    with django_capture_on_commit_callbacks(execute=True):
+        service.import_payment_list()
+
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+    assert not storage.exists(file_name)
+
+
+def test_import_does_not_crash_logging_change_after_removing_shared_export_file(
+    group_two_plans_with_shared_export_file,
+):
+    ctx = group_two_plans_with_shared_export_file
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "currency"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "USD"],
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "USD"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+
+    # log_payment_plan_change diffs a pre-remove snapshot whose export_file_delivery FK now
+    # points at a deleted FileTemp: this must not raise FileTemp.DoesNotExist.
+    service.import_payment_list()
+
+    ctx["payment_one"].refresh_from_db()
+    ctx["payment_two"].refresh_from_db()
+    assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
+    assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
 
 
 def test_import_payment_list_builds_services_when_validate_not_called(group_two_plans_one_fsp):

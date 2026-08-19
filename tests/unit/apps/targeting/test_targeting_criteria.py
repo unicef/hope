@@ -1,7 +1,6 @@
 import datetime
 
 from dateutil.relativedelta import relativedelta
-from flaky import flaky
 import pytest
 
 from extras.test_utils.factories import (
@@ -257,7 +256,6 @@ def test_household_ids(user, business_area, three_households):
     assert Household.objects.filter(plan.get_query()).distinct().count() == 1
 
 
-@flaky
 def test_individual_ids(user, business_area, three_households):
     hh1, _, _ = three_households
     individual = IndividualFactory(household=hh1)

@@ -33,6 +33,7 @@ from hope.apps.household.const import (
     STATUS_INACTIVE,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.program.api.serializers import (
     PaymentPlanPurposeSerializer,
@@ -130,6 +131,11 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
+    plan_type = serializers.ChoiceField(
+        choices=PaymentPlan.PlanType.choices,
+        required=False,
+        default=PaymentPlan.PlanType.REGULAR,
+    )
 
 
 class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
@@ -653,6 +659,28 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
         return attrs
 
 
+class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
+    """Top-Up and Top-Up Amendment creation: dispersion dates plus the amount, given one of two ways.
+
+    ``fixed_amount`` tops every eligible beneficiary up by the same value. ``file`` is the filled-in
+    amount template and decides both the amounts and who is in — beneficiaries left empty or at zero
+    are not part of the child plan and stay eligible for a later one. Exactly one of the two is
+    required.
+    """
+
+    fixed_amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, min_value=Decimal("0.01"))
+    file = serializers.FileField(required=False)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        fixed_amount, file = attrs.get("fixed_amount"), attrs.get("file")
+        if (fixed_amount is None) == (file is None):
+            raise serializers.ValidationError("Provide either a fixed amount or an amount file, not both.")
+        if file is not None:
+            attrs["amounts"] = parse_top_up_amount_file(self.context["payment_plan"], file)
+        return attrs
+
+
 class FollowUpInstructionCreateSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
@@ -846,8 +874,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     program_cycle = ProgramCycleSmallSerializer()
     is_payment_gateway = serializers.BooleanField(read_only=True)
     is_instruction_managed = serializers.BooleanField(read_only=True)
-    has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
-    has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
+    has_payment_list_export_file = serializers.BooleanField(source="has_entitlement_file")
     imported_file_name = serializers.CharField()
     payments_conflicts_count = serializers.SerializerMethodField()
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
@@ -861,17 +888,15 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_households = serializers.SerializerMethodField()
     excluded_individuals = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
-    can_create_top_up = serializers.SerializerMethodField()
-    can_create_top_up_amendment = serializers.SerializerMethodField()
+    can_create_top_up = serializers.BooleanField()
+    can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField()
+    can_send_to_vision = serializers.BooleanField()
     can_split = serializers.SerializerMethodField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    can_export_xlsx = serializers.SerializerMethodField()
-    can_download_xlsx = serializers.SerializerMethodField()
-    can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     steficon_rule = RuleCommitSerializer(read_only=True)
@@ -897,7 +922,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "is_payment_gateway",
             "is_instruction_managed",
             "has_payment_list_export_file",
-            "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
             "imported_file_date",
             "payments_conflicts_count",
@@ -919,13 +943,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
             "can_send_to_payment_gateway",
+            "can_send_to_vision",
             "can_split",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
-            "can_export_xlsx",
-            "can_download_xlsx",
-            "can_send_xlsx_password",
             "approval_process",
             "total_entitled_quantity_usd",
             "total_entitled_quantity_revised_usd",
@@ -1018,17 +1040,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             )
         return self._payments_summary_cache[cache_key]
 
-    @staticmethod
-    def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
-        delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
-        financial_service_provider = getattr(payment_plan, "financial_service_provider", None)
-        if not delivery_mechanism or not financial_service_provider:
-            return False
-        return bool(financial_service_provider.get_xlsx_template(delivery_mechanism))
-
-    def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
-        return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
-
     def get_payments_conflicts_count(self, payment_plan: PaymentPlan) -> int:
         # count conflict only for OPEN PaymentPlan
         if payment_plan.status == PaymentPlan.Status.OPEN:
@@ -1080,12 +1091,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             qs.values_list("id", flat=True)
         )
 
-    def get_can_create_top_up(self, obj: PaymentPlan) -> bool:
-        return obj.plan_type == PaymentPlan.PlanType.REGULAR and obj.eligible_payments_for_top_up().exists()
-
-    def get_can_create_top_up_amendment(self, obj: PaymentPlan) -> bool:
-        return obj.plan_type == PaymentPlan.PlanType.TOP_UP and obj.eligible_payments_for_top_up_amendment().exists()
-
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(
             is_follow_up=True,
@@ -1121,49 +1126,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["error_count"]
-
-    def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
-            user = self.context.get("request").user
-            if obj.is_payment_gateway:
-                if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
-                    return False
-                return self._payments_summary(obj)["pg_xlsx_export_blocking_count"] == 0
-
-            if not user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, obj.business_area):
-                return False
-            return self._has_fsp_delivery_mechanism_xlsx_template(obj)
-
-        return False
-
-    def get_can_download_xlsx(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
-            user = self.context.get("request").user
-            if obj.is_payment_gateway:
-                if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
-                    return False
-                return obj.has_export_file
-
-            if not user.has_perm(Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, obj.business_area):
-                return False
-            return obj.has_export_file
-
-        return False
-
-    def get_can_send_xlsx_password(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status in PaymentPlan.EXPORTABLE_STATUSES:
-            user = self.context.get("request").user
-            if obj.is_payment_gateway:
-                if not user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, obj.business_area):
-                    return False
-                return obj.has_export_file
-        return False
 
     def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
@@ -1549,6 +1511,8 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")
     collector = IndividualDetailSerializer()
     snapshot_collector_account_data = serializers.SerializerMethodField()
+    extra_fields = serializers.SerializerMethodField()
+    fsp_extra_fields = serializers.SerializerMethodField()
 
     class Meta(PaymentListSerializer.Meta):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
@@ -1564,12 +1528,21 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "additional_collector_name",
             "transaction_reference_id",
             "snapshot_collector_account_data",
-            "extras",
+            "extra_fields",
+            "fsp_extra_fields",
             "sent_to_fsp_date",
         )
 
     def get_snapshot_collector_account_data(self, obj: Payment) -> dict | None:
         return PaymentListSerializer.get_collector_field(obj, "account_data")
+
+    @extend_schema_field(serializers.DictField())
+    def get_extra_fields(self, obj: Payment) -> dict[str, object]:
+        return obj.extra_fields
+
+    @extend_schema_field(serializers.DictField())
+    def get_fsp_extra_fields(self, obj: Payment) -> dict[str, object]:
+        return obj.fsp_extra_fields
 
 
 class PaymentPlanSmallSerializer(serializers.ModelSerializer):
@@ -1951,6 +1924,7 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
 
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField()
+    plan_type = serializers.ChoiceField(choices=PaymentPlan.PlanType.choices)
     export_file_link = serializers.CharField(allow_null=True)
     has_password = serializers.BooleanField()
 
@@ -1963,6 +1937,10 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     can_send_to_payment_gateway = serializers.SerializerMethodField()
     batches = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
+    can_export_regular = serializers.SerializerMethodField()
+    can_export_follow_up = serializers.SerializerMethodField()
+    can_export_top_up = serializers.SerializerMethodField()
+    can_export_top_up_amendment = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -1975,6 +1953,10 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_send_to_payment_gateway",
             "batches",
             "delivery_import_file",
+            "can_export_regular",
+            "can_export_follow_up",
+            "can_export_top_up",
+            "can_export_top_up_amendment",
         ]
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
@@ -1994,12 +1976,15 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
                         output_field=IntegerField(),
                     )
                 ),
+                # a batch is exported for a single plan type, so Max just picks that type
+                batch_plan_type=Max("plan_type"),
             )
             .order_by("export_tag")
         )
         return [
             {
                 "export_tag": row["export_tag"],
+                "plan_type": row["batch_plan_type"],
                 "export_file_link": (
                     reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
                     if row["has_file"]
@@ -2009,6 +1994,26 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             }
             for row in tags_qs
         ]
+
+    def _has_exportable_plans(self, obj: PaymentPlanGroup, plan_type: str) -> bool:
+        """Whether any plan of a plan_type can be exported."""
+        return obj.payment_plans.filter(
+            plan_type=plan_type,
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            export_tag__isnull=True,
+        ).exists()
+
+    def get_can_export_regular(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.REGULAR)
+
+    def get_can_export_follow_up(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.FOLLOW_UP)
+
+    def get_can_export_top_up(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP)
+
+    def get_can_export_top_up_amendment(self, obj: PaymentPlanGroup) -> bool:
+        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))

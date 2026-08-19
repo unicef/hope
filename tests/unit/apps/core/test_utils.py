@@ -15,10 +15,13 @@ from extras.test_utils.factories import (
     ProgramFactory,
 )
 from extras.test_utils.factories.core import (
+    FileTempFactory,
     FlexibleAttributeChoiceFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
 )
+from extras.test_utils.factories.payment import PaymentPlanFactory
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import (
     AutoCompleteFilterTemp,
     CaseInsensitiveTuple,
@@ -51,13 +54,14 @@ from hope.apps.core.utils import (
     send_email_notification_on_commit,
     serialize_flex_attributes,
     sort_by_attr,
+    to_camel_case,
     to_choice_object,
     to_dict,
     to_snake_case,
     unique_slugify,
 )
 from hope.apps.payment.utils import get_payment_delivered_quantity_status_and_value
-from hope.models import BusinessArea, FlexibleAttribute, Household, Individual, Payment
+from hope.models import BusinessArea, FileTemp, FlexibleAttribute, Household, Individual, Payment
 
 # ============================================================================
 # Pure function tests (no DB needed)
@@ -371,6 +375,16 @@ def test_nested_getattr_raises_when_no_default():
         nested_getattr(obj, "missing")
 
 
+@pytest.mark.django_db
+def test_nested_getattr_returns_default_when_related_object_deleted():
+    file_temp = FileTempFactory()
+    payment_plan = PaymentPlanFactory(export_file_delivery=file_temp)
+    snapshot = copy_model_object(payment_plan)
+    FileTemp.objects.filter(pk=file_temp.pk).delete()
+
+    assert nested_getattr(snapshot, "export_file_delivery", None) is None
+
+
 def test_build_arg_dict_from_dict_maps_keys():
     assert build_arg_dict_from_dict({"src_a": 1, "src_b": 2}, {"dst_a": "src_a", "dst_b": "src_b"}) == {
         "dst_a": 1,
@@ -402,6 +416,21 @@ def test_build_flex_arg_dict_from_list_if_exists_keeps_only_present_keys():
 )
 def test_to_snake_case(camel, expected):
     assert to_snake_case(camel) == expected
+
+
+@pytest.mark.parametrize(
+    ("snake", "expected"),
+    [
+        ("", ""),
+        ("camel", "camel"),
+        ("camel_case", "camelCase"),
+        ("camel_case_word", "camelCaseWord"),
+        ("alreadyCamel", "alreadyCamel"),
+        ("single", "single"),
+    ],
+)
+def test_to_camel_case(snake, expected):
+    assert to_camel_case(snake) == expected
 
 
 def test_check_concurrency_version_returns_for_none():

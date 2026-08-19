@@ -35,7 +35,7 @@ def user():
 
 @pytest.fixture
 def business_area_with_kobo_token():
-    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan", kobo_token="123")
+    return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 
 
 @pytest.fixture

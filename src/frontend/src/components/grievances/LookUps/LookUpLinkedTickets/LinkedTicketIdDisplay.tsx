@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlueText } from '../LookUpStyles';
 import { ReactElement } from 'react';
@@ -12,7 +13,10 @@ export function LinkedTicketIdDisplay({
   const { businessArea } = useBaseUrl();
 
   const { data } = useQuery({
-    queryKey: ['grievanceTicket', ticketId, businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      { businessAreaSlug: businessArea, id: ticketId },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug: businessArea,

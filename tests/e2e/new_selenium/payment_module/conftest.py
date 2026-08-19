@@ -2,6 +2,7 @@ import datetime
 from decimal import Decimal
 from typing import Any
 
+from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import (
@@ -76,6 +77,33 @@ def closed_payment_plan(business_area: BusinessArea, create_super_user: Any) -> 
 
 
 @pytest.fixture
+def payment_plan_for_pagination(business_area: BusinessArea) -> tuple[PaymentPlan, str, str]:
+    """OPEN plan with 12 eligible payments -> 2 pages at the default page size of 10.
+
+    Regression fixture for PR #6064 (https://github.com/unicef/hope/pull/6064). Returns
+    (plan, page_one_marker_unicef_id, page_two_marker_unicef_id). created_at is assigned
+    explicitly so the frontend's default ordering=-created_at deterministically keeps the
+    newest payment on page 1 and the oldest on page 2.
+    """
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+    plan = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=program.cycles.first(),
+        status=PaymentPlan.Status.OPEN,
+        financial_service_provider=FinancialServiceProviderFactory(),
+        delivery_mechanism=DeliveryMechanismFactory(),
+    )
+    # Each payment needs a distinct household (unique constraint on parent + household);
+    # PaymentFactory auto-builds one per payment, inheriting the plan's business area/program.
+    payments = PaymentFactory.create_batch(12, parent=plan, program=program)
+    base = timezone.now()
+    for index, payment in enumerate(payments):
+        # index 0 = newest (page 1), index 11 = oldest (page 2, last row).
+        Payment.objects.filter(pk=payment.pk).update(created_at=base - datetime.timedelta(minutes=index))
+    return plan, payments[0].unicef_id, payments[11].unicef_id
+
+
+@pytest.fixture
 def payment_module_program(business_area: BusinessArea) -> Program:
     return ProgramFactory(
         name="Payment Module Program",
@@ -92,17 +120,6 @@ def program_cycle(payment_module_program: Program) -> ProgramCycle:
 @pytest.fixture
 def payment_plan_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
     return PaymentPlanGroupFactory(cycle=program_cycle, name="Original Group Name")
-
-
-@pytest.fixture
-def group_with_payment_plan(program_cycle: ProgramCycle, payment_plan_group: PaymentPlanGroup) -> PaymentPlanGroup:
-    PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=payment_plan_group,
-        business_area=program_cycle.program.business_area,
-        status=PaymentPlan.Status.OPEN,
-    )
-    return payment_plan_group
 
 
 @pytest.fixture

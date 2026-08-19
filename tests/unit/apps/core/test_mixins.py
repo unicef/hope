@@ -1,35 +1,38 @@
-import os
 from typing import Type
 from unittest.mock import MagicMock, patch
 
+from django.conf import settings
 import pytest
 from requests import Response, Session
 
 from hope.apps.core.api.mixins import BaseAPI
 
 
+class TestAPI(BaseAPI):
+    API_KEY_SETTING_NAME = "TEST_API_KEY"
+
+    def get_api_url(self) -> str:
+        return getattr(settings, "TEST_API_URL", "")
+
+    def get_api_key(self) -> str | None:
+        return "test_fake_key"
+
+
 @pytest.fixture
 def api_class() -> Type[BaseAPI]:
-    class TestAPI(BaseAPI):
-        API_KEY_ENV_NAME = "TEST_API_KEY"
-        API_URL_ENV_NAME = "TEST_API_URL"
-
     return TestAPI
 
 
 @pytest.fixture
-def api_instance(api_class: Type[BaseAPI]) -> BaseAPI:
-    with patch.dict(
-        os.environ,
-        {"TEST_API_KEY": "test_fake_key", "TEST_API_URL": "http://test-hope.com"},
-    ):
-        return api_class()
+def api_instance(api_class: Type[BaseAPI], settings) -> BaseAPI:
+    settings.TEST_API_URL = "http://test-hope.com"
+    return api_class()
 
 
-def test_base_api_init_missing_credentials_raises_error(api_class):
-    with patch.dict(os.environ, {"TEST_API_KEY": "", "TEST_API_URL": ""}):
-        with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
-            api_class()
+def test_base_api_init_missing_credentials_raises_error(api_class, settings):
+    settings.TEST_API_URL = ""
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        api_class()
 
     assert "Missing TestAPI Key/URL" in str(exc.value)
 
@@ -135,3 +138,101 @@ def test_base_api_delete_invalid_json_returns_empty_dict(mock_delete, api_instan
     assert status_code == 200
     assert result == {}
     mock_delete.assert_called_once_with("/test-endpoint", params={"param": "value"})
+
+
+def test_get_api_url_returns_empty_when_setting_name_not_set():
+    api = BaseAPI.__new__(BaseAPI)
+    assert api.get_api_url() == ""
+
+
+class TestAPIMissingKey(BaseAPI):
+    API_KEY_SETTING_NAME = "TEST_API_KEY"
+    API_URL_SETTING_NAME = "TEST_API_URL"
+
+
+class RequiredSettingsAPI(BaseAPI):
+    API_URL_SETTING_NAME = "TEST_API_URL"
+    API_AUTHENTICATION_REQUIRED = False
+    API_REQUIRED_SETTING_NAMES = ("TEST_REQUIRED_SETTING",)
+
+
+def test_base_api_init_raises_when_key_missing(settings):
+    settings.TEST_API_URL = "http://test-hope.com"
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        TestAPIMissingKey()
+
+    assert "Missing TestAPIMissingKey Key/URL" in str(exc.value)
+
+
+def test_base_api_init_raises_when_required_setting_missing(settings):
+    settings.TEST_API_URL = "http://test-hope.com"
+    settings.TEST_REQUIRED_SETTING = ""
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        RequiredSettingsAPI()
+
+    assert "Missing RequiredSettingsAPI settings: TEST_REQUIRED_SETTING" in str(exc.value)
+
+
+def test_get_api_key_returns_none_when_env_name_not_set():
+    api = BaseAPI.__new__(BaseAPI)
+    assert api.API_KEY_SETTING_NAME == ""
+    assert api.get_api_key() is None
+
+
+class ConstructorOverrideAPI(BaseAPI):
+    API_URL_SETTING_NAME = ""
+    API_KEY_SETTING_NAME = "TEST_API_KEY"
+
+
+def test_init_prefers_constructor_api_url(settings):
+    settings.TEST_API_KEY = "settings_key"
+    api = ConstructorOverrideAPI(api_url="https://cw.example.com/api/cb/")
+
+    assert api.api_url == "https://cw.example.com/api/cb/"
+    assert api.api_key == "settings_key"
+
+
+def test_init_prefers_constructor_api_key(settings):
+    api = ConstructorOverrideAPI(api_url="https://cw.example.com/", api_key="arg_key")
+
+    assert api.api_key == "arg_key"
+    assert api._client.headers["Authorization"] == "Token arg_key"
+
+
+def test_init_falls_back_to_settings_without_args(settings):
+    # backward-compat: no-arg construction is unchanged
+    settings.TEST_API_URL = "http://test-hope.com"
+    api = TestAPI()
+
+    assert api.api_url == "http://test-hope.com"
+    assert api.api_key == "test_fake_key"
+
+
+def test_init_raises_when_url_absent_from_args_and_settings(settings):
+    settings.TEST_API_KEY = "settings_key"
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        ConstructorOverrideAPI()
+
+    assert "Missing ConstructorOverrideAPI Key/URL" in str(exc.value)
+
+
+def test_get_url_uses_constructor_api_url(settings):
+    settings.TEST_API_KEY = "settings_key"
+    api = ConstructorOverrideAPI(api_url="https://cw.example.com")
+
+    assert api.get_url("/api/rest/rdi/delete-callback/") == ("https://cw.example.com/api/rest/rdi/delete-callback/")
+
+
+@pytest.mark.parametrize(
+    ("api_url", "endpoint"),
+    [
+        ("https://cw.example.com/api/", "/rest/rdi/delete-callback/"),
+        ("https://cw.example.com/api", "/rest/rdi/delete-callback/"),
+        ("https://cw.example.com/api/", "rest/rdi/delete-callback/"),
+    ],
+)
+def test_get_url_normalizes_slashes(settings, api_url, endpoint):
+    settings.TEST_API_KEY = "settings_key"
+    api = ConstructorOverrideAPI(api_url=api_url)
+
+    assert api.get_url(endpoint) == "https://cw.example.com/api/rest/rdi/delete-callback/"

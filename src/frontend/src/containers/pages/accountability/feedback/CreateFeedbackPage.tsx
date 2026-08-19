@@ -29,7 +29,8 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
@@ -129,24 +130,27 @@ function CreateFeedbackPage(): ReactElement {
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['choicesFeedbackIssueTypeList', businessArea],
+    queryKey: restQueryKey(RestService.restChoicesFeedbackIssueTypeList),
     queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 
+  const programsParams = createApiParams(
+    { businessAreaSlug: businessArea, limit: 100 },
+    {
+      withPagination: false,
+    },
+  );
+
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', { limit: 100 }, businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList(
-          createApiParams(
-            { businessAreaSlug: businessArea, limit: 100 },
-            {
-              withPagination: false,
-            },
-          ),
-        ),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsParams,
+      ),
+      queryFn: () => RestService.restBusinessAreasProgramsList(programsParams),
     });
 
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -159,6 +163,16 @@ function CreateFeedbackPage(): ReactElement {
         businessAreaSlug,
         requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsFeedbacksList,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasFeedbacksList),
+      });
+    },
   });
 
   if (choicesLoading || programsDataLoading) return <LoadingComponent />;
@@ -302,7 +316,12 @@ function CreateFeedbackPage(): ReactElement {
                       )}
                       {activeStep === FeedbackSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display="flex" flexDirection="column">
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                            }}
+                          >
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -317,13 +336,21 @@ function CreateFeedbackPage(): ReactElement {
                           {values.selectedHousehold && (
                             <>
                               {!isSocialDctType && (
-                                <Box py={4}>
+                                <Box
+                                  sx={{
+                                    py: 4,
+                                  }}
+                                >
                                   <Typography variant="subtitle2">
                                     {t(
                                       `${beneficiaryGroup?.groupLabel} Questionnaire`,
                                     )}
                                   </Typography>
-                                  <Box py={4}>
+                                  <Box
+                                    sx={{
+                                      py: 4,
+                                    }}
+                                  >
                                     <HouseholdQuestionnaire
                                       values={values}
                                       programCode={
@@ -343,7 +370,11 @@ function CreateFeedbackPage(): ReactElement {
                                   `${beneficiaryGroup?.memberLabel} Questionnaire`,
                                 )}
                               </Typography>
-                              <Box py={4}>
+                              <Box
+                                sx={{
+                                  py: 4,
+                                }}
+                              >
                                 <IndividualQuestionnaire values={values} />
                               </Box>
                               <BoxWithBorderBottom />
@@ -365,7 +396,11 @@ function CreateFeedbackPage(): ReactElement {
                       {activeStep === steps.length - 1 && (
                         <BoxPadding>
                           <OverviewContainer>
-                            <Box p={6}>
+                            <Box
+                              sx={{
+                                p: 6,
+                              }}
+                            >
                               <Grid container spacing={6}>
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField label={t('Category')}>
@@ -501,8 +536,18 @@ function CreateFeedbackPage(): ReactElement {
                           {errors.verificationRequired}
                         </FormHelperText>
                       ) : null}
-                      <Box pt={3} display="flex" flexDirection="row">
-                        <Box mr={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                          display: 'flex',
+                          flexDirection: 'row',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            mr: 3,
+                          }}
+                        >
                           <Button
                             component={Link}
                             to={`/${baseUrl}/grievance/feedback`}
@@ -511,7 +556,12 @@ function CreateFeedbackPage(): ReactElement {
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display="flex" ml="auto">
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            ml: 'auto',
+                          }}
+                        >
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}

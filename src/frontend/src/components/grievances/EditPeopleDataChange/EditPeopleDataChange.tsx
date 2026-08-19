@@ -1,11 +1,12 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutlined } from '@mui/icons-material';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { FieldArray } from 'formik';
 import { ReactElement, useEffect } from 'react';
@@ -57,7 +58,10 @@ function EditPeopleDataChange({
           values.selectedIndividual?.programCode));
   const { data: editPeopleFieldsData, isLoading: editPeopleFieldsLoading } =
     useQuery({
-      queryKey: ['allEditPeopleFieldsAttributes', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
           {
@@ -67,7 +71,10 @@ function EditPeopleDataChange({
     });
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['grievanceTicketsChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -76,7 +83,10 @@ function EditPeopleDataChange({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: ['individualsChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -84,25 +94,25 @@ function EditPeopleDataChange({
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
-    queryKey: ['countriesList'],
+    queryKey: restQueryKey(RestService.restChoicesCountriesList),
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
+  const fullIndividualParams = {
+    businessAreaSlug: businessArea,
+    programCode: dynamicProgramCode,
+    id: individual?.id,
+  };
   const { data: fullIndividual, isLoading: fullIndividualLoading } =
     useQuery<IndividualDetail>({
-      queryKey: [
-        'businessAreaProgramIndividual',
-        businessArea,
-        dynamicProgramCode,
-        individual?.id,
-        values.selectedIndividual,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsRetrieve,
+        fullIndividualParams,
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasProgramsIndividualsRetrieve({
-          businessAreaSlug: businessArea,
-          programCode: dynamicProgramCode,
-          id: individual?.id,
-        }),
+        RestService.restBusinessAreasProgramsIndividualsRetrieve(
+          fullIndividualParams,
+        ),
       enabled: Boolean(individual && businessArea && dynamicProgramCode),
     });
 
@@ -177,7 +187,7 @@ function EditPeopleDataChange({
                     onClick={() => {
                       arrayHelpers.push({ fieldName: null, fieldValue: '' });
                     }}
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     data-cy="button-add-new-field"
                     disabled={isEditTicket}
                   >
@@ -190,7 +200,11 @@ function EditPeopleDataChange({
         </BoxWithBorders>
       )}
       <BoxWithBorders>
-        <Box mt={3}>
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
           <Title>
             <Typography variant="h6">
               {t(
@@ -214,7 +228,11 @@ function EditPeopleDataChange({
         </Box>
       </BoxWithBorders>
       <BoxWithBorders>
-        <Box mt={3}>
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
           <Title>
             <Typography variant="h6">{t('Accounts')}</Typography>
           </Title>

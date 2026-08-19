@@ -1,4 +1,7 @@
+import time
+
 from django.conf import settings
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from seleniumbase import BaseCase
 
@@ -57,13 +60,45 @@ class HopeTestBrowser(BaseCase):
 
     def select_listbox_element(self, name: str, selector: str = 'ul[role="listbox"]', timeout: int = 10):
         self.wait_for_element_visible(selector, timeout=timeout)
-        elements = self.find_elements(f"{selector} li")
-        for element in elements:
-            if element.text.strip() == name:
-                element.click()
-                self.wait_for_element_absent(selector)
-                return
-        raise AssertionError(f"Option '{name}' not found in listbox. Available: {[e.text.strip() for e in elements]}")
+        # A click can be dropped during the MUI open transition; if the listbox
+        # stays open after the pick, click the option once more.
+        self._click_listbox_option(name, selector, timeout)
+        if not self._listbox_closed(selector):
+            self._click_listbox_option(name, selector, timeout)
+        self.wait_for_element_absent(selector)
+
+    def _click_listbox_option(
+        self,
+        name: str,
+        selector: str,
+        timeout: int = 10,
+        not_found_message: str | None = None,
+    ) -> None:
+        """Click the option labelled exactly `name`, retrying while an async listbox re-renders."""
+        deadline = time.monotonic() + timeout
+        labels: list[str] = []
+        while True:
+            try:
+                options = self.find_elements(f"{selector} li")
+                labels = [option.text.strip() for option in options]
+                matches = [option for option, label in zip(options, labels, strict=True) if label == name]
+                if matches:
+                    # Clicking the node avoids landing on a neighbour mid-transform.
+                    self.execute_script("arguments[0].click()", matches[0])
+                    return
+            except StaleElementReferenceException:
+                labels = []
+            if time.monotonic() >= deadline:
+                message = not_found_message or f"Option '{name}' not found in listbox"
+                raise AssertionError(f"{message}. Available: {labels}")
+            time.sleep(0.1)
+
+    def _listbox_closed(self, selector: str, timeout: int = 5) -> bool:
+        try:
+            self.wait_for_element_absent(selector, timeout=timeout)
+            return True
+        except Exception:  # noqa: BLE001
+            return False
 
     def select_option_by_name(self, option_name: str, selector: str | None = None):
         if selector is None:
@@ -111,15 +146,11 @@ class HopeTestBrowser(BaseCase):
         else:
             self.click(select_selector)
         self.wait_for_element_visible('ul[role="listbox"]')
-        elements = self.find_elements('ul[role="listbox"] li')
-        for element in elements:
-            if element.text.strip() == name:
-                element.click()
-                break
-        else:
-            raise AssertionError(
-                f"Chip option '{name}' not found in select. Available: {[e.text.strip() for e in elements]}"
-            )
+        self._click_listbox_option(
+            name,
+            'ul[role="listbox"]',
+            not_found_message=f"Chip option '{name}' not found in select",
+        )
         self.execute_script(
             "document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', keyCode:27, bubbles:true}))"
         )

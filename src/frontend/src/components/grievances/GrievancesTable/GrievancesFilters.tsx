@@ -1,4 +1,7 @@
-import { isShowIssueType } from '@components/grievances/utils/createGrievanceUtils';
+import {
+  isShowIssueType,
+  SYSTEM_GENERATED_ISSUE_TYPES,
+} from '@components/grievances/utils/createGrievanceUtils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
 import { FiltersSection } from '@core/FiltersSection';
@@ -18,15 +21,16 @@ import { LanguageAutocompleteRestFilter } from '@shared/autocompletes/LanguageAu
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import {
+  GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 
 interface GrievancesFiltersProps {
   filter;
@@ -76,14 +80,22 @@ export const GrievancesFilters = ({
     '*',
   );
 
-  const categoryChoices = useMemo(
-    () =>
-      filter.grievanceType ===
-      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
-        ? choicesData.grievanceTicketManualCategoryChoices
-        : choicesData.grievanceTicketSystemCategoryChoices,
-    [choicesData, filter.grievanceType],
-  );
+  const isUserGeneratedTab =
+    filter.grievanceType ===
+    GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated];
+
+  const categoryChoices = useMemo(() => {
+    if (isUserGeneratedTab)
+      return choicesData.grievanceTicketManualCategoryChoices;
+    // Data Change is a manual category, but it also owns a system-generated issue type
+    // (Biometric Photo Error), so it has to be selectable on the system tab too.
+    const dataChangeCategory = choicesData.grievanceTicketCategoryChoices?.find(
+      (item) => item.value?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE,
+    );
+    return dataChangeCategory
+      ? [...choicesData.grievanceTicketSystemCategoryChoices, dataChangeCategory]
+      : choicesData.grievanceTicketSystemCategoryChoices;
+  }, [choicesData, isUserGeneratedTab]);
 
   const showIssueType = isShowIssueType(filter.category);
 
@@ -112,26 +124,37 @@ export const GrievancesFilters = ({
   const subCategoriesObj = issueTypeDict[filter.category]?.subCategories || [];
 
   // Transform to array of { name, value }
-  const subcategories = Object.entries(subCategoriesObj).map(
-    ([value, name]) => ({
+  const subcategories = Object.entries(subCategoriesObj)
+    .map(([value, name]) => ({
       name,
       value,
-    }),
-  );
+    }))
+    // Data Change shows on both tabs, so split its issue types by who creates them.
+    .filter(({ value }) => {
+      if (filter.category?.toString() !== GRIEVANCE_CATEGORIES.DATA_CHANGE)
+        return true;
+      const isSystemIssueType = SYSTEM_GENERATED_ISSUE_TYPES.includes(value);
+      return isUserGeneratedTab ? !isSystemIssueType : isSystemIssueType;
+    });
 
   return (
     <FiltersSection
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             value={filter.search}
             label="Search"
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
-            borderRadius="4px 0px 0px 4px"
           />
         </Grid>
         <DocumentSearchField
@@ -146,6 +169,7 @@ export const GrievancesFilters = ({
               filter={filter}
               name="program"
               value={filter.program}
+              status={[ProgramStatusEnum.ACTIVE]}
               setFilter={setFilter}
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
@@ -201,12 +225,12 @@ export const GrievancesFilters = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
-            value={filter.category}
+            value={filter.category?.toString() ?? ''}
             fullWidth
             data-cy="filters-category"
           >
             {categoryChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
+              <MenuItem key={item.value} value={item.value?.toString()}>
                 {item.name}
               </MenuItem>
             ))}
@@ -256,7 +280,13 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
-          <Grid container spacing={3} alignItems="flex-end">
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              alignItems: 'flex-end',
+            }}
+          >
             <Grid size={{ xs: 6 }}>
               <NumberTextField
                 topLabel={t('Similarity Score')}
@@ -333,6 +363,27 @@ export const GrievancesFilters = ({
             ))}
           </SelectFilter>
         </Grid>
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated && (
+          <Grid size={{ xs: 3 }}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('submissionChannel', e.target.value)
+              }
+              label={t('Submission Channel')}
+              value={filter.submissionChannel}
+              data-cy="filters-submission-channel"
+              fullWidth
+            >
+              {choicesData.grievanceTicketManualSubmissionChannelChoices?.map(
+                (item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) =>
@@ -352,23 +403,6 @@ export const GrievancesFilters = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        {isAllPrograms && (
-          <Grid size={{ xs: 2 }}>
-            <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('programState', e.target.value)
-              }
-              label={t('Programme State')}
-              value={filter.programState}
-              fullWidth
-              disableClearable
-              data-cy="filters-program-state"
-            >
-              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
-              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
-            </SelectFilter>
-          </Grid>
-        )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
           <Grid size={{ xs: 2 }}>
             <SelectFilter

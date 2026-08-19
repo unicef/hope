@@ -30,6 +30,8 @@ from hope.apps.household.celery_tasks import (
     mass_unwithdraw_households_async_task_action,
     mass_withdraw_households_async_task,
     mass_withdraw_households_async_task_action,
+    rebuild_program_indexes_async_task,
+    rebuild_program_indexes_async_task_action,
     recalculate_population_fields_async_task,
     recalculate_population_fields_async_task_action,
     recalculate_population_fields_chunk_async_task,
@@ -478,7 +480,8 @@ def test_calculate_children_fields_for_not_collected_individual_data_schedules_a
 
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task")
-def test_recalculate_population_fields_task_action_skips_when_recalculation_disabled(mock_chunk_delay, business_area):
+def test_recalculate_population_fields_task_action_runs_when_recalculation_disabled(mock_chunk_delay, business_area):
+    # KAB always runs, so households of non-recalculating DCTs are no longer skipped.
     program = ProgramFactory(business_area=business_area)
     data_collecting_type = program.data_collecting_type
     data_collecting_type.recalculate_composition = False
@@ -492,7 +495,44 @@ def test_recalculate_population_fields_task_action_skips_when_recalculation_disa
 
     recalculate_population_fields_async_task_action(job)
 
+    mock_chunk_delay.assert_called_once()
+
+
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task")
+def test_recalculate_population_fields_task_action_noops_on_empty_household_ids(
+    mock_chunk_delay, business_area, program_source
+):
+    # Without the guard an empty list would select every household in the DB.
+    HouseholdFactory(business_area=business_area, program=program_source)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action",
+        {"household_ids": [], "program_id": None},
+    )
+
+    recalculate_population_fields_async_task_action(job)
+
     mock_chunk_delay.assert_not_called()
+
+
+@freeze_time("2024-05-15")
+@patch("hope.apps.household.celery_tasks.recalculate_population_fields_async_task")
+def test_interval_recalculate_population_fields_task_action_skips_individuals_without_household(
+    mock_recalculate_task, business_area, program_source
+):
+    birthday_today = timezone.now().date().replace(year=1990)
+    household = HouseholdFactory(business_area=business_area, program=program_source)
+    IndividualFactory(
+        household=household, business_area=business_area, program=program_source, birth_date=birthday_today
+    )
+    IndividualFactory(household=None, business_area=business_area, program=program_source, birth_date=birthday_today)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.interval_recalculate_population_fields_async_task_action",
+        {},
+    )
+
+    interval_recalculate_population_fields_async_task_action(job)
+
+    mock_recalculate_task.assert_called_once_with(household_ids=[str(household.pk)])
 
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_async_task")
@@ -534,6 +574,45 @@ def test_enroll_households_to_program_task_action_returns_early_when_already_run
 
     mock_cache_get.assert_called_once()
     mock_enroll.assert_not_called()
+
+
+@patch("hope.apps.household.celery_tasks.rebuild_program_indexes", return_value=(True, "ok"))
+def test_rebuild_program_indexes_action_rebuilds_the_jobs_program(mock_rebuild):
+    program = ProgramFactory(status=Program.ACTIVE)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action", {}, program=program
+    )
+
+    rebuild_program_indexes_async_task_action(job)
+
+    mock_rebuild.assert_called_once_with(str(program.id))
+
+
+@patch("hope.apps.household.celery_tasks.rebuild_program_indexes", return_value=(False, "es exploded"))
+def test_rebuild_program_indexes_action_raises_on_failure(mock_rebuild):
+    # the (ok, msg) contract must become an exception, or the AsyncJob would report success
+    program = ProgramFactory(status=Program.ACTIVE)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action", {}, program=program
+    )
+
+    with pytest.raises(RuntimeError, match="es exploded"):
+        rebuild_program_indexes_async_task_action(job)
+
+
+@patch.object(AsyncJob, "queue")
+def test_rebuild_program_indexes_task_schedules_async_job(mock_queue, user, django_capture_on_commit_callbacks):
+    program = ProgramFactory(status=Program.ACTIVE)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        job = rebuild_program_indexes_async_task(str(program.id), owner=user)
+
+    assert job == AsyncJob.objects.get()
+    assert job.action == "hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action"
+    assert job.program == program
+    assert job.owner == user
+    assert job.group_key == "household"
+    mock_queue.assert_called_once_with()
 
 
 @patch("hope.apps.household.celery_tasks.delete_program_indexes", side_effect=RuntimeError("cleanup failed"))

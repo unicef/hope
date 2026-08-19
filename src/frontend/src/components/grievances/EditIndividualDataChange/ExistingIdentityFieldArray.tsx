@@ -44,6 +44,14 @@ export function ExistingIdentityFieldArray({
       />
     </Grid>
   ) : (
-    isEditTicket && <Box ml={2}>-</Box>
+    isEditTicket && (
+      <Box
+        sx={{
+          ml: 2,
+        }}
+      >
+        -
+      </Box>
+    )
   );
 }

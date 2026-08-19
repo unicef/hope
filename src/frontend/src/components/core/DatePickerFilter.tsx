@@ -18,7 +18,12 @@ export const DatePickerFilter = ({
       : dataCy;
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
       <FormControl data-cy={calculatedDataCy} size="small">
         <DesktopDatePicker

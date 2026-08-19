@@ -367,7 +367,7 @@ def test_form_missing_credentials_blocks_save_and_shows_error(
     data = _program_form_data(program, biometric_deduplication_enabled=True)
     form = ProgramAdminForm(data=data, instance=program)
 
-    error = DeduplicationEngineAPI.DeduplicationEngineMissingAPICredentialsError("Missing credentials")
+    error = DeduplicationEngineAPI.API_MISSING_CREDENTIALS_EXCEPTION_CLASS("Missing credentials")
     with patch("hope.admin.program.BiometricDeduplicationService", side_effect=error):
         assert not form.is_valid()
 
@@ -471,22 +471,46 @@ def test_check_index_button_no_permission(django_app: Any, program: Program) -> 
     assert response.status_code == 403
 
 
-def test_reindex_program_button(django_app: Any, program: Program) -> None:
+def test_reindex_program_button_get_asks_for_confirmation(django_app: Any, program: Program) -> None:
     user_with_perm = UserFactory(is_staff=True, is_superuser=False)
     perm = Permission.objects.get(codename="can_reindex_programs")
     user_with_perm.user_permissions.add(perm)
     url = reverse("admin:program_program_reindex_program", args=[program.pk])
-    with patch("hope.admin.program.rebuild_program_indexes", return_value=(True, "ok")) as mock_rebuild:
+    with patch("hope.admin.program.rebuild_program_indexes_async_task") as mock_task:
         response = django_app.get(url, user=user_with_perm, expect_errors=True)
-    mock_rebuild.assert_called_once_with(str(program.id))
+    mock_task.assert_not_called()
+    assert response.status_code == 200
+    assert "DESTRUCTIVE" in response.text
+
+
+def test_reindex_program_button_confirmed_schedules_job(django_app_no_csrf: Any, program: Program) -> None:
+    user_with_perm = UserFactory(is_staff=True, is_superuser=False)
+    perm = Permission.objects.get(codename="can_reindex_programs")
+    user_with_perm.user_permissions.add(perm)
+    url = reverse("admin:program_program_reindex_program", args=[program.pk])
+    with patch("hope.admin.program.rebuild_program_indexes_async_task") as mock_task:
+        mock_task.return_value = MagicMock(pk=123)
+        response = django_app_no_csrf.post(url, user=user_with_perm, expect_errors=True)
+    mock_task.assert_called_once_with(str(program.id), owner=user_with_perm)
     assert response.status_code == 302
     assert reverse("admin:program_program_change", args=[program.pk]) in response.location
+
+
+def test_reindex_program_button_warns_when_rebuild_already_running(django_app_no_csrf: Any, program: Program) -> None:
+    superuser = UserFactory(is_staff=True, is_superuser=True)
+    url = reverse("admin:program_program_reindex_program", args=[program.pk])
+    with patch("hope.admin.program.rebuild_program_indexes_async_task") as mock_task:
+        mock_task.return_value = None  # requeue's "already running" answer
+        response = django_app_no_csrf.post(url, user=superuser, expect_errors=True)
+    assert response.status_code == 302
+    followed = response.follow()
+    assert "already running" in followed.text
 
 
 def test_reindex_program_button_no_permission(django_app: Any, program: Program) -> None:
     user_no_perm = UserFactory(is_staff=True, is_superuser=False)
     url = reverse("admin:program_program_reindex_program", args=[program.pk])
-    with patch("hope.admin.program.rebuild_program_indexes") as mock_rebuild:
+    with patch("hope.admin.program.rebuild_program_indexes_async_task") as mock_task:
         response = django_app.get(url, user=user_no_perm, expect_errors=True)
-    mock_rebuild.assert_not_called()
+    mock_task.assert_not_called()
     assert response.status_code == 403

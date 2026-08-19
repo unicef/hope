@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
+from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY, get_role_choices
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
@@ -41,6 +42,9 @@ class Payment(
     AdminUrlMixin,
     SignatureMixin,
 ):
+    EXTRA_FIELDS_KEY = "extra_fields"
+    FSP_EXTRA_FIELDS_KEY = "fsp_extra_fields"
+
     usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
 
     STATUS_SUCCESS = "Transaction Successful"
@@ -83,6 +87,25 @@ class Payment(
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
         (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
+    )
+
+    # Only scalar fields: keeping FKs out avoids per-row related-object fetches (N+1) when
+    # diffing thousands of payments in bulk. FK/config changes (FSP, delivery mechanism) are
+    # audited at the PaymentPlan level instead.
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "status_date",
+            "entitlement_quantity",
+            "delivered_quantity",
+            "delivery_date",
+            "fsp_auth_code",
+            "reason_for_unsuccessful_payment",
+            "transaction_reference_id",
+            "excluded",
+            "conflicted",
+            "fsp_extra_fields",
+        ]
     )
 
     parent = models.ForeignKey(
@@ -219,6 +242,7 @@ class Payment(
 
     class Meta:
         app_label = "payment"
+        permissions = (("pm_sync_payment_with_pg", "Can sync payment with payment gateway"),)
         constraints = [
             UniqueConstraint(
                 fields=["parent", "household"],
@@ -265,7 +289,32 @@ class Payment(
         "delivered_quantity_usd",
         "delivery_date",
         "transaction_reference_id",
+        "fsp_extra_fields",
     )
+
+    @property
+    def extra_fields(self) -> dict[str, object]:
+        return self.extras.get(self.EXTRA_FIELDS_KEY, {})
+
+    @property
+    def fsp_extra_fields(self) -> dict[str, object]:
+        return self.extras.get(self.FSP_EXTRA_FIELDS_KEY, {})
+
+    def set_extra_fields(self, values: dict[str, object]) -> None:
+        extras = {**self.extras}
+        if values:
+            extras[self.EXTRA_FIELDS_KEY] = values
+        else:
+            extras.pop(self.EXTRA_FIELDS_KEY, None)
+        self.extras = extras
+
+    def set_fsp_extra_fields(self, values: dict[str, object]) -> None:
+        extras = {**self.extras}
+        if values:
+            extras[self.FSP_EXTRA_FIELDS_KEY] = values
+        else:
+            extras.pop(self.FSP_EXTRA_FIELDS_KEY, None)
+        self.extras = extras
 
     def mark_as_failed(self) -> None:  # pragma: no cover
         if self.status is self.STATUS_FORCE_FAILED:

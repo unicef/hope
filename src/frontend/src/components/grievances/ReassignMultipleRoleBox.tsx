@@ -49,7 +49,8 @@ export function ReassignMultipleRoleBox({
   }
   const selectedIndividualsToReassign =
     ticket.ticketDetails.selectedDuplicates?.filter(
-      (el) => el.role === 'PRIMARY' || el.role === 'HEAD',
+      (el) =>
+        el.role === 'PRIMARY' || el.id === el.household?.headOfHousehold?.id,
     );
   const mappedReassignLookups = (): ReactElement => (
     <>
@@ -65,8 +66,18 @@ export function ReassignMultipleRoleBox({
         const mappedLookUpsForExternalHouseholds = rolesInHouseholds
           .filter((element) => element.role !== null)
           .map((householdAndRole) => (
-            <Box mb={2} mt={2} key={householdAndRole.id}>
-              <Box mb={2}>
+            <Box
+              key={householdAndRole.id}
+              sx={{
+                mb: 2,
+                mt: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <LabelizedField label={t('ROLE')}>
                   <>{capitalize(householdAndRole.role)} Collector</>
                 </LabelizedField>
@@ -74,11 +85,11 @@ export function ReassignMultipleRoleBox({
                   label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
                 >
                   <ContentLink
-                    href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
+                    href={`/${baseUrl}/population/individuals/${selectedIndividualToReassign.id}`}
                   >
-                    {householdAndRole.individual.unicefId}
+                    {selectedIndividualToReassign.unicefId}
                   </ContentLink>{' '}
-                  {householdAndRole.individual.fullName}
+                  {selectedIndividualToReassign.fullName}
                 </LabelizedField>
                 <LabelizedField
                   label={t(`${beneficiaryGroup?.groupLabel.toUpperCase()} ID`)}
@@ -111,13 +122,24 @@ export function ReassignMultipleRoleBox({
         return (
           <Box
             key={household.unicefId}
-            mt={3}
-            display="flex"
-            flexDirection="column"
+            sx={{
+              mt: 3,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
             {shouldShowReassignHoH && (
-              <Box mb={2} mt={2}>
-                <Box mb={2}>
+              <Box
+                sx={{
+                  mb: 2,
+                  mt: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    mb: 2,
+                  }}
+                >
                   <LabelizedField label={t('ROLE')}>
                     <>{t(`Head of ${beneficiaryGroup?.groupLabel}`)}</>
                   </LabelizedField>
@@ -127,11 +149,11 @@ export function ReassignMultipleRoleBox({
                     )}
                   >
                     <ContentLink
-                      href={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                      href={`/${baseUrl}/population/individuals/${selectedIndividualToReassign.id}`}
                     >
-                      {ticket.individual.unicefId}
+                      {selectedIndividualToReassign.unicefId}
                     </ContentLink>{' '}
-                    {ticket.individual.fullName}
+                    {selectedIndividualToReassign.fullName}
                   </LabelizedField>
                   <LabelizedField
                     label={t(
@@ -139,7 +161,7 @@ export function ReassignMultipleRoleBox({
                     )}
                   >
                     <ContentLink
-                      href={`/${baseUrl}/population/household/${ticket?.household.id}`}
+                      href={`/${baseUrl}/population/household/${household?.id}`}
                     >
                       {household.unicefId}
                     </ContentLink>
@@ -186,7 +208,13 @@ export function ReassignMultipleRoleBox({
           `Upon removing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
         )}
       </Typography>
-      <Box mt={3} display="flex" flexDirection="column">
+      <Box
+        sx={{
+          mt: 3,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {mappedReassignLookups()}
       </Box>
     </StyledBox>

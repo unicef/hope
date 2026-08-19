@@ -359,19 +359,6 @@ class Individual(
         help_text="Preferred language",
     )
     relationship_confirmed = models.BooleanField(default=False, help_text="Relationship confirmed status")
-    wallet_name = models.CharField(max_length=64, blank=True, default="", help_text="Cryptocurrency wallet name")
-    blockchain_name = models.CharField(
-        max_length=64,
-        blank=True,
-        default="",
-        help_text="Cryptocurrency blockchain name",
-    )
-    wallet_address = models.CharField(
-        max_length=128,
-        blank=True,
-        default="",
-        help_text="Cryptocurrency wallet address",
-    )
 
     # System fields
     duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
@@ -757,7 +744,7 @@ class Individual(
     def is_head(self) -> bool:
         if not self.household:
             return False
-        return self.household.head_of_household.id == self.id
+        return self.household.head_of_household_id == self.id
 
     def erase(self) -> None:
         for document in self.documents.all():
@@ -786,7 +773,7 @@ class Individual(
         calculate_phone_numbers_validity(self)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        recalculate_phone_numbers_validity(self, Individual)
+        recalculate_phone_numbers_validity(self)
         super().save(*args, **kwargs)
 
 

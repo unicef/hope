@@ -15,6 +15,8 @@ terms:
     - Purchase Order
     - Financial Service Provider
     - FSP
+    - Top-Up
+    - Top-Up Amendment
 
 anchors:
     - "Payment Record": single entry in a Payment Plan
@@ -71,3 +73,11 @@ Grouping of assistance measurement (currency), delivery type, entitlement formul
 ## Payment Gateway
 
 The component that is used to manage API-integrated FSPs and their corresponding payment records.
+
+## Top-Up
+
+An additional <glossary:Payment Plan> created from a Standard plan in Accepted or Finished status, paying selected beneficiaries of that plan again. The amount is decided at creation: one fixed value for every eligible beneficiary, or per beneficiary from an uploaded template. One Top-Up per beneficiary per source plan.
+
+## Top-Up Amendment
+
+A correction layer created from a <glossary:Top-Up> in Accepted or Finished status, funded the same two ways as the Top-Up itself. One Amendment per beneficiary per source Top-Up; an Amendment cannot be amended again.

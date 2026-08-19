@@ -5,6 +5,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { Title } from '@core/Title';
@@ -14,7 +15,7 @@ import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export function RequestedHouseholdDataChange({
@@ -65,14 +66,12 @@ export function RequestedHouseholdDataChange({
     onSuccess: () => {
       showMessage('Changes Approved');
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessArea,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
@@ -180,7 +179,7 @@ export function RequestedHouseholdDataChange({
           val &&
           typeof val === 'object' &&
           'approve_status' in val &&
-          (val as any).approve_status === true,
+          (val as { approve_status?: boolean }).approve_status === true,
       )
       .map(([key]) => key);
 
@@ -192,7 +191,7 @@ export function RequestedHouseholdDataChange({
           val &&
           typeof val === 'object' &&
           'approve_status' in val &&
-          (val as any).approve_status === true,
+          (val as { approve_status?: boolean }).approve_status === true,
       )
       .map(([key]) => key);
 
@@ -233,12 +232,6 @@ export function RequestedHouseholdDataChange({
               values.selectedFlexFields.includes(key);
           }
         });
-        // Only add flex_fields to householdApproveData if not empty
-        if (Object.keys(flexFieldsApproveData).length > 0) {
-          householdApproveData.flex_fields = flexFieldsApproveData;
-        } else if ('flex_fields' in householdApproveData) {
-          delete householdApproveData.flex_fields;
-        }
         // Roles: add each as roles__<individual_id>: boolean
         householdApproveData.roles = values.selectedRoles.map(
           (individualId) => ({
@@ -250,8 +243,10 @@ export function RequestedHouseholdDataChange({
         // Build mutation payload
         const mutationPayload: {
           householdApproveData: any;
+          flexFieldsApproveData: { [key: string]: boolean };
         } = {
           householdApproveData,
+          flexFieldsApproveData,
         };
 
         try {
@@ -266,7 +261,12 @@ export function RequestedHouseholdDataChange({
       {({ submitForm, setFieldValue, values }) => (
         <ApproveBox>
           <Title>
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography variant="h6">Requested Data Change</Typography>
               {shouldShowEditButton(values) ? (
                 <Button

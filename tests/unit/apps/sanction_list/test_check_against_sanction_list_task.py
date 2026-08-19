@@ -86,7 +86,7 @@ def make_uploaded_file(sanction_list: SanctionList) -> Any:
 
 @patch("hope.apps.utils.celery_tasks.requests.post")
 @patch("hope.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
-@override_settings(EMAIL_SUBJECT_PREFIX="test")
+@override_settings(DEFAULT_EMAIL_DISPLAY="test")
 @override_config(ENABLE_MAILJET=True)
 @freeze_time("2024-01-10 01:01:01")
 def test_sanction_list_email(
@@ -149,9 +149,9 @@ def test_sanction_list_email(
                 {
                     "From": {
                         "Email": settings.DEFAULT_EMAIL,
-                        "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        "Name": "test",
                     },
-                    "Subject": f"[test] {subject}",
+                    "Subject": subject,
                     "To": [{"Email": "test_email@email.com"}],
                     "Cc": [{"Email": settings.SANCTION_LIST_CC_MAIL}],
                     "HTMLPart": render_to_string(

@@ -2,6 +2,7 @@ from datetime import timedelta
 import hashlib
 import json
 import logging
+from typing import Any
 from uuid import UUID
 
 from concurrency.api import disable_concurrency
@@ -16,8 +17,11 @@ from hope.apps.household.documents import (
     get_household_doc,
     get_individual_doc,
 )
-from hope.apps.household.services.household_recalculate_data import recalculate_data
-from hope.apps.household.services.index_management import delete_program_indexes
+from hope.apps.household.services.household_recalculate_data import (
+    aggregate_composition_by_household_id,
+    recalculate_data,
+)
+from hope.apps.household.services.index_management import delete_program_indexes, rebuild_program_indexes
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.apps.utils.phone import calculate_phone_numbers_validity
@@ -38,26 +42,30 @@ def recalculate_population_fields_chunk_async_task_action(job: AsyncJob) -> None
 
     with disable_concurrency(Household), disable_concurrency(Individual):
         program = Program.objects.get(id=program_id) if program_id else None
-        with transaction.atomic():
-            for page in paginator.page_range:
+        for page in paginator.page_range:
+            with transaction.atomic():
                 logger.info(
                     f"recalculate_population_fields_chunk_async_task: Processing page {page} of {paginator.num_pages}"
                 )
                 households_ids_page = paginator.page(page).object_list
                 households_to_update = []
                 fields_to_update = []
-                for hh in (
+                households = list(
                     Household.objects.filter(pk__in=households_ids_page)
                     .select_related("business_area")
                     .only("id", "business_area_id", "business_area__name")
-                    .prefetch_related("individuals")
                     .select_for_update(of=("self",), skip_locked=True)
                     .order_by("pk")
-                ):
+                )
+                # One grouped count for the whole page instead of one aggregate per household.
+                composition_counts = aggregate_composition_by_household_id([hh.pk for hh in households])
+                for hh in households:
                     if program:
                         hh.program = program
                     set_sentry_business_area_tag(hh.business_area.name)
-                    household, updated_fields = recalculate_data(hh, save=False)
+                    household, updated_fields = recalculate_data(
+                        hh, save=False, composition_counts=composition_counts[hh.pk]
+                    )
                     households_to_update.append(household)
                     fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
                 if fields_to_update:
@@ -81,16 +89,13 @@ def recalculate_population_fields_async_task_action(job: AsyncJob) -> None:
     household_ids = job.config["household_ids"]
     program_id = job.config["program_id"]
 
-    params = {}
-    if household_ids:
-        params["pk__in"] = household_ids
-    recalculate_composition = None
-    if program_id:
-        program = Program.objects.get(id=program_id)
-        recalculate_composition = program.data_collecting_type.recalculate_composition
-    queryset = Household.objects.filter(**params).only("pk").order_by("pk")
-    if not recalculate_composition:
-        queryset = queryset.none()
+    # An empty list would otherwise select every household in the DB.
+    if not household_ids:
+        return
+
+    # No gate on recalculate_composition: recalculate_data itself decides what to compute
+    # (composition only when the flag is on, KAB always), so all selected households flow through.
+    queryset = Household.objects.filter(pk__in=household_ids).only("pk").order_by("pk")
 
     if queryset.exists():
         paginator = Paginator(queryset, config.RECALCULATE_POPULATION_FIELDS_CHUNK)
@@ -125,7 +130,9 @@ def interval_recalculate_population_fields_async_task_action(job: AsyncJob) -> N
     now_day, now_month = datetime_now.day, datetime_now.month
 
     households = (
-        Individual.objects.filter(birth_date__day=now_day, birth_date__month=now_month)
+        # household_id__isnull=False: individuals without a household (e.g. external collectors)
+        # would otherwise inject the string "None" into the pk__in filter downstream.
+        Individual.objects.filter(birth_date__day=now_day, birth_date__month=now_month, household_id__isnull=False)
         .order_by("household_id")
         .values_list("household_id", flat=True)
         .distinct("household_id")
@@ -308,6 +315,29 @@ def mass_unwithdraw_households_async_task(
         config={"household_ids": household_ids, "program_id": program_id, "reopen_tickets": reopen_tickets},
         group_key="household",
         description=f"Mass unwithdraw households for program {program_id}",
+    )
+
+
+def rebuild_program_indexes_async_task_action(job: AsyncJob) -> None:
+    ok, msg = rebuild_program_indexes(str(job.program_id))
+    if not ok:
+        raise RuntimeError(msg)  # surfaces as the job's failure state
+
+
+def rebuild_program_indexes_async_task(program_id: str, owner: Any = None) -> AsyncJob | None:
+    """Admin "Rebuild Index" button: destructive delete -> create -> populate of one program's indexes.
+
+    requeue, not queue_task: a second concurrent run for the same program would race the
+    delete -> create -> populate sequence. Returns None when a rebuild is already running.
+    """
+    program = Program.objects.get(id=program_id)
+    return AsyncJob.requeue(
+        action="hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action",
+        instance=program,
+        program=program,
+        owner=owner,
+        group_key="household",
+        description=f"Rebuild ES indexes for program {program_id}",
     )
 
 

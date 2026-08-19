@@ -22,6 +22,7 @@ import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   deepUnderscore,
   mapPartnerChoicesFromChoicesWithoutUnicef,
@@ -46,7 +47,9 @@ export const CreateProgramPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: treeData } = useQuery<AreaTree[]>({
-    queryKey: ['allAreasTree', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -55,7 +58,9 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: ['userChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -64,7 +69,9 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: ['programChoices', businessArea],
+      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
+        businessAreaSlug: businessArea,
+      }),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -88,10 +95,12 @@ export const CreateProgramPage = (): ReactElement => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programs', businessArea],
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       await queryClient.invalidateQueries({
-        queryKey: ['programChoices', businessArea],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsChoicesRetrieve,
+        ),
       });
     },
   });
@@ -372,7 +381,11 @@ export const CreateProgramPage = (): ReactElement => {
                 />
               }
             >
-              <Box p={3}>
+              <Box
+                sx={{
+                  p: 3,
+                }}
+              >
                 <Fade in={step === 0} timeout={600}>
                   <div>
                     {step === 0 && (

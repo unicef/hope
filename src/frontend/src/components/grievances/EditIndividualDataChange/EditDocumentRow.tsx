@@ -66,7 +66,12 @@ export function EditDocumentRow({
         />
       </Grid>
       <Grid size={1}>
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <IconButton
             onClick={() => {
               arrayHelpers.remove({
@@ -110,7 +115,12 @@ export function EditDocumentRow({
       <Grid size={1}>
         {!removed ? (
           !isEditTicket && (
-            <Box display="flex" alignItems="center">
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
               <IconButton
                 onClick={() => {
                   setFieldValue(
@@ -138,7 +148,14 @@ export function EditDocumentRow({
             </Box>
           )
         ) : (
-          <Box display="flex" alignItems="center" height={48} color="red">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              height: 48,
+              color: 'red',
+            }}
+          >
             {t('REMOVED')}
           </Box>
         )}

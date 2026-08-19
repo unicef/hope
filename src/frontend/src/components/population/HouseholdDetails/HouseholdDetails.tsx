@@ -196,10 +196,19 @@ export function HouseholdDetails({
           <Grid size={3}>
             <LabelizedField label={t('Cash received')}>
               {household?.deliveredQuantities?.length ? (
-                <Box mb={2}>
+                <Box
+                  sx={{
+                    mb: 2,
+                  }}
+                >
                   <Grid container>
                     <Grid size={6}>
-                      <Box display="flex" flexDirection="column">
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
                         {household?.deliveredQuantities?.map((item) => (
                           <Box
                             key={`${item.currency}-${item.totalDeliveredQuantity}`}

@@ -9,6 +9,7 @@ import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { choicesToDict, displayNameWithLatin } from '@utils/utils';
 import { RestService } from '@restgenerated/index';
+import { restQueryKey } from '@utils/queryKeys';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useQuery } from '@tanstack/react-query';
 
@@ -26,7 +27,10 @@ const IndividualQuestionnaire = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: choicesData } = useQuery<IndividualChoices>({
-    queryKey: ['individualChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasIndividualsChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasIndividualsChoicesRetrieve({
         businessAreaSlug: businessArea,

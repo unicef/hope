@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from io import BytesIO
 import logging
-from typing import IO, TYPE_CHECKING
+from typing import IO, TYPE_CHECKING, cast
 
 from django.db import transaction
 import openpyxl
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import log_payment_plan_change
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
 from hope.models import (
@@ -42,12 +44,12 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.payment_plans: list[PaymentPlan] = list(
             payment_plan_group.payment_plans.filter(
                 status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-                plan_type=PaymentPlan.PlanType.REGULAR,
             ).order_by("unicef_id")
         )
         self.eligible_plans: list[PaymentPlan] = []
         self.payment_to_plan: dict[str, PaymentPlan] = {}
         self.payment_gateway_payment_ids: set[str] = set()
+        self.fsp_owned_headers: set[str] = set()
         self.headers: list[str] = []
         self.sheetname: str = ""
         self.ws: Worksheet | None = None
@@ -75,11 +77,18 @@ class XlsxPaymentPlanGroupDeliveryImportService:
 
     def _build_payment_index(self) -> None:
         payments = (
-            Payment.objects.filter(parent__in=self.eligible_plans).eligible().values_list("unicef_id", "parent_id")
+            Payment.objects.filter(parent__in=self.eligible_plans)
+            .eligible()
+            .values_list(
+                "unicef_id",
+                "parent_id",
+                "extras",
+            )
         )
         payment_plan_by_id = {str(payment_plan.id): payment_plan for payment_plan in self.eligible_plans}
-        for unicef_id, parent_id in payments:
+        for unicef_id, parent_id, extras in payments:
             self.payment_to_plan[str(unicef_id)] = payment_plan_by_id[str(parent_id)]
+            self.fsp_owned_headers.update(extras.get(Payment.FSP_EXTRA_FIELDS_KEY, {}))
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
@@ -192,7 +201,11 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             if not rows:
                 continue
             sub_workbook_file = self._build_per_plan_workbook(rows)
-            service = XlsxPaymentPlanDeliveryImportService(payment_plan, sub_workbook_file)
+            service = XlsxPaymentPlanDeliveryImportService(
+                payment_plan,
+                sub_workbook_file,
+                fsp_owned_headers=self.fsp_owned_headers,
+            )
             service.open_workbook()
             self.per_plan_services[str(payment_plan.id)] = service
 
@@ -218,17 +231,19 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 XlsxError(
                     self.sheetname,
                     None,
-                    "There aren't any updates in imported file, please add changes and try again",
+                    "There aren't any updates in the imported file. Reconciliation data is either empty or has "
+                    "already been uploaded and cannot be overwritten.",
                 )
             )
 
-    def import_payment_list(self) -> None:
+    def import_payment_list(self, user_id: str | None = None) -> None:
         if not self.per_plan_services:
             self._build_per_plan_services()
         with transaction.atomic():
             for payment_plan_id, service in self.per_plan_services.items():
                 payment_plan = service.payment_plan
-                service.import_payment_list()
+                old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+                service.import_payment_list(user_id)
                 payment_plan.remove_export_files()
                 flow = PaymentPlanFlow(payment_plan)
                 flow.background_action_status_none()
@@ -236,6 +251,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
                     flow.status_finished()
                 payment_plan.save()
+                log_payment_plan_change(payment_plan, old_payment_plan, user_id)
                 logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
             # all plans in the group share one cycle: invalidate the cycle-list cache once

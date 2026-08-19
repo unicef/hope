@@ -2,6 +2,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import React, { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Checkbox } from '@mui/material';
 import Table from '@mui/material/Table';
@@ -40,25 +41,23 @@ function RequestedHouseholdDataChangeTable(
   const { setFieldValue, ticket, isEdit, values } = props;
   const householdId = ticket.household?.id;
 
+  const householdParams = {
+    businessAreaSlug: businessArea,
+    id: householdId,
+    //@ts-ignore
+    programCode: ticket.household.programCode,
+  };
   const {
     data: household,
     isLoading: householdLoading,
     error,
   } = useQuery<HouseholdDetail>({
-    queryKey: [
-      'household',
-      businessArea,
-      householdId,
-      //@ts-ignore
-      ticket.household.programCode,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+      householdParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        id: householdId,
-        //@ts-ignore
-        programCode: ticket.household.programCode,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve(householdParams),
     enabled: Boolean(householdId && businessArea),
   });
   const selectedBioData = values.selected;
@@ -85,7 +84,10 @@ function RequestedHouseholdDataChangeTable(
   );
 
   const { data: allEditHouseholdFieldsData } = useQuery({
-    queryKey: ['allEditHouseholdFieldsAttributes', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
         { businessAreaSlug: businessArea },
@@ -101,7 +103,7 @@ function RequestedHouseholdDataChangeTable(
   );
 
   const { data: countriesChoicesData } = useQuery({
-    queryKey: ['restChoicesCountriesList'],
+    queryKey: restQueryKey(RestService.restChoicesCountriesList),
     queryFn: () => RestService.restChoicesCountriesList(),
     enabled: true,
   });
@@ -181,7 +183,7 @@ function RequestedHouseholdDataChangeTable(
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
                       checked={isRoleSelected}
-                      inputProps={{ 'aria-labelledby': labelId }}
+                      slotProps={{ input: { 'aria-labelledby': labelId } }}
                     />
                   ) : (
                     isRoleSelected && (
@@ -195,10 +197,15 @@ function RequestedHouseholdDataChangeTable(
                   {`Roles (${role.full_name})`}
                 </TableCell>
                 <TableCell align="left">
-                  {role.previous_value === null ? 'No role' : (roleDisplayMap[role.previous_value] || role.previous_value)}
+                  {role.previous_value === null
+                    ? 'No role'
+                    : roleDisplayMap[role.previous_value] ||
+                      role.previous_value}
                 </TableCell>
                 <TableCell align="left">
-                  {role.value === null ? 'No role' : (roleDisplayMap[role.value] || role.value)}
+                  {role.value === null
+                    ? 'No role'
+                    : roleDisplayMap[role.value] || role.value}
                 </TableCell>
               </TableRow>
             );

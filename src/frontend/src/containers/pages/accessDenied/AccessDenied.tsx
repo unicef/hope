@@ -89,7 +89,7 @@ export function AccessDenied() {
         />
       </SquareLogo>
       <TextContainer>
-        <Title>Access Denied</Title>
+        <Title data-cy="access-denied-title">Access Denied</Title>
         {detail && <Paragraph>{detail}</Paragraph>}
         {permissionsArray.length === 0 ? (
           <Paragraph>
@@ -109,8 +109,18 @@ export function AccessDenied() {
           </SmallerPermissions>
         )}
       </TextContainer>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <Box mr={4}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            mr: 4,
+          }}
+        >
           <Button
             endIcon={<Refresh />}
             variant="outlined"

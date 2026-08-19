@@ -17,6 +17,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
@@ -28,7 +29,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const permissions = usePermissions();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { data: paymentPlan, error } = useQuery<PaymentPlanDetail>({
-    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
@@ -66,7 +67,9 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
 
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
-    status === PaymentPlanStatusEnum.FINISHED;
+    status === PaymentPlanStatusEnum.FINISHED ||
+    status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
+    status === PaymentPlanStatusEnum.CLOSED;
 
   const shouldDisplayFundsCommitment =
     status === PaymentPlanStatusEnum.IN_REVIEW ||

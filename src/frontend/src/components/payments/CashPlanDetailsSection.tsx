@@ -48,7 +48,11 @@ export function CashPlanDetailsSection({
         <Title data-cy="div-payment-plan-details">
           <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
-        <Box pr={2}>
+        <Box
+          sx={{
+            pr: 2,
+          }}
+        >
           <Grid data-cy="grid-payment-plan-details" container spacing={3}>
             {[
               {
@@ -88,7 +92,7 @@ export function CashPlanDetailsSection({
           </Title>
           <Grid container>
             <Grid size={{ xs: 3 }}>
-              <Grid container direction="column">
+              <Grid container sx={{ flexDirection: 'column' }}>
                 <LabelizedField label={t('SUCCESSFUL')}>
                   <p>{formatFigure(bankReconciliationSuccessPercentage)}%</p>
                 </LabelizedField>
@@ -100,17 +104,15 @@ export function CashPlanDetailsSection({
             <Grid size={{ xs: 9 }}>
               <ChartContainer>
                 <Doughnut
-                  options={
-                    {
-                      maintainAspectRatio: false,
-                      cutout: '80%',
-                      plugins: {
-                        legend: {
-                          display: false,
-                        },
+                  options={{
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: {
+                      legend: {
+                        display: false,
                       },
-                    }
-                  }
+                    },
+                  }}
                   data={{
                     labels: [t('SUCCESSFUL'), t('ERRONEOUS')],
                     datasets: [

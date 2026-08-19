@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { useProgramContext } from 'src/programContext';
 import { useTranslation } from 'react-i18next';
@@ -40,10 +41,14 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
     onSuccess: () => {
       showMessage(t('Authorized users updated successfully.'));
       queryClient.invalidateQueries({
-        queryKey: ['onlineEdit', businessAreaSlug, programCode, id],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: ['availableUsers', businessAreaSlug, programCode],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsUsersAvailableList,
+        ),
       });
       const url = `/${baseUrl}/population/individuals/online-templates/${id}`;
       navigate(url);
@@ -84,6 +89,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
               color="primary"
               type="submit"
               disabled={isSubmitting}
+              data-cy="button-save-authorized-users"
             >
               {t('Save')}
             </Button>

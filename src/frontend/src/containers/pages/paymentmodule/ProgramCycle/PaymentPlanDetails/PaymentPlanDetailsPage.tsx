@@ -19,6 +19,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
@@ -26,6 +27,7 @@ import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlemen
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { FspExtraFields } from '@components/paymentmodule/PaymentPlanDetails/FspExtraFields/FspExtraFields';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
@@ -36,7 +38,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<PaymentPlanDetail>({
-    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
@@ -60,7 +62,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       }
       return false;
     },
-    refetchIntervalInBackground: true,
   });
 
   if (isLoading) return <LoadingComponent />;
@@ -79,7 +80,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
 
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
-    status === PaymentPlanStatusEnum.FINISHED;
+    status === PaymentPlanStatusEnum.FINISHED ||
+    status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
+    status === PaymentPlanStatusEnum.CLOSED;
 
   const shouldDisplayVerificationSummary =
     status === PaymentPlanStatusEnum.FINISHED ||
@@ -91,7 +94,12 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.ACCEPTED ||
     status === PaymentPlanStatusEnum.FINISHED;
   return (
-    <Box display="flex" flexDirection="column">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
         permissions={permissions}
@@ -109,9 +117,19 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
+          {status === PaymentPlanStatusEnum.LOCKED_FSP &&
+            !paymentPlan.isInstructionManaged && (
+              <FspExtraFields
+                paymentPlan={paymentPlan}
+                permissions={permissions}
+              />
+            )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
-          <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
+          <ConversionToUsd
+            paymentPlan={paymentPlan}
+            permissions={permissions}
+          />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
           <PaymentsTable
             businessArea={businessArea}

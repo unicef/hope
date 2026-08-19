@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 from typing import TYPE_CHECKING, Any, Iterable, Sequence, T, TypeVar
 
@@ -7,6 +8,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -294,9 +296,14 @@ class SignatureMixin(models.Model):
         super().save(*args, **kwargs)
 
     def _normalize(self, name: str, value: Any) -> Any:
+        if isinstance(value, dict):
+            return json.dumps(value, sort_keys=True, default=str)
         if "." in name:
             return value
-        field = self.__class__._meta.get_field(name)
+        try:
+            field = self.__class__._meta.get_field(name)
+        except FieldDoesNotExist:
+            return value
         if isinstance(field, models.DecimalField) and value is not None:
             return f"{{:.{field.decimal_places}f}}".format(value)
         return value

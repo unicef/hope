@@ -7,6 +7,7 @@ from unittest.mock import patch
 import uuid
 
 from django.conf import settings
+import openpyxl
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -109,6 +110,13 @@ def test_export_received_from_pending(verification_setup, initial_status, result
 
     wb = export_service.generate_workbook()
     assert wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value == result
+
+
+def test_generate_workbook_loads_verification_rows_in_one_query(verification_setup, django_assert_num_queries):
+    export_service = XlsxVerificationExportService(verification_setup["verification_plan"])
+
+    with django_assert_num_queries(1):
+        export_service.generate_workbook()
 
 
 def test_validation_valid_not_changed_file(verification_setup):
@@ -449,3 +457,93 @@ def test_validation_of_unordered_columns(mock_check_version: Any, file_name: str
     xlsx_verification_import_service.validate()
 
     assert xlsx_verification_import_service.errors == []
+
+
+def test_validation_invalid_amount_zero_without_received(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    export_service = XlsxVerificationExportService(verification_plan)
+    wb = export_service.generate_workbook()
+    wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 0
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = io.BytesIO(tmp.read())
+    import_service = XlsxVerificationImportService(verification_plan, file)
+    import_service.open_workbook()
+    import_service.validate()
+    error = import_service.errors[0]
+    assert [error.sheet, error.coordinates, error.message] == [
+        "Payment Verifications",
+        f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+        "You can't set received_amount 0.00 and not set received to NO",
+    ]
+
+
+def test_validation_invalid_amount_without_received(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    export_service = XlsxVerificationExportService(verification_plan)
+    wb = export_service.generate_workbook()
+    wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 10
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = io.BytesIO(tmp.read())
+    import_service = XlsxVerificationImportService(verification_plan, file)
+    import_service.open_workbook()
+    import_service.validate()
+    error = import_service.errors[0]
+    assert [error.sheet, error.coordinates, error.message] == [
+        "Payment Verifications",
+        f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
+        "You can't set received_amount 10.00 and not set received to YES",
+    ]
+
+
+def test_import_verifications_raises_with_errors(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    export_service = XlsxVerificationExportService(verification_plan)
+    wb = export_service.generate_workbook()
+    wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = 10
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = io.BytesIO(tmp.read())
+    import_service = XlsxVerificationImportService(verification_plan, file)
+    import_service.open_workbook()
+    import_service.validate()
+    assert import_service.errors != []
+    with pytest.raises(ValidationError, match="You can't import verifications with errors."):
+        import_service.import_verifications()
+
+
+def test_import_verifications_raises_without_validation(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    export_service = XlsxVerificationExportService(verification_plan)
+    wb = export_service.generate_workbook()
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        file = io.BytesIO(tmp.read())
+    import_service = XlsxVerificationImportService(verification_plan, file)
+    import_service.open_workbook()
+    with pytest.raises(ValidationError, match="Run validation before import."):
+        import_service.import_verifications()
+
+
+def test_validate_headers_reports_missing_mandatory_headers(verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    import_service = XlsxVerificationImportService(verification_plan, io.BytesIO())
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["some_other_column"])
+    import_service.ws_verifications = ws
+    # __init__ sets the indices to 0, which never triggers the `is None` missing-header
+    # checks - mimic the intended "not found" state
+    import_service.PAYMENT_RECORD_ID_COLUMN_INDEX = None
+    import_service.RECEIVED_COLUMN_INDEX = None
+    import_service.RECEIVED_AMOUNT_COLUMN_INDEX = None
+
+    import_service._validate_headers()
+
+    error = import_service.errors[0]
+    assert [error.sheet, error.coordinates, error.message] == [
+        "Payment Verifications",
+        None,
+        "Missing mandatory headers: payment_record_id received received_amount",
+    ]

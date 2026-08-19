@@ -1,7 +1,7 @@
 import { Box, Button, DialogContent, IconButton } from '@mui/material';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import CloseIcon from '@mui/icons-material/Close';
-import { ReactElement, useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -51,6 +51,7 @@ function PhotoModal({
   closeHandler,
   showRotate = true,
   alt = 'photo',
+  children,
 }: {
   src: string;
   alt?: string;
@@ -59,6 +60,7 @@ function PhotoModal({
   title?: string;
   closeHandler?;
   showRotate?: boolean;
+  children?: ReactNode;
 }): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [turnAngle, setTurnAngle] = useState(90);
@@ -106,7 +108,12 @@ function PhotoModal({
         break;
       case 'pictureClose':
         element = (
-          <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <MiniImage
               data-cy="mini-image-close"
               alt={alt}
@@ -134,7 +141,17 @@ function PhotoModal({
 
   return (
     <>
-      {matchVariant()}
+      {children ? (
+        <Box
+          data-cy="photo-modal-trigger"
+          onClick={() => setDialogOpen(true)}
+          sx={{ cursor: 'pointer', display: 'inline-block' }}
+        >
+          {children}
+        </Box>
+      ) : (
+        matchVariant()
+      )}
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -147,7 +164,11 @@ function PhotoModal({
           showRotate={showRotate}
         />
         <DialogContent>
-          <Box p={3}>
+          <Box
+            sx={{
+              p: 3,
+            }}
+          >
             <TransformWrapper>
               <TransformComponent>
                 <StyledImage id="modalImg" alt="photo" src={src} />

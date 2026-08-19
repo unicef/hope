@@ -34,8 +34,18 @@ export function FspHeader({
           : null
       }
     >
-      <Box display="flex" mt={2} mb={2}>
-        <Box mr={3}>
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 2,
+          mb: 2,
+        }}
+      >
+        <Box
+          sx={{
+            mr: 3,
+          }}
+        >
           <Button
             color="primary"
             variant="outlined"

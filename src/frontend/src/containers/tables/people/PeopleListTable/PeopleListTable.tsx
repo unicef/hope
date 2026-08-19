@@ -4,8 +4,9 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
@@ -76,42 +77,42 @@ export const PeopleListTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  const individualsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsCount',
-      programId,
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve,
+      individualsCountParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        individualsCountParams,
       ),
     enabled: page === 0,
   });
 
   const itemsCount = usePersistedCount(page, countData);
 
-  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasProgramsIndividualsList',
-      queryVariables,
-      businessArea,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+  const individualsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedIndividualListList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsIndividualsList,
+        individualsListParams,
       ),
-  });
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsList(
+          individualsListParams,
+        ),
+      placeholderData: keepPreviousData,
+    });
 
   return (
     <TableWrapper>
@@ -124,6 +125,7 @@ export const PeopleListTable = ({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         allowSort={false}
         filterOrderBy={filter.orderBy}
         itemsCount={itemsCount}

@@ -1,5 +1,6 @@
 import React, { ReactElement, useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { Box, Button } from '@mui/material';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -10,6 +11,7 @@ import {
   GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
   GRIEVANCES_VIEW_LIST_PERMISSIONS,
   PERMISSIONS,
+  canManageNeedsAdjudication,
   hasPermissions,
 } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -18,7 +20,6 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Tabs, Tab } from '@core/Tabs';
@@ -27,6 +28,7 @@ import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 
 export const GrievancesTablePage = (): ReactElement => {
@@ -39,7 +41,10 @@ export const GrievancesTablePage = (): ReactElement => {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -70,9 +75,9 @@ export const GrievancesTablePage = (): ReactElement => {
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
+    submissionChannel: '',
     preferredLanguage: '',
     program: '',
-    programState: PROGRAM_STATE_FILTER.ALL,
     areaScope: 'all',
   };
 
@@ -112,12 +117,14 @@ export const GrievancesTablePage = (): ReactElement => {
           grievanceType: GrievanceTypes[newValue],
           category: '',
           program: '',
+          submissionChannel: '',
         });
         setAppliedFilter({
           ...appliedFilter,
           grievanceType: GrievanceTypes[newValue],
           category: '',
           program: '',
+          submissionChannel: '',
         });
         navigate(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
@@ -152,22 +159,37 @@ export const GrievancesTablePage = (): ReactElement => {
   return (
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
-        {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-          <ButtonTooltip
-            variant="contained"
-            color="primary"
-            component={Link}
-            title={t(
-              'Programme has to be active to create a new Grievance Ticket',
-            )}
-            to={`/${baseUrl}/grievance/new-ticket`}
-            dataCy="button-new-ticket"
-            dataPerm={`${PERMISSIONS.GRIEVANCES_CREATE}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST} ${PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}`}
-            disabled={!isActiveProgram}
-          >
-            {t('NEW TICKET')}
-          </ButtonTooltip>
-        )}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {canManageNeedsAdjudication(permissions) && (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() =>
+                navigate(`/${baseUrl}/grievance/na-tickets-management`)
+              }
+              data-cy="button-na-tickets-management"
+              sx={{ whiteSpace: 'nowrap', px: 4, flexShrink: 0 }}
+            >
+              {t('NA Tickets Management')}
+            </Button>
+          )}
+          {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+            <ButtonTooltip
+              variant="contained"
+              color="primary"
+              component={Link}
+              title={t(
+                'Programme has to be active to create a new Grievance Ticket',
+              )}
+              to={`/${baseUrl}/grievance/new-ticket`}
+              dataCy="button-new-ticket"
+              dataPerm={`${PERMISSIONS.GRIEVANCES_CREATE}, ${PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST} ${PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST}, ${PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS}`}
+              disabled={!isActiveProgram}
+            >
+              {t('NEW TICKET')}
+            </ButtonTooltip>
+          )}
+        </Box>
       </PageHeader>
       <GrievancesFilters
         choicesData={choicesData}

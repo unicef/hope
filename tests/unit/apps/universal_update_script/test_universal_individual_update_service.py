@@ -1,4 +1,5 @@
 from io import BytesIO
+from unittest.mock import patch
 
 from constance.test import override_config
 from django.core.files.base import ContentFile
@@ -27,6 +28,7 @@ from hope.models import (
     AccountType,
     Area,
     AreaType,
+    AsyncJob,
     Country,
     Currency,
     Document,
@@ -207,6 +209,90 @@ def universal_update_for_currency(program: Program) -> UniversalUpdate:
     update.household_flex_fields_fields = []
     update.save()
     return update
+
+
+@pytest.fixture
+def universal_update_minimal(program: Program) -> UniversalUpdate:
+    update = UniversalUpdate(program=program)
+    update.save()
+    return update
+
+
+@pytest.fixture
+def national_id_type() -> DocumentType:
+    return DocumentType.objects.create(key="national_id", label="National ID")
+
+
+@pytest.fixture
+def universal_update_with_documents(program: Program, national_id_type: DocumentType) -> UniversalUpdate:
+    update = UniversalUpdate(program=program)
+    update.save()
+    update.document_types.add(national_id_type)
+    return update
+
+
+@pytest.fixture
+def universal_update_with_accounts(program: Program, account_type: AccountType) -> UniversalUpdate:
+    update = UniversalUpdate(program=program)
+    update.save()
+    update.account_types.add(account_type)
+    return update
+
+
+@pytest.fixture
+def financial_institution() -> FinancialInstitution:
+    return FinancialInstitution.objects.create(
+        name="Standalone Financial Institution",
+        type=FinancialInstitution.FinancialInstitutionType.TELCO,
+    )
+
+
+@pytest.fixture
+def two_national_id_documents(
+    individual: Individual, program: Program, national_id_type: DocumentType, poland: Country
+) -> list[Document]:
+    return [
+        Document.objects.create(
+            individual=individual,
+            program=program,
+            type=national_id_type,
+            document_number="DOC-1",
+            rdi_merge_status=Document.MERGED,
+            country=poland,
+        ),
+        Document.objects.create(
+            individual=individual,
+            program=program,
+            type=national_id_type,
+            document_number="DOC-2",
+            rdi_merge_status=Document.MERGED,
+            country=poland,
+        ),
+    ]
+
+
+@pytest.fixture
+def two_mobile_wallets(
+    individual: Individual, account_type: AccountType, financial_institution: FinancialInstitution
+) -> list[Account]:
+    return [
+        Account.objects.create(
+            account_type=account_type,
+            financial_institution=financial_institution,
+            individual=individual,
+            number="111",
+            data={"number": "111"},
+            rdi_merge_status=Account.MERGED,
+        ),
+        Account.objects.create(
+            account_type=account_type,
+            financial_institution=financial_institution,
+            individual=individual,
+            number="222",
+            data={"number": "222"},
+            rdi_merge_status=Account.MERGED,
+        ),
+    ]
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
@@ -861,3 +947,139 @@ def test_get_generator_handler_renders_currency_code(all_currencies: None) -> No
     usd = Currency.objects.get(code="USD")
     handler = get_generator_handler(usd)
     assert handler(usd) == "USD"
+
+
+def test_handle_documents_update_returns_empty_when_document_fields_none(
+    universal_update_minimal: UniversalUpdate, individual: Individual
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_minimal)
+    service.document_fields = None
+    documents_to_update, documents_to_create = service.handle_documents_update((), [], individual)
+    assert documents_to_update == []
+    assert documents_to_create == []
+
+
+def test_handle_documents_update_creates_new_document(
+    universal_update_with_documents: UniversalUpdate,
+    individual: Individual,
+    national_id_type: DocumentType,
+    poland: Country,
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_with_documents)
+    headers = ["unicef_id", "national_id_no_i_c", "national_id_country_i_c"]
+    row = (individual.unicef_id, "NEW-DOC-123", "Poland")
+    documents_to_update, documents_to_create = service.handle_documents_update(row, headers, individual)
+    assert documents_to_update == []
+    assert len(documents_to_create) == 1
+    assert documents_to_create[0].document_number == "NEW-DOC-123"
+    assert documents_to_create[0].type == national_id_type
+    assert documents_to_create[0].country == poland
+
+
+def test_handle_account_update_creates_new_account(
+    universal_update_with_accounts: UniversalUpdate,
+    individual: Individual,
+    financial_institution: FinancialInstitution,
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_with_accounts)
+    headers = ["unicef_id", "account__mobile__financial_institution_pk", "account__mobile__number"]
+    row = (individual.unicef_id, financial_institution.id, "555000111")
+    service.handle_account_update(row, headers, individual)
+    account = Account.objects.get(individual=individual)
+    assert account.number == "555000111"
+    assert account.financial_institution == financial_institution
+    assert account.account_type.key == "mobile"
+
+
+def test_handle_update_flushes_batch_when_batch_size_reached(
+    universal_update_minimal: UniversalUpdate, individual: Individual
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_minimal, batch_size=1)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["unicef_id"])
+    ws.append([individual.unicef_id])
+    with patch(
+        "hope.apps.universal_update_script.universal_individual_update_service"
+        ".universal_individual_update_service.populate_index"
+    ) as populate_index_mock:
+        individual_ids = service.handle_update(ws, ["unicef_id"])
+    assert individual_ids == [str(individual.id)]
+    assert populate_index_mock.call_count == 4  # in-loop flush + final flush, 2 indexes each
+
+
+def test_get_individual_row_appends_none_for_missing_document(
+    universal_update_with_documents: UniversalUpdate, individual: Individual
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_with_documents)
+    row = service.get_individual_row(individual)
+    assert row == [individual.unicef_id, None, None]
+
+
+def test_get_individual_row_raises_for_multiple_documents_of_same_type(
+    universal_update_with_documents: UniversalUpdate,
+    individual: Individual,
+    two_national_id_documents: list[Document],
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_with_documents)
+    with pytest.raises(ValueError, match="Multiple documents found"):
+        service.get_individual_row(individual)
+
+
+def test_get_individual_row_appends_none_for_missing_wallet(
+    universal_update_with_accounts: UniversalUpdate, individual: Individual
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_with_accounts)
+    row = service.get_individual_row(individual)
+    assert row == [individual.unicef_id, None, None, None]
+
+
+def test_get_individual_row_raises_for_multiple_wallets(
+    universal_update_with_accounts: UniversalUpdate,
+    individual: Individual,
+    two_mobile_wallets: list[Account],
+) -> None:
+    service = UniversalIndividualUpdateService(universal_update_with_accounts)
+    with pytest.raises(ValueError, match="Multiple wallets found"):
+        service.get_individual_row(individual)
+
+
+def test_schedule_population_recalculation_queues_single_deduplicated_job(
+    individual: Individual, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.schedule_population_recalculation([str(individual.id), str(individual.id)])
+
+    job = AsyncJob.objects.get(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    )
+    assert job.config["household_ids"] == [str(individual.household_id)]
+    assert job.config["program_id"] == str(program.id)
+
+
+def test_schedule_population_recalculation_skips_when_no_individuals_processed(program: Program) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.schedule_population_recalculation([])
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    ).exists()
+
+
+def test_schedule_population_recalculation_skips_without_recalc_fields(
+    individual: Individual, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(
+        program=program, individual_fields=["given_name"], household_fields=["address"]
+    )
+    service = UniversalIndividualUpdateService(universal_update)
+
+    service.schedule_population_recalculation([str(individual.id)])
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    ).exists()

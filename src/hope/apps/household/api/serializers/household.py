@@ -307,6 +307,36 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
             "other_sex_group_count",
+            "kab_female_age_group_0_5_count",
+            "kab_female_age_group_6_11_count",
+            "kab_female_age_group_12_17_count",
+            "kab_female_age_group_18_59_count",
+            "kab_female_age_group_60_count",
+            "kab_male_age_group_0_5_count",
+            "kab_male_age_group_6_11_count",
+            "kab_male_age_group_12_17_count",
+            "kab_male_age_group_18_59_count",
+            "kab_male_age_group_60_count",
+            "kab_female_age_group_0_5_disabled_count",
+            "kab_female_age_group_6_11_disabled_count",
+            "kab_female_age_group_12_17_disabled_count",
+            "kab_female_age_group_18_59_disabled_count",
+            "kab_female_age_group_60_disabled_count",
+            "kab_male_age_group_0_5_disabled_count",
+            "kab_male_age_group_6_11_disabled_count",
+            "kab_male_age_group_12_17_disabled_count",
+            "kab_male_age_group_18_59_disabled_count",
+            "kab_male_age_group_60_disabled_count",
+            "kab_size",
+            "kab_pregnant_count",
+            "kab_children_count",
+            "kab_female_children_count",
+            "kab_male_children_count",
+            "kab_children_disabled_count",
+            "kab_female_children_disabled_count",
+            "kab_male_children_disabled_count",
+            "kab_other_sex_group_count",
+            "kab_unknown_sex_group_count",
             "start",
             "deviceid",
             "fchild_hoh",
@@ -356,6 +386,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_delivered_quantities(self, obj: Household) -> dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
+    @extend_schema_field(IndividualRoleInHouseholdForHouseholdSerializer(many=True))
     def get_roles_in_household(self, obj: Household) -> dict:
         return IndividualRoleInHouseholdForHouseholdSerializer(
             obj.individuals_and_roles(manager="all_merge_status_objects"), many=True

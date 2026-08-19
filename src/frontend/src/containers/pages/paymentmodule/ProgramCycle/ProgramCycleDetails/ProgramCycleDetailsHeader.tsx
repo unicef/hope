@@ -18,6 +18,7 @@ import { PaymentPlanGroupCreate } from '@restgenerated/models/PaymentPlanGroupCr
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/index';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,12 +58,9 @@ export const ProgramCycleDetailsHeader = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            programCycle.id,
-            programId,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesRetrieve,
+          ),
         });
         showMessage(t('Programme Cycle Finished'));
       },
@@ -89,12 +87,9 @@ export const ProgramCycleDetailsHeader = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            programCycle.id,
-            programId,
-          ],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsCyclesRetrieve,
+          ),
         });
       },
     });
@@ -106,6 +101,8 @@ export const ProgramCycleDetailsHeader = ({
         programCode: programId,
         // Generated PaymentPlanGroupCreate marks readonly id/unicefId as
         // required; only name + cycle are accepted on create.
+        // The generated PaymentPlanGroupCreate model doesn't match the actual
+        // create payload ({ name, cycle }); cast until codegen is corrected.
         requestBody: {
           name,
           cycle: programCycle.id,
@@ -113,7 +110,9 @@ export const ProgramCycleDetailsHeader = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroupsList', businessArea, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+        ),
       });
     },
   });
@@ -168,7 +167,13 @@ export const ProgramCycleDetailsHeader = ({
 
   const buttons = (
     <>
-      <Box display="flex" mt={2} mb={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 2,
+          mb: 2,
+        }}
+      >
         {programCycle.status !== 'Finished' &&
           hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
             <Box>
@@ -186,8 +191,15 @@ export const ProgramCycleDetailsHeader = ({
             </Box>
           )}
 
-        {hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE, permissions) && (
-          <Box ml={2}>
+        {hasPermissions(
+          PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE,
+          permissions,
+        ) && (
+          <Box
+            sx={{
+              ml: 2,
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
@@ -206,7 +218,11 @@ export const ProgramCycleDetailsHeader = ({
             PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
             permissions,
           ) && (
-            <Box ml={2}>
+            <Box
+              sx={{
+                ml: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -224,7 +240,11 @@ export const ProgramCycleDetailsHeader = ({
             PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE,
             permissions,
           ) && (
-            <Box ml={2}>
+            <Box
+              sx={{
+                ml: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -258,7 +278,9 @@ export const ProgramCycleDetailsHeader = ({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateGroupOpen(false)}>{t('Cancel')}</Button>
+          <Button onClick={() => setCreateGroupOpen(false)}>
+            {t('Cancel')}
+          </Button>
           <Button
             onClick={handleCreateGroup}
             variant="contained"
@@ -275,8 +297,18 @@ export const ProgramCycleDetailsHeader = ({
   return (
     <PageHeader
       title={
-        <Box display="flex" alignItems={'center'}>
-          <Box display="flex" flexDirection="column">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <Box>{programCycle.title}</Box>
           </Box>
         </Box>

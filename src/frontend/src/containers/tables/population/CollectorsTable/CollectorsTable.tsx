@@ -11,6 +11,7 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualSimple } from '@restgenerated/models/IndividualSimple';
 import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, choicesToDict, displayNameWithLatin } from '@utils/utils';
 import { ReactElement, ReactNode, useState } from 'react';
@@ -75,19 +76,18 @@ export const CollectorsTable = ({
     choicesData?.relationshipChoices,
   );
 
+  const membersParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    id: household.id,
+  };
   const { data, isLoading, error } = useQuery<PaginatedHouseholdMemberList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsMembers',
-      programId,
-      businessArea,
-      household.id,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsMembersList,
+      membersParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsMembersList({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        id: household.id,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsMembersList(membersParams),
     enabled: !!businessArea && !!programId && !!household?.id,
   });
 

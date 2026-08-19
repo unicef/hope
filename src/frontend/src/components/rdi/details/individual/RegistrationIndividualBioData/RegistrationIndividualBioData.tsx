@@ -62,8 +62,16 @@ export function RegistrationIndividualBioData({
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.map((doc) => (
     <Grid key={doc.id} size={3}>
-      <Box flexDirection="column">
-        <Box mb={1}>
+      <Box
+        sx={{
+          flexDirection: 'column',
+        }}
+      >
+        <Box
+          sx={{
+            mb: 1,
+          }}
+        >
           <LabelizedField label={doc.type.label}>
             {doc.photo ? (
               <DocumentRegistrationPhotoModal
@@ -83,8 +91,16 @@ export function RegistrationIndividualBioData({
 
   const mappedIdentities = individual.identities?.map((item) => (
     <Grid key={item.id} size={3}>
-      <Box flexDirection="column">
-        <Box mb={1}>
+      <Box
+        sx={{
+          flexDirection: 'column',
+        }}
+      >
+        <Box
+          sx={{
+            mb: 1,
+          }}
+        >
           <LabelizedField label={`${item.partner} ID`}>
             {item.number}
           </LabelizedField>

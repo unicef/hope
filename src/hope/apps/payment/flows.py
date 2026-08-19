@@ -166,10 +166,19 @@ class PaymentPlanFlow:
         pass
 
     @background_action_status.transition(
+        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
+        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+        conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.LOCKED_FSP],
+    )
+    def background_action_status_xlsx_importing_fsp_extra_fields(self) -> None:
+        pass
+
+    @background_action_status.transition(
         source=[
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
             PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
         ],
         target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
@@ -177,6 +186,7 @@ class PaymentPlanFlow:
             lambda obj: (
                 obj.payment_plan.status
                 in [
+                    obj.payment_plan.Status.LOCKED_FSP,
                     obj.payment_plan.Status.LOCKED,
                     obj.payment_plan.Status.ACCEPTED,
                     obj.payment_plan.Status.FINISHED,
@@ -187,7 +197,7 @@ class PaymentPlanFlow:
     def background_action_status_xlsx_import_error(self) -> None:
         pass
 
-    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus), target=None)
+    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus))
     def background_action_status_none(self) -> None:
         self.payment_plan.background_action_status = None
 
@@ -544,6 +554,6 @@ class FollowUpInstructionFlow:
     def background_action_status_xlsx_import_error(self) -> None:
         pass
 
-    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus), target=None)
+    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus))
     def background_action_status_none(self) -> None:
         self.instruction.background_action_status = None

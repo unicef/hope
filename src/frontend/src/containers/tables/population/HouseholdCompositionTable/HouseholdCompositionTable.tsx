@@ -140,7 +140,12 @@ export function HouseholdCompositionTable({
           </TableRow>
         </TableBody>
       </Table>
-      <Box display="flex" mt={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 2,
+        }}
+      >
         {/* TODO: Add the following fields */}
         {/* <Box mr={2}>
           <LabelizedField

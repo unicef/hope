@@ -70,7 +70,12 @@ export function IdentitiesToEditTable({
   return (
     <>
       <TableTitle>
-        <Box display="flex" justifyContent="space-between">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="h6">{t('Identity to be edited')}</Typography>
         </Box>
       </TableTitle>
@@ -88,7 +93,7 @@ export function IdentitiesToEditTable({
                     ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                   }
                   checked={selectedIdentitiesToEdit.includes(index)}
-                  inputProps={{ 'aria-labelledby': 'selected' }}
+                  slotProps={{ input: { 'aria-labelledby': 'selected' } }}
                 />
               ) : (
                 selectedIdentitiesToEdit.includes(index) && (

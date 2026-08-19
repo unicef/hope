@@ -14,6 +14,7 @@ import { HouseholdTable } from '@containers/tables/population/HouseholdTable/Hou
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
@@ -25,7 +26,10 @@ function PopulationHouseholdPage(): ReactElement {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasHouseholdsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -87,10 +91,12 @@ function PopulationHouseholdPage(): ReactElement {
         }}
       />
       <Box
-        display="flex"
-        flexDirection="column"
         data-cy="page-details-container"
         ref={tableRef}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
         <HouseholdTable
           filter={appliedFilter}

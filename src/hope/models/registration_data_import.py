@@ -32,9 +32,9 @@ DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
 UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
 NOT_PROCESSED = "NOT_PROCESSED"
 DEDUPLICATION_BATCH_STATUS_CHOICE = (
-    (SIMILAR_IN_BATCH, "Similar in batch"),
-    (DUPLICATE_IN_BATCH, "Duplicate in batch"),
-    (UNIQUE_IN_BATCH, "Unique in batch"),
+    (SIMILAR_IN_BATCH, "Similar in RDI"),
+    (DUPLICATE_IN_BATCH, "Duplicate in RDI"),
+    (UNIQUE_IN_BATCH, "Unique in RDI"),
     (NOT_PROCESSED, "Not Processed"),
 )
 

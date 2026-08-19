@@ -11,6 +11,7 @@ import { styled } from '@mui/system';
 import { ReactElement } from 'react';
 import { theme as muiTheme } from 'src/theme';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -65,13 +66,18 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   const { businessArea, programCode } = useBaseUrl();
 
+  const profileParams = {
+    businessAreaSlug: businessArea,
+    program: programCode === 'all' ? undefined : programCode,
+  };
+
   const { data: meData } = useQuery({
-    queryKey: ['profile', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersProfileRetrieve,
+      profileParams,
+    ),
     queryFn: () => {
-      return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
-        program: programCode === 'all' ? undefined : programCode,
-      });
+      return RestService.restBusinessAreasUsersProfileRetrieve(profileParams);
     },
     staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
     gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
@@ -87,8 +93,18 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   return (
     <StyledAppBar open={open}>
       <StyledToolbar>
-        <Box display="flex" alignItems="center" justifyContent="center">
-          <Box ml={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              ml: 1,
+            }}
+          >
             <StyledIconButton
               edge="start"
               color="inherit"
@@ -99,18 +115,38 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
               <MenuIcon />
             </StyledIconButton>
           </Box>
-          <Box display="flex" alignItems="center">
-            <Box ml={6} data-cy="business-area-container">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Box
+              data-cy="business-area-container"
+              sx={{
+                ml: 6,
+              }}
+            >
               <BusinessAreaSelect />
             </Box>
             {businessArea !== 'global' && (
-              <Box ml={6} data-cy="global-program-filter-container">
+              <Box
+                data-cy="global-program-filter-container"
+                sx={{
+                  ml: 6,
+                }}
+              >
                 <GlobalProgramSelect />
               </Box>
             )}
           </Box>
         </Box>
-        <Box display="flex" justifyContent="flex-end">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
             <StyledLink target="_blank" href={servicenow}>
               Support

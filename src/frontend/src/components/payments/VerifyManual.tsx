@@ -4,14 +4,18 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -34,20 +38,29 @@ export function VerifyManual({
   receivedAmount,
   verificationPlanId,
   paymentId,
-  paymentPlanId,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const { programCode, businessAreaSlug } = useBaseUrl();
-  const paymentQueryKey = [
-    'payment',
-    businessAreaSlug,
-    paymentId,
-    programCode,
-    paymentPlanId,
-  ];
+  const {
+    data: verificationStatusChoices = [],
+    isLoading: isStatusChoicesLoading,
+    isError: isStatusChoicesError,
+    error: statusChoicesError,
+  } = useVerificationStatusChoices();
+  useApiErrorSnackbar(isStatusChoicesError, statusChoicesError);
+  // Manual verification only allows marking a payment received / not received.
+  const statusChoices = verificationStatusChoices
+    .filter((choice) => ['RECEIVED', 'NOT_RECEIVED'].includes(choice.value))
+    .map((choice) => ({
+      ...choice,
+      dataCy: `choice-${choice.value.toLowerCase().replace(/_/g, '-')}`,
+    }));
+  const paymentQueryKey = restQueryKey(
+    RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve,
+  );
   const formId = `verify-manual-form-${paymentId}`;
   const updateVerificationMutation = useMutation({
     mutationFn: (data: PatchedPaymentVerificationUpdate) =>
@@ -61,8 +74,7 @@ export function VerifyManual({
         },
       ),
 
-    onSuccess: async (data) => {
-      queryClient.setQueryData(paymentQueryKey, data);
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: paymentQueryKey,
       });
@@ -94,7 +106,11 @@ export function VerifyManual({
       {({ values }) => (
         <Form id={formId}>
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
-          <Box p={2}>
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
             <Button
               color="primary"
               variant="contained"
@@ -119,24 +135,17 @@ export function VerifyManual({
               <DialogContainer>
                 <Grid container>
                   <Grid size={{ xs: 12 }}>
-                    <Field
-                      name="status"
-                      label="Status"
-                      style={{ flexDirection: 'row' }}
-                      choices={[
-                        {
-                          value: 'RECEIVED',
-                          name: t('Received'),
-                          dataCy: 'choice-received',
-                        },
-                        {
-                          value: 'NOT_RECEIVED',
-                          name: t('Not Received'),
-                          dataCy: 'choice-not-received',
-                        },
-                      ]}
-                      component={FormikRadioGroup}
-                    />
+                    {isStatusChoicesLoading ? (
+                      <LoadingComponent />
+                    ) : (
+                      <Field
+                        name="status"
+                        label="Status"
+                        style={{ flexDirection: 'row' }}
+                        choices={statusChoices}
+                        component={FormikRadioGroup}
+                      />
+                    )}
                   </Grid>
                   <Grid size={{ xs: 6 }}>
                     {values.status === 'RECEIVED' && (

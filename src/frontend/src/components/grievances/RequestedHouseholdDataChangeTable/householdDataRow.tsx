@@ -65,7 +65,7 @@ export const householdDataRow = (
             color="primary"
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             checked={isItemSelected}
-            inputProps={{ 'aria-labelledby': labelId }}
+            slotProps={{ input: { 'aria-labelledby': labelId } }}
           />
         ) : (
           isItemSelected && (

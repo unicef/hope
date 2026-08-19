@@ -12,6 +12,7 @@ import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { displayNameWithLatin } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -22,7 +23,7 @@ function HouseholdQuestionnaire({
   values,
   programCode,
 }: HouseholdQuestionnaireProps): ReactElement {
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -32,24 +33,22 @@ function HouseholdQuestionnaire({
       ? values.selectedHousehold.id
       : values.selectedHousehold;
 
+  const householdParams = {
+    businessAreaSlug: businessArea,
+    id: householdId,
+    programCode: programCode,
+  };
   const {
     data: household,
     isLoading,
     error,
   } = useQuery<HouseholdDetail>({
-    queryKey: [
-      'household',
-      businessArea,
-      householdId,
-      programCode,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+      householdParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        id: householdId,
-        programCode: programCode,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve(householdParams),
     enabled: !!householdId && !!programCode,
   });
 

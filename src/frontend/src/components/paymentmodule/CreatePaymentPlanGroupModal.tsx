@@ -13,6 +13,7 @@ import {
 import { PaymentPlanGroupCreate } from '@restgenerated/models/PaymentPlanGroupCreate';
 import { RestService } from '@restgenerated/index';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,6 +46,8 @@ export const CreatePaymentPlanGroupModal = ({
         programCode: programId,
         // Generated PaymentPlanGroupCreate marks readonly id/unicefId as
         // required; only name + cycle are accepted on create.
+        // The generated PaymentPlanGroupCreate model doesn't match the actual
+        // create payload ({ name, cycle }); cast until codegen is corrected.
         requestBody: {
           name,
           cycle: cycleId,
@@ -52,7 +55,9 @@ export const CreatePaymentPlanGroupModal = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['paymentPlanGroupsList', businessArea, programId],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+        ),
       });
     },
   });
@@ -77,7 +82,11 @@ export const CreatePaymentPlanGroupModal = ({
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle>{t('Create Payment Plan Group')}</DialogTitle>
       <DialogContent>
-        <Box mb={2}>
+        <Box
+          sx={{
+            mb: 2,
+          }}
+        >
           <Typography variant="body2" color="textSecondary">
             {t('Cycle')}: <strong>{cycleTitle}</strong>
           </Typography>

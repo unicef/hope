@@ -1,5 +1,6 @@
 import abc
 import base64
+import binascii
 import hashlib
 import logging
 from typing import TYPE_CHECKING, Any, Iterable
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRegistrationService(AuroraProcessor, abc.ABC):
-    process_flex_records_task = process_flex_records_async_task
+    process_flex_records_task = staticmethod(process_flex_records_async_task)
 
     def __init__(self, registration: Registration) -> None:
         self.registration = registration
@@ -100,9 +101,11 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             Record.objects.filter(id__in=records_ids)
             .exclude(status=Record.STATUS_IMPORTED)
             .exclude(ignored=True)
+            .order_by("id")
             .values_list("id", flat=True)
         )
         imported_records_ids = []
+        ignored_records_ids = []
         records_with_error = []
 
         try:
@@ -111,7 +114,10 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                 try:
                     with atomic():
                         self.create_household_for_rdi_household(record, rdi)
-                    imported_records_ids.append(record_id)
+                    if record.ignored:
+                        ignored_records_ids.append(record_id)
+                    else:
+                        imported_records_ids.append(record_id)
                 except ValidationError as e:
                     records_with_error.append((record, str(e)))
                     continue
@@ -129,6 +135,21 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                             "error_message",
                         )
                     )
+
+            if (
+                ignored_records_ids
+                and not imported_records_ids
+                and not records_with_error
+                and rdi.status == RegistrationDataImport.IMPORTING
+            ):
+                rdi.status = RegistrationDataImport.IMPORT_ERROR
+                rdi.error_message = "All selected Aurora Records were ignored during processing"
+                rdi.save(
+                    update_fields=(
+                        "status",
+                        "error_message",
+                    )
+                )
 
             if imported_records_ids:
                 number_of_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).count()
@@ -199,5 +220,9 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         if certificate_picture:
             format_image = "jpg"
             name = hashlib.sha256(document_number.encode()).hexdigest()
-            certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
+            try:
+                decoded = base64.b64decode(certificate_picture)
+            except (binascii.Error, TypeError, ValueError) as e:
+                raise ValidationError("Invalid image data") from e
+            certificate_picture = ContentFile(decoded, name=f"{name}.{format_image}")
         return certificate_picture

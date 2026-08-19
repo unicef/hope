@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
@@ -50,6 +50,17 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "xlsx_file_imported",
     )
     date_hierarchy = "updated_at"
+    readonly_fields = (
+        "activation_date",
+        "completion_date",
+        "responded_count",
+        "received_count",
+        "not_received_count",
+        "received_with_problems_count",
+        "xlsx_file_exporting",
+        "xlsx_file_imported",
+        "error",
+    )
     search_fields = ("payment_plan__name",)
 
     @button(permission="payment.view_paymentverification")
@@ -97,3 +108,6 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             " (also sending messages via Rapid Pro).",
             success_message="Successfully activated.",
         )
+
+    def has_add_permission(self: Any, request: Any) -> bool:
+        return False

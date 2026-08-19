@@ -11,12 +11,12 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
-  PROGRAM_STATE_FILTER,
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
   hasCreatorOrOwnerPermissions,
+  hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
 import {
@@ -33,6 +34,7 @@ import {
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
+import { BulkCloseModal } from './bulk/BulkCloseModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -88,9 +90,10 @@ export const GrievancesTable = ({
       grievanceStatus: filter.grievanceStatus,
       priority: filter.priority === 'Not Set' ? 0 : filter.priority,
       urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
+      submissionChannel: filter.submissionChannel,
       preferredLanguage: filter.preferredLanguage,
       programCode: isAllPrograms ? filter.program : programCode,
-      isActiveProgram: filter.programState === PROGRAM_STATE_FILTER.ACTIVE ? true : null,
+      isActiveProgram: isAllPrograms ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
     [
@@ -116,9 +119,9 @@ export const GrievancesTable = ({
       filter.grievanceStatus,
       filter.priority,
       filter.urgency,
+      filter.submissionChannel,
       filter.preferredLanguage,
       filter.program,
-      filter.programState,
       filter.areaScope,
       isAllPrograms,
       programCode,
@@ -135,15 +138,12 @@ export const GrievancesTable = ({
   const [page, setPage] = useState<number>(0);
 
   const { data: usersListData } = useQuery<PaginatedUserList>({
-    queryKey: [
-      'businessAreasUsersList',
-      {
-        businessAreaSlug: businessArea,
-        limit: 20,
-        ordering: 'first_name,last_name,email',
-        search: debouncedInputText || undefined,
-      },
-    ],
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, {
+      businessAreaSlug: businessArea,
+      limit: 20,
+      ordering: 'first_name,last_name,email',
+      search: debouncedInputText || undefined,
+    }),
     queryFn: ({ queryKey }) => {
       const [, params] = queryKey;
       return RestService.restBusinessAreasUsersList(params as any);
@@ -162,41 +162,36 @@ export const GrievancesTable = ({
   }, [usersListData]);
 
   //ALL PROGRAMS
+  const allGrievanceTicketsParams = createApiParams(
+    {
+      businessAreaSlug: businessArea,
+      program: programId === 'all' ? undefined : programId,
+    },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: allProgramsGrievanceTicketsData,
     isLoading: isLoadingAll,
+    isFetching: isFetchingAll,
     error: errorAll,
   } = useQuery<PaginatedGrievanceTicketListList>({
-    queryKey: [
-      'businessAreasGrievanceTickets',
-      queryVariables,
-      businessArea,
-      filter.grievanceType,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsList,
+      allGrievanceTicketsParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList(
-        createApiParams(
-          {
-            businessAreaSlug: businessArea,
-            program: programId === 'all' ? undefined : programId,
-          },
-          queryVariables,
-          {
-            withPagination: true,
-          },
-        ),
-      ),
+      RestService.restBusinessAreasGrievanceTicketsList(allGrievanceTicketsParams),
     enabled: isAllPrograms,
+    placeholderData: keepPreviousData,
   });
 
   //ALL PROGRAMS COUNT
   const { data: allProgramsGrievanceTicketsCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasGrievanceTicketsCount',
-      businessArea,
-      queryVariables,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+      createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
         createApiParams({ businessAreaSlug: businessArea }, queryVariables),
@@ -205,43 +200,42 @@ export const GrievancesTable = ({
   });
 
   // SELECTED PROGRAM
+  const selectedProgramGrievanceTicketsParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+    { withPagination: true },
+  );
   const {
     data: selectedProgramGrievanceTicketsData,
     isLoading: isLoadingSelected,
+    isFetching: isFetchingSelected,
     error: errorSelected,
   } = useQuery<PaginatedGrievanceTicketListList>({
-    queryKey: [
-      'businessAreasProgramsGrievanceTickets',
-      queryVariables,
-      programId,
-      businessArea,
-      filter.grievanceType,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsGrievanceTicketsList,
+      selectedProgramGrievanceTicketsParams,
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsGrievanceTicketsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        selectedProgramGrievanceTicketsParams,
       ),
     enabled: !isAllPrograms,
+    placeholderData: keepPreviousData,
   });
   //SELECTED PROGRAM COUNT
+  const selectedProgramGrievanceTicketsCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    queryVariables,
+  );
   const { data: selectedProgramGrievanceTicketsCount } =
     useQuery<CountResponse>({
-      queryKey: [
-        'businessAreasProgramsGrievanceTicketsCount',
-        businessArea,
-        programId,
-        queryVariables,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
+        selectedProgramGrievanceTicketsCountParams,
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-          ),
+          selectedProgramGrievanceTicketsCountParams,
         ),
       enabled: !isAllPrograms && page === 0,
     });
@@ -277,21 +271,30 @@ export const GrievancesTable = ({
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      { businessAreaSlug },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,
       }),
   });
 
+  const currentUserParams = {
+    businessAreaSlug,
+    program: programCode === 'all' ? undefined : programCode,
+  };
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programCode],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersProfileRetrieve,
+        currentUserParams,
+      ),
       queryFn: () => {
-        return RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug,
-          program: programCode === 'all' ? undefined : programCode,
-        });
+        return RestService.restBusinessAreasUsersProfileRetrieve(
+          currentUserParams,
+        );
       },
       staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
       gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
@@ -316,6 +319,15 @@ export const GrievancesTable = ({
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
   const currentUserId = currentUserData.id;
+
+  const canBulkClose = hasPermissions(
+    [
+      PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+      PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+    ],
+    permissions,
+  );
 
   const getCanViewDetailsOfTicket = (ticket: GrievanceTicketList): boolean => {
     const isTicketCreator = currentUserId === ticket.createdBy?.id;
@@ -399,11 +411,13 @@ export const GrievancesTable = ({
       <Paper>
         <EnhancedTableToolbar title={t('Grievance Tickets List')} />
         <Box
-          display="flex"
-          flexDirection="row"
-          marginX={6}
-          gap={4}
           component="div"
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            marginX: 6,
+            gap: 4,
+          }}
         >
           <BulkAssignModal
             selectedTickets={selectedTickets}
@@ -421,6 +435,12 @@ export const GrievancesTable = ({
             selectedTickets={selectedTickets}
             setSelected={setSelectedTickets}
           />
+          {canBulkClose && (
+            <BulkCloseModal
+              selectedTickets={selectedTickets}
+              setSelected={setSelectedTickets}
+            />
+          )}
         </Box>
         <UniversalRestTable
           isOnPaper={false}
@@ -435,6 +455,7 @@ export const GrievancesTable = ({
           }
           error={isAllPrograms ? errorAll : errorSelected}
           isLoading={isAllPrograms ? isLoadingAll : isLoadingSelected}
+          isFetching={isAllPrograms ? isFetchingAll : isFetchingSelected}
           queryVariables={queryVariables}
           setQueryVariables={setQueryVariables}
           defaultOrderBy="created_at"

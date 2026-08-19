@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 import itertools
 import logging
-from typing import Any, Iterable, cast
+from typing import Any, Iterable
 
 from constance import config
 from django.db import transaction
@@ -11,6 +11,7 @@ from django.db.models.functions import Concat
 from psycopg2._psycopg import IntegrityError
 
 from hope.apps.core.utils import to_dict
+from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import (
     DUPLICATE,
@@ -127,7 +128,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for index, individual in enumerate(individual_qs):
-            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
+            deduplication_result = self._deduplicate_single_individual(individual)
             if index % 100 == 0:
                 log.info(f"RDI:{rdi_id} Deduplicated {index} individuals against population")
             individual.deduplication_golden_record_results = deduplication_result.results_data
@@ -176,7 +177,7 @@ class DeduplicateTask:
         ]
         individual_qs = individuals.only(*individual_fields).prefetch_related("identities")
         for individual in evaluate_qs(individual_qs.select_for_update().order_by("pk")):
-            deduplication_result = self._deduplicate_single_individual(cast("Individual", individual))
+            deduplication_result = self._deduplicate_single_individual(individual)
 
             individual.deduplication_golden_record_results = deduplication_result.results_data
             if deduplication_result.duplicates:
@@ -814,7 +815,7 @@ class HardDocumentDeduplication:
                 all_matching_number_documents_dict,
                 all_matching_number_documents_signatures,  # type: ignore[arg-type]
                 already_processed_signatures,
-                documents_to_dedup,  # type: ignore[arg-type]
+                documents_to_dedup,
                 new_document_signatures_duplicated_in_batch=new_document_signatures_duplicated_in_batch,
                 new_document_signatures_in_batch_per_individual_dict=new_document_signatures_in_batch_per_individual_dict,
                 new_documents=new_documents,
@@ -1027,9 +1028,7 @@ class HardDocumentDeduplication:
         return program_ids
 
     def _generate_signature(self, document: Document) -> str:
-        if document.type.valid_for_deduplication:
-            return f"{document.type_id}--{document.document_number}--{document.country_id}"
-        return f"{document.document_number}--{document.country_id}"
+        return document.dedup_signature
 
     def _prepare_grievance_ticket_documents_deduplication(
         self,
@@ -1057,6 +1056,7 @@ class HardDocumentDeduplication:
 
         ticket = GrievanceTicket(
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            submission_channel=SUBMISSION_CHANNEL_HOPE,
             business_area=business_area,
             admin2=admin_level_2,
             area=area,

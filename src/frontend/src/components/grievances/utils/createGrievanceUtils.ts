@@ -19,13 +19,29 @@ export const replaceLabels = (text, _beneficiaryGroup) => {
     .replace(/Household/g, _beneficiaryGroup.groupLabel);
 };
 
-export function isShowIssueType(category: any): boolean {
+export function isShowIssueType(category: string | number): boolean {
   const cat = category?.toString();
   return (
     cat === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
     cat === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
     cat === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+  );
+}
+export const SYSTEM_GENERATED_ISSUE_TYPES = [GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR];
+
+export function isSystemGenerated(category: any, issueType?: number): boolean {
+  const cat = category?.toString();
+  if (
+    issueType != null &&
+    SYSTEM_GENERATED_ISSUE_TYPES.includes(issueType.toString())
+  ) {
+    return true;
+  }
+  return (
+    cat === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION ||
+    cat === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
+    cat === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
   );
 }
 export const getIssueTypeToDisplay = (issueType: number): string =>
@@ -50,8 +66,7 @@ export const selectedIssueType = (formValues, issueTypeDict): string => {
   return (
     (
       subcategories.find((el) => el.value === issueType) as
-        | { name: string; value: string }
-        | undefined
+        { name: string; value: string } | undefined
     )?.name || '-'
   );
 };
@@ -81,7 +96,7 @@ export const roleDisplayMap = {
 };
 
 export function prepareExistingAccountValues(
-  individualDataUpdateAccountsToEdit: any,
+  individualDataUpdateAccountsToEdit: Record<string, unknown>[] | null | undefined,
 ) {
   if (!individualDataUpdateAccountsToEdit) {
     return [];
@@ -114,6 +129,9 @@ function prepareDocumentPhotoFields(input) {
   return input;
 }
 
+// `values` is the full Formik grievance form bag (~40 dynamic field paths spanning
+// every category/issue-type branch) and `extras` is assembled dynamically per branch;
+// there is no single generated model for either, so both stay `any` intentionally.
 export function prepareRestVariables(values: any): CreateGrievanceTicket {
   const extras: any = {};
   const category = parseInt(values.category, 10);
@@ -368,35 +386,34 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
     partner: values.partner ? parseInt(values.partner, 10) : undefined,
     program: values.program,
     comments: values.comments,
+    submissionChannel: values.submissionChannel,
     linkedFeedbackId: values.linkedFeedbackId,
     documentation: values.documentation || [],
   };
 }
 
-export const matchGrievanceUrlByCategory = (category: number): string => {
+export const matchGrievanceUrlByCategory = (
+  category: number,
+  issueType?: number,
+): string => {
   if (!category) return null;
-  const categoryString = category.toString();
-  const systemGeneratedGrievanceCategories = [
-    GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION,
-    GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION,
-    GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
-  ];
-  if (systemGeneratedGrievanceCategories.includes(categoryString)) {
-    return 'system-generated';
-  }
-  return 'user-generated';
+  return isSystemGenerated(category, issueType)
+    ? 'system-generated'
+    : 'user-generated';
 };
 
 export const getGrievanceDetailsPath = (
   ticketId: string,
   category: number,
   baseUrl: string,
+  issueType?: number,
 ): string => {
   if (!ticketId || !category) {
     return null;
   }
   return `/${baseUrl}/grievance/tickets/${matchGrievanceUrlByCategory(
     category,
+    issueType,
   )}/${ticketId}`;
 };
 
@@ -404,9 +421,13 @@ export const getGrievanceEditPath = (
   ticketId: string,
   category: number,
   baseUrl: string,
+  issueType?: number,
 ): string => {
   if (!ticketId || !category) {
     return null;
+  }
+  if (issueType?.toString() === GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR) {
+    return `/${baseUrl}/grievance/edit-ticket/picture-error/${ticketId}`;
   }
   return `/${baseUrl}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
     category,
@@ -443,6 +464,9 @@ export const categoriesAndColors = [
  *   (empty_arr is omitted)
  */
 
+// Recursive serializer over an arbitrary nested request object; `obj` is
+// intentionally `any` since it walks values of every shape (files, arrays,
+// nested objects, primitives) with no fixed schema.
 export function grievanceRequestToFormData(
   obj: any,
   form?: FormData,

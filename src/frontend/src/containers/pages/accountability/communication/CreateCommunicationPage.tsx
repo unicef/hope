@@ -8,10 +8,14 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { MessageCreate } from '@restgenerated/models/MessageCreate';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
+import { useSexChoices } from '@hooks/useSexChoices';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
@@ -120,6 +124,14 @@ function prepareSampleSizeRequest(
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const {
+    data: sexChoices = [],
+    isLoading: isSexChoicesLoading,
+    isError: isSexChoicesError,
+    error: sexChoicesError,
+  } = useSexChoices();
+  useApiErrorSnackbar(isSexChoicesError, sexChoicesError);
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: (data: MessageCreate) =>
       RestService.restBusinessAreasProgramsMessagesCreate({
@@ -127,6 +139,13 @@ const CreateCommunicationPage = (): ReactElement => {
         programCode: programId,
         requestBody: data,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsMessagesList,
+        ),
+      });
+    },
   });
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
@@ -146,7 +165,10 @@ const CreateCommunicationPage = (): ReactElement => {
   const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
 
   const { data: adminAreasData } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
@@ -428,7 +450,12 @@ const CreateCommunicationPage = (): ReactElement => {
                 onChange={() => setFormValues(values)}
               />
               {activeStep === CommunicationSteps.LookUp && (
-                <Box display="flex" flexDirection="column">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
                   <LookUpSelectionCommunication
                     businessArea={businessArea}
                     values={values}
@@ -441,18 +468,33 @@ const CreateCommunicationPage = (): ReactElement => {
               )}
               {activeStep === CommunicationSteps.SampleSize &&
                 (values.households.length ? (
-                  <Box px={8}>
-                    <Box pt={3}>
-                      <Box fontSize={12} color="#797979">
+                  <Box
+                    sx={{
+                      px: 8,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        pt: 3,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          fontSize: 12,
+                          color: '#797979',
+                        }}
+                      >
                         {t(
                           'You have selected households as the recipients group',
                         )}
                       </Box>
                       <Box
-                        pb={3}
-                        pt={3}
-                        fontSize={16}
-                        fontWeight="fontWeightBold"
+                        sx={{
+                          pb: 3,
+                          pt: 3,
+                          fontSize: 16,
+                          fontWeight: 'fontWeightBold',
+                        }}
                       >
                         {t('Message will be sent to all households selected')}:
                         ({values.households.length})
@@ -460,9 +502,25 @@ const CreateCommunicationPage = (): ReactElement => {
                     </Box>
                   </Box>
                 ) : (
-                  <Box px={8}>
-                    <Box display="flex" alignItems="center">
-                      <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
+                  <Box
+                    sx={{
+                      px: 8,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          pl: 5,
+                          pr: 5,
+                          fontWeight: '500',
+                          fontSize: 'medium',
+                        }}
+                      >
                         {t('Sample Size')}:
                       </Box>
                       <RadioGroup
@@ -487,7 +545,11 @@ const CreateCommunicationPage = (): ReactElement => {
                     </Box>
                     <TabPanel value={selectedSampleSizeType} index={0}>
                       {sampleSizeError && (
-                        <Box mb={3}>
+                        <Box
+                          sx={{
+                            mb: 3,
+                          }}
+                        >
                           <Typography color="error">
                             {t('Error loading sample size data')}:{' '}
                             {sampleSizeError.message}
@@ -503,12 +565,18 @@ const CreateCommunicationPage = (): ReactElement => {
                           component={FormikMultiSelectField}
                         />
                       )}
-                      <Box pt={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                        }}
+                      >
                         <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight="fontWeightBold"
+                          sx={{
+                            pb: 3,
+                            pt: 3,
+                            fontSize: 16,
+                            fontWeight: 'fontWeightBold',
+                          }}
                         >
                           Sample size:{' '}
                           {sampleSizeLoading ? (
@@ -533,7 +601,11 @@ const CreateCommunicationPage = (): ReactElement => {
                       </Box>
                     </TabPanel>
                     <TabPanel value={selectedSampleSizeType} index={1}>
-                      <Box pt={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                        }}
+                      >
                         <Field
                           name="confidenceInterval"
                           label={t('Confidence Interval')}
@@ -553,8 +625,17 @@ const CreateCommunicationPage = (): ReactElement => {
                         <Typography variant="caption">
                           {t('Cluster Filters')}
                         </Typography>
-                        <Box flexDirection="column" display="flex">
-                          <Box display="flex">
+                        <Box
+                          sx={{
+                            flexDirection: 'column',
+                            display: 'flex',
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                            }}
+                          >
                             <Field
                               name="adminCheckbox"
                               label={t('Administrative Level')}
@@ -608,34 +689,28 @@ const CreateCommunicationPage = (): ReactElement => {
                             )}
                             {values.sexCheckbox && (
                               <Grid size={{ xs: 5 }}>
-                                <Field
-                                  name="filterSex"
-                                  label={t('Gender')}
-                                  color="primary"
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                    { value: 'OTHER', name: t('Other') },
-                                    {
-                                      value: 'NOT_COLLECTED',
-                                      name: t('Not Collected'),
-                                    },
-                                    {
-                                      value: 'NOT_ANSWERED',
-                                      name: t('Not Answered'),
-                                    },
-                                  ]}
-                                  component={FormikSelectField}
-                                />
+                                {isSexChoicesLoading ? (
+                                  <LoadingComponent />
+                                ) : (
+                                  <Field
+                                    name="filterSex"
+                                    label={t('Gender')}
+                                    color="primary"
+                                    choices={sexChoices}
+                                    component={FormikSelectField}
+                                  />
+                                )}
                               </Grid>
                             )}
                           </Grid>
                         </Box>
                         <Box
-                          pb={3}
-                          pt={3}
-                          fontSize={16}
-                          fontWeight="fontWeightBold"
+                          sx={{
+                            pb: 3,
+                            pt: 3,
+                            fontSize: 16,
+                            fontWeight: 'fontWeightBold',
+                          }}
                         >
                           Sample size:{' '}
                           {sampleSizeLoading ? (
@@ -664,7 +739,11 @@ const CreateCommunicationPage = (): ReactElement => {
               {activeStep === CommunicationSteps.Details && (
                 <>
                   <Border />
-                  <Box my={3}>
+                  <Box
+                    sx={{
+                      my: 3,
+                    }}
+                  >
                     <Grid size={12}>
                       <Field
                         name="title"
@@ -693,8 +772,18 @@ const CreateCommunicationPage = (): ReactElement => {
               )}
               {dataChangeErrors(errors)}
             </Form>
-            <Box pt={3} display="flex" flexDirection="row">
-              <Box mr={3}>
+            <Box
+              sx={{
+                pt: 3,
+                display: 'flex',
+                flexDirection: 'row',
+              }}
+            >
+              <Box
+                sx={{
+                  mr: 3,
+                }}
+              >
                 <Button
                   component={Link}
                   to={`/${baseUrl}/accountability/communication`}
@@ -703,7 +792,12 @@ const CreateCommunicationPage = (): ReactElement => {
                   {t('Cancel')}
                 </Button>
               </Box>
-              <Box display="flex" ml="auto">
+              <Box
+                sx={{
+                  display: 'flex',
+                  ml: 'auto',
+                }}
+              >
                 <Button
                   disabled={activeStep === CommunicationSteps.LookUp}
                   onClick={() => handleBack(values)}
