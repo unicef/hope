@@ -19,7 +19,6 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.household.celery_tasks import (
-    calculate_children_fields_for_not_collected_individual_data_async_task,
     cleanup_indexes_in_inactive_programs_async_task,
     cleanup_indexes_in_inactive_programs_async_task_action,
     enroll_households_to_program_async_task,
@@ -455,26 +454,6 @@ def test_mass_unwithdraw_households_task_action_calls_service(mock_program_get, 
 
     mock_service_cls.assert_called_once_with(program_source)
     mock_service_cls.return_value.unwithdraw.assert_called_once_with(ANY, reopen_tickets=False)
-
-
-@patch.object(AsyncJob, "queue")
-def test_calculate_children_fields_for_not_collected_individual_data_schedules_async_job(
-    mock_queue, django_capture_on_commit_callbacks
-):
-    with django_capture_on_commit_callbacks(execute=True):
-        calculate_children_fields_for_not_collected_individual_data_async_task()
-
-    job = AsyncJob.objects.get()
-
-    assert job.type == "JOB_TASK"
-    assert (
-        job.action == "hope.apps.household.celery_tasks."
-        "calculate_children_fields_for_not_collected_individual_data_async_task_action"
-    )
-    assert job.config == {}
-    assert job.group_key == "household"
-    assert job.description == "Calculate children fields for households"
-    mock_queue.assert_called_once_with()
 
 
 @patch("hope.apps.household.celery_tasks.recalculate_population_fields_chunk_async_task")
