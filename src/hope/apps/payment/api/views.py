@@ -2270,7 +2270,6 @@ class PaymentPlanManagerialViewSet(
             .select_related("program_cycle__program")
         )
 
-    # TODO: e2e failed probably because of cache here
     @etag_decorator(PaymentPlanKeyConstructor)
     @cached_response(key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
