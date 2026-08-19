@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
@@ -471,7 +472,7 @@ def test_target_population_caching(
 
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 15
+        assert len(ctx.captured_queries) == 13
 
     with CaptureQueriesContext(connection) as ctx:
         response = target_population_list_context["client"].get(target_population_list_context["tp_list_url"])
@@ -479,18 +480,19 @@ def test_target_population_caching(
 
         etag_second_call = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
         assert etag_second_call == etag
 
-    target_population_list_context["tp"].status = PaymentPlan.Status.TP_PROCESSING
-    target_population_list_context["tp"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        target_population_list_context["tp"].status = PaymentPlan.Status.TP_PROCESSING
+        target_population_list_context["tp"].save()
     with CaptureQueriesContext(connection) as ctx:
         response = target_population_list_context["client"].get(target_population_list_context["tp_list_url"])
         assert response.status_code == status.HTTP_200_OK
 
         etag_call_after_update = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 9
+        assert len(ctx.captured_queries) == 7
 
         assert etag_call_after_update != etag
 
@@ -500,7 +502,7 @@ def test_target_population_caching(
 
         etag_call_after_update_second_call = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
         assert etag_call_after_update_second_call == etag_call_after_update
 
 

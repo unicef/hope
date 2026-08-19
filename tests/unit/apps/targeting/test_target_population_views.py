@@ -2,6 +2,7 @@ import json
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import freezegun
 import pytest
@@ -308,27 +309,28 @@ def test_list_target_populations_caching(
         assert response.status_code == status.HTTP_200_OK
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 15
+        assert len(ctx.captured_queries) == 13
 
     with CaptureQueriesContext(connection) as ctx:
         response = api_client_for_user.get(list_url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
         assert response.headers["etag"] == etag
 
-    tp1.status = PaymentPlan.Status.TP_PROCESSING
-    tp1.save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        tp1.status = PaymentPlan.Status.TP_PROCESSING
+        tp1.save()
 
     with CaptureQueriesContext(connection) as ctx:
         response = api_client_for_user.get(list_url)
         etag_call_after_update = response.headers["etag"]
         assert response.status_code == status.HTTP_200_OK
-        assert len(ctx.captured_queries) == 9
+        assert len(ctx.captured_queries) == 7
         assert etag != etag_call_after_update
 
     with CaptureQueriesContext(connection) as ctx:
         response = api_client_for_user.get(list_url)
         etag_call_after_update_second_call = response.headers["etag"]
         assert response.status_code == status.HTTP_200_OK
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
         assert etag_call_after_update == etag_call_after_update_second_call
