@@ -4,7 +4,12 @@ from django import forms
 from django.db import models
 import pytest
 
-from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.core import (
+    BeneficiaryGroupFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeFactory,
+    FlexibleAttributeForPDUFactory,
+)
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import DocumentFactory, HouseholdFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
@@ -14,6 +19,16 @@ from hope.apps.payment.services.payment_household_snapshot_service import create
 from hope.models import DataCollectingType, FinancialServiceProviderXlsxTemplate, MergeStatusModel
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def flex_attribute():
+    return FlexibleAttributeFactory(name="flex_field_for_template")
+
+
+@pytest.fixture
+def pdu_flex_attribute():
+    return FlexibleAttributeForPDUFactory(label="PDU Field For Template")
 
 
 def test_fsp_template_get_column_from_core_field():
@@ -171,3 +186,14 @@ def test_model_form_integration_fsp_template():
     form = FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})
     assert not form.is_valid()
     assert form.errors == {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]}
+
+
+def test_flex_fields_form_choices_exclude_pdu_attributes(flex_attribute, pdu_flex_attribute):
+    class FinancialServiceProviderXlsxTemplateFlexFieldsForm(forms.ModelForm):
+        class Meta:
+            model = FinancialServiceProviderXlsxTemplate
+            fields = ["flex_fields"]
+
+    form = FinancialServiceProviderXlsxTemplateFlexFieldsForm()
+
+    assert list(form.fields["flex_fields"].choices) == [("flex_field_for_template", "flex_field_for_template")]

@@ -40,8 +40,9 @@ class FlexFieldArrayField(ArrayField):
         **kwargs: Any,
     ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
-        # TODO exclude PDU here
-        flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
+        flexible_attributes = (
+            FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).values_list("name", flat=True).distinct()
+        )
         flexible_choices = ((x, x) for x in flexible_attributes)
         kwargs.setdefault("widget", widget)
         kwargs.setdefault("choices", flexible_choices)
