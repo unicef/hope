@@ -121,6 +121,7 @@ def attacker(
             Permissions.PAYMENT_VERIFICATION_ACTIVATE,
             Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
             Permissions.TARGETING_CREATE,
+            Permissions.TARGETING_UPDATE,
         ],
         attacker_business_area,
         program=attacker_payment_plan.program,
@@ -604,3 +605,38 @@ def test_create_target_population_with_fsp_of_other_business_area_is_denied(
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
     assert not PaymentPlan.objects.filter(name="target population with a foreign fsp").exists()
+
+
+@pytest.fixture
+def attacker_target_population(attacker_payment_plan: PaymentPlan) -> PaymentPlan:
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_OPEN,
+        program_cycle__program=attacker_payment_plan.program,
+    )
+
+
+def test_move_target_population_into_cycle_of_other_business_area_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_target_population: PaymentPlan,
+    victim_payment_plan: PaymentPlan,
+) -> None:
+    victim_cycle = victim_payment_plan.program_cycle
+    own_cycle_id = attacker_target_population.program_cycle_id
+    url = reverse(
+        "api:payments:target-populations-detail",
+        kwargs={**cross_ba_kwargs, "pk": str(attacker_target_population.id)},
+    )
+
+    response = api_client.patch(
+        url,
+        {
+            "program_cycle_id": str(victim_cycle.id),
+            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=victim_cycle).id),
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    attacker_target_population.refresh_from_db()
+    assert attacker_target_population.program_cycle_id == own_cycle_id

@@ -804,7 +804,10 @@ class PaymentPlanService:
 
     def _set_program_cycle(self, input_data: dict) -> None:
         if program_cycle_id := input_data.get("program_cycle_id"):
-            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+            # the cycle a target population is moved to has to stay inside the program of the url path
+            program_cycle = get_object_or_404(
+                ProgramCycle, pk=program_cycle_id, program=self.payment_plan.program_cycle.program
+            )
             if program_cycle == self.payment_plan.program_cycle:
                 return
             self._validate_pp_cycle(program_cycle)
