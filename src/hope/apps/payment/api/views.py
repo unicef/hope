@@ -1136,7 +1136,8 @@ class PaymentPlanViewSet(
             engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
             if version := serializer.validated_data.get("version"):
                 check_concurrency_version_in_mutation(version, payment_plan)
-            engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
+            # engine rules are limited to the business areas they are allowed in, and so is the id
+            engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id, allowed_business_areas=self.business_area)
             if payment_plan.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
                 raise ValidationError(f"Not allowed to run engine formula within status {payment_plan.status}.")
             if not engine_rule.enabled or engine_rule.deprecated:
@@ -2336,7 +2337,8 @@ class TargetPopulationViewSet(
         engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
         if version := serializer.validated_data.get("version"):
             check_concurrency_version_in_mutation(version, tp)
-        engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
+        # engine rules are limited to the business areas they are allowed in, and so is the id
+        engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id, allowed_business_areas=self.business_area)
         # tp vulnerability_score
         if tp.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
             raise ValidationError(f"Not allowed to run engine formula within status {tp.status}.")

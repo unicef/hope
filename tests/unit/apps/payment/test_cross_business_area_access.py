@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     ProgramFactory,
+    RuleCommitFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
@@ -31,6 +32,7 @@ from hope.models import (
     PaymentPlanPurpose,
     PaymentPlanSupportingDocument,
     PaymentVerificationPlan,
+    Rule,
     User,
 )
 
@@ -122,6 +124,7 @@ def attacker(
             Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
             Permissions.TARGETING_CREATE,
             Permissions.TARGETING_UPDATE,
+            Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
         ],
         attacker_business_area,
         program=attacker_payment_plan.program,
@@ -640,3 +643,52 @@ def test_move_target_population_into_cycle_of_other_business_area_is_denied(
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     attacker_target_population.refresh_from_db()
     assert attacker_target_population.program_cycle_id == own_cycle_id
+
+
+@pytest.fixture
+def victim_engine_rule(victim_business_area: BusinessArea) -> Any:
+    rule = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True).rule
+    rule.allowed_business_areas.set([victim_business_area])
+    return rule
+
+
+def test_apply_engine_formula_with_rule_of_other_business_area_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_payment_plan: PaymentPlan,
+    victim_engine_rule: Any,
+) -> None:
+    attacker_payment_plan.status = PaymentPlan.Status.LOCKED
+    attacker_payment_plan.save(update_fields=["status"])
+    url = reverse(
+        "api:payments:payment-plans-apply-engine-formula",
+        kwargs={**cross_ba_kwargs, "pk": str(attacker_payment_plan.id)},
+    )
+
+    response = api_client.post(url, {"engine_formula_rule_id": str(victim_engine_rule.id)}, format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    attacker_payment_plan.refresh_from_db()
+    assert attacker_payment_plan.background_action_status is None
+
+
+def test_apply_engine_formula_on_target_population_with_rule_of_other_business_area_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_target_population: PaymentPlan,
+    victim_business_area: BusinessArea,
+) -> None:
+    rule = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=True, is_release=True).rule
+    rule.allowed_business_areas.set([victim_business_area])
+    attacker_target_population.status = PaymentPlan.Status.TP_LOCKED
+    attacker_target_population.save(update_fields=["status"])
+    url = reverse(
+        "api:payments:target-populations-apply-engine-formula",
+        kwargs={**cross_ba_kwargs, "pk": str(attacker_target_population.id)},
+    )
+
+    response = api_client.post(url, {"engine_formula_rule_id": str(rule.id)}, format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    attacker_target_population.refresh_from_db()
+    assert attacker_target_population.steficon_rule_targeting is None

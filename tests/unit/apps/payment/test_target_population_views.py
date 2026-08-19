@@ -1384,6 +1384,7 @@ def test_apply_engine_formula_tp(
         version=11,
         is_release=True,
     ).rule
+    rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
     data = {
@@ -1415,6 +1416,7 @@ def test_apply_engine_formula_tp_validation_errors(
         target_population_actions_context["program_active"],
     )
     rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=False, version=22).rule
+    rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_STEFICON_ERROR
     target_population_actions_context["target_population"].save()
 
@@ -1548,6 +1550,7 @@ def test_vulnerability_score_filter_applies_correctly(
     steficon_rule_commit = RuleCommitFactory(
         rule__type=Rule.TYPE_TARGETING, rule__enabled=True, enabled=True, is_release=True
     )
+    steficon_rule_commit.rule.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].save()
     target_population_actions_context["target_population"].refresh_from_db()
 
@@ -1683,6 +1686,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
     steficon_rule_commit = RuleCommitFactory(
         rule__type=Rule.TYPE_TARGETING, rule__enabled=True, enabled=True, is_release=True
     )
+    steficon_rule_commit.rule.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].save()
     target_population_actions_context["target_population"].refresh_from_db()
 
@@ -1876,6 +1880,7 @@ def test_apply_engine_formula_tp_without_version_skips_concurrency_check(
         version=33,
         is_release=True,
     ).rule
+    rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
 
