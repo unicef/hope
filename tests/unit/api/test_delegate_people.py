@@ -5,18 +5,26 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+    RegistrationDataImportFactory,
+)
 from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollectingTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
+    ROLE_PRIMARY,
 )
 from hope.models import (
     BusinessArea,
     DataCollectingType,
     PendingHousehold,
     PendingIndividual,
+    PendingIndividualRoleInHousehold,
     Program,
     RegistrationDataImport,
 )
@@ -116,3 +124,66 @@ def test_delegate_people_reassigns_primary_collector(
     hh2 = PendingHousehold.objects.get(registration_data_import=rdi_loading, village="village2")
     assert hh1.primary_collector.full_name == "John Doe"
     assert hh2.primary_collector.full_name == "Jack Jones"
+
+
+@pytest.fixture
+def victim_primary_role(afghanistan_country) -> PendingIndividualRoleInHousehold:
+    """A primary collector of an import that belongs to another business area."""
+    victim_business_area = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="0070")
+    victim_program = ProgramFactory(status=Program.DRAFT, business_area=victim_business_area)
+    victim_rdi = RegistrationDataImportFactory(
+        business_area=victim_business_area,
+        program=victim_program,
+        status=RegistrationDataImport.LOADING,
+    )
+    household = PendingHouseholdFactory(
+        business_area=victim_business_area,
+        program=victim_program,
+        registration_data_import=victim_rdi,
+        create_role=False,
+    )
+    individual = PendingIndividualFactory(
+        business_area=victim_business_area,
+        program=victim_program,
+        registration_data_import=victim_rdi,
+        household=household,
+    )
+    return PendingIndividualRoleInHousehold.objects.create(
+        household=household, individual=individual, role=ROLE_PRIMARY
+    )
+
+
+def test_delegate_people_of_other_business_area_is_denied(
+    token_api_client: APIClient,
+    business_area: BusinessArea,
+    rdi_loading: RegistrationDataImport,
+    people_ids: list[UUID],
+    victim_primary_role: PendingIndividualRoleInHousehold,
+) -> None:
+    collector_before = victim_primary_role.individual_id
+    url = reverse("api:rdi-delegate-people", args=[business_area.slug, str(rdi_loading.id)])
+    data = {"delegates": [{"delegate_id": people_ids[2], "delegated_for": [str(collector_before)]}]}
+
+    response = token_api_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK, str(response.json())
+    assert response.json()["updated"] == 0
+    victim_primary_role.refresh_from_db()
+    assert victim_primary_role.individual_id == collector_before
+
+
+def test_delegate_to_individual_of_other_business_area_is_denied(
+    token_api_client: APIClient,
+    business_area: BusinessArea,
+    rdi_loading: RegistrationDataImport,
+    people_ids: list[UUID],
+    victim_primary_role: PendingIndividualRoleInHousehold,
+) -> None:
+    url = reverse("api:rdi-delegate-people", args=[business_area.slug, str(rdi_loading.id)])
+    data = {"delegates": [{"delegate_id": str(victim_primary_role.individual_id), "delegated_for": [people_ids[1]]}]}
+
+    response = token_api_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
+    hh2 = PendingHousehold.objects.get(registration_data_import=rdi_loading, village="village2")
+    assert hh2.primary_collector.full_name == "Mary Doe"
