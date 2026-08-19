@@ -752,3 +752,45 @@ def test_household_create_facility(
     assert PendingHousehold.objects.first().facility.name == "NEW ORG LAX TEST"
     assert Facility.objects.first().name == "NEW ORG LAX TEST"
     assert Facility.objects.first().admin_area.p_code == "AF01"
+
+
+@pytest.fixture
+def collector_of_other_business_area() -> PendingIndividual:
+    """A collector that belongs to an import of another business area."""
+    other_business_area = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="0070")
+    other_rdi = RegistrationDataImportFactory(
+        business_area=other_business_area,
+        status=RegistrationDataImport.LOADING,
+        program__status=Program.DRAFT,
+        program__business_area=other_business_area,
+    )
+    return PendingIndividualFactory(
+        individual_id="IND999",
+        registration_data_import=other_rdi,
+        program=other_rdi.program,
+        business_area=other_business_area,
+    )
+
+
+def test_create_household_with_collector_of_other_business_area_is_denied(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    collector_of_other_business_area: PendingIndividual,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "size": 1,
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": collector_of_other_business_area.unicef_id,
+        "members": [head_of_household.unicef_id],
+    }
+
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert not PendingHousehold.objects.filter(village="Test Village").exists()
