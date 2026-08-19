@@ -419,7 +419,8 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        import_data = ImportData.objects.filter(id=import_data_id).first()
+        # the uploaded file is listed per business area, so the id has to stay inside the one of the path
+        import_data = ImportData.objects.filter(id=import_data_id, business_area_slug=self.business_area.slug).first()
         if not import_data:
             raise ValidationError("Import data not found")
         if import_data.status != ImportData.STATUS_FINISHED:
@@ -428,8 +429,8 @@ class RegistrationDataImportViewSet(
         # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
-        import_data_id = validated_data.pop("import_data_id")
-        import_data_obj = ImportData.objects.get(id=import_data_id)
+        validated_data.pop("import_data_id")
+        import_data_obj = import_data
         business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
 
         registration_data_import = RegistrationDataImport(
@@ -500,7 +501,10 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        import_data = KoboImportData.objects.filter(id=import_data_id).first()
+        # the uploaded file is listed per business area, so the id has to stay inside the one of the path
+        import_data = KoboImportData.objects.filter(
+            id=import_data_id, business_area_slug=self.business_area.slug
+        ).first()
         if not import_data:
             raise ValidationError("Kobo import data not found")
         if import_data.status != ImportData.STATUS_FINISHED:
@@ -509,8 +513,8 @@ class RegistrationDataImportViewSet(
         # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
-        import_data_id = validated_data.pop("import_data_id")
-        import_data_obj = KoboImportData.objects.get(id=import_data_id)
+        validated_data.pop("import_data_id")
+        import_data_obj = import_data
         business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
 
         registration_data_import = RegistrationDataImport(
