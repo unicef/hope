@@ -32,6 +32,11 @@ def program_with_status_exists(program_status: str) -> Exists:
     return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__status=program_status))
 
 
+def without_program_q() -> Q:
+    through_model = GrievanceTicket.programs.through
+    return ~Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
+
+
 class GrievanceOrderingFilter(OrderingFilter):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -241,7 +246,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
-            return qs.filter(program_with_status_exists(Program.ACTIVE) | Q(programs__isnull=True))
+            return qs.filter(program_with_status_exists(Program.ACTIVE) | without_program_q())
         if value is False:
             return qs.filter(program_with_status_exists(Program.FINISHED))
         return qs
