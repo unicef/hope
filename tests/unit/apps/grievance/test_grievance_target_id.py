@@ -287,4 +287,3 @@ def test_list_queryset_annotates_the_social_worker_program_flag(
     queryset = viewset.get_queryset()
 
     assert "has_social_worker_program_annotated" in queryset.query.annotations
-
