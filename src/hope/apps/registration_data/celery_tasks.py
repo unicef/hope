@@ -567,18 +567,16 @@ def remove_rdi_population_on_failure(job: AsyncRetryJob, exc: Exception) -> None
 
 
 def notify_rdi_deleted_async_task(callback_url: str, signed_token: str) -> None:
-    """Enqueue the success-only CW callback (REWORK #4). Retriable via async_retry_job_task (cap 3)."""
     AsyncRetryJob.queue_task(
         job_name=notify_rdi_deleted_async_task.__name__,
         action="hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task_action",
         config={"callback_url": callback_url, "signed_token": signed_token},
         group_key="registration_data",
-        description="Notify CW: RDI reset succeeded",
+        description="Notify Country Workspace: RDI reset succeeded",
     )
 
 
 def notify_rdi_deleted_async_task_action(job: AsyncRetryJob) -> None:
-    """One POST of the signed token to the callback URL; non-2xx raises → async_retry_job_task retries (REWORK #4)."""
     from hope.apps.registration_data.api.country_workspace import CountryWorkspaceAPI
 
     CountryWorkspaceAPI(api_url=job.config["callback_url"]).notify_rdi_deleted(job.config["signed_token"])
@@ -587,8 +585,7 @@ def notify_rdi_deleted_async_task_action(job: AsyncRetryJob) -> None:
 def rdi_dispatcher_task(program: Program) -> None:
     """Advance a program's CW merge queue: process the oldest RDI still waiting to merge.
 
-    Triggered on CW RDI completion (CompleteRDIView) and by admin retry. Lock-free — the
-    dispatcher only decides who is next; the per-program lock lives in the merge job.
+    Triggered on CW RDI completion (CompleteRDIView) and by admin retry.
     """
     if program is None:
         return

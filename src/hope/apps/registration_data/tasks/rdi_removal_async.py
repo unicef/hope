@@ -12,43 +12,33 @@ logger = logging.getLogger(__name__)
 
 
 class RdiPopulationRemoval:
-    """Retriable hard-delete of a CW-managed RDI's population (REWORK #3).
-
-    One locked txn: lock the RDI, fail fast if MERGED, hard-delete the population.
-    The row stays DELETE_SCHEDULED until it is gone; progress is traced via logs and
-    the AsyncJob admin, not a transient status.
+    """Retriable hard-delete of a CW-managed RDI's population.
 
     Outcomes:
       - success / already-gone row  → enqueue the CW success callback (success-only).
       - MERGED                       → nothing to wipe; leave status intact, no retry, no callback.
-                                       Re-raised as NonRetriableTaskError, so the AsyncJob is logged
-                                       as errored in the admin — a business no-op, not a task "success".
       - ProtectedError (dependents) → DELETE_FAILED, no retry.
       - any other error             → propagates; async_retry_job_task retries and, once
                                       spent, the on_failure hook marks DELETE_FAILED.
     """
 
     def execute(self, rdi_id: str, callback_url: str, signed_token: str) -> None:
-        # lazy import: celery_tasks imports this class, so import at call time
         from hope.apps.registration_data.celery_tasks import locked_cache, notify_rdi_deleted_async_task
 
-        logger.info("RDI wipe job started for %s", rdi_id)
-        # Same cache lock the merge holds: wipe and merge are mutually exclusive on this RDI.
+        logger.info("RDI reset job started for %s", rdi_id)
         with locked_cache(key=f"merge_registration_data_import_async_task-{rdi_id}") as acquired:
             if not acquired:
                 logger.info("RDI wipe for %s deferred: a merge holds the lock", rdi_id)
-                raise RuntimeError("rdi_merge_in_progress")  # transient → retried, never DELETE_FAILED
+                raise RuntimeError("rdi_merge_in_progress")
             try:
-                if not self._wipe(rdi_id):  # single locked txn; False if the row was already gone
-                    logger.info("RDI wipe for %s: row already gone → idempotent success", rdi_id)
+                if not self._wipe(rdi_id):
+                    logger.info("RDI wipe for %s: row already gone.", rdi_id)
                     notify_rdi_deleted_async_task(callback_url, signed_token)
                     return
-            except (
-                NonRetriableTaskError
-            ) as exc:  # MERGED — nothing to wipe: leave intact, no retry (job logged errored)
-                logger.warning("RDI wipe for %s aborted: already MERGED, status left intact: %s", rdi_id, exc)
+            except NonRetriableTaskError:  # MERGED
+                logger.warning("RDI wipe for %s aborted: RDI already MERGED.", rdi_id)
                 raise
-            except ProtectedError as exc:  # rdi_has_dependents → deterministic, fail fast
+            except ProtectedError as exc:
                 logger.warning("RDI wipe for %s blocked by protected dependents: %s", rdi_id, exc)
                 self.mark_failed(rdi_id, reason=str(exc))
                 raise NonRetriableTaskError(str(exc)) from exc
@@ -76,8 +66,7 @@ class RdiPopulationRemoval:
 
     @staticmethod
     def mark_failed(rdi_id: str, *, reason: str) -> None:
-        # own txn so the FAILED write survives the rolled-back wipe txn; keyed on rdi_id so it works
-        # even if the wipe's SELECT/lock raised. CW is not told (success-only).
+        # Internal use only, CW is not told about failure.
         with transaction.atomic():
             RegistrationDataImport.objects.filter(id=rdi_id).update(
                 status=RegistrationDataImport.DELETE_FAILED,

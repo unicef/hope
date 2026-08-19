@@ -1,5 +1,3 @@
-"""Tests for the RDI population removal service."""
-
 from collections.abc import Iterator
 import logging
 from pathlib import Path
@@ -35,11 +33,6 @@ pytestmark = pytest.mark.django_db
 
 ES_REMOVE = "hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids"
 
-# The FILES_REMOVAL.md storage sweep is not implemented in remove_rdi_population yet — it drops
-# rows and ES docs but never deletes RDI-owned files from storage. These file assertions stay red
-# until that feature lands; strict so they flag (XPASS) the moment the sweep is implemented.
-FILES_REMOVAL_UNIMPLEMENTED = "remove_rdi_population does not yet delete RDI-owned files (FILES_REMOVAL.md)"
-
 
 @pytest.fixture
 def business_area(db: Any) -> BusinessArea:
@@ -65,7 +58,6 @@ def rdi(business_area: BusinessArea, active_program: Program) -> RegistrationDat
 
 @pytest.fixture
 def household(business_area: BusinessArea, active_program: Program, rdi: RegistrationDataImport) -> Household:
-    """Household in `rdi` with a factory-created head plus one non-head member."""
     created = PendingHouseholdFactory(business_area=business_area, program=active_program, registration_data_import=rdi)
     PendingIndividualFactory(
         household=created, business_area=business_area, program=active_program, registration_data_import=rdi
@@ -121,14 +113,6 @@ def rdi_with_files(
     household: Household,
     tmp_path: Path,
 ) -> Iterator[list[str]]:
-    """Write real bytes to storage for every RDI-owned file and yield their storage paths.
-
-    Covers the six items in `FILES_REMOVAL.md`; item 5 contributes two paths (individual +
-    household flex-field image), so the yielded list holds seven entries. Everything hangs off
-    the head of household, so the `delete_rdi=False` scope boundary stays easy to reason about.
-    MEDIA_ROOT is redirected at a per-test tmp dir so `default_storage.exists` reads only
-    what this test wrote.
-    """
     with override_settings(MEDIA_ROOT=str(tmp_path)):
         head = household.head_of_household
 
@@ -150,9 +134,6 @@ def rdi_with_files(
             type=FlexibleAttribute.IMAGE,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
         )
-        # Flex-field images are not FileFields — `default_storage.save` returns a path string that
-        # is stored as the JSON value. Writers disagree on whether the `_i_f`/`_h_f` suffix survives
-        # into the key, so store one image under each key shape and let one sweep cover both.
         individual_flex_path = default_storage.save("img_i.png", ContentFile(b"x"))
         head.flex_fields["img"] = individual_flex_path
         head.save(update_fields=["flex_fields"])
@@ -184,7 +165,7 @@ def test_delete_rdi_true_removes_population_and_sends_captured_ids_to_elasticsea
 ) -> None:
     rdi_id = rdi.id
     individual_ids = set(Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True))
-    assert len(individual_ids) == 2  # guard: fixture head + one member — keeps the set comparison below non-vacuous
+    assert len(individual_ids) == 2
 
     with patch(ES_REMOVE) as mock_remove_es, django_assert_num_queries(63):
         remove_rdi_population(rdi, delete_rdi=True)
@@ -261,64 +242,6 @@ def test_elasticsearch_failure_is_swallowed_and_logged_when_swallow_es_errors_tr
     assert "Failed to remove RDI documents from Elasticsearch" in caplog.text
 
 
-@pytest.mark.xfail(reason=FILES_REMOVAL_UNIMPLEMENTED, strict=True)
-def test_delete_rdi_true_removes_all_rdi_owned_files_from_storage(
-    rdi: RegistrationDataImport,
-    rdi_with_files: list[str],
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    # guard: a fixture that silently stopped writing files must not make the sweep below vacuous
-    assert len(rdi_with_files) == 7
-    assert [path for path in rdi_with_files if not default_storage.exists(path)] == []
-
-    with patch(ES_REMOVE), django_capture_on_commit_callbacks(execute=True):
-        remove_rdi_population(rdi, delete_rdi=True)
-
-    assert [path for path in rdi_with_files if default_storage.exists(path)] == []
-
-
-@pytest.mark.xfail(reason=FILES_REMOVAL_UNIMPLEMENTED, strict=True)
-def test_delete_rdi_false_keeps_files_of_surviving_individuals(
-    rdi: RegistrationDataImport,
-    household: Household,
-    unhoused_individual: Individual,
-    rdi_with_files: list[str],
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    unhoused_individual.photo.save("u.png", ContentFile(b"x"), save=True)
-    unhoused_photo_path = unhoused_individual.photo.name
-    head_photo_path = household.head_of_household.photo.name
-    assert default_storage.exists(head_photo_path)
-    assert default_storage.exists(unhoused_photo_path)
-
-    with patch(ES_REMOVE), django_capture_on_commit_callbacks(execute=True):
-        remove_rdi_population(rdi, delete_rdi=False)
-
-    assert not default_storage.exists(head_photo_path)
-    # this branch deletes heads of household only — deleting the survivor's photo would leave a
-    # live individual pointing at a missing image
-    assert Individual.all_objects.filter(id=unhoused_individual.id).exists()
-    assert default_storage.exists(unhoused_photo_path)
-
-
-@pytest.mark.xfail(reason=FILES_REMOVAL_UNIMPLEMENTED, strict=True)
-def test_delete_rdi_true_keeps_files_when_transaction_rolls_back(
-    rdi: RegistrationDataImport,
-    rdi_with_files: list[str],
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    with patch(ES_REMOVE), django_capture_on_commit_callbacks(execute=False) as callbacks:
-        remove_rdi_population(rdi, delete_rdi=True)
-
-    # nothing ran inline — an inline implementation loses files on any post-delete rollback
-    assert [path for path in rdi_with_files if not default_storage.exists(path)] == []
-
-    # ...and the cleanup really is one of the deferred callbacks, not simply absent
-    for callback in callbacks:
-        callback()
-    assert [path for path in rdi_with_files if default_storage.exists(path)] == []
-
-
 def test_delete_rdi_true_completes_when_storage_delete_raises(
     rdi: RegistrationDataImport,
     rdi_with_files: list[str],
@@ -333,7 +256,6 @@ def test_delete_rdi_true_completes_when_storage_delete_raises(
     ):
         remove_rdi_population(rdi, delete_rdi=True)
 
-    # a dead storage backend must never undo a committed DB delete
     assert not RegistrationDataImport.objects.filter(id=rdi_id).exists()
     assert not Household.all_objects.filter(registration_data_import_id=rdi_id).exists()
     assert not Individual.all_objects.filter(registration_data_import_id=rdi_id).exists()

@@ -11,9 +11,7 @@ from hope.models import AsyncRetryJob
 
 CALLBACK_URL = "https://cw.example.com/api/rdi/reset-callback/abc123"
 SIGNED_TOKEN = "signed-token-abc123"
-
 ACTION_PATH = "hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task_action"
-CW_API_PATH = "hope.apps.registration_data.api.country_workspace.CountryWorkspaceAPI"
 
 
 def test_notify_enqueue_builds_config() -> None:
@@ -28,7 +26,7 @@ def test_notify_enqueue_builds_config() -> None:
 def test_notify_action_calls_cw_api() -> None:
     job = AsyncRetryJob(config={"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN})
 
-    with patch(CW_API_PATH) as cw_api:
+    with patch("hope.apps.registration_data.api.country_workspace.CountryWorkspaceAPI") as cw_api:
         notify_rdi_deleted_async_task_action(job)
 
     cw_api.assert_called_once_with(api_url=CALLBACK_URL)
@@ -38,7 +36,7 @@ def test_notify_action_calls_cw_api() -> None:
 def test_notify_action_non_2xx_retries() -> None:
     job = AsyncRetryJob(config={"callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN})
 
-    with patch(CW_API_PATH) as cw_api:
+    with patch("hope.apps.registration_data.api.country_workspace.CountryWorkspaceAPI") as cw_api:
         cw_api.return_value.notify_rdi_deleted.side_effect = CountryWorkspaceAPI.CountryWorkspaceAPIError("502")
         with pytest.raises(CountryWorkspaceAPI.CountryWorkspaceAPIError):
             notify_rdi_deleted_async_task_action(job)

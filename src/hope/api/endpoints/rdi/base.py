@@ -294,11 +294,11 @@ class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
 
             job = remove_rdi_population_async_task(rdi, callback_url=callback_url, signed_token=signed_token)
             if job is None:
-                logger.info("RDI reset for %s idempotent: a live wipe already backs it (status %s)", rdi_id, rdi.status)
+                logger.info("RDI reset for %s is already in progress (status %s)", rdi_id, rdi.status)
                 return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)
 
             rdi.status = RegistrationDataImport.DELETE_SCHEDULED
             rdi.save(update_fields=["status"])
-            logger.info("RDI reset scheduled for %s: wipe job %s queued", rdi_id, job.pk)
+            logger.info("RDI reset scheduled for %s: delete rdi job %s queued", rdi_id, job.pk)
 
         return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)

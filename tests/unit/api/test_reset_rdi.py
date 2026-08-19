@@ -1,10 +1,3 @@
-"""Section A — `ResetRDIView` (async reset: enqueue only, no inline wipe).
-
-TDD: written against the REWORK #1 contract while the view is still a 501 stub, so
-most assertions run red until the real endpoint lands. The enqueue fn is patched so no
-real wipe is scheduled; these assert scheduling + response only.
-"""
-
 from typing import Any
 from unittest.mock import Mock, patch
 import uuid
@@ -34,9 +27,6 @@ pytestmark = pytest.mark.django_db
 CALLBACK_URL = "https://cw.example.com/api/rdi/callback/abc123"
 SIGNED_TOKEN = "signed-token-abc123"
 
-ENQUEUE = "hope.api.endpoints.rdi.base.remove_rdi_population_async_task"
-ES_REMOVE = "hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids"
-
 
 @pytest.fixture
 def business_area(business_area: BusinessArea) -> BusinessArea:
@@ -49,15 +39,12 @@ def _reset_url(ba: BusinessArea, rdi_id: str) -> str:
     return reverse("api:rdi-reset", args=[ba.slug, rdi_id])
 
 
-# ---------------------------------------------------------------------------
-# F — callback_url body validation (400)
-# ---------------------------------------------------------------------------
 @pytest.mark.parametrize(
     "body",
     [
-        {},  # both fields absent
-        {"callback_url": CALLBACK_URL},  # signed_token missing
-        {"signed_token": SIGNED_TOKEN},  # callback_url missing
+        {},
+        {"callback_url": CALLBACK_URL},
+        {"signed_token": SIGNED_TOKEN},
     ],
 )
 def test_reset_400_missing_required_field(
@@ -81,13 +68,13 @@ def test_reset_400_missing_required_field(
     [
         "",
         "not-a-url",
-        "example.com/cb",  # no scheme
-        "http://",  # no host
-        "https:// cw/cb",  # space
-        "javascript:alert(1)",  # bad scheme
-        "ftp://cw/cb",  # non-http(s) scheme (custom validator)
-        "ftps://cw/cb",  # non-http(s) scheme (custom validator)
-        "https://cw//api//cb",  # double slash in path (custom validator)
+        "example.com/cb",
+        "http://",
+        "https:// cw/cb",
+        "javascript:alert(1)",
+        "ftp://cw/cb",
+        "ftps://cw/cb",
+        "https://cw//api//cb",
     ],
 )
 def test_reset_400_invalid_callback_url(
@@ -108,10 +95,7 @@ def test_reset_400_invalid_callback_url(
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.content)
 
 
-# ---------------------------------------------------------------------------
-# E — schedules the async wipe (202)
-# ---------------------------------------------------------------------------
-@patch(ENQUEUE)
+@patch("hope.api.endpoints.rdi.base.remove_rdi_population_async_task")
 def test_reset_202_schedules_fresh(
     enqueue: Mock,
     token_api_client: APIClient,
@@ -136,10 +120,7 @@ def test_reset_202_schedules_fresh(
     enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
 
 
-# ---------------------------------------------------------------------------
-# D — idempotent double-POST while a wipe is genuinely running (202)
-# ---------------------------------------------------------------------------
-@patch(ENQUEUE)
+@patch("hope.api.endpoints.rdi.base.remove_rdi_population_async_task")
 def test_reset_202_idempotent_when_live_job(
     enqueue: Mock,
     token_api_client: APIClient,
@@ -160,13 +141,10 @@ def test_reset_202_idempotent_when_live_job(
     )
     assert response.status_code == status.HTTP_202_ACCEPTED, str(response.content)
     rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED  # path D returns current status, never rewrites
+    assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED
     enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
 
 
-# ---------------------------------------------------------------------------
-# C — MERGED is terminal (409)
-# ---------------------------------------------------------------------------
 def test_reset_409_for_merged(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
@@ -188,9 +166,6 @@ def test_reset_409_for_merged(
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
 
 
-# ---------------------------------------------------------------------------
-# B — merge holds the row lock (409)
-# ---------------------------------------------------------------------------
 @pytest.mark.django_db(transaction=True)
 def test_reset_409_when_merge_holds_row_lock(
     token_api_client: APIClient,
@@ -231,9 +206,6 @@ def test_reset_409_when_merge_holds_row_lock(
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
 
 
-# ---------------------------------------------------------------------------
-# A — not found (404)
-# ---------------------------------------------------------------------------
 def test_reset_404_for_unknown_rdi(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
@@ -284,9 +256,6 @@ def test_reset_404_for_non_cw_managed(
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
 
 
-# ---------------------------------------------------------------------------
-# Inbound auth / permission (unchanged by the signed-URL decision)
-# ---------------------------------------------------------------------------
 def test_reset_401_without_token(
     user_business_area: BusinessArea,
     program: Program,
@@ -342,7 +311,7 @@ def test_reset_403_without_rdi_delete_grant(
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
 
 
-@patch(ENQUEUE)
+@patch("hope.api.endpoints.rdi.base.remove_rdi_population_async_task")
 def test_reset_writes_api_log_entry(
     enqueue: Mock,
     api_token: Any,
@@ -366,12 +335,6 @@ def test_reset_writes_api_log_entry(
     assert entry.status_code == status.HTTP_202_ACCEPTED
 
 
-# ---------------------------------------------------------------------------
-# Reuse — a completed reset frees the country_workspace_id for recreate
-# (ported from the removed sync test_delete_rdi.py; reframed for async:
-# reset -> run the real wipe job -> recreate. Unlike the tests above, this one
-# runs the actual wipe so the row is really gone before recreate.)
-# ---------------------------------------------------------------------------
 def test_reset_frees_country_workspace_id_for_recreate(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
@@ -386,7 +349,7 @@ def test_reset_frees_country_workspace_id_for_recreate(
         country_workspace_id=cw_id,
     )
 
-    with patch(ENQUEUE) as enqueue:
+    with patch("hope.api.endpoints.rdi.base.remove_rdi_population_async_task") as enqueue:
         enqueue.return_value = Mock()
         reset = token_api_client.post(
             _reset_url(user_business_area, str(rdi.id)),
@@ -395,12 +358,11 @@ def test_reset_frees_country_workspace_id_for_recreate(
         )
     assert reset.status_code == status.HTTP_202_ACCEPTED, str(reset.content)
 
-    # run the real wipe (ES + success-callback stubbed) — deletes the row, freeing the cw_id
     job = AsyncRetryJob(
         config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
     )
     with (
-        patch(ES_REMOVE),
+        patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids"),
         patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task"),
     ):
         remove_rdi_population_async_task_action(job)

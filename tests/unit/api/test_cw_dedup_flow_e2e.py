@@ -35,7 +35,6 @@ pytestmark = [
 
 @pytest.fixture
 def warm_content_type_cache() -> None:
-    # ContentType.objects.get_for_model is cached, so to prevent query count variation run it before tests
     ContentType.objects.get_for_models(*apps.get_models())
 
 
@@ -47,9 +46,6 @@ def mock_deduplication_engine_env_vars(settings) -> None:
 
 @pytest.fixture
 def user_business_area(user_business_area: BusinessArea) -> BusinessArea:
-    # rdi-create / rdi-complete / push endpoints gate on the *user's* selected BA
-    # (api_token.valid_for.first()) via CountryWorkspaceOnlyPermission — the flag must live
-    # here, not on `business_area`, which these tests never use for the request.
     user_business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
     user_business_area.save(update_fields=["ingest_source"])
     return user_business_area
@@ -280,8 +276,8 @@ def test_cw_lax_auto_merges_with_duplicate_ticket(
 
 # --- Reset (async hard-delete) flow -------------------------------------------------
 # CREATE -> UPLOAD -> RESET -> CREATE -> UPLOAD -> COMPLETE. RESET hard-deletes the RDI
-# (`delete_rdi=True`, no `DELETED` state), so re-uploading needs a fresh CREATE, not the
-# same id. Proves an RDI is *reusable* after reset, not merely gone.
+# (`delete_rdi=True`, no `DELETED` state), so re-uploading needs a fresh CREATE.
+# Reuses same country_workspace_id
 
 
 @pytest.fixture
@@ -352,14 +348,8 @@ def _reset_rdi(
     django_capture_on_commit_callbacks: Any,
 ) -> None:
     reset_url = reverse("api:rdi-reset", args=[business_area.slug, rdi_id])
-    # Mock the outbound HOPE->CW callback at the HTTP boundary (not the method), so the real
-    # `_post` / auth-header / body logic runs. `responses` patches `HTTPAdapter.send`, so
-    # `BaseAPI`'s custom-mounted retry adapter is still intercepted; the Django test client
-    # calls to HOPE endpoints are untouched (not `requests`-based).
     with responses.RequestsMock() as rsps:
         rsps.add(responses.POST, callback_url, status=200)
-        # The view enqueues the wipe via `transaction.on_commit`; capture(execute=True) fires
-        # it (and the nested success-callback job) inline once the atomic block commits.
         with django_capture_on_commit_callbacks(execute=True):
             resp = token_api_client.post(
                 reset_url, {"callback_url": callback_url, "signed_token": CW_SIGNED_TOKEN}, format="json"
@@ -367,7 +357,6 @@ def _reset_rdi(
 
         assert resp.status_code == status.HTTP_202_ACCEPTED, str(resp.json())
         assert resp.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
-        # Success-only callback fired exactly once, on the signed URL, no auth header, token in the body.
         assert len(rsps.calls) == 1
         sent = rsps.calls[0].request
         assert "Authorization" not in sent.headers
@@ -417,11 +406,9 @@ def test_cw_reset_wipes_population_then_reupload_merges_clean(
 
     _reset_rdi(token_api_client, user_business_area, first_rdi_id, cw_callback_url, django_capture_on_commit_callbacks)
 
-    # Reset hard-deletes the RDI and its whole population — reusable, not just flagged deleted.
     assert not RegistrationDataImport.objects.filter(id=first_rdi_id).exists()
     assert not Individual.pending_objects.filter(country_workspace_id__in=cw_individual_ids.values()).exists()
 
-    # Re-run the exact CW ids into a fresh RDI and complete it: dedup must behave identically.
     second_rdi_id = _create_rdi(
         token_api_client=token_api_client,
         business_area=user_business_area,
@@ -442,8 +429,6 @@ def test_cw_reset_wipes_population_then_reupload_merges_clean(
         second_id_map["cw-ind-C"],
     )
 
-    # Complete without a query-count assert — N+1 coverage stays on the lax/social tests;
-    # here we only need the re-uploaded RDI to merge cleanly after a reset.
     complete_url = reverse("api:rdi-complete", args=[user_business_area.slug, second_rdi_id])
     with patch(
         "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings",

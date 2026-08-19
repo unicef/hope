@@ -26,10 +26,12 @@ def remove_rdi_population(
     delete_rdi: bool,
     swallow_es_errors: bool = False,
 ) -> None:
-    """Remove an RDI's population and Elasticsearch docs; ``delete_rdi`` also drops the RDI row.
+    """Remove an RDI's population and Elasticsearch docs.
+
+    When ``delete_rdi`` is True it also drops the RDI row.
 
     ``swallow_es_errors`` keeps an Elasticsearch cleanup failure from rolling back the surrounding
-    transaction (used by the hard DELETE).
+    transaction.
     """
     program = rdi.program
 
@@ -40,6 +42,13 @@ def remove_rdi_population(
     household_ids = [row[0] for row in household_rows]
     hoh_ids = [row[1] for row in household_rows if row[1] is not None]
 
+    logger.debug(
+        "Removing RDI %s population: %d households, %d individuals (delete_rdi=%s)",
+        rdi.id,
+        len(household_ids),
+        len(individual_ids),
+        delete_rdi,
+    )
     Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
 
     if delete_rdi:

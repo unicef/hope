@@ -96,7 +96,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     REFUSED_IMPORT = "REFUSED"
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
-    # Async CW reset (hard-delete) lifecycle — REWORK #5. Code-only, no schema migration.
     DELETE_SCHEDULED = "DELETE_SCHEDULED"
     DELETE_FAILED = "DELETE_FAILED"
     STATUS_CHOICE = (

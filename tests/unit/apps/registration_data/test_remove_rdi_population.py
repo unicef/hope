@@ -64,7 +64,6 @@ def test_wipe_enqueue_skips_when_wipe_already_running(program) -> None:
     assert first is not None
     jobs_before = AsyncRetryJob.objects.count()
 
-    # the first job is now live (STARTED) → requeue must not start a second one alongside it
     with patch.object(AsyncRetryJob, "task_status", new_callable=PropertyMock, return_value="STARTED"):
         second = remove_rdi_population_async_task(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
 
@@ -149,7 +148,7 @@ def test_wipe_action_merged_under_lock_fails(program) -> None:
         remove_rdi_population_async_task_action(job)
 
     rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.MERGED  # terminal success, never clobbered
+    assert rdi.status == RegistrationDataImport.MERGED
     wipe.assert_not_called()
     notify.assert_not_called()
 
@@ -219,7 +218,6 @@ def test_wipe_on_failure_hook_sets_failed(program) -> None:
 
 
 def test_fail_marks_status_keyed_on_id_without_a_select(program) -> None:
-    # keyed UPDATE from rdi_id alone, no fetch — so it fires even when the wipe's SELECT/lock raised
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
@@ -228,7 +226,7 @@ def test_fail_marks_status_keyed_on_id_without_a_select(program) -> None:
         RdiPopulationRemoval.mark_failed(str(rdi.id), reason="boom")
 
     queries = ctx.captured_queries
-    assert len(queries) == 3  # SAVEPOINT, keyed UPDATE, RELEASE — no SELECT fetches the row first
+    assert len(queries) == 3
     assert queries[1]["sql"].upper().startswith("UPDATE")
 
     rdi.refresh_from_db()
@@ -286,12 +284,12 @@ def test_wipe_action_skips_when_merge_holds_lock(program) -> None:
     with (
         patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population") as wipe,
         patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task") as notify,
-        pytest.raises(RuntimeError, match="rdi_merge_in_progress"),  # transient → retried, not DELETE_FAILED
+        pytest.raises(RuntimeError, match="rdi_merge_in_progress"),
     ):
         remove_rdi_population_async_task_action(job)
 
     rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED  # untouched — never wiped under a merge
+    assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED
     wipe.assert_not_called()
     notify.assert_not_called()
 
@@ -314,7 +312,7 @@ def test_wipe_action_holds_merge_lock_during_wipe(program) -> None:
     ):
         remove_rdi_population_async_task_action(job)
 
-    assert seen.get("held") is True  # a concurrent merge is locked out for the whole wipe
+    assert seen.get("held") is True
 
 
 def test_wipe_action_releases_merge_lock_after_success(program) -> None:
@@ -331,7 +329,7 @@ def test_wipe_action_releases_merge_lock_after_success(program) -> None:
     ):
         remove_rdi_population_async_task_action(job)
 
-    assert cache.get(_merge_key(rdi.id)) is None  # released → a later merge can acquire it
+    assert cache.get(_merge_key(rdi.id)) is None
 
 
 @pytest.mark.django_db(transaction=True)

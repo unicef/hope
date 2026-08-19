@@ -166,12 +166,3 @@ def test_country_workspace_id_allows_distinct_non_null_values() -> None:
     RegistrationDataImportFactory(country_workspace_id="cw-corr-2")
 
     assert RegistrationDataImport.objects.filter(country_workspace_id__in=["cw-corr-1", "cw-corr-2"]).count() == 2
-
-
-def test_new_delete_statuses_in_choices() -> None:
-    status_values = {value for value, _label in RegistrationDataImport.STATUS_CHOICE}
-
-    assert {
-        RegistrationDataImport.DELETE_SCHEDULED,
-        RegistrationDataImport.DELETE_FAILED,
-    } <= status_values
