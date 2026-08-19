@@ -235,8 +235,21 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     @classmethod
     def validate_uniqueness(cls, qs: QuerySet["Account"] | list["Account"]) -> None:
-        for dmd in qs:
-            dmd.update_unique_field()
+        accounts_without_unique_fields = []
+        for account in qs:
+            unique_fields = account.unique_fields if hasattr(account, "unique_fields") else None
+            if isinstance(unique_fields, list | tuple) and not unique_fields:
+                account.unique_key = None
+                account.is_unique = True
+                accounts_without_unique_fields.append(account)
+            else:
+                account.update_unique_field()
+
+        if accounts_without_unique_fields:
+            Account.all_objects.filter(pk__in=[account.pk for account in accounts_without_unique_fields]).update(
+                unique_key=None,
+                is_unique=True,
+            )
 
 
 class PendingAccount(Account):

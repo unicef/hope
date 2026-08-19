@@ -9,7 +9,7 @@ from extras.test_utils.factories.household import HouseholdFactory, IndividualFa
 from extras.test_utils.factories.payment import AccountFactory, AccountTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.household.const import LOT_DIFFICULTY
-from hope.models import Account, MergeStatusModel
+from hope.models import Account, MergeStatusModel, PendingAccount
 
 pytestmark = pytest.mark.django_db
 
@@ -44,6 +44,24 @@ def account(individual):
 
 
 @pytest.fixture
+def pending_accounts_without_unique_fields(individual):
+    account_type = AccountTypeFactory(unique_fields=[])
+    accounts = AccountFactory.create_batch(
+        3,
+        individual=individual,
+        account_type=account_type,
+        unique_key="stale-key",
+        is_unique=False,
+        rdi_merge_status=MergeStatusModel.PENDING,
+    )
+    account_ids = [account.pk for account in accounts]
+    pending_accounts = list(
+        PendingAccount.objects.filter(pk__in=account_ids).select_related("account_type", "individual__program")
+    )
+    return pending_accounts, account_ids
+
+
+@pytest.fixture
 def household_with_two_individuals(business_area):
     program = ProgramFactory(business_area=business_area)
     individual_1 = IndividualFactory(household=None, program=program, business_area=business_area)
@@ -60,11 +78,28 @@ def test_account_str(account):
     assert str(account) == f"{account.individual} - {account.account_type}"
 
 
-def test_validate_uniqueness(account, monkeypatch):
+def test_validate_uniqueness_calls_update_for_account_with_unique_fields(account, account_type_bank, monkeypatch):
     update_unique_field_mock = mock.Mock()
     monkeypatch.setattr(Account, "update_unique_field", update_unique_field_mock)
-    Account.validate_uniqueness(Account.objects.all())
+    account.account_type = account_type_bank
+
+    Account.validate_uniqueness([account])
+
     update_unique_field_mock.assert_called_once()
+
+
+def test_validate_uniqueness_bulk_updates_accounts_without_unique_fields(
+    pending_accounts_without_unique_fields,
+    django_assert_num_queries,
+):
+    pending_accounts, account_ids = pending_accounts_without_unique_fields
+
+    with django_assert_num_queries(1):
+        PendingAccount.validate_uniqueness(pending_accounts)
+
+    assert Account.all_objects.filter(pk__in=account_ids, unique_key__isnull=True, is_unique=True).count() == len(
+        account_ids
+    )
 
 
 def test_update_unique_field_empty_unique_fields_resets_flags(account):
