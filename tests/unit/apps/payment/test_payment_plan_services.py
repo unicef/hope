@@ -20,6 +20,7 @@ from viewflow.fsm import TransitionNotAllowed
 from extras.test_utils.factories import (
     AccountFactory,
     AccountTypeFactory,
+    ApprovalProcessFactory,
     AreaFactory,
     AreaTypeFactory,
     BusinessAreaFactory,
@@ -2067,14 +2068,17 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_ready_for_closure_sends_notification(mock_notify, user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_ready_for_closure_sends_notification(
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
+) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
         status=PaymentPlan.Status.FINISHED,
     )
 
-    PaymentPlanService(payment_plan).ready_for_closure(user=user)
+    with django_assert_num_queries(11):
+        PaymentPlanService(payment_plan).ready_for_closure(user=user)
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
@@ -2105,7 +2109,7 @@ def test_ready_for_closure_suppresses_notification_when_notify_false(
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 def test_send_back_to_finished_sends_notification(
-    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
+    mock_notify, user: User, business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2113,7 +2117,8 @@ def test_send_back_to_finished_sends_notification(
         status=PaymentPlan.Status.READY_FOR_CLOSURE,
     )
 
-    PaymentPlanService(payment_plan).send_back_to_finished(user=user)
+    with django_assert_num_queries(11):
+        PaymentPlanService(payment_plan).send_back_to_finished(user=user)
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
@@ -2123,6 +2128,51 @@ def test_send_back_to_finished_sends_notification(
         str(user.pk),
         mock.ANY,
     )
+
+
+def test_ready_for_closure_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.FINISHED,
+    )
+    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.READY_FOR_CLOSURE)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).ready_for_closure(user=user)
+
+    assert "Mark as Ready for Closure is possible only within Status FINISHED" in str(error.value)
+
+
+def test_send_back_to_finished_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.FINISHED)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).send_back_to_finished(user=user)
+
+    assert "Send Back is possible only within Status READY_FOR_CLOSURE" in str(error.value)
+
+
+def test_acceptance_process_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.IN_APPROVAL,
+    )
+    ApprovalProcessFactory(payment_plan=payment_plan)
+    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.IN_AUTHORIZATION)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.APPROVE.value, "comment": ""}, user=user
+        )
+
+    assert "Not possible to create APPROVE for Payment Plan within status IN_AUTHORIZATION" in str(error.value)
 
 
 def test_build_payments_chunks_with_chunks_no_none_returns_single_chunk(locked_payment_plan_with_payments):
