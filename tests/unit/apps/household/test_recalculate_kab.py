@@ -218,19 +218,6 @@ def test_recalculate_composition_true_populates_both(
     assert household.kab_female_age_group_0_5_count == 1
 
 
-def test_run_from_migration_skips_individual_recalc(
-    household_from_individuals: Callable[..., Household],
-) -> None:
-    household = household_from_individuals(recalculate_composition=True, collects_individual_data=True)
-
-    # run_from_migration=True skips the per-individual recalculation but still aggregates composition + KAB.
-    recalculate_data(household, run_from_migration=True)
-    household.refresh_from_db()
-
-    assert household.size == 4
-    assert household.kab_size == 4
-
-
 @pytest.mark.parametrize(
     ("sex", "birth_date", "expected_child_hoh", "expected_fchild_hoh"),
     [

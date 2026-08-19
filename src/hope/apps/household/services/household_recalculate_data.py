@@ -70,7 +70,6 @@ AGE_GROUP_FIELDS: tuple[str, ...] = tuple(f for f in KAB_SOURCE_FIELDS if "_age_
 def recalculate_data(
     household: Household,
     save: bool = True,
-    run_from_migration: bool = False,
     composition_counts: dict | None = None,
 ) -> tuple[Household, list[str]]:
     """Recalculate composition (when the DCT flag is on) and KAB (always) for one household.
@@ -86,7 +85,7 @@ def recalculate_data(
 
     updated_fields: list[str] = []
     if household.program.data_collecting_type.recalculate_composition:
-        updated_fields += _recalculate_composition(household, run_from_migration)
+        updated_fields += _recalculate_composition(household)
     # KAB always runs and always yields fields, so there is always something to persist.
     updated_fields += _recalculate_kab(household, composition_counts)
     updated_fields.append("updated_at")
@@ -109,17 +108,16 @@ def _recalculate_kab(household: Household, composition_counts: dict | None = Non
     return [f"kab_{field}" for field in KAB_SOURCE_FIELDS]
 
 
-def _recalculate_composition(household: Household, run_from_migration: bool) -> list[str]:
+def _recalculate_composition(household: Household) -> list[str]:
     individuals_to_update = []
     individuals_fields_to_update: list[str] = []
 
-    if not run_from_migration:  # TODO remove after migration
-        for individual in household.individuals.all().select_for_update().order_by("pk"):
-            _individual, _fields_to_update = individual.recalculate_data(save=False)
-            individuals_to_update.append(_individual)
-            individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)
+    for individual in household.individuals.all().select_for_update().order_by("pk"):
+        _individual, _fields_to_update = individual.recalculate_data(save=False)
+        individuals_to_update.append(_individual)
+        individuals_fields_to_update.extend(x for x in _fields_to_update if x not in individuals_fields_to_update)
 
-        Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
+    Individual.objects.bulk_update(individuals_to_update, individuals_fields_to_update)
 
     age_groups = _aggregate_composition(household)
     updated_fields = ["child_hoh", "fchild_hoh"]
