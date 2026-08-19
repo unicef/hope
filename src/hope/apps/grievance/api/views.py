@@ -590,6 +590,10 @@ class GrievanceTicketGlobalViewSet(
             # the loop above already asks for some of these as plain lookups, which would clash
             to_prefetch = [path for path in to_prefetch if path not in annotated_paths]
             to_prefetch += [Prefetch(path, queryset=households) for path in annotated_paths]
+
+        if self.action == "list":
+            to_prefetch.append("linked_tickets")
+
         return (
             super()
             .get_queryset()
@@ -603,8 +607,6 @@ class GrievanceTicketGlobalViewSet(
                 # feeds TicketNeedsAdjudicationDetails.documents_no_longer_conflict() (can_close_as_unique)
                 "needs_adjudication_ticket_details__golden_records_individual__documents__type",
                 "needs_adjudication_ticket_details__possible_duplicates__documents__type",
-                # read per row by the list serializer's related_tickets_count;
-                "linked_tickets",
             )
             .annotate(
                 has_social_worker_program_annotated=Exists(
