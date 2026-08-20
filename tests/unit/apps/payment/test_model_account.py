@@ -46,13 +46,15 @@ def account(individual):
 @pytest.fixture
 def pending_accounts_without_unique_fields(individual):
     account_type = AccountTypeFactory(unique_fields=[])
-    accounts = AccountFactory.create_batch(
-        3,
-        individual=individual,
-        account_type=account_type,
-        unique_key="stale-key",
-        is_unique=False,
-        rdi_merge_status=MergeStatusModel.PENDING,
+    accounts = Account.all_objects.bulk_create(
+        AccountFactory.build_batch(
+            Account.VALIDATE_UNIQUENESS_BATCH_SIZE + 1,
+            individual=individual,
+            account_type=account_type,
+            unique_key="stale-key",
+            is_unique=False,
+            rdi_merge_status=MergeStatusModel.PENDING,
+        )
     )
     account_ids = [account.pk for account in accounts]
     pending_accounts = list(
@@ -94,7 +96,7 @@ def test_validate_uniqueness_bulk_updates_accounts_without_unique_fields(
 ):
     pending_accounts, account_ids = pending_accounts_without_unique_fields
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         PendingAccount.validate_uniqueness(pending_accounts)
 
     assert Account.all_objects.filter(pk__in=account_ids, unique_key__isnull=True, is_unique=True).count() == len(
