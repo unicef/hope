@@ -35,7 +35,7 @@ function FeedbackTable({
 
   const initialQueryVariables = useMemo(
     () => ({
-      feedbackId: filter.feedbackId,
+      search: filter.feedbackId,
       issueType: filter.issueType || null,
       createdBy: decodeIdString(filter.createdBy) || null,
       createdAtBefore: dateToIsoString(filter.createdAtBefore, 'startOfDay'),

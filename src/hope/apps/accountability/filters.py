@@ -2,7 +2,14 @@ import re
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
-from django_filters import BooleanFilter, CharFilter, ChoiceFilter, FilterSet, rest_framework as filters
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    ChoiceFilter,
+    FilterSet,
+    UUIDFilter,
+    rest_framework as filters,
+)
 
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.models import Feedback, Message, Program, Survey
@@ -42,6 +49,7 @@ class FeedbackFilter(FilterSet):
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
     created_at = filters.DateFromToRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")
+    program = UUIDFilter(field_name="program__id")
     is_active_program = BooleanFilter(method="filter_is_active_program")
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:

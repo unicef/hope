@@ -1747,3 +1747,88 @@ def test_feedback_per_program_count_excludes_feedback_of_other_program(
     response = authenticated_client.get(url_count_per_program)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["count"] == 1
+
+
+def test_filter_by_program(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    feedback_1,
+    feedback_3,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"program": str(program_active.id)})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == str(feedback_1.id)
+
+
+def test_filter_by_program_count(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    feedback_1,
+    feedback_3,
+    url_count,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_count, {"program": str(program_active.id)})
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 1
+
+
+def test_filter_by_program_excludes_feedback_without_program(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    feedback_1,
+    feedback_2,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"program": str(program_active.id)})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == str(feedback_1.id)
+
+
+def test_filter_by_program_with_invalid_uuid_returns_400(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_1,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"program": "not-a-uuid"})
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
