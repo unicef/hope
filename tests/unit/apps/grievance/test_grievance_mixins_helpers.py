@@ -40,28 +40,28 @@ def test_handle_document_operations_no_documents(mock_delete, mock_update, mock_
     mock_create.assert_not_called()
 
 
-def test_apply_ticket_field_updates_priority_unchanged(mock_ticket):
+def test_apply_ticket_field_updates_priority_unchanged(mock_ticket, mock_approver):
     mock_ticket.priority = 1
 
-    GrievanceMutationMixin._apply_ticket_field_updates(mock_ticket, {"priority": 1})
+    GrievanceMutationMixin._apply_ticket_field_updates(mock_ticket, {"priority": 1}, mock_approver)
 
     assert mock_ticket.priority == 1
 
 
-def test_apply_ticket_field_updates_urgency_unchanged(mock_ticket):
+def test_apply_ticket_field_updates_urgency_unchanged(mock_ticket, mock_approver):
     mock_ticket.urgency = 2
 
-    GrievanceMutationMixin._apply_ticket_field_updates(mock_ticket, {"urgency": 2})
+    GrievanceMutationMixin._apply_ticket_field_updates(mock_ticket, {"urgency": 2}, mock_approver)
 
     assert mock_ticket.urgency == 2
 
 
-def test_apply_ticket_field_updates_existing_field_not_overwritten(mock_ticket):
+def test_apply_ticket_field_updates_existing_field_not_overwritten(mock_ticket, mock_approver):
     mock_ticket.priority = 0
     mock_ticket.urgency = 0
     mock_ticket.description = "old"
 
-    GrievanceMutationMixin._apply_ticket_field_updates(mock_ticket, {"description": "new"})
+    GrievanceMutationMixin._apply_ticket_field_updates(mock_ticket, {"description": "new"}, mock_approver)
 
     assert mock_ticket.description == "old"
 

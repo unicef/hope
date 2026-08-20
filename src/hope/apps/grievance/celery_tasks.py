@@ -1,6 +1,7 @@
-from datetime import timedelta
+from datetime import date, timedelta
 import logging
 
+from constance import config
 from django.db import Error, transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -9,8 +10,9 @@ from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionE
 from hope.apps.core.celery import app
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.services.daily_digest_service import DailyDigestService
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, Individual, PeriodicAsyncJob
+from hope.models import AsyncJob, AsyncRetryJob, BusinessArea, Individual, PeriodicAsyncJob
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +66,55 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual_async_ta
         group_key="grievance",
         description=f"Deduplicate and sanctions-check grievance individual {individual_id}",
     )
+
+
+def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
+    business_area_id = job.config["business_area_id"]
+    digest_date = job.config["digest_date"]
+
+    # Jobs can run more than once (redelivery, recovery re-queue, a duplicate beat firing), and
+    # rerunning would mail everyone again. Skip a business area/day that already went out.
+    completed_key = f"{business_area_id}:{digest_date}"
+    if job.config.get("completed_for") == completed_key:
+        return
+    if (
+        PeriodicAsyncJob.objects.filter(
+            job_name=daily_grievance_digest_async_task.__name__,
+            config__completed_for=completed_key,
+        )
+        .exclude(pk=job.pk)
+        .exists()
+    ):
+        return
+
+    business_area = BusinessArea.objects.filter(id=business_area_id).first()
+    if business_area is None:
+        logger.warning(f"Skipping the {digest_date} grievance digest: business area {business_area_id} is gone")
+        return
+
+    set_sentry_business_area_tag(business_area.name)
+    _, failed = DailyDigestService(business_area, date.fromisoformat(digest_date)).send()
+
+    if failed:
+        raise RuntimeError(f"{failed} recipient(s) missed the {digest_date} grievance digest for {business_area.slug}")
+
+    job.config["completed_for"] = completed_key
+    job.save(update_fields=["config"])
+
+
+@app.task()
+def daily_grievance_digest_async_task() -> None:
+    if not config.SEND_GRIEVANCES_NOTIFICATION:
+        return
+    digest_date = (timezone.now() - timedelta(days=1)).date().isoformat()
+    for business_area_id, name in BusinessArea.objects.filter(enable_email_notification=True).values_list("id", "name"):
+        PeriodicAsyncJob.queue_task(
+            job_name=daily_grievance_digest_async_task.__name__,
+            action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
+            config={"business_area_id": str(business_area_id), "digest_date": digest_date},
+            group_key="grievance",
+            description=f"Send the {digest_date} grievance digest for {name}",
+        )
 
 
 def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:

@@ -177,3 +177,62 @@ def test_get_api_key_returns_none_when_env_name_not_set():
     api = BaseAPI.__new__(BaseAPI)
     assert api.API_KEY_SETTING_NAME == ""
     assert api.get_api_key() is None
+
+
+class ConstructorOverrideAPI(BaseAPI):
+    API_URL_SETTING_NAME = ""
+    API_KEY_SETTING_NAME = "TEST_API_KEY"
+
+
+def test_init_prefers_constructor_api_url(settings):
+    settings.TEST_API_KEY = "settings_key"
+    api = ConstructorOverrideAPI(api_url="https://cw.example.com/api/cb/")
+
+    assert api.api_url == "https://cw.example.com/api/cb/"
+    assert api.api_key == "settings_key"
+
+
+def test_init_prefers_constructor_api_key(settings):
+    api = ConstructorOverrideAPI(api_url="https://cw.example.com/", api_key="arg_key")
+
+    assert api.api_key == "arg_key"
+    assert api._client.headers["Authorization"] == "Token arg_key"
+
+
+def test_init_falls_back_to_settings_without_args(settings):
+    # backward-compat: no-arg construction is unchanged
+    settings.TEST_API_URL = "http://test-hope.com"
+    api = TestAPI()
+
+    assert api.api_url == "http://test-hope.com"
+    assert api.api_key == "test_fake_key"
+
+
+def test_init_raises_when_url_absent_from_args_and_settings(settings):
+    settings.TEST_API_KEY = "settings_key"
+    with pytest.raises(BaseAPI.APIMissingCredentialsError) as exc:
+        ConstructorOverrideAPI()
+
+    assert "Missing ConstructorOverrideAPI Key/URL" in str(exc.value)
+
+
+def test_get_url_uses_constructor_api_url(settings):
+    settings.TEST_API_KEY = "settings_key"
+    api = ConstructorOverrideAPI(api_url="https://cw.example.com")
+
+    assert api.get_url("/api/rest/rdi/delete-callback/") == ("https://cw.example.com/api/rest/rdi/delete-callback/")
+
+
+@pytest.mark.parametrize(
+    ("api_url", "endpoint"),
+    [
+        ("https://cw.example.com/api/", "/rest/rdi/delete-callback/"),
+        ("https://cw.example.com/api", "/rest/rdi/delete-callback/"),
+        ("https://cw.example.com/api/", "rest/rdi/delete-callback/"),
+    ],
+)
+def test_get_url_normalizes_slashes(settings, api_url, endpoint):
+    settings.TEST_API_KEY = "settings_key"
+    api = ConstructorOverrideAPI(api_url=api_url)
+
+    assert api.get_url(endpoint) == "https://cw.example.com/api/rest/rdi/delete-callback/"
