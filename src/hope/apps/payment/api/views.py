@@ -2557,8 +2557,7 @@ class PaymentViewSet(
     filterset_class = PaymentSearchFilter
 
     def get_object(self) -> Payment:
-        # Not bound to the payment plan of the path: the details page is reached by a plain link and
-        # sends no usable plan id. The program still matches the permissions checked for the path.
+        # the details page is reached by a plain link with no plan id, so scope to the program instead
         return get_object_or_404(Payment, id=self.kwargs["payment_id"], parent__program_cycle__program=self.program)
 
     def get_queryset(self) -> QuerySet:

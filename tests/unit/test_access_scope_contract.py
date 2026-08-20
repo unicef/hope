@@ -13,7 +13,6 @@ SCOPE_FIELDS = {"business_area", "program", "program_cycle", "payment_plan"}
 
 WRITE_ACTIONS = ("create", "update", "copy", "import", "assign", "message", "sample", "approve", "reassign", "split")
 
-# (viewset, action, field): why it needs no scope.
 ALLOWED_UNSCOPED = {
     # the view rejects any item whose office differs from the business area of the plan
     ("PaymentPlanViewSet", "assign_funds_commitments", "fund_commitment_items_ids.<cannot instantiate>"),
