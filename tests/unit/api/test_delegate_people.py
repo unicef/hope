@@ -186,3 +186,33 @@ def test_delegate_to_individual_of_other_business_area_is_denied(
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
     hh2 = PendingHousehold.objects.get(registration_data_import=rdi_loading, village="village2")
     assert hh2.primary_collector.full_name == "Mary Doe"
+
+
+def test_delegate_people_in_import_of_other_business_area_is_denied(
+    token_api_client: APIClient,
+    business_area: BusinessArea,
+    people_ids: list[UUID],
+    victim_primary_role: PendingIndividualRoleInHousehold,
+) -> None:
+    victim_rdi = victim_primary_role.household.registration_data_import
+    url = reverse("api:rdi-delegate-people", args=[business_area.slug, str(victim_rdi.id)])
+    data = {"delegates": [{"delegate_id": people_ids[2], "delegated_for": [str(victim_primary_role.individual_id)]}]}
+
+    response = token_api_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
+    victim_primary_role.refresh_from_db()
+    assert victim_primary_role.individual_id != people_ids[2]
+
+
+def test_delegate_people_without_delegates_is_rejected(
+    token_api_client: APIClient,
+    business_area: BusinessArea,
+    rdi_loading: RegistrationDataImport,
+) -> None:
+    url = reverse("api:rdi-delegate-people", args=[business_area.slug, str(rdi_loading.id)])
+
+    response = token_api_client.post(url, {"delegates": []}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
+    assert "delegates" in response.json()
