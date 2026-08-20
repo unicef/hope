@@ -52,7 +52,6 @@ from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.models import (
     Approval,
     ApprovalProcess,
-    BusinessArea,
     Currency,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -600,12 +599,9 @@ class PaymentPlanService:
         from_input_to_targeting_criteria(targeting_criteria_input, program, self.payment_plan)
 
     @staticmethod
-    def create(input_data: dict, user: "User", business_area_slug: str) -> PaymentPlan:
-        business_area = BusinessArea.objects.get(slug=business_area_slug)
-        program_cycle = get_object_or_404(
-            ProgramCycle, pk=input_data["program_cycle_id"], program__business_area=business_area
-        )
-        program = program_cycle.program
+    def create(input_data: dict, user: "User", program: Program) -> PaymentPlan:
+        business_area = program.business_area
+        program_cycle = get_object_or_404(ProgramCycle, pk=input_data["program_cycle_id"], program=program)
         if program_cycle.status == ProgramCycle.FINISHED:
             raise ValidationError("Impossible to create Target Population for Programme Cycle within Finished status")
 

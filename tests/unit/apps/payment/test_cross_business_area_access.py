@@ -560,6 +560,42 @@ def test_create_target_population_in_cycle_of_other_business_area_is_denied(
     assert not PaymentPlan.objects.filter(name="cross ba target population").exists()
 
 
+def test_create_target_population_in_cycle_of_other_program_is_denied(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_business_area: BusinessArea,
+    attacker_purpose: PaymentPlanPurpose,
+) -> None:
+    other_program = ProgramFactory(business_area=attacker_business_area)
+    other_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle__program=other_program)
+    household = HouseholdFactory(business_area=attacker_business_area, program=other_program, create_role=False)
+    url = reverse("api:payments:target-populations-list", kwargs=cross_ba_kwargs)
+
+    response = api_client.post(
+        url,
+        {
+            "name": "cross program target population",
+            "program_cycle_id": str(other_plan.program_cycle.id),
+            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=other_plan.program_cycle).id),
+            "payment_plan_purposes": [str(attacker_purpose.id)],
+            "rules": [
+                {
+                    "household_filters_blocks": [],
+                    "household_ids": household.unicef_id,
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
+            "flag_exclude_if_on_sanction_list": False,
+            "flag_exclude_if_active_adjudication_ticket": False,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
+    assert not PaymentPlan.objects.filter(name="cross program target population").exists()
+
+
 @pytest.fixture
 def victim_fsp(victim_business_area: BusinessArea) -> Any:
     delivery_mechanism = DeliveryMechanismFactory()

@@ -272,7 +272,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
         PaymentPlanService.create(
             input_data=create_input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == f"Target Population with name: TEST_123 and program: {program.name} already exists."
 
@@ -283,7 +283,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
         PaymentPlanService.create(
             input_data=create_input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == "Impossible to create Target Population for Programme within not Active status"
 
@@ -293,7 +293,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
         PaymentPlanService.create(
             input_data=create_input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == "Impossible to create Target Population for Programme Cycle within Finished status"
 
@@ -310,7 +310,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     pp = PaymentPlanService.create(
         input_data=create_input_data,
         user=user,
-        business_area_slug=business_area.slug,
+        program=program,
     )
     pp.status = PaymentPlan.Status.TP_OPEN
     pp.save()
@@ -406,11 +406,11 @@ def test_create(
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(25):
+        with django_assert_num_queries(23):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
-                business_area_slug=business_area.slug,
+                program=program,
             )
         assert mock_transaction.on_commit.call_count == 1
 
@@ -447,7 +447,7 @@ def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: 
     }
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(input_data=input_data, user=user, business_area_slug=business_area.slug)
+        PaymentPlanService.create(input_data=input_data, user=user, program=program)
     assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
 
 
@@ -466,7 +466,7 @@ def test_create_raises_when_payment_plan_group_does_not_exist(user: User, busine
     }
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(input_data=input_data, user=user, business_area_slug=business_area.slug)
+        PaymentPlanService.create(input_data=input_data, user=user, program=program)
     assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
 
 
@@ -999,7 +999,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
         PaymentPlanService.create(
             input_data=input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == "Impossible to create Target Population for Programme Cycle within Finished status"
 
@@ -1010,7 +1010,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
     PaymentPlanService.create(
         input_data=input_data,
         user=user,
-        business_area_slug=business_area.slug,
+        program=program,
     )
     cycle.refresh_from_db()
     assert cycle.status == ProgramCycle.DRAFT
@@ -1064,11 +1064,11 @@ def test_full_rebuild(
         "payment_plan_purposes": [purpose],
     }
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(18):
+        with django_assert_num_queries(16):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
-                business_area_slug=business_area.slug,
+                program=program,
             )
         assert mock_transaction.on_commit.call_count == 1
 

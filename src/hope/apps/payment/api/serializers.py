@@ -1756,11 +1756,8 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program = self.get_program()
         data["program"] = program
         data["created_by"] = request.user
-        business_area = program.business_area
 
-        payment_plan = PaymentPlanService.create(
-            input_data=data, user=request.user, business_area_slug=business_area.slug
-        )
+        payment_plan = PaymentPlanService.create(input_data=data, user=request.user, program=program)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
