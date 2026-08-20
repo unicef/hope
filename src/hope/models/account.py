@@ -249,7 +249,7 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
         if accounts_without_unique_fields:
             account_ids = (account.pk for account in accounts_without_unique_fields)
-            for account_ids_batch in batched(account_ids, cls.VALIDATE_UNIQUENESS_BATCH_SIZE):
+            for account_ids_batch in batched(account_ids, cls.VALIDATE_UNIQUENESS_BATCH_SIZE, strict=False):
                 Account.all_objects.filter(pk__in=account_ids_batch).update(
                     unique_key=None,
                     is_unique=True,
