@@ -3,6 +3,7 @@
 from typing import Any
 from unittest.mock import MagicMock
 
+from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
 from django.forms.models import inlineformset_factory
@@ -124,7 +125,7 @@ def request_factory() -> RequestFactory:
 
 @pytest.fixture
 def admin_site() -> AdminSite:
-    return AdminSite()
+    return admin.site
 
 
 def test_role_history(role_1: Role, superuser: User, django_app):
@@ -291,8 +292,6 @@ def test_role_assignment_inline_business_area_not_autocomplete(
     business_area_ukr: BusinessArea,
     partner: Partner,
 ):
-    from django.contrib import admin
-
     partner.allowed_business_areas.add(business_area_afg)
 
     request = get_mock_request(request_factory, object_id=partner.id)
@@ -309,11 +308,7 @@ def test_role_assignment_inline_business_area_not_autocomplete(
 def test_role_assignment_inline_role_not_autocomplete(
     request_factory: RequestFactory,
     partner: Partner,
-    role_available_for_partner: Role,
-    role_not_available_for_partner: Role,
 ):
-    from django.contrib import admin
-
     request = get_mock_request(request_factory, object_id=partner.id)
 
     model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin.site)
@@ -361,8 +356,6 @@ def test_user_role_assignment_admin_business_area_not_autocomplete(
     request_factory: RequestFactory,
     admin_site: AdminSite,
     staff_user: User,
-    business_area_afg: BusinessArea,
-    role_1: Role,
 ):
     admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
 
