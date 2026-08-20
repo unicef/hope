@@ -95,9 +95,11 @@ def test_reset_400_invalid_callback_url(
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.content)
 
 
+@patch("hope.api.endpoints.rdi.base.rdi_dispatcher_task")
 @patch("hope.api.endpoints.rdi.base.remove_rdi_population_async_task")
 def test_reset_202_schedules_fresh(
     enqueue: Mock,
+    dispatcher: Mock,
     token_api_client: APIClient,
     user_business_area: BusinessArea,
     program: Program,
@@ -118,11 +120,15 @@ def test_reset_202_schedules_fresh(
     assert response.json()["status"] == RegistrationDataImport.DELETE_SCHEDULED
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()  # enqueue only, no inline wipe
     enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
+    # the RDI left the merge queue, so the next one waiting behind it must be picked up
+    dispatcher.assert_called_once_with(program)
 
 
+@patch("hope.api.endpoints.rdi.base.rdi_dispatcher_task")
 @patch("hope.api.endpoints.rdi.base.remove_rdi_population_async_task")
 def test_reset_202_idempotent_when_live_job(
     enqueue: Mock,
+    dispatcher: Mock,
     token_api_client: APIClient,
     user_business_area: BusinessArea,
     program: Program,
@@ -143,9 +149,13 @@ def test_reset_202_idempotent_when_live_job(
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED
     enqueue.assert_called_once_with(rdi, callback_url=CALLBACK_URL, signed_token=SIGNED_TOKEN)
+    # the first reset already advanced the queue; this one is a no-op
+    dispatcher.assert_not_called()
 
 
+@patch("hope.api.endpoints.rdi.base.rdi_dispatcher_task")
 def test_reset_409_for_merged(
+    dispatcher: Mock,
     token_api_client: APIClient,
     user_business_area: BusinessArea,
     program: Program,
@@ -164,6 +174,7 @@ def test_reset_409_for_merged(
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {"error": "rdi_already_merged"}
     assert RegistrationDataImport.objects.filter(id=rdi.id).exists()
+    dispatcher.assert_not_called()
 
 
 @pytest.mark.django_db(transaction=True)

@@ -3,6 +3,7 @@ import logging
 from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import urlsplit
 
+from django.core.validators import URLValidator
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpRequest
@@ -244,14 +245,14 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
 
 
 class RDIResetSerializer(serializers.Serializer):
-    callback_url = serializers.URLField(required=True)
+    callback_url = serializers.URLField(
+        required=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+    )
     signed_token = serializers.CharField(required=True)
 
     def validate_callback_url(self, value: str) -> str:
-        parts = urlsplit(value)
-        if parts.scheme not in ("http", "https"):
-            raise serializers.ValidationError("callback_url must be http or https")
-        if "//" in parts.path:
+        if "//" in urlsplit(value).path:
             raise serializers.ValidationError("callback_url path must not contain '//'")
         return value
 
@@ -299,6 +300,9 @@ class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
 
             rdi.status = RegistrationDataImport.DELETE_SCHEDULED
             rdi.save(update_fields=["status"])
+            # The RDI just left the merge queue; nothing else advances it, so a newer RDI waiting
+            # behind it would stall until an admin retry. Let the dispatcher pick the next head.
+            rdi_dispatcher_task(cast("Program", rdi.program))
             logger.info("RDI reset scheduled for %s: delete rdi job %s queued", rdi_id, job.pk)
 
         return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)
