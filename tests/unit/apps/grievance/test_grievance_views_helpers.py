@@ -121,7 +121,7 @@ def test_validate_preconditions_close_adjudication_without_admin2(
     adjudication_ticket_without_admin2: GrievanceTicket,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(1):
         GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
             mock_viewset,
             adjudication_user,
