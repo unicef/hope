@@ -348,7 +348,7 @@ def test_frontend_url_payment_verification(program, cycle):
     plan = PaymentPlanFactory(program_cycle=cycle(program()), status=PaymentPlan.Status.FINISHED)
     verification_plan = PaymentVerificationPlanFactory(payment_plan=plan)
     verification = PaymentVerificationFactory(payment_verification_plan=verification_plan)
-    assert (
-        site._registry[PaymentVerification].frontend_url(verification)
-        == f"/afg/programs/TEST/payment-verification/payment-plan/{plan.id}/verification/payment/{verification.id}"
+    expected = (
+        f"/afg/programs/TEST/payment-verification/payment-plan/{plan.id}/verification/payment/{verification.payment.id}"
     )
+    assert site._registry[PaymentVerification].frontend_url(verification) == expected

@@ -74,7 +74,7 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
         return (
             f"/{plan.business_area.slug}/programs/{program.code}"
             f"/payment-verification/payment-plan/{plan.payment_plan.id}"
-            f"/verification/payment/{obj.id}"
+            f"/verification/payment/{obj.payment.id}"
         )
 
     def has_add_permission(self: Any, request: Any) -> bool:
