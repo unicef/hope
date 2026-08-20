@@ -174,7 +174,7 @@ class HouseholdFilter(UpdatedAtFilter):
             .execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-        return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
+        return qs.filter(Q(id__in=es_ids) | inner_query)
 
     def _get_elasticsearch_query_for_households(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
