@@ -1,8 +1,4 @@
-"""Guardrail for the cross business area IDOR class of bug (GHSA-2xf8-jjc2-9pmv).
-
-Fails on any writable relation field over business area or program data whose queryset is not
-narrowed to the scope of the url path. Adding a field to the allow list needs a reason next to it.
-"""
+"""Fails on a writable relation field over scoped data not narrowed to the url path (GHSA-2xf8-jjc2-9pmv)."""
 
 from django.urls import get_resolver
 import pytest
