@@ -560,7 +560,7 @@ class GrievanceTicketGlobalViewSet(
         return super().get_queryset().filter(self.grievance_permissions_query).distinct()
 
     def get_queryset(self) -> QuerySet:
-        to_prefetch = []
+        to_prefetch: list[str | Prefetch] = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
             to_prefetch.append(key)
             if "household" in value:
@@ -592,7 +592,13 @@ class GrievanceTicketGlobalViewSet(
             to_prefetch += [Prefetch(path, queryset=households) for path in annotated_paths]
 
         if self.action == "list":
-            to_prefetch.append("linked_tickets")
+            # only the fields get_related_tickets_count reads, mirroring the program-scoped list
+            to_prefetch.append(
+                Prefetch(
+                    "linked_tickets",
+                    queryset=GrievanceTicket.objects.only("id", "household_unicef_id"),
+                )
+            )
 
         return (
             super()
