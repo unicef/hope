@@ -15,7 +15,6 @@ from hope.models import User
 
 class BulkActionService:
     def _open_tickets(self, tickets_ids: Sequence[str], business_area_slug: str) -> QuerySet[GrievanceTicket]:
-        # ticket ids are global, the business area they have to belong to comes from the url path
         return GrievanceTicket.objects.filter(
             ~Q(status=GrievanceTicket.STATUS_CLOSED),
             id__in=tickets_ids,

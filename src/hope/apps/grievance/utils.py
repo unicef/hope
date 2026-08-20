@@ -91,7 +91,6 @@ def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTi
 
 def update_grievance_documents(ticket_id: str, documents: list[dict]) -> None:
     for document in documents:
-        # the id comes from the request body, the ticket from the url path, as in delete
         current_document = GrievanceDocument.objects.filter(id=document["id"], grievance_ticket_id=ticket_id).first()
         if current_document:
             os.remove(current_document.file.path)

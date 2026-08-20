@@ -1,8 +1,4 @@
-"""Cross business area scoping of the registration data import actions (GHSA-2xf8-jjc2-9pmv).
-
-Permissions are checked against the business area of the url path, while the uploaded file an
-import starts from is named by a global id in the request body.
-"""
+"""Cross business area scoping of the registration data import actions (GHSA-2xf8-jjc2-9pmv)."""
 
 from typing import Any, Callable
 

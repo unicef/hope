@@ -1,8 +1,4 @@
-"""Cross business area scoping of the partner choices lookup (GHSA-2xf8-jjc2-9pmv).
-
-The business area comes from the url path, the beneficiary that names the program comes as a
-global id in the query.
-"""
+"""Cross business area scoping of the partner choices lookup (GHSA-2xf8-jjc2-9pmv)."""
 
 from typing import Any, Callable
 

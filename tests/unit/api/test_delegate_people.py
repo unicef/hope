@@ -128,7 +128,6 @@ def test_delegate_people_reassigns_primary_collector(
 
 @pytest.fixture
 def victim_primary_role(afghanistan_country) -> PendingIndividualRoleInHousehold:
-    """A primary collector of an import that belongs to another business area."""
     victim_business_area = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="0070")
     victim_program = ProgramFactory(status=Program.DRAFT, business_area=victim_business_area)
     victim_rdi = RegistrationDataImportFactory(

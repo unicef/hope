@@ -1,13 +1,7 @@
 """Guardrail for the cross business area IDOR class of bug (GHSA-2xf8-jjc2-9pmv).
 
-Permissions are checked against the business area and the program of the url path, while an object
-referenced by id in the request body is loaded globally. A writable relation field over a model that
-carries business area or program data therefore has to narrow its queryset to the scope of the path,
-which is what ScopedRelatedField does.
-
-This test walks every REST route, instantiates the serializer of every write action and fails on any
-such field that is neither scoped nor listed below. Adding a field to the allow list is a deliberate
-decision that needs a reason next to it.
+Fails on any writable relation field over business area or program data whose queryset is not
+narrowed to the scope of the url path. Adding a field to the allow list needs a reason next to it.
 """
 
 from django.urls import get_resolver
@@ -17,18 +11,15 @@ from rest_framework.relations import ManyRelatedField, RelatedField
 
 from hope.apps.core.api.fields import ScopedRelatedFieldMixin
 
-# Fields of these models never belong to a single business area.
 GLOBAL_MODELS = {"BusinessArea", "Partner", "Area", "AreaType", "Country", "User", "Role"}
 
-# Model fields that place an object inside a business area or a program.
 SCOPE_FIELDS = {"business_area", "program", "program_cycle", "payment_plan"}
 
 WRITE_ACTIONS = ("create", "update", "copy", "import", "assign", "message", "sample", "approve", "reassign", "split")
 
-# (viewset, action, field): why it does not have to be scoped.
+# (viewset, action, field): why it needs no scope.
 ALLOWED_UNSCOPED = {
-    # The view checks the office of every item against the business area of the payment plan it is
-    # assigning them to, and that plan comes from the scoped get_object.
+    # the view rejects any item whose office differs from the business area of the plan
     ("PaymentPlanViewSet", "assign_funds_commitments", "fund_commitment_items_ids.<cannot instantiate>"),
 }
 
@@ -52,8 +43,7 @@ def _is_already_scoped(field: RelatedField) -> bool:
     if isinstance(field, ScopedRelatedFieldMixin):
         return True
     queryset = field.queryset
-    # the name of the table shows up in the repr of the where clause, so the fields it compares
-    # have to be read from the tree instead of matched as text
+    # matching text would hit the table name in the repr, so read the compared fields from the tree
     return queryset is not None and bool(_filtered_fields(queryset.all().query.where) & SCOPE_FIELDS)
 
 

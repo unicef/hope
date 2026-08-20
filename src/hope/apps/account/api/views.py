@@ -182,8 +182,6 @@ class UserViewSet(
         household_id = request.query_params.get("household")
         individual_id = request.query_params.get("individual")
 
-        # the beneficiary that names the program is looked up by a global id, so it has to be
-        # pinned to the business area of the path like the program code already is
         if program_code:
             program = get_object_or_404(Program, business_area=business_area, code=program_code)
         elif household_id:

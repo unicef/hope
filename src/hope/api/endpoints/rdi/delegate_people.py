@@ -24,7 +24,6 @@ class DelegatePeopleSerializer(serializers.Serializer):
     delegates = DelegateSerializer(many=True, required=True, allow_empty=False, allow_null=False)
 
     def create(self, validated_data: dict) -> dict:
-        # every id in the payload is global, the import to stay inside comes from the url path
         rdi = self.context["registration_data_import"]
         delegates = validated_data.pop("delegates")
         updated = 0

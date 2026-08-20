@@ -646,7 +646,6 @@ class PaymentPlanService:
             delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
             if fsp_id and delivery_mechanism_code:
-                # the list endpoint offers only the providers allowed in this business area, the id has to match
                 fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id, allowed_business_areas=business_area)
                 PaymentPlanService._check_group_fsp_consistency(payment_plan_group, fsp)
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
@@ -804,7 +803,6 @@ class PaymentPlanService:
 
     def _set_program_cycle(self, input_data: dict) -> None:
         if program_cycle_id := input_data.get("program_cycle_id"):
-            # the cycle a target population is moved to has to stay inside the program of the url path
             program_cycle = get_object_or_404(
                 ProgramCycle, pk=program_cycle_id, program=self.payment_plan.program_cycle.program
             )

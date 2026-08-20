@@ -254,7 +254,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.business_area = kwargs.pop("business_area", None)
-        # the view builds this serializer by hand, so the scope has to be put in the context here
+        # built by hand in the view, so the scope has to be set here
         kwargs.setdefault("context", {})["business_area"] = self.business_area
         super().__init__(*args, **kwargs)
 

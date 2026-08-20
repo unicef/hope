@@ -1,9 +1,4 @@
-"""Cross business area scoping of the token api (GHSA-2xf8-jjc2-9pmv).
-
-A token is valid for the business area of the url path, while a program referenced by id in the
-request body is loaded globally. These tests pin the program of another business area to the same
-failure as a program that does not exist.
-"""
+"""Cross business area scoping of the token api (GHSA-2xf8-jjc2-9pmv)."""
 
 import pytest
 from rest_framework import status

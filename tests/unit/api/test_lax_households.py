@@ -756,7 +756,6 @@ def test_household_create_facility(
 
 @pytest.fixture
 def collector_of_other_business_area() -> PendingIndividual:
-    """A collector that belongs to an import of another business area."""
     other_business_area = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="0070")
     other_rdi = RegistrationDataImportFactory(
         business_area=other_business_area,

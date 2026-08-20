@@ -196,8 +196,6 @@ XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml
 
 
 class ScopedPaymentPlanMixin:
-    """Payment plan ids are global, so every lookup has to be pinned to the program from the url path."""
-
     payment_plan_url_kwarg = "payment_plan_pk"
 
     def scoped_payment_plan(self, pk: Any) -> PaymentPlan:
@@ -1136,7 +1134,6 @@ class PaymentPlanViewSet(
             engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
             if version := serializer.validated_data.get("version"):
                 check_concurrency_version_in_mutation(version, payment_plan)
-            # engine rules are limited to the business areas they are allowed in, and so is the id
             engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id, allowed_business_areas=self.business_area)
             if payment_plan.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
                 raise ValidationError(f"Not allowed to run engine formula within status {payment_plan.status}.")
@@ -2337,7 +2334,6 @@ class TargetPopulationViewSet(
         engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
         if version := serializer.validated_data.get("version"):
             check_concurrency_version_in_mutation(version, tp)
-        # engine rules are limited to the business areas they are allowed in, and so is the id
         engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id, allowed_business_areas=self.business_area)
         # tp vulnerability_score
         if tp.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
@@ -2561,10 +2557,8 @@ class PaymentViewSet(
     filterset_class = PaymentSearchFilter
 
     def get_object(self) -> Payment:
-        # Scoped to the program rather than bound to the payment plan of the path: the details page is
-        # reached by a plain link and only learns the plan from the payment it is about to fetch, so it
-        # sends no usable plan id. Staying inside the program keeps the permissions of the path honest,
-        # and a payment of another plan of the same program is visible to this user anyway.
+        # Not bound to the payment plan of the path: the details page is reached by a plain link and
+        # sends no usable plan id. The program still matches the permissions checked for the path.
         return get_object_or_404(Payment, id=self.kwargs["payment_id"], parent__program_cycle__program=self.program)
 
     def get_queryset(self) -> QuerySet:

@@ -116,7 +116,7 @@ class BusinessAreaViewSet(
         program_id = request.query_params.get("program_id", None)
         business_area_slug = self.kwargs["slug"]
         if program_id:
-            # the program whose flexible fields are read is named by a global id in the query
+            # checked for scope only, the generator below takes the id
             get_object_or_404(Program, id=program_id, business_area__slug=business_area_slug)
         result_list = get_fields_attr_generators(business_area_slug=business_area_slug, program_id=program_id)
         return Response(FieldAttributeSerializer(result_list, many=True).data, status=200)

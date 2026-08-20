@@ -30,7 +30,6 @@ class SelectedBusinessAreaMixin:
             raise Http404
 
     def get_serializer_context(self) -> dict[str, Any]:
-        # the token is valid for the business area of the url path, so a scoped field can narrow to it
         return {**super().get_serializer_context(), "business_area": self.selected_business_area}
 
 

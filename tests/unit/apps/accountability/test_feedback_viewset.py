@@ -896,7 +896,7 @@ def test_update_feedback_with_program_without_permission_in_program(
         },
         format="json",
     )
-    # feedback lives in a program the user has no role in - not visible, so not found
+    # not visible in that program, so not found rather than forbidden
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -1401,7 +1401,7 @@ def test_create_feedback_message_with_program_without_permission_in_program(
         {"description": "Message for Feedback #1"},
         format="json",
     )
-    # feedback lives in a program the user has no role in - not visible, so not found
+    # not visible in that program, so not found rather than forbidden
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 

@@ -1,8 +1,4 @@
-"""Cross business area scoping of the field attribute lookup (GHSA-2xf8-jjc2-9pmv).
-
-The business area comes from the url path, the program whose flexible fields are read comes as a
-global id in the query, so the two have to be reconciled.
-"""
+"""Cross business area scoping of the field attribute lookup (GHSA-2xf8-jjc2-9pmv)."""
 
 from typing import Any, Callable
 

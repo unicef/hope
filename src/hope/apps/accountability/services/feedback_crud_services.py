@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from hope.models import Area, BusinessArea, Feedback, Household, Individual, Program, User
 
 _SIMPLE_FIELDS = ("comments", "area", "language", "consent")
-# Beneficiaries carry business area data, so an id from the body has to stay inside the one of the path.
 _SCOPED_FK_FIELDS = {
     "household_lookup": Household,
     "individual_lookup": Individual,
@@ -28,7 +27,7 @@ class FeedbackCrudServices:
             if cls._has_value(input_data, field):
                 setattr(obj, field, get_object_or_404(model, id=input_data[field], business_area=business_area))
         if cls._has_value(input_data, "admin2"):
-            # admin areas are shared reference data, they do not belong to a single business area
+            # admin areas are shared reference data, not owned by a business area
             obj.admin2 = get_object_or_404(Area, id=input_data["admin2"])
 
     @classmethod

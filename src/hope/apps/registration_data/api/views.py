@@ -419,7 +419,6 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        # the uploaded file is listed per business area, so the id has to stay inside the one of the path
         import_data = ImportData.objects.filter(id=import_data_id, business_area_slug=self.business_area.slug).first()
         if not import_data:
             raise ValidationError("Import data not found")
@@ -501,7 +500,6 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        # the uploaded file is listed per business area, so the id has to stay inside the one of the path
         import_data = KoboImportData.objects.filter(
             id=import_data_id, business_area_slug=self.business_area.slug
         ).first()

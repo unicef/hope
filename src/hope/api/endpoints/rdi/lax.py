@@ -564,8 +564,6 @@ class HouseholdSerializer(serializers.ModelSerializer):
         allow_null=True,
         queryset=Currency.objects.all(),
     )
-    # the members of a household are already resolved inside the rdi of the url path, and so are
-    # the individuals it names as head of household or as collectors
     head_of_household_id = ScopedSlugRelatedField(
         source="head_of_household",
         slug_field="unicef_id",
