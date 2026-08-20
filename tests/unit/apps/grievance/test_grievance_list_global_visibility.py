@@ -154,11 +154,6 @@ def test_list_returns_ticket_once_when_linked_to_multiple_programs(
     assert [result["id"] for result in response.data["results"]] == [str(ticket_in_three_programs.id)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="get_count_queryset has the M2M join and no .distinct(), so it counts "
-    "ticket x program rows. To be fixed by the Exists().",
-)
 def test_count_returns_one_when_ticket_linked_to_multiple_programs(
     api_client: Any,
     user: User,
