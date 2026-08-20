@@ -202,6 +202,19 @@ def test_generate_report(xlsx_update_file, individuals) -> None:
     assert len(report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH]) == 1
 
 
+def test_generate_report_rows_carry_row_number_and_matched_individuals(xlsx_update_file, individuals) -> None:
+    updater = IndividualXlsxUpdate(xlsx_update_file)
+
+    report = updater.get_matching_report()
+
+    assert report[IndividualXlsxUpdate.STATUS_NO_MATCH][0].row_number == 5
+    assert report[IndividualXlsxUpdate.STATUS_NO_MATCH][0].individuals == []
+    assert report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH][0].row_number == 4
+    assert len(report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH][0].individuals) == 2
+    assert report[IndividualXlsxUpdate.STATUS_UNIQUE][0].row_number == 2
+    assert len(report[IndividualXlsxUpdate.STATUS_UNIQUE][0].individuals) == 1
+
+
 def test_update_individuals(xlsx_update_file, individuals) -> None:
     updater = IndividualXlsxUpdate(xlsx_update_file)
 

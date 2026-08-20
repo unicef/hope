@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
     from xlwt import Row
@@ -28,6 +28,11 @@ from hope.models import Individual, log_create
 
 class InvalidColumnsError(Exception):
     pass
+
+
+class RowMatchReport(NamedTuple):
+    row_number: int
+    individuals: list[Individual]
 
 
 class IndividualXlsxUpdate:
@@ -74,7 +79,8 @@ class IndividualXlsxUpdate:
             columns.append("phone_no_valid")
             columns.append("phone_no_alternative_valid")
         for individuals_unique_report in self.report_dict[IndividualXlsxUpdate.STATUS_UNIQUE]:
-            row_num, individual = individuals_unique_report
+            row_num = individuals_unique_report.row_number
+            individual = individuals_unique_report.individuals[0]
             row = self.individuals_ws[row_num]
             individual.detail_id = row_num
             individual = self._update_single_individual(row, individual)
@@ -121,11 +127,10 @@ class IndividualXlsxUpdate:
 
         return queryset
 
-    def _row_report_data(self, row: Row) -> Any:
+    def _row_report_data(self, row: Row) -> int:
         return row[0].row
 
-    def _get_matching_report_for_single_row(self, row: Row) -> Any:
-        # TODO: refactor the output of this function
+    def _get_matching_report_for_single_row(self, row: Row) -> tuple[str, RowMatchReport]:
         q_object = Q()
         for match_col in self.xlsx_match_columns:
             attr = self.core_attr_by_names[match_col]
@@ -134,16 +139,12 @@ class IndividualXlsxUpdate:
 
         individuals = list(self._get_queryset().filter(q_object))
         if not individuals:
-            return IndividualXlsxUpdate.STATUS_NO_MATCH, self._row_report_data(row)
-        if len(individuals) > 1:
-            return IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH, (
-                self._row_report_data(row),
-                individuals,
-            )
-        return IndividualXlsxUpdate.STATUS_UNIQUE, (
-            self._row_report_data(row),
-            individuals[0],
-        )
+            status = IndividualXlsxUpdate.STATUS_NO_MATCH
+        elif len(individuals) > 1:
+            status = IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH
+        else:
+            status = IndividualXlsxUpdate.STATUS_UNIQUE
+        return status, RowMatchReport(self._row_report_data(row), individuals)
 
     def _update_single_individual(self, row: Row, individual: Individual) -> Individual:
         old_individual = copy_model_object(individual)
