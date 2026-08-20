@@ -36,7 +36,13 @@ export function DocumentationField({
         />
       </Grid>
       <Grid size={4}>
-        <Box style={{ height: '100%' }} display="flex" alignItems="center">
+        <Box
+          style={{ height: '100%' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <input
             type="file"
             accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

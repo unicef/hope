@@ -6,10 +6,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { YES_NO_CHOICES } from '@utils/constants';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { t } from 'i18next';
 import React, { FC } from 'react';
 
@@ -27,7 +29,9 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
 }) => {
   const { businessArea } = useBaseUrl();
   const { data: individualChoicesData } = useQuery<IndividualChoices>({
-    queryKey: ['individualChoices', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasIndividualsChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -43,7 +47,13 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
 
   return (
     <FiltersSection isOnPaper={isOnPaper} withApplyClearButtons={false}>
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={3}>
           <RdiAutocompleteRestFilter
             value={filter.registrationDataImportId}
@@ -123,12 +133,11 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
             value={filter.hasGrievanceTicket}
             data-cy="ind-filters-grievance-ticket"
           >
-            <MenuItem key="yes" value="YES">
-              {t('Yes')}
-            </MenuItem>
-            <MenuItem key="no" value="NO">
-              {t('No')}
-            </MenuItem>
+            {YES_NO_CHOICES.map((choice) => (
+              <MenuItem key={choice.value} value={choice.value}>
+                {t(choice.label)}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={3}>
@@ -162,12 +171,11 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
             value={filter.receivedAssistance}
             data-cy="ind-filters-received-assistance"
           >
-            <MenuItem key="yes" value="YES">
-              {t('Yes')}
-            </MenuItem>
-            <MenuItem key="no" value="NO">
-              {t('No')}
-            </MenuItem>
+            {YES_NO_CHOICES.map((choice) => (
+              <MenuItem key={choice.value} value={choice.value}>
+                {t(choice.label)}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
       </Grid>

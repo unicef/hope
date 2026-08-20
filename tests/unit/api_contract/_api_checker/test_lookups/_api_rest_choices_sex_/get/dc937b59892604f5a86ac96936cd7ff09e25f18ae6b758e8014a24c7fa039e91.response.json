@@ -1,0 +1,36 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "196"
+    },
+    "data": [
+        {
+            "name": "Female",
+            "value": "FEMALE"
+        },
+        {
+            "name": "Male",
+            "value": "MALE"
+        },
+        {
+            "name": "Not answered",
+            "value": "NOT_ANSWERED"
+        },
+        {
+            "name": "Not collected",
+            "value": "NOT_COLLECTED"
+        },
+        {
+            "name": "Other",
+            "value": "OTHER"
+        }
+    ],
+    "content_type": "application/json"
+}

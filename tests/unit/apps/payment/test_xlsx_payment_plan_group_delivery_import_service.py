@@ -134,6 +134,14 @@ def group_two_plans_with_shared_export_file(group_two_plans_one_fsp):
 
 
 @pytest.fixture
+def group_two_plans_with_sparse_fsp_header(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    ctx["payment_one"].extras = {"fsp_extra_fields": {"fsp_reference": "owned-by-fsp"}}
+    ctx["payment_one"].save(update_fields=["extras"])
+    return ctx
+
+
+@pytest.fixture
 def group_with_plan_without_template(program_cycle, business_area, fsp, delivery_mechanism):
     group = PaymentPlanGroupFactory(cycle=program_cycle)
     plan = PaymentPlanFactory(
@@ -284,6 +292,27 @@ def test_validate_succeeds_for_correct_header_and_rows(group_two_plans_one_fsp):
     assert service.errors == []
 
 
+def test_group_reconciliation_uses_group_wide_fsp_header_ownership(
+    group_two_plans_with_sparse_fsp_header,
+):
+    ctx = group_two_plans_with_sparse_fsp_header
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "fsp_reference", "returned_code"],
+        [
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "returned-fsp-value", "RETURNED-002"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+    service.open_workbook()
+    service.validate()
+    plan_service = service.per_plan_services[str(ctx["plan_two"].id)]
+    row = next(plan_service.ws_payments.iter_rows(min_row=2))
+
+    extras = plan_service._get_extras_for_row(row)
+
+    assert extras == {"returned_code": "RETURNED-002"}
+
+
 def test_validate_errors_when_required_column_missing(group_two_plans_one_fsp):
     ctx = group_two_plans_one_fsp
     file = _make_workbook(
@@ -346,7 +375,11 @@ def test_validate_errors_when_no_actual_changes(group_two_plans_one_fsp):
     service.open_workbook()
     service.validate()
 
-    assert any("aren't any updates" in error.message for error in service.errors)
+    expected_message = (
+        "There aren't any updates in the imported file. Reconciliation data is either empty or has already been "
+        "uploaded and cannot be overwritten."
+    )
+    assert any(error.message == expected_message for error in service.errors)
 
 
 def test_import_payment_list_writes_delivered_quantity_per_plan(group_two_plans_one_fsp):

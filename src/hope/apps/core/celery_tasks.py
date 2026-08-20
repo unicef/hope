@@ -5,6 +5,7 @@ from typing import Any
 from django.apps import apps
 from django.conf import settings
 from django.utils import timezone
+from django.utils.module_loading import import_string
 from sentry_sdk import set_tag
 
 from hope.apps.core.celery import app
@@ -187,6 +188,14 @@ def async_retry_job_task(
         }
         job.save(update_fields=["errors"])
         logger.exception(f"Async retry job action failed for job {job.pk} ({job.action})")
+        if self.request.retries >= self.max_retries:  # retries exhausted — give up
+            action = job.config.get("on_failure_action")
+            if action:
+                try:
+                    import_string(action)(job, exc)
+                except Exception:
+                    logger.exception("on_failure_action %s failed (job %s)", action, job.pk)
+            raise
         raise self.retry(exc=exc)
 
 

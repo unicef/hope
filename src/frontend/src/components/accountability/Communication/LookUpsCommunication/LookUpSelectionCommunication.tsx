@@ -12,6 +12,7 @@ import { LookUpTargetPopulationFiltersCommunication } from './LookUpTargetPopula
 import { useProgramContext } from 'src/programContext';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 
@@ -79,7 +80,10 @@ export function LookUpSelectionCommunication({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasHouseholdsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -131,13 +135,22 @@ export function LookUpSelectionCommunication({
   return (
     <Box>
       <BoxWithBorderBottom
-        p={4}
-        m={4}
-        display="flex"
-        alignItems="center"
-        bgcolor="#F5F5F5"
+        sx={{
+          p: 4,
+          m: 4,
+          display: 'flex',
+          alignItems: 'center',
+          bgcolor: '#F5F5F5',
+        }}
       >
-        <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
+        <Box
+          sx={{
+            pl: 5,
+            pr: 5,
+            fontWeight: '500',
+            fontSize: 'medium',
+          }}
+        >
           {t('Look up for')}
         </Box>
         <RadioGroup
@@ -159,7 +172,12 @@ export function LookUpSelectionCommunication({
           ))}
         </RadioGroup>
       </BoxWithBorderBottom>
-      <Box p={4} mt={4}>
+      <Box
+        sx={{
+          p: 4,
+          mt: 4,
+        }}
+      >
         {selectedTab === CommunicationTabsValues.HOUSEHOLD && (
           <LookUpHouseholdFiltersCommunication
             filter={filterHH}

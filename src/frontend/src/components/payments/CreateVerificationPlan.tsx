@@ -32,6 +32,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { FormikEffect } from '@core/FormikEffect';
@@ -42,6 +43,10 @@ import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { AreaList } from '@restgenerated/models/AreaList';
 import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
 import { RestService } from '@restgenerated/services/RestService';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
+import { useSexChoices } from '@hooks/useSexChoices';
+import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -164,6 +169,20 @@ export const CreateVerificationPlan = ({
   const { businessArea, baseUrl, programId: programCode } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const queryClient = useQueryClient();
+  const {
+    data: sexChoices = [],
+    isLoading: isSexChoicesLoading,
+    isError: isSexChoicesError,
+    error: sexChoicesError,
+  } = useSexChoices();
+  const {
+    data: channelChoices = [],
+    isLoading: isChannelChoicesLoading,
+    isError: isChannelChoicesError,
+    error: channelChoicesError,
+  } = useVerificationChannelChoices();
+  useApiErrorSnackbar(isSexChoicesError, sexChoicesError);
+  useApiErrorSnackbar(isChannelChoicesError, channelChoicesError);
 
   const createVerificationPlanMutation = useMutation({
     mutationFn: (data: PaymentVerificationPlanCreate) =>
@@ -178,12 +197,9 @@ export const CreateVerificationPlan = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -191,7 +207,10 @@ export const CreateVerificationPlan = ({
   const [formValues, setFormValues] = useState(initialValues);
 
   const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
-    queryKey: ['rapidProFlows', businessArea, programCode],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList,
+      { businessAreaSlug: businessArea, programCode },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
@@ -207,7 +226,10 @@ export const CreateVerificationPlan = ({
   const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<AreaList[]>({
-    queryKey: ['adminAreas', businessArea, { level: 2 }],
+    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasList, {
+      businessAreaSlug: businessArea,
+      level: 2,
+    }),
     queryFn: async () => {
       return RestService.restBusinessAreasGeoAreasList({
         businessAreaSlug: businessArea,
@@ -337,7 +359,11 @@ export const CreateVerificationPlan = ({
               values={values}
               onChange={() => handleFormChange(values)}
             />
-            <Box mr={2}>
+            <Box
+              sx={{
+                mr: 2,
+              }}
+            >
               <ButtonTooltip
                 title={getTooltipTitle()}
                 disabled={!isActiveProgram || !canCreatePaymentVerificationPlan}
@@ -389,7 +415,11 @@ export const CreateVerificationPlan = ({
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
-                    <Box pt={6}>
+                    <Box
+                      sx={{
+                        pt: 6,
+                      }}
+                    >
                       {mappedAdminAreas && (
                         <Field
                           name="excludedAdminAreasFull"
@@ -399,13 +429,23 @@ export const CreateVerificationPlan = ({
                           component={FormikMultiSelectField}
                         />
                       )}
-                      <Box pt={3}>
-                        <Box pt={3}>
+                      <Box
+                        sx={{
+                          pt: 3,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            pt: 3,
+                          }}
+                        >
                           <Box
-                            pb={3}
-                            pt={3}
-                            fontSize={16}
-                            fontWeight="fontWeightBold"
+                            sx={{
+                              pb: 3,
+                              pt: 3,
+                              fontSize: 16,
+                              fontWeight: 'fontWeightBold',
+                            }}
                           >
                             Sample size:{' '}
                             {isNaN(sampleSizesData?.sampleSize?.sampleSize)
@@ -420,34 +460,27 @@ export const CreateVerificationPlan = ({
                             {getSampleSizePercentage()}
                           </Box>
                         </Box>
-                        <Box fontSize={12} color="#797979">
+                        <Box
+                          sx={{
+                            fontSize: 12,
+                            color: '#797979',
+                          }}
+                        >
                           {t('This option is recommended for RapidPro')}
                         </Box>
-                        <Field
-                          name="verificationChannel"
-                          label={t('Verification Channel')}
-                          style={{ flexDirection: 'row' }}
-                          data-cy="checkbox-verification-channel"
-                          choices={[
-                            {
-                              value: 'RAPIDPRO',
-                              name: 'RAPIDPRO',
-                              dataCy: 'radio-rapidpro',
-                            },
-                            {
-                              value: 'XLSX',
-                              name: 'XLSX',
-                              dataCy: 'radio-xlsx',
-                            },
-                            {
-                              value: 'MANUAL',
-                              name: 'MANUAL',
-                              dataCy: 'radio-manual',
-                            },
-                          ]}
-                          component={FormikRadioGroup}
-                          alignItems="center"
-                        />
+                        {isChannelChoicesLoading ? (
+                          <LoadingComponent />
+                        ) : (
+                          <Field
+                            name="verificationChannel"
+                            label={t('Verification Channel')}
+                            style={{ flexDirection: 'row' }}
+                            data-cy="checkbox-verification-channel"
+                            choices={channelChoices}
+                            component={FormikRadioGroup}
+                            alignItems="center"
+                          />
+                        )}
                         {values.verificationChannel === 'RAPIDPRO' && (
                           <Field
                             name="rapidProFlow"
@@ -466,7 +499,11 @@ export const CreateVerificationPlan = ({
                     </Box>
                   </TabPanel>
                   <TabPanel value={selectedTab} index={1}>
-                    <Box pt={3}>
+                    <Box
+                      sx={{
+                        pt: 3,
+                      }}
+                    >
                       <Field
                         name="confidenceInterval"
                         label={t('Confidence Interval')}
@@ -488,8 +525,17 @@ export const CreateVerificationPlan = ({
                       <Typography variant="caption">
                         {t('Cluster Filters')}
                       </Typography>
-                      <Box flexDirection="column" display="flex">
-                        <Box display="flex">
+                      <Box
+                        sx={{
+                          flexDirection: 'column',
+                          display: 'flex',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                          }}
+                        >
                           <Field
                             name="adminCheckbox"
                             label={t('Administrative Level')}
@@ -521,7 +567,11 @@ export const CreateVerificationPlan = ({
                         <Grid container>
                           {values.ageCheckbox && (
                             <Grid size={{ xs: 12 }}>
-                              <Box mt={6}>
+                              <Box
+                                sx={{
+                                  mt: 6,
+                                }}
+                              >
                                 <Grid container>
                                   <Grid size={{ xs: 4 }}>
                                     <Field
@@ -547,26 +597,22 @@ export const CreateVerificationPlan = ({
                           )}
                           {values.sexCheckbox && (
                             <Grid size={{ xs: 5 }}>
-                              <Box mt={6}>
-                                <Field
-                                  name="filterSex"
-                                  label={t('Gender')}
-                                  color="primary"
-                                  choices={[
-                                    { value: 'FEMALE', name: t('Female') },
-                                    { value: 'MALE', name: t('Male') },
-                                    { value: 'OTHER', name: t('Other') },
-                                    {
-                                      value: 'NOT_COLLECTED',
-                                      name: t('Not Collected'),
-                                    },
-                                    {
-                                      value: 'NOT_ANSWERED',
-                                      name: t('Not Answered'),
-                                    },
-                                  ]}
-                                  component={FormikSelectField}
-                                />
+                              <Box
+                                sx={{
+                                  mt: 6,
+                                }}
+                              >
+                                {isSexChoicesLoading ? (
+                                  <LoadingComponent />
+                                ) : (
+                                  <Field
+                                    name="filterSex"
+                                    label={t('Gender')}
+                                    color="primary"
+                                    choices={sexChoices}
+                                    component={FormikSelectField}
+                                  />
+                                )}
                               </Box>
                             </Grid>
                           )}
@@ -574,35 +620,29 @@ export const CreateVerificationPlan = ({
                       </Box>
 
                       <Box
-                        pb={3}
-                        pt={3}
-                        fontSize={16}
-                        fontWeight="fontWeightBold"
+                        sx={{
+                          pb: 3,
+                          pt: 3,
+                          fontSize: 16,
+                          fontWeight: 'fontWeightBold',
+                        }}
                       >
                         Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
                         out of {sampleSizesData?.sampleSize?.paymentRecordCount}
                         {getSampleSizePercentage()}
                       </Box>
-                      <Field
-                        name="verificationChannel"
-                        label={t('Verification Channel')}
-                        style={{ flexDirection: 'row' }}
-                        alignItems="center"
-                        choices={[
-                          {
-                            value: 'RAPIDPRO',
-                            name: 'RAPIDPRO',
-                            dataCy: 'radio-rapidpro',
-                          },
-                          { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                          {
-                            value: 'MANUAL',
-                            name: 'MANUAL',
-                            dataCy: 'radio-manual',
-                          },
-                        ]}
-                        component={FormikRadioGroup}
-                      />
+                      {isChannelChoicesLoading ? (
+                        <LoadingComponent />
+                      ) : (
+                        <Field
+                          name="verificationChannel"
+                          label={t('Verification Channel')}
+                          style={{ flexDirection: 'row' }}
+                          alignItems="center"
+                          choices={channelChoices}
+                          component={FormikRadioGroup}
+                        />
+                      )}
                       {values.verificationChannel === 'RAPIDPRO' && (
                         <Field
                           name="rapidProFlow"

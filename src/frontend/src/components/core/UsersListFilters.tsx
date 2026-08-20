@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
@@ -49,7 +50,9 @@ export function UsersListFilters({
   };
 
   const { data: choicesData, isLoading } = useQuery({
-    queryKey: ['userChoices', businessArea],
+    queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
+      businessAreaSlug: businessArea,
+    }),
     queryFn: () =>
       RestService.restBusinessAreasUsersChoicesRetrieve({
         businessAreaSlug: businessArea,

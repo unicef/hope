@@ -25,6 +25,7 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useProgramContext } from 'src/programContext';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { showApiErrorMessages } from '@utils/utils';
@@ -73,11 +74,9 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'businessAreasGrievanceTicketsRetrieve',
-          businessAreaSlug,
-          ticket.id,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
       });
     },
   });

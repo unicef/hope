@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   StyledAutocomplete,
@@ -31,15 +32,18 @@ export function AdminAreaAutocompleteMultiple({
   const debouncedInputText = useDebounce(inputValue, 400);
   const [newValue, setNewValue] = useState([]);
   const { businessArea } = useBaseUrl();
+  const geoAreasParams = {
+    businessAreaSlug: businessArea,
+    level: level,
+    name: debouncedInputText,
+    parentId: parentId || undefined,
+  };
   const { data: areasData, isLoading } = useQuery({
-    queryKey: ['adminAreas', debouncedInputText, businessArea, level, parentId],
-    queryFn: () =>
-      RestService.restBusinessAreasGeoAreasList({
-        businessAreaSlug: businessArea,
-        level: level,
-        name: debouncedInputText,
-        parentId: parentId || undefined,
-      }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasList,
+      geoAreasParams,
+    ),
+    queryFn: () => RestService.restBusinessAreasGeoAreasList(geoAreasParams),
     enabled: !!businessArea,
   });
 
@@ -88,8 +92,9 @@ export function AdminAreaAutocompleteMultiple({
         <StyledTextField
           {...params}
           slotProps={{
+            ...params.slotProps,
             htmlInput: {
-              ...params.inputProps,
+              ...params.slotProps.htmlInput,
               value: inputValue,
             },
           }}

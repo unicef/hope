@@ -162,6 +162,7 @@ def _patch_sync_apps_for_no_migrations() -> None:
     Django's sync_apps() skips apps where models_module is None, but our
     models are in hope.models with app_label pointing to hope.apps.*.
     """
+    from django.conf import settings
     from django.core.management.commands import migrate
 
     original_sync_apps = migrate.Command.sync_apps
@@ -174,6 +175,13 @@ def _patch_sync_apps_for_no_migrations() -> None:
         for app_config in django_apps.get_app_configs():
             if app_config.models_module is None and "hope" in app_config.name:
                 app_config.models_module = hope.models
+
+        # Execute premigrations.sql before syncing models that depend on
+        # custom collations, extensions, and functions.
+        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
+        with open(filename, "r") as file:
+            pre_sql = file.read()
+        connection.cursor().execute(pre_sql)
 
         return original_sync_apps(self, connection, app_labels)
 
@@ -596,7 +604,6 @@ def business_area(create_unicef_partner: Any, create_role_with_all_permissions: 
         slug="afghanistan",
         has_data_sharing_agreement=True,
         is_accountability_applicable=True,
-        kobo_token="XXX",
         active=True,
     )
     FlagState.objects.get_or_create(
@@ -837,51 +844,23 @@ def _collect_migration_sql_statements() -> tuple[set[str], list]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def register_custom_sql_signal() -> None:
+def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> None:
     from django.db import connections
-    from django.db.models.signals import post_migrate, pre_migrate
+    from django.db.utils import ProgrammingError
 
-    apps, all_sqls = _collect_migration_sql_statements()
+    _apps, all_sqls = _collect_migration_sql_statements()
 
-    def pre_migration_custom_sql(
-        sender: Any,
-        app_config: Any,
-        verbosity: Any,
-        interactive: Any,
-        using: Any,
-        **kwargs: Any,
-    ) -> None:
+    with django_db_blocker.unblock():
         filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
         with open(filename, "r") as file:
             pre_sql = file.read()
-        conn = connections[using]
+        conn = connections["default"]
         conn.cursor().execute(pre_sql)
 
-    def post_migration_custom_sql(
-        sender: Any,
-        app_config: Any,
-        verbosity: Any,
-        interactive: Any,
-        using: Any,
-        **kwargs: Any,
-    ) -> None:
-        app_label = app_config.label
-        if app_label not in apps:
-            return
-        apps.remove(app_label)
-        if apps:
-            return
-        conn = connections[using]
         for stmt in all_sqls:
-            conn.cursor().execute(stmt)
-
-    pre_migrate.connect(
-        pre_migration_custom_sql,
-        dispatch_uid="tests.pre_migrationc_custom_sql",
-        weak=False,
-    )
-    post_migrate.connect(
-        post_migration_custom_sql,
-        dispatch_uid="tests.post_migration_custom_sql",
-        weak=False,
-    )
+            try:
+                conn.cursor().execute(stmt)
+            except ProgrammingError as e:
+                if "already exists" in str(e):
+                    continue
+                raise

@@ -10,6 +10,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { Box, Fade, Tooltip } from '@mui/material';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState, useEffect, useRef } from 'react';
@@ -33,7 +34,10 @@ export const HouseholdMembersPage = (): ReactElement => {
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: ['individualChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -192,10 +196,12 @@ export const HouseholdMembersPage = (): ReactElement => {
                 }}
               />
               <Box
-                display="flex"
-                flexDirection="column"
                 data-cy="page-details-container"
                 ref={tableRef}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
               >
                 <IndividualsListTable
                   filter={appliedFilter}

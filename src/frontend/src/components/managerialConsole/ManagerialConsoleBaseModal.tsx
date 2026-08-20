@@ -36,7 +36,7 @@ interface ManagerialConsoleBaseModalProps {
   dialogTitle: string;
   title: string;
   children?: ReactNode;
-  onSave: (plans, comment) => Promise<void>;
+  onSave: (plans: string[], comment: string) => Promise<void>;
   disabledSave?: boolean;
 }
 
@@ -89,7 +89,12 @@ export const ManagerialConsoleBaseModal = ({
           <DialogTitle id="dialog-title">{dialogTitle}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box mt={2} mb={6}>
+          <Box
+            sx={{
+              mt: 2,
+              mb: 6,
+            }}
+          >
             <Typography>{title}</Typography>
             <Typography>
               {t('Selected Plans IDs')}:{' '}
@@ -97,14 +102,18 @@ export const ManagerialConsoleBaseModal = ({
                 {selectedPlansUnicefIds?.join(', ')}
               </Bold>
             </Typography>
-            <Box mt={4}>
+            <Box
+              sx={{
+                mt: 4,
+              }}
+            >
               <TextField
                 size="small"
                 label={t('Comment')}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 multiline
-                inputProps={{ maxLength: 500 }}
+                slotProps={{ htmlInput: { maxLength: 500 } }}
                 fullWidth
                 data-cy={`comment-${buttonTitle.toLowerCase()}`}
               />

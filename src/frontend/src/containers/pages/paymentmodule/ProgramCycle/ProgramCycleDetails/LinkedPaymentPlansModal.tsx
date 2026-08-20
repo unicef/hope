@@ -67,7 +67,13 @@ export const LinkedPaymentPlansModal = ({
 
   return (
     <>
-      <Box display="flex" alignItems="center" gap={0.5}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+        }}
+      >
         <span>{linkedPlans.length}</span>
         <IconButton
           color="primary"
@@ -91,7 +97,11 @@ export const LinkedPaymentPlansModal = ({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            <Box mb={2}>
+            <Box
+              sx={{
+                mb: 2,
+              }}
+            >
               <LabelizedField label={t('Original Payment Plan')}>
                 {canViewDetails ? (
                   <BlackLink

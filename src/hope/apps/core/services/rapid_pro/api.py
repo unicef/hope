@@ -62,7 +62,7 @@ class RapidProAPI:
     def _init_token(self, business_area_slug: str, mode: str) -> None:
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         token = getattr(business_area, RapidProAPI.mode_to_token_dict[mode], None)
-        self.url = business_area.rapid_pro_host or settings.RAPID_PRO_URL
+        self.url = (business_area.rapid_pro_host or settings.RAPID_PRO_URL).rstrip("/")
         if not token:
             raise TokenNotProvidedError(f"Token is not set for {business_area.name}.")
         self._client.headers.update({"Authorization": f"Token {token}"})

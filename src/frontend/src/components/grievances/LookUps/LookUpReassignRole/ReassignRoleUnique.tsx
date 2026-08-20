@@ -8,9 +8,10 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 
 const ReassignRoleButton = styled(Button)`
   padding: 25px;
@@ -54,11 +55,13 @@ export function ReassignRoleUnique({
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['businessAreasGrievanceTicketsRetrieve', businessArea, id],
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsRetrieve,
+          ),
         });
         showMessage(t('Role Reassigned'));
       },
-      onError: (error: any) => {
+      onError: (error: ApiErrorShape) => {
         showApiErrorMessages(error, showMessage);
       },
     });

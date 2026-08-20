@@ -694,3 +694,51 @@ def test_deduplication_documents_invalidates_batch_duplicate_of_same_individual(
 
     assert doc1.status == Document.STATUS_INVALID
     assert doc2.status == Document.STATUS_VALID
+
+
+# --- deduplicate_individuals_against_population ---
+
+
+def test_deduplicate_individuals_against_population_marks_duplicates(task, individual_without_household):
+    dedup_result = DeduplicationResult(
+        duplicates=[str(individual_without_household.id)],
+        possible_duplicates=[],
+        original_individuals_ids_duplicates=[],
+        original_individuals_ids_possible_duplicates=[],
+        results_data={
+            "duplicates": [{"id": str(individual_without_household.id), "score": 15.0}],
+            "possible_duplicates": [],
+        },
+    )
+    individuals = Individual.objects.filter(id=individual_without_household.id)
+    with (
+        patch("hope.apps.registration_data.tasks.deduplicate.ensure_index_ready"),
+        patch.object(task, "_deduplicate_single_individual", return_value=dedup_result),
+    ):
+        task.deduplicate_individuals_against_population(individuals)
+
+    individual_without_household.refresh_from_db()
+    assert individual_without_household.deduplication_golden_record_status == DUPLICATE
+    assert individual_without_household.deduplication_golden_record_results == dedup_result.results_data
+
+
+def test_deduplicate_individuals_against_population_marks_possible_duplicates(task, individual_without_household):
+    dedup_result = DeduplicationResult(
+        duplicates=[],
+        possible_duplicates=[str(individual_without_household.id)],
+        original_individuals_ids_duplicates=[],
+        original_individuals_ids_possible_duplicates=[],
+        results_data={
+            "duplicates": [],
+            "possible_duplicates": [{"id": str(individual_without_household.id), "score": 12.0}],
+        },
+    )
+    individuals = Individual.objects.filter(id=individual_without_household.id)
+    with (
+        patch("hope.apps.registration_data.tasks.deduplicate.ensure_index_ready"),
+        patch.object(task, "_deduplicate_single_individual", return_value=dedup_result),
+    ):
+        task.deduplicate_individuals_against_population(individuals)
+
+    individual_without_household.refresh_from_db()
+    assert individual_without_household.deduplication_golden_record_status == NEEDS_ADJUDICATION

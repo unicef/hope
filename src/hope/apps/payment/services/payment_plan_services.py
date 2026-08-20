@@ -3,9 +3,9 @@ from decimal import Decimal
 from itertools import groupby
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Union, cast
+from uuid import UUID
 
 from constance import config
-from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -160,7 +160,15 @@ class PaymentPlanService:
         return self.actions_map.get(self.action)
 
     def send_for_approval(self) -> PaymentPlan:
+        background_action_status = self.payment_plan.background_action_status
+        if (
+            background_action_status is not None
+            and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
         flow = PaymentPlanFlow(self.payment_plan)
+        if background_action_status in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES:
+            flow.background_action_status_none()
         flow.status_send_to_approval()
         self.payment_plan.save()
         # create new ApprovalProcess
@@ -321,7 +329,15 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock_fsp(self) -> PaymentPlan | None:
+        background_action_status = self.payment_plan.background_action_status
+        if (
+            background_action_status is not None
+            and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
         flow = PaymentPlanFlow(self.payment_plan)
+        if background_action_status in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES:
+            flow.background_action_status_none()
         flow.status_unlock_fsp()
         self.payment_plan.save()
 
@@ -469,7 +485,7 @@ class PaymentPlanService:
             household_id=OuterRef("pk"),
             unicef_id__in=ind_ids,
         )
-        households = (
+        household_rows = list(
             households.annotate(
                 pr_collector=IndividualRoleInHousehold.objects.filter(
                     household=OuterRef("pk"), role=ROLE_PRIMARY
@@ -489,16 +505,25 @@ class PaymentPlanService:
             .values("pk", "pr_collector", "alt_collector", "unicef_id", "head_of_household", "use_alt_collector")
         )
 
-        for household in households:
-            collector, collector_type = PaymentPlanService._get_collector(household)
+        collector_ids = {
+            household["alt_collector"] if household["use_alt_collector"] else household["pr_collector"]
+            for household in household_rows
+        }
+        collector_ids.discard(None)
+        collectors_by_id = {
+            collector.id: collector
+            for collector in Individual.objects.filter(id__in=collector_ids).select_related("household__country")
+        }
+        delivery_mechanism = payment_plan.delivery_mechanism
+        financial_service_provider = payment_plan.financial_service_provider
+        wallet_validity_by_collector_id = PaymentDataCollector.validate_accounts(
+            financial_service_provider,
+            delivery_mechanism,
+            collectors_by_id.values(),
+        )
 
-            has_valid_wallet = True
-            if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
-                has_valid_wallet = PaymentDataCollector.validate_account(
-                    payment_plan.financial_service_provider,
-                    payment_plan.delivery_mechanism,
-                    collector,
-                )
+        for household in household_rows:
+            collector, collector_type = PaymentPlanService._get_collector(household, collectors_by_id)
 
             payments_to_create.append(
                 Payment(
@@ -512,9 +537,9 @@ class PaymentPlanService:
                     head_of_household_id=household["head_of_household"],
                     collector=collector,
                     collector_type=collector_type,
-                    financial_service_provider=payment_plan.financial_service_provider,
-                    delivery_type=payment_plan.delivery_mechanism,
-                    has_valid_wallet=has_valid_wallet,
+                    financial_service_provider=financial_service_provider,
+                    delivery_type=delivery_mechanism,
+                    has_valid_wallet=wallet_validity_by_collector_id[collector.id],
                 )
             )
         try:
@@ -526,7 +551,10 @@ class PaymentPlanService:
         PaymentPlanService.generate_signature(payment_plan)
 
     @staticmethod
-    def _get_collector(household: dict[str, Any]) -> tuple[Individual, str]:
+    def _get_collector(
+        household: dict[str, Any],
+        collectors_by_id: dict[UUID, Individual] | None = None,
+    ) -> tuple[Individual, str]:
         use_alt_collector = household.get("use_alt_collector", False)
         if use_alt_collector:
             collector_id = household.get("alt_collector")
@@ -540,7 +568,10 @@ class PaymentPlanService:
             logging.exception(msg)
             raise ValidationError(msg)
 
-        return Individual.objects.get(id=collector_id), collector_type
+        collector = collectors_by_id.get(collector_id) if collectors_by_id is not None else None
+        if collector is None:
+            collector = Individual.objects.get(id=collector_id)
+        return collector, collector_type
 
     @staticmethod
     def generate_signature(payment_plan: PaymentPlan) -> None:
@@ -1028,8 +1059,7 @@ class PaymentPlanService:
 
         copied_payments = []
         for payment in source_payments:
-            # The queryset is typed, but iteration widens to Model under the pinned stubs.
-            entitlement_quantity, entitlement_quantity_usd = entitlement_of(cast("Payment", payment))
+            entitlement_quantity, entitlement_quantity_usd = entitlement_of(payment)
             copied_payments.append(
                 Payment(
                     parent=self.payment_plan,
@@ -1428,7 +1458,7 @@ class PaymentPlanService:
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
 
-    def ready_for_closure(self) -> PaymentPlan:
+    def ready_for_closure(self, user: "User", *, notify: bool = True) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.FINISHED:
             raise ValidationError(
                 f"Mark as Ready for Closure is possible only within Status {PaymentPlan.Status.FINISHED}"
@@ -1437,15 +1467,28 @@ class PaymentPlanService:
         flow.status_ready_for_closure()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        if notify:
+            send_payment_notification_emails_async_task(
+                self.payment_plan,
+                PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+                str(user.pk),
+                f"{timezone.now():%-d %B %Y}",
+            )
         return self.payment_plan
 
-    def send_back_to_finished(self) -> PaymentPlan:
+    def send_back_to_finished(self, user: "User") -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
             raise ValidationError(f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}")
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_finished()
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        send_payment_notification_emails_async_task(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+            str(user.pk),
+            f"{timezone.now():%-d %B %Y}",
+        )
         return self.payment_plan
 
     def close(self, closure_comment: str | None = None, user_id: str | None = None) -> PaymentPlan:
@@ -1541,7 +1584,7 @@ class PaymentPlanService:
             Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
         ).distinct()
 
-        if settings.ENV == "prod":
+        if not config.NOTIFY_INTERNAL_USERS:
             users = users.exclude(is_superuser=True)
 
         if users:

@@ -174,12 +174,6 @@ class PaymentPlan(
         Status.DRAFT,
     )
 
-    EXPORTABLE_STATUSES = (
-        Status.ACCEPTED,
-        Status.FINISHED,
-        Status.READY_FOR_CLOSURE,
-    )
-
     HARD_CONFLICT_STATUSES = (
         Status.LOCKED,
         Status.LOCKED_FSP,
@@ -236,6 +230,10 @@ class PaymentPlan(
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
         )
+        XLSX_IMPORTING_FSP_EXTRA_FIELDS = (
+            "XLSX_IMPORTING_FSP_EXTRA_FIELDS",
+            "Importing FSP Extra Fields XLSX file",
+        )
         EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
         EXCLUDE_BENEFICIARIES_ERROR = (
             "EXCLUDE_BENEFICIARIES_ERROR",
@@ -278,6 +276,8 @@ class PaymentPlan(
         REVIEW = "REVIEW", "Review"
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
+        MARK_READY_FOR_CLOSURE = "MARK_READY_FOR_CLOSURE", "Mark Ready for Closure"
+        SEND_BACK_TO_FINISHED = "SEND_BACK_TO_FINISHED", "Send Back to Finished"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
         SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
 
@@ -1142,44 +1142,17 @@ class PaymentPlan(
         return self.available_payment_records().count() > 0
 
     @property
-    def has_export_file(self) -> bool:
-        """Check if export file exists.
-
-        for Locked plan return export_file_entitlement file
-        for Accepted and Finished export_file_delivery file
-        """
+    def has_entitlement_file(self) -> bool:
         try:
-            if self.status == PaymentPlan.Status.LOCKED:
-                return self.export_file_entitlement is not None
-            if self.status in (
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-                PaymentPlan.Status.READY_FOR_CLOSURE,
-            ):
-                return self.export_file_delivery is not None
-            return False
+            return self.export_file_entitlement is not None
         except FileTemp.DoesNotExist:
             return False
 
     @property
-    def payment_list_export_file_link(self) -> str | None:
-        """Return expor file which is different in various statues.
-
-        for Locked plan return export_file_entitlement file link
-        for Accepted and Finished export_file_delivery file link
-        """
-        pp_status_to_file_field: dict[str, str] = {
-            PaymentPlan.Status.LOCKED: "export_file_entitlement",
-            PaymentPlan.Status.ACCEPTED: "export_file_delivery",
-            PaymentPlan.Status.FINISHED: "export_file_delivery",
-            PaymentPlan.Status.READY_FOR_CLOSURE: "export_file_delivery",
-        }
-
-        file_field = pp_status_to_file_field.get(self.status)
-        if file_field:
-            file_obj = getattr(self, file_field, None)
-            return file_obj.file.url if file_obj and file_obj.file else None
-        return None
+    def entitlement_export_file_link(self) -> str | None:
+        """Return the entitlement export file link (payment-list download is entitlement-only)."""
+        file_obj = self.export_file_entitlement
+        return file_obj.file.url if file_obj and file_obj.file else None
 
     @property
     def imported_file_name(self) -> str:

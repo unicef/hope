@@ -18,7 +18,8 @@ import { SplitPaymentPlan } from '@restgenerated/models/SplitPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -49,6 +50,7 @@ export const SplitIntoPaymentLists = ({
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { mutateAsync: mutate, isPending: loading } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -70,6 +72,12 @@ export const SplitIntoPaymentLists = ({
     onSuccess: () => {
       showMessage(t('Payment Plan has been split successfully.'));
       setDialogOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+      });
     },
   });
 

@@ -12,7 +12,10 @@ import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
-import { generateTableOrderOptionsGroup, PROGRAM_STATE_FILTER } from '@utils/constants';
+import {
+  generateTableOrderOptionsGroup,
+  PROGRAM_STATE_CHOICES,
+} from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -73,7 +76,13 @@ export function HouseholdFilters({
       applyHandler={handleApplyFilter}
       isOnPaper={isOnPaper}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
@@ -207,8 +216,11 @@ export function HouseholdFilters({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
-              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
+              {PROGRAM_STATE_CHOICES.map((choice) => (
+                <MenuItem key={choice.value} value={choice.value}>
+                  {t(choice.label)}
+                </MenuItem>
+              ))}
             </SelectFilter>
           </Grid>
         )}

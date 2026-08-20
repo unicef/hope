@@ -80,7 +80,13 @@ export function EditDocumentationRow({
       )}
       <Grid size={1}>
         {!removed ? (
-          <Box ml={2} display="flex" align-items="center">
+          <Box
+            align-items="center"
+            sx={{
+              ml: 2,
+              display: 'flex',
+            }}
+          >
             <IconButton
               onClick={() => {
                 arrayHelpers.replace(index, {
@@ -108,7 +114,14 @@ export function EditDocumentationRow({
             )}
           </Box>
         ) : (
-          <Box display="flex" alignItems="center" height={48} color="red">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              height: 48,
+              color: 'red',
+            }}
+          >
             {t('REMOVED')}
           </Box>
         )}

@@ -101,7 +101,12 @@ export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
         {specificError ? (
           <Paragraph>Error: {specificError}</Paragraph>
         ) : isEnvWhereShowErrors && errorMessage ? (
-          <Box display="flex" flexDirection="column">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             {pathname && (
               <Paragraph style={{ wordWrap: 'break-word' }}>
                 Location: {pathname}
@@ -121,7 +126,13 @@ export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
           </Paragraph>
         )}
       </TextContainer>
-      <Box display="flex" justifyContent="center" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Button
           endIcon={<ArrowBackIcon />}
           color="primary"

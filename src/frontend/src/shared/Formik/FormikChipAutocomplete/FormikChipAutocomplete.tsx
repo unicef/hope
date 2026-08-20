@@ -82,7 +82,7 @@ export function FormikChipAutocomplete({
           const missing = lockedValues.filter((v) => !newIds.includes(v));
           form.setFieldValue(field.name, [...newIds, ...missing]);
         }}
-        renderTags={(tagValues, getTagProps) =>
+        renderValue={(tagValues, getTagProps) =>
           tagValues.map((option, index) => {
             const isLocked = lockedValues.includes(option.value);
             const { key, ...tagProps } = getTagProps({ index });

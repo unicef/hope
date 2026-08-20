@@ -13,6 +13,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -37,7 +38,14 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
   const permissions = usePermissions();
   const queryClient = useQueryClient();
   const { data: group, isLoading } = useQuery({
-    queryKey: ['paymentPlanGroup', businessArea, programId, groupId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: groupId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve({
         businessAreaSlug: businessArea,
@@ -56,16 +64,21 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
   useEffect(() => {
     const isBusy = isGroupBackgroundActionBusy(group ?? null);
     if (wasBusy.current && !isBusy) {
-      queryClient.invalidateQueries({ queryKey: ['businessAreasPaymentPlans'] });
-      queryClient.invalidateQueries({ queryKey: ['businessAreasProgramsPaymentPlansList'] });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+      });
     }
     wasBusy.current = isBusy;
   }, [group, queryClient]);
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL, permissions))
+  if (
+    !hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL, permissions)
+  )
     return (
-      <PermissionDenied permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL} />
+      <PermissionDenied
+        permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL}
+      />
     );
   if (isLoading) return <LoadingComponent />;
 
@@ -117,7 +130,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         </ContainerColumnWithBorder>
       </Grid>
       {group?.batches && group.batches.length > 0 && (
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12 }} data-cy="batches-section">
           <ContainerColumnWithBorder>
             <Title>
               <Typography variant="h6">{t('Batches')}</Typography>
@@ -125,10 +138,12 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
             {group.batches.map((batch) => (
               <Box
                 key={batch.exportTag}
-                display="flex"
-                alignItems="center"
-                gap={2}
-                py={1}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  py: 1,
+                }}
               >
                 <BlackLink
                   to={`/${baseUrl}/payment-module/groups/${groupId}/batches/${encodeURIComponent(String(batch.exportTag))}`}

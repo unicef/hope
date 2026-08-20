@@ -18,19 +18,36 @@ export function ActiveProgramDetailsPageHeaderButtons({
   canDuplicate,
 }: ActiveProgramDetailsPageHeaderPropTypes): ReactElement {
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canFinish && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <FinishProgram program={program} />
         </Box>
       )}
       {canEdit && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <EditProgramMenu program={program} />
         </Box>
       )}
       {canDuplicate && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <DuplicateProgramButtonLink program={program} />
         </Box>
       )}

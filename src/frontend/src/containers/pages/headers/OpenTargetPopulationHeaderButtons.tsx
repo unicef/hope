@@ -9,6 +9,7 @@ import {
 import { Box, Button, IconButton } from '@mui/material';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { ReactElement, useState } from 'react';
@@ -61,23 +62,27 @@ export function OpenTargetPopulationHeaderButtons({
     onSuccess: () => {
       showMessage(t('Payment Plan has been rebuilt.'));
       queryClient.invalidateQueries({
-        queryKey: [
-          'targetPopulation',
-          businessArea,
-          targetPopulation.id,
-          programId,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+        ),
       });
 
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsTargetPopulationsList'],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsList,
+        ),
       });
     },
     onError: (e) => showApiErrorMessages(e, showMessage),
   });
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       {canDuplicate && (
         <IconButton
           onClick={() => setOpenDuplicate(true)}
@@ -99,7 +104,11 @@ export function OpenTargetPopulationHeaderButtons({
         </IconButton>
       )}
       {canEdit && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             data-cy="button-edit"
             variant="outlined"
@@ -115,7 +124,11 @@ export function OpenTargetPopulationHeaderButtons({
         </Box>
       )}
       {canEdit && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             data-cy="button-rebuild"
             variant="outlined"
@@ -136,7 +149,11 @@ export function OpenTargetPopulationHeaderButtons({
         </Box>
       )}
       {canLock && (
-        <Box m={2}>
+        <Box
+          sx={{
+            m: 2,
+          }}
+        >
           <Button
             variant="contained"
             color="primary"

@@ -17,6 +17,7 @@ import {
 } from '../../../config/permissions';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -30,12 +31,15 @@ function GrievancesDashboardPage(): ReactElement {
   // Use program-specific dashboard if we're in a specific program context,
   // otherwise use global dashboard
   const { data, isLoading: loading } = useQuery({
-    queryKey: [
-      'grievanceDashboard',
-      businessAreaSlug,
-      programCode,
-      isAllPrograms,
-    ],
+    queryKey: isAllPrograms
+      ? restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsDashboardRetrieve,
+          { businessAreaSlug },
+        )
+      : restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsDashboardRetrieve,
+          { businessAreaSlug, programCode },
+        ),
     queryFn: () => {
       if (isAllPrograms) {
         return RestService.restBusinessAreasGrievanceTicketsDashboardRetrieve({

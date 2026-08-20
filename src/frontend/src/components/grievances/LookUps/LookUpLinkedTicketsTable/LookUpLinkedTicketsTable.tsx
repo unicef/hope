@@ -5,7 +5,8 @@ import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { MouseEvent, ReactElement, useState, useEffect, useMemo } from 'react';
@@ -29,7 +30,10 @@ export function LookUpLinkedTicketsTable({
 }: LookUpLinkedTicketsTableProps): ReactElement {
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -71,16 +75,25 @@ export function LookUpLinkedTicketsTable({
 
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
 
-  const { data, isLoading, error } = useQuery<PaginatedGrievanceTicketListList>(
-    {
-      queryKey: [
-        programId
-          ? 'businessAreasProgramsGrievanceTicketsList'
-          : 'businessAreasGrievanceTicketsList',
-        queryVariables,
-        businessArea,
-        programId,
-      ],
+  const { data, isLoading, isFetching, error } =
+    useQuery<PaginatedGrievanceTicketListList>({
+      queryKey: programId
+        ? restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsList,
+            createApiParams(
+              { businessAreaSlug: businessArea, programCode: programId },
+              queryVariables,
+              { withPagination: true },
+            ),
+          )
+        : restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsList,
+            createApiParams(
+              { businessAreaSlug: businessArea },
+              queryVariables,
+              { withPagination: true },
+            ),
+          ),
       queryFn: () => {
         if (programId) {
           return RestService.restBusinessAreasProgramsGrievanceTicketsList(
@@ -100,19 +113,23 @@ export function LookUpLinkedTicketsTable({
           );
         }
       },
+      placeholderData: keepPreviousData,
       enabled: !choicesLoading && !!choicesData,
-    },
-  );
+    });
 
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: [
-      programId
-        ? 'businessAreasProgramsGrievanceTicketsCount'
-        : 'businessAreasGrievanceTicketsCount',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: programId
+      ? restQueryKey(
+          RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
+          createApiParams(
+            { businessAreaSlug: businessArea, programCode: programId },
+            queryVariables,
+          ),
+        )
+      : restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+          createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+        ),
     queryFn: () => {
       if (programId) {
         return RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
@@ -192,6 +209,7 @@ export function LookUpLinkedTicketsTable({
         data={data}
         error={error}
         isLoading={isLoading}
+        isFetching={isFetching}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
         itemsCount={countData?.count}

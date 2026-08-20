@@ -33,6 +33,7 @@ from hope.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
+from hope.apps.household.const import SEX_CHOICE
 from hope.models import (
     AccountType,
     BusinessArea,
@@ -108,7 +109,7 @@ class BusinessAreaViewSet(
             200: FieldAttributeSerializer(many=True),
         },
     )
-    @action(detail=True, methods=["get"], url_path="all-fields-attributes")
+    @action(detail=True, methods=["get"], url_path="all-fields-attributes", pagination_class=None)
     def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_id = request.query_params.get("program_id", None)
         business_area_slug = self.kwargs["slug"]
@@ -190,6 +191,18 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="payment-verification-plan-sampling")
     def payment_verification_plan_sampling(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.SAMPLING_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-verification-plan-channel")
+    def payment_verification_plan_channel(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="sex")
+    def sex(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(SEX_CHOICE), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})

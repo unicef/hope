@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { Button, Grid, Typography } from '@mui/material';
 import { Field, FieldArray } from 'formik';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { AddCircleOutline, Delete } from '@mui/icons-material';
+import { AddCircleOutlined, Delete } from '@mui/icons-material';
 import Tooltip from '@mui/material/Tooltip';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DarkGrey } from '@components/grievances/LookUps/LookUpStyles';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
+import { restQueryKey } from '@utils/queryKeys';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
 import { roleDisplayMap } from '@components/grievances/utils/createGrievanceUtils';
@@ -45,7 +46,10 @@ function EditHouseholdDataChange({
           values.selectedIndividual?.programCode));
 
   const { data: individualsChoices } = useQuery({
-    queryKey: ['individualsChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasIndividualsChoicesRetrieve,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasIndividualsChoicesRetrieve({
         businessAreaSlug: businessArea,
@@ -62,7 +66,10 @@ function EditHouseholdDataChange({
 
   const { data: householdFieldsData, isLoading: householdFieldsLoading } =
     useQuery({
-      queryKey: ['householdFields', businessArea, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList,
+        { businessAreaSlug: businessArea },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
           {
@@ -72,35 +79,42 @@ function EditHouseholdDataChange({
       enabled: Boolean(businessArea),
     });
 
+  const fullHouseholdParams = {
+    businessAreaSlug: businessArea,
+    id: household.id,
+    programCode: dynamicProgramCode,
+  };
   const {
     data: fullHousehold,
     isLoading: fullHouseholdLoading,
     refetch: refetchHousehold,
   } = useQuery<HouseholdDetail>({
-    queryKey: [businessArea, household.id, dynamicProgramCode, programId],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+      fullHouseholdParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        id: household.id,
-        programCode: dynamicProgramCode,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve(
+        fullHouseholdParams,
+      ),
     enabled: Boolean(household && businessArea && dynamicProgramCode),
   });
 
   // Fetch household members for roles logic
+  const householdMembersParams = {
+    businessAreaSlug: businessArea,
+    id: household.id,
+    programCode: dynamicProgramCode,
+  };
   const { data: householdMembers, isLoading: membersLoading } = useQuery({
-    queryKey: [
-      'householdMembers',
-      businessArea,
-      household.id,
-      dynamicProgramCode,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsHouseholdsMembersList,
+      householdMembersParams,
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsMembersList({
-        businessAreaSlug: businessArea,
-        id: household.id,
-        programCode: dynamicProgramCode,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsMembersList(
+        householdMembersParams,
+      ),
     enabled: Boolean(household && businessArea && dynamicProgramCode),
   });
 
@@ -159,7 +173,6 @@ function EditHouseholdDataChange({
     (fieldItem) => fieldItem.fieldName,
   );
 
-
   return (
     !isEditTicket && (
       <>
@@ -187,7 +200,7 @@ function EditHouseholdDataChange({
                 <Grid size={4}>
                   <Button
                     color="primary"
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlined />}
                     onClick={() => {
                       arrayHelpers.push({ fieldName: null, fieldValue: null });
                     }}
@@ -200,12 +213,17 @@ function EditHouseholdDataChange({
             )}
           />
         </Grid>
-
         {/* Roles in Household Section */}
         <Title>
           <Typography variant="h6">{t('Roles in Household')}</Typography>
         </Title>
-        <Grid container spacing={2} alignItems="center">
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Grid size={4}>
             <strong>{t('Full Name')}</strong>
           </Grid>
@@ -295,25 +313,17 @@ function EditHouseholdDataChange({
                   <span>
                     <Button
                       color="primary"
-                      startIcon={<AddCircleOutline />}
+                      startIcon={<AddCircleOutlined />}
                       onClick={() => {
                         if (availableIndividuals.length > 0) {
                           const defaultIndividual = availableIndividuals[0].id;
-                          // Find current role for this individual
-                          const currentRoleObj =
-                            fullHousehold.rolesInHousehold.find(
-                              (r) => r.individual.id === defaultIndividual,
-                            );
-                          // Only add if newRole is not equal to current role
-                          if (!currentRoleObj || '' !== currentRoleObj.role) {
-                            setFieldValue('roles', [
-                              ...(values.roles || []),
-                              {
-                                individual: defaultIndividual,
-                                newRole: '',
-                              },
-                            ]);
-                          }
+                          setFieldValue('roles', [
+                            ...(values.roles || []),
+                            {
+                              individual: defaultIndividual,
+                              newRole: '',
+                            },
+                          ]);
                         }
                       }}
                       data-cy="button-add-new-role"

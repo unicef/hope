@@ -15,6 +15,7 @@ import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
 import { showApiErrorMessages } from '@utils/utils';
+import { restQueryKey } from '@utils/queryKeys';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -44,12 +45,9 @@ export function DeleteVerificationPlan({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'PaymentVerificationPlanDetails',
-          businessArea,
-          paymentPlanId,
-          programCode,
-        ],
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+        ),
       });
     },
   });
@@ -66,7 +64,11 @@ export function DeleteVerificationPlan({
   };
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setDeleteDialogOpen(true)}
@@ -88,7 +90,11 @@ export function DeleteVerificationPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               <div>
                 {t(
                   'Are you sure you would like to remove this verification plan?',

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
@@ -62,7 +63,7 @@ export const TargetPopulationForPeopleFilters = ({
   ];
 
   const { data: statusChoicesData } = useQuery({
-    queryKey: ['choicesPaymentPlanStatusList'],
+    queryKey: restQueryKey(RestService.restChoicesPaymentPlanStatusList),
     queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
   });
 
@@ -80,7 +81,13 @@ export const TargetPopulationForPeopleFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: 'flex-end',
+        }}
+      >
         <Grid size={3}>
           <SearchTextField
             label={t('Search')}

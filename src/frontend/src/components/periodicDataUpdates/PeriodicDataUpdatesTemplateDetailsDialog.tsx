@@ -18,6 +18,7 @@ import { PDUXlsxTemplateDetail } from '@restgenerated/models/PDUXlsxTemplateDeta
 import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -34,12 +35,14 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
   const { businessArea, programId } = useBaseUrl();
   const { data: templateDetailsData, isLoading } =
     useQuery<PDUXlsxTemplateDetail>({
-      queryKey: [
-        'PDUXlsxTemplateDetails',
-        businessArea,
-        programId,
-        template.id,
-      ],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+          id: template.id,
+          programCode: programId,
+        },
+      ),
 
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve(
@@ -52,7 +55,10 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
     });
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPeriodicFieldsList,
+        { businessAreaSlug: businessArea, programCode: programId },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,

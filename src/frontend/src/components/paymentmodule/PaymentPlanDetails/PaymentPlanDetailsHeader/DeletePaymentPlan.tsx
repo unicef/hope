@@ -16,7 +16,8 @@ import {
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +36,7 @@ export function DeletePaymentPlan({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const { mutateAsync: deletePaymentPlan, isPending: loadingDelete } =
     useMutation({
       mutationFn: ({
@@ -51,6 +53,11 @@ export function DeletePaymentPlan({
           id,
           programCode,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        });
+      },
     });
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();
@@ -77,7 +84,11 @@ export function DeletePaymentPlan({
 
   return (
     <>
-      <Box p={2}>
+      <Box
+        sx={{
+          p: 2,
+        }}
+      >
         <IconButton
           onClick={() => setDeleteDialogOpen(true)}
           disabled={!isActiveProgram}
@@ -98,7 +109,11 @@ export function DeletePaymentPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box
+              sx={{
+                p: 5,
+              }}
+            >
               {t('Are you sure you want to remove this Payment Plan?')}
             </Box>
           </DialogContainer>

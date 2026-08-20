@@ -58,6 +58,7 @@ class DataCollectingTypeForm(forms.ModelForm):
             "individual_filters_available",
             "household_filters_available",
             "recalculate_composition",
+            "collects_individual_data",
             "weight",
             "compatible_types",
             "limit_to",

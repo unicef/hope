@@ -17,6 +17,7 @@ import { Choice } from '@restgenerated/models/Choice';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import {
   decodeIdString,
   getFilterFromQueryParams,
@@ -83,12 +84,14 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     isLoading,
     error,
   } = useQuery<PaymentVerificationPlanDetails>({
-    queryKey: [
-      'PaymentVerificationPlanDetails',
-      businessArea,
-      paymentPlanId,
-      programId,
-    ],
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
         businessAreaSlug: businessArea,
@@ -100,7 +103,9 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   const { data: choicesData, isLoading: choicesLoading } = useQuery<
     Array<Choice>
   >({
-    queryKey: ['samplingChoices', businessArea],
+    queryKey: restQueryKey(
+      RestService.restChoicesPaymentVerificationPlanSamplingList,
+    ),
     queryFn: () => RestService.restChoicesPaymentVerificationPlanSamplingList(),
   });
 

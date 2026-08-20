@@ -19,7 +19,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import { RestService } from 'src/restgenerated';
 import { useMutation } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 export interface Individual {
@@ -39,13 +39,15 @@ export interface BiometricsResultsProps {
 
 const Placeholder: FC = () => (
   <Box
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-    width="45%"
-    height="200px"
-    border="1px solid #ccc"
     data-cy="placeholder"
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '45%',
+      height: '200px',
+      border: '1px solid #ccc',
+    }}
   >
     <PersonIcon color="primary" style={{ fontSize: 100 }} />
   </Box>
@@ -76,7 +78,7 @@ export const BiometricsResults = ({
         businessAreaSlug,
         id: ticketId,
       }),
-    onError: (error: any) => {
+    onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);
     },
   });
@@ -84,7 +86,11 @@ export const BiometricsResults = ({
   return (
     <>
       {canViewBiometricsResults && (
-        <Box p={2}>
+        <Box
+          sx={{
+            p: 2,
+          }}
+        >
           <Button
             onClick={() => {
               setDialogOpen(true);
@@ -112,9 +118,20 @@ export const BiometricsResults = ({
         </DialogTitleWrapper>
         <DialogContent data-cy="dialog-content">
           <DialogContainer>
-            <Box display="flex" justifyContent="space-between" p={5}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                p: 5,
+              }}
+            >
               {individual1?.unicefId && (
-                <Box display="flex" flexDirection="column">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
                   {individual1?.photo ? (
                     <img
                       src={individual1?.photo}
@@ -137,7 +154,12 @@ export const BiometricsResults = ({
               )}
 
               {individual2?.unicefId && (
-                <Box display="flex" flexDirection="column">
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
                   {individual2?.photo ? (
                     <img
                       src={individual2?.photo}
@@ -159,7 +181,12 @@ export const BiometricsResults = ({
                 </Box>
               )}
             </Box>
-            <Box p={5} data-cy="results-info">
+            <Box
+              data-cy="results-info"
+              sx={{
+                p: 5,
+              }}
+            >
               <div>
                 <strong>
                   {t('Algorithm similarity score:')} {similarityScore}
