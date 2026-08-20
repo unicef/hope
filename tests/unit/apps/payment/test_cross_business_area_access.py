@@ -430,7 +430,6 @@ def test_retrieve_payment_of_own_program_works_without_a_usable_payment_plan_in_
     cross_ba_kwargs: dict[str, str],
     attacker_second_plan_payment: Payment,
 ) -> None:
-    """The details page is opened by a plain link and sends no plan id, so the payment has to be found anyway."""
     url = reverse(
         "api:payments:payments-detail",
         kwargs={
