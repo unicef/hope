@@ -14,6 +14,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import create_diff
+from hope.apps.core.api.mixins import BusinessAreaProgramsAccessMixin
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import LogEntry, Program
 
@@ -420,6 +421,14 @@ def test_activity_logs_count_includes_entry_without_programs(  # noqa: PLR0917
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["count"] == 5
+
+
+def test_filter_many_programs_access_rejects_non_many_to_many_field() -> None:
+    mixin = BusinessAreaProgramsAccessMixin()
+    mixin.program_model_field = "business_area"
+
+    with pytest.raises(TypeError, match="business_area must be a many-to-many field"):
+        mixin._filter_many_programs_access(LogEntry.objects.all(), [])
 
 
 @pytest.mark.enable_activity_log
