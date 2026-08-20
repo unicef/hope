@@ -11,7 +11,7 @@ GLOBAL_MODELS = {"BusinessArea", "Partner", "Area", "AreaType", "Country", "User
 
 SCOPE_FIELDS = {"business_area", "program", "program_cycle", "payment_plan"}
 
-WRITE_ACTIONS = ("create", "update", "copy", "import", "assign", "message", "sample", "approve", "reassign", "split")
+WRITE_METHODS = {"post", "put", "patch", "delete"}
 
 ALLOWED_UNSCOPED = {
     # the view rejects any item whose office differs from the business area of the plan
@@ -42,7 +42,8 @@ def _is_already_scoped(field: RelatedField) -> bool:
     return queryset is not None and bool(_filtered_fields(queryset.all().query.where) & SCOPE_FIELDS)
 
 
-def _viewsets_of_rest_api() -> set[type]:
+def _write_endpoints_of_rest_api() -> set[tuple[type, str]]:
+    """Every (view, action) a request can reach with a method that writes."""
     found = set()
 
     def walk(patterns: list, prefix: str = "") -> None:
@@ -50,19 +51,27 @@ def _viewsets_of_rest_api() -> set[type]:
             if hasattr(pattern, "url_patterns"):
                 walk(pattern.url_patterns, prefix + str(pattern.pattern))
                 continue
-            viewset = getattr(pattern.callback, "cls", None)
-            if viewset is not None and (prefix + str(pattern.pattern)).startswith("api/rest"):
-                found.add(viewset)
+            view = getattr(pattern.callback, "cls", None)
+            if view is None or not (prefix + str(pattern.pattern)).startswith("api/rest"):
+                continue
+            # the router names the action per method, a plain view answers on the method itself
+            actions = getattr(pattern.callback, "actions", None)
+            if actions is None:
+                found.update((view, method) for method in WRITE_METHODS if hasattr(view, method))
+            else:
+                found.update((view, action) for method, action in actions.items() if method in WRITE_METHODS)
 
     walk(get_resolver().url_patterns)
     return found
 
 
-def _serializers_of(viewset: type) -> dict:
-    found = dict(getattr(viewset, "serializer_classes_by_action", {}) or {})
-    if getattr(viewset, "serializer_class", None) is not None:
-        found.setdefault("<default>", viewset.serializer_class)
-    return found
+def _serializer_of(view: type, action: str) -> type | None:
+    """The serializer the action builds, in the order get_serializer_class resolves it."""
+    by_action = getattr(view, "serializer_classes_by_action", {}) or {}
+    if action in by_action:
+        return by_action[action]
+    from_decorator = (getattr(getattr(view, action, None), "kwargs", None) or {}).get("serializer_class")
+    return from_decorator or getattr(view, "serializer_class", None)
 
 
 def _unwrap(field: object) -> object:
@@ -103,15 +112,13 @@ def _unscoped_relation_fields(serializer_cls: type, seen: set | None = None) -> 
 
 def collect_unscoped_fields() -> set[tuple[str, str, str]]:
     found = set()
-    for viewset in _viewsets_of_rest_api():
-        for action, serializer_cls in _serializers_of(viewset).items():
-            if action != "<default>" and not any(write in action for write in WRITE_ACTIONS):
-                continue
-            found.update(
-                (viewset.__name__, action, name)
-                for name, scoped in _unscoped_relation_fields(serializer_cls)
-                if not scoped
-            )
+    for view, action in _write_endpoints_of_rest_api():
+        serializer_cls = _serializer_of(view, action)
+        if serializer_cls is None:
+            continue
+        found.update(
+            (view.__name__, action, name) for name, scoped in _unscoped_relation_fields(serializer_cls) if not scoped
+        )
     return found
 
 
