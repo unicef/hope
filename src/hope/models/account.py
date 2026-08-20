@@ -209,9 +209,13 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     def unique_fields(self) -> list[str]:
         return self.account_type.unique_fields
 
+    def has_no_unique_fields(self) -> bool:
+        unique_fields = getattr(self, "unique_fields", None)
+        return isinstance(unique_fields, list | tuple) and not unique_fields
+
     def update_unique_field(self) -> None:
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, list | tuple):
-            if not self.unique_fields:
+            if self.has_no_unique_fields():
                 self.is_unique = True
                 self.unique_key = None
                 self.save(update_fields=["unique_key", "is_unique"])
@@ -239,8 +243,7 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     def validate_uniqueness(cls, qs: QuerySet["Account"] | list["Account"]) -> None:
         accounts_without_unique_fields = []
         for account in qs:
-            unique_fields = account.unique_fields if hasattr(account, "unique_fields") else None
-            if isinstance(unique_fields, list | tuple) and not unique_fields:
+            if account.has_no_unique_fields():
                 account.unique_key = None
                 account.is_unique = True
                 accounts_without_unique_fields.append(account)

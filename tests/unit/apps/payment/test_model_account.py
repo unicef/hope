@@ -80,6 +80,20 @@ def test_account_str(account):
     assert str(account) == f"{account.individual} - {account.account_type}"
 
 
+@pytest.mark.parametrize(
+    ("unique_fields", "expected"),
+    [
+        ([], True),
+        (["number"], False),
+        (None, False),
+    ],
+)
+def test_has_no_unique_fields(account, unique_fields, expected):
+    account.account_type.unique_fields = unique_fields
+
+    assert account.has_no_unique_fields() is expected
+
+
 def test_validate_uniqueness_calls_update_for_account_with_unique_fields(account, account_type_bank, monkeypatch):
     update_unique_field_mock = mock.Mock()
     monkeypatch.setattr(Account, "update_unique_field", update_unique_field_mock)
