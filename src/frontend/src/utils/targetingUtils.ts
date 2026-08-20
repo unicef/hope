@@ -1,3 +1,4 @@
+import { TargetingCriteriaRule } from '@restgenerated/models/TargetingCriteriaRule';
 import * as Yup from 'yup';
 
 const hasValue = (value): boolean =>
@@ -265,12 +266,55 @@ export function mapCriteriaToInitialValues(criteria) {
   };
 }
 
-// TODO Marącin make Type to this function
+type ComparisonMethod =
+  'EQUALS' | 'CONTAINS' | 'RANGE' | 'GREATER_THAN' | 'LESS_THAN' | 'IS_NULL';
 
-export function formatCriteriaFilters(filters) {
+interface FilterRangeValue {
+  from?: string | number;
+  to?: string | number;
+}
+
+type FilterValue =
+  string | number | boolean | string[] | FilterRangeValue | null;
+
+interface PduData {
+  subtype?: string;
+}
+
+interface FieldAttribute {
+  labelEn?: string;
+  type?: string;
+  choices?: any;
+  pduData?: PduData;
+}
+
+export interface CriteriaFilter {
+  fieldName: string;
+  type?: string;
+  value?: FilterValue;
+  isNull?: boolean;
+  associatedWith?: string;
+  flexFieldClassification?: string;
+  roundNumber?: number;
+  fieldAttribute?: FieldAttribute;
+  pduData?: PduData;
+}
+
+export interface FormattedCriteriaFilter extends CriteriaFilter {
+  comparisonMethod: ComparisonMethod;
+  arguments: any[];
+}
+
+export interface IndividualsFiltersBlock<T = CriteriaFilter> {
+  individualBlockFilters: T[];
+}
+
+export function formatCriteriaFilters(
+  filters: CriteriaFilter[],
+): FormattedCriteriaFilter[] {
   return filters.map((each) => {
-    let comparisonMethod;
-    let values;
+    let comparisonMethod: ComparisonMethod;
+    let values: any[];
     switch (each?.fieldAttribute?.type || each?.type) {
       case 'SELECT_ONE':
         comparisonMethod = 'EQUALS';
@@ -278,7 +322,7 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'SELECT_MANY':
         comparisonMethod = 'CONTAINS';
-        values = [...each.value];
+        values = [...(each.value as string[])];
         break;
       case 'STRING':
         comparisonMethod = 'CONTAINS';
@@ -289,18 +333,20 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'DECIMAL':
       case 'INTEGER':
-      case 'DATE':
-        if (hasValue(each.value.from) && hasValue(each.value.to)) {
+      case 'DATE': {
+        const range = each.value as FilterRangeValue;
+        if (hasValue(range.from) && hasValue(range.to)) {
           comparisonMethod = 'RANGE';
-          values = [each.value.from, each.value.to];
-        } else if (hasValue(each.value.from) && !hasValue(each.value.to)) {
+          values = [range.from, range.to];
+        } else if (hasValue(range.from) && !hasValue(range.to)) {
           comparisonMethod = 'GREATER_THAN';
-          values = [each.value.from];
+          values = [range.from];
         } else {
           comparisonMethod = 'LESS_THAN';
-          values = [each.value.to];
+          values = [range.to];
         }
         break;
+      }
       case 'BOOL':
         comparisonMethod = 'EQUALS';
         values = [each.value];
@@ -316,7 +362,7 @@ export function formatCriteriaFilters(filters) {
             break;
           case 'SELECT_MANY':
             comparisonMethod = 'CONTAINS';
-            values = [...each.value];
+            values = [...(each.value as string[])];
             break;
           case 'STRING':
             comparisonMethod = 'CONTAINS';
@@ -324,18 +370,20 @@ export function formatCriteriaFilters(filters) {
             break;
           case 'DECIMAL':
           case 'INTEGER':
-          case 'DATE':
-            if (hasValue(each.value.from) && hasValue(each.value.to)) {
+          case 'DATE': {
+            const range = each.value as FilterRangeValue;
+            if (hasValue(range.from) && hasValue(range.to)) {
               comparisonMethod = 'RANGE';
-              values = [each.value.from, each.value.to];
-            } else if (hasValue(each.value.from) && !hasValue(each.value.to)) {
+              values = [range.from, range.to];
+            } else if (hasValue(range.from) && !hasValue(range.to)) {
               comparisonMethod = 'GREATER_THAN';
-              values = [each.value.from];
+              values = [range.from];
             } else {
               comparisonMethod = 'LESS_THAN';
-              values = [each.value.to];
+              values = [range.to];
             }
             break;
+          }
           case 'BOOL':
             comparisonMethod = 'EQUALS';
             values = [each.value === 'Yes'];
@@ -361,11 +409,9 @@ export function formatCriteriaFilters(filters) {
   });
 }
 
-// TODO Marcin make Type to this function
-
 export function formatCriteriaIndividualsFiltersBlocks(
-  individualsFiltersBlocks,
-) {
+  individualsFiltersBlocks: IndividualsFiltersBlock[],
+): IndividualsFiltersBlock<FormattedCriteriaFilter>[] {
   return individualsFiltersBlocks.map((block) => ({
     individualBlockFilters: formatCriteriaFilters(block.individualBlockFilters),
   }));
@@ -414,9 +460,25 @@ function mapFilterToVariable(filter: Filter): Result {
   return result;
 }
 
-// TODO Marcin make Type to this function
+export interface TargetingCriteria {
+  individualIds?: string;
+  householdIds?: string;
+  alternativeCollectorsIds?: string;
+  householdsFiltersBlocks: Filter[];
+  individualsFiltersBlocks: IndividualsFiltersBlock<Filter>[];
+}
 
-export function getTargetingCriteriaVariables(values) {
+export interface TargetingCriteriaFormValues {
+  criterias: TargetingCriteria[];
+  flagExcludeIfActiveAdjudicationTicket?: boolean;
+  flagExcludeIfOnSanctionList?: boolean;
+}
+
+export function getTargetingCriteriaVariables(
+  values: TargetingCriteriaFormValues,
+): { rules: TargetingCriteriaRule[] } {
+  // the cast drops fieldAttribute, which the generated type marks read-only
+  // and required, but the API never accepts it back
   return {
     rules: values.criterias.map((criteria) => ({
       individualIds: criteria.individualIds,
@@ -430,6 +492,6 @@ export function getTargetingCriteriaVariables(values) {
             block.individualBlockFilters.map(mapFilterToVariable),
         }),
       ),
-    })),
+    })) as TargetingCriteriaRule[],
   };
 }
