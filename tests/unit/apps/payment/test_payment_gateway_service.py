@@ -299,6 +299,121 @@ def unmatched_payment_gateway_record():
     )
 
 
+@pytest.fixture
+def error_records_by_payment_instruction(payment_gateway_setup):
+    split_1, split_2 = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    PaymentPlanSplit.objects.filter(pk__in=[split_1.pk, split_2.pk]).update(sent_to_payment_gateway=True)
+    return {
+        split_1.id: [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(payment_2.id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent=str(split_1.id),
+                status="ERROR",
+                auth_code="1",
+                payout_amount=0.0,
+                fsp_code="1",
+                message="Error",
+            )
+        ],
+        split_2.id: [
+            PaymentRecordData(
+                id=2,
+                remote_id=str(payment_1.id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="2",
+                parent=str(split_2.id),
+                status="ERROR",
+                auth_code="2",
+                payout_amount=0.0,
+                fsp_code="2",
+                message="Error",
+            )
+        ],
+    }
+
+
+@pytest.fixture
+def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
+    split_1, _ = payment_gateway_setup["splits"]
+    payment_1, payment_2 = payment_gateway_setup["payments"]
+    PaymentPlanSplit.objects.filter(pk=split_1.pk).update(sent_to_payment_gateway=True)
+    return {
+        "payment_plan": payment_gateway_setup["payment_plan"],
+        "sent_split": split_1,
+        "unsent_payment": payment_1,
+        "sent_payment": payment_2,
+        "gateway_records": [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(payment_2.id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent=str(split_1.id),
+                status="ERROR",
+                auth_code="1",
+                payout_amount=0.0,
+                fsp_code="1",
+                message="Error",
+            )
+        ],
+    }
+
+
+def test_sync_records_batches_updates_and_uses_prefetched_reconciliation(error_records_by_payment_instruction) -> None:
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_records_for_payment_instruction = Mock(
+        side_effect=error_records_by_payment_instruction.__getitem__
+    )
+
+    with (
+        mock.patch.object(PaymentPlan, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
+        mock.patch.object(pg_service, "change_payment_instruction_status"),
+        mock.patch.object(
+            pg_service,
+            "_bulk_update_payments",
+            wraps=pg_service._bulk_update_payments,
+        ) as bulk_update_mock,
+    ):
+        pg_service.sync_records()
+
+    is_reconciled_mock.assert_not_called()
+    bulk_update_mock.assert_called_once()
+    payments_by_update_fields = bulk_update_mock.call_args.args[0]
+    assert len(payments_by_update_fields) == 1
+    assert len(next(iter(payments_by_update_fields.values()))) == 2
+
+
+def test_sync_records_keeps_plan_unreconciled_when_pending_payment_is_not_in_sent_instruction(
+    payment_gateway_setup_with_unsent_pending_payment,
+) -> None:
+    setup = payment_gateway_setup_with_unsent_pending_payment
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_records_for_payment_instruction = Mock(return_value=setup["gateway_records"])
+
+    with (
+        mock.patch.object(PaymentPlan, "is_reconciled", new_callable=mock.PropertyMock) as is_reconciled_mock,
+        mock.patch.object(pg_service, "change_payment_instruction_status") as change_status_mock,
+    ):
+        pg_service.sync_records()
+
+    is_reconciled_mock.assert_not_called()
+    change_status_mock.assert_not_called()
+    pg_service.api.get_records_for_payment_instruction.assert_called_once_with(setup["sent_split"].id)
+    setup["payment_plan"].refresh_from_db()
+    setup["unsent_payment"].refresh_from_db()
+    setup["sent_payment"].refresh_from_db()
+    assert setup["payment_plan"].status == PaymentPlan.Status.ACCEPTED
+    assert setup["unsent_payment"].status == Payment.STATUS_PENDING
+    assert setup["sent_payment"].status == Payment.STATUS_ERROR
+
+
 @mock.patch(
     "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
     return_value="FINALIZED",
@@ -1592,6 +1707,7 @@ def test_sync_delivery_mechanisms(
     get_delivery_mechanisms_mock: Any,
     delivery_mechanisms: dict,
     account_types: dict,
+    django_assert_num_queries: Any,
 ) -> None:
     assert DeliveryMechanism.objects.count() == len(delivery_mechanisms)
 
@@ -1614,7 +1730,8 @@ def test_sync_delivery_mechanisms(
     pg_service = PaymentGatewayService()
     pg_service.api.get_delivery_mechanisms = get_delivery_mechanisms_mock  # type: ignore
 
-    pg_service.sync_delivery_mechanisms()
+    with django_assert_num_queries(2):
+        pg_service.sync_delivery_mechanisms()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     assert dm_cash.is_active
     assert dm_cash.account_type.key == "bank"

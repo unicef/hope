@@ -28,6 +28,22 @@ export function isShowIssueType(category: string | number): boolean {
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   );
 }
+export const SYSTEM_GENERATED_ISSUE_TYPES = [GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR];
+
+export function isSystemGenerated(category: any, issueType?: number): boolean {
+  const cat = category?.toString();
+  if (
+    issueType != null &&
+    SYSTEM_GENERATED_ISSUE_TYPES.includes(issueType.toString())
+  ) {
+    return true;
+  }
+  return (
+    cat === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION ||
+    cat === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
+    cat === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
+  );
+}
 export const getIssueTypeToDisplay = (issueType: number): string =>
   (issueType &&
     GRIEVANCE_ISSUE_TYPES_NAMES[issueType]
@@ -370,35 +386,34 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
     partner: values.partner ? parseInt(values.partner, 10) : undefined,
     program: values.program,
     comments: values.comments,
+    submissionChannel: values.submissionChannel,
     linkedFeedbackId: values.linkedFeedbackId,
     documentation: values.documentation || [],
   };
 }
 
-export const matchGrievanceUrlByCategory = (category: number): string => {
+export const matchGrievanceUrlByCategory = (
+  category: number,
+  issueType?: number,
+): string => {
   if (!category) return null;
-  const categoryString = category.toString();
-  const systemGeneratedGrievanceCategories = [
-    GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION,
-    GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION,
-    GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
-  ];
-  if (systemGeneratedGrievanceCategories.includes(categoryString)) {
-    return 'system-generated';
-  }
-  return 'user-generated';
+  return isSystemGenerated(category, issueType)
+    ? 'system-generated'
+    : 'user-generated';
 };
 
 export const getGrievanceDetailsPath = (
   ticketId: string,
   category: number,
   baseUrl: string,
+  issueType?: number,
 ): string => {
   if (!ticketId || !category) {
     return null;
   }
   return `/${baseUrl}/grievance/tickets/${matchGrievanceUrlByCategory(
     category,
+    issueType,
   )}/${ticketId}`;
 };
 
@@ -406,9 +421,13 @@ export const getGrievanceEditPath = (
   ticketId: string,
   category: number,
   baseUrl: string,
+  issueType?: number,
 ): string => {
   if (!ticketId || !category) {
     return null;
+  }
+  if (issueType?.toString() === GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR) {
+    return `/${baseUrl}/grievance/edit-ticket/picture-error/${ticketId}`;
   }
   return `/${baseUrl}/grievance/edit-ticket/${matchGrievanceUrlByCategory(
     category,
