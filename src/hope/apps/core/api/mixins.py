@@ -2,7 +2,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, Mapping
 
 from django.conf import settings
-from django.db.models import Exists, OuterRef, Q, QuerySet
+from django.db.models import Exists, Model, OuterRef, Q, QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
 from requests.adapters import HTTPAdapter
@@ -19,7 +19,7 @@ from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.apps.account.api.permissions import BaseRestPermission
 
 if TYPE_CHECKING:
-    from hope.models import BusinessArea, Program
+    from hope.models import BusinessArea, Partner, Program
 
 
 class BaseAPI:
@@ -242,7 +242,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         # filter_q empty if no access to any program
         return queryset.filter(Q(filter_q) | without_program_q) if filter_q else queryset.none()
 
-    def _area_ids_by_program(self, partner: Any, program_ids: list) -> dict[str, list]:
+    def _area_ids_by_program(self, partner: "Partner", program_ids: list) -> dict[str, list]:
         from hope.models import Area
 
         # Batch-fetch all area limits for all programs in a single query instead of one per program.
@@ -266,12 +266,12 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
             areas_query |= Q(**{f"{field}__in": area_ids})
         return areas_null | areas_query
 
-    def _program_link_queryset(self, model: Any) -> QuerySet:
+    def _program_link_queryset(self, model: type[Model]) -> QuerySet:
         m2m_field = model._meta.get_field(self.program_model_field)
         through = m2m_field.remote_field.through
         return through.objects.filter(**{m2m_field.m2m_field_name(): OuterRef("pk")})
 
-    def _visibility_q_for_many(self, model: Any, program_ids: list, area_ids_by_program: dict[str, list]) -> Q:
+    def _visibility_q_for_many(self, model: type[Model], program_ids: list, area_ids_by_program: dict[str, list]) -> Q:
         programs_by_area_limits: dict[frozenset, list] = {}
         for program_id in program_ids:
             key = frozenset(area_ids_by_program.get(str(program_id), ()))
