@@ -13,8 +13,9 @@ big m2m tables with correlated `EXISTS` subqueries.
 
 Why assert on SQL at all:
 
-- The rewrites change neither the response body nor the number of queries, only how many
-  rows the database scans. SQL is the only place a regression shows.
+- These rewrites change how many rows a statement scans, and nothing else observes that.
+  Response bodies are unchanged, and query *counts* moved in this ticket for unrelated
+  reasons, in both directions - so a count is not a proxy for the cost of a statement.
 - The ticket -> program join does have one behavioural symptom, duplicate rows, covered by
   `test_list_returns_ticket_once_when_linked_to_multiple_programs` and others. But
   `.distinct()` hides it, so a rewrite that brings the join back *and* adds a `.distinct()`
