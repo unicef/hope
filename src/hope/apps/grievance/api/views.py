@@ -133,6 +133,8 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from django.contrib.auth.models import AbstractUser
 
 
@@ -791,13 +793,19 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
         ):
             partner = user.partner
-            for selected_individual in grievance_ticket.ticket_details.selected_individuals.select_related(
-                "household__admin2", "program"
-            ).all():
-                if not partner.has_area_access(
-                    area_id=selected_individual.household.admin2.id,
-                    program_id=selected_individual.program.id,
-                ):
+            limits_by_program: dict["UUID", set["UUID"]] = {}
+            selected_individuals = grievance_ticket.ticket_details.selected_individuals.values_list(
+                "household__admin2_id", "program_id"
+            )
+            for admin2_id, program_id in selected_individuals:
+                if not admin2_id:
+                    continue
+                if program_id not in limits_by_program:
+                    limits_by_program[program_id] = set(
+                        partner.get_area_limits_for_program(program_id).values_list("id", flat=True)
+                    )
+                allowed_area_ids = limits_by_program[program_id]
+                if allowed_area_ids and admin2_id not in allowed_area_ids:
                     raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
         if not grievance_ticket.can_change_status(new_status):

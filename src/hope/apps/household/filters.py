@@ -174,7 +174,7 @@ class HouseholdFilter(UpdatedAtFilter):
             .execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-        return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
+        return qs.filter(Q(id__in=es_ids) | inner_query)
 
     def _get_elasticsearch_query_for_households(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
@@ -211,24 +211,20 @@ class HouseholdFilter(UpdatedAtFilter):
     def _search_db(self, qs: QuerySet[Household], value: str, program: Program | None) -> QuerySet[Household]:
         program_filter = Q(program=program) if program else Q()
         search = value.strip()
-        return (
-            qs.annotate(
-                phone_no_normalized=Replace("head_of_household__phone_no", Value(" "), Value("")),
-                phone_no_alt_normalized=Replace("head_of_household__phone_no_alternative", Value(" "), Value("")),
+        return qs.annotate(
+            phone_no_normalized=Replace("head_of_household__phone_no", Value(" "), Value("")),
+            phone_no_alt_normalized=Replace("head_of_household__phone_no_alternative", Value(" "), Value("")),
+        ).filter(
+            program_filter
+            & (
+                Q(unicef_id__icontains=search)
+                | Q(head_of_household__unicef_id__icontains=search)
+                | Q(head_of_household__full_name__icontains=search)
+                | Q(phone_no_normalized__icontains=search)
+                | Q(phone_no_alt_normalized__icontains=search)
+                | Q(detail_id__icontains=search)
+                | Q(program_registration_id__icontains=search)
             )
-            .filter(
-                program_filter
-                & (
-                    Q(unicef_id__icontains=search)
-                    | Q(head_of_household__unicef_id__icontains=search)
-                    | Q(head_of_household__full_name__icontains=search)
-                    | Q(phone_no_normalized__icontains=search)
-                    | Q(phone_no_alt_normalized__icontains=search)
-                    | Q(detail_id__icontains=search)
-                    | Q(program_registration_id__icontains=search)
-                )
-            )
-            .distinct()
         )
 
     def _filter_detail_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:

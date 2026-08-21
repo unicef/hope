@@ -1023,3 +1023,45 @@ def test_grievance_ticket_list_returns_finished_program_ticket_when_filtered_by_
 
     assert response.status_code == status.HTTP_200_OK
     assert [result["id"] for result in response.json()["results"]] == [str(ticket_in_finished_program.id)]
+
+
+def test_count_returns_one_when_ticket_linked_to_multiple_programs(
+    api_client: Any,
+    count_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    program_different: Program,
+    area1: Area,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        admin2=area1,
+        description="Ticket linked to multiple programs",
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+    )
+    ticket.programs.add(program)
+    ticket.programs.add(program_different)
+
+    response = api_client.get(count_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 1
