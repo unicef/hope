@@ -73,7 +73,7 @@ def test_individual_search_by_household_unicef_id_returns_household_members(popu
     assert population["other"] not in queryset
 
 
-@pytest.mark.parametrize("term", ["Kowalski", "IND", "XYZ-24-0000.0001"])
+@pytest.mark.parametrize("term", ["Kowalski", "IND", "XYZ-24-0000.0001", "IND-24-0000.0002 Kowalski"])
 def test_individual_search_by_non_unicef_id_term_falls_back_to_default_search(population, staff_request, term):
     model_admin = IndividualAdmin(Individual, AdminSite())
 
@@ -86,6 +86,16 @@ def test_individual_search_by_name_still_matches(population, staff_request):
     model_admin = IndividualAdmin(Individual, AdminSite())
 
     queryset, _ = model_admin.get_search_results(staff_request, model_admin.get_queryset(staff_request), "Kowalski")
+
+    assert list(queryset) == [population["other"]]
+
+
+def test_individual_search_by_unicef_id_and_name_matches_both_terms(population, staff_request):
+    model_admin = IndividualAdmin(Individual, AdminSite())
+
+    queryset, _ = model_admin.get_search_results(
+        staff_request, model_admin.get_queryset(staff_request), "IND-24-0000.0002 Kowalski"
+    )
 
     assert list(queryset) == [population["other"]]
 

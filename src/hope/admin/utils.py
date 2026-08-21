@@ -525,7 +525,7 @@ class UnicefIdSearchMixin(admin.ModelAdmin):
     def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> tuple[QuerySet, bool]:
         term = search_term.strip().upper()
         prefix, _, rest = term.partition("-")
-        field = self.unicef_id_search_map.get(prefix) if rest else None
+        field = self.unicef_id_search_map.get(prefix) if rest and len(term.split()) == 1 else None
         if field:
             return queryset.filter(**{f"{field}__startswith": term}), False
         return super().get_search_results(request, queryset, search_term)
