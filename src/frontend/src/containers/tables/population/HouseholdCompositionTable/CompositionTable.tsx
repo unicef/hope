@@ -1,13 +1,16 @@
 import { LabelizedField } from '@components/core/LabelizedField';
 import { Title } from '@components/core/Title';
+import { Info } from '@mui/icons-material';
 import {
   Box,
+  IconButton,
   Paper,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { ReactElement } from 'react';
@@ -36,6 +39,7 @@ export interface CompositionRow {
 
 export interface CompositionTableProps {
   title: string;
+  tooltip?: string;
   rows: CompositionRow[];
   footer: { label: string; value: Count; dataCy?: string }[];
   dataCy?: string;
@@ -47,6 +51,7 @@ const format = (value: Count): string =>
 
 export function CompositionTable({
   title,
+  tooltip,
   rows,
   footer,
   dataCy,
@@ -55,7 +60,20 @@ export function CompositionTable({
   return (
     <OverviewPaper data-cy={dataCy}>
       <Title>
-        <Typography variant="h6">{title}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="h6">{title}</Typography>
+          {tooltip && (
+            <Tooltip title={tooltip}>
+              <IconButton
+                color="primary"
+                aria-label={title}
+                data-cy="composition-table-info"
+              >
+                <Info />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Title>
       <Table>
         <TableHead>

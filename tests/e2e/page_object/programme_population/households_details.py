@@ -42,6 +42,7 @@ class HouseholdsDetails(BaseComponents):
     known_affected_beneficiaries = '[data-cy="known-affected-beneficiaries"]'
     kab_row05 = '[data-cy="kab-row05"]'
     kab_size = '[data-cy="kab-size"]'
+    kab_info = '[data-cy="known-affected-beneficiaries"] [data-cy="composition-table-info"]'
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
@@ -156,3 +157,6 @@ class HouseholdsDetails(BaseComponents):
 
     def get_kab_size(self) -> WebElement:
         return self.wait_for(self.kab_size)
+
+    def get_kab_info(self) -> WebElement:
+        return self.wait_for(self.kab_info)

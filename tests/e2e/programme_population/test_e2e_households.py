@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_programs(business_area) -> None:
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD, collects_individual_data=True)
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name="Test Programm",
@@ -141,3 +141,4 @@ class TestSmokeHouseholds:
         # the unset male disabled counter renders as "-", the zero as "0"
         assert page_households_details.get_kab_row05().text.split() == ["0", "-", "5", "2", "1", "-", "0", "-"]
         assert "3" in page_households_details.get_kab_size().text
+        assert page_households_details.get_kab_info().is_displayed()

@@ -213,9 +213,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         grievancesChoices={grievancesChoices}
       />
       <HouseholdCompositionTable household={household} />
-      {selectedProgram?.dataCollectingType?.collectsIndividualData && (
-        <KnownAffectedBeneficiariesTable household={household} />
-      )}
+      <KnownAffectedBeneficiariesTable household={household} />
       <Container>
         {household ? (
           <>

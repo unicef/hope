@@ -10,7 +10,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "870"
+        "Content-Length": "861"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/?limit=50&offset=50",
@@ -34,8 +34,7 @@
                     "type": "STANDARD",
                     "type_display": "Standard",
                     "individual_filters_available": false,
-                    "household_filters_available": true,
-                    "collects_individual_data": false
+                    "household_filters_available": true
                 },
                 "beneficiary_group": {
                     "id": "bf5d7dcc-8cee-400b-9398-330497bc5bec",

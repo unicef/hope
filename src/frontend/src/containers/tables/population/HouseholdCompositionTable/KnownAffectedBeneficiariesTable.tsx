@@ -15,6 +15,9 @@ export function KnownAffectedBeneficiariesTable({
     <CompositionTable
       dataCy="known-affected-beneficiaries"
       title={t('Known Affected Beneficiaries')}
+      tooltip={t(
+        'Figures represent known affected beneficiaries counted from individual records, not declared household size.',
+      )}
       rows={[
         {
           ageGroup: '0 - 5',
