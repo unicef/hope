@@ -557,7 +557,9 @@ class GrievanceTicketGlobalViewSet(
     parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_count_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(self.grievance_permissions_query).distinct()
+        # no distinct(): visibility and the program filters are Exists subqueries, the ticket detail
+        # relations are OneToOne, and the office_search filters that do join m2m add their own distinct()
+        return super().get_queryset().filter(self.grievance_permissions_query)
 
     def get_queryset(self) -> QuerySet:
         to_prefetch: list[str | Prefetch] = []
