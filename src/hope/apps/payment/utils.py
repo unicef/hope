@@ -15,6 +15,7 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     User,
@@ -68,6 +69,32 @@ def log_payment_plan_change(
     )
     # program_cycle is a non-null FK and ProgramCycle.program is non-null, so program is always set.
     log.programs.add(payment_plan.program.pk)
+
+
+def log_payment_plan_group_change(
+    payment_plan_group: PaymentPlanGroup,
+    old_payment_plan_group: PaymentPlanGroup,
+    user_id: str | None,
+) -> None:
+    """Create an activity log entry for a PaymentPlanGroup change applied outside a logging view.
+
+    The export/import async tasks flip ``background_action_status`` after the dispatching view
+    took its ``log_create()`` snapshot, so the outcome (finished vs. error) would otherwise go
+    unlogged. ``user_id`` is None for system-initiated runs.
+    """
+    changes = create_diff(old_payment_plan_group, payment_plan_group, PaymentPlanGroup.ACTIVITY_LOG_MAPPING)
+    if not changes:
+        return
+    user = User.objects.filter(pk=user_id).first() if user_id else None
+    log = LogEntry.objects.create(
+        action=LogEntry.UPDATE,
+        content_object=payment_plan_group,
+        user=user,
+        business_area=payment_plan_group.cycle.program.business_area,
+        object_repr=str(payment_plan_group),
+        changes=changes,
+    )
+    log.programs.add(payment_plan_group.cycle.program.pk)
 
 
 def _log_payment_plan_event(

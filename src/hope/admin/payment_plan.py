@@ -432,8 +432,17 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
                     return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
+                old_group = copy_model_object(group)
                 group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
                 group.save(update_fields=["background_action_status"])
+                log_create(
+                    mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+                    business_area_field="cycle.program.business_area",
+                    user=request.user,
+                    programs=group.cycle.program.pk,
+                    old_object=old_group,
+                    new_object=group,
+                )
                 export_payment_plan_group_delivery_xlsx_async_task(
                     group, str(request.user.pk), fsp_xlsx_template_id, export_tag
                 )

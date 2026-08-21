@@ -1716,7 +1716,9 @@ def test_send_group_to_payment_gateway_dispatches_each_plan(
 
     assert response.status_code == status.HTTP_200_OK
     assert mock_execute_update_status_action.call_count == 2
-    dispatched_actions = {call.kwargs["input_data"]["action"] for call in mock_execute_update_status_action.mock_calls}
+    dispatched_actions = {
+        call.kwargs["input_data"]["action"] for call in mock_execute_update_status_action.call_args_list
+    }
     assert dispatched_actions == {PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY}
 
     init_targets = {call.args[0].pk for call in mock_service_init.mock_calls}
