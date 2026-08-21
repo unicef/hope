@@ -1,3 +1,4 @@
+from functools import cached_property
 import logging
 from typing import Any
 
@@ -154,6 +155,10 @@ class GrievanceTicketFilter(FilterSet):
         )
     )
 
+    @cached_property
+    def business_area(self) -> BusinessArea:
+        return BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
+
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
             return qs.filter(program_with_code_exists(value))
@@ -181,7 +186,7 @@ class GrievanceTicketFilter(FilterSet):
                 return qs.filter(household_unicef_id__istartswith=search)
             if search.startswith("IND-"):
                 household_unicef_ids = (
-                    Individual.objects.filter(unicef_id__istartswith=search)
+                    Individual.objects.filter(business_area=self.business_area, unicef_id__istartswith=search)
                     .order_by("household__unicef_id")
                     .distinct("household__unicef_id")
                     .values_list("household__unicef_id", flat=True)
@@ -192,7 +197,7 @@ class GrievanceTicketFilter(FilterSet):
 
         query |= Q(household_unicef_id__icontains=search)
         unicef_ids = (
-            Individual.objects.filter(relationship=HEAD)
+            Individual.objects.filter(business_area=self.business_area, relationship=HEAD)
             .filter(
                 Q(full_name__icontains=search)
                 | Q(detail_id__icontains=search)
@@ -215,7 +220,8 @@ class GrievanceTicketFilter(FilterSet):
         document_type = self.data.get("document_type")
         unicef_ids = (
             Individual.objects.filter(
-                Q(relationship=HEAD)
+                Q(business_area=self.business_area)
+                & Q(relationship=HEAD)
                 & Q(documents__type__key=document_type)
                 & Q(documents__document_number__icontains=document_number)
             )
@@ -258,7 +264,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         user = self.request.user
-        business_area = BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
+        business_area = self.business_area
         program_code = self.request.parser_context["kwargs"].get("program_code")
         program = Program.objects.filter(code=program_code, business_area=business_area).first()
 
