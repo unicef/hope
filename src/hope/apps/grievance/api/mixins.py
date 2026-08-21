@@ -24,13 +24,19 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import Household, Individual, IndividualRoleInHousehold, User
+from hope.models import BusinessArea, Household, Individual, IndividualRoleInHousehold, User
 
 
-def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> dict[str, str]:
+def get_fallback_individual_unicef_ids(
+    tickets: Iterable[GrievanceTicket], business_area: BusinessArea
+) -> dict[str, str]:
     """Map household unicef id -> individual unicef id, for one page of tickets.
 
     Only social worker programme tickets need it, so the rest of the page is skipped.
+
+    Scoped to the business area for the same reason the search filters are (ticket 331051):
+    household unicef ids are unique across business areas today, but nothing enforces it, and
+    an unscoped lookup would answer with a foreign individual if that ever stopped holding.
     """
     household_unicef_ids = {
         ticket.household_unicef_id
@@ -42,7 +48,7 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
         return {}
 
     return dict(
-        Individual.objects.filter(household__unicef_id__in=household_unicef_ids)
+        Individual.objects.filter(business_area=business_area, household__unicef_id__in=household_unicef_ids)
         # Lowest id per household, the same individual the old per-ticket subquery picked.
         .order_by("household__unicef_id", "id")
         .distinct("household__unicef_id")
@@ -50,8 +56,13 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
     )
 
 
-def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str, int]:
-    """Map household unicef id -> number of *other* tickets for that household, for one page."""
+def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket], business_area: BusinessArea) -> dict[str, int]:
+    """Map household unicef id -> number of *other* tickets in this business area, for one page.
+
+    Scoped like the lookup above. Here the scoping also bounds what the number can mean: this
+    count is rendered to the user, so counting a foreign business area's tickets would show
+    them a total they have no way to reconcile with the list in front of them.
+    """
     household_unicef_ids = {ticket.household_unicef_id for ticket in tickets if ticket.household_unicef_id}
 
     if not household_unicef_ids:
@@ -59,7 +70,9 @@ def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str,
 
     return {
         row["household_unicef_id"]: row["ticket_count"] - 1
-        for row in GrievanceTicket.objects.filter(household_unicef_id__in=household_unicef_ids)
+        for row in GrievanceTicket.objects.filter(
+            business_area=business_area, household_unicef_id__in=household_unicef_ids
+        )
         .values("household_unicef_id")
         .annotate(ticket_count=Count("pk"))
     }
@@ -90,8 +103,8 @@ class GrievanceListBatchMixin:
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
         if page is None:  # pagination disabled - nothing to batch per page
             return super().list(request, *args, **kwargs)
-        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page)
-        self.existing_tickets_counts = get_existing_tickets_counts(page)
+        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page, self.business_area)
+        self.existing_tickets_counts = get_existing_tickets_counts(page, self.business_area)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
 

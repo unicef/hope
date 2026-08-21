@@ -59,9 +59,7 @@ def second_program(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def two_program_ticket(
-    afghanistan: BusinessArea, first_program: Program, second_program: Program
-) -> GrievanceTicket:
+def two_program_ticket(afghanistan: BusinessArea, first_program: Program, second_program: Program) -> GrievanceTicket:
     ticket = GrievanceTicketFactory(business_area=afghanistan)
     ticket.programs.set([first_program, second_program])
     return ticket
