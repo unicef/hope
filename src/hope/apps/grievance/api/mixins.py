@@ -73,8 +73,8 @@ class GrievanceListBatchMixin:
     correlated subquery on the program-nested list and a COUNT per row on the global
     one (ticket 331051).
 
-    Only for paginated viewsets - list() serializes the page, so a viewset with
-    pagination_class = None cannot use this mixin. Both grievance lists paginate.
+    Batching is per page, so with pagination disabled list() falls back to DRF's
+    default and the serializer resolves both fields per row.
     """
 
     fallback_individual_unicef_ids: dict[str, str] | None = None
@@ -88,6 +88,8 @@ class GrievanceListBatchMixin:
 
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        if page is None:  # pagination disabled - nothing to batch per page
+            return super().list(request, *args, **kwargs)
         self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page)
         self.existing_tickets_counts = get_existing_tickets_counts(page)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
