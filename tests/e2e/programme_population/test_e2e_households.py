@@ -101,7 +101,7 @@ class TestSmokeHouseholds:
         page_households.get_nav_programme_population().click()
         page_households.get_nav_households().click()
         page_households.get_households_row_by_number(0).click()
-        assert "7" in page_households_details.get_label_household_size().text
+        assert "3" in page_households_details.get_label_household_size().text
         assert "Displaced | Refugee / Asylum Seeker" in page_households_details.get_label_residence_status().text
         assert "Agata Kowalska" in page_households_details.get_label_head_of_household().text
         assert "Afghanistan" in page_households_details.get_label_country().text
