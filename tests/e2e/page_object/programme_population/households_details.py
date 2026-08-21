@@ -41,7 +41,7 @@ class HouseholdsDetails(BaseComponents):
     row05 = '[data-cy="row05"]'
     known_affected_beneficiaries = '[data-cy="known-affected-beneficiaries"]'
     kab_size = '[data-cy="kab-size"]'
-    kab_info = '[data-cy="composition-table-info"]'
+    kab_info = '[data-cy="kab-info"]'
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)

@@ -115,7 +115,7 @@ export function HouseholdCompositionTable({
             <IconButton
               color="primary"
               aria-label={t('Known Affected Beneficiaries')}
-              data-cy="composition-table-info"
+              data-cy="kab-info"
             >
               <Info />
             </IconButton>
