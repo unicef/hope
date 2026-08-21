@@ -65,130 +65,9 @@
             "unicef_id": "PP-BA0000-25-00000001",
             "name": null,
             "status": "FINISHED",
-            "total_households_count": 0,
-            "total_individuals_count": 0,
-            "currency": null,
-            "excluded_ids": null,
-            "total_entitled_quantity": null,
-            "total_delivered_quantity": null,
-            "total_undelivered_quantity": null,
-            "dispersion_start_date": "2025-01-01",
-            "dispersion_end_date": "2025-01-31",
             "plan_type": "REGULAR",
-            "follow_ups": [],
-            "top_ups": [],
-            "created_by": " ",
-            "created_at": "2025-01-01T00:00:00Z",
-            "updated_at": "2025-01-01T00:00:00Z",
-            "program": {
-                "id": "6485040e-3faf-4d2f-a405-0cce536b4a0d",
-                "code": "1cpl",
-                "name": "Program 0",
-                "status": "ACTIVE",
-                "screen_beneficiary": false
-            },
-            "payment_plan_group": {
-                "id": "f45bdafc-e7b7-49fd-b386-62c27f335260",
-                "unicef_id": "PPG-2",
-                "name": "Default Group"
-            },
-            "export_tag": null,
-            "version": 1735688653315204,
-            "background_action_status": null,
-            "background_action_status_display": null,
-            "start_date": null,
-            "end_date": null,
-            "program_cycle": {
-                "id": "bc857d24-a581-406b-8031-cd93ded0513f",
-                "title": "Programme Cycle 0"
-            },
             "is_payment_gateway": false,
-            "is_instruction_managed": false,
-            "has_payment_list_export_file": false,
-            "imported_file_name": "",
-            "imported_file_date": null,
-            "payments_conflicts_count": 0,
             "delivery_mechanism": null,
-            "volume_by_delivery_mechanism": [
-                {
-                    "id": "cb35a199-c561-4206-a989-065b41e8f319",
-                    "delivery_mechanism": null,
-                    "volume": null,
-                    "volume_usd": null
-                }
-            ],
-            "split_choices": [
-                {
-                    "name": "By Admin Area 1",
-                    "value": "BY_ADMIN_AREA1"
-                },
-                {
-                    "name": "By Admin Area 2",
-                    "value": "BY_ADMIN_AREA2"
-                },
-                {
-                    "name": "By Admin Area 3",
-                    "value": "BY_ADMIN_AREA3"
-                },
-                {
-                    "name": "By Collector",
-                    "value": "BY_COLLECTOR"
-                },
-                {
-                    "name": "By Records",
-                    "value": "BY_RECORDS"
-                },
-                {
-                    "name": "No Split",
-                    "value": "NO_SPLIT"
-                }
-            ],
-            "exclusion_reason": null,
-            "exclude_household_error": null,
-            "bank_reconciliation_success": 0,
-            "bank_reconciliation_error": 0,
-            "can_create_payment_verification_plan": false,
-            "available_payment_records_count": 0,
-            "reconciliation_summary": {
-                "delivered_fully": 0,
-                "delivered_partially": 0,
-                "not_delivered": 0,
-                "unsuccessful": 0,
-                "pending": 1,
-                "reconciled": 0,
-                "number_of_payments": 1
-            },
-            "excluded_households": [],
-            "excluded_individuals": [],
-            "can_create_follow_up": false,
-            "can_create_top_up": true,
-            "can_create_top_up_amendment": false,
-            "total_withdrawn_households_count": 0,
-            "unsuccessful_payments_count": 0,
-            "can_send_to_payment_gateway": false,
-            "can_send_to_vision": false,
-            "can_split": false,
-            "supporting_documents": [],
-            "total_households_count_with_valid_phone_no": 0,
-            "financial_service_provider": null,
-            "approval_process": [],
-            "total_entitled_quantity_usd": null,
-            "total_entitled_quantity_revised_usd": null,
-            "total_delivered_quantity_usd": null,
-            "total_undelivered_quantity_usd": null,
-            "male_children_count": 0,
-            "female_children_count": 0,
-            "male_adults_count": 0,
-            "female_adults_count": 0,
-            "steficon_rule": null,
-            "source_payment_plan": null,
-            "exchange_rate": null,
-            "custom_exchange_rate": false,
-            "unore_exchange_rate": null,
-            "unore_exchange_rate_unavailable": false,
-            "eligible_payments_count": 1,
-            "funds_commitments": null,
-            "available_funds_commitments": [],
             "payment_verification_plans": [
                 {
                     "id": "8c9b66e2-d220-4238-a5fd-a0744b669bc9",
@@ -217,26 +96,6 @@
                     "excluded_admin_areas_filter": null,
                     "rapid_pro_flow_id": "",
                     "admin_url": "/api/unicorn/payment/paymentverificationplan/8c9b66e2-d220-4238-a5fd-a0744b669bc9/change/"
-                }
-            ],
-            "payment_verification_summary": {
-                "id": "5e278fb2-54f4-4efd-b41a-1c871dcf98a9",
-                "status": "PENDING",
-                "activation_date": null,
-                "completion_date": null,
-                "number_of_verification_plans": 1,
-                "status_display": "Pending"
-            },
-            "admin_url": "/api/unicorn/payment/paymentplan/cb35a199-c561-4206-a989-065b41e8f319/change/",
-            "abort_comment": "",
-            "closure_comment": null,
-            "closed_by": null,
-            "status_date": "2025-01-01T00:00:00Z",
-            "flat_amount_value": null,
-            "payment_plan_purposes": [
-                {
-                    "id": "ef54a9bb-ebee-4adc-9d8c-ea895099053c",
-                    "name": "Purpose 0"
                 }
             ]
         },
