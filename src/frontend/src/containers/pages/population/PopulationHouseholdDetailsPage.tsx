@@ -35,7 +35,6 @@ import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { KnownAffectedBeneficiariesTable } from '../../tables/population/HouseholdCompositionTable/KnownAffectedBeneficiariesTable';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Container = styled.div`
@@ -213,7 +212,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         grievancesChoices={grievancesChoices}
       />
       <HouseholdCompositionTable household={household} />
-      <KnownAffectedBeneficiariesTable household={household} />
       <Container>
         {household ? (
           <>

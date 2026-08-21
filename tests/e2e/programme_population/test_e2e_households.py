@@ -139,6 +139,6 @@ class TestSmokeHouseholds:
         assert "Known Affected Beneficiaries" in page_households_details.get_known_affected_beneficiaries().text
         # age group, females, with disability, pregnant, (spacer), males, with disability;
         # the unset male disabled counter renders as "-", the zero as "0"
-        assert page_households_details.get_kab_row05().text.split() == ["0", "-", "5", "2", "1", "-", "0", "-"]
+        assert page_households_details.get_row05().text.split() == ["0", "-", "5", "2", "1", "-", "0", "-"]
         assert "3" in page_households_details.get_kab_size().text
         assert page_households_details.get_kab_info().is_displayed()

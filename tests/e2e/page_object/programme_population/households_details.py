@@ -40,9 +40,8 @@ class HouseholdsDetails(BaseComponents):
     label_user_name = 'div[data-cy="label-User name"]'
     row05 = '[data-cy="row05"]'
     known_affected_beneficiaries = '[data-cy="known-affected-beneficiaries"]'
-    kab_row05 = '[data-cy="kab-row05"]'
     kab_size = '[data-cy="kab-size"]'
-    kab_info = '[data-cy="known-affected-beneficiaries"] [data-cy="composition-table-info"]'
+    kab_info = '[data-cy="composition-table-info"]'
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
@@ -151,9 +150,6 @@ class HouseholdsDetails(BaseComponents):
 
     def get_known_affected_beneficiaries(self) -> WebElement:
         return self.wait_for(self.known_affected_beneficiaries)
-
-    def get_kab_row05(self) -> WebElement:
-        return self.wait_for(self.kab_row05)
 
     def get_kab_size(self) -> WebElement:
         return self.wait_for(self.kab_size)
