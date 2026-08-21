@@ -666,6 +666,29 @@ def multi_active_program_ticket(afghanistan: BusinessArea, program_afghanistan1:
 
 
 @pytest.fixture
+def ticket_in_removed_and_live_program_with_same_code(afghanistan: BusinessArea) -> GrievanceTicket:
+    # programme codes are only unique while is_removed=False, so a live and a removed
+    # programme can share one code inside a business area
+    removed_program = ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="removed programme",
+        code="dupe",
+    )
+    removed_program.is_removed = True
+    removed_program.save(update_fields=["is_removed"])
+    live_program = ProgramFactory(
+        business_area=afghanistan,
+        status=Program.ACTIVE,
+        name="live programme",
+        code="dupe",
+    )
+    ticket = GrievanceTicketFactory(business_area=afghanistan)
+    ticket.programs.add(removed_program, live_program)
+    return ticket
+
+
+@pytest.fixture
 def submission_channel_tickets(afghanistan: BusinessArea, program_afghanistan1: Program) -> dict:
     call_center_ticket = GrievanceTicketFactory(
         business_area=afghanistan,
@@ -1417,6 +1440,31 @@ def test_filter_by_program_status_keeps_tickets_without_a_program(
     assert response.status_code == status.HTTP_200_OK
     returned_ids = [ticket["id"] for ticket in response.data["results"]]
     assert str(ticket_without_program.id) in returned_ids
+
+
+def test_filter_by_program_does_not_duplicate_ticket_when_removed_programme_shares_code(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    ticket_in_removed_and_live_program_with_same_code: GrievanceTicket,
+    list_global_url: str,
+) -> None:
+    client = api_client(user)
+    response = client.get(list_global_url, {"program": "dupe"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [ticket["id"] for ticket in response.data["results"]] == [
+        str(ticket_in_removed_and_live_program_with_same_code.id)
+    ]
+
+    count_url = reverse(
+        "api:grievance:grievance-tickets-global-count",
+        kwargs={"business_area_slug": afghanistan.slug},
+    )
+    count_response = client.get(count_url, {"program": "dupe"})
+
+    assert count_response.status_code == status.HTTP_200_OK
+    assert count_response.data["count"] == 1
 
 
 def test_filter_by_program_status_does_not_duplicate_multi_program_tickets(

@@ -32,6 +32,11 @@ def program_with_status_exists(program_status: str) -> Exists:
     return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__status=program_status))
 
 
+def program_with_code_exists(program_code: str) -> Exists:
+    through_model = GrievanceTicket.programs.through
+    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__code=program_code))
+
+
 def without_program_q() -> Q:
     through_model = GrievanceTicket.programs.through
     return ~Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
@@ -151,7 +156,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
-            return qs.filter(programs__code=value)
+            return qs.filter(program_with_code_exists(value))
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
