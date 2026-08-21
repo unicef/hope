@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -29,7 +29,7 @@ from hope.apps.grievance.models import (
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(CursorPaginatorAdmin, LinkedObjectsMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(ViewOnUiMixin, CursorPaginatorAdmin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "created_at",
@@ -99,6 +99,14 @@ class GrievanceTicketAdmin(CursorPaginatorAdmin, LinkedObjectsMixin, HOPEModelAd
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
+
+    def frontend_url(self, obj: GrievanceTicket) -> str | None:
+        program = obj.programs.first()
+        program_code = program.code if program else "all"
+        return (
+            f"/{obj.business_area.slug}/programs/{program_code}/grievance/tickets/"
+            f"{obj.grievance_type_to_string()}-generated/{obj.id}"
+        )
 
 
 @admin.register(TicketNote)
