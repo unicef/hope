@@ -523,9 +523,12 @@ class UnicefIdSearchMixin(admin.ModelAdmin):
     # unicef_id prefix a user may paste -> field to prefix-match on
     unicef_id_search_map: dict[str, str] = {}
 
+    # the trigger format PREFIX-yy-0000.0000, or any truncation of it (still a valid startswith)
+    unicef_id_re = re.compile(r"([A-Z]+)-(\d{1,2}|\d{2}-\d{0,4}|\d{2}-\d{4}\.\d{0,4})")
+
     def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> tuple[QuerySet, bool]:
         term = search_term.strip().upper()
-        match = re.fullmatch(r"([A-Z]+)-\S+", term)
+        match = self.unicef_id_re.fullmatch(term)
         field = self.unicef_id_search_map.get(match[1]) if match else None
         if field:
             return queryset.filter(**{f"{field}__startswith": term}), False

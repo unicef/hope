@@ -53,12 +53,13 @@ def test_individual_search_by_unicef_id_finds_individual_regardless_of_case(popu
     assert list(queryset) == [population["individual"]]
 
 
-def test_individual_search_by_unicef_id_emits_prefix_like_without_upper(population, staff_request):
+@pytest.mark.parametrize("term", ["IND-24-0000.0001", "IND-2", "IND-24", "IND-24-00", "IND-24-0000."])
+def test_individual_search_by_unicef_id_emits_prefix_like_without_upper(population, staff_request, term):
     model_admin = IndividualAdmin(Individual, AdminSite())
 
-    sql = search_sql(model_admin, staff_request, "IND-24-0000.0001")
+    sql = search_sql(model_admin, staff_request, term)
 
-    assert "LIKE IND-24-0000.0001%" in sql
+    assert f"LIKE {term}%" in sql
     assert "UPPER" not in sql
 
 
@@ -73,7 +74,10 @@ def test_individual_search_by_household_unicef_id_returns_household_members(popu
     assert population["other"] not in queryset
 
 
-@pytest.mark.parametrize("term", ["Kowalski", "IND", "XYZ-24-0000.0001", "IND-24-0000.0002 Kowalski"])
+@pytest.mark.parametrize(
+    "term",
+    ["Kowalski", "IND", "XYZ-24-0000.0001", "IND-24-0000.0002 Kowalski", "IND-24-0000.00012", "IND-2-34"],
+)
 def test_individual_search_by_non_unicef_id_term_falls_back_to_default_search(population, staff_request, term):
     model_admin = IndividualAdmin(Individual, AdminSite())
 
