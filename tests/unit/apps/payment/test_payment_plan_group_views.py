@@ -8,6 +8,7 @@ from zipfile import BadZipFile
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
+from django.http import Http404
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
@@ -1593,6 +1594,65 @@ def test_export_task_error_logs_activity_entry(
     }
 
 
+@pytest.mark.enable_activity_log
+def test_export_task_unexpected_error_logs_activity_entry(
+    user: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+) -> None:
+    group = group_with_accepted_plan_and_payment
+    template = FinancialServiceProviderXlsxTemplateFactory()
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        export_payment_plan_group_delivery_xlsx_async_task(
+            group, str(user.pk), str(template.pk), plan_type=PaymentPlan.PlanType.REGULAR
+        )
+    # the template disappears before the worker picks the job up
+    template.delete()
+    job = AsyncRetryJob.objects.latest("pk")
+    with pytest.raises(Http404):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+    log = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+    }
+
+
+@pytest.mark.enable_activity_log
+def test_export_task_success_logs_activity_entry(
+    user: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+) -> None:
+    group = group_with_accepted_plan_and_payment
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        export_payment_plan_group_delivery_xlsx_async_task(group, str(user.pk), plan_type=PaymentPlan.PlanType.REGULAR)
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    group.refresh_from_db()
+    assert group.background_action_status is None
+    log = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
+        "to": None,
+    }
+    assert list(log.programs.values_list("pk", flat=True)) == [program.pk]
+
+
 def test_export_queues_async_task_on_commit(
     client: Any,
     user: Any,
@@ -2565,6 +2625,60 @@ def test_delivery_import_xlsx_task_logs_completion_entry(
     assert log.changes["background_action_status"] == {
         "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         "to": None,
+    }
+
+
+@pytest.mark.enable_activity_log
+def test_delivery_import_xlsx_task_error_logs_activity_entry(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    e2e_import_setup: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = e2e_import_setup["group"]
+    workbook = openpyxl.Workbook()
+    ws = workbook.active
+    ws.append(["payment_id", "delivered_quantity"])
+    ws.append([str(e2e_import_setup["payment_one"].unicef_id), Decimal("75.00")])
+    buffer = BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    upload = SimpleUploadedFile(
+        "import.xlsx",
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    with (
+        patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True),
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": upload},
+            format="multipart",
+        )
+    # the uploaded file disappears from storage before the worker picks the job up
+    group.refresh_from_db()
+    group.delivery_import_file.delete()
+    job = AsyncRetryJob.objects.latest("pk")
+    with pytest.raises(AttributeError):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    log = LogEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk
+    ).latest("timestamp")
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR,
     }
 
 

@@ -175,3 +175,20 @@ def test_log_payment_plan_group_change_skips_log_when_no_mapped_field_changed(gr
     log_payment_plan_group_change(group, old_group, str(user.pk))
 
     assert not _group_logs(group.id).exists()
+
+
+@pytest.mark.enable_activity_log
+def test_update_group_with_unchanged_name_logs_nothing(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+
+    response = client.put(_detail_url(business_area.slug, program.code, group.id), {"name": group.name})
+
+    assert response.status_code == 200
+    assert not _group_logs(group.id).exists()

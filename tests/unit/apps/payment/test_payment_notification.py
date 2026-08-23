@@ -615,16 +615,13 @@ def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
     ]
 
 
-def test_prepare_user_recipients_for_mark_ready_for_closure(
-    notification_setup: dict, django_assert_num_queries: Any
-) -> None:
-    with django_assert_num_queries(1):
-        payment_notification = PaymentNotification(
-            notification_setup["payment_plan"],
-            PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
-            notification_setup["user_action_user"],
-            f"{timezone.now():%-d %B %Y}",
-        )
+def test_prepare_user_recipients_for_mark_ready_for_closure(notification_setup: dict) -> None:
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
 
     assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
         "user_with_action_permissions",
@@ -639,6 +636,43 @@ def test_prepare_user_recipients_for_mark_ready_for_closure(
         "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
         "user_with_partner_unicef_hq",
     ]
+
+
+def test_prepare_user_recipients_for_send_back_to_finished(notification_setup: dict) -> None:
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
+        notification_setup["user_action_user"],
+        f"{timezone.now():%-d %B %Y}",
+    )
+
+    assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
+        "user_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
+        "user_with_mark_ready_permission",
+        "user_with_no_permissions_partner_with_action_permissions",
+        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
+        "user_with_partner_unicef_hq",
+    ]
+
+
+def test_prepare_notification_from_refetched_payment_plan_stays_within_query_budget(
+    notification_setup: dict, django_assert_num_queries: Any
+) -> None:
+    payment_plan = PaymentPlan.objects.get(pk=notification_setup["payment_plan"].pk)
+
+    with django_assert_num_queries(5):
+        PaymentNotification(
+            payment_plan,
+            PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+            notification_setup["user_action_user"],
+            f"{timezone.now():%-d %B %Y}",
+        )
 
 
 def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_closure(

@@ -2158,6 +2158,20 @@ def test_send_back_to_finished_rejects_stale_status(user: User, business_area: A
     assert "Send Back is possible only within Status READY_FOR_CLOSURE" in str(error.value)
 
 
+def test_close_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+    PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.CLOSED)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).close(closure_comment="Comment", user_id=str(user.pk))
+
+    assert "Close Payment Plan is possible only within Status READY_FOR_CLOSURE" in str(error.value)
+
+
 def test_acceptance_process_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
