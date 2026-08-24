@@ -91,22 +91,6 @@ def draft_household(
 
 
 @pytest.fixture
-def program_less_rdi(business_area: BusinessArea) -> RegistrationDataImport:
-    return RegistrationDataImportFactory(
-        business_area=business_area, program=None, status=RegistrationDataImport.IN_REVIEW
-    )
-
-
-@pytest.fixture
-def program_less_household(
-    business_area: BusinessArea, active_program: Program, program_less_rdi: RegistrationDataImport
-) -> Household:
-    return PendingHouseholdFactory(
-        business_area=business_area, program=active_program, registration_data_import=program_less_rdi
-    )
-
-
-@pytest.fixture
 def rdi_with_files(
     business_area: BusinessArea,
     rdi: RegistrationDataImport,
