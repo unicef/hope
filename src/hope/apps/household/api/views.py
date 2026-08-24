@@ -198,7 +198,8 @@ class HouseholdViewSet(
         payments = (
             hh.payment_set.eligible()
             .exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-            .select_related("currency")
+            .select_related("currency", "parent", "parent__program_cycle", "parent__payment_plan_group")
+            .prefetch_related("parent__payment_plan_purposes")
         )
 
         page = self.paginate_queryset(payments)

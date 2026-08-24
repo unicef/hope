@@ -1326,6 +1326,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
     program_code = serializers.CharField(source="parent.program.code")
+    payment_plan_cycle = serializers.SerializerMethodField()
+    payment_plan_group = serializers.SerializerMethodField()
+    payment_plan_purposes = serializers.SerializerMethodField()
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu
@@ -1379,6 +1382,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "program_name",
             "program_code",
             "collector_type_display",
+            "payment_plan_cycle",
+            "payment_plan_group",
+            "payment_plan_purposes",
         )
 
     @classmethod
@@ -1485,6 +1491,17 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     def get_collector_phone_no_alt(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_payment_plan_cycle(self, obj: Payment) -> str | None:
+        return self._safe_get(obj, "parent.program_cycle.title")
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_payment_plan_group(self, obj: Payment) -> str | None:
+        return self._safe_get(obj, "parent.payment_plan_group.name")
+
+    def get_payment_plan_purposes(self, obj: Payment) -> list[str]:
+        return list(obj.parent.payment_plan_purposes.values_list("name", flat=True))
 
 
 class PaymentDetailParentSerializer(serializers.ModelSerializer):

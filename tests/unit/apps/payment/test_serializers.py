@@ -270,6 +270,9 @@ def test_payment_list_serializer_all_data(payment_list_context: dict[str, Any]) 
     assert data["status"] == payment.get_status_display()
     assert data["fsp_name"] == "FSP 1"
     assert data["fsp_auth_code"] == ""
+    assert data["payment_plan_cycle"] == payment.parent.program_cycle.title
+    assert data["payment_plan_group"] == payment.parent.payment_plan_group.name
+    assert data["payment_plan_purposes"] == list(payment.parent.payment_plan_purposes.values_list("name", flat=True))
 
 
 def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, Any]) -> None:
@@ -614,3 +617,11 @@ def test_payment_list_serializer_snapshot_collector_data_with_collector_type_bas
     assert payment.collector_is_alternate is True
     full_name_alt = PaymentListSerializer.get_collector_field(payment, "full_name")
     assert full_name_alt == "Test Alternate Collector"
+
+
+def test_payment_list_serializer_payment_plan_group_none_when_missing() -> None:
+    serializer = PaymentListSerializer()
+    payment = Mock()
+    payment.parent = Mock(payment_plan_group=None)
+
+    assert serializer.get_payment_plan_group(payment) is None
