@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from typing import Any, Callable
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -14,6 +16,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
+from extras.test_utils.sql import joined_tables, statements_from
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import Program
@@ -350,3 +353,153 @@ def test_global_dashboard_excludes_finished_program_tickets(
     program_response = authenticated_client.get(finished_program_url)
     assert program_response.status_code == status.HTTP_200_OK
     assert program_response.json()["tickets_by_type"]["user_generated_count"] == 1
+
+
+@pytest.fixture
+def ticket_without_program(dashboard_context: dict[str, Any]) -> Any:
+    return GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        issue_type=None,
+        status=GrievanceTicket.STATUS_NEW,
+        business_area=dashboard_context["business_area"],
+    )
+
+
+@pytest.fixture
+def ticket_on_active_and_finished_programs(dashboard_context: dict[str, Any], finished_program: Any) -> Any:
+    ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        issue_type=None,
+        status=GrievanceTicket.STATUS_NEW,
+        business_area=dashboard_context["business_area"],
+    )
+    ticket.programs.add(dashboard_context["program"], finished_program)
+    return ticket
+
+
+def test_global_dashboard_counts_ticket_with_no_program(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    ticket_without_program: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(dashboard_context["global_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["tickets_by_type"]["user_generated_count"] == 5
+
+
+def test_global_dashboard_counts_ticket_once_when_on_active_and_finished_programs(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    ticket_on_active_and_finished_programs: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(dashboard_context["global_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["tickets_by_type"]["user_generated_count"] == 5
+
+
+def test_global_dashboard_queryset_joins_neither_business_area_nor_programs(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    with CaptureQueriesContext(connection) as captured:
+        response = authenticated_client.get(dashboard_context["global_url"])
+    assert response.status_code == status.HTTP_200_OK
+
+    view = response.renderer_context["view"]
+    assert joined_tables(view.get_dashboard_base_queryset()) == {"grievance_grievanceticket"}
+
+    aggregates = statements_from(captured, "grievance_grievanceticket")
+    assert len(aggregates) == 4
+    for statement in aggregates:
+        assert "core_businessarea" not in statement
+        assert '"grievance_grievanceticket"."id" IN (SELECT' not in statement
+
+
+def test_program_dashboard_queryset_joins_neither_business_area_nor_programs(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        dashboard_context["program"],
+    )
+
+    with CaptureQueriesContext(connection) as captured:
+        response = authenticated_client.get(dashboard_context["program_url"])
+    assert response.status_code == status.HTTP_200_OK
+
+    view = response.renderer_context["view"]
+    assert joined_tables(view.get_dashboard_base_queryset(view.program)) == {"grievance_grievanceticket"}
+
+    aggregates = statements_from(captured, "grievance_grievanceticket")
+    assert len(aggregates) == 4
+    for statement in aggregates:
+        assert "core_businessarea" not in statement
+        assert "program_program" not in statement
+
+
+def test_global_dashboard_issues_expected_number_of_queries(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    create_user_role_with_permissions: Callable,
+    django_assert_num_queries: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    with django_assert_num_queries(12):
+        response = authenticated_client.get(dashboard_context["global_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_program_dashboard_issues_expected_number_of_queries(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    create_user_role_with_permissions: Callable,
+    django_assert_num_queries: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        dashboard_context["program"],
+    )
+
+    with django_assert_num_queries(16):
+        response = authenticated_client.get(dashboard_context["program_url"])
+
+    assert response.status_code == status.HTTP_200_OK

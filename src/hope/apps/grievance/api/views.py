@@ -196,17 +196,23 @@ def create_type_generated_queries() -> tuple[Q, Q]:
 class GrievanceDashboardMixin:
     """Common dashboard logic for grievance tickets."""
 
-    def get_dashboard_base_queryset(self, program: Any = None) -> QuerySet:
+    def get_dashboard_base_queryset(self, program: Any = None) -> QuerySet: # AI: add type for program argument
         """Get base queryset for dashboard data with optional program filtering."""
-        base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=self.business_area_slug)
+        through = GrievanceTicket.programs.through
+        base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area=self.business_area)
 
         if program:
-            return base_queryset.filter(programs__in=[program])
+            return base_queryset.filter(id__in=through.objects.filter(program=program).values("grievanceticket_id"))
 
-        active_or_no_program = base_queryset.filter(
-            Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True)
-        ).values("pk")
-        return base_queryset.filter(pk__in=active_or_no_program)
+        # evaluated on purpose: passing a subquery here brings the `program_program` join back.
+        active_program_ids = list(
+            Program.objects.filter(business_area=self.business_area, status=Program.ACTIVE).values_list("id", flat=True)
+        )
+        has_active_program = Exists(
+            through.objects.filter(grievanceticket_id=OuterRef("pk"), program_id__in=active_program_ids)
+        )
+        has_no_program = ~Exists(through.objects.filter(grievanceticket_id=OuterRef("pk")))
+        return base_queryset.filter(has_active_program | has_no_program)
 
     def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, Any]:
         """Generate dashboard data from base queryset."""
