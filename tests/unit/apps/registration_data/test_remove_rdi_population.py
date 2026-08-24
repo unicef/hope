@@ -271,9 +271,7 @@ def test_fail_marks_status_and_invalidates_cache(program) -> None:
 def test_fail_on_missing_rdi_is_a_noop(program) -> None:
     missing_id = str(uuid.uuid4())
 
-    with patch(
-        "hope.apps.registration_data.tasks.rdi_removal_async.invalidate_rdi_cache"
-    ) as invalidate:
+    with patch("hope.apps.registration_data.tasks.rdi_removal_async.invalidate_rdi_cache") as invalidate:
         result = RdiPopulationRemoval.mark_failed(missing_id, reason="boom")
 
     assert result is None

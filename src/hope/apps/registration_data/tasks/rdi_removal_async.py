@@ -71,11 +71,7 @@ class RdiPopulationRemoval:
     def mark_failed(rdi_id: str, *, reason: str) -> None:
         # Internal use only, CW is not told about failure.
         with transaction.atomic():
-            rdi = (
-                RegistrationDataImport.objects.select_related("business_area", "program")
-                .filter(id=rdi_id)
-                .first()
-            )
+            rdi = RegistrationDataImport.objects.select_related("business_area", "program").filter(id=rdi_id).first()
             if rdi is None:
                 return
             RegistrationDataImport.objects.filter(id=rdi_id).update(
