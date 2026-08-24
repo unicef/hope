@@ -113,8 +113,7 @@ def _calculate_expected_hash(payment: Payment) -> str:
             value = nested_getattr(payment, field_name, None)
         else:
             value = getattr(payment, field_name, None)
-        # Replicate _normalize: skip normalization for dotted names
-        if "." not in field_name and hasattr(payment, "_normalize"):
+        if hasattr(payment, "_normalize"):
             value = payment._normalize(field_name, value)
         sha1.update(str(value).encode("utf-8"))
     return sha1.hexdigest()

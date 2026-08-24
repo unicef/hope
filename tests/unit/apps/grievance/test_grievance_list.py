@@ -53,6 +53,11 @@ def program_different(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
+def program_finished(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(business_area=afghanistan, status=Program.FINISHED, name="program afghanistan finished")
+
+
+@pytest.fixture
 def partner() -> Partner:
     return PartnerFactory(name="TestPartner")
 
@@ -338,6 +343,47 @@ def grievance_ticket_different_program(
 
 
 @pytest.fixture
+def ticket_in_two_active_programs(
+    afghanistan: BusinessArea,
+    program: Program,
+    program_different: Program,
+    user: User,
+) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        admin2=None,
+        description="Ticket linked to two active programs",
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+    )
+    ticket.programs.set([program, program_different])
+    return ticket
+
+
+@pytest.fixture
+def ticket_in_finished_program(
+    afghanistan: BusinessArea,
+    program_finished: Program,
+    user: User,
+) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        business_area=afghanistan,
+        admin2=None,
+        description="Ticket linked to a finished program",
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+    )
+    ticket.programs.set([program_finished])
+    return ticket
+
+
+@pytest.fixture
 def setup_grievance_tickets(
     grievance_tickets: list[GrievanceTicket],
     program: Program,
@@ -361,6 +407,17 @@ def list_url(afghanistan: BusinessArea, program: Program) -> str:
         kwargs={
             "business_area_slug": afghanistan.slug,
             "program_code": program.code,
+        },
+    )
+
+
+@pytest.fixture
+def finished_program_list_url(afghanistan: BusinessArea, program_finished: Program) -> str:
+    return reverse(
+        "api:grievance:grievance-tickets-list",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "program_code": program_finished.code,
         },
     )
 
@@ -699,7 +756,7 @@ def test_grievance_ticket_list_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 9
-        assert len(ctx.captured_queries) == 37
+        assert len(ctx.captured_queries) == 38
 
     # no change - use cache
     with CaptureQueriesContext(connection) as ctx:
@@ -720,7 +777,7 @@ def test_grievance_ticket_list_caching(
         etag_third_call = response.headers["etag"]
         assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
         assert etag_third_call not in [etag, etag_second_call]
-        assert len(ctx.captured_queries) == 32
+        assert len(ctx.captured_queries) == 33
 
     set_admin_area_limits_in_program(partner, program, [area1])
     with CaptureQueriesContext(connection) as ctx:
@@ -731,7 +788,7 @@ def test_grievance_ticket_list_caching(
         assert len(response.json()["results"]) == 6
         assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
         assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-        assert len(ctx.captured_queries) == 32
+        assert len(ctx.captured_queries) == 33
 
     ticket.delete()
     with CaptureQueriesContext(connection) as ctx:
@@ -848,3 +905,121 @@ def test_grievance_ticket_count_changes_when_ticket_programs_change(
     response = api_client.get(count_url)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["count"] == 9
+
+
+def test_grievance_ticket_list_query_count_does_not_grow_with_page_size(
+    api_client: Any,
+    list_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    setup_grievance_tickets: list[GrievanceTicket],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    # Regression guard for ticket 331051
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    # Warm the per-request caches the first call populates (business area version, the
+    # user's permissions) so the two measured calls differ only in page size.
+    api_client.get(list_url, {"limit": 1})
+
+    with CaptureQueriesContext(connection) as three_rows:
+        response_three = api_client.get(list_url, {"limit": 3})
+    with CaptureQueriesContext(connection) as six_rows:
+        response_six = api_client.get(list_url, {"limit": 6})
+
+    assert len(response_three.json()["results"]) == 3
+    assert len(response_six.json()["results"]) == 6
+    assert len(six_rows.captured_queries) == len(three_rows.captured_queries)
+
+
+def test_grievance_ticket_list_returns_ticket_once_when_filtered_by_active_program(
+    api_client: Any,
+    list_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    ticket_in_two_active_programs: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    # The program-nested list, unlike the global one, has no .distinct() to hide the row
+    # explosion, so the through-table join in filter_is_active_program returned the ticket once
+    # per active program it is linked to (ticket 331051). The global list runs the same filter
+    # over a different queryset, so it is pinned separately in
+    # test_grievance_list_global_visibility.py.
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = api_client.get(list_url, {"is_active_program": "true"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [result["id"] for result in response.json()["results"]] == [str(ticket_in_two_active_programs.id)]
+
+
+def test_grievance_ticket_list_excludes_finished_program_ticket_when_filtered_by_active_program(
+    api_client: Any,
+    finished_program_list_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    ticket_in_finished_program: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    # ProgramMixin pins this list to the programme in the URL, so the only way the filter can drop
+    # a row here is a ticket whose single programme is finished. Without it the dedup test above
+    # would stay green even if the filter stopped filtering.
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = api_client.get(finished_program_list_url, {"is_active_program": "true"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == []
+
+
+def test_grievance_ticket_list_returns_finished_program_ticket_when_filtered_by_inactive_program(
+    api_client: Any,
+    finished_program_list_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    ticket_in_finished_program: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    # The is_active_program=false branch: a bare program_with_status_exists(FINISHED).
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = api_client.get(finished_program_list_url, {"is_active_program": "false"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [result["id"] for result in response.json()["results"]] == [str(ticket_in_finished_program.id)]

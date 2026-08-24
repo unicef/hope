@@ -67,7 +67,9 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
 
   const shouldDisplayReconciliationSummary =
     status === PaymentPlanStatusEnum.ACCEPTED ||
-    status === PaymentPlanStatusEnum.FINISHED;
+    status === PaymentPlanStatusEnum.FINISHED ||
+    status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
+    status === PaymentPlanStatusEnum.CLOSED;
 
   const shouldDisplayFundsCommitment =
     status === PaymentPlanStatusEnum.IN_REVIEW ||

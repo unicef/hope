@@ -357,6 +357,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
                     self.handle_pdu_fields(row, first_row, obj_to_create)
                 self._create_hh_ind(obj_to_create, row, first_row)
+        self.execute_individuals_additional_steps(self.individuals)
 
         PendingIndividual.objects.bulk_create(self.individuals)
         PendingHousehold.objects.bulk_update(

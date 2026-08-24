@@ -1,5 +1,7 @@
 from typing import Any
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -245,14 +247,26 @@ def test_details(
         payment_context["business_area"],
         payment_context["program_active"],
     )
-    response = payment_context["client"].get(payment_context["url_details"])
+    with CaptureQueriesContext(connection) as captured_queries:
+        response = payment_context["client"].get(payment_context["url_details"])
 
     assert response.status_code == expected_status
+    assert "available_count" not in " ".join(query["sql"] for query in captured_queries.captured_queries)
     if expected_status == status.HTTP_200_OK:
         resp_data = response.json()
         assert "id" in resp_data
         assert resp_data["delivered_quantity"] == "999.00"
         assert resp_data["status"] == "Transaction Successful"
+        assert set(resp_data["parent"]) == {
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "plan_type",
+            "is_payment_gateway",
+            "delivery_mechanism",
+            "payment_verification_plans",
+        }
 
 
 @pytest.mark.parametrize(
@@ -412,7 +426,7 @@ def test_filter_by_individual_unicef_id(
     assert payment["unicef_id"] == payment_people_context["payment"].unicef_id
 
 
-def test_extras_in_payment_detail_api(
+def test_extra_fields_in_payment_detail_api(
     payment_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -423,11 +437,17 @@ def test_extras_in_payment_detail_api(
         payment_context["program_active"],
     )
     payment_obj = payment_context["payment"]
-    payment_obj.extras = {"custom_field_1": "value1", "custom_field_2": 123}
+    payment_obj.extras = {
+        "extra_fields": {
+            "custom_field_1": "value1",
+            "custom_field_2": 123,
+        }
+    }
     payment_obj.save()
 
     response = payment_context["client"].get(payment_context["url_details"])
 
     assert response.status_code == status.HTTP_200_OK
     resp_data = response.json()
-    assert resp_data["extras"] == {"custom_field_1": "value1", "custom_field_2": 123}
+    assert resp_data["extra_fields"] == {"custom_field_1": "value1", "custom_field_2": 123}
+    assert "extras" not in resp_data

@@ -470,6 +470,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
             "deduplication_golden_record_results",
             "duplicate",
             "documents",
+            "program",
             "program_code",
         )
 

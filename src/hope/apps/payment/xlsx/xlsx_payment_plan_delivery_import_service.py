@@ -42,7 +42,12 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     class XlsxPaymentPlanDeliveryImportServiceError(Exception):
         pass
 
-    def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO | IO[bytes]) -> None:
+    def __init__(
+        self,
+        payment_plan: "PaymentPlan",
+        file: io.BytesIO | IO[bytes],
+        fsp_owned_headers: set[str] | None = None,
+    ) -> None:
         self.payment_plan = payment_plan
         self.pp_currency_exchange_date = self.payment_plan.currency_exchange_date
         self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments.select_related(
@@ -56,6 +61,11 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         self.file = file
         self.errors: list[XlsxError] = []
         self.payments_dict: dict = {str(x.unicef_id): x for x in self.payment_list}
+        self.fsp_owned_headers = (
+            fsp_owned_headers
+            if fsp_owned_headers is not None
+            else {header for payment in self.payments_dict.values() for header in payment.fsp_extra_fields}
+        )
         self.payment_ids: list = list(self.payments_dict.keys())
         self.payment_ids_from_xlsx: list = []
         self.payments_to_save: list = []
@@ -229,7 +239,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             return
 
         new_extras = self._get_extras_for_row(row)
-        if new_extras != (payment.extras or {}):
+        if new_extras != payment.extra_fields:
             self.is_updated = True
 
     def _validate_rows(self) -> None:
@@ -393,7 +403,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 or (additional_document_number != payment.additional_document_number)
                 or (reference_id != payment.transaction_reference_id)
                 or (transaction_status_blockchain_link != payment.transaction_status_blockchain_link)
-                or (new_extras != (payment.extras or {}))
+                or (new_extras != payment.extra_fields)
             ):
                 self.old_payments[payment.pk] = copy_model_object(payment)
                 payment.delivered_quantity = delivered_quantity
@@ -416,7 +426,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 payment.additional_document_number = additional_document_number
                 payment.transaction_reference_id = reference_id
                 payment.transaction_status_blockchain_link = transaction_status_blockchain_link
-                payment.extras = new_extras
+                payment.set_extra_fields(new_extras)
 
                 self.payments_to_save.append(payment)
                 self._update_payment_verification(payment, delivered_quantity)
@@ -485,7 +495,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     def _get_extras_for_row(self, row: Row) -> dict:
         extras: dict[str, object] = {}
         for idx, header in enumerate(self.xlsx_headers):
-            if header in self.KNOWN_COLUMNS:
+            if header in self.KNOWN_COLUMNS or header in self.fsp_owned_headers:
                 continue
             value = row[idx].value
             if value is None or value == "":

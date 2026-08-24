@@ -49,6 +49,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.eligible_plans: list[PaymentPlan] = []
         self.payment_to_plan: dict[str, PaymentPlan] = {}
         self.payment_gateway_payment_ids: set[str] = set()
+        self.fsp_owned_headers: set[str] = set()
         self.headers: list[str] = []
         self.sheetname: str = ""
         self.ws: Worksheet | None = None
@@ -76,11 +77,18 @@ class XlsxPaymentPlanGroupDeliveryImportService:
 
     def _build_payment_index(self) -> None:
         payments = (
-            Payment.objects.filter(parent__in=self.eligible_plans).eligible().values_list("unicef_id", "parent_id")
+            Payment.objects.filter(parent__in=self.eligible_plans)
+            .eligible()
+            .values_list(
+                "unicef_id",
+                "parent_id",
+                "extras",
+            )
         )
         payment_plan_by_id = {str(payment_plan.id): payment_plan for payment_plan in self.eligible_plans}
-        for unicef_id, parent_id in payments:
+        for unicef_id, parent_id, extras in payments:
             self.payment_to_plan[str(unicef_id)] = payment_plan_by_id[str(parent_id)]
+            self.fsp_owned_headers.update(extras.get(Payment.FSP_EXTRA_FIELDS_KEY, {}))
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
@@ -193,7 +201,11 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             if not rows:
                 continue
             sub_workbook_file = self._build_per_plan_workbook(rows)
-            service = XlsxPaymentPlanDeliveryImportService(payment_plan, sub_workbook_file)
+            service = XlsxPaymentPlanDeliveryImportService(
+                payment_plan,
+                sub_workbook_file,
+                fsp_owned_headers=self.fsp_owned_headers,
+            )
             service.open_workbook()
             self.per_plan_services[str(payment_plan.id)] = service
 

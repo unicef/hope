@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 default=dict,
                 encoder=django.core.serializers.json.DjangoJSONEncoder,
+                help_text="Additional account-specific fields",
             ),
         ),
         migrations.AlterField(
