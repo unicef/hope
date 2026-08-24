@@ -1,14 +1,14 @@
 import calendar
 from collections import defaultdict
 from collections.abc import Iterable
+import functools
 from itertools import batched
 import json
 import logging
-from pathlib import Path
+import operator
 from typing import (
     Any,
     NamedTuple,
-    Protocol,
     TypedDict,
     cast,
 )
@@ -19,91 +19,109 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import Case, Count, DecimalField, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
-import sentry_sdk
 
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
 from hope.apps.household.const import DISABLED, NON_BENEFICIARY
-from hope.models import BusinessArea, DataCollectingType, Household, Individual, Payment, PaymentPlan
+from hope.models import (
+    BusinessArea,
+    DataCollectingType,
+    Household,
+    Individual,
+    Payment,
+    PaymentPlan,
+    PaymentVerificationPlan,
+)
 
 logger = logging.getLogger(__name__)
-
-
-CACHE_TIMEOUT = 60 * 60 * 24
-FERTILITY_DATA_CACHE_KEY = "fertility_data"
-
-
-def _load_fertility_data() -> dict[str, dict[str, float]]:
-    """Load and cache fertility data from the JSON file.
-
-    Data is transformed from a list to a nested dictionary with the format:
-    `{year: {business_area_name: rate}}`.
-    """
-    cached_data = cache.get(FERTILITY_DATA_CACHE_KEY)
-    if cached_data is not None:
-        return cached_data
-
-    iso3_to_ba_name_map = {
-        country.iso_code3: ba.name
-        for ba in BusinessArea.objects.prefetch_related("countries")
-        for country in ba.countries.all()
-        if country.iso_code3
-    }
-
-    file_path = Path(__file__).parent / "rates" / "fertility_rates.json"
-    transformed_data: dict[str, dict[str, float]] = defaultdict(dict)
-
-    try:
-        with open(file_path) as f:
-            data_from_file = json.load(f)
-
-        for country_entry in data_from_file:
-            iso_code = country_entry.get("Country Code")
-            business_area_name = iso3_to_ba_name_map.get(iso_code)
-
-            if not business_area_name:
-                logger.warning(f"Could not map country code '{iso_code}' to a Business Area.")
-                continue
-
-            for key, value in country_entry.items():
-                if key.isdigit():
-                    year_str = key
-                    rate = float(value)
-                    transformed_data[year_str][business_area_name] = rate
-
-    except (FileNotFoundError, json.JSONDecodeError, TypeError) as e:
-        logger.error(f"Could not load or process fertility data file: {e}")
-        sentry_sdk.capture_exception(e)
-        raise
-
-    final_data = dict(transformed_data)
-    cache.set(FERTILITY_DATA_CACHE_KEY, final_data, CACHE_TIMEOUT)
-    return final_data
-
-
-def get_fertility_rate(country: str, year: int) -> float:
-    """Get the fertility rate for a given country and year.
-
-    Falls back to the most recent year's data if the requested year is not found.
-    """
-    data = _load_fertility_data()
-    if not data:
-        return 0.0
-
-    if str(year) in data:
-        return data[str(year)].get(country, 0.0)
-
-    # Fallback to the most recent available year
-    available_years = sorted(data.keys(), reverse=True)
-    if available_years:
-        latest_year_data = data[available_years[0]]
-        return latest_year_data.get(country, 0.0)
-
-    return 0.0
 
 
 GLOBAL_SLUG = "global"
 DEFAULT_ITERATOR_CHUNK_SIZE = 2500
 HOUSEHOLD_BATCH_SIZE = 2500
+
+
+def payment_date_field() -> Coalesce:
+    """Effective payment date used to bucket payments by year/month."""
+    return Coalesce("delivery_date", "entitlement_date", "status_date")
+
+
+# Disabled-count columns on Household that sum to the number of persons with a disability.
+DISABLED_COUNT_FIELDS: tuple[str, ...] = (
+    "female_age_group_0_5_disabled_count",
+    "female_age_group_6_11_disabled_count",
+    "female_age_group_12_17_disabled_count",
+    "female_age_group_18_59_disabled_count",
+    "female_age_group_60_disabled_count",
+    "male_age_group_0_5_disabled_count",
+    "male_age_group_6_11_disabled_count",
+    "male_age_group_12_17_disabled_count",
+    "male_age_group_18_59_disabled_count",
+    "male_age_group_60_disabled_count",
+)
+
+
+def get_pwd_count_expression(prefix: str = "") -> models.Expression:
+    """Sum of the 10 disabled age-group counters (optionally the kab_* mirror)."""
+    fields_to_sum = [Coalesce(F(f"{prefix}{field_name}"), 0) for field_name in DISABLED_COUNT_FIELDS]
+    return functools.reduce(operator.add, fields_to_sum, Value(0))
+
+
+def get_kab_pwd_count_expression() -> models.Expression:
+    """Sum of the 10 Known-Affected-Beneficiary disabled age-group counters."""
+    return get_pwd_count_expression(prefix="kab_")
+
+
+def _dimension_annotations(date_field: Coalesce) -> dict[str, Any]:
+    """Shared dimension annotations used to group payments in country/global aggregation."""
+    return {
+        "year": ExtractYear(date_field),
+        "month": ExtractMonth(date_field),
+        "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
+        "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
+        "currency_code": Coalesce(F("currency__code"), Value("UNK")),
+        "admin1_name": Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
+        "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
+        "sector_name": Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
+        "fsp_name": Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
+        "delivery_type_name": Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
+        "payment_status": Coalesce(F("status"), Value("Unknown Status")),
+    }
+
+
+def _count_household(
+    current_summary: "CountrySummaryDict | GlobalSummaryDict",
+    household_id: UUID | None,
+    household_map: dict[UUID, dict[str, Any]],
+    seen_set: set[UUID],
+) -> None:
+    """Add a household's affected-people counts to the summary (KAB-first, legacy fallback)."""
+    if not (household_id and isinstance(household_id, UUID) and household_id not in seen_set):
+        return
+    h_data = household_map.get(household_id, {})
+    current_summary["households"] += 1
+
+    kab_size = h_data.get("kab_size")
+    if kab_size is not None:
+        # KAB known: use the true affected-beneficiary counts.
+        current_summary["individuals"] += int(kab_size)
+        pwd_count = h_data.get("kab_pwd_count", 0)
+    else:
+        # KAB unknown: fall back to the legacy denormalised counts.
+        current_summary["individuals"] += int(h_data.get("size", 0))
+        pwd_count = h_data.get("pwd_count", 0)
+
+    is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
+    if not is_sw_program:
+        children_count = h_data.get("kab_children_count")
+        if children_count is None:
+            children_count = h_data.get("children_count")
+        if children_count is not None:
+            current_summary["children_counts"] += children_count
+
+    current_summary["pwd_counts"] += int(pwd_count)
+
+    current_summary["_seen_households"].add(household_id)
+    seen_set.add(household_id)
 
 
 class CountrySummaryDict(TypedDict):
@@ -147,26 +165,7 @@ class CountrySummaryKey(NamedTuple):
     currency: str
 
 
-def get_pwd_count_expression() -> models.Expression:
-    fields_to_sum = [
-        Coalesce(F(f"{field_name}"), 0)
-        for field_name in [
-            "female_age_group_0_5_disabled_count",
-            "female_age_group_6_11_disabled_count",
-            "female_age_group_12_17_disabled_count",
-            "female_age_group_18_59_disabled_count",
-            "female_age_group_60_disabled_count",
-            "male_age_group_0_5_disabled_count",
-            "male_age_group_6_11_disabled_count",
-            "male_age_group_12_17_disabled_count",
-            "male_age_group_18_59_disabled_count",
-            "male_age_group_60_disabled_count",
-        ]
-    ]
-    return sum(fields_to_sum, start=Value(0))
-
-
-class DashboardCacheBase(Protocol):
+class DashboardCacheBase:
     CACHE_KEY_PREFIX = "dashboard_data_"
 
     @classmethod
@@ -218,10 +217,10 @@ class DashboardCacheBase(Protocol):
             )
             .exclude(
                 status__in=[
-                    "Transaction Erroneous",
-                    "Not Distributed",
-                    "Force failed",
-                    "Manually Cancelled",
+                    Payment.STATUS_ERROR,
+                    Payment.STATUS_NOT_DISTRIBUTED,
+                    Payment.STATUS_FORCE_FAILED,
+                    Payment.STATUS_MANUALLY_CANCELLED,
                 ]
             )
         )
@@ -232,7 +231,7 @@ class DashboardCacheBase(Protocol):
 
     @classmethod
     def _get_payment_data(cls, base_queryset: models.QuerySet) -> models.QuerySet:
-        date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
+        date_field = payment_date_field()
         planned_statuses = [
             PaymentPlan.Status.IN_APPROVAL,
             PaymentPlan.Status.IN_AUTHORIZATION,
@@ -259,28 +258,10 @@ class DashboardCacheBase(Protocol):
                 default=Value(0.0),
                 output_field=DecimalField(),
             ),
-            year=ExtractYear(date_field),
-            month=ExtractMonth(date_field),
-            business_area_name=Coalesce(F("business_area__name"), Value("Unknown Country")),
-            region_name=Coalesce(F("business_area__region_name"), Value("Unknown Region")),
-            currency_code=Coalesce(F("currency__code"), Value("UNK")),
-            admin1_name=Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
-            program_name=Coalesce(
-                F("program__name"),
-                F("household__program__name"),
-                Value("Unknown Program"),
-            ),
-            sector_name=Coalesce(
-                F("program__sector"),
-                F("household__program__sector"),
-                Value("Unknown Sector"),
-            ),
-            fsp_name=Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
-            delivery_type_name=Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
-            payment_status=Coalesce(F("status"), Value("Unknown Status")),
             reconciled=Count("pk", filter=Q(payment_verifications__isnull=False), distinct=True),
             household_id_val=F("household_id"),
             parent_id_val=F("parent_id"),
+            **_dimension_annotations(date_field),
         ).values(
             "payment_quantity_usd",
             "payment_quantity",
@@ -343,6 +324,7 @@ class DashboardCacheBase(Protocol):
                         ),
                         output_field=models.IntegerField(),
                     ),
+                    kab_pwd_count_calc=get_kab_pwd_count_expression(),
                     admin1_name_hh=Coalesce(F("admin1__name"), Value("Unknown Admin1")),
                     country_name_hh=Coalesce(F("business_area__name"), Value("Unknown Country")),
                 )
@@ -350,7 +332,10 @@ class DashboardCacheBase(Protocol):
                     "id",
                     "size",
                     "children_count",
+                    "kab_size",
+                    "kab_children_count",
                     "pwd_count_calc",
+                    "kab_pwd_count_calc",
                     "admin1_name_hh",
                     "country_name_hh",
                     "program__data_collecting_type__type",
@@ -366,6 +351,9 @@ class DashboardCacheBase(Protocol):
                     "size": 1 if is_sw_program or size_value is None else size_value,
                     "children_count": hh.get("children_count"),
                     "pwd_count": hh.get("pwd_count_calc") or 0,
+                    "kab_size": hh.get("kab_size"),
+                    "kab_children_count": hh.get("kab_children_count"),
+                    "kab_pwd_count": hh.get("kab_pwd_count_calc"),
                     "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
                     "country": hh.get("country_name_hh", "Unknown Country"),
                     "dct_type": dct_type,
@@ -376,28 +364,7 @@ class DashboardCacheBase(Protocol):
     def _get_payment_plan_counts(
         cls, base_queryset: models.QuerySet, group_by_annotated_names: list[str]
     ) -> dict[str, dict[tuple, int]]:
-        date_field: F | Coalesce = Coalesce("delivery_date", "entitlement_date", "status_date")
-        potential_annotations = {
-            "year": ExtractYear(date_field),
-            "month": ExtractMonth(date_field),
-            "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
-            "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
-            "currency_code": Coalesce(F("currency__code"), Value("UNK")),
-            "admin1_name": Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
-            "program_name": Coalesce(
-                F("program__name"),
-                F("household__program__name"),
-                Value("Unknown Program"),
-            ),
-            "sector_name": Coalesce(
-                F("program__sector"),
-                F("household__program__sector"),
-                Value("Unknown Sector"),
-            ),
-            "fsp_name": Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
-            "delivery_type_name": Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
-            "payment_status": Coalesce(F("status"), Value("Unknown Status")),
-        }
+        potential_annotations = _dimension_annotations(payment_date_field())
 
         relevant_annotations = {
             name: expr for name, expr in potential_annotations.items() if name in group_by_annotated_names
@@ -411,7 +378,9 @@ class DashboardCacheBase(Protocol):
             total_counts[key] += 1
 
         finished_plans_base = (
-            annotated_plans_qs.filter(parent__payment_verification_plans__status__in=["FINISHED", "CLOSED"])
+            annotated_plans_qs.filter(
+                parent__payment_verification_plans__status__in=[PaymentVerificationPlan.STATUS_FINISHED]
+            )
             .values_list("parent_id", *group_by_annotated_names)
             .distinct()
         )
@@ -534,9 +503,12 @@ class DashboardDataCache(DashboardCacheBase):
         current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
         current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
 
-        household_id = payment.get("household_id_val")
-        payment_year = payment.get("year")
-        cls._summary_count(current_summary, household_id, household_map, payment, seen_households_by_year[payment_year])
+        _count_household(
+            current_summary,
+            payment.get("household_id_val"),
+            household_map,
+            seen_households_by_year[payment.get("year")],
+        )
 
     @classmethod
     def refresh_data(cls, business_area_slug: str, years_to_refresh: list[int] | None = None) -> list[dict[str, Any]]:
@@ -559,7 +531,7 @@ class DashboardDataCache(DashboardCacheBase):
         base_payments_qs = cls._get_base_payment_queryset(business_area=business_area)
 
         if is_partial_refresh_attempt and years_to_refresh:
-            date_field_expr: F | Coalesce = Coalesce("delivery_date", "entitlement_date", "status_date")
+            date_field_expr: F | Coalesce = payment_date_field()
             base_payments_qs = cls._annotate_refresh_year_for_payments(
                 base_payments_qs, date_field_expr, years_to_refresh
             )
@@ -622,45 +594,11 @@ class DashboardDataCache(DashboardCacheBase):
             )
         return base_payments_qs
 
-    @classmethod
-    def _summary_count(
-        cls,
-        current_summary: CountrySummaryDict | dict[str, Any],
-        household_id: UUID | None,
-        household_map: dict[UUID, dict[str, Any]],
-        payment: dict[str, Any],
-        global_seen_households: set[UUID] | None = None,
-    ) -> None:
-        seen_set = global_seen_households if global_seen_households is not None else current_summary["_seen_households"]
-
-        if household_id and isinstance(household_id, UUID) and household_id not in seen_set:
-            h_data = household_map.get(household_id, {})
-            current_summary["households"] += 1
-            current_summary["individuals"] += int(h_data.get("size", 0))
-
-            children_count = h_data.get("children_count")
-            is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
-
-            if not is_sw_program:
-                if children_count is None:
-                    payment_year = payment.get("year")
-                    country_name = h_data.get("country", "Unknown Country")
-                    if payment_year:
-                        fertility_rate = get_fertility_rate(country_name, payment_year)
-                        current_summary["children_counts"] += fertility_rate
-                else:
-                    current_summary["children_counts"] += children_count
-
-            current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
-            if global_seen_households is not None:
-                global_seen_households.add(household_id)
-            current_summary["_seen_households"].add(household_id)
-
 
 class DashboardGlobalDataCache(DashboardCacheBase):
     @classmethod
     def _get_all_db_years(cls) -> list[int]:
-        date_field_expr_for_years = Coalesce("delivery_date", "entitlement_date", "status_date")
+        date_field_expr_for_years = payment_date_field()
         base_qs_for_years = cls._get_base_payment_queryset()
         all_distinct_years_query = (
             base_qs_for_years.annotate(_year_val=ExtractYear(date_field_expr_for_years))
@@ -750,7 +688,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
         for year_to_process in actual_years_to_process:
             base_payments_qs_for_year_scope = cls._get_base_payment_queryset()
-            date_field_expr = Coalesce("delivery_date", "entitlement_date", "status_date")
+            date_field_expr = payment_date_field()
 
             current_year_payments_qs = base_payments_qs_for_year_scope.annotate(
                 _temp_processing_year=ExtractYear(date_field_expr)
@@ -787,34 +725,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     household_map, payment, plan_counts, summary_for_year, seen_households_for_year
                 )
 
-            for (
-                year_val_from_key,
-                country,
-                region,
-                sector,
-                delivery_type,
-                status,
-            ), totals in summary_for_year.items():
-                all_newly_processed_data.append(
-                    {
-                        "year": year_val_from_key,
-                        "country": country,
-                        "region": region,
-                        "sector": sector,
-                        "delivery_types": delivery_type,
-                        "status": status,
-                        "total_delivered_quantity_usd": totals["total_usd"],
-                        "payments": totals["total_payments"],
-                        "households": totals["households"],
-                        "individuals": totals["individuals"],
-                        "children_counts": int(round(totals["children_counts"])),
-                        "pwd_counts": totals["pwd_counts"],
-                        "reconciled": totals["reconciled_count"],
-                        "finished_payment_plans": totals["finished_payment_plans"],
-                        "total_payment_plans": totals["total_payment_plans"],
-                        "total_planned_usd": totals["planned_sum_for_group"],
-                    }
-                )
+            all_newly_processed_data.extend(cls._build_summary_results(summary_for_year))
 
         serialized_data: list[dict[str, Any]] = list(DashboardBaseSerializer(all_newly_processed_data, many=True).data)
 
@@ -845,15 +756,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         )
         current_summary = summary_for_year[key]
 
-        plan_key_values = [
-            payment.get("year"),
-            payment.get("business_area_name", "Unknown Country"),
-            payment.get("region_name", "Unknown Region"),
-            payment.get("sector_name", "Unknown Sector"),
-            payment.get("delivery_type_name", "Unknown Delivery Type"),
-            payment.get("payment_status", "Unknown Status"),
-        ]
-        plan_key = tuple(plan_key_values)
+        plan_key = key
 
         if current_summary["total_payments"] == 0:
             current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
@@ -864,28 +767,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
         current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
 
-        household_id = payment.get("household_id_val")
-        seen_set = global_seen_households if global_seen_households is not None else current_summary["_seen_households"]
-
-        if household_id and isinstance(household_id, UUID) and household_id not in seen_set:
-            h_data = household_map.get(household_id, {})
-            current_summary["households"] += 1
-            current_summary["individuals"] += int(h_data.get("size", 0))
-
-            children_count = h_data.get("children_count")
-            is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
-
-            if not is_sw_program:
-                if children_count is None:
-                    payment_year = payment.get("year")
-                    country_name = h_data.get("country", "Unknown Country")
-                    if payment_year:
-                        fertility_rate = get_fertility_rate(country_name, payment_year)
-                        current_summary["children_counts"] += fertility_rate
-                else:
-                    current_summary["children_counts"] += children_count
-
-            current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
-            if global_seen_households is not None:
-                global_seen_households.add(household_id)
-            current_summary["_seen_households"].add(household_id)
+        _count_household(
+            current_summary,
+            payment.get("household_id_val"),
+            household_map,
+            global_seen_households if global_seen_households is not None else current_summary["_seen_households"],
+        )

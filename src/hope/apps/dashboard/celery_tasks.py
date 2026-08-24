@@ -36,15 +36,19 @@ def update_dashboard_figures() -> None:
         lock_acquired = cache.add(lock_key, True, timeout=60 * 60)
         try:
             DashboardDataCache.refresh_data(business_area.slug)
+        except Exception as e:
+            logger.error(f"Error refreshing dashboard data for {business_area.slug}: {e}", exc_info=True)
         finally:
             if lock_acquired:
                 cache.delete(lock_key)
 
-    set_sentry_business_area_tag("global")
+    set_sentry_business_area_tag(GLOBAL_SLUG)
     global_lock_key = f"dash_report_task_running_{GLOBAL_SLUG}"
     global_lock_acquired = cache.add(global_lock_key, True, timeout=60 * 60)
     try:
         DashboardGlobalDataCache.refresh_data()
+    except Exception as e:
+        logger.error(f"Error refreshing global dashboard data: {e}", exc_info=True)
     finally:
         if global_lock_acquired:
             cache.delete(global_lock_key)

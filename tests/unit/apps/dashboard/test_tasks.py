@@ -140,45 +140,39 @@ def test_generate_dash_report_task_business_area_not_found(mock_refresh_data: Mo
     mock_refresh_data.assert_not_called()
 
 
-def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) -> None:
-    """
-    Test that update_dashboard_figures retries on failure.
-    """
-    mocked_error_message = "Mocked error"
-
-    with patch(
-        "hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data",
-        side_effect=Exception(mocked_error_message),
-    ) as mock_data_refresh:
-        BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
-
-        with pytest.raises(Exception, match=mocked_error_message):
-            update_dashboard_figures.apply(throw=True)
-        mock_data_refresh.assert_any_call(afghanistan.slug)
-
-
-def test_update_dashboard_figures_retry_on_global_failure(
-    afghanistan: BusinessArea,
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.logger.error")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_update_dashboard_figures_continues_on_ba_failure(
+    mock_ba_refresh: Mock, mock_logger_error: Mock, mock_global_refresh: Mock, afghanistan: BusinessArea
 ) -> None:
-    """
-    Test that update_dashboard_figures retries on failure of global data refresh.
-    """
-    mocked_error_message = "Mocked global error"
-    with (
-        patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data") as mock_ba_refresh,
-        patch(
-            "hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data",
-            side_effect=Exception(mocked_error_message),
-        ) as mock_global_refresh,
-    ):
-        BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
+    """update_dashboard_figures logs and continues when a single BA refresh fails."""
+    mock_ba_refresh.side_effect = Exception("Mocked error")
+    BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
 
-        with pytest.raises(Exception, match=mocked_error_message):
-            update_dashboard_figures.apply(throw=True)
+    update_dashboard_figures.apply()  # must not raise
 
-        active_bas_count = BusinessArea.objects.filter(active=True).count()
-        assert mock_ba_refresh.call_count == active_bas_count
-        mock_global_refresh.assert_called_once_with()
+    mock_ba_refresh.assert_any_call(afghanistan.slug)
+    mock_logger_error.assert_called_once()
+    mock_global_refresh.assert_called_once()
+
+
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.logger.error")
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_update_dashboard_figures_continues_on_global_failure(
+    mock_ba_refresh: Mock, mock_logger_error: Mock, mock_global_refresh: Mock, afghanistan: BusinessArea
+) -> None:
+    """update_dashboard_figures logs and does not raise when the global refresh fails."""
+    mock_global_refresh.side_effect = Exception("Mocked global error")
+    BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
+
+    update_dashboard_figures.apply()  # must not raise
+
+    active_bas_count = BusinessArea.objects.filter(active=True).count()
+    assert mock_ba_refresh.call_count == active_bas_count
+    mock_global_refresh.assert_called_once_with()
+    mock_logger_error.assert_called_once()
 
 
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
