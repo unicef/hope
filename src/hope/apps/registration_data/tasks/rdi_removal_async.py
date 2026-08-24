@@ -5,6 +5,7 @@ from django.db.models.deletion import ProtectedError
 
 from hope.apps.core.celery_tasks import NonRetriableTaskError
 from hope.apps.registration_data.services.rdi_removal import remove_rdi_population
+from hope.apps.registration_data.signals import invalidate_rdi_cache
 from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import RegistrationDataImport
 
@@ -70,7 +71,15 @@ class RdiPopulationRemoval:
     def mark_failed(rdi_id: str, *, reason: str) -> None:
         # Internal use only, CW is not told about failure.
         with transaction.atomic():
+            rdi = (
+                RegistrationDataImport.objects.select_related("business_area", "program")
+                .filter(id=rdi_id)
+                .first()
+            )
+            if rdi is None:
+                return
             RegistrationDataImport.objects.filter(id=rdi_id).update(
                 status=RegistrationDataImport.DELETE_FAILED,
                 error_message=reason,
             )
+            invalidate_rdi_cache(rdi.business_area.slug, rdi.program.code)

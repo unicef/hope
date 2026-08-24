@@ -1,20 +1,23 @@
 from unittest.mock import PropertyMock, patch
+import uuid
 
 from django.db import OperationalError, connection, connections
 from django.db.models.deletion import ProtectedError
-from django.test.utils import CaptureQueriesContext
+from django.test import TestCase
 import psycopg2
 import pytest
 
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.api.caches import get_or_create_cache_key
 from hope.apps.core.celery_tasks import NonRetriableTaskError
 from hope.apps.registration_data.celery_tasks import (
     remove_rdi_population_async_task,
     remove_rdi_population_async_task_action,
     remove_rdi_population_on_failure,
 )
+from hope.apps.registration_data.signals import invalidate_rdi_cache
 from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
 from hope.models import AsyncRetryJob, RegistrationDataImport
 
@@ -22,6 +25,11 @@ pytestmark = pytest.mark.django_db
 
 CALLBACK_URL = "https://cw.example.com/api/rdi/callback/abc123"
 SIGNED_TOKEN = "signed-token-abc123"
+
+
+def _rdi_version_key(business_area_slug: str, program_code: str) -> str:
+    ba_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+    return f"{business_area_slug}:{ba_version}:{program_code}:registration_data_import_list"
 
 
 @pytest.fixture
@@ -208,21 +216,43 @@ def test_wipe_on_failure_hook_sets_failed(program) -> None:
     notify.assert_not_called()
 
 
-def test_fail_marks_status_keyed_on_id_without_a_select(program) -> None:
+def test_fail_marks_status_and_invalidates_cache(program) -> None:
     rdi = RegistrationDataImportFactory(
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
+    version_key = _rdi_version_key(program.business_area.slug, program.code)
+    initial_version = get_or_create_cache_key(version_key, 0)
 
-    with CaptureQueriesContext(connection) as ctx:
+    with (
+        TestCase.captureOnCommitCallbacks(execute=True),
+        patch(
+            "hope.apps.registration_data.tasks.rdi_removal_async.invalidate_rdi_cache",
+            wraps=invalidate_rdi_cache,
+        ) as invalidate,
+    ):
         RdiPopulationRemoval.mark_failed(str(rdi.id), reason="boom")
 
-    queries = ctx.captured_queries
-    assert len(queries) == 3
-    assert queries[1]["sql"].upper().startswith("UPDATE")
+    invalidate.assert_called_once_with(program.business_area.slug, program.code)
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DELETE_FAILED
     assert rdi.error_message == "boom"
+
+    new_version = get_or_create_cache_key(version_key, 0)
+    assert new_version == initial_version + 1
+
+
+def test_fail_on_missing_rdi_is_a_noop(program) -> None:
+    missing_id = str(uuid.uuid4())
+
+    with patch(
+        "hope.apps.registration_data.tasks.rdi_removal_async.invalidate_rdi_cache"
+    ) as invalidate:
+        result = RdiPopulationRemoval.mark_failed(missing_id, reason="boom")
+
+    assert result is None
+    invalidate.assert_not_called()
+    assert not RegistrationDataImport.objects.filter(id=missing_id).exists()
 
 
 @pytest.mark.django_db(transaction=True)
