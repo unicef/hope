@@ -640,11 +640,13 @@ def _with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]
             "parent__program_cycle__program__data_collecting_type",
             "parent__delivery_mechanism",
             "parent__financial_service_provider",
+            "parent__payment_plan_group",
         )
         .prefetch_related(
             individual_prefetch,
             "parent__payment_verification_plans",
             "payment_verifications",
+            "parent__payment_plan_purposes",
         )
         .all()
     )
@@ -675,9 +677,11 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
 
     def get_queryset(self) -> QuerySet:
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
-        return payment_plan.eligible_payments.exclude(
-            payment_verifications__payment_verification_plan__isnull=True
-        ).select_related("currency")
+        return (
+            payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
+            .select_related("currency", "parent__program_cycle", "parent__payment_plan_group")
+            .prefetch_related("parent__payment_plan_purposes")
+        )
 
     @extend_schema(
         responses={
@@ -2642,10 +2646,13 @@ class PaymentGlobalViewSet(
                 "head_of_household",
                 "collector",
                 "parent",
+                "parent__program_cycle",
+                "parent__payment_plan_group",
                 "financial_service_provider",
                 "program",
                 "currency",
             )
+            .prefetch_related("parent__payment_plan_purposes")
             .order_by("-created_at")
         )
 

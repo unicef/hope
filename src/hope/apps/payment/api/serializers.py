@@ -1501,7 +1501,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return self._safe_get(obj, "parent.payment_plan_group.name")
 
     def get_payment_plan_purposes(self, obj: Payment) -> list[str]:
-        return list(obj.parent.payment_plan_purposes.values_list("name", flat=True))
+        return [purpose.name for purpose in obj.parent.payment_plan_purposes.all()]
 
 
 class PaymentDetailParentSerializer(serializers.ModelSerializer):

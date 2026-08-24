@@ -456,7 +456,11 @@ class ProgramViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
-        payments = Payment.objects.filter(parent__program_cycle__program=program)
+        payments = (
+            Payment.objects.filter(parent__program_cycle__program=program)
+            .select_related("parent__program_cycle", "parent__payment_plan_group")
+            .prefetch_related("parent__payment_plan_purposes")
+        )
         filterset = PaymentSearchFilter(
             request.GET,
             queryset=payments,
